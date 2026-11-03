@@ -1,0 +1,49 @@
+{
+  "code": "general_ad_objects_v1",
+  "version": "1",
+  "title": "Общая база объектов из рекламы",
+  "target": "property",
+  "markers": [
+    "общая база объектов",
+    "объекты из рекламы"
+  ],
+  "requiredHeaders": [
+    "адрес",
+    "площадь",
+    "цена"
+  ],
+  "defaults": {
+    "sourceType": "external_market"
+  },
+  "columns": {
+    "адрес": "addressText",
+    "район": "district",
+    "площадь": "area",
+    "цена": "price",
+    "стоимость": "price",
+    "этаж": "floor",
+    "этажность": "floorsTotal",
+    "комнаты": "roomsCount",
+    "назначение": "commercialPurpose",
+    "тип": "propertyTypeText",
+    "операция": "operationText",
+    "описание": "description",
+    "рекл. текст": "adText",
+    "реклама": "adUrl",
+    "площадка": "adPlatformText",
+    "собственник": "ownerName",
+    "телефон собственника": "ownerPhone",
+    "риелтор": "realtorText",
+    "дата": "listedDate"
+  },
+  "excludedByPolicy": [
+    "паспорт",
+    "выдан",
+    "регистрация"
+  ],
+  "unresolved": [
+    "ов",
+    "зу",
+    "а"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "code": "property_agreement_control_v1",
+  "version": "1",
+  "title": "Анализ наличия договора и качества рекламы",
+  "target": "property_agreement_control",
+  "markers": ["анализ договоров", "наличие договора", "контроль договоров"],
+  "requiredHeaders": ["адрес", "наличие договора"],
+  "defaults": { "propertyType": "commercial", "operationType": "rent", "sourceType": "agency_listing" },
+  "columns": {
+    "актуальность": "actuality",
+    "задача": "taskText",
+    "адрес": "addressText",
+    "площадь": "area",
+    "цена": "price",
+    "рекл. текст": "adText",
+    "реклама": "adUrl",
+    "наличие договора": "agreementPresence",
+    "причины, почему его нет": "absenceReason",
+    "комиссия от": "commissionFrom",
+    "комиссия до": "commissionTo",
+    "что нужно исправить": "fixNote"
+  },
+  "excludedByPolicy": [],
+  "unresolved": []
+}

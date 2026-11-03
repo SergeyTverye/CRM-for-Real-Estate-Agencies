@@ -1,0 +1,33 @@
+{
+  "code": "historical_deals_v1",
+  "version": "1",
+  "title": "Исторический архив сделок",
+  "target": "historical_deal_archive",
+  "markers": ["архив сделок", "историческая база", "база клиентов (архив)"],
+  "requiredHeaders": ["адрес", "фио", "стоимость"],
+  "columns": {
+    "№": "sourceRowId",
+    "дата сделки": "dealDate",
+    "год": "dealYear",
+    "месяц": "dealMonth",
+    "день": "dealDay",
+    "жилая/коммерческая": "propertyType",
+    "адрес": "objectText",
+    "комнаты/тип помещения": "roomsOrType",
+    "участник сделки": "partyRole",
+    "фио": "participantName",
+    "телефон": "contactPhone",
+    "этаж/этажность": "floor",
+    "площадь": "area",
+    "доп. характеристики": "extra",
+    "стоимость": "price",
+    "условия продажи": "conditions",
+    "риелтор": "realtorText",
+    "информационный договор": "contractRef",
+    "сумма комиссии": "commissionAmount",
+    "фактическое поступление": "commissionReceived",
+    "доп. информация": "additionalInfo"
+  },
+  "excludedByPolicy": ["паспорт", "выдан", "кем выдан", "регистрация", "дата рождения", "день рождения", "месяц рождения", "год рождения", "д.р.", "м.р.", "г.р."],
+  "unresolved": []
+}

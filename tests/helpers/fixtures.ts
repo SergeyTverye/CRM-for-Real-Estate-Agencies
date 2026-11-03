@@ -82,3 +82,48 @@ export function routeParams<P extends Record<string, string>>(params: P) {
 export async function readBody<T = Record<string, unknown>>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
+
+// ───── Фабрики доменных данных через application-сервисы (соблюдают инварианты) ─────
+
+import { createClient } from "@/modules/clients/application/client-service";
+import { createNeed } from "@/modules/needs/application/need-service";
+import { createProperty } from "@/modules/properties/application/property-service";
+
+export const inDays = (d: number) => new Date(Date.now() + d * 86_400_000).toISOString();
+
+export function nextAction(title = "Позвонить клиенту", days = 1) {
+  return { title, dueAt: inDays(days), taskType: "call_or_contact" };
+}
+
+let phoneSeq = 1000;
+export function uniquePhone(): string {
+  phoneSeq += 1;
+  return `+7 900 000-${String(phoneSeq).slice(0, 2)}-${String(phoneSeq).slice(2, 4)}`;
+}
+
+export async function makeClient(actor: Actor, overrides: Record<string, unknown> = {}) {
+  return createClient(actor, {
+    displayName: `Клиент ${Math.random().toString(36).slice(2, 7)}`,
+    clientKind: "person",
+    contacts: [{ contactType: "phone", value: uniquePhone() }],
+    ...overrides,
+  });
+}
+
+export const NEED_PARAMS = { operationType: "rent", propertyType: "commercial", budgetMax: "150000.00", areaMin: "40", areaMax: "120" };
+
+export async function makeNeed(actor: Actor, clientId: string, overrides: Record<string, unknown> = {}) {
+  return createNeed(actor, { clientId, ...NEED_PARAMS, nextAction: nextAction(), ...overrides });
+}
+
+export async function makeProperty(actor: Actor, overrides: Record<string, unknown> = {}) {
+  return createProperty(actor, {
+    propertyType: "commercial",
+    operationType: "rent",
+    sourceType: "agency_listing",
+    addressText: `ул. Тестовая, д. ${Math.floor(Math.random() * 900) + 1}`,
+    area: "80",
+    price: "100000.00",
+    ...overrides,
+  });
+}

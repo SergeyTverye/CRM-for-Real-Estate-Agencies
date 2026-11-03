@@ -1,0 +1,22 @@
+{
+  "code": "incoming_clients_v1",
+  "version": "1",
+  "title": "Текущая клиентская база по входящим звонкам",
+  "target": "client_request_need",
+  "markers": ["входящие звонки", "клиентская база", "текущая база клиентов"],
+  "requiredHeaders": ["дата поступления", "имя", "функция"],
+  "defaults": { "propertyType": "commercial", "channelCode": "phone", "sourceCode": "other" },
+  "columns": {
+    "дата поступления": "receivedDate",
+    "дата обновления": "updatedDate",
+    "отметка о состоянии": "stateMark",
+    "функция": "functionText",
+    "имя": "name",
+    "координаты": "coordinates",
+    "комментарии": "comment"
+  },
+  "functionMap": { "аренда": "rent", "снять": "rent", "арендовать": "rent", "покупка": "buy", "купить": "buy", "продажа": "sell", "продать": "sell", "сдать": "lease_out", "сдача": "lease_out" },
+  "stateMap": { "актуально": "active", "в работе": "active", "неактуально": "closed", "отказ": "closed", "сделка": "success", "закрыто": "closed", "пауза": "paused" },
+  "excludedByPolicy": ["паспорт", "выдан", "регистрация", "дата рождения"],
+  "unresolved": []
+}

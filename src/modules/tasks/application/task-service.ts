@@ -115,16 +115,16 @@ export async function assertTaskLinksAccessible(tx: Tx | typeof db, actor: Actor
     agreementIds: u(links.agreementIds),
     offerIds: u(links.offerIds),
   };
-  const checks: Promise<void>[] = [];
-  if (l.clientIds.length) checks.push(assertAccessible(tx.client.count({ where: { id: { in: l.clientIds }, ...clientScope(actor) } }), l.clientIds.length, "links.clientIds"));
-  if (l.needIds.length) checks.push(assertAccessible(tx.clientNeed.count({ where: { id: { in: l.needIds }, ...needScope(actor) } }), l.needIds.length, "links.needIds"));
-  if (l.propertyIds.length) checks.push(assertAccessible(tx.property.count({ where: { id: { in: l.propertyIds } } }), l.propertyIds.length, "links.propertyIds"));
-  if (l.showingIds.length) checks.push(assertAccessible(tx.showing.count({ where: { id: { in: l.showingIds }, ...showingScope(actor) } }), l.showingIds.length, "links.showingIds"));
-  if (l.dealIds.length) checks.push(assertAccessible(tx.deal.count({ where: { id: { in: l.dealIds }, ...dealScope(actor) } }), l.dealIds.length, "links.dealIds"));
-  if (l.advertisementIds.length) checks.push(assertAccessible(tx.advertisement.count({ where: { id: { in: l.advertisementIds } } }), l.advertisementIds.length, "links.advertisementIds"));
-  if (l.agreementIds.length) checks.push(assertAccessible(tx.agreement.count({ where: { id: { in: l.agreementIds }, ...agreementScope(actor) } }), l.agreementIds.length, "links.agreementIds"));
-  if (l.offerIds.length) checks.push(assertAccessible(tx.commercialOffer.count({ where: { id: { in: l.offerIds }, ...offerScope(actor) } }), l.offerIds.length, "links.offerIds"));
-  await Promise.all(checks);
+  // Последовательно: внутри интерактивной транзакции одно соединение, параллельные запросы недопустимы.
+  if (l.clientIds.length) await assertAccessible(tx.client.count({ where: { id: { in: l.clientIds }, ...clientScope(actor) } }), l.clientIds.length, "links.clientIds");
+  if (l.needIds.length) await assertAccessible(tx.clientNeed.count({ where: { id: { in: l.needIds }, ...needScope(actor) } }), l.needIds.length, "links.needIds");
+  if (l.propertyIds.length) await assertAccessible(tx.property.count({ where: { id: { in: l.propertyIds } } }), l.propertyIds.length, "links.propertyIds");
+  if (l.showingIds.length) await assertAccessible(tx.showing.count({ where: { id: { in: l.showingIds }, ...showingScope(actor) } }), l.showingIds.length, "links.showingIds");
+  if (l.dealIds.length) await assertAccessible(tx.deal.count({ where: { id: { in: l.dealIds }, ...dealScope(actor) } }), l.dealIds.length, "links.dealIds");
+  if (l.advertisementIds.length) await assertAccessible(tx.advertisement.count({ where: { id: { in: l.advertisementIds } } }), l.advertisementIds.length, "links.advertisementIds");
+  if (l.agreementIds.length) await assertAccessible(tx.agreement.count({ where: { id: { in: l.agreementIds }, ...agreementScope(actor) } }), l.agreementIds.length, "links.agreementIds");
+  if (l.offerIds.length) await assertAccessible(tx.commercialOffer.count({ where: { id: { in: l.offerIds }, ...offerScope(actor) } }), l.offerIds.length, "links.offerIds");
+
 }
 
 export interface InsertTaskData {

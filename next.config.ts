@@ -28,7 +28,9 @@ const nextConfig: NextConfig = {
   // pino и argon2 — нативные/серверные пакеты, не бандлим их.
   serverExternalPackages: ["pino", "@node-rs/argon2", "exceljs", "pg"],
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    // В dev-режиме CSP не применяется: dev-сервер Next.js использует eval и HMR-websocket.
+    const headers = process.env.NODE_ENV === "production" ? securityHeaders : securityHeaders.filter((h) => h.key !== "Content-Security-Policy");
+    return [{ source: "/:path*", headers }];
   },
 };
 

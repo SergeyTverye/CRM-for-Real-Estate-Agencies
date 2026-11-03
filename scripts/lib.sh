@@ -62,3 +62,19 @@ backup_run() {
   # Запуск команды в одноразовом ops/backup контейнере.
   dc --profile ops run --rm -T backup "$@"
 }
+
+# Установка INSTANCE_ROLE в .env (active|standby).
+set_env_role() {
+  local role="$1" tmp
+  tmp="$(mktemp)"
+  awk -v r="$role" 'BEGIN{d=0} /^INSTANCE_ROLE=/{print "INSTANCE_ROLE=" r; d=1; next} {print} END{if(!d) print "INSTANCE_ROLE=" r}' "$ENV_FILE" >"$tmp"
+  mv "$tmp" "$ENV_FILE"
+  chmod 600 "$ENV_FILE"
+}
+
+# Запись события экземпляра в AuditLog через ops-контейнер (параметры — переменные psql, без конкатенации SQL).
+record_instance_event() {
+  local action="$1" dep="$2" inst="$3" who="$4"
+  backup_run psql -X -q -v ON_ERROR_STOP=1 -v action="$action" -v dep="$dep" -v inst="$inst" -v who="$who" \
+    -f /opt/crm-backup/instance-event.sql >/dev/null || warn "не удалось записать событие $action в AuditLog"
+}

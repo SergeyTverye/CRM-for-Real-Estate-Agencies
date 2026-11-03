@@ -1,0 +1,52 @@
+{
+  "code": "residential_sale_objects_v1",
+  "version": "1",
+  "title": "Жилая продажа",
+  "target": "property",
+  "markers": [
+    "жилая продажа",
+    "продажа жилой",
+    "жилье продажа"
+  ],
+  "requiredHeaders": [
+    "адрес",
+    "площадь",
+    "цена"
+  ],
+  "defaults": {
+    "propertyType": "residential",
+    "operationType": "sale",
+    "sourceType": "agency_listing"
+  },
+  "columns": {
+    "адрес": "addressText",
+    "район": "district",
+    "площадь": "area",
+    "цена": "price",
+    "стоимость": "price",
+    "этаж": "floor",
+    "этажность": "floorsTotal",
+    "комнаты": "roomsCount",
+    "назначение": "commercialPurpose",
+    "тип": "propertyTypeText",
+    "операция": "operationText",
+    "описание": "description",
+    "рекл. текст": "adText",
+    "реклама": "adUrl",
+    "площадка": "adPlatformText",
+    "собственник": "ownerName",
+    "телефон собственника": "ownerPhone",
+    "риелтор": "realtorText",
+    "дата": "listedDate"
+  },
+  "excludedByPolicy": [
+    "паспорт",
+    "выдан",
+    "регистрация"
+  ],
+  "unresolved": [
+    "ов",
+    "зу",
+    "а"
+  ]
+}

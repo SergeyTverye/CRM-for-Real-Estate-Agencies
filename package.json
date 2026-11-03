@@ -20,7 +20,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:migrate:dev": "prisma migrate dev",
-    "import:sample": "tsx scripts/dev/generate-import-sample.ts"
+    "import:sample": "tsx scripts/dev/generate-import-sample.ts",
+    "dev:webpack": "next dev --webpack"
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.2",

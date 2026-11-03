@@ -1,0 +1,51 @@
+{
+  "code": "commercial_rent_objects_v1",
+  "version": "1",
+  "title": "Коммерческая аренда",
+  "target": "property",
+  "markers": [
+    "коммерческая аренда",
+    "аренда коммерческой"
+  ],
+  "requiredHeaders": [
+    "адрес",
+    "площадь",
+    "цена"
+  ],
+  "defaults": {
+    "propertyType": "commercial",
+    "operationType": "rent",
+    "sourceType": "agency_listing"
+  },
+  "columns": {
+    "адрес": "addressText",
+    "район": "district",
+    "площадь": "area",
+    "цена": "price",
+    "стоимость": "price",
+    "этаж": "floor",
+    "этажность": "floorsTotal",
+    "комнаты": "roomsCount",
+    "назначение": "commercialPurpose",
+    "тип": "propertyTypeText",
+    "операция": "operationText",
+    "описание": "description",
+    "рекл. текст": "adText",
+    "реклама": "adUrl",
+    "площадка": "adPlatformText",
+    "собственник": "ownerName",
+    "телефон собственника": "ownerPhone",
+    "риелтор": "realtorText",
+    "дата": "listedDate"
+  },
+  "excludedByPolicy": [
+    "паспорт",
+    "выдан",
+    "регистрация"
+  ],
+  "unresolved": [
+    "ов",
+    "зу",
+    "а"
+  ]
+}

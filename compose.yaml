@@ -125,10 +125,15 @@ services:
       BACKUP_TARGETS: ${BACKUP_TARGETS:-}
       RCLONE_CONFIG: /secrets/rclone.conf
       RCLONE_CONFIG_PASS: ${RCLONE_CONFIG_PASS:-}
+      BACKUP_MANDATORY_TARGETS: ${BACKUP_MANDATORY_TARGETS:-}
+      BACKUP_REMOTE_RETENTION_DAILY: ${BACKUP_REMOTE_RETENTION_DAILY:-14}
+      HOME: /tmp
     volumes:
       - ./data/files:/data/files
       - ./backups:/backups
       - ${BACKUP_SECRETS_DIR:-./secrets}:/secrets:ro
+      # Локальный диск/NAS как дополнительный независимый target (provider filesystem).
+      - ${BACKUP_FILESYSTEM_TARGET_PATH:-./data/offsite-local}:/remote-store
     depends_on:
       db:
         condition: service_healthy

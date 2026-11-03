@@ -4,7 +4,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { getConfig } from "@/shared/config/env";
 import { addDays, startOfDayInTz, todayAsDateOnly } from "@/shared/time";
 import { NotFoundError } from "@/shared/errors";
-import { parseInput, skipTake, zCode, zPagination, zUuid, type Page } from "@/shared/validation";
+import { assertRecordId, parseInput, skipTake, zCode, zPagination, zUuid, type Page } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { canSeeClient, canSeeNeed, needScope, showingScope, agreementScope, offerScope, taskScope } from "@/modules/access/domain/scopes";
 import { OPEN_TASK_STATUSES, todayGroupOf, type TodayGroup } from "../domain/task-rules";
@@ -130,6 +130,8 @@ export const taskFiltersSchema = zPagination.extend({
   dealId: zUuid.optional(),
   propertyId: zUuid.optional(),
   q: z.string().trim().max(200).optional(),
+  /** Drill-down из отчёта: только просроченные в выбранном представлении (в т.ч. «Все» у руководителя). */
+  overdueOnly: z.enum(["yes"]).optional(),
 });
 
 export type TaskFilters = z.input<typeof taskFiltersSchema>;
@@ -144,7 +146,7 @@ export async function listTasks(actor: Actor, rawFilters: unknown): Promise<Page
   if (f.responsibleUserId && isManager(actor)) and.push({ responsibleUserId: f.responsibleUserId });
   if (f.status === "open" || ["overdue", "today", "week"].includes(f.view)) and.push({ status: { in: [...OPEN_TASK_STATUSES] } });
   else if (f.status !== "all") and.push({ status: f.status });
-  if (f.view === "overdue") and.push({ dueAt: { lt: now } });
+  if (f.view === "overdue" || f.overdueOnly) and.push({ dueAt: { lt: now } });
   if (f.view === "today") and.push({ dueAt: { gte: now, lt: startTomorrow } });
   if (f.view === "week") and.push({ dueAt: { gte: now, lt: weekEnd } });
   if (f.taskType) and.push({ taskType: f.taskType });
@@ -181,18 +183,27 @@ export async function listTasksLinkedTo(
   if (link.agreementId) and.push({ agreementLinks: { some: { agreementId: link.agreementId } } });
   if (link.advertisementId) and.push({ advertisementLinks: { some: { advertisementId: link.advertisementId } } });
   if (link.offerId) and.push({ offerLinks: { some: { commercialOfferId: link.offerId } } });
-  if (!opts.includeClosed) and.push({ status: { in: [...OPEN_TASK_STATUSES] } });
-  // Задачи по доступной карточке видны в её контексте (карточка уже проверена вызывающим кодом).
-  const rows = await db.task.findMany({
-    where: { AND: and },
+  // Открытые задачи всегда загружаются полностью и идут первыми; завершённые — отдельно, с лимитом.
+  const open = await db.task.findMany({
+    where: { AND: [...and, { status: { in: [...OPEN_TASK_STATUSES] } }] },
     include: taskInclude,
-    orderBy: [{ status: "asc" }, { dueAt: "asc" }],
-    take: opts.take ?? 100,
+    orderBy: { dueAt: "asc" },
+    take: 200,
   });
+  const closed = opts.includeClosed
+    ? await db.task.findMany({
+        where: { AND: [...and, { status: { notIn: [...OPEN_TASK_STATUSES] } }] },
+        include: taskInclude,
+        orderBy: [{ completedAt: { sort: "desc", nulls: "last" } }, { dueAt: "desc" }],
+        take: opts.take ?? 100,
+      })
+    : [];
+  const rows = [...open, ...closed];
   return rows.map((r) => toTaskView(actor, r));
 }
 
 export async function getTask(actor: Actor, taskId: string): Promise<TaskView> {
+  assertRecordId(taskId);
   const row = await db.task.findFirst({ where: { id: taskId, ...taskScope(actor) }, include: taskInclude });
   if (!row) throw new NotFoundError();
   return toTaskView(actor, row);
@@ -279,7 +290,14 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
   const controls: Record<TodayGroup, ControlItem[]> = empty();
   const responsibleFilter = scope === "all" ? {} : { responsibleUserId: userId };
   const showings = await db.showing.findMany({
-    where: { status: "planned", scheduledAt: { lt: startTomorrow }, ...responsibleFilter, ...showingScope(actor) },
+    where: {
+      status: "planned",
+      scheduledAt: { lt: startTomorrow },
+      // Показы с открытой задачей-встречей уже есть в группе задач.
+      taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } },
+      ...responsibleFilter,
+      ...showingScope(actor),
+    },
     select: { id: true, scheduledAt: true, property: { select: { addressText: true } }, responsible: { select: { displayName: true } } },
     orderBy: { scheduledAt: "asc" },
     take: 100,

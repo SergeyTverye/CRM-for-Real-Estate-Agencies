@@ -23,10 +23,11 @@ export function needScope(actor: Actor): Prisma.ClientNeedWhereInput {
   return isManager(actor) ? {} : { OR: [{ responsibleUserId: actor.userId }, { client: { responsibleUserId: actor.userId } }] };
 }
 
+/** Обращение видно ответственному, ответственному за клиента и сотруднику, который его зарегистрировал. */
 export function leadRequestScope(actor: Actor): Prisma.LeadRequestWhereInput {
   return isManager(actor)
     ? {}
-    : { OR: [{ responsibleUserId: actor.userId }, { client: { responsibleUserId: actor.userId } }] };
+    : { OR: [{ responsibleUserId: actor.userId }, { createdBy: actor.userId }, { client: { responsibleUserId: actor.userId } }] };
 }
 
 export function communicationScope(actor: Actor): Prisma.CommunicationWhereInput {

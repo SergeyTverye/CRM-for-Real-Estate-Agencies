@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CODEBOOK, type CodebookName, codesOf } from "./codebook";
-import { ValidationError, type FieldErrors } from "./errors";
+import { NotFoundError, ValidationError, type FieldErrors } from "./errors";
 
 /**
  * Общие схемы runtime-валидации DTO (Zod). Серверная схема — доверенная граница;
@@ -157,4 +157,11 @@ export function searchParamsToObject(sp: URLSearchParams | Record<string, string
     }
   }
   return out;
+}
+
+const UUID_ANY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Идентификатор записи из URL: не-UUID трактуется как отсутствующая запись (404), а не ошибка сервера. */
+export function assertRecordId(id: string): void {
+  if (!UUID_ANY_RE.test(id)) throw new NotFoundError();
 }

@@ -18,13 +18,16 @@ export function Field({
   required?: boolean;
   className?: string;
 }) {
+  // <label> оборачивает поле: подпись программно связана с вводом (доступность, автотесты).
   return (
     <div className={className}>
-      <label className="label">
-        {label}
-        {required ? <span className="text-red-600"> *</span> : null}
+      <label className="block">
+        <span className="label">
+          {label}
+          {required ? <span className="text-red-600"> *</span> : null}
+        </span>
+        {children}
       </label>
-      {children}
       {hint && !error ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
       {error ? <p className="field-error">{error}</p> : null}
     </div>

@@ -1,7 +1,6 @@
 import { defineConfig } from "vitest/config";
 import path from "node:path";
 import os from "node:os";
-import { TEST_DATABASE_URL } from "./tests/helpers/test-env";
 
 /**
  * Unit — чистая бизнес-логика без БД.
@@ -9,7 +8,8 @@ import { TEST_DATABASE_URL } from "./tests/helpers/test-env";
  * последовательно в одном процессе: файлы делят одну тестовую БД.
  */
 
-const TEST_DB = TEST_DATABASE_URL;
+// Должен совпадать с tests/helpers/test-env.ts (глобальная подготовка БД).
+const TEST_DB = process.env.TEST_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_test";
 const tmp = path.join(os.tmpdir(), `crm-test-${process.pid}`);
 
 const env = {
