@@ -1,0 +1,13 @@
+# Override для изолированного тестового контура восстановления (T08, ТЗ 31.3, 36.8).
+# Используется scripts/restore-test.sh с отдельным project name, своими томом БД
+# и каталогами restore-test/, поэтому рабочие данные не затрагиваются.
+services:
+  app:
+    volumes:
+      - ./restore-test/data/files:/data/files
+      - ./restore-test/data/import-staging:/data/import-staging
+      - ./restore-test/backups:/backups
+  backup:
+    volumes:
+      - ./restore-test/data/files:/data/files
+      - ./restore-test/backups:/backups

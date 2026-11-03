@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Спокойный desktop-first интерфейс (ТЗ 37.1): нейтральная палитра, цвет — только как сигнал состояния. */
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #d9e8ff;
+  --color-brand-500: #2f6fd6;
+  --color-brand-600: #2559b0;
+  --color-brand-700: #1e4890;
+}
+
+html, body { background: #f5f6f8; color: #1f2933; }
+body { font-size: 14px; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply border-brand-600 bg-brand-600 text-white hover:bg-brand-700; }
+  .btn-danger { @apply border-red-600 bg-white text-red-700 hover:bg-red-50; }
+  .btn-sm { @apply px-2 py-1 text-xs; }
+  .btn-link { @apply border-transparent bg-transparent px-1 text-brand-600 shadow-none hover:bg-transparent hover:underline; }
+  .input { @apply w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100; }
+  .input-error { @apply border-red-500 focus:border-red-500 focus:ring-red-100; }
+  .label { @apply mb-1 block text-xs font-medium text-slate-600; }
+  .field-error { @apply mt-1 text-xs text-red-600; }
+  .card { @apply rounded-lg border border-slate-200 bg-white shadow-xs; }
+  .card-header { @apply flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5; }
+  .card-title { @apply text-sm font-semibold text-slate-800; }
+  .card-body { @apply p-4; }
+  .table { @apply w-full border-collapse text-left text-sm; }
+  .table th { @apply border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .table td { @apply border-b border-slate-100 px-3 py-2 align-top; }
+  .table tr:hover td { @apply bg-slate-50/70; }
+  .badge { @apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap; }
+  .badge-gray { @apply border-slate-200 bg-slate-100 text-slate-700; }
+  .badge-blue { @apply border-blue-200 bg-blue-50 text-blue-800; }
+  .badge-green { @apply border-green-200 bg-green-50 text-green-800; }
+  .badge-yellow { @apply border-amber-200 bg-amber-50 text-amber-800; }
+  .badge-red { @apply border-red-200 bg-red-50 text-red-800; }
+  .link { @apply text-brand-600 hover:underline; }
+  .muted { @apply text-slate-500; }
+  .alert { @apply rounded-md border px-3 py-2 text-sm; }
+  .alert-error { @apply border-red-200 bg-red-50 text-red-800; }
+  .alert-warning { @apply border-amber-200 bg-amber-50 text-amber-900; }
+  .alert-success { @apply border-green-200 bg-green-50 text-green-800; }
+  .alert-info { @apply border-blue-200 bg-blue-50 text-blue-900; }
+  .dl { @apply grid grid-cols-[minmax(140px,max-content)_1fr] gap-x-4 gap-y-1.5 text-sm; }
+  .dl dt { @apply text-slate-500; }
+  .dl dd { @apply text-slate-900; }
+}

@@ -1,0 +1,145 @@
+# Production-like локальный стек (ТЗ 11, 36.2).
+# Постоянные сервисы: db, app. Одноразовый: migrate (миграции + идемпотентный seed).
+# Наружу публикуется только порт приложения; PostgreSQL и файловое хранилище не экспонируются.
+# Изменяемые параметры — только в .env (scripts/bootstrap.sh создаёт его из .env.example).
+name: ${COMPOSE_PROJECT_NAME:-crm}
+
+x-app-image: &app-image
+  image: crm-app:${APP_IMAGE_TAG:-local}
+  build:
+    context: .
+    args:
+      APP_VERSION: ${APP_VERSION:-dev}
+      APP_COMMIT: ${APP_COMMIT:-unknown}
+
+x-app-env: &app-env
+  NODE_ENV: production
+  DATABASE_URL: postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD не задан — запустите scripts/bootstrap.sh}@db:5432/${POSTGRES_DB:?}
+  APP_TIMEZONE: ${APP_TIMEZONE:?}
+  DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-server}
+  DEPLOYMENT_ID: ${DEPLOYMENT_ID:?DEPLOYMENT_ID не задан — запустите scripts/bootstrap.sh}
+  INSTANCE_ID: ${INSTANCE_ID:?}
+  INSTANCE_ROLE: ${INSTANCE_ROLE:-active}
+  SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-12}
+  COOKIE_SECURE: ${COOKIE_SECURE:-auto}
+  FILE_STORAGE_PATH: /data/files
+  IMPORT_STAGING_PATH: /data/import-staging
+  BACKUP_PATH: /backups
+  MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
+  UPLOAD_ALLOWED_EXTENSIONS: ${UPLOAD_ALLOWED_EXTENSIONS:-pdf,jpg,jpeg,png,webp,doc,docx,xls,xlsx,txt,csv}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  REACTIVATION_GAP_DAYS: ${REACTIVATION_GAP_DAYS:-90}
+  NEED_INACTIVITY_DAYS: ${NEED_INACTIVITY_DAYS:-14}
+  AGREEMENT_EXPIRY_WARNING_DAYS: ${AGREEMENT_EXPIRY_WARNING_DAYS:-30}
+  AD_CHECK_INTERVAL_DAYS: ${AD_CHECK_INTERVAL_DAYS:-7}
+  BACKUP_TARGETS: ${BACKUP_TARGETS:-}
+  BACKUP_RETENTION_DAILY: ${BACKUP_RETENTION_DAILY:-14}
+  AI_ENABLED: ${AI_ENABLED:-false}
+  POSTGRES_HOST: db
+  POSTGRES_DB: ${POSTGRES_DB}
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+services:
+  db:
+    image: postgres:18.6-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: [internal]
+
+  migrate:
+    <<: *app-image
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    restart: "no"
+    command: ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node_modules/.bin/prisma db seed"]
+    environment:
+      <<: *app-env
+      SEED_MANAGER_LOGIN: ${SEED_MANAGER_LOGIN:-manager}
+      SEED_REALTOR1_LOGIN: ${SEED_REALTOR1_LOGIN:-realtor1}
+      SEED_REALTOR2_LOGIN: ${SEED_REALTOR2_LOGIN:-realtor2}
+      SEED_MANAGER_PASSWORD: ${SEED_MANAGER_PASSWORD:-}
+      SEED_REALTOR1_PASSWORD: ${SEED_REALTOR1_PASSWORD:-}
+      SEED_REALTOR2_PASSWORD: ${SEED_REALTOR2_PASSWORD:-}
+      SEED_MUST_CHANGE_PASSWORD: ${SEED_MUST_CHANGE_PASSWORD:-true}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+  app:
+    <<: *app-image
+    # Процесс работает от владельца каталогов data/ и backups/ на хосте (bootstrap задаёт APP_UID/APP_GID).
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    restart: unless-stopped
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8080}:3000"
+    volumes:
+      - ./data/files:/data/files
+      - ./data/import-staging:/data/import-staging
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks: [internal, public]
+
+  # Одноразовый ops-контейнер резервного копирования (ТЗ 36.3, 39.10): pg_dump/pg_restore 18,
+  # архивация файлов, manifest/checksums, rclone crypt для off-site targets.
+  # Запускается только скриптами: docker compose --profile ops run --rm backup <command>
+  backup:
+    profiles: ["ops"]
+    image: crm-backup:${APP_IMAGE_TAG:-local}
+    build:
+      context: ops/backup
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    restart: "no"
+    environment:
+      PGHOST: db
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID}
+      APP_VERSION: ${APP_VERSION:-dev}
+      APP_COMMIT: ${APP_COMMIT:-unknown}
+      BACKUP_DIR: /backups
+      FILES_DIR: /data/files
+      BACKUP_RETENTION_DAILY: ${BACKUP_RETENTION_DAILY:-14}
+      BACKUP_TARGETS: ${BACKUP_TARGETS:-}
+      RCLONE_CONFIG: /secrets/rclone.conf
+      RCLONE_CONFIG_PASS: ${RCLONE_CONFIG_PASS:-}
+    volumes:
+      - ./data/files:/data/files
+      - ./backups:/backups
+      - ${BACKUP_SECRETS_DIR:-./secrets}:/secrets:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    # public — только для исходящих соединений к off-site targets (rclone).
+    networks: [internal, public]
+
+volumes:
+  postgres_data:
+
+networks:
+  # PostgreSQL доступна только во внутренней сети.
+  internal:
+    internal: true
+  public:

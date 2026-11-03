@@ -397,28 +397,46 @@ I0 должен завершаться реальным запуском сис�
 
 ## Запуск
 
-После реализации I0 предполагаемый базовый сценарий будет выглядеть примерно так:
+На хосте нужны только **Docker Engine** и **Docker Compose plugin** (Linux x86_64/arm64; для разработки — также Docker Desktop/Colima).
+Node.js, npm, Prisma и PostgreSQL на хосте не требуются.
 
 ```bash
-cp .env.example .env
-docker compose build
-docker compose up -d
+./scripts/bootstrap.sh   # проверка Docker, каталоги data/ и backups/, .env с новыми секретами
+./scripts/deploy.sh      # сборка образов, PostgreSQL, миграции + seed, запуск приложения
 ```
 
-Точные команды должны поддерживаться README в актуальном состоянии по мере разработки.
+После `deploy.sh` в консоли выводится адрес (по умолчанию `http://<сервер>:8080`).
+Первичные учётные записи: `manager`, `realtor1`, `realtor2`; пароли — в `.env` (`SEED_*_PASSWORD`), при первом входе система требует смену пароля.
 
-Проект должен допускать production-like запуск на машине, где установлены:
+### Эксплуатационные команды
 
-```text
-Docker Engine
-Docker Compose plugin
+| Команда | Назначение |
+|---|---|
+| `./scripts/bootstrap.sh` | первичная подготовка узла (существующий `.env` не перезаписывается) |
+| `./scripts/deploy.sh` | развёртывание/повторный запуск (идемпотентно) |
+| `./scripts/update.sh` | обновление: защитный backup → сборка → миграции → перезапуск |
+| `./scripts/status.sh` | состояние контейнеров и `/api/health` |
+| `./scripts/logs.sh [app\|db] [--follow]` | логи без секретов |
+| `./scripts/backup.sh [--targets all]` | локальный backup (+ off-site репликация) |
+| `./scripts/backup-verify.sh <id>` | проверка checksums/manifest/читаемости |
+| `./scripts/backup-list.sh` | список копий |
+| `./scripts/restore.sh <id>` | восстановление (с подтверждением и защитным snapshot) |
+| `./scripts/restore-test.sh [<id>]` | T08: восстановление в изолированный тестовый контур |
+| `./scripts/down.sh` | остановка без удаления данных |
+
+Данные: PostgreSQL — том `postgres_data`; файлы — `./data/files`; резервные копии — `./backups` (рекомендуется дополнительно копировать на другой носитель/NAS).
+
+## Разработка
+
+```bash
+npm ci
+docker compose -f compose.test.yaml up -d --wait   # PostgreSQL 18 для разработки и тестов (порт 55432)
+cp .env.example .env.local                         # затем укажите DATABASE_URL=postgresql://crm:crm_test_password@127.0.0.1:55432/crm_dev
+npx prisma migrate deploy && npx prisma db seed
+npm run dev
 ```
 
-Установка PostgreSQL на хостовую систему для штатного запуска не требуется.
-
-Установка Node.js на production host также не должна требоваться.
-
----
+Проверки: `npm run lint`, `npm run typecheck`, `npm test` (unit), `npm run test:integration` (integration + authorization на БД `crm_test`), `npm run test:e2e` (Playwright).
 
 ## Конфигурация
 

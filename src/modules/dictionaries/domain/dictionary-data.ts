@@ -1,0 +1,110 @@
+/**
+ * Бизнес-справочники (ТЗ 40.9): стабильный code + русское display_name + активность.
+ * Предприятие может пополнять их через «Администрирование → Справочники»
+ * без изменения бизнес-логики; используемый code не удаляется, только деактивируется.
+ */
+export const DICTIONARY_CATEGORIES = {
+  lead_channel: "Канал обращения",
+  lead_source: "Источник обращения",
+  need_operation_type: "Операция клиента (потребность)",
+  property_operation_type: "Операция с объектом",
+  property_type: "Тип недвижимости",
+  property_subtype: "Подтип недвижимости",
+  commercial_purpose: "Назначение коммерческого помещения",
+  ad_platform: "Рекламная площадка",
+  match_rejection_reason: "Причина отказа от объекта",
+  agreement_absence_reason: "Причина отсутствия договора",
+  agreement_commission_type: "Тип комиссии по договору",
+} as const;
+
+export type DictionaryCategory = keyof typeof DICTIONARY_CATEGORIES;
+
+export const DICTIONARY_SEED: Record<DictionaryCategory, [code: string, label: string][]> = {
+  lead_channel: [
+    ["phone", "Телефонный звонок"],
+    ["walk_in", "Визит в офис"],
+    ["messenger", "Мессенджер"],
+    ["email", "E-mail"],
+    ["website", "Заявка с сайта"],
+    ["other", "Другое"],
+  ],
+  lead_source: [
+    ["avito", "Авито"],
+    ["cian", "ЦИАН"],
+    ["domclick", "Домклик"],
+    ["yandex_realty", "Яндекс Недвижимость"],
+    ["signboard", "Вывеска/баннер на объекте"],
+    ["recommendation", "Рекомендация"],
+    ["repeat_client", "Повторное обращение"],
+    ["own_site", "Сайт агентства"],
+    ["other", "Другое"],
+  ],
+  need_operation_type: [
+    ["buy", "Купить"],
+    ["rent", "Арендовать"],
+    ["sell", "Продать"],
+    ["lease_out", "Сдать в аренду"],
+  ],
+  property_operation_type: [
+    ["sale", "Продажа"],
+    ["rent", "Аренда"],
+  ],
+  property_type: [
+    ["residential", "Жилая"],
+    ["commercial", "Коммерческая"],
+    ["country", "Загородная"],
+    ["land", "Земельный участок"],
+  ],
+  property_subtype: [
+    ["apartment", "Квартира"],
+    ["room", "Комната"],
+    ["house", "Дом"],
+    ["townhouse", "Таунхаус"],
+    ["office", "Офис"],
+    ["retail", "Торговое помещение"],
+    ["free_purpose", "Свободного назначения"],
+    ["warehouse", "Склад"],
+    ["production", "Производство"],
+    ["building", "Здание"],
+    ["land_plot", "Участок"],
+    ["other", "Другое"],
+  ],
+  commercial_purpose: [
+    ["office", "Офис"],
+    ["retail", "Торговля"],
+    ["catering", "Общепит"],
+    ["services", "Услуги"],
+    ["warehouse", "Склад"],
+    ["production", "Производство"],
+    ["any", "Любое"],
+  ],
+  ad_platform: [
+    ["avito", "Авито"],
+    ["cian", "ЦИАН"],
+    ["domclick", "Домклик"],
+    ["yandex_realty", "Яндекс Недвижимость"],
+    ["own_site", "Сайт агентства"],
+    ["other", "Другое"],
+  ],
+  match_rejection_reason: [
+    ["price", "Цена"],
+    ["location", "Расположение"],
+    ["area", "Площадь/планировка"],
+    ["condition", "Состояние"],
+    ["already_seen", "Уже видел"],
+    ["other", "Другое"],
+  ],
+  agreement_absence_reason: [
+    ["owner_refused", "Собственник отказался"],
+    ["in_progress", "Договор в работе"],
+    ["not_required", "Не требуется"],
+    ["no_contact", "Нет связи с собственником"],
+    ["other", "Другое"],
+  ],
+  agreement_commission_type: [
+    ["percent", "Процент"],
+    ["fixed", "Фиксированная сумма"],
+    ["monthly_rent", "Месячная арендная плата"],
+    ["other", "Другое"],
+  ],
+};

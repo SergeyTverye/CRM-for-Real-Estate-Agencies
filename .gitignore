@@ -147,3 +147,20 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# --- CRM project specific ---
+# runtime data: user files, backups, import uploads (never commit)
+/data/
+/backups/
+/restore-test/
+# generated Prisma client
+/src/generated/
+# test artifacts
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+next-env.d.ts
+/secrets/
+/.deploy-test/
+/.claude/
