@@ -20,7 +20,7 @@ CODE="${1-}"; KIND="${2-}"
 mkdir -p secrets/recovery; chmod 700 secrets secrets/recovery
 touch secrets/rclone.conf; chmod 600 secrets/rclone.conf
 
-rc() { docker run --rm -i -u "$(id -u):$(id -g)" -v "$ROOT_DIR/secrets:/secrets" -e RCLONE_CONFIG=/secrets/rclone.conf crm-backup:local rclone "$@"; }
+rc() { docker run --rm -i -u "$(id -u):$(id -g)" -e HOME=/tmp -v "$ROOT_DIR/secrets:/secrets" -e RCLONE_CONFIG=/secrets/rclone.conf crm-backup:local rclone "$@"; }
 docker image inspect crm-backup:local >/dev/null 2>&1 || dc --profile ops build backup
 
 PREFIX="crm-backups"
@@ -45,8 +45,8 @@ case "$KIND" in
   *) fail "тип: filesystem | yandex | mailru | sberdisk" ;;
 esac
 
-CRYPT_PASS="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 40)"
-CRYPT_SALT="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 40)"
+CRYPT_PASS="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 40 || true)"
+CRYPT_SALT="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 40 || true)"
 rc config create "$CODE-crypt" crypt remote="$BASE" filename_encryption=standard directory_name_encryption=true \
   password="$CRYPT_PASS" password2="$CRYPT_SALT" --obscure >/dev/null
 umask 077

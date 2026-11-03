@@ -104,7 +104,7 @@ export default async function DealCardPage({ params }: { params: Promise<{ id: s
         </div>
       ) : null}
 
-      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card title="Сделка">
           <Dl
             items={[
@@ -123,7 +123,7 @@ export default async function DealCardPage({ params }: { params: Promise<{ id: s
             ]}
           />
         </Card>
-        <Card title={`Участники (${d.parties.length})`} bodyClassName="" actions={canEdit ? <DealPartyAddButton dealId={id} /> : undefined}>
+        <Card title={`Участники (${d.parties.length})`} bodyClassName="" actions={canEdit && !closed ? <DealPartyAddButton dealId={id} /> : undefined}>
           <table className="table">
             <thead>
               <tr>
@@ -149,7 +149,7 @@ export default async function DealCardPage({ params }: { params: Promise<{ id: s
                   </td>
                   <td>{p.comment ?? "—"}</td>
                   <td>
-                    {canEdit && d.parties.length > 1 ? (
+                    {canEdit && !closed && d.parties.length > 1 ? (
                       <ActionButton method="DELETE" url={`/api/v1/deals/${id}/parties/${p.id}`} label="Убрать" className="btn btn-sm btn-link" confirm="Убрать участника из сделки?" />
                     ) : null}
                   </td>

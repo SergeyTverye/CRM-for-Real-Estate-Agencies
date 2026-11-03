@@ -10,23 +10,19 @@ CRM-система для ООО «Магазин недвижимости», р
 
 ## Статус проекта
 
-Проект находится в стадии разработки.
+Core MVP реализован по инкрементам I0–I5 технического задания: инфраструктура, аутентификация и RBAC,
+ядро CRM, операционный контур, сделки и документы, импорт, отчётность, резервное копирование
+с проверяемым восстановлением. Фактическое состояние, результаты T01–T10 и известные ограничения —
+в [`IMPLEMENTATION_REPORT.md`](IMPLEMENTATION_REPORT.md); трассировка требований —
+[`docs/requirements-traceability.md`](docs/requirements-traceability.md).
 
-Исходная реализация создаётся с нуля на основании утверждённого технического задания.
+Нормативный baseline: **ТЗ v1.6.1** — [`tz.md`](tz.md). При расхождении между `tz.md`, README,
+инструкциями для coding-агентов, комментариями в коде или инженерными предположениями приоритет имеет `tz.md`.
 
-Текущий нормативный baseline:
-
-**ТЗ v1.6.1**
-
-Главный источник требований:
-
-```text
-tz.md
-```
-
-`tz.md` определяет функциональные требования, бизнес-правила, модель данных, архитектуру, требования безопасности, интерфейс, миграцию, резервное копирование, тестирование и критерии приёмки.
-
-При расхождении между `tz.md`, README, инструкциями для coding-агентов, комментариями в коде или инженерными предположениями приоритет имеет `tz.md`.
+Документация: [инструкция администратора](docs/operations/admin-guide.md) ·
+[инструкция пользователя](docs/user-guide.md) · [модель данных](docs/data-model-mapping.md) ·
+[инженерные допущения](docs/implementation-assumptions.md) · [ADR](docs/adr) ·
+[соглашения разработки](docs/dev-conventions.md) · [приёмка](docs/acceptance).
 
 ---
 
@@ -203,77 +199,35 @@ PostgreSQL / file storage
 
 ---
 
-## Планируемая структура репозитория
+## Структура репозитория
 
 ```text
 /
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/
-│   │   ├── (crm)/
-│   │   └── api/
-│   │       └── v1/
-│   │
-│   ├── modules/
-│   │   ├── auth/
-│   │   ├── users/
-│   │   ├── clients/
-│   │   ├── requests/
-│   │   ├── needs/
-│   │   ├── properties/
-│   │   ├── communications/
-│   │   ├── showings/
-│   │   ├── tasks/
-│   │   ├── agreements/
-│   │   ├── commercial-offers/
-│   │   ├── advertisements/
-│   │   ├── deals/
-│   │   ├── documents/
-│   │   ├── search/
-│   │   ├── reports/
-│   │   ├── import/
-│   │   ├── backup/
-│   │   └── audit/
-│   │
-│   ├── shared/
-│   └── ui/
-│
-├── prisma/
-│   ├── schema.prisma
-│   ├── migrations/
-│   └── seed.ts
-│
-├── import-profiles/
-├── scripts/
-├── ops/
-│
-├── tests/
-│   ├── integration/
-│   ├── authorization/
-│   └── e2e/
-│
-├── docs/
-│   ├── adr/
-│   ├── acceptance/
-│   ├── requirements-traceability.md
-│   ├── data-model-mapping.md
-│   ├── implementation-assumptions.md
-│   └── future-backlog.md
-│
-├── AGENTS.md
-├── CLAUDE.md
-├── tz.md
+│   │   ├── (auth)/            вход, смена пароля
+│   │   ├── (crm)/             рабочие места (Сегодня, Обращения, Клиенты, Потребности, Объекты, …)
+│   │   └── api/v1/            REST/JSON API (route handlers)
+│   ├── server/                HTTP-слой: аутентификация, CSRF, формат ошибок, форматирование
+│   ├── modules/<домен>/       application (use-case, queries) и domain (правила)
+│   │                          access (RBAC-политики), auth, users, clients, requests, needs,
+│   │                          properties, matching, communications, showings, tasks, agreements,
+│   │                          advertisements, commercial-offers, deals, documents, search,
+│   │                          reports, import, export, archive, operations, audit, dictionaries
+│   ├── shared/                config, db, errors, validation, codebook, storage, logging, time
+│   └── ui/                    общие компоненты интерфейса
+├── prisma/                    schema.prisma, migrations/, seed.ts, seed/
+├── import-profiles/           versioned профили импорта Excel
+├── ops/backup/                образ и скрипты резервного копирования (pg_dump, rclone crypt)
+├── scripts/                   bootstrap/deploy/update/backup/restore/status/logs/down, portable
+├── tests/                     unit, integration, authorization, e2e (Playwright)
+├── docs/                      ADR, приёмка, трассировка, модель данных, инструкции
+├── compose.yaml               production-like стек (db, migrate, app, backup)
+├── compose.test.yaml          PostgreSQL для разработки и тестов
+├── compose.restore-test.yaml  изолированный контур проверки восстановления (T08)
 ├── Dockerfile
-├── docker-compose.yml
-├── docker-compose.test.yml
-├── package.json
-├── package-lock.json
-├── .env.example
-├── .gitignore
-└── README.md
+└── .env.example
 ```
-
-Фактическая структура может уточняться при реализации, если изменение сохраняет модульную архитектуру и требования `tz.md`.
 
 ---
 

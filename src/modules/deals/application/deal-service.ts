@@ -143,6 +143,10 @@ async function loadDeal(tx: DbOrTx, actor: Actor, id: string) {
   return deal;
 }
 
+function assertDealOpen(deal: { status: string }) {
+  if (["completed", "cancelled"].includes(deal.status)) throw new DomainError("DEAL_CLOSED", "Сделка закрыта — состав участников не меняется");
+}
+
 function assertCanEditDeal(actor: Actor, deal: { responsibleUserId: string }) {
   if (!isManager(actor) && deal.responsibleUserId !== actor.userId) throw new ForbiddenError("Изменять сделку может ответственный или руководитель");
 }
@@ -192,6 +196,7 @@ export async function addDealParty(actor: Actor, dealId: string, input: unknown)
   return transaction(async (tx) => {
     const deal = await loadDeal(tx, actor, dealId);
     assertCanEditDeal(actor, deal);
+    assertDealOpen(deal);
     if (p.clientId) await assertPartyClients(tx, actor, [p.clientId]);
     const party = await tx.dealParty.create({ data: { dealId, clientId: p.clientId ?? null, externalPartyName: p.externalPartyName, partyRole: p.partyRole, comment: p.comment }, select: { id: true } });
     await writeAudit(tx, { actorUserId: actor.userId, action: "deal.party_added", entityType: "Deal", entityId: dealId, after: { partyId: party.id, partyRole: p.partyRole, clientId: p.clientId } });
@@ -203,6 +208,7 @@ export async function removeDealParty(actor: Actor, dealId: string, partyId: str
   await transaction(async (tx) => {
     const deal = await loadDeal(tx, actor, dealId);
     assertCanEditDeal(actor, deal);
+    assertDealOpen(deal);
     const party = await tx.dealParty.findFirst({ where: { id: partyId, dealId }, include: { _count: { select: { commissions: true } } } });
     if (!party) throw new NotFoundError();
     if (party._count.commissions) throw new DomainError("PARTY_HAS_COMMISSIONS", "Участник указан плательщиком комиссии");

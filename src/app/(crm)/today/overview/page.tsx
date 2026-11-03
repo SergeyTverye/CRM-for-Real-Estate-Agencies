@@ -10,6 +10,10 @@ import { Badge, Card, EmptyState, PageHeader, StatusBadge } from "@/ui/component
 
 export const metadata = { title: "Обзор руководителя" };
 
+function hoursSince(d: Date): number {
+  return (Date.now() - d.getTime()) / 3_600_000;
+}
+
 /**
  * Режим «Обзор» стартового экрана руководителя (ТЗ 37.18): KPI за период по тем же первичным данным,
  * «Требует внимания», договоры и реклама с ближайшим сроком, нагрузка по сотрудникам, последние сделки,
@@ -27,7 +31,7 @@ export default async function ManagerOverviewPage() {
   const kpis = report.kpis.filter((k) => kpiKeys.includes(k.key));
   const deadlines = [...today.controls.documents, ...today.controls.advertising].sort((a, b) => a.dateLabel.getTime() - b.dateLabel.getTime()).slice(0, 10);
   const lastBackup = ops.lastLocalBackup;
-  const backupAgeHours = lastBackup ? (Date.now() - lastBackup.startedAt.getTime()) / 3_600_000 : null;
+  const backupAgeHours = lastBackup ? hoursSince(lastBackup.startedAt) : null;
   return (
     <div>
       <PageHeader

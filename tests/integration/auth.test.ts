@@ -4,7 +4,7 @@ import { login, logout, changeOwnPassword } from "@/modules/auth/application/aut
 import { resolveSession } from "@/modules/auth/application/session-service";
 import { hashSessionToken } from "@/modules/auth/infrastructure/session-token";
 import { updateUser } from "@/modules/users/application/users-service";
-import { AuthenticationError, RateLimitError } from "@/shared/errors";
+import { InvalidCredentialsError, RateLimitError } from "@/shared/errors";
 
 let u: TestUsers;
 beforeEach(async () => {
@@ -35,8 +35,8 @@ describe("I1: аутентификация и сессии (T01)", () => {
   it("одинаковый ответ для неверного пароля и несуществующего логина", async () => {
     const e1 = await login(u.realtor1.login, "wrong-password1", meta, { delay: false }).catch((e) => e);
     const e2 = await login("no_such_user", "wrong-password1", meta, { delay: false }).catch((e) => e);
-    expect(e1).toBeInstanceOf(AuthenticationError);
-    expect(e2).toBeInstanceOf(AuthenticationError);
+    expect(e1).toBeInstanceOf(InvalidCredentialsError);
+    expect(e2).toBeInstanceOf(InvalidCredentialsError);
     expect(e1.message).toBe(e2.message);
   });
 
@@ -44,7 +44,7 @@ describe("I1: аутентификация и сессии (T01)", () => {
     const r = await login(u.realtor2.login, TEST_PASSWORD, meta, { delay: false });
     await updateUser(u.manager, u.realtor2.userId, { isActive: false });
     expect(await resolveSession(r.token)).toBeNull();
-    await expect(login(u.realtor2.login, TEST_PASSWORD, meta, { delay: false })).rejects.toBeInstanceOf(AuthenticationError);
+    await expect(login(u.realtor2.login, TEST_PASSWORD, meta, { delay: false })).rejects.toBeInstanceOf(InvalidCredentialsError);
     // История не разрушена: пользователь существует, запись аудита есть.
     expect(await db.user.findUnique({ where: { id: u.realtor2.userId } })).not.toBeNull();
     expect(await db.auditLog.count({ where: { action: "user.deactivated", entityId: u.realtor2.userId } })).toBe(1);

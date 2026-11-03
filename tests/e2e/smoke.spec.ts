@@ -27,7 +27,7 @@ test.describe("T01: вход и различия ролей", () => {
     await page.getByLabel("Логин").fill("no-such-user");
     await page.getByLabel("Пароль").fill("wrong-password-1");
     await page.getByRole("button", { name: "Войти" }).click();
-    await expect(page.getByRole("alert")).toContainText("Неверный логин или пароль");
+    await expect(page.getByText("Неверный логин или пароль")).toBeVisible();
   });
 });
 
@@ -46,7 +46,7 @@ test.describe("Сквозной сценарий: обращение → кли�
 
   test("экран «Сегодня» показывает счётчики и группы действий", async ({ page }) => {
     await login(page, "realtor1");
-    await expect(page.getByRole("heading", { name: "Сегодня" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Сегодня", exact: true })).toBeVisible();
     await expect(page.getByText("Просрочено").first()).toBeVisible();
   });
 

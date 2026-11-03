@@ -8,7 +8,7 @@ const PORT = Number(process.env.E2E_PORT ?? 3200);
 const E2E_DB = process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";
 
 export const E2E_PASSWORDS = {
-  manager: "E2eManager2026",
+  manager: "E2eRukovod2026",
   realtor1: "E2eAgentOne26",
   realtor2: "E2eAgentTwo26",
 };

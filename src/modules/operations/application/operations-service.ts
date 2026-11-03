@@ -186,7 +186,29 @@ export async function startManualBackup(actor: Actor): Promise<{ started: true }
   child.stderr?.on("data", (b: Buffer) => {
     stderr = (stderr + b.toString()).slice(-4000);
   });
-  child.on("exit", (code) => logger[code === 0 ? "info" : "error"]({ event: "backup.manual_finished", code, tail: code === 0 ? undefined : stderr.split("\n").slice(-5).join(" | ") }, "manual backup finished"));
+  const startedAt = new Date();
+  child.on("exit", (code) => {
+    logger[code === 0 ? "info" : "error"]({ event: "backup.manual_finished", code, tail: code === 0 ? undefined : stderr.split("\n").slice(-5).join(" | ") }, "manual backup finished");
+    if (code === 0) return;
+    // Скрипт не смог даже зарегистрировать запуск (нет инструментов/БД) — фиксируем неудачу, чтобы её было видно в UI.
+    void (async () => {
+      const recorded = await db.backupRun.count({ where: { startedAt: { gte: new Date(startedAt.getTime() - 5_000) }, initiatedByUserId: actor.userId } });
+      if (recorded) return;
+      const id = startedAt.toISOString().slice(0, 19).replace("T", "_").replace(/:/g, "-");
+      await db.backupRun.create({
+        data: {
+          backupId: `${id}-failed`,
+          deploymentId: getConfig().DEPLOYMENT_ID,
+          startedAt,
+          finishedAt: new Date(),
+          initiatedByUserId: actor.userId,
+          triggerType: "manual",
+          localStatus: "failed",
+          errorSummary: (stderr.split("\n").filter(Boolean).slice(-2).join(" | ") || `exit ${code}`).slice(0, 500),
+        },
+      });
+    })().catch((err) => logger.error({ err }, "failed to record backup failure"));
+  });
   child.unref();
   await writeAudit(db, { actorUserId: actor.userId, action: "backup.manual_started", entityType: "BackupRun", entityId: actor.userId });
   return { started: true };

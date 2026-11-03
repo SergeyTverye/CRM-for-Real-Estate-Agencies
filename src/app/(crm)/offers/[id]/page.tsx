@@ -85,7 +85,9 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
       />
 
       {priceChanged.length ? (
-        <div className="alert alert-info mb-4">Текущая цена {priceChanged.length === 1 ? "объекта" : "части объектов"} изменилась, в предложении сохранена цена на момент подготовки.</div>
+        <div className="alert alert-info mb-4">
+          Текущая цена {priceChanged.length === 1 ? "объекта" : "части объектов"} изменилась или отличается от цены в КП — в предложении сохранена цена на момент подготовки.
+        </div>
       ) : null}
 
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -145,7 +147,8 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
                     {i.priceSnapshot ? fmtMoney(i.priceSnapshot) : "по запросу"}
                     {changed.has(i.id) ? (
                       <div className="mt-0.5 max-w-56 whitespace-normal text-xs text-amber-800">
-                        <Badge tone="yellow">цена изменилась</Badge> сейчас {fmtMoney(i.property.price)}; в предложении сохранена цена на момент подготовки
+                        <Badge tone="yellow">сейчас {fmtMoney(i.property.price)}</Badge>
+                        <div>текущая цена объекта изменилась; в предложении сохранена цена на момент подготовки</div>
                       </div>
                     ) : null}
                   </td>

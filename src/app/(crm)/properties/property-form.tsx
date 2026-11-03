@@ -256,7 +256,7 @@ export function PropertyForm({
         ) : null}
         {landOrCountry ? (
           <>
-            <Field label="Площадь участка, м²" error={fieldError("landArea")}>
+            <Field label="Площадь участка, сот." error={fieldError("landArea")}>
               {input("landArea", { inputMode: "decimal" })}
             </Field>
             <Field label="Площадь строения, м²" error={fieldError("buildingArea")}>

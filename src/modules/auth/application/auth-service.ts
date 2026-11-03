@@ -1,7 +1,7 @@
 import { db, transaction } from "@/shared/db/client";
 import { getConfig } from "@/shared/config/env";
 import { logger } from "@/shared/logging/logger";
-import { AuthenticationError, RateLimitError, ValidationError } from "@/shared/errors";
+import { InvalidCredentialsError, RateLimitError, ValidationError } from "@/shared/errors";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { hashPassword, verifyPassword, getDummyHash } from "../infrastructure/password-hasher";
 import { LoginRateLimiter } from "../infrastructure/login-rate-limiter";
@@ -50,7 +50,7 @@ export async function login(rawLogin: string, password: string, meta: SessionMet
     rl.recordFailure(loginNorm, ip);
     logger.warn({ event: "auth.login_failed", reason: !user ? "unknown_login" : !ok ? "bad_password" : "inactive" }, "login failed");
     if (opts.delay !== false) await sleep(rl.delayFor(loginNorm, ip));
-    throw new AuthenticationError(INVALID_CREDENTIALS);
+    throw new InvalidCredentialsError(INVALID_CREDENTIALS);
   }
 
   rl.recordSuccess(loginNorm, ip);

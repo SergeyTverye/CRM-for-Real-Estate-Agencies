@@ -24,6 +24,18 @@ function isValidTimeZone(tz: string): boolean {
   }
 }
 
+const WEAK_DB_PASSWORDS = new Set(["", "password", "postgres", "changeme", "change_me", "crm", "admin", "123456", "secret"]);
+
+/** Пустой, демонстрационный или короткий (< 12 символов) пароль PostgreSQL в production запрещён. */
+function isWeakDbPassword(url: string): boolean {
+  try {
+    const pwd = decodeURIComponent(new URL(url).password);
+    return WEAK_DB_PASSWORDS.has(pwd.toLowerCase()) || pwd.length < 12 || /change[_-]?me/i.test(pwd);
+  } catch {
+    return true;
+  }
+}
+
 const DEV_DEPLOYMENT_ID = "00000000-0000-4000-8000-000000000001";
 
 const schema = z
@@ -69,7 +81,7 @@ const schema = z
       if (!env.DEPLOYMENT_ID) ctx.addIssue({ code: "custom", path: ["DEPLOYMENT_ID"], message: "обязателен в production" });
       if (!env.INSTANCE_ID) ctx.addIssue({ code: "custom", path: ["INSTANCE_ID"], message: "обязателен в production" });
       if (!env.APP_TIMEZONE) ctx.addIssue({ code: "custom", path: ["APP_TIMEZONE"], message: "обязателен в production" });
-      if (/change[_-]?me|password@|:postgres@/i.test(env.DATABASE_URL)) {
+      if (isWeakDbPassword(env.DATABASE_URL)) {
         ctx.addIssue({
           code: "custom",
           path: ["DATABASE_URL"],

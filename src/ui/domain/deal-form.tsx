@@ -191,10 +191,10 @@ export function NewDealForm({
         {parties.map((p, i) => (
           <div key={p.key} className="rounded-md border border-slate-200 p-3">
             <div className="grid grid-cols-1 gap-2 md:grid-cols-12">
-              <Field label="Роль" required error={fieldError(`parties.${i}.partyRole`)} className="md:col-span-2">
+              <Field label="Роль" required error={fieldError(`parties.${i}.partyRole`)} className="md:col-span-3">
                 <SelectInput value={p.partyRole} onChange={(partyRole) => setParty(i, { partyRole })} options={ROLES} />
               </Field>
-              <Field label="Кто" className="md:col-span-2">
+              <Field label="Кто" className="md:col-span-3">
                 <SelectInput
                   value={p.kind}
                   onChange={(k) => setParty(i, { kind: k as PartyDraft["kind"] })}
@@ -205,18 +205,18 @@ export function NewDealForm({
                 />
               </Field>
               {p.kind === "client" ? (
-                <Field label="Клиент" required error={fieldError(`parties.${i}.clientId`)} className="md:col-span-4">
+                <Field label="Клиент" required error={fieldError(`parties.${i}.clientId`)} className="md:col-span-6">
                   <ClientPicker value={p.client} onChange={(client) => setParty(i, { client })} invalid={Boolean(fieldError(`parties.${i}.clientId`))} />
                 </Field>
               ) : (
-                <Field label="Наименование / ФИО" required error={fieldError(`parties.${i}.externalPartyName`)} className="md:col-span-4">
+                <Field label="Наименование / ФИО" required error={fieldError(`parties.${i}.externalPartyName`)} className="md:col-span-6">
                   <input className={`input ${fieldError(`parties.${i}.externalPartyName`) ? "input-error" : ""}`} value={p.externalPartyName} onChange={(e) => setParty(i, { externalPartyName: e.target.value })} />
                 </Field>
               )}
-              <Field label="Комментарий" className="md:col-span-3">
+              <Field label="Комментарий" className="md:col-span-10">
                 <input className="input" value={p.comment} onChange={(e) => setParty(i, { comment: e.target.value })} />
               </Field>
-              <div className="flex items-end md:col-span-1">
+              <div className="flex items-end justify-end md:col-span-2">
                 <button type="button" className="btn btn-sm btn-link text-red-700" disabled={parties.length === 1} onClick={() => removeParty(i)}>
                   Убрать
                 </button>
@@ -237,27 +237,27 @@ export function NewDealForm({
         {commissions.map((c, i) => (
           <div key={c.key} className="rounded-md border border-slate-200 p-3">
             <div className="grid grid-cols-1 gap-2 md:grid-cols-12">
-              <Field label="Сумма, ₽" required error={fieldError(`commissions.${i}.amount`)} className="md:col-span-2">
+              <Field label="Сумма, ₽" required error={fieldError(`commissions.${i}.amount`)} className="md:col-span-3">
                 <input className={`input ${fieldError(`commissions.${i}.amount`) ? "input-error" : ""}`} inputMode="decimal" value={c.amount} onChange={(e) => setCommission(i, { amount: e.target.value })} />
               </Field>
-              <Field label="Статус" className="md:col-span-2">
+              <Field label="Статус" className="md:col-span-3">
                 <SelectInput value={c.status} onChange={(s) => setCommission(i, { status: s })} options={COMMISSION_STATUSES} />
               </Field>
-              <Field label="Срок оплаты" error={fieldError(`commissions.${i}.dueAt`)} className="md:col-span-2">
+              <Field label="Срок оплаты" error={fieldError(`commissions.${i}.dueAt`)} className="md:col-span-3">
                 <input type="date" className="input" value={c.dueAt} onChange={(e) => setCommission(i, { dueAt: e.target.value })} />
               </Field>
               {["received", "partially_received"].includes(c.status) ? (
-                <Field label="Получена" error={fieldError(`commissions.${i}.receivedAt`)} className="md:col-span-2">
+                <Field label="Получена" error={fieldError(`commissions.${i}.receivedAt`)} className="md:col-span-3">
                   <DateTimeInput value={c.receivedAt} onChange={(receivedAt) => setCommission(i, { receivedAt })} timeZone={timeZone} />
                 </Field>
               ) : null}
-              <Field label="Плательщик" className="md:col-span-2">
+              <Field label="Плательщик" className="md:col-span-4">
                 <SelectInput value={c.payerIndex} onChange={(payerIndex) => setCommission(i, { payerIndex })} options={payerOptions} placeholder="—" />
               </Field>
-              <Field label="Комментарий" className={["received", "partially_received"].includes(c.status) ? "md:col-span-1" : "md:col-span-3"}>
+              <Field label="Комментарий" className="md:col-span-6">
                 <input className="input" value={c.comment} onChange={(e) => setCommission(i, { comment: e.target.value })} />
               </Field>
-              <div className="flex items-end md:col-span-1">
+              <div className="flex items-end justify-end md:col-span-2">
                 <button type="button" className="btn btn-sm btn-link text-red-700" onClick={() => setCommissions((s) => s.filter((_, j) => j !== i))}>
                   Убрать
                 </button>

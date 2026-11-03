@@ -51,7 +51,7 @@ export default async function PropertyCardPage({ params, searchParams }: { param
   ];
   if (p.roomsCount !== null) key.push(["Комнат", String(p.roomsCount)]);
   if (p.floor !== null) key.push(["Этаж", `${p.floor}${p.floorsTotal ? ` из ${p.floorsTotal}` : ""}`]);
-  if (p.landArea) key.push(["Участок", fmtNum(p.landArea, "м²")]);
+  if (p.landArea) key.push(["Участок", fmtNum(p.landArea, "сот.")]);
 
   const activeAds = p.advertisements.filter((a) => a.status === "active").length;
 

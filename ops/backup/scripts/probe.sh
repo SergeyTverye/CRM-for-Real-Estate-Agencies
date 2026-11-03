@@ -11,6 +11,7 @@ RC=(rclone --config "$RCLONE_CONFIG" --stats 0)
 TMP="$(mktemp -d)"; NAME="probe-$(date -u +%Y%m%d%H%M%S)-$$.txt"
 echo "crm probe $(date -u +%FT%TZ)" > "$TMP/$NAME"
 status="ok"
+"${RC[@]}" mkdir "$CODE-crypt:" >/dev/null 2>&1 || true
 "${RC[@]}" lsf "$CODE-crypt:" >/dev/null 2>&1 || status="list_failed"
 [ "$status" = ok ] && { "${RC[@]}" copyto "$TMP/$NAME" "$CODE-crypt:.probe/$NAME" >/dev/null 2>&1 || status="write_failed"; }
 [ "$status" = ok ] && { "${RC[@]}" cat "$CODE-crypt:.probe/$NAME" 2>/dev/null | cmp -s - "$TMP/$NAME" || status="read_failed"; }

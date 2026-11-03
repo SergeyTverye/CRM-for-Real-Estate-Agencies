@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { requirePageActor } from "@/server/page-auth";
 import { listShowings } from "@/modules/showings/application/showing-service";
-import { getPropertyCard } from "@/modules/properties/application/property-queries";
-import { NotFoundError } from "@/shared/errors";
 import { searchParamsToObject } from "@/shared/validation";
 import { labelOf } from "@/shared/codebook";
 import { addDays, localDateString } from "@/shared/time";
@@ -11,11 +9,11 @@ import { codeOptions, userOptions } from "@/server/options";
 import { loadList } from "@/server/list-page";
 import { Badge, Card, EmptyState, FilterBar, FilterField, PageHeader, Pagination, Select, StatusBadge } from "@/ui/components";
 import { ViewTabs, listHref } from "@/ui/domain/deal-list-kit";
-import { PropertyFilterPicker, type PropertyPick } from "@/ui/domain/deal-pickers";
+import { PropertyFilterPicker } from "@/ui/domain/deal-pickers";
+import { loadPropertyPick } from "@/ui/domain/deal-prefill";
 
 export const metadata = { title: "Показы" };
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 type ShowingRow = Awaited<ReturnType<typeof listShowings>>["items"][number];
@@ -52,15 +50,7 @@ export default async function ShowingsPage({ searchParams }: { searchParams: Pro
     : sp;
   const res = await loadList(() => listShowings(actor, query), "/showings");
 
-  let property: PropertyPick | null = null;
-  if (sp.propertyId && UUID_RE.test(sp.propertyId)) {
-    try {
-      const card = await getPropertyCard(actor, sp.propertyId);
-      property = { id: card.property.id, addressText: card.property.addressText, price: card.property.price?.toString() ?? null, responsible: card.property.responsible };
-    } catch (e) {
-      if (!(e instanceof NotFoundError)) throw e;
-    }
-  }
+  const property = await loadPropertyPick(actor, sp.propertyId);
 
   const newHref = sp.propertyId ? `/showings/new?propertyId=${sp.propertyId}` : "/showings/new";
   return (

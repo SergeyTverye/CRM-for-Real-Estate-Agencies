@@ -45,6 +45,15 @@ export class AuthenticationError extends AppError {
   }
 }
 
+/** Неверный логин/пароль: одинаковое сообщение для любого логина (не раскрывает его существование). */
+export class InvalidCredentialsError extends AppError {
+  readonly status = 401;
+  readonly code = "INVALID_CREDENTIALS";
+  constructor(message = "Неверный логин или пароль") {
+    super(message);
+  }
+}
+
 export class PasswordChangeRequiredError extends AppError {
   readonly status = 403;
   readonly code = "PASSWORD_CHANGE_REQUIRED";

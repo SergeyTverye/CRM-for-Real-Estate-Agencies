@@ -143,6 +143,8 @@ export function ImportCommitPanel({ jobId, jobStatus, sections, users }: { jobId
                   {s.committed ? <span className="badge badge-green ml-2">Загружена</span> : null}
                   {!s.recognized ? (
                     <span className="mt-0.5 block text-xs text-slate-600">Не распознана — автоматически не импортируется. Нужна новая версия профиля (mapping) в import-profiles/.</span>
+                  ) : s.committed ? (
+                    <span className="mt-0.5 block text-xs text-slate-500">Секция уже загружена; повторная загрузка не выполняется. Результат по строкам — в таблице выше (фильтр «Результат загрузки»).</span>
                   ) : (
                     <span className="mt-0.5 block text-xs text-slate-500">
                       строк: {s.total} · к загрузке: {s.candidates} · будет пропущено (ошибки, не распознано, политика): {s.skipped}

@@ -68,7 +68,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const sourceCode = report.filters.sourceCode;
   const userName = userId ? (users.find((u) => u.value === userId)?.label ?? "выбранный сотрудник") : null;
   const kpi = (key: string) => report.kpis.find((k) => k.key === key);
-  const kpiValue = (key: string) => kpi(key)?.value ?? 0;
   const signalOf = (key: string, value: number): Signal => {
     if (value <= 0) return null;
     if (key === "overdue") return "attention";

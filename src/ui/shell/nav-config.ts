@@ -18,6 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/agreements", label: "Договоры" },
   { href: "/advertisements", label: "Реклама" },
   { href: "/reports", label: "Отчёты", managerOnly: true },
+  { href: "/archive", label: "Архив сделок", managerOnly: true },
   { href: "/import", label: "Импорт", managerOnly: true },
   { href: "/operations", label: "Эксплуатация", managerOnly: true },
   { href: "/admin", label: "Администрирование", managerOnly: true },

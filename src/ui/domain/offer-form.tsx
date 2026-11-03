@@ -128,9 +128,9 @@ export function OfferForm({
       </div>
 
       <section className="space-y-2">
-        <div className="flex items-baseline justify-between">
+        <div>
           <h3 className="text-sm font-semibold text-slate-800">Объекты в предложении</h3>
-          <span className="text-xs text-slate-500">Цена и условия фиксируются на момент подготовки; пустое поле — значение из карточки объекта</span>
+          <p className="text-xs text-slate-500">Порядок — кнопками ↑↓. Цена и условия фиксируются в КП; пустое поле — значение из карточки объекта на момент сохранения.</p>
         </div>
         {fieldError("items") ? <p className="field-error">{fieldError("items")}</p> : null}
         {v.items.length === 0 ? (

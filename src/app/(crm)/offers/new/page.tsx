@@ -18,7 +18,7 @@ export default async function NewOfferPage({ searchParams }: { searchParams: Pro
     .filter((m) => m.status !== "rejected" && m.status !== "withdrawn")
     .map((m) => ({ propertyId: m.property.id, addressText: m.property.addressText, price: m.property.price?.toString() ?? null, area: m.property.area?.toString() ?? null, matchStatus: m.status }))
     .filter((s, i, arr) => arr.findIndex((x) => x.propertyId === s.propertyId) === i);
-  const title = need?.pick.clientVisible ? `Коммерческое предложение для: ${need.pick.client.displayName}` : "";
+  const title = need?.pick.clientVisible ? `Коммерческое предложение — ${need.pick.client.displayName}` : "";
   return (
     <div className="max-w-5xl">
       <PageHeader

@@ -18,7 +18,7 @@ export function useApiAction() {
         return await fn();
       } catch (e) {
         if (e instanceof ApiCallError) {
-          if (e.status === 401) {
+          if (e.status === 401 && e.body.code === "UNAUTHENTICATED") {
             router.push("/login");
             return undefined;
           }

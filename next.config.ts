@@ -24,6 +24,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // В Docker-сборке проверка типов выполняется отдельно (npm run typecheck в CI/проверке инкремента);
+  // повторный запуск tsc внутри next build на сервере с малым объёмом памяти может завершиться OOM.
+  typescript: { ignoreBuildErrors: process.env.CRM_DOCKER_BUILD === "1" },
   reactStrictMode: true,
   // pino и argon2 — нативные/серверные пакеты, не бандлим их.
   serverExternalPackages: ["pino", "@node-rs/argon2", "exceljs", "pg"],

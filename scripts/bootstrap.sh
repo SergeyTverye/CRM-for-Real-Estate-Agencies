@@ -19,8 +19,8 @@ fi
 
 rand_secret() {
   local s
-  s="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 22)"
-  printf '%s%s' "$s" "$(LC_ALL=C tr -dc '0-9' </dev/urandom | head -c 2)"
+  s="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 22 || true)"
+  printf '%s%s' "$s" "$(LC_ALL=C tr -dc '0-9' </dev/urandom | head -c 2 || true)"
 }
 
 new_uuid() {

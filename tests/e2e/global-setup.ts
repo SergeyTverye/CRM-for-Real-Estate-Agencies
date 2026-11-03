@@ -14,7 +14,7 @@ export default async function globalSetup() {
     ...process.env,
     DATABASE_URL: E2E_DB,
     APP_TIMEZONE: "Europe/Moscow",
-    SEED_MANAGER_PASSWORD: "E2eManager2026",
+    SEED_MANAGER_PASSWORD: "E2eRukovod2026",
     SEED_REALTOR1_PASSWORD: "E2eAgentOne26",
     SEED_REALTOR2_PASSWORD: "E2eAgentTwo26",
     SEED_MUST_CHANGE_PASSWORD: "false",

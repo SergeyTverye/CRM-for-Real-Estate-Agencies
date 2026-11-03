@@ -316,6 +316,7 @@ async function createPropertyFromRow(tx: Tx, rec: Record<string, unknown>, o: Co
       floorsTotal: (rec.floorsTotal as number | null) ?? null,
       roomsCount: (rec.roomsCount as number | null) ?? null,
       description: (rec.description as string | null) ?? null,
+      attributesJsonb: rec.extraAttributes && Object.keys(rec.extraAttributes as object).length ? (rec.extraAttributes as Prisma.InputJsonValue) : undefined,
       status: "active",
       responsibleUserId: rec.sourceType === "external_market" ? null : o.responsibleUserId,
       createdBy: o.actorId,

@@ -18,7 +18,9 @@ RUN npm ci --no-audit --no-fund
 # ── 2. Сборка ──
 FROM ${NODE_IMAGE} AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    CRM_DOCKER_BUILD=1 \
+    NODE_OPTIONS=--max-old-space-size=1536
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

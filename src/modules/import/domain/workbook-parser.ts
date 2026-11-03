@@ -257,6 +257,12 @@ export function parseSectionRows(sheet: SheetData, section: DetectedSection, pro
           sourceType: profile.defaults.sourceType ?? "agency_listing",
           sourceUrl: null as string | null,
           owner: null as null | { name: string; phone: string },
+          // Поля без однозначного структурного аналога сохраняются в attributes_jsonb, а не теряются молча.
+          extraAttributes: Object.fromEntries(
+            ([["purposeText", "commercialPurpose"], ["realtorText", "realtorText"], ["listedDate", "listedDate"]] as const)
+              .map(([k, f]) => [k, t(f)])
+              .filter(([, v]) => v),
+          ),
         };
         if (!rec.addressText) base.errorCodes.push("missing_address");
         if (!propertyType || !operationType) base.errorCodes.push("unknown_type_or_operation");
