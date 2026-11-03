@@ -66,6 +66,11 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
             <Link href="/tasks/new" className="btn">
               + Задача
             </Link>
+            {isManager ? (
+              <Link href="/today/overview" className="btn">
+                Обзор руководителя
+              </Link>
+            ) : null}
           </>
         }
       />

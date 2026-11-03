@@ -21,7 +21,8 @@
     "db:seed": "prisma db seed",
     "db:migrate:dev": "prisma migrate dev",
     "import:sample": "tsx scripts/dev/generate-import-sample.ts",
-    "dev:webpack": "next dev --webpack"
+    "dev:webpack": "next dev --webpack",
+    "test:e2e:full": "npm run build && playwright test"
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.2",
