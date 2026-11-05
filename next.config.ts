@@ -23,6 +23,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   // Отдельный каталог сборки позволяет запускать несколько dev-серверов параллельно (QA/скриншоты).
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,

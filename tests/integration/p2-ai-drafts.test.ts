@@ -30,6 +30,28 @@ it("preview writes only cost ledger, confirmation atomically creates active need
   expect(await db.clientNeed.findUnique({where:{id:saved.id}})).toMatchObject({status:"active",operationType:"rent",commercialPurpose:"office"});
   expect(await db.taskNeed.count({where:{clientNeedId:saved.id}})).toBe(1);
 });
+it("uses client, contact-person and staff names only for redaction before dispatch", async () => {
+  const client = await makeClient(users.realtor1, { displayName: "Злата Белозерова" });
+  await db.clientContactPerson.create({ data: { clientId: client.id, fullName: "Назар Дубровский" } });
+  await db.user.update({ where: { id: users.realtor2.userId }, data: { displayName: "Мирон Свиридов" } });
+  const f = fake(JSON.stringify({filters,taskType:task.taskType,taskTitle:task.title,taskDescription:null,taskDueAt:null,clarificationQuestion:null}));
+  await previewCallNote(users.realtor1, { context: {kind:"client",id:client.id}, note: "со златой белозеровой, назару дубровскому и мирону свиридову нужен офис 80 м²" }, f.ai);
+  expect(f.provider.requests).toHaveLength(1);
+  expect(f.provider.requests[0]!.input).not.toMatch(/злат|белозер|назар|дубровск|мирон|свирид/iu);
+  expect(f.provider.requests[0]!.input).toContain("80 м²");
+});
+it("preserves public offer snapshot addresses while removing contacts", async () => {
+  const client = await makeClient(users.realtor1, {displayName:"Иван Петров"});
+  const need = await makeNeed(users.realtor1, client.id);
+  const property = await makeProperty(users.realtor1, {addressText:"Красный Проспект, 25", area:"80",price:"100000"});
+  const offer = await createOffer(users.realtor1,{clientNeedId:need.id,items:[{propertyId:property.id}]});
+  await db.commercialOfferItem.updateMany({where:{commercialOfferId:offer.id},data:{termsSnapshot:"улица Ивана Петрова; +7 900 123-45-67; test@example.ru"}});
+  const f = fake('{"text":"Площадь 80 м²"}');
+  await previewOfferText(users.realtor1,{offerId:offer.id,kind:"intro"},f.ai);
+  const payload = f.provider.requests[0]!.input;
+  expect(payload).toContain("Красный Проспект, 25"); expect(payload).toContain("улица Ивана Петрова");
+  expect(payload).not.toMatch(/900|test@example/);
+});
 it("explicit confirmation and task due date required; invalid creation leaves no partial need",async()=>{
   const client=await makeClient(users.realtor1);const data={context:{kind:"client",id:client.id},filters,task,expectedUpdatedAt:null};
   await expect(confirmCallNote(users.realtor1,{...data,confirmed:false})).rejects.toThrow();

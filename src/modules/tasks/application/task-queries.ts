@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { cache } from "react";
 import { db } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { getConfig } from "@/shared/config/env";
@@ -8,7 +9,7 @@ import { assertRecordId, parseInput, skipTake, zCode, zPagination, zUuid, type P
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { canSeeClient, canSeeNeed, clientScope, dealScope, needScope, showingScope, agreementScope, offerScope, taskScope } from "@/modules/access/domain/scopes";
 import { OPEN_TASK_STATUSES, todayGroupOf, type TodayGroup } from "../domain/task-rules";
-import { todayTaskBucket } from "@/modules/calendar/domain/today-counters";
+import { todayTaskBucket, todayTaskRanges } from "@/modules/calendar/domain/today-counters";
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
 import { clientTaskContext } from "@/modules/clients/application/client-queries";
 
@@ -236,8 +237,24 @@ export async function listRecurrenceSeries(actor: Actor, task: TaskView): Promis
   });
 }
 
-export async function countOverdueTasks(actor: Actor): Promise<number> {
-  return db.task.count({ where: { AND: [taskScope(actor)], responsibleUserId: actor.userId, status: { in: [...OPEN_TASK_STATUSES] }, dueAt: { lt: new Date() }, NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } } });
+/** React request cache gives layout indicators and the page the same clock tick. */
+export const getTodayReferenceTime = cache(() => new Date());
+
+export async function countTodayTasks(actor: Actor, now = getTodayReferenceTime(), responsibleUserId: string | null = actor.userId) {
+  const { startTomorrow, weekEnd } = dayBounds(now);
+  const ranges = todayTaskRanges(now, startTomorrow, weekEnd);
+  const where: Prisma.TaskWhereInput = {
+    AND: [taskScope(actor)], ...(responsibleUserId ? { responsibleUserId } : {}),
+    status: { in: [...OPEN_TASK_STATUSES] },
+    NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } },
+  };
+  const count = (dueAt: Prisma.DateTimeFilter) => db.task.count({ where: { ...where, dueAt } });
+  const [overdue, today, upcoming] = await Promise.all([count(ranges.overdue), count(ranges.today), count(ranges.upcoming)]);
+  return { overdue, today, upcoming };
+}
+
+export async function countOverdueTasks(actor: Actor, now = getTodayReferenceTime()): Promise<number> {
+  return (await countTodayTasks(actor, now)).overdue;
 }
 
 // ───────────────────────────── UC-10 GetTodayView ─────────────────────────────
@@ -273,10 +290,9 @@ const todayFiltersSchema = z.object({
  * показов, договоров, рекламы и КП. Отдельной таблицы нет. Руководитель может переключить «Мои/Все»
  * и фильтр по сотруднику; риелтор видит только свои действия.
  */
-export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Promise<TodayView> {
+export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now = getTodayReferenceTime()): Promise<TodayView> {
   const f = parseInput(todayFiltersSchema, rawFilters);
   const cfg = getConfig();
-  const now = new Date();
   const { startTomorrow, weekEnd } = dayBounds(now);
   const manager = isManager(actor);
   const scope: TodayView["scope"] = manager && f.userId ? "user" : manager && f.scope === "all" ? "all" : "mine";
@@ -290,7 +306,7 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
   };
   // A large overdue queue must not displace today's or next week's actions.
   const tasks = (await Promise.all([
-    { lt: now }, { gte: now, lt: startTomorrow }, { gte: startTomorrow, lt: weekEnd },
+    ...Object.values(todayTaskRanges(now, startTomorrow, weekEnd)),
   ].map(dueAt => db.task.findMany({ where: { ...taskWhere, dueAt }, include: taskIncludeFor(actor), orderBy: [{ dueAt: "asc" }, { id: "asc" }], take: 200 })))).flat();
   const safeIds = new Set((await db.task.findMany({ where: { id: { in: tasks.map(t => t.id) }, AND: [safeTaskTextScope(actor)] }, select: { id: true } })).map(t => t.id));
   const views = tasks.map((t) => toTaskView(actor, safeIds.has(t.id) ? t : { ...t, title: "Задача", description: null }, now));
@@ -422,15 +438,13 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
     },
   });
 
-  const [overdueCount, todayCount, weekCount, showingsTodayCount] = await Promise.all([
-    db.task.count({ where: { ...taskWhere, dueAt: { lt: now } } }),
-    db.task.count({ where: { ...taskWhere, dueAt: { gte: now, lt: startTomorrow } } }),
-    db.task.count({ where: { ...taskWhere, dueAt: { gte: startTomorrow, lt: weekEnd } } }),
+  const [taskCounts, showingsTodayCount] = await Promise.all([
+    countTodayTasks(actor, now, scope === "all" ? null : userId),
     db.showing.count({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: dayBounds(now).startToday, lt: startTomorrow } } }),
   ]);
   return {
     scope,
-    counters: { overdue: overdueCount, today: todayCount, week: weekCount, needsWithoutNextAction, showingsToday: showingsTodayCount },
+    counters: { overdue: taskCounts.overdue, today: taskCounts.today, week: taskCounts.upcoming, needsWithoutNextAction, showingsToday: showingsTodayCount },
     overdue,
     today,
     controls,

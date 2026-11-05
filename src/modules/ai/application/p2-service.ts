@@ -9,7 +9,7 @@ import { loadAccessibleClient } from "@/modules/clients/application/client-servi
 import { loadAccessibleNeed, createNeed, updateNeedParams } from "@/modules/needs/application/need-service";
 import { updateOffer } from "@/modules/commercial-offers/application/offer-service";
 import { SearchFilters } from "@/modules/property-search/domain/types";
-import { sanitizeCallNote, sanitizeFreeNote, taskDraftSchema, checkOfferNumbers } from "../domain/p2-drafts";
+import { sanitizeFactContacts, sanitizeFreeNote, taskDraftSchema, checkOfferNumbers } from "../domain/p2-drafts";
 import { AiError } from "../domain/contracts";
 import { createPersistentSearchAi } from "./persistent-search-ai";
 import { getAiLimits } from "./settings-service";
@@ -31,7 +31,8 @@ async function noteContext(actor: Actor, context: NoteContext) {
   }
   const client = await loadAccessibleClient(db, actor, clientId);
   const people = await db.clientContactPerson.findMany({where:{clientId},select:{fullName:true}});
-  return {clientId,needId,names:[client.displayName,...people.map(p=>p.fullName)]};
+  const staff = await db.user.findMany({select:{displayName:true}});
+  return {clientId,needId,names:[client.displayName,...people.map(p=>p.fullName),...staff.map(u=>u.displayName)]};
 }
 export async function p2Available(actor: Actor) { return (await getAiLimits(actor)).modes.ai; }
 export async function withP2Ai<T>(actor: Actor, type: "call_note" | "offer_text", work: (ai: SearchAi, context: {user:{userId:string;active:boolean};jobId:string;ownerUserId:string;requestId:string})=>Promise<T>, injected?: SearchAi) {
@@ -84,14 +85,12 @@ async function offerContext(actor: Actor, id: string) {
   const offer = await db.commercialOffer.findFirst({where:{id,...offerScope(actor)},include:{items:{orderBy:{position:"asc"}}}});
   if (!offer) throw new NotFoundError();
   const need = await loadAccessibleNeed(db,actor,offer.clientNeedId);
-  const client = await loadAccessibleClient(db,actor,need.clientId);
-  const people = await db.clientContactPerson.findMany({where:{clientId:client.id},select:{fullName:true}});
-  const names = [client.displayName,...people.map(p=>p.fullName)];
+  await loadAccessibleClient(db,actor,need.clientId);
   if (offer.status !== "draft") throw new DomainError("OFFER_FROZEN","Создайте черновую редакцию КП для изменения текста.");
   const facts = {need:{operation:need.operationType,areaMin:need.areaMin?.toString(),areaMax:need.areaMax?.toString(),
     budgetMin:need.budgetMin?.toString(),budgetMax:need.budgetMax?.toString(),purpose:need.commercialPurpose},
-    items:offer.items.map(i=>({address:sanitizeCallNote(i.addressSnapshot ?? "",names),area:i.areaSnapshot?.toString() ?? null,
-      price:i.priceSnapshot?.toString() ?? null,confirmedCharacteristics:sanitizeCallNote(i.termsSnapshot ?? "",names)}))};
+    items:offer.items.map(i=>({address:sanitizeFactContacts(i.addressSnapshot ?? ""),area:i.areaSnapshot?.toString() ?? null,
+      price:i.priceSnapshot?.toString() ?? null,confirmedCharacteristics:sanitizeFactContacts(i.termsSnapshot ?? "")}))};
   return {offer,facts};
 }
 export async function previewOfferText(actor: Actor, raw: unknown, injected?: SearchAi) {

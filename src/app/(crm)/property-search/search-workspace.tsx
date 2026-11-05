@@ -1,4 +1,5 @@
 "use client";
+import { sourceReason } from "./source-reason";
 
 import { displayLabel, labelOf, DISPLAY_LABELS } from "@/shared/codebook";
 import { ListingPhoto } from "./listing-photo";
@@ -154,7 +155,7 @@ export function SearchWorkspace({ initialFilters, initialRun, initialNeedId, ini
       const Icon = s.status === "success" ? CheckCircle2 : s.status === "disabled" ? CircleOff : s.status === "timeout" ? Clock3 : AlertTriangle;
       return <div key={s.source} className="min-w-0 rounded border p-3"><div className="flex items-center gap-2"><Icon aria-hidden size={18} className={s.status === "success" ? "text-emerald-600" : "text-amber-600"} /><strong className="text-sm">{sourceLabels[s.source] ?? s.source}</strong></div>
         <div className="my-2 flex flex-wrap items-center gap-2"><Badge tone={s.status === "success" ? "green" : s.status === "disabled" ? "gray" : "yellow"}>{statusLabels[s.status] ?? s.status}</Badge><span className="text-sm">Объявлений: {s.resultCount}</span></div>
-        <p className="break-words text-xs text-slate-600">{s.reason || (s.status === "success" ? "Источник обработан" : "Причина не указана источником")}</p>
+        <p className="break-words text-xs text-slate-600" title={s.reason ?? undefined}>{sourceReason(s.reason, s.status)}</p>
         <p className="mt-2 text-xs text-slate-500">{s.durationMs != null && <>Время источника: {numberText(s.durationMs / 1000)} с · </>}Завершение запуска: {run.finishedAt ? new Date(run.finishedAt).toLocaleString("ru-RU", {timeZone:"Asia/Novosibirsk"}) : "—"}</p></div>;
     })}</div><p className="mt-3 text-sm text-slate-600">{run.fallbackReason}</p></Card>}
     {comparison.length > 0 && <div className="flex flex-wrap items-center gap-3 rounded border bg-white p-3"><span className="text-sm">Выбрано для сравнения: {comparison.length} / 4</span><button className="btn btn-primary" disabled={comparison.length < 2} onClick={() => setCompareOpen(true)}>Сравнить</button><button className="btn btn-secondary" onClick={() => setComparison([])}>Сбросить</button></div>}

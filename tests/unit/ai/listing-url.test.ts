@@ -18,6 +18,16 @@ describe("web results must identify a listing", () => {
 
 
 describe("strict card allowlist", () => {
+  it.each(["sitemap", "search", "catalog", "map", "list"])("rejects navigation segments on every platform: %s", segment => {
+    for (const host of ["onrealt.ru", "cian.ru", "avito.ru", "domclick.ru", "realty.yandex.ru", "mirkvartir.ru", "youla.ru"]) {
+      expect(listingUrlRejection(`https://${host}/novosibirsk/${segment}/12345`)).not.toBeNull();
+    }
+    expect(listingUrlRejection(`https://avito.ru/novosibirsk/kommercheskaya_nedvizhimost/${segment}_1234567`)).not.toBeNull();
+  });
+  it.each(["?search=office", "?map=1", "?catalog=1", "#list", "#search"])("rejects navigation query or fragment: %s", suffix => {
+    expect(listingUrlRejection(`https://onrealt.ru/novosibirsk/kypit-ofis/12345${suffix}`)).not.toBeNull();
+  });
+  it("retains known card tracking parameters", () => expect(listingUrlRejection("https://onrealt.ru/novosibirsk/snyat-sklad/12345?utm_source=crm")).toBeNull());
   it.each([
     "https://cian.ru/sale/commercial/123456789/",
     "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/ofis_123456789",
