@@ -25,3 +25,5 @@
 - Независимые Iceman/Beam находки исправлены `9e2b71b` / `f15adc8`. [QA](acceptance/qa-stage2.md) фиксирует dev E2E и ограничения production build (EPERM/Deny ACL); старые числа выше относятся к своим промежуточным версиям. Итоговый пересчёт — только [test-protocol](vkr/test-protocol.md).
 - [Чистый deploy d69a3fb](operations/clean-deploy-v241.md): build/migrate/seed/login/PDF/T08/restart PASS; Docker очищен, удаление каталога клона blocked by policy. Поздний HEAD этим прогоном не проверен.
 - Документация этапа 2: [приёмка](acceptance/stage2-live-ai-ux.md), user-guide, API, трассировка, README и IMPLEMENTATION_REPORT обновлены; NFR-14 локально, реальный Excel и UAT остаются PARTIAL.
+
+- Этап 2 завершён (05.11.2026): живые испытания Yandex AI (10 подборов, 5 web_search, 12 прочих AI-вызовов этапа поиска + 4 P2 + 4 parse для пересъёмки; ~6,27 руб. по журналу CRM), UI/UX P1, P2 (заметка после звонка, тексты КП), исправления по Iceman/Beam, правило жилого назначения. Итог: unit 1003/1003, integration+authorization 197/197, E2E 16/16 (production), Docker и чистое развёртывание PASS.

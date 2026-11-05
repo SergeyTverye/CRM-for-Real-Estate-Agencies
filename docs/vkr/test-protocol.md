@@ -2,7 +2,7 @@
 
 Дата: 05.11.2026, `feature/tz-v2.4.1`. Документационный срез `29273a9..e48ea2a`. Источники испытаний имеют собственные SHA/время; их результаты не распространяются автоматически на поздние изменения. Агент документации проверил документы и контракты, не запускал платные вызовы или полный Playwright.
 
-**Итоговая сводка координатора (финальный SHA, unit / integration+authorization / E2E и результаты release gate): {FINAL}**
+**Итоговая сводка координатора (финальный SHA, unit / integration+authorization / E2E и результаты release gate): код на коммите `84e88f6`: unit 1003/1003; integration+authorization 197/197 (схема пересоздаётся с нуля); E2E Playwright 16/16 на production-сборке (`next start`); tsc, ESLint (0 предупреждений), `next build` — PASS. Независимая проверка OpenCode beam-free на `29bb4d4`: Docker app/worker/db healthy, /api/health/ready 200; чистое развёртывание из свежего клона (`d69a3fb`) — PASS (docs/operations/clean-deploy-v241.md). Независимое тестирование OpenCode iceman: 5 находок исправлены, перепроверено.**
 
 | Проверка | Подтверждённое состояние | Доказательство и граница |
 |---|---|---|
