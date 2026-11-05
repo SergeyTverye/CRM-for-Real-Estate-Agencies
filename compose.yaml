@@ -101,6 +101,22 @@ services:
       start_period: 40s
     networks: [internal, public]
 
+  worker:
+    <<: *app-image
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    restart: unless-stopped
+    command: ["node_modules/.bin/tsx", "src/worker/notifications-worker.ts"]
+    environment:
+      <<: *app-env
+      NOTIFICATIONS_INTERVAL_MS: ${NOTIFICATIONS_INTERVAL_MS:-15000}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    # Worker has no HTTP listener; do not inherit the image's app healthcheck.
+    healthcheck:
+      disable: true
+    networks: [internal]
+
   # Одноразовый ops-контейнер резервного копирования (ТЗ 36.3, 39.10): pg_dump/pg_restore 18,
   # архивация файлов, manifest/checksums, rclone crypt для off-site targets.
   # Запускается только скриптами: docker compose --profile ops run --rm backup <command>
