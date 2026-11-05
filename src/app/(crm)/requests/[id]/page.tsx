@@ -79,6 +79,13 @@ export default async function RequestCardPage({ params }: { params: Promise<{ id
               ["Дата и время", fmtDateTime(r.occurredAt)],
               ["Канал", dictLabel(dicts, "lead_channel", r.channelCode)],
               ["Источник", dictLabel(dicts, "lead_source", r.sourceCode)],
+              ["Результат звонка", r.outcomeCode ? labelOf("callOutcome", r.outcomeCode) : null],
+              ["Время звонка", r.callAt ? fmtDateTime(r.callAt) : null],
+              ["Внешнее объявление", r.externalListing ? (
+                <span>{labelOf("externalSource", r.externalListing.source)} · {r.externalListing.address ?? "Адрес не указан"}
+                  {/^https?:\/\//i.test(r.externalListing.url) ? <a className="link ml-2" href={r.externalListing.url} target="_blank" rel="noreferrer noopener">Открыть объявление</a> : null}
+                </span>
+              ) : null],
               [
                 "Клиент",
                 r.client ? (

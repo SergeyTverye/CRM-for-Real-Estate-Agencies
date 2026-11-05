@@ -45,6 +45,9 @@ const outcomeSchema = z.discriminatedUnion("resultCode", [
 
 export const registerRequestSchema = z.object({
   occurredAt: zDateTime,
+  callAt: zDateTime.optional(),
+  externalListingId: zUuid.optional(),
+  outcomeCode: zCode("callOutcome").optional(),
   channelCode: z.string().trim().min(1, "Укажите канал"),
   sourceCode: z.string().trim().min(1, "Укажите источник"),
   summary: zOptText(4000),
@@ -101,7 +104,17 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
     throw new ForbiddenError("Ответственного назначает правило предприятия; изменить его может руководитель");
   }
 
+  const expectedOutcome = d.outcome.resultCode === "new_need" || d.outcome.resultCode === "linked_existing_need" ? "prospective"
+    : d.outcome.resultCode === "one_off_service" ? "one_time" : d.outcome.resultCode === "invalid_or_spam" ? "spam" : "one_time";
+  if (d.outcomeCode && d.outcomeCode !== expectedOutcome && !(d.outcomeCode === "wrong" && expectedOutcome === "spam")) {
+    throw new ValidationError("Результат звонка не соответствует решению по обращению", { outcomeCode: ["Проверьте результат"] });
+  }
+  if (d.callAt && +d.callAt !== +d.occurredAt) throw new ValidationError("Время звонка должно совпадать с временем обращения");
+  const callFields = { callAt: d.callAt ?? (d.channelCode === "phone" ? d.occurredAt : null), externalListingId: d.externalListingId ?? null, outcomeCode: d.outcomeCode ?? expectedOutcome };
   return transaction(async (tx) => {
+    const external = d.externalListingId ? await tx.externalListing.findUnique({ where: { id: d.externalListingId }, select: { id: true, propertyId: true } }) : null;
+    if (d.externalListingId && !external) throw new NotFoundError("Внешнее объявление не найдено");
+    if (d.responsibleUserId && !await tx.user.findFirst({ where: { id: d.responsibleUserId, isActive: true }, select: { id: true } })) throw new ValidationError("Ответственный недоступен");
     // Объектный контекст: Advertisement → его Property.
     let propertyId = d.propertyId ?? null;
     if (d.advertisementId) {
@@ -109,6 +122,10 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
       if (!ad) throw new NotFoundError("Объявление не найдено");
       if (propertyId && propertyId !== ad.propertyId) throw new ValidationError(undefined, { advertisementId: ["Объявление относится к другому объекту"] });
       propertyId = ad.propertyId;
+    }
+    if (external?.propertyId) {
+      if (propertyId && propertyId !== external.propertyId) throw new ValidationError("Внешнее объявление относится к другому объекту", { externalListingId: ["Выберите объявление этого объекта"] });
+      propertyId = external.propertyId;
     }
     let propertyResponsible: string | null = null;
     if (propertyId) {
@@ -174,6 +191,7 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
       const rawContact = d.client.mode === "new" ? d.client.client.contacts.map((c) => c.value).join(", ") : d.rawContact;
       const lr = await tx.leadRequest.create({
         data: {
+          ...callFields,
           responsibleUserId: actor.userId,
           occurredAt: d.occurredAt,
           channelCode: d.channelCode,
@@ -233,6 +251,7 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
     const statusCode = o.resultCode === "new_need" || o.resultCode === "linked_existing_need" ? "processed" : o.resultCode === "one_off_service" && taskId ? "processed" : "closed";
     const lr = await tx.leadRequest.create({
       data: {
+        ...callFields,
         clientId,
         clientNeedId: needId,
         propertyId,
@@ -250,6 +269,8 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
       select: { id: true },
     });
     if (needId) await assertNeedInvariants(tx, [needId]);
+    await writeAudit(tx, { actorUserId: actor.userId, action: "lead_request.registered", entityType: "LeadRequest", entityId: lr.id,
+      after: { responsibleUserId, propertyId, clientId, needId, outcomeCode: callFields.outcomeCode } });
     return {
       ...result,
       requestId: lr.id,

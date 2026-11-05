@@ -1,0 +1,44 @@
+import { chromium } from "playwright";
+import { config } from "dotenv";
+import assert from "node:assert/strict";
+config({ quiet: true });
+const origin = process.env.CALLS_DEMO_ORIGIN ?? "http://localhost:3407";
+const browser = await chromium.launch({headless:true});
+try {
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});
+ page.setDefaultTimeout(60000); page.setDefaultNavigationTimeout(120000);
+ const faults=[];page.on("pageerror",e=>faults.push(e.message));
+ await page.goto(`${origin}/login`,{waitUntil:"domcontentloaded"});
+ await page.waitForFunction(()=>Object.keys(document.querySelector("form")??{}).some(k=>k.startsWith("__reactProps")));
+ // Credentials remain in process memory; no trace, video, screenshot, or network dump.
+ await page.getByLabel("Логин").fill(process.env.SEED_REALTOR1_LOGIN ?? "realtor1");
+ await page.getByLabel("Пароль").fill(process.env.SEED_REALTOR1_PASSWORD);
+ await page.getByRole("button",{name:"Войти",exact:true}).click();
+ await page.waitForURL(/\/today/, {timeout:60000,waitUntil:"domcontentloaded"});
+ console.log("PASS login");
+ await page.getByRole("button",{name:"Записать звонок",exact:true}).click();
+ const dialog=page.getByRole("dialog");
+ await dialog.getByLabel("Источник",{exact:false}).selectOption("avito");
+ await dialog.getByLabel("Кратко: что хотел клиент, о чём договорились",{exact:false}).fill("AT-13 browser: синтетический разовый звонок");
+ await dialog.getByText("Ошибочный звонок, реклама, спам.",{exact:true}).count();
+ const requestSaved=page.waitForResponse(r=>r.url().endsWith("/api/v1/requests")&&r.request().method()==="POST");
+ await dialog.getByRole("button",{name:"Зарегистрировать обращение",exact:true}).click();
+ const saved=await requestSaved; assert.equal(saved.status(),201); const registered=await saved.json(); assert.equal(registered.clientId,null);
+ await dialog.getByText("Обращение зарегистрировано",{exact:false}).waitFor({timeout:15000});
+ await page.goto(`${origin}/reports/sources?sourceCode=avito`,{waitUntil:"domcontentloaded"});
+ await page.getByRole("heading",{name:"Звонки и источники",exact:true}).waitFor();
+ await page.screenshot({path:"data/calls-sources-demo.png",fullPage:true});
+ assert.ok((await page.locator("body").innerText()).includes("AT-13 browser: синтетический разовый звонок"));
+ console.log("PASS call modal and source report");
+ const clients=await (await page.request.get(`${origin}/api/v1/clients/pick`)).json(); assert.ok(clients.items.length);
+ const clientId=clients.items[0].id;
+ await page.goto(`${origin}/clients/${clientId}?tab=history`,{waitUntil:"domcontentloaded"});
+ await page.getByRole("heading",{name:"Текущие этапы потребностей",exact:true}).waitFor();
+ await page.screenshot({path:"data/calls-timeline-demo.png",fullPage:true});
+ await page.locator("select[name=kind]").selectOption("task");
+ await page.getByRole("button",{name:"Применить",exact:true}).click();
+ await page.waitForURL(/kind=task/);
+ const timeline=await page.request.get(`${origin}/api/v1/clients/${clientId}/timeline?kind=task&pageSize=2`);assert.equal(timeline.status(),200);
+ assert.equal(faults.length,0, faults.join("; "));
+ console.log("PASS crm_demo: login, header call modal, one-off without Client, source drill-down, timeline filters; no browser errors");
+} finally {await browser.close();}

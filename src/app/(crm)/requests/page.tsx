@@ -27,9 +27,9 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
         title="Обращения"
         subtitle={isManager ? "Входящие обращения всех сотрудников" : "Ваши обращения и обращения ваших клиентов"}
         actions={
-          <Link href="/requests/new" className="btn btn-primary">
+          <><Link href="/reports/sources" className="btn">Статистика звонков</Link><Link href="/requests/new" className="btn btn-primary">
             + Обращение
-          </Link>
+          </Link></>
         }
       />
       <FilterBar action="/requests" resetHref="/requests">

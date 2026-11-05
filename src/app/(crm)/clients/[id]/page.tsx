@@ -1,9 +1,11 @@
+import { ClientTimelinePanel } from "./timeline-panel";
+import { searchParamsToObject } from "@/shared/validation";
 import { CallNoteButton } from "@/ui/domain/ai-p2-drafts";
 import { p2Available } from "@/modules/ai/application/p2-service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
-import { getClientCard, getClientTimeline, getClientRecentInteractions } from "@/modules/clients/application/client-queries";
+import { getClientCard, getClientRecentInteractions } from "@/modules/clients/application/client-queries";
 import { listTasksLinkedTo } from "@/modules/tasks/application/task-queries";
 import { NotFoundError } from "@/shared/errors";
 import { labelOf } from "@/shared/codebook";
@@ -19,11 +21,12 @@ import { DocumentsPanel } from "@/ui/domain/documents-panel";
 
 export const metadata = { title: "Клиент" };
 
-export default async function ClientCardPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+export default async function ClientCardPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const actor = await requirePageActor();
   const aiEnabled = await p2Available(actor);
   const { id } = await params;
-  const { tab = "overview" } = await searchParams;
+  const filters = searchParamsToObject(await searchParams);
+  const { tab = "overview" } = filters;
   let client;
   try {
     client = await getClientCard(actor, id);
@@ -245,7 +248,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
         </Card>
       ) : null}
 
-      {tab === "history" ? <Timeline events={await getClientTimeline(actor, id)} dicts={dicts} /> : null}
+      {tab === "history" ? <ClientTimelinePanel actor={actor} clientId={id} filters={filters} /> : null}
       {tab === "tasks" ? <TaskList tasks={tasks} emptyHint="Нет задач по клиенту" newHref={`/tasks/new?clientId=${id}`} /> : null}
 
       {tab === "deals" ? (

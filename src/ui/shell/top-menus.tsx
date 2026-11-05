@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { RecordCallButton } from "@/app/(crm)/requests/call-button";
 import { CREATE_ITEMS } from "./nav-config";
 import { apiCall } from "../api-client";
 
@@ -29,7 +30,7 @@ export function CreateMenu() {
   const [open, setOpen] = useState(false);
   const ref = useClickOutside(() => setOpen(false));
   return (
-    <div className="relative" ref={ref}>
+    <div className="flex items-center gap-2"><RecordCallButton /><div className="relative" ref={ref}>
       <button type="button" className="btn btn-primary" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         + Создать
       </button>
@@ -42,7 +43,7 @@ export function CreateMenu() {
           ))}
         </div>
       ) : null}
-    </div>
+    </div></div>
   );
 }
 

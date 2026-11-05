@@ -3,7 +3,7 @@ import { db } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { parseInput, skipTake, zPagination, zUuid, type Page } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { clientScope, needScope, dealScope, communicationScope, showingScope, offerScope, leadRequestScope, taskScope } from "@/modules/access/domain/scopes";
+import { clientScope, dealScope, communicationScope, showingScope, offerScope, taskScope } from "@/modules/access/domain/scopes";
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
 import { labelOf } from "@/shared/codebook";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
@@ -192,55 +192,8 @@ export function clientTaskContext(clientId: string): Prisma.TaskWhereInput {
   ] };
 }
 
-/**
- * Единая лента истории клиента (ТЗ 37.5): обращения, коммуникации, предложения объектов,
- * показы, смены этапов, задачи и сделки. AuditLog в ленту не подмешивается.
- */
-export async function getClientTimeline(actor: Actor, clientId: string, take = 200): Promise<TimelineEvent[]> {
-  await loadAccessibleClient(db, actor, clientId);
-  const needWhere = { clientId, ...needScope(actor) };
-  const [requests, comms, needs, matches, showings, stages, tasks, deals, offers] = await Promise.all([
-    db.leadRequest.findMany({ where: { clientId, ...leadRequestScope(actor) }, include: { creator: { select: { displayName: true } } }, orderBy: { occurredAt: "desc" }, take }),
-    db.communication.findMany({ where: { clientId, ...communicationScope(actor) }, include: { author: { select: { displayName: true } } }, orderBy: { occurredAt: "desc" }, take }),
-    db.clientNeed.findMany({ where: needWhere, include: { creator: { select: { displayName: true } } }, orderBy: { openedAt: "desc" }, take }),
-    db.needPropertyMatch.findMany({
-      where: { need: needWhere },
-      include: { property: { select: { addressText: true } }, creator: { select: { displayName: true } } },
-      orderBy: { offeredAt: "desc" },
-      take,
-    }),
-    db.showing.findMany({ where: { need: needWhere, ...showingScope(actor) }, include: { property: { select: { addressText: true } } }, orderBy: { scheduledAt: "desc" }, take }),
-    db.needStageHistory.findMany({ where: { need: needWhere }, include: { changer: { select: { displayName: true } } }, orderBy: { occurredAt: "desc" }, take }),
-    db.task.findMany({
-      where: { clientLinks: { some: { clientId } } },
-      include: { responsible: { select: { displayName: true } } },
-      orderBy: { createdAt: "desc" },
-      take,
-    }),
-    db.deal.findMany({ where: { parties: { some: { clientId } }, ...dealScope(actor) }, include: { property: { select: { addressText: true } } }, orderBy: { openedAt: "desc" }, take }),
-    db.commercialOffer.findMany({ where: { need: needWhere, ...offerScope(actor) }, orderBy: { createdAt: "desc" }, take }),
-  ]);
-  const ev: TimelineEvent[] = [];
-  for (const r of requests) ev.push({ at: r.occurredAt, kind: "request", title: `Обращение (${r.channelCode}, ${r.sourceCode})`, details: r.summary, href: `/requests/${r.id}`, author: r.creator.displayName });
-  for (const c of comms) ev.push({ at: c.occurredAt, kind: "communication", title: `Коммуникация: ${c.communicationType}`, details: c.comment, author: c.author.displayName });
-  for (const n of needs) ev.push({ at: n.openedAt, kind: "need", title: "Открыта потребность", details: `${n.operationType} / ${n.propertyType}`, href: `/needs/${n.id}`, author: n.creator.displayName });
-  for (const m of matches) ev.push({ at: m.offeredAt, kind: "match", title: `Предложен объект: ${m.property.addressText}`, details: m.comment, href: `/needs/${m.clientNeedId}`, author: m.creator.displayName });
-  for (const s of showings)
-    ev.push({ at: s.occurredAt ?? s.scheduledAt, kind: "showing", title: `Показ: ${s.property.addressText}`, details: [s.status, s.resultCode, s.comment].filter(Boolean).join(" · "), href: `/showings/${s.id}` });
-  for (const h of stages)
-    ev.push({
-      at: h.occurredAt,
-      kind: "stage",
-      title: h.fromStatus !== h.toStatus && h.toStatus ? `Статус потребности: ${h.toStatus}` : `Этап потребности: ${h.toStage}`,
-      details: [h.reasonCode, h.comment].filter(Boolean).join(" · "),
-      href: `/needs/${h.clientNeedId}`,
-      author: h.changer.displayName,
-    });
-  for (const t of tasks) {
-    ev.push({ at: t.createdAt, kind: "task", title: `Задача: ${t.title}`, details: `срок ${t.dueAt.toISOString()}`, href: `/tasks/${t.id}`, author: t.responsible.displayName });
-    if (t.completedAt) ev.push({ at: t.completedAt, kind: "task", title: `Выполнено: ${t.title}`, details: t.resultComment, href: `/tasks/${t.id}` });
-  }
-  for (const d of deals) ev.push({ at: d.openedAt, kind: "deal", title: `Сделка: ${d.property.addressText}`, details: d.status, href: `/deals/${d.id}` });
-  for (const o of offers) ev.push({ at: o.sentAt ?? o.createdAt, kind: "offer", title: `Коммерческое предложение: ${o.title ?? ""}`.trim(), details: o.status, href: `/offers/${o.id}` });
-  return ev.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, take);
+/** Compatibility wrapper; full filtered cursor contract is getClientTimelinePage. */
+export async function getClientTimeline(actor: Actor, clientId: string, take = 100) {
+  const { getClientTimelinePage } = await import("./timeline-service");
+  return (await getClientTimelinePage(actor, clientId, { pageSize: Math.min(100, Math.max(1, take)) })).items;
 }

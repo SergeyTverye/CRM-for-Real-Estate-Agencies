@@ -14,6 +14,8 @@ export const requestFiltersSchema = zPagination.extend({
   to: zDateOnly.optional(),
   sourceCode: z.string().max(50).optional(),
   channelCode: z.string().max(50).optional(),
+  advertisementId: zUuid.optional(),
+  outcomeCode: zCode("callOutcome").optional(),
   resultCode: zCode("leadResult").optional(),
   statusCode: zCode("leadStatus").optional(),
   responsibleUserId: zUuid.optional(),
@@ -38,6 +40,8 @@ export async function listRequests(actor: Actor, raw: unknown) {
   if (f.to) and.push({ occurredAt: { lt: new Date(f.to.getTime() + 86_400_000) } });
   if (f.sourceCode) and.push({ sourceCode: f.sourceCode });
   if (f.channelCode) and.push({ channelCode: f.channelCode });
+  if (f.advertisementId) and.push({ advertisementId: f.advertisementId });
+  if (f.outcomeCode) and.push({ outcomeCode: f.outcomeCode });
   if (f.resultCode) and.push({ resultCode: f.resultCode });
   if (f.statusCode) and.push({ statusCode: f.statusCode });
   if (f.responsibleUserId && isManager(actor)) and.push({ responsibleUserId: f.responsibleUserId });
@@ -99,6 +103,7 @@ export async function getRequestCard(actor: Actor, requestId: string) {
       need: { select: { id: true, status: true, stage: true, responsibleUserId: true, client: { select: { responsibleUserId: true } } } },
       property: { select: { id: true, addressText: true, responsible: { select: { displayName: true } } } },
       advertisement: { select: { id: true, platformCode: true, url: true } },
+      externalListing: { select: { source: true, address: true, url: true } },
       responsible: { select: { id: true, displayName: true } },
       creator: { select: { id: true, displayName: true } },
     },

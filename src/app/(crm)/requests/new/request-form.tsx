@@ -5,12 +5,12 @@ import { useRef, useState } from "react";
 import { apiCall } from "@/ui/api-client";
 import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
 import { Field, FormErrorBanner, SubmitButton } from "@/ui/form";
-import { DateTimeInput, NextActionFields, SelectInput, defaultNextAction, type NextActionValue, type Option } from "@/ui/client-kit";
+import { EntityPicker, DateTimeInput, NextActionFields, SelectInput, defaultNextAction, type NextActionValue, type Option } from "@/ui/client-kit";
 import { DuplicateNotice, emptyClient, NewClientFields, newClientPayload, type NewClientValue } from "@/ui/domain/client-fields";
 import { NeedParamsFields, emptyNeedParams, needParamsPayload, type NeedParamsOptions, type NeedParamsValue } from "@/ui/domain/need-params-fields";
 import { ClientPicker, PropertyPicker, type ClientPick, type PropertyPick } from "@/ui/domain/need-pickers";
 import { NEED_TASK_TYPES } from "@/ui/domain/need-state-actions";
-import { labelOf } from "@/shared/codebook";
+import { labelOf, optionsOf } from "@/shared/codebook";
 
 /**
  * Быстрая регистрация обращения (UC-01, ТЗ 37.4.1): канал/источник, объект (с расчётом ответственного
@@ -61,7 +61,8 @@ interface NeedRow {
   stage: string;
 }
 
-interface Props {
+export interface RequestFormProps {
+  callMode?: boolean;
   actorId: string;
   isManager: boolean;
   timeZone: string;
@@ -81,7 +82,7 @@ interface Done extends RegisterResult {
   propertyResponsibleName: string | null;
 }
 
-export function RequestForm(props: Props) {
+export function RequestForm(props: RequestFormProps) {
   const [done, setDone] = useState<Done | null>(null);
   const [round, setRound] = useState(0);
   if (done) {
@@ -139,21 +140,26 @@ function RequestFormInner({
   initialPreview,
   initialClient,
   initialClientNeeds,
-  advertisementId,
+  advertisementId: initialAdvertisementId,
+  callMode = false,
   onDone,
-}: Props & { onDone: (r: Done) => void }) {
+}: RequestFormProps & { onDone: (r: Done) => void }) {
+  const [advertisement, setAdvertisement] = useState<{ id: string; label: string; propertyId?: string } | null>(() => initialAdvertisementId ? { id: initialAdvertisementId, label: "Объявление агентства" } : null);
+  const advertisementId = advertisement?.id;
+  const [external, setExternal] = useState<{ id: string; label: string } | null>(null);
+  const [callOutcome, setCallOutcome] = useState("one_time");
   const [occurredAt, setOccurredAt] = useState(() => new Date().toISOString());
   const [channelCode, setChannel] = useState(() => (channels.some((c) => c.value === "phone") ? "phone" : ""));
   const [sourceCode, setSource] = useState("");
   const [property, setProperty] = useState<PropertyPick | null>(initialProperty);
   const [preview, setPreview] = useState<ResponsiblePreview | null>(initialPreview);
-  const [clientMode, setClientMode] = useState<ClientMode>(initialClient ? "existing" : "new");
+  const [clientMode, setClientMode] = useState<ClientMode>(initialClient ? "existing" : callMode ? "none" : "new");
   const [client, setClient] = useState<ClientPick | null>(initialClient);
   const [clientNeeds, setClientNeeds] = useState<Option[]>(initialClientNeeds);
   const [newClient, setNewClient] = useState<NewClientValue>(emptyClient);
   const [rawContact, setRawContact] = useState("");
   const [summary, setSummary] = useState("");
-  const [resultCode, setResultCode] = useState<ResultCode>("new_need");
+  const [resultCode, setResultCode] = useState<ResultCode>(callMode ? "one_off_service" : "new_need");
   const [need, setNeed] = useState<NeedParamsValue>(emptyNeedParams);
   const [next, setNext] = useState<NextActionValue>(() => defaultNextAction("Связаться с клиентом"));
   const [linkedNeedId, setLinkedNeedId] = useState(initialClientNeeds.length === 1 ? (initialClientNeeds[0]?.value ?? "") : "");
@@ -163,7 +169,7 @@ function RequestFormInner({
   const previewSeq = useRef(0);
   const needsSeq = useRef(0);
 
-  const dirty = Boolean(summary || rawContact || newClient.displayName || newClient.contacts.some((c) => c.value) || client);
+  const dirty = Boolean(summary || rawContact || sourceCode || property || advertisement || external || responsibleUserId || newClient.displayName || newClient.contacts.some((c) => c.value) || client);
   useUnsavedChangesWarning(dirty && !pending);
 
   // Ошибки нормализации контактов приходят без префикса client.client.
@@ -235,6 +241,9 @@ function RequestFormInner({
             : { resultCode };
     const body = {
       occurredAt,
+      callAt: channelCode === "phone" ? occurredAt : undefined,
+      outcomeCode: resultCode === "new_need" || resultCode === "linked_existing_need" ? "prospective" : resultCode === "invalid_or_spam" ? (callOutcome === "wrong" ? "wrong" : "spam") : "one_time",
+      externalListingId: external?.id,
       channelCode,
       sourceCode,
       summary: summary || null,
@@ -292,6 +301,15 @@ function RequestFormInner({
         <Field label="Объект, о котором обращение" error={fieldError("propertyId") ?? fieldError("advertisementId")} hint={property ? undefined : "Необязательно. Если звонят по объекту или объявлению — выберите его."}>
           <PropertyPicker value={property} onChange={(p) => void changeProperty(p)} />
         </Field>
+        <Field label="Объявление агентства" error={fieldError("advertisementId")}>
+          <EntityPicker url="/api/v1/requests/pick-context?kind=advertisement" value={advertisement} onChange={async (ad) => {
+            setAdvertisement(ad); setProperty(null); setPreview(null);
+            if (ad) setPreview(await apiCall<ResponsiblePreview>("GET", `/api/v1/requests/responsible-preview?advertisementId=${ad.id}`).catch(() => null));
+          }} render={(ad) => ad.label} placeholder="Площадка или адрес…" />
+        </Field>
+        <Field label="Внешнее объявление" error={fieldError("externalListingId")}>
+          <EntityPicker url="/api/v1/requests/pick-context?kind=external" value={external} onChange={setExternal} render={(ad) => ad.label} placeholder="Источник или адрес внешнего объявления…" />
+        </Field>
         {advertisementId ? <div className="text-xs text-slate-500">Обращение по объявлению агентства (из ссылки).</div> : null}
         {preview ? (
           <div className="alert alert-info">
@@ -348,6 +366,7 @@ function RequestFormInner({
       </Section>
 
       <Section title="Итог разговора">
+        {resultCode === "invalid_or_spam" ? <Field label="Результат звонка"><SelectInput value={callOutcome === "wrong" ? "wrong" : "spam"} onChange={setCallOutcome} options={optionsOf("callOutcome").filter(o => o.value === "spam" || o.value === "wrong")} /></Field> : null}
         <Field label="Кратко: что хотел клиент, о чём договорились" required={["no_followup", "invalid_or_spam", "one_off_service"].includes(resultCode)} hint={["no_followup", "invalid_or_spam", "one_off_service"].includes(resultCode) ? "Укажите причину завершения обращения" : undefined} error={fieldError("summary")}>
           <textarea className="input min-h-20" value={summary} onChange={(e) => setSummary(e.target.value)} />
         </Field>
