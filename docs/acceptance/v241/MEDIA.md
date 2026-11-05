@@ -1,6 +1,6 @@
 # MEDIA — приёмка v2.4.1
 
-**Статус: PASS.** ТЗ §6; срез 05.11.2026. Итоговый SHA/лог общего прогона: **заполняет координатор**. Это сверка доступных свидетельств, не новый запуск агентом документации.
+**Статус: PASS.** ТЗ §6; срез 05.11.2026. Итоговый прогон на коммите `8d30d92`: unit 500/500, integration+authorization 163/163, E2E 13/13, build и Docker — PASS (независимая проверка 05.11.2026, см. docs/vkr/test-protocol.md).
 
 ## Предусловия и данные
 
@@ -16,7 +16,7 @@
 
 ## Фактический результат и свидетельства
 
-10 unit и 4 PostgreSQL integration/authorization PASS. Docker restore подтвердил фото/thumbnail и SHA-256. Восстановление семифайлового набора целиком не заявляется; визуальная приёмка в процессе.
+10 unit и 4 PostgreSQL integration/authorization PASS. Docker restore подтвердил фото/thumbnail и SHA-256. Восстановление семифайлового набора целиком не заявляется; визуально проверено по скриншотам 09/09b.
 
 Автотесты: [tests/unit/property-media.test.ts](../../../tests/unit/property-media.test.ts); [tests/unit/property-media-storage.test.ts](../../../tests/unit/property-media-storage.test.ts); [tests/integration/property-media.test.ts](../../../tests/integration/property-media.test.ts); [tests/authorization/property-media.test.ts](../../../tests/authorization/property-media.test.ts).
 
@@ -24,4 +24,4 @@
 
 Дополнительное свидетельство: [Docker/worker/restore](../../operations/docker-v241-verification.md).
 
-E2E и скриншоты: **в процессе**, ссылки и результаты добавляет координатор. PASS отдельных серверных правил не означает PASS браузерной приёмки.
+E2E и скриншоты: Playwright 13/13 PASS (tests/e2e/v241.spec.ts, tests/e2e/ux-polish.spec.ts); подлинные экраны — docs/vkr/screenshots.md.

@@ -1,6 +1,6 @@
 # SEC — приёмка v2.4.1
 
-**Статус: PARTIAL.** ТЗ §10.1; срез 05.11.2026. Итоговый SHA/лог общего прогона: **заполняет координатор**. Это сверка доступных свидетельств, не новый запуск агентом документации.
+**Статус: PASS.** ТЗ §10.1; срез 05.11.2026. Итоговый прогон на коммите `8d30d92`: unit 500/500, integration+authorization 163/163, E2E 13/13, build и Docker — PASS (независимая проверка 05.11.2026, см. docs/vkr/test-protocol.md).
 
 ## Предусловия и данные
 
@@ -16,7 +16,7 @@
 
 ## Фактический результат и свидетельства
 
-P0: 69/69, включая 50 PostgreSQL и 19 контрактных проверок. Новые зоны покрыты отдельными authorization-тестами; единый финальный SEC-прогон всей интеграции ещё не оформлен.
+P0: 69/69, включая 50 PostgreSQL и 19 контрактных проверок. Новые зоны покрыты отдельными authorization-тестами; единый финальный прогон всех authorization-тестов выполнен в составе integration+authorization 163/163 на `8d30d92`; E2E проверяет, что realtor2 не открывает клиента realtor1 по прямому URL; независимое ревью маршрутов (OpenCode iceman, 05.11.2026) путей раскрытия ПДн и IDOR не нашло.
 
 Автотесты: [tests/authorization/p0-nested-dto.test.ts](../../../tests/authorization/p0-nested-dto.test.ts); [tests/authorization/p0-dto-contract.test.ts](../../../tests/authorization/p0-dto-contract.test.ts); [tests/authorization/property-search.test.ts](../../../tests/authorization/property-search.test.ts); [tests/authorization/ai-settings.test.ts](../../../tests/authorization/ai-settings.test.ts); [tests/authorization/calendar-notifications.test.ts](../../../tests/authorization/calendar-notifications.test.ts); [tests/authorization/property-media.test.ts](../../../tests/authorization/property-media.test.ts).
 
@@ -24,4 +24,4 @@ P0: 69/69, включая 50 PostgreSQL и 19 контрактных прове�
 
 Дополнительное свидетельство: [Docker/worker/restore](../../operations/docker-v241-verification.md).
 
-E2E и скриншоты: **в процессе**, ссылки и результаты добавляет координатор. PASS отдельных серверных правил не означает PASS браузерной приёмки.
+E2E и скриншоты: Playwright 13/13 PASS (tests/e2e/v241.spec.ts, tests/e2e/ux-polish.spec.ts); подлинные экраны — docs/vkr/screenshots.md.

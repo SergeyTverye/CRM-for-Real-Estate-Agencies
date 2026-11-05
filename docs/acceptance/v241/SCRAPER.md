@@ -1,6 +1,6 @@
 # SCRAPER — приёмка v2.4.1
 
-**Статус: PARTIAL.** ТЗ §4; срез 05.11.2026. Итоговый SHA/лог общего прогона: **заполняет координатор**. Это сверка доступных свидетельств, не новый запуск агентом документации.
+**Статус: PARTIAL.** ТЗ §4; срез 05.11.2026, проверенный commit `8d30d92`.
 
 ## Предусловия и данные
 
@@ -16,7 +16,7 @@
 
 ## Фактический результат и свидетельства
 
-76/76 offline unit PASS; Docker create({browser:true}) и закрытие PASS без навигации. Живые площадки не проверены. География Новосибирска для части источников требует sourceOptions, иначе unsupported_filter.
+На записанных ответах семи площадок: PASS. Живой срез PARTIAL: Yandex success/23, OnRealt success/31, Youla success/0, Avito blocked 403, Domclick blocked 401, Cian parse_failed, Mir Kvartir fetch_failed ([свидетельство](../../integrations/scraper-live-smoke.md)).
 
 Автотесты: [tests/unit/property-search/adapter.test.ts](../../../tests/unit/property-search/adapter.test.ts); [tests/unit/property-search/network.test.ts](../../../tests/unit/property-search/network.test.ts); [tests/unit/property-search/domain.test.ts](../../../tests/unit/property-search/domain.test.ts).
 
@@ -24,4 +24,4 @@
 
 Дополнительное свидетельство: [Docker/worker/restore](../../operations/docker-v241-verification.md).
 
-E2E и скриншоты: **в процессе**, ссылки и результаты добавляет координатор. PASS отдельных серверных правил не означает PASS браузерной приёмки.
+Общий Playwright E2E: 13/13 PASS; подлинные скриншоты: [19 PNG](../../screenshots/vkr/screenshots.md). См. [протокол ВКР](../../vkr/test-protocol.md).

@@ -1154,7 +1154,7 @@ IMPLEMENTATION_REPORT.md
 
 Ветка feature/tz-v2.4.1 от ba7e6fa; документационный срез 05.11.2026. Добавлены контроль перспективных обращений, специальная задача возврата pause_return, поиск объектов и подборки, persistent AI-бюджет, галерея, редакции КП, чек-лист сделки, календарь и уведомления. Это расширение P1, поэтому прежнее отнесение любого AI/сбора к будущему scope в разделах baseline относится только к v1.6.1.
 
-Фактическая готовность: [трассировка](docs/requirements-traceability.md#v241), [13 сценариев приёмки](docs/acceptance/v241), [протокол ВКР](docs/vkr/test-protocol.md). Координатор сообщил unit 301/301 и integration+authorization 152/152; итоговый SHA/общие логи ещё заполняются. E2E и скриншоты в процессе. Живые площадки и реальный Excel — PARTIAL; NFR-14 и три одновременных пользователя не измерены. Docker build/миграция/restore с файлами подтверждены [отдельным протоколом](docs/operations/docker-v241-verification.md), чистая установка v2.4.1 этим прогоном не проверена.
+Фактическая готовность: [трассировка](docs/requirements-traceability.md#v241), [13 сценариев приёмки](docs/acceptance/v241), [протокол ВКР](docs/vkr/test-protocol.md). Проверенный SHA `8d30d92`: unit 500/500, integration+authorization 163/163, typecheck/lint (0 warnings)/Next build PASS, Playwright 13/13; подлинные скриншоты — 19 PNG ([набор](docs/vkr/screenshots.md)). Docker build, healthy app/worker/db, readiness 200 и restore-test PASS ([протокол](docs/operations/docker-v241-verification.md)); чистая установка отдельно не подтверждена. Живой SCRAPER и реальный Excel — PARTIAL. Локальная нагрузка трёх пользователей измерена (0 ошибок 5xx/409, p95 ≤259 мс), NFR-14 на согласованном оборудовании не подтверждён.
 
 ### Поиск объектов и ИИ
 

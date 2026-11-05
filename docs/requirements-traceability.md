@@ -95,7 +95,7 @@
 
 | Требование | Модуль / файлы | Тесты / свидетельства | Статус |
 |---|---|---|---|
-| §10.1 SEC | `access/application/redact-client.ts; access/domain/scopes.ts; documents` | [тесты и фактический протокол](acceptance/v241/SEC.md) | PARTIAL |
+| §10.1 SEC | `access/application/redact-client.ts; access/domain/scopes.ts; documents` | [тесты и фактический протокол](acceptance/v241/SEC.md) | PASS |
 | §2 LEAD | `requests/application/request-service.ts; tasks; requests/contact-control` | [тесты и фактический протокол](acceptance/v241/LEAD.md) | PASS |
 | §3, §3.1 SEARCH | `property-search/domain; property-search/application; ai/domain/provider-parse.ts` | [тесты и фактический протокол](acceptance/v241/SEARCH.md) | PARTIAL |
 | §4 SCRAPER | `property-search/infrastructure/scraper-adapter.ts; shared/net/ssrf.ts` | [тесты и фактический протокол](acceptance/v241/SCRAPER.md) | PARTIAL |
@@ -114,18 +114,18 @@
 | §3.2 факты площадки отдельно от проверки сотрудника | `ExternalListingSnapshot`, `ExternalListingVerification`, `listing-service.ts` | [integration](../tests/integration/property-search.test.ts), [протокол](integrations/property-search-application.md) | PASS |
 | §4 семь источников, лимиты географии/пагинации, отсутствие обхода CAPTCHA | `property-search/infrastructure`, `vendor/real-estate-scrapper-2.1.0.tgz` | [adapter unit](../tests/unit/property-search/adapter.test.ts), [ограничения](integrations/scraper.md); live не подтверждён | PARTIAL |
 | §4–5 очищенный AI-ввод, sourceMethod, evidence, без слепого доверия описанию | `property-search/domain/evaluation.ts`, `ai/domain`, `ai/infrastructure` | [search-ai unit](../tests/unit/ai/search-ai.test.ts), [network](../tests/unit/property-search/network.test.ts), [AI-протокол](integrations/yandex-ai.md) | PASS |
-| §5 таймзона, отчётные границы, повторы | `shared/time.ts`, `calendar`, `reports`, `notifications` | [time unit](../tests/unit/time.test.ts), [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [calendar integration](../tests/integration/calendar-notifications.test.ts); итоговый браузерный прогон в процессе | PARTIAL |
+| §5 таймзона, отчётные границы, повторы | `shared/time.ts`, `calendar`, `reports`, `notifications` | [time unit](../tests/unit/time.test.ts), [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [calendar integration](../tests/integration/calendar-notifications.test.ts); Playwright E2E 13/13 PASS | PARTIAL |
 | §6 очередь/повтор файлов, обложка, EXIF, thumbnail и права | `properties/application/property-media-service.ts`, `documents` | [MEDIA](acceptance/v241/MEDIA.md), [restore](operations/docker-v241-verification.md) | PASS |
 | §7 исходные snapshot КП и новая редакция draft, явная отправка | `commercial-offers/application/offer-service.ts` | [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [протокол](p1a-working-contour.md) | PASS |
 | §7 нейтральный HTML/DOCX, реестры CSV и чек-лист | `commercial-offers/application`, `deals/application/checklist-service.ts`, `export/application` | [OFFER-DOC](acceptance/v241/OFFER-DOC.md); визуальная печать/PDF не приняты | PARTIAL |
-| §8 приватность, сроки без фиктивной длительности, отдельные встречи | `calendar/application`, `calendar/domain`, `notifications/application` | [calendar authorization](../tests/authorization/calendar-notifications.test.ts), [unit](../tests/unit/calendar-notifications.test.ts), [протокол](calendar-notifications.md); общий UI в процессе | PARTIAL |
-| §11 обновление документации и материалы защиты | README, IMPLEMENTATION_REPORT, docs/api, docs/vkr, docs/acceptance/v241 | [протокол испытаний](vkr/test-protocol.md), [методика экономики](vkr/economics.md); финальные числа/E2E/скриншоты заполняет координатор | PARTIAL |
-| §9 визуальные токены, 360 px, фокус, работа сотрудников | `src/ui`, `(crm)/layout`, новые страницы | Код; итоговые E2E/скриншоты в процессе, пользовательская проверка не оформлена | PARTIAL |
+| §8 приватность, сроки без фиктивной длительности, отдельные встречи | `calendar/application`, `calendar/domain`, `notifications/application` | [calendar authorization](../tests/authorization/calendar-notifications.test.ts), [unit](../tests/unit/calendar-notifications.test.ts), [протокол](calendar-notifications.md); общий UI включён в E2E 13/13 PASS | PARTIAL |
+| §11 обновление документации и материалы защиты | README, IMPLEMENTATION_REPORT, docs/api, docs/vkr, docs/acceptance/v241 | [протокол испытаний](vkr/test-protocol.md): SHA `8d30d92`, 500 unit, 163 integration/authorization, 13 E2E, 19 скриншотов | PASS |
+| §9 визуальные токены, 360 px, фокус, работа сотрудников | `src/ui`, `(crm)/layout`, новые страницы | Код; E2E 13/13 и 19 скриншотов; пользовательская приёмка отдельно не оформлена | PARTIAL |
 | §11 Docker, миграция, backup/restore и worker restart | `compose.yaml`, `Dockerfile`, `scripts/restore-test.sh` | [Docker-протокол](operations/docker-v241-verification.md), вход/файл/галерея восстановлены | PASS |
 | §11 чистая установка именно v2.4.1 | bootstrap/deploy | Docker-протокол проверяет обновление существующего стека; отдельного clean-install протокола нет | PARTIAL |
-| §11 NFR-14 | Индексы, пагинация | Не измерено на согласованном оборудовании | PARTIAL |
-| §11 три одновременных пользователя | app/worker/db | Не измерено; три роли в последовательных тестах не являются нагрузкой | PARTIAL |
-| §11 Playwright и скриншоты | `tests/e2e`, `docs/vkr/screenshots` | В процессе, обновляет координатор | PARTIAL |
+| §11 NFR-14 | Индексы, пагинация | Локально 3 пользователя/3 мин, 0 ошибок 5xx/409, p95 ≤259 мс; целевое согласованное оборудование не подтверждено ([замер](operations/perf-v241.md)) | PARTIAL |
+| §11 три одновременных пользователя | app/worker/db | Локальный прогон: три одновременных пользователя в течение 3 минут; 0 ошибок 5xx/409 | PASS (локальный замер) |
+| §11 Playwright и скриншоты | `tests/e2e`, `docs/screenshots/vkr` | 13/13 E2E PASS; 19 подлинных PNG, demo-fixtures помечены ([описание](vkr/screenshots.md)) | PASS |
 | §11 повтор T01–T10 на финальном SHA | `docs/acceptance/T01.md`–`T10.md` | Модульные регрессии есть; финальная общая сверка в [протоколе](vkr/test-protocol.md) ещё не заполнена | PARTIAL |
 
-Координатор сообщил unit **301/301**, integration+authorization **152/152**; итоговые логи/SHA добавляются в [протокол](vkr/test-protocol.md). Модульные числа не суммируются. Live-площадки SCRAPER — PARTIAL: записанные синтетические ответы и запуск Chromium не доказывают живой сбор. Реальный Excel — PARTIAL по прямому требованию ТЗ. Материалы ВКР и расчёт измеренного/прогнозного эффекта — [docs/vkr](vkr).
+Независимая проверка commit `8d30d92`: unit **500/500**, integration+authorization **163/163**, typecheck/lint (0 warnings)/build PASS, Playwright **13/13**; подробности в [протоколе](vkr/test-protocol.md). Живой SCRAPER — PARTIAL (live-срез [описан отдельно](integrations/scraper-live-smoke.md)); записанные ответы 7 площадок — PASS. Реальный Excel — PARTIAL, образца нет. NFR-14 на согласованном оборудовании не подтверждён. Материалы ВКР — [docs/vkr](vkr).

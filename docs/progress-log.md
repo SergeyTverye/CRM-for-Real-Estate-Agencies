@@ -13,3 +13,5 @@
 - Проверки: unit 301/301, integration+authorization 152/152, e2e 10/10, eslint/tsc/build PASS, restore-test PASS.
 - Независимые ревью OpenCode: домен поиска (3 находки, исправлены), безопасность (находок нет), подборки (6 находок, исправлены).
 - В работе: полировка UI + пересъёмка, замеры 3 пользователей/NFR-14, живой smoke скрапера.
+
+- Финал: независимая проверка (OpenCode beam) на 8d30d92 — unit 500/500, integration+authorization 163/163, E2E 13/13, tsc/eslint/build/Docker PASS. Живой срез скрапера: Яндекс/OnRealt/Юла success, Авито/Домклик blocked, Циан parse_failed, Мир Квартир fetch_failed. Нагрузка 3 пользователей — локально, p95 <= 259 мс. Документация и карточки приёмки обновлены.
