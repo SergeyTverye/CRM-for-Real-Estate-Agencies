@@ -13,7 +13,7 @@ export function resolveDistrict(city: string | null, district: string | null, ad
   const text = (address ?? "").toLocaleLowerCase("ru").replaceAll("ё", "е").replace(/\s+/g, " ");
   const matches = catalog.filter(d => {
     const name = normalizeGeography(d);
-    return new RegExp(`(?:^|[,;\\s])(?:район\\s+${name}|${name}\\s+(?:район|р-н))(?=$|[,;\\s])`, "u").test(text);
+    return new RegExp(`(?:^|[,;\\s])(?:(?:район|р-н)\\s+${name}|${name}\\s+(?:район|р-н))(?=$|[,;\\s])`, "u").test(text);
   });
   return matches.length === 1 ? matches[0]! : null;
 }

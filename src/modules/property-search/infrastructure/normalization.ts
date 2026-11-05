@@ -9,8 +9,8 @@ export function parsePriceUnit(text: string | null | undefined, operation: "sale
   if (operation === "sale") return "rub_total";
   if (!text || operation !== "rent") return null;
   const perArea = /(?:м[²2]|кв\.?\s*м)/iu.test(text);
-  if (/(?:месяц|мес\.?)(?:\s|$|\/)/iu.test(text)) return perArea ? "rub_m2_month" : "rub_month";
-  if (/(?:год|года)(?:\s|$|\/)/iu.test(text)) return perArea ? "rub_m2_year" : "rub_year";
+  if (/(?:месяц|мес\.?)(?=$|[^\p{L}\p{N}_])/iu.test(text)) return perArea ? "rub_m2_month" : "rub_month";
+  if (/(?:год|года)(?=$|[^\p{L}\p{N}_])/iu.test(text)) return perArea ? "rub_m2_year" : "rub_year";
   return null;
 }
 /** Package 2.1.0 already expands Cian grouped listings into #part-N/parentId rows. */

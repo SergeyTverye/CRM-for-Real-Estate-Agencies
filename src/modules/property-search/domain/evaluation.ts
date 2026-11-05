@@ -2,7 +2,7 @@ import { compareMoney, type CriterionEvaluation, type DescriptionAnalyzer, type 
 import { normalizeGeography, resolveDistrict } from "./geography";
 
 const featureRules = [
-  { key: "separate_entrance", request: /отдельн\S*\s+вход/iu, fact: /отдельн\S*\s+вход/iu },
+  { key: "separate_entrance", request: /отдельн\S*\s+вход/iu, fact: /отдельн\S*\s+вход\S*/iu },
   { key: "shop_window", request: /витрин/iu, fact: /витрин\S*/iu },
   { key: "first_line", request: /перв\S*\s+лини/iu, fact: /(?:перв\S*|1[- ]?я)\s+лини\S*/iu },
   { key: "wet_point", request: /мокр\S*\s+точк/iu, fact: /мокр\S*\s+точк\S*/iu },
@@ -24,11 +24,11 @@ export function evaluateFeature(criterion: string, listing: NormalizedListing): 
   for (const clause of listing.description.split(/[;!?\n]|(?<!\d)\.|\.(?!\d)|,(?!\d)/u)) {
     const match = rule.fact.exec(clause);
     if (!match) continue;
-    // A proposed installation is neither a current feature nor proof of its absence.
-    if (/можно|возможн|планиру|проект|перспектив|будет|будут|при\s+необходимости/iu.test(clause)) continue;
     const prefix = clause.slice(0, match.index);
     const suffix = clause.slice(match.index + match[0].length);
-    const negated = /(?:^|\s)(?:нет|без|не|отсутствует|отсутствуют)\s*(?:\S+\s+){0,2}$/iu.test(prefix) || /^\s*(?:нет|отсутствует|отсутствуют|не\s+(?:имеется|предусмотрен|оборудован))/iu.test(suffix);
+    const negated = /(?:^|\s)(?:нет|без|не|отсутствует|отсутствуют)\s*(?:\S+\s+){0,2}$/iu.test(prefix) || /^\s*(?:нет|отсутствует|отсутствуют|не\s+(?:имеется|предусмотрен|оборудован|планиру|будет|будут|возмож))/iu.test(suffix);
+    // Explicit absence wins over hypothetical/future language in the same clause.
+    if (!negated && /можно|возможн|планиру|проект|перспектив|будет|будут|при\s+необходимости/iu.test(clause)) continue;
     const numeric = match[1] ? Number(match[1].replace(",", ".")) : null;
     evidence.push({ criterion, source: "rule", evidence: clause.trim(), state: negated || (minimum !== null && numeric !== null && numeric < minimum) ? "contradicted" : minimum !== null && numeric === null ? "unknown" : "matched" });
   }
