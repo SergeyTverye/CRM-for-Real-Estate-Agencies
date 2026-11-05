@@ -6,7 +6,7 @@ import { getConfig } from "@/shared/config/env";
 import { db } from "@/shared/db/client";
 import { SOURCES, type Source } from "../domain/types";
 
-export type SearchAiPort = Pick<SearchAi, "parseSearchQuery" | "analyzeDescriptions" | "webSearch">;
+export type SearchAiPort = Pick<SearchAi, "parseSearchQuery" | "analyzeDescriptions" | "webSearch" | "checkWebSearchAvailability">;
 // Composition seam: a persistent AiGate-backed factory can be installed by the AI module.
 let aiFactory: (() => Promise<SearchAiPort | null>) | undefined;
 export function configureSearchAi(factory: () => Promise<SearchAiPort | null>) { aiFactory = factory; }

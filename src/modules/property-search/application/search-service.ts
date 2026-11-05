@@ -12,6 +12,7 @@ import { decideFallback } from "../domain/fallback";
 import { guardExternalUrl } from "@/shared/net/ssrf";
 import { getSearchAi, scraperFor, searchSettings, type SearchAiPort } from "./dependencies";
 import type { ScraperAdapter } from "../infrastructure/scraper-adapter";
+import { stableListingId } from "./listing-identity";
 
 export const jsonValue = (value: unknown) => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const priceUnits = { rub_total: "total", rub_month: "per_month", rub_year: "per_year", rub_m2_month: "per_m2_month", rub_m2_year: "per_m2_year" } as const;
@@ -43,6 +44,8 @@ export async function getSearchRun(actor: Actor, id: string) {
 
 async function persistListing(tx: Tx, runId: string, listing: NormalizedListing, evaluation: ListingEvaluation, previousRunId: string | null, sourceMethod: "scraper" | "web_search" = "scraper", sourceOverride?: string) {
   const source = sourceOverride ?? listing.source;
+  listing = { ...listing, sourceListingId: stableListingId(listing.sourceListingId, listing.url),
+    identityNeedsReview: listing.identityNeedsReview || !listing.sourceListingId };
   // The SQL partial unique index treats NULL unit as a single (non-grouped) unit.
   // Advisory lock also serializes upserts when the Prisma schema cannot express that index.
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([source, listing.sourceListingId, listing.sourceUnitId])}, 0))`;
@@ -102,8 +105,10 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
         } }); } catch { /* Limits/failure keep unresolved evidence unknown. No provider bypass. */ }
       }
     }
+    const availability = ai ? await ai.checkWebSearchAvailability(aiContext(actor, run.id), filters)
+      : { budgetAvailable: false, limitAvailable: false };
     const fallback = decideFallback(result.sources, { aiEnabled: settings.aiEnabled && !!ai, webSearchEnabled: settings.config.YANDEX_WEB_SEARCH_ENABLED,
-      autoFallback: settings.autoFallback, manualAllowed: settings.manualAllowed, budgetAvailable: true, limitAvailable: true, alreadyAttempted: false });
+      autoFallback: settings.autoFallback, manualAllowed: settings.manualAllowed, ...availability, alreadyAttempted: false });
     await transaction(async tx => {
       for (const source of result.sources) await tx.searchRunSource.create({ data: { runId: run.id, ...source } });
       for (const item of result.listings) await persistListing(tx, run.id, item.listing, item.evaluation, previousRunId);

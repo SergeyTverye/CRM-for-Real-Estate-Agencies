@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { db, transaction } from "@/shared/db/client";
+import { db, transaction, type DbOrTx } from "@/shared/db/client";
 import { ConflictError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import { parseInput, zUuid, zExpectedUpdatedAt } from "@/shared/validation";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { needScope } from "@/modules/access/domain/scopes";
 import { assertNeedInvariants } from "@/modules/needs/domain/need-invariant";
-import { proposeProperties } from "@/modules/matching/application/matching-service";
+import { proposePropertiesInTransaction } from "@/modules/matching/application/matching-service";
 import { createOffer, updateOffer } from "@/modules/commercial-offers/application/offer-service";
 import { createTask } from "@/modules/tasks/application/task-service";
 import { SearchFilters, PURPOSES, SOURCES } from "../domain/types";
@@ -68,14 +68,34 @@ const transferSchema = z.object({ confirmed: z.literal(true), identityConfirmed:
   address: z.string().trim().min(1).max(1000).optional(), operation: z.enum(["sale", "rent"]).optional() });
 export async function transferToCatalog(actor: Actor, listingId: string, input: unknown) {
   const data = parseInput(transferSchema, input);
-  const initial = await listingById(listingId);
-  await guardExternalUrl(initial.url);
+  await listingById(listingId);
   return transaction(async tx => {
     await tx.$executeRaw`SELECT id FROM external_listings WHERE id = ${listingId}::uuid FOR UPDATE`;
     const listing = await tx.externalListing.findUniqueOrThrow({ where: { id: listingId } });
     if (listing.propertyId) return { id: listing.propertyId, created: false };
-    if ((!listing.sourceListingId || listing.sourceMethod === "web_search") && !data.identityConfirmed)
+    const snapshot = await tx.externalListingSnapshot.findFirst({ where: { listingId }, orderBy: { fetchedAt: "desc" } });
+    const facts = snapshot?.normalized as Record<string, unknown> | undefined;
+    const siblingUnit = listing.sourceListingId && !listing.sourceUnitId ? await tx.externalListing.findFirst({
+      where: { source: listing.source, sourceListingId: listing.sourceListingId, sourceUnitId: { not: null } }, select: { id: true },
+    }) : null;
+    const missingUnit = !listing.sourceUnitId && (!!siblingUnit || /#part-\d+$/u.test(listing.url));
+    const unverifiedIdentity = !listing.sourceListingId || facts?.identityNeedsReview === true || missingUnit ||
+      (["web_search", "manual"].includes(listing.sourceMethod) && listing.sourceListingId.startsWith("url:"));
+    if (unverifiedIdentity && !data.identityConfirmed)
       throw new ConflictError("IDENTITY_CONFIRMATION_REQUIRED", "Недостаточно ключей. Проверьте первоисточник и подтвердите идентичность вручную.");
+    await guardExternalUrl(listing.url);
+    // Serialize the provenance as well as this row: separate rows may describe one object.
+    if (listing.sourceListingId) {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([listing.source, listing.sourceListingId, listing.sourceUnitId])}, 0))`;
+      const linked = await tx.externalListing.findFirst({ where: { source: listing.source, sourceListingId: listing.sourceListingId,
+        sourceUnitId: listing.sourceUnitId, propertyId: { not: null } }, select: { propertyId: true } });
+      if (linked?.propertyId) {
+        await tx.externalListing.update({ where: { id: listingId }, data: { propertyId: linked.propertyId } });
+        await tx.searchSelection.updateMany({ where: { listingId }, data: { propertyId: linked.propertyId } });
+        await searchAudit(tx, actor, "transferred", "ExternalListing", listingId, { propertyId: linked.propertyId, reused: true, identityConfirmed: data.identityConfirmed });
+        return { id: linked.propertyId, created: false };
+      }
+    }
     const addressText = data.address ?? listing.address;
     if (!addressText) throw new ValidationError("Укажите проверенный адрес объекта");
     // Unknown price units must not silently become comparable CRM prices.
@@ -91,10 +111,12 @@ export async function transferToCatalog(actor: Actor, listingId: string, input: 
   });
 }
 const needAction = z.object({ needId: zUuid, comment: noteSchema });
-async function actionContext(actor: Actor, listingId: string, input: unknown) {
+async function actionContext(actor: Actor, listingId: string, input: unknown, client: DbOrTx = db) {
   const data = parseInput(needAction, input);
-  await loadAccessibleNeed(db, actor, data.needId);
-  const listing = await listingById(listingId);
+  await loadAccessibleNeed(client, actor, data.needId);
+  parseInput(zUuid, listingId);
+  const listing = await client.externalListing.findUnique({ where: { id: listingId } });
+  if (!listing) throw new NotFoundError();
   if (!listing.propertyId) throw new ConflictError("PROPERTY_REQUIRED", "Сначала перенесите объявление в каталог CRM и подтвердите данные объекта.");
   return { data, listing, propertyId: listing.propertyId };
 }
@@ -103,23 +125,18 @@ export async function proposeListing(actor: Actor, listingId: string, input: unk
   await loadAccessibleNeed(db, actor, data.needId);
   return transaction(async tx => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`search-propose:${data.needId}`}, 0))`;
-    return proposeListingLocked(actor, listingId, input);
-  });
-}
-async function proposeListingLocked(actor: Actor, listingId: string, input: unknown) {
-  const { data, propertyId } = await actionContext(actor, listingId, input);
-  // Matching service owns stage transitions; this boundary adds idempotence for candidates.
-  const existing = await db.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } });
-  const result = existing ? { created: [] as string[], skipped: [propertyId] } : await proposeProperties(actor, data.needId, { propertyIds: [propertyId], comment: data.comment });
-  const matchId = existing?.id ?? result.created[0] ?? (await db.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } }))?.id;
-  await transaction(async tx => {
+    const { propertyId } = await actionContext(actor, listingId, input, tx);
+    // Matching service owns stage transitions; this boundary adds idempotence for candidates.
+    const existing = await tx.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } });
+    const result = existing ? { created: [] as string[], skipped: [propertyId] } : await proposePropertiesInTransaction(tx, actor, data.needId, { propertyIds: [propertyId], comment: data.comment });
+    const matchId = existing?.id ?? result.created[0] ?? (await tx.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } }))?.id;
     await loadAccessibleNeed(tx, actor, data.needId);
     await tx.searchSelection.upsert({ where: { needId_listingId: { needId: data.needId, listingId } },
       create: { needId: data.needId, listingId, addedBy: actor.userId, propertyId, matchId, reviewStatus: "proposed", comment: data.comment },
       update: { propertyId, matchId, reviewStatus: "proposed" } });
     await searchAudit(tx, actor, "proposed", "ExternalListing", listingId, { needId: data.needId, propertyId, matchId });
+    return { ...result, matchId };
   });
-  return { ...result, matchId };
 }
 export async function listingToOffer(actor: Actor, listingId: string, input: unknown) {
   const data = parseInput(needAction, input);

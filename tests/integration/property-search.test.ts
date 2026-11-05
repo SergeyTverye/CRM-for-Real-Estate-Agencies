@@ -1,3 +1,4 @@
+import * as audit from "@/modules/audit/application/audit";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db, resetDatabase, seedBase, makeClient, makeNeed, type TestUsers } from "../helpers/fixtures";
 import { resetConfigCache, getConfig } from "@/shared/config/env";
@@ -101,8 +102,9 @@ describe("search application integration", () => {
     process.env.YANDEX_AI_MAX_MONTHLY_COST_RUB="0"; resetConfigCache();
     const fresh = await gatedAi();
     const denied = await runSearch(users.realtor1,{filters,sources:["cian"],confirmedPaid:true},{ai:fresh.ai,scraper:adapter([],[{source:"cian",status:"blocked",resultCount:0,reason:"HTTP 429"}])});
-    expect(fresh.provider.requests).toHaveLength(0); expect(denied.webSearchUsed).toBe(true);
-    expect(denied.sources.find(s=>s.source==="web_search")?.status).toBe("error");
+    expect(fresh.provider.requests).toHaveLength(0); expect(denied.webSearchUsed).toBe(false);
+    expect(denied.sources.some(s=>s.source==="web_search")).toBe(false);
+    expect(denied.fallbackReason).toContain("Бюджет или лимит");
     process.env.YANDEX_AI_MAX_MONTHLY_COST_RUB="1000"; resetConfigCache();
   });
   it("a saved search update requires current version", async () => {
@@ -125,6 +127,104 @@ describe("search application integration", () => {
     const run = await search([listing("1000", null)]); const id = run.results[0]!.listingId;
     await expect(transferToCatalog(users.realtor1,id,{confirmed:true})).rejects.toMatchObject({code:"IDENTITY_CONFIRMATION_REQUIRED"});
     await transferToCatalog(users.realtor1,id,{confirmed:true,identityConfirmed:true}); expect(await db.property.count()).toBe(1);
+  });
+  it("a grouped listing without a unit requires confirmation even with an advertisement ID", async () => {
+    const grouped = { ...listing(), identityNeedsReview: true };
+    const run = await search([grouped]); const id = run.results[0]!.listingId;
+    await expect(transferToCatalog(users.realtor1, id, { confirmed: true })).rejects.toMatchObject({ status: 409, code: "IDENTITY_CONFIRMATION_REQUIRED" });
+    expect(await db.property.count()).toBe(0);
+    await transferToCatalog(users.realtor1, id, { confirmed: true, identityConfirmed: true });
+    expect(await db.property.count()).toBe(1);
+  });
+  it.each(["manual", "web_search"])("%s without a stable ID requires identity confirmation", async sourceMethod => {
+    const run = await search(); const id = run.results[0]!.listingId;
+    await db.externalListing.update({ where: { id }, data: { source: sourceMethod, sourceMethod, sourceListingId: null } });
+    await expect(transferToCatalog(users.realtor1, id, { confirmed: true })).rejects.toMatchObject({ status: 409, code: "IDENTITY_CONFIRMATION_REQUIRED" });
+    await transferToCatalog(users.realtor1, id, { confirmed: true, identityConfirmed: true });
+  });
+  it("keeps different units separate while concurrent transfers remain idempotent", async () => {
+    const run = await search([ { ...listing(), sourceUnitId: "unit-1" }, { ...listing(), sourceUnitId: "unit-2" } ]);
+    const ids = run.results.map(r => r.listingId);
+    const moved = await Promise.all(ids.flatMap(id => [1, 2].map(() => transferToCatalog(users.realtor1, id, { confirmed: true }))));
+    expect(new Set(moved.map(r => r.id)).size).toBe(2);
+    expect(await db.property.count()).toBe(2);
+  });
+  it("rolls back match, stage, selection and audit together if proposal audit fails", async () => {
+    const need = await needFor(); const run = await search(); const id = run.results[0]!.listingId;
+    await transferToCatalog(users.realtor1, id, { confirmed: true });
+    await setSelection(users.realtor1, id, { needId: need.id });
+    const before = await db.clientNeed.findUniqueOrThrow({ where: { id: need.id } });
+    const stageHistory = await db.needStageHistory.count();
+    const auditCount = await db.auditLog.count();
+    const original = audit.writeAudit;
+    const failing = vi.spyOn(audit, "writeAudit").mockImplementation(async (tx, event) => {
+      if (event.action === "property_search.proposed") throw new Error("Synthetic audit failure");
+      return original(tx, event);
+    });
+    try {
+      await expect(proposeListing(users.realtor1, id, { needId: need.id })).rejects.toThrow("Synthetic audit failure");
+    } finally { failing.mockRestore(); }
+    expect(await db.needPropertyMatch.count()).toBe(0);
+    expect(await db.searchSelection.findFirst({ where: { needId: need.id } })).toMatchObject({ reviewStatus: "candidate", matchId: null });
+    expect(await db.clientNeed.findUnique({ where: { id: need.id } })).toMatchObject({ stage: before.stage });
+    expect(await db.needStageHistory.count()).toBe(stageHistory);
+    expect(await db.auditLog.count()).toBe(auditCount);
+    await proposeListing(users.realtor1, id, { needId: need.id });
+    expect(await db.needPropertyMatch.count()).toBe(1);
+  });
+  it("deduplicates missing source IDs by canonical URL and preserves manual-review flags", async () => {
+    const first = await search([{ ...listing("1000", null), url: "https://CIAN.ru/synthetic/?b=2&a=1&utm_source=one#photos" }]);
+    const second = await search([{ ...listing("1000", null), url: "https://cian.ru/synthetic?a=1&b=2&utm_source=two" }]);
+    expect(second.results[0]!.listingId).toBe(first.results[0]!.listingId);
+    expect(second.results[0]!.listing.sourceListingId).toMatch(/^url:[a-f0-9]{64}$/u);
+    expect(second.results[0]!.snapshot).toMatchObject({ identityNeedsReview: true });
+    const noUrl = await search([{ ...listing("1000", null), url: "", identityNeedsReview: false }]);
+    expect(noUrl.results[0]!.snapshot).toMatchObject({ sourceListingId: null, identityNeedsReview: true });
+    await expect(transferToCatalog(users.realtor1, noUrl.results[0]!.listingId, { confirmed: true })).rejects.toMatchObject({ status: 409 });
+  });
+  it("repeated web runs share one listing and snapshot provenance agrees", async () => {
+    const { ai, provider } = await gatedAi();
+    const first = await runSearch(users.realtor1, { filters, sources: ["cian"], confirmedPaid: true }, { ai, scraper: adapter([]) });
+    const second = await runSearch(users.realtor1, { filters, sources: ["cian"], confirmedPaid: true }, { ai, scraper: adapter([]) });
+    const one = await manualWebSearch(users.realtor1, first.id);
+    const two = await manualWebSearch(users.realtor1, second.id);
+    expect(provider.requests).toHaveLength(2);
+    expect(two.results[0]!.listingId).toBe(one.results[0]!.listingId);
+    expect(two.results[0]!.snapshot).toMatchObject({ source: "web_search", sourceMethod: "web_search", identityNeedsReview: true });
+    expect(two.results[0]!.listing).toMatchObject({ source: "web_search", sourceMethod: "web_search" });
+    expect(await db.externalListing.count()).toBe(1);
+    const available = await ai.checkWebSearchAvailability({ user: { userId: users.realtor1.userId, active: true }, ownerUserId: users.realtor1.userId, jobId: second.id, requestId: "preflight" }, filters);
+    expect(available.limitAvailable).toBe(false);
+  });
+  it.each(["YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR", "YANDEX_WEB_SEARCH_MAX_CALLS_PER_JOB", "YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY"])("exhausted %s prevents auto fallback without consuming its attempt", async key => {
+    const previous = process.env[key]; process.env[key] = "0";
+    try {
+      const { ai, provider } = await gatedAi();
+      const run = await runSearch(users.realtor1, { filters, sources: ["cian"], confirmedPaid: true }, { ai, scraper: adapter([], [{ source: "cian", status: "blocked", resultCount: 0, reason: "Blocked" }]) });
+      expect(run.webSearchUsed).toBe(false);
+      expect(run.fallbackReason).toContain("Бюджет или лимит");
+      expect(provider.requests).toHaveLength(0);
+      expect(run.sources.some(s => s.source === "web_search")).toBe(false);
+    } finally { if (previous === undefined) delete process.env[key]; else process.env[key] = previous; resetConfigCache(); }
+  });
+  it("repeated gate preflight does not reserve quota or budget", async () => {
+    const previous = process.env.YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR;
+    process.env.YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR = "1";
+    try {
+      const { ai, provider } = await gatedAi();
+      const run = await runSearch(users.realtor1, { filters, sources: ["cian"], confirmedPaid: true }, { ai, scraper: adapter([]) });
+      const context = { user: { userId: users.realtor1.userId, active: true }, ownerUserId: users.realtor1.userId, jobId: run.id, requestId: "preflight-only" };
+      expect(await ai.checkWebSearchAvailability(context, filters)).toEqual({ budgetAvailable: true, limitAvailable: true });
+      expect(await ai.checkWebSearchAvailability(context, filters)).toEqual({ budgetAvailable: true, limitAvailable: true });
+      expect(provider.requests).toHaveLength(0);
+      await manualWebSearch(users.realtor1, run.id);
+      expect(provider.requests).toHaveLength(1);
+      expect((await ai.checkWebSearchAvailability(context, filters)).limitAvailable).toBe(false);
+    } finally {
+      if (previous === undefined) delete process.env.YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR;
+      else process.env.YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR = previous;
+      resetConfigCache();
+    }
   });
   it("recorded fixtures cover success, partial, total failure and healthy empty", async () => {
     for (const scenario of ["success","partial","failure","empty"]) {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { db, transaction } from "@/shared/db/client";
+import { db, transaction, type Tx } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { NotFoundError, ValidationError } from "@/shared/errors";
 import { parseInput, zCode, zOptText, zUuid } from "@/shared/validation";
@@ -141,29 +141,31 @@ const proposeSchema = z.object({
 const ACTIVE_MATCH_STATUSES = ["proposed", "interested", "showing_planned"];
 
 export async function proposeProperties(actor: Actor, needId: string, input: unknown): Promise<{ created: string[]; skipped: string[] }> {
+  return transaction(tx => proposePropertiesInTransaction(tx, actor, needId, input));
+}
+
+export async function proposePropertiesInTransaction(tx: Tx, actor: Actor, needId: string, input: unknown): Promise<{ created: string[]; skipped: string[] }> {
   const d = parseInput(proposeSchema, input);
-  return transaction(async (tx) => {
-    const need = await loadAccessibleNeed(tx, actor, needId);
-    if (!["active", "paused"].includes(need.status)) throw new ValidationError("Подбор возможен только для открытой потребности");
-    const props = await tx.property.findMany({ where: { id: { in: d.propertyIds } }, select: { id: true } });
-    if (props.length !== new Set(d.propertyIds).size) throw new NotFoundError("Объект не найден");
-    const active = await tx.needPropertyMatch.findMany({
-      where: { clientNeedId: needId, propertyId: { in: d.propertyIds }, status: { in: ACTIVE_MATCH_STATUSES } },
-      select: { propertyId: true },
-    });
-    const skip = new Set(active.map((a) => a.propertyId));
-    const created: string[] = [];
-    for (const pid of new Set(d.propertyIds)) {
-      if (skip.has(pid)) continue;
-      const m = await tx.needPropertyMatch.create({
-        data: { clientNeedId: needId, propertyId: pid, status: "proposed", sourceCode: d.sourceCode, comment: d.comment, createdBy: actor.userId },
-        select: { id: true },
-      });
-      created.push(m.id);
-    }
-    if (created.length) await advanceNeedStage(tx, actor, needId, "selection", "auto:property_proposed");
-    return { created, skipped: [...skip] };
+  const need = await loadAccessibleNeed(tx, actor, needId);
+  if (!["active", "paused"].includes(need.status)) throw new ValidationError("Подбор возможен только для открытой потребности");
+  const props = await tx.property.findMany({ where: { id: { in: d.propertyIds } }, select: { id: true } });
+  if (props.length !== new Set(d.propertyIds).size) throw new NotFoundError("Объект не найден");
+  const active = await tx.needPropertyMatch.findMany({
+    where: { clientNeedId: needId, propertyId: { in: d.propertyIds }, status: { in: ACTIVE_MATCH_STATUSES } },
+    select: { propertyId: true },
   });
+  const skip = new Set(active.map((a) => a.propertyId));
+  const created: string[] = [];
+  for (const pid of new Set(d.propertyIds)) {
+    if (skip.has(pid)) continue;
+    const m = await tx.needPropertyMatch.create({
+      data: { clientNeedId: needId, propertyId: pid, status: "proposed", sourceCode: d.sourceCode, comment: d.comment, createdBy: actor.userId },
+      select: { id: true },
+    });
+    created.push(m.id);
+  }
+  if (created.length) await advanceNeedStage(tx, actor, needId, "selection", "auto:property_proposed");
+  return { created, skipped: [...skip] };
 }
 
 const updateMatchSchema = z

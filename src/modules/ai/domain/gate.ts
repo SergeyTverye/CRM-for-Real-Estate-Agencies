@@ -67,7 +67,7 @@ export class AiGate {
     private readonly settings: AiSettingsRepository, private readonly timeZone = "Asia/Novosibirsk",
     private readonly clock: () => Date = () => new Date()) {}
 
-  async check(callType: CallType, user: AiUser, job: AiJob): Promise<AiReservation> {
+  async check(callType: CallType, user: AiUser, job: AiJob, options: { reserve?: boolean } = {}): Promise<AiReservation> {
     const limits = effectiveLimits(this.env, await this.settings.getLimits());
     if (!limits.enabled) throw new AiError("AI_DISABLED");
     if (!user.active || job.ownerUserId !== user.userId) throw new AiError("AI_FORBIDDEN");
@@ -95,7 +95,7 @@ export class AiGate {
         model: job.model, tariff: job.tariff, createdAt: now, ...keys, estimatedUsage: job.estimatedUsage,
         estimatedWebCalls: job.estimatedWebCalls, estimatedMicros, chargedMicros: estimatedMicros, state: "reserved",
       };
-      await tx.insert(reservation);
+      if (options.reserve !== false) await tx.insert(reservation);
       return reservation;
     });
   }

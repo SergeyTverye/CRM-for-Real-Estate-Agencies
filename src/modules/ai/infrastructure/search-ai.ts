@@ -28,7 +28,7 @@ export class SearchAi {
     private readonly tariffs: TariffRepository, private readonly config: SearchAiConfig,
     private readonly clock: () => Date = () => new Date()) {}
 
-  private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[]): Promise<AiResponse> {
+  private async prepareCall(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], reserve = true): Promise<AiRequest> {
     const model = type === "web_search" ? this.config.webModel || this.config.model : this.config.model;
     const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens: this.config.maxOutputTokens,
       ...(type === "parse" ? { responseSchema: providerParseSchema, responseSchemaStrict: true } : {}),
@@ -41,7 +41,12 @@ export class SearchAi {
       fingerprint: createHash("sha256").update(JSON.stringify(request)).digest("hex"), model, tariff,
       estimatedUsage: { inputTokens, outputTokens: request.maxOutputTokens }, estimatedWebCalls: tools ? 1 : 0,
       automaticWeb: context.automaticWeb, fullTechnicalFailure: context.fullTechnicalFailure,
-    });
+    }, { reserve });
+    return request;
+  }
+
+  private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[]): Promise<AiResponse> {
+    const request = await this.prepareCall(type, context, input, instructions, tools);
     let response: AiResponse;
     try { response = await this.provider.respond(request); }
     catch (error) {
@@ -101,7 +106,17 @@ export class SearchAi {
     return { evidence, ...this.metadata(response) };
   }
 
-  async webSearch(context: AiCallContext, rawFilters: unknown) {
+  async checkWebSearchAvailability(context: AiCallContext, rawFilters: unknown) {
+    try {
+      const { filters, tool, instructions } = this.webRequest(rawFilters);
+      await this.prepareCall("web_search", context, { filters }, instructions, [tool], false);
+      return { budgetAvailable: true, limitAvailable: true };
+    } catch (error) {
+      return { budgetAvailable: !(error instanceof AiError && error.code === "AI_BUDGET_EXHAUSTED"), limitAvailable: false };
+    }
+  }
+
+  private webRequest(rawFilters: unknown) {
     const filters = this.safeFilters(searchFiltersSchema.parse(rawFilters));
     const city = filters.city.trim().toLocaleLowerCase("ru-RU");
     // Never apply Novosibirsk's region to an unrelated city or derive it from employee IP.
@@ -109,8 +124,12 @@ export class SearchAi {
     const region = city === "москва" ? "213" : city === "новосибирск" ? "65" : null;
     const tool: WebSearchTool = { type: "web_search", search_context_size: this.config.contextSize,
       filters: { ...(region ? { user_location: { region } } : {}), ...(this.config.allowedDomains.length ? { allowed_domains: this.config.allowedDomains } : {}) } };
-    const response = await this.call("web_search", context, { filters },
-      `${untrusted} Найди публичные объявления коммерческой недвижимости по фильтрам. Каждый кандидат должен содержать исходный URL конкретного объявления (не страницу результатов поиска). Не выдумывай URL и факты. Верни JSON: {"candidates":[{"title":"...","url":"https://..."}]}. Если первоисточника нет, url=null. Не подтверждай пригодность и собственника.`, [tool]);
+    return { filters, tool, region, instructions: `${untrusted} Найди публичные объявления коммерческой недвижимости по фильтрам. Каждый кандидат должен содержать исходный URL конкретного объявления (не страницу результатов поиска). Не выдумывай URL и факты. Верни JSON: {"candidates":[{"title":"...","url":"https://..."}]}. Если первоисточника нет, url=null. Не подтверждай пригодность и собственника.` };
+  }
+
+  async webSearch(context: AiCallContext, rawFilters: unknown) {
+    const { filters, tool, region, instructions } = this.webRequest(rawFilters);
+    const response = await this.call("web_search", context, { filters }, instructions, [tool]);
     const result = this.decode(webResultSchema, response.text);
     const sources = new Set(response.sourceUrls.map(publicSourceUrl).filter(Boolean));
     const candidates = result.candidates.map((c) => {
