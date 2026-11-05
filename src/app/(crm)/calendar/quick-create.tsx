@@ -1,4 +1,5 @@
 "use client";
+import { requestConfirmation } from "@/ui/confirm-dialog";
 import { useState } from "react";
 import { DateTimeInput, Modal, type Option } from "@/ui/client-kit";
 import { NeedPicker, PropertySelect, type NeedLabels, type NeedPick, type PropertyPick } from "@/ui/domain/deal-pickers";
@@ -17,7 +18,7 @@ export function CalendarQuickCreate({ timeZone, users, labels, onDone }: { timeZ
   const action = useApiAction();
   useUnsavedChangesWarning(!!type && dirty);
   function open(next: "task" | "showing") { setType(next); setAt(new Date(Date.now()+3600000).toISOString()); setTitle(""); setNeed(null); setProperty(null); setResponsible(""); setDirty(false); action.setError(null); }
-  function close() { if (!dirty || window.confirm("Закрыть без сохранения?")) setType(null); }
+  async function close() { if (!dirty || await requestConfirmation("Закрыть без сохранения?")) setType(null); }
   return <>
     <button className="btn" onClick={() => open("task")}>+ Задача</button><button className="btn" onClick={() => open("showing")}>+ Показ</button>
     <Modal open={!!type} onClose={close} title={type === "showing" ? "Назначить показ" : "Быстрая задача"}>

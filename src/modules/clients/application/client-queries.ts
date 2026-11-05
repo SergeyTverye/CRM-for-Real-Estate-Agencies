@@ -3,7 +3,9 @@ import { db } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { parseInput, skipTake, zPagination, zUuid, type Page } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { clientScope, needScope, dealScope, communicationScope, showingScope, offerScope, leadRequestScope } from "@/modules/access/domain/scopes";
+import { clientScope, needScope, dealScope, communicationScope, showingScope, offerScope, leadRequestScope, taskScope } from "@/modules/access/domain/scopes";
+import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
+import { labelOf } from "@/shared/codebook";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { loadAccessibleClient } from "./client-service";
 
@@ -158,6 +160,34 @@ export interface TimelineEvent {
   details?: string | null;
   href?: string | null;
   author?: string | null;
+}
+
+/** Last five interactions, bounded per source before a stable merge. */
+export async function getClientRecentInteractions(actor: Actor, clientId: string): Promise<TimelineEvent[]> {
+  await loadAccessibleClient(db, actor, clientId);
+  const [comms, showings, offers, tasks] = await Promise.all([
+    db.communication.findMany({ where: { clientId, AND: [communicationScope(actor)] }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take: 5, select: { id: true, occurredAt: true, communicationType: true, comment: true, author: { select: { displayName: true } } } }),
+    db.showing.findMany({ where: { need: { clientId }, AND: [showingScope(actor)] }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 5, select: { id: true, updatedAt: true, scheduledAt: true, status: true, property: { select: { addressText: true } } } }),
+    db.commercialOffer.findMany({ where: { need: { clientId }, AND: [offerScope(actor)] }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 5, select: { id: true, title: true, updatedAt: true, status: true } }),
+    db.task.findMany({ where: { AND: [taskScope(actor), safeTaskTextScope(actor), clientTaskContext(clientId)], NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } }, orderBy: [{ updatedAt: "desc" }, { id: "desc" }], take: 5, select: { id: true, title: true, updatedAt: true, status: true, responsible: { select: { displayName: true } } } }),
+  ]);
+  const events: TimelineEvent[] = [
+    ...comms.map(c => ({ at: c.occurredAt, kind: "communication" as const, title: labelOf("communicationType", c.communicationType), details: c.comment, author: c.author.displayName, href: `/clients/${clientId}?tab=history` })),
+    ...showings.map(s => ({ at: s.updatedAt, kind: "showing" as const, title: `Показ: ${s.property.addressText}`, details: labelOf("showingStatus", s.status), href: `/showings/${s.id}` })),
+    ...offers.map(o => ({ at: o.updatedAt, kind: "offer" as const, title: `КП: ${o.title ?? "без названия"}`, details: labelOf("offerStatus", o.status), href: `/offers/${o.id}` })),
+    ...tasks.map(t => ({ at: t.updatedAt, kind: "task" as const, title: t.title, details: labelOf("taskStatus", t.status), author: t.responsible.displayName, href: `/tasks/${t.id}` })),
+  ];
+  return events.sort((a, b) => +b.at - +a.at || (a.href ?? "").localeCompare(b.href ?? "")).slice(0, 5);
+}
+
+export function clientTaskContext(clientId: string): Prisma.TaskWhereInput {
+  return { OR: [
+    { clientLinks: { some: { clientId } } }, { needLinks: { some: { need: { clientId } } } },
+    { showingLinks: { some: { showing: { need: { clientId } } } } },
+    { offerLinks: { some: { offer: { need: { clientId } } } } },
+    { agreementLinks: { some: { agreement: { clientId } } } },
+    { dealLinks: { some: { deal: { parties: { some: { clientId } } } } } },
+  ] };
 }
 
 /**

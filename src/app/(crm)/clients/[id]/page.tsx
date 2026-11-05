@@ -1,7 +1,9 @@
+import { CallNoteButton } from "@/ui/domain/ai-p2-drafts";
+import { p2Available } from "@/modules/ai/application/p2-service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
-import { getClientCard, getClientTimeline } from "@/modules/clients/application/client-queries";
+import { getClientCard, getClientTimeline, getClientRecentInteractions } from "@/modules/clients/application/client-queries";
 import { listTasksLinkedTo } from "@/modules/tasks/application/task-queries";
 import { NotFoundError } from "@/shared/errors";
 import { labelOf } from "@/shared/codebook";
@@ -10,6 +12,7 @@ import { codeOptions, loadDictionaries, userOptions } from "@/server/options";
 import { dictLabel } from "@/modules/dictionaries/application/dictionaries-service";
 import { Badge, Card, Dl, EmptyState, PageHeader, StatusBadge, Tabs } from "@/ui/components";
 import { ActionButton, QuickFormButton } from "@/ui/client-kit";
+import { TaskQuickActions } from "@/ui/domain/task-actions";
 import { TaskList } from "@/ui/domain/task-list";
 import { Timeline } from "@/ui/domain/timeline";
 import { DocumentsPanel } from "@/ui/domain/documents-panel";
@@ -18,6 +21,7 @@ export const metadata = { title: "Клиент" };
 
 export default async function ClientCardPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
   const actor = await requirePageActor();
+  const aiEnabled = await p2Available(actor);
   const { id } = await params;
   const { tab = "overview" } = await searchParams;
   let client;
@@ -29,7 +33,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
   }
   const dicts = await loadDictionaries();
   const isManager = actor.role === "manager";
-  const tasks = await listTasksLinkedTo(actor, { clientId: id }, { includeClosed: tab === "tasks", take: 100 });
+  const tasks = await listTasksLinkedTo(actor, { clientId: id }, { includeClosed: tab === "tasks", take: 100, includeIndirectClient: true });
   const openTasks = tasks.filter((t) => ["planned", "in_progress"].includes(t.status));
   const nearest = openTasks[0];
   const primary = client.contacts[0];
@@ -52,6 +56,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
         }
         actions={
           <>
+            <CallNoteButton timeZone={zone} context={{kind:"client",id}} enabled={aiEnabled} />
             <Link className="btn btn-primary" href={`/needs/new?clientId=${id}`}>
               + Потребность
             </Link>
@@ -78,7 +83,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
         }
       />
       <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <Card title="Ближайшее действие">
+        <Card title="Следующее действие" actions={<Link className="btn btn-sm" href={`/tasks/new?clientId=${id}`}>+ Создать</Link>}>
           {nearest ? (
             <div>
               <Link href={`/tasks/${nearest.id}`} className="link font-medium">
@@ -87,6 +92,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
               <div className={`text-sm ${nearest.overdue ? "text-red-600" : "text-slate-500"}`}>
                 {fmtDateTime(nearest.dueAt)} · {nearest.responsible.displayName}
               </div>
+              <div className="mt-3"><TaskQuickActions taskId={nearest.id} updatedAt={nearest.updatedAt.toISOString()} dueAt={nearest.dueAt.toISOString()} timeZone={zone} /></div>
             </div>
           ) : (
             <span className="text-slate-500">Нет запланированных действий</span>
@@ -142,6 +148,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
 
       {tab === "overview" ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <section className="lg:col-span-2" aria-label="Последние взаимодействия"><div className="mb-2 flex justify-between"><h2 className="font-semibold">Последние 5 взаимодействий</h2><Link className="link text-sm" href={`${base}?tab=history`}>Вся история →</Link></div><Timeline events={await getClientRecentInteractions(actor, id)} dicts={dicts} /></section>
           <Card
             title="Контакты"
             actions={

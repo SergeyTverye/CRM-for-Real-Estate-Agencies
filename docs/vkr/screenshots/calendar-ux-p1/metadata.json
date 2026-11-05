@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-05T12:00:45.316Z",
+  "baseURL": "http://localhost:3340",
+  "dataset": "crm_demo / DEMO-V241",
+  "version": "feature/tz-v2.4.1 working copy",
+  "checks": [
+    "today counters",
+    "client interactions",
+    "repeat form",
+    "RBAC picker",
+    "Escape unsaved changes",
+    "notification groups"
+  ],
+  "businessMutations": false
+}

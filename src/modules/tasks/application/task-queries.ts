@@ -8,6 +8,9 @@ import { assertRecordId, parseInput, skipTake, zCode, zPagination, zUuid, type P
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { canSeeClient, canSeeNeed, clientScope, dealScope, needScope, showingScope, agreementScope, offerScope, taskScope } from "@/modules/access/domain/scopes";
 import { OPEN_TASK_STATUSES, todayGroupOf, type TodayGroup } from "../domain/task-rules";
+import { todayTaskBucket } from "@/modules/calendar/domain/today-counters";
+import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
+import { clientTaskContext } from "@/modules/clients/application/client-queries";
 
 export interface TaskLinkView {
   kind: "client" | "need" | "property" | "showing" | "deal" | "advertisement" | "agreement" | "offer";
@@ -159,6 +162,7 @@ export async function listTasks(actor: Actor, rawFilters: unknown): Promise<Page
   if (f.status === "open" || ["overdue", "today", "week"].includes(f.view)) and.push({ status: { in: [...OPEN_TASK_STATUSES] } });
   else if (f.status !== "all") and.push({ status: f.status });
   if (f.view === "overdue" || f.overdueOnly) and.push({ dueAt: { lt: now } });
+  if (["overdue", "today", "week"].includes(f.view)) and.push({ NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } });
   if (f.view === "today") and.push({ dueAt: { gte: now, lt: startTomorrow } });
   if (f.view === "week") and.push({ dueAt: { gte: now, lt: weekEnd } });
   if (f.taskType) and.push({ taskType: f.taskType });
@@ -184,10 +188,10 @@ export async function listTasks(actor: Actor, rawFilters: unknown): Promise<Page
 export async function listTasksLinkedTo(
   actor: Actor,
   link: { clientId?: string; needId?: string; dealId?: string; propertyId?: string; showingId?: string; agreementId?: string; advertisementId?: string; offerId?: string },
-  opts: { includeClosed?: boolean; take?: number } = {},
+  opts: { includeClosed?: boolean; take?: number; includeIndirectClient?: boolean } = {},
 ): Promise<TaskView[]> {
   const and: Prisma.TaskWhereInput[] = [taskScope(actor)];
-  if (link.clientId) and.push({ clientLinks: { some: { clientId: link.clientId } } });
+  if (link.clientId) and.push(opts.includeIndirectClient ? { AND: [clientTaskContext(link.clientId), safeTaskTextScope(actor)] } : { clientLinks: { some: { clientId: link.clientId } } });
   if (link.needId) and.push({ needLinks: { some: { clientNeedId: link.needId } } });
   if (link.dealId) and.push({ dealLinks: { some: { dealId: link.dealId } } });
   if (link.propertyId) and.push({ propertyLinks: { some: { propertyId: link.propertyId } } });
@@ -233,7 +237,7 @@ export async function listRecurrenceSeries(actor: Actor, task: TaskView): Promis
 }
 
 export async function countOverdueTasks(actor: Actor): Promise<number> {
-  return db.task.count({ where: { responsibleUserId: actor.userId, status: { in: [...OPEN_TASK_STATUSES] }, dueAt: { lt: new Date() } } });
+  return db.task.count({ where: { AND: [taskScope(actor)], responsibleUserId: actor.userId, status: { in: [...OPEN_TASK_STATUSES] }, dueAt: { lt: new Date() }, NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } } });
 }
 
 // ───────────────────────────── UC-10 GetTodayView ─────────────────────────────
@@ -251,11 +255,12 @@ export interface ControlItem {
 
 export interface TodayView {
   scope: "mine" | "all" | "user";
-  counters: { overdue: number; today: number; week: number; needsWithoutNextAction: number };
+  counters: { overdue: number; today: number; week: number; needsWithoutNextAction: number; showingsToday: number };
   overdue: TaskView[];
   today: Record<TodayGroup, TaskView[]>;
   controls: Record<TodayGroup, ControlItem[]>;
   week: TaskView[];
+  showingsToday: ControlItem[];
 }
 
 const todayFiltersSchema = z.object({
@@ -278,24 +283,26 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
   const userId = scope === "user" ? f.userId! : actor.userId;
 
   const taskWhere: Prisma.TaskWhereInput = {
+    AND: [taskScope(actor)],
+    NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } },
     status: { in: [...OPEN_TASK_STATUSES] },
     ...(scope === "all" ? {} : { responsibleUserId: userId }),
   };
-  const tasks = await db.task.findMany({
-    where: { ...taskWhere, dueAt: { lt: weekEnd } },
-    include: taskIncludeFor(actor),
-    orderBy: { dueAt: "asc" },
-    take: 500,
-  });
-  const views = tasks.map((t) => toTaskView(actor, t, now));
+  // A large overdue queue must not displace today's or next week's actions.
+  const tasks = (await Promise.all([
+    { lt: now }, { gte: now, lt: startTomorrow }, { gte: startTomorrow, lt: weekEnd },
+  ].map(dueAt => db.task.findMany({ where: { ...taskWhere, dueAt }, include: taskIncludeFor(actor), orderBy: [{ dueAt: "asc" }, { id: "asc" }], take: 200 })))).flat();
+  const safeIds = new Set((await db.task.findMany({ where: { id: { in: tasks.map(t => t.id) }, AND: [safeTaskTextScope(actor)] }, select: { id: true } })).map(t => t.id));
+  const views = tasks.map((t) => toTaskView(actor, safeIds.has(t.id) ? t : { ...t, title: "Задача", description: null }, now));
   const empty = (): Record<TodayGroup, never[]> => ({ calls: [], meetings: [], offers: [], documents: [], advertising: [], other: [] });
   const today: Record<TodayGroup, TaskView[]> = empty();
   const overdue: TaskView[] = [];
   const week: TaskView[] = [];
   for (const v of views) {
-    if (v.dueAt < now) overdue.push(v);
-    else if (v.dueAt < startTomorrow) today[todayGroupOf(v.taskType)].push(v);
-    else week.push(v);
+    const bucket = todayTaskBucket(v, now, startTomorrow, weekEnd);
+    if (bucket === "overdue") overdue.push(v);
+    else if (bucket === "today") today[todayGroupOf(v.taskType)].push(v);
+    else if (bucket === "week") week.push(v);
   }
 
   // Контрольные даты.
@@ -304,9 +311,7 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
   const showings = await db.showing.findMany({
     where: {
       status: "planned",
-      scheduledAt: { lt: startTomorrow },
-      // Показы с открытой задачей-встречей уже есть в группе задач.
-      taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } },
+      scheduledAt: { lt: dayBounds(now).startToday },
       ...responsibleFilter,
       ...showingScope(actor),
     },
@@ -326,6 +331,9 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
       responsibleName: s.responsible.displayName,
     });
 
+  const todayShowings = await db.showing.findMany({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: dayBounds(now).startToday, lt: startTomorrow } },
+    select: { id: true, scheduledAt: true, property: { select: { addressText: true } }, responsible: { select: { displayName: true } } }, orderBy: { scheduledAt: "asc" }, take: 200 });
+  const showingsToday: ControlItem[] = todayShowings.map(s => ({ kind: "showing", id: s.id, title: `Показ: ${s.property.addressText}`, dateLabel: s.scheduledAt, isDateOnly: false, href: `/showings/${s.id}`, overdue: s.scheduledAt < now, responsibleName: s.responsible.displayName }));
   const todayDate = todayAsDateOnly(now, cfg.APP_TIMEZONE);
   const agreementHorizon = addDays(todayDate, cfg.AGREEMENT_EXPIRY_WARNING_DAYS);
   const agreements = await db.agreement.findMany({
@@ -414,13 +422,19 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
     },
   });
 
-  const todayCount = Object.values(today).reduce((n, list) => n + list.length, 0);
+  const [overdueCount, todayCount, weekCount, showingsTodayCount] = await Promise.all([
+    db.task.count({ where: { ...taskWhere, dueAt: { lt: now } } }),
+    db.task.count({ where: { ...taskWhere, dueAt: { gte: now, lt: startTomorrow } } }),
+    db.task.count({ where: { ...taskWhere, dueAt: { gte: startTomorrow, lt: weekEnd } } }),
+    db.showing.count({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: dayBounds(now).startToday, lt: startTomorrow } } }),
+  ]);
   return {
     scope,
-    counters: { overdue: overdue.length, today: todayCount, week: week.length, needsWithoutNextAction },
+    counters: { overdue: overdueCount, today: todayCount, week: weekCount, needsWithoutNextAction, showingsToday: showingsTodayCount },
     overdue,
     today,
     controls,
     week,
+    showingsToday,
   };
 }

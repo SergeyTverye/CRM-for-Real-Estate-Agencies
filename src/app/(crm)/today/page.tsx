@@ -1,4 +1,5 @@
-import { ContactControl } from "../requests/contact-control";
+import { getContactControl } from "@/modules/requests/application/contact-control";
+import { fmtDateTime } from "@/server/format";
 import Link from "next/link";
 import { TodayAgenda } from "../calendar/today-agenda";
 import { requirePageActor } from "@/server/page-auth";
@@ -30,12 +31,13 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
     view = await getTodayView(actor, {});
   }
   const users = isManager ? await userOptions() : [];
+  const contact = await getContactControl(actor, view.scope === "mine" ? actor.userId : view.scope === "user" ? sp.userId : undefined);
   const showResponsible = view.scope !== "mine";
   const selectedUser = view.scope === "user" ? users.find((u) => u.value === sp.userId) : undefined;
 
   // Drill-down из счётчиков в список задач с тем же охватом.
   const taskHref = (v: "overdue" | "today" | "week") =>
-    view.scope === "all" ? `/tasks?view=all&status=open` : view.scope === "user" ? `/tasks?view=${v}&responsibleUserId=${sp.userId}` : `/tasks?view=${v}`;
+    view.scope === "all" ? `/today?scope=all#${v}` : view.scope === "user" ? `/tasks?view=${v}&responsibleUserId=${sp.userId}` : `/tasks?view=${v}`;
   const needsHref = `/needs?withoutNextAction=yes${view.scope === "user" ? `&responsibleUserId=${sp.userId}` : ""}`;
 
   const overdueControls: ControlItem[] = [];
@@ -46,8 +48,8 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
     });
     return { key: g, label: TODAY_GROUP_LABELS[g], tasks: view.today[g], controls };
   });
-  const plannedGroups = groups.filter((g) => g.tasks.length || g.controls.length);
-  const hasOverdue = view.overdue.length > 0 || overdueControls.length > 0;
+  const plannedGroups = groups.filter((g) => g.tasks.length);
+  const hasOverdue = view.counters.overdue > 0;
 
   return (
     <div>
@@ -96,39 +98,27 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
       ) : null}
       {filterError ? <div className="alert alert-warning mb-3">Некорректный фильтр сотрудника — показаны ваши действия.</div> : null}
 
-      <ContactControl actor={actor} userId={view.scope === "mine" ? actor.userId : view.scope === "user" ? sp.userId : undefined} />
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <TodayCounter label="Просрочено" value={view.counters.overdue} href={taskHref("overdue")} tone="red" />
         <TodayCounter label="На сегодня" value={view.counters.today} href={taskHref("today")} tone="blue" />
-        <TodayCounter label="Ближайшие 7 дней" value={view.counters.week} href={taskHref("week")} tone="gray" />
-        <TodayCounter
-          label="Потребности без следующего действия"
-          value={view.counters.needsWithoutNextAction}
-          href={needsHref}
-          tone="yellow"
-          hint="Активные потребности без открытой задачи и приостановленные без задачи возврата"
-        />
+        <TodayCounter label="Перспективные без действия" value={contact.requests.length} href="#prospective" tone="yellow" />
+        <TodayCounter label="Показы сегодня" value={view.counters.showingsToday} href="#showings-today" tone="gray" />
       </div>
-
-      <TodayAgenda actor={actor} employee={view.scope === "user" ? sp.userId : actor.userId} />
+      <p className="mb-3 text-xs text-slate-500">«Просрочено» и «На сегодня» считают открытые задачи по сроку. Показы и контрольные даты приведены отдельно. Счётчик в шапке всегда относится к вашим задачам.</p>
 
       {hasOverdue ? (
         <Card
           className="mb-4 border-red-200"
-          bodyClassName=""
-          title={<span className="text-red-700">Просрочено · {view.overdue.length + overdueControls.length}</span>}
+          bodyClassName="max-h-96 overflow-y-auto"
+          title={<span id="overdue" className="text-red-700">Просрочено · {view.counters.overdue}</span>}
         >
           {view.overdue.length ? <TaskRows tasks={view.overdue} withOpen compact /> : null}
-          {overdueControls.length ? (
-            <>
-              <div className="border-t border-slate-100 bg-slate-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Контрольные даты</div>
-              <ControlRows items={overdueControls} showResponsible={showResponsible} />
-            </>
-          ) : null}
+          {view.counters.overdue > view.overdue.length ? <p className="px-4 py-2 text-sm">Показаны первые {view.overdue.length}. <Link className="link" href={view.scope === "all" ? "/tasks?view=all&overdueOnly=yes" : taskHref("overdue")}>Все просроченные задачи →</Link></p> : null}
         </Card>
       ) : null}
 
-      <h2 className="mb-2 text-sm font-semibold text-slate-700">На сегодня</h2>
+      <section id="prospective" className="mb-4"><Card title={`Перспективные без действия · ${contact.requests.length}`}>{contact.requests.length ? <ul className="max-h-72 divide-y overflow-auto">{contact.requests.map(r => <li key={r.id} className="flex flex-wrap justify-between gap-2 py-2"><div><Link className="link font-medium" href={`/requests/${r.id}`}>{r.client?.displayName ?? "Перспективное обращение"}</Link><p className="text-xs text-slate-500">{fmtDateTime(r.occurredAt)} · {r.responsible.displayName}</p></div><Link className="btn btn-sm" href={`/requests/${r.id}`}>Назначить действие</Link></li>)}</ul> : <p className="text-sm text-slate-500">Все перспективные обращения имеют актуальное действие.</p>}</Card></section>
+      <h2 id="today" className="mb-2 text-sm font-semibold text-slate-700">На сегодня · {view.counters.today}</h2>
       {plannedGroups.length === 0 ? (
         <Card className="mb-4">
           <EmptyState
@@ -153,21 +143,23 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
       ) : (
         <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
           {plannedGroups.map((g) => (
-            <Card key={g.key} bodyClassName="" title={`${g.label} · ${g.tasks.length + g.controls.length}`}>
+            <Card key={g.key} bodyClassName="" title={`${g.label} · ${g.tasks.length}`}>
               {g.tasks.length ? <TaskRows tasks={g.tasks} withOpen compact /> : null}
-              {g.controls.length ? (
-                <>
-                  {g.tasks.length ? <div className="border-t border-slate-100" /> : null}
-                  <ControlRows items={g.controls} showResponsible={showResponsible} />
-                </>
-              ) : null}
             </Card>
           ))}
         </div>
       )}
 
+      {view.counters.today > Object.values(view.today).flat().length ? <p className="mb-4 text-sm text-slate-500">Показаны первые 200 задач на сегодня из {view.counters.today}.</p> : null}
+      <section id="showings-today" className="mb-4"><Card title={`Показы сегодня · ${view.counters.showingsToday}`} bodyClassName=""><ControlRows items={view.showingsToday} showResponsible={showResponsible} />{view.counters.showingsToday > view.showingsToday.length ? <p className="p-4 text-sm text-slate-500">Показаны первые {view.showingsToday.length} показов из {view.counters.showingsToday}.</p> : null}{!view.counters.showingsToday ? <p className="p-4 text-sm text-slate-500">На сегодня показы не назначены.</p> : null}</Card></section>
+      <TodayAgenda actor={actor} employee={view.scope === "all" ? "" : view.scope === "user" ? sp.userId : actor.userId} />
+      <Card className="mb-4" bodyClassName="" title="Контрольные даты: договоры, реклама, КП и прошедшие показы">
+        <ControlRows items={[...overdueControls, ...groups.flatMap(g => g.controls)].filter(c => c.kind !== "showing" || c.overdue)} showResponsible={showResponsible} />
+      </Card>
+      {view.counters.needsWithoutNextAction ? <p className="alert alert-warning mb-4"><Link className="link" href={needsHref}>Потребности без следующего действия · {view.counters.needsWithoutNextAction}</Link></p> : null}
       <TaskList
-        title={`Ближайшие 7 дней · ${view.week.length}`}
+        footer={view.counters.week > view.week.length ? <p className="p-4 text-sm text-slate-500">Показаны первые {view.week.length} задач из {view.counters.week}.</p> : undefined}
+        title={<span id="week">После сегодня, ближайшие 7 дней · {view.counters.week}</span>}
         tasks={view.week}
         compact
         withOpen

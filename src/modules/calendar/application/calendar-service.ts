@@ -70,6 +70,7 @@ export async function listCalendar(actor: Actor, input: unknown): Promise<Calend
         const item: CalendarItem = { id: `calendar_event:${e.id}:${occurrence.start}`, sourceId: e.id,
           type: "calendar_event", title: e.title, description: e.description, ...occurrence, status: "scheduled",
           allDay: e.allDay, ownerUserId: e.ownerUserId, updatedAt: e.updatedAt.toISOString(),
+          url: `/calendar?eventId=${e.id}`,
           editable: e.ownerUserId === actor.userId, recurrenceRule: e.recurrenceRule };
         const projected = canRead ? item : privateProjection(item);
         if (!f.status || projected.status === f.status) items.push(projected);
@@ -136,7 +137,7 @@ export async function saveCalendarEvent(actor: Actor, input: unknown, id?: strin
     const candidates = await tx.calendarEvent.findMany({ where: { ownerUserId, archivedAt: null, id: { not: eventId }, startAt: { lt: horizon }, OR: [{ endAt: { gt: data.startAt } }, { recurrenceRule: { not: null } }] }, select: { startAt: true, endAt: true, recurrenceRule: true } });
     const proposed = occurrences({ start: data.startAt.toISOString(), end: data.endAt.toISOString(), recurrenceRule: data.recurrenceRule },data.startAt,horizon,getConfig().APP_TIMEZONE);
     const overlap = candidates.some(e => occurrences({ start: e.startAt.toISOString(), end: e.endAt.toISOString(), recurrenceRule: e.recurrenceRule }, data.startAt, horizon, getConfig().APP_TIMEZONE).some(o => proposed.some(p => Date.parse(o.start) < Date.parse(p.end!) && Date.parse(o.end!) > Date.parse(p.start))));
-    return { id: eventId!, warning: overlap ? "Встреча пересекается с другой записью" : null };
+    return { id: eventId!, warning: overlap ? "Встреча сохранена, но это время уже занято другой встречей. Проверьте расписание и при необходимости перенесите встречу. Для повторений проверены ближайшие 90 дней." : null };
   });
 }
 
@@ -155,7 +156,28 @@ export async function getCalendarEvent(actor: Actor, id: string) {
   if (!e) throw new NotFoundError();
   if ((e.ownerUserId !== actor.userId && e.visibility === "private") || !await linksAccessible(db, actor, e))
     return { title: "Занято", startAt: e.startAt, endAt: e.endAt, allDay: e.allDay, editable: false };
-  return { ...e, editable: e.ownerUserId === actor.userId };
+  const [client, need, property, deal] = await Promise.all([
+    e.clientId ? db.client.findUnique({ where: { id: e.clientId }, select: { id: true, displayName: true } }) : null,
+    e.needId ? db.clientNeed.findUnique({ where: { id: e.needId }, select: { id: true, district: true, client: { select: { displayName: true } } } }) : null,
+    e.propertyId ? db.property.findUnique({ where: { id: e.propertyId }, select: { id: true, addressText: true } }) : null,
+    e.dealId ? db.deal.findUnique({ where: { id: e.dealId }, select: { id: true, property: { select: { addressText: true } } } }) : null,
+  ]);
+  return { ...e, editable: e.ownerUserId === actor.userId, linked: {
+    clientId: client ? { id: client.id, label: client.displayName } : null,
+    needId: need ? { id: need.id, label: `${need.client.displayName}${need.district ? ` · ${need.district}` : ""}` } : null,
+    propertyId: property ? { id: property.id, label: property.addressText } : null,
+    dealId: deal ? { id: deal.id, label: deal.property.addressText } : null,
+  } };
+}
+
+/** Picker DTOs use the same client boundary as event commands. */
+export async function pickCalendarLinks(actor: Actor, raw: unknown) {
+  const f = parseInput(z.object({ type: z.enum(["clientId", "needId", "propertyId", "dealId"]), q: z.string().trim().max(200).default("") }), raw);
+  const text = { contains: f.q, mode: "insensitive" as const };
+  if (f.type === "clientId") return db.client.findMany({ where: { AND: [clientScope(actor), { status: { not: "archived" }, displayName: text }] }, take: 20, orderBy: { displayName: "asc" }, select: { id: true, displayName: true } }).then(rows => rows.map(r => ({ id: r.id, label: r.displayName })));
+  if (f.type === "propertyId") return db.property.findMany({ where: { archivedAt: null, addressText: text }, take: 20, orderBy: { addressText: "asc" }, select: { id: true, addressText: true } }).then(rows => rows.map(r => ({ id: r.id, label: r.addressText })));
+  if (f.type === "needId") return db.clientNeed.findMany({ where: { AND: [needScope(actor), { client: clientScope(actor) }, { OR: [{ client: { displayName: text } }, { district: text }] }] }, take: 20, orderBy: { updatedAt: "desc" }, select: { id: true, district: true, client: { select: { displayName: true } } } }).then(rows => rows.map(r => ({ id: r.id, label: `${r.client.displayName}${r.district ? ` · ${r.district}` : ""}` })));
+  return db.deal.findMany({ where: { AND: [dealScope(actor), { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }, { property: { addressText: text } }] }, take: 20, orderBy: { updatedAt: "desc" }, select: { id: true, property: { select: { addressText: true } } } }).then(rows => rows.map(r => ({ id: r.id, label: r.property.addressText })));
 }
 
 export async function moveCalendarSource(actor: Actor, input: unknown) {
@@ -182,9 +204,9 @@ export async function quickCreateCalendarSource(actor: Actor, input: unknown) {
   return saveCalendarEvent(actor, d.data);
 }
 
-export async function todayAgenda(actor: Actor, employee = actor.userId) {
+export async function todayAgenda(actor: Actor, employee: string | undefined = actor.userId) {
   const start = startOfDayInTz(new Date(), getConfig().APP_TIMEZONE), end = new Date(+start + 86400000);
-  const items = await listCalendar(actor, { from: start.toISOString(), to: new Date(+end + 6 * 86400000).toISOString(), employee });
+  const items = await listCalendar(actor, { from: start.toISOString(), to: new Date(+end + 6 * 86400000).toISOString(), ...(employee ? { employee } : {}) });
   return { items: items.filter(e => !["completed", "cancelled", "no_show", "archived"].includes(e.status) && (new Date(e.start) < end || e.type === "showing")),
     free: freeIntervals(new Date(+start + 9 * 3600000), new Date(+start + 18 * 3600000), items.filter(e => e.type === "calendar_event")) };
 }

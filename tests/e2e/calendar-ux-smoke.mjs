@@ -1,0 +1,84 @@
+// Manual, focused visual smoke. Does not run as part of the full Playwright suite.
+import { chromium, expect } from "@playwright/test";
+import { parse } from "dotenv";
+import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import pg from "pg";
+
+const baseURL = process.env.UX_BASE_URL ?? "http://localhost:3340";
+const env = parse(readFileSync(".env"));
+const output = "docs/vkr/screenshots/calendar-ux-p1";
+mkdirSync(output, { recursive: true });
+const database = new pg.Client({ connectionString: "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_demo" });
+await database.connect();
+const demo = await database.query("SELECT id FROM clients WHERE notes LIKE '%DEMO-V241%'");
+await database.end();
+const demoIds = new Set(demo.rows.map(row => row.id));
+if (!demoIds.size) throw new Error("Synthetic demo dataset is missing");
+const browser = await chromium.launch({ headless: true });
+let stage = "login";
+let page;
+try {
+  const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 1000 } });
+  page = await context.newPage();
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const response = await context.request.post("/api/v1/auth/login", { headers: { origin: baseURL }, data: { login: env.SEED_REALTOR1_LOGIN ?? "realtor1", password: env.SEED_REALTOR1_PASSWORD } });
+  expect(response.ok()).toBe(true);
+  stage = "verify demo database";
+  const clients = await (await context.request.get("/api/v1/clients?pageSize=50")).json();
+  expect(clients.items.length).toBeGreaterThan(0);
+  expect(clients.items.every(client => demoIds.has(client.id))).toBe(true);
+  stage = "today counters";
+  await page.goto("/today");
+  await expect(page.getByRole("heading", { name: "Сегодня", exact: true })).toBeVisible();
+  const overdue = page.locator("a.card").filter({ hasText: "Просрочено" }).first();
+  const value = Number((await overdue.locator("div").first().innerText()).trim());
+  if (value) await expect(page.locator("#overdue")).toHaveText(`Просрочено · ${value}`);
+  const header = page.getByRole("link").filter({ hasText: /Просрочено/ }).filter({ hasNot: page.locator("div.text-2xl") });
+  // Header and page share the same task predicate; scoped views have a separate caption.
+  if (await header.count()) expect(await header.first().innerText()).toContain(String(value));
+  await page.screenshot({ path: `${output}/01-today.png`, fullPage: true, caret: "initial" });
+  stage = "client overview";
+  await page.goto(`/clients/${clients.items[0].id}`);
+  await expect(page.getByRole("heading", { name: "Следующее действие", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Последние 5 взаимодействий", exact: true })).toBeVisible();
+  expect(await page.getByRole("region", { name: "Последние взаимодействия" }).locator("ol > li").count()).toBeLessThanOrEqual(5);
+  await page.screenshot({ path: `${output}/02-client.png`, fullPage: true, caret: "initial" });
+  stage = "calendar repeat form and picker";
+  await page.goto("/calendar");
+  await expect(page.locator(".fc-timeGridWeek-view")).toBeVisible();
+  await expect(page.getByText("Загрузка календаря…", { exact: true })).toBeHidden({ timeout: 30000 });
+  await expect(page.locator(".fc-event").first()).toBeVisible();
+  await page.screenshot({ path: `${output}/03-calendar.png`, fullPage: true, caret: "initial" });
+  await page.getByRole("button", { name: "+ Встреча / личная запись", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Новая встреча / личная запись", exact: true });
+  await dialog.getByRole("combobox", { name: /^Повторение/ }).selectOption("weekly");
+  await dialog.getByRole("combobox", { name: /^Окончание серии/ }).selectOption("count");
+  await dialog.getByText("Связанные записи CRM", { exact: true }).click();
+  await dialog.getByRole("textbox", { name: "Клиент", exact: true }).fill(clients.items[0].displayName);
+  await expect(dialog.getByRole("button", { name: clients.items[0].displayName, exact: true })).toBeVisible({ timeout: 30000 });
+  await dialog.getByRole("button", { name: clients.items[0].displayName, exact: true }).click();
+  await expect(page.getByText("Загрузка календаря…", { exact: true })).toBeHidden({ timeout: 30000 });
+  await page.screenshot({ path: `${output}/04-repeat-picker.png`, fullPage: true, caret: "initial" });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Подтверждение действия" })).toBeVisible();
+  await page.getByRole("dialog", { name: "Подтверждение действия" }).getByRole("button", { name: "Отмена", exact: true }).click();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Закрыть", exact: true }).last().click();
+  await page.getByRole("dialog", { name: "Подтверждение действия" }).getByRole("button", { name: "Подтвердить", exact: true }).click();
+  stage = "notification groups";
+  await page.goto("/notifications");
+  await expect(page.getByRole("heading", { name: /Уведомления/ })).toBeVisible();
+  await expect(page.locator("details summary").first()).toBeVisible();
+  await expect(page.locator("details li").first()).toContainText(/Срок:|Когда:|Срок договора:/);
+  await page.screenshot({ path: `${output}/05-notifications.png`, fullPage: true, caret: "initial" });
+  expect(errors).toEqual([]);
+  writeFileSync(`${output}/metadata.json`, JSON.stringify({ date: new Date().toISOString(), baseURL, dataset: "crm_demo / DEMO-V241", version: "feature/tz-v2.4.1 working copy", checks: ["today counters", "client interactions", "repeat form", "RBAC picker", "Escape unsaved changes", "notification groups"], businessMutations: false }, null, 2));
+  console.log("calendar UX visual smoke: PASS (5 screenshots, synthetic database verified)");
+} catch (error) {
+  if (page) await page.screenshot({ path: `${output}/failure.png`, caret: "initial" }).catch(() => {});
+  console.error(`calendar UX visual smoke failed at: ${stage}`);
+  throw error;
+} finally {
+  await browser.close();
+}

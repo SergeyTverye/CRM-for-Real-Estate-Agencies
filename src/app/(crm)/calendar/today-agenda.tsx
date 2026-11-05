@@ -12,6 +12,6 @@ export async function TodayAgenda({ actor, employee }: { actor: Actor; employee?
       {e.url ? <Link href={e.url}>{e.title}</Link> : <span>{e.title}</span>}
       <AgendaActions item={e} timeZone={tz()} />
     </li>)}</ul> : <p>На сегодня событий нет.</p>}
-    <p className="mt-3 text-sm text-slate-600">Свободные интервалы 09:00–18:00 (только интервальная занятость): {view.free.length ? view.free.map(f => `${fmtDateTime(f.start)} — ${fmtDateTime(f.end)}`).join("; ") : "нет"}.</p>
+    {employee ? <p className="mt-3 text-sm text-slate-600">Свободные интервалы 09:00–18:00 (только интервальная занятость): {view.free.length ? view.free.map(f => `${fmtDateTime(f.start)} — ${fmtDateTime(f.end)}`).join("; ") : "нет"}.</p> : <p className="mt-3 text-sm text-slate-500">Для свободных интервалов выберите сотрудника.</p>}
   </section>;
 }
