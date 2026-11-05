@@ -6,7 +6,7 @@ import { addDays, startOfDayInTz, todayAsDateOnly } from "@/shared/time";
 import { NotFoundError } from "@/shared/errors";
 import { assertRecordId, parseInput, skipTake, zCode, zPagination, zUuid, type Page } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { canSeeClient, canSeeNeed, needScope, showingScope, agreementScope, offerScope, taskScope } from "@/modules/access/domain/scopes";
+import { canSeeClient, canSeeNeed, clientScope, dealScope, needScope, showingScope, agreementScope, offerScope, taskScope } from "@/modules/access/domain/scopes";
 import { OPEN_TASK_STATUSES, todayGroupOf, type TodayGroup } from "../domain/task-rules";
 
 export interface TaskLinkView {
@@ -64,18 +64,30 @@ export const taskInclude = {
 
 type TaskRow = Prisma.TaskGetPayload<{ include: typeof taskInclude }>;
 
+function taskIncludeFor(actor: Actor) {
+  return {
+    ...taskInclude,
+    clientLinks: { ...taskInclude.clientLinks, where: { client: clientScope(actor) } },
+    needLinks: { ...taskInclude.needLinks, where: { need: needScope(actor) } },
+    showingLinks: { ...taskInclude.showingLinks, where: { showing: showingScope(actor) } },
+    dealLinks: { ...taskInclude.dealLinks, where: { deal: dealScope(actor) } },
+    agreementLinks: { ...taskInclude.agreementLinks, where: { agreement: agreementScope(actor) } },
+    offerLinks: { ...taskInclude.offerLinks, where: { offer: offerScope(actor) } },
+  } satisfies Prisma.TaskInclude;
+}
+
 export function toTaskView(actor: Actor, t: TaskRow, now = new Date()): TaskView {
   const links: TaskLinkView[] = [];
   for (const { client } of t.clientLinks) {
     const ok = canSeeClient(actor, client);
-    links.push({ kind: "client", id: client.id, label: ok ? client.displayName : "Клиент (нет доступа)", href: ok ? `/clients/${client.id}` : null });
+    if (ok) links.push({ kind: "client", id: client.id, label: client.displayName, href: `/clients/${client.id}` });
   }
   for (const { need } of t.needLinks) {
     const ok = canSeeNeed(actor, need);
     links.push({
       kind: "need",
       id: need.id,
-      label: ok ? `Потребность: ${need.client.displayName}` : "Потребность (нет доступа)",
+      label: ok && canSeeClient(actor, need.client) ? `Потребность: ${need.client.displayName}` : "Потребность (нет доступа)",
       href: ok ? `/needs/${need.id}` : null,
     });
   }
@@ -159,7 +171,7 @@ export async function listTasks(actor: Actor, rawFilters: unknown): Promise<Page
   const [rows, total] = await Promise.all([
     db.task.findMany({
       where,
-      include: taskInclude,
+      include: taskIncludeFor(actor),
       orderBy: f.status === "completed" || f.status === "cancelled" ? [{ completedAt: "desc" }, { dueAt: "desc" }] : [{ dueAt: "asc" }],
       ...skipTake(f),
     }),
@@ -174,7 +186,7 @@ export async function listTasksLinkedTo(
   link: { clientId?: string; needId?: string; dealId?: string; propertyId?: string; showingId?: string; agreementId?: string; advertisementId?: string; offerId?: string },
   opts: { includeClosed?: boolean; take?: number } = {},
 ): Promise<TaskView[]> {
-  const and: Prisma.TaskWhereInput[] = [];
+  const and: Prisma.TaskWhereInput[] = [taskScope(actor)];
   if (link.clientId) and.push({ clientLinks: { some: { clientId: link.clientId } } });
   if (link.needId) and.push({ needLinks: { some: { clientNeedId: link.needId } } });
   if (link.dealId) and.push({ dealLinks: { some: { dealId: link.dealId } } });
@@ -186,14 +198,14 @@ export async function listTasksLinkedTo(
   // Открытые задачи всегда загружаются полностью и идут первыми; завершённые — отдельно, с лимитом.
   const open = await db.task.findMany({
     where: { AND: [...and, { status: { in: [...OPEN_TASK_STATUSES] } }] },
-    include: taskInclude,
+    include: taskIncludeFor(actor),
     orderBy: { dueAt: "asc" },
     take: 200,
   });
   const closed = opts.includeClosed
     ? await db.task.findMany({
         where: { AND: [...and, { status: { notIn: [...OPEN_TASK_STATUSES] } }] },
-        include: taskInclude,
+        include: taskIncludeFor(actor),
         orderBy: [{ completedAt: { sort: "desc", nulls: "last" } }, { dueAt: "desc" }],
         take: opts.take ?? 100,
       })
@@ -204,7 +216,7 @@ export async function listTasksLinkedTo(
 
 export async function getTask(actor: Actor, taskId: string): Promise<TaskView> {
   assertRecordId(taskId);
-  const row = await db.task.findFirst({ where: { id: taskId, ...taskScope(actor) }, include: taskInclude });
+  const row = await db.task.findFirst({ where: { id: taskId, ...taskScope(actor) }, include: taskIncludeFor(actor) });
   if (!row) throw new NotFoundError();
   return toTaskView(actor, row);
 }
@@ -271,7 +283,7 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
   };
   const tasks = await db.task.findMany({
     where: { ...taskWhere, dueAt: { lt: weekEnd } },
-    include: taskInclude,
+    include: taskIncludeFor(actor),
     orderBy: { dueAt: "asc" },
     take: 500,
   });

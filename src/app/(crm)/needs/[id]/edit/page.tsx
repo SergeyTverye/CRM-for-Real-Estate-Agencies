@@ -53,7 +53,7 @@ export default async function EditNeedPage({ params }: { params: Promise<{ id: s
       <PageHeader
         title="Параметры потребности"
         back={{ href: `/needs/${id}`, label: needTitle(dicts, n) }}
-        subtitle={card.clientVisible ? `Клиент: ${n.client.displayName}` : undefined}
+        subtitle={card.clientVisible && n.client ? `Клиент: ${n.client.displayName}` : undefined}
       />
       <Card>
         <NeedEditForm

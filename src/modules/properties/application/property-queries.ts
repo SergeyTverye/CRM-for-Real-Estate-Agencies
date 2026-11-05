@@ -1,3 +1,4 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
@@ -124,7 +125,7 @@ export async function getPropertyCard(actor: Actor, propertyId: string) {
       agreements: {
         where: { archivedAt: null, ...agreementScope(actor) },
         orderBy: { updatedAt: "desc" },
-        include: { legalEntity: { select: { displayName: true } } },
+        include: { legalEntity: { select: { displayName: true } }, client: { select: { responsibleUserId: true } } },
       },
       matches: {
         where: matchScope(actor),
@@ -166,7 +167,7 @@ export async function getPropertyCard(actor: Actor, propertyId: string) {
   }));
   const myGrant = property.contactGrants.find((g) => g.userId === actor.userId) ?? null;
   return {
-    property: { ...property, contactGrants: isManager(actor) ? property.contactGrants : [] },
+    property: { ...property, agreements: property.agreements.map((a) => redactClientLink(actor, a)), matches: [], contactGrants: isManager(actor) ? property.contactGrants : [] },
     owners,
     ownersCount: ownersRaw.length,
     canSeeOwners,

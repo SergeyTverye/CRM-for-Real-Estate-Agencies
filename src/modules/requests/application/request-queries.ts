@@ -1,10 +1,11 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { NotFoundError } from "@/shared/errors";
 import { assertRecordId, parseInput, skipTake, zCode, zPagination, zUuid, zDateOnly } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { canSeeClient, canSeeNeed, leadRequestScope } from "@/modules/access/domain/scopes";
+import { canSeeClient, canSeeNeed, leadRequestScope, clientScope, taskScope } from "@/modules/access/domain/scopes";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 
 export const requestFiltersSchema = zPagination.extend({
@@ -47,7 +48,7 @@ export async function listRequests(actor: Actor, raw: unknown) {
       OR: [
         { summary: { contains: f.q, mode: "insensitive" } },
         { rawContact: { contains: f.q, mode: "insensitive" } },
-        { client: { displayName: { contains: f.q, mode: "insensitive" } } },
+        { client: { AND: [clientScope(actor), { displayName: { contains: f.q, mode: "insensitive" } }] } },
       ],
     });
   const where: Prisma.LeadRequestWhereInput = { AND: and };
@@ -62,10 +63,10 @@ export async function listRequests(actor: Actor, raw: unknown) {
             id: true,
             displayName: true,
             responsibleUserId: true,
-            taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] } } }, orderBy: { task: { dueAt: "asc" } }, take: 1, select: { task: { select: { title: true, dueAt: true } } } },
+            taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] }, ...taskScope(actor) } }, orderBy: { task: { dueAt: "asc" } }, take: 1, select: { task: { select: { title: true, dueAt: true } } } },
           },
         },
-        need: { select: { id: true, responsibleUserId: true, client: { select: { responsibleUserId: true } }, taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] } } }, take: 1, select: { task: { select: { title: true, dueAt: true } } } } } },
+        need: { select: { id: true, responsibleUserId: true, client: { select: { responsibleUserId: true } }, taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] }, ...taskScope(actor) } }, take: 1, select: { task: { select: { title: true, dueAt: true } } } } } },
         property: { select: { id: true, addressText: true } },
         advertisement: { select: { id: true, platformCode: true } },
         responsible: { select: { id: true, displayName: true } },
@@ -76,10 +77,12 @@ export async function listRequests(actor: Actor, raw: unknown) {
   ]);
   return {
     items: rows.map((r) => ({
-      ...r,
+      ...redactClientLink(actor, r),
+      need: r.need && canSeeNeed(actor, r.need) ? redactClientLink(actor, r.need) : null,
+      clientNeedId: r.need && canSeeNeed(actor, r.need) ? r.clientNeedId : null,
       clientVisible: r.client ? canSeeClient(actor, r.client) : false,
       needVisible: r.need ? canSeeNeed(actor, r.need) : false,
-      nextAction: r.need?.taskLinks[0]?.task ?? r.client?.taskLinks[0]?.task ?? null,
+      nextAction: (r.need && canSeeNeed(actor, r.need) ? r.need.taskLinks[0]?.task : null) ?? (r.client && canSeeClient(actor, r.client) ? r.client.taskLinks[0]?.task : null) ?? null,
     })),
     total,
     page: f.page,
@@ -102,7 +105,7 @@ export async function getRequestCard(actor: Actor, requestId: string) {
   });
   if (!r) throw new NotFoundError();
   return {
-    request: r,
+    request: { ...redactClientLink(actor, r), need: r.need && canSeeNeed(actor, r.need) ? redactClientLink(actor, r.need) : null, clientNeedId: r.need && canSeeNeed(actor, r.need) ? r.clientNeedId : null },
     clientVisible: r.client ? canSeeClient(actor, r.client) : false,
     needVisible: r.need ? canSeeNeed(actor, r.need) : false,
   };

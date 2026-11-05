@@ -24,7 +24,7 @@ function dealSearchOr(actor: Actor, q: string): Prisma.DealWhereInput[] {
   const or: Prisma.DealWhereInput[] = [
     { property: { addressText: { contains: q, mode: "insensitive" } } },
     { parties: { some: { client: { AND: [clientScope(actor), { displayName: { contains: q, mode: "insensitive" } }] } } } },
-    { parties: { some: { externalPartyName: { contains: q, mode: "insensitive" } } } },
+    { parties: { some: { externalPartyName: { contains: q, mode: "insensitive" }, OR: [{ clientId: null }, { client: clientScope(actor) }] } } },
   ];
   if (UUID_RE.test(q)) or.push({ id: q.toLowerCase() });
   return or;

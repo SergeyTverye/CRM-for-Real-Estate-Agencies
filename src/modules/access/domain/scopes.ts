@@ -93,25 +93,41 @@ export function advertisementWriteScope(actor: Actor): Prisma.AdvertisementWhere
   return isManager(actor) ? {} : { OR: [{ responsibleUserId: actor.userId }, { property: { responsibleUserId: actor.userId } }] };
 }
 
-/**
- * Документ доступен, если доступна хотя бы одна связанная бизнес-сущность (ТЗ 20.4, 27.4).
- * Для объекта: фото — всем, кто видит каталог; прочие документы объекта (правоустанавливающие,
- * договоры) — на уровне доступа к контактам собственника.
- */
+/** Every protected link must pass; public links cannot override a denied link. */
 export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
   if (isManager(actor)) return {};
+  const need: Prisma.ClientNeedWhereInput = { AND: [needScope(actor), { client: clientScope(actor) }] };
+  const showing: Prisma.ShowingWhereInput = { AND: [showingScope(actor), { need: { client: clientScope(actor) } }] };
+  const offer: Prisma.CommercialOfferWhereInput = { AND: [offerScope(actor), { need: { client: clientScope(actor) } }] };
+  const deal: Prisma.DealWhereInput = { AND: [dealScope(actor), { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] };
+  const agreement: Prisma.AgreementWhereInput = { AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal }] }] };
   return {
-    OR: [
-      { clientLinks: { some: { client: clientScope(actor) } } },
-      { needLinks: { some: { need: needScope(actor) } } },
-      { showingLinks: { some: { showing: showingScope(actor) } } },
-      { dealLinks: { some: { deal: dealScope(actor) } } },
-      { agreementLinks: { some: { agreement: agreementScope(actor) } } },
-      { offerLinks: { some: { offer: offerScope(actor) } } },
-      { advertisementLinks: { some: {} }, documentTypeCode: "photo" },
-      { advertisementLinks: { some: { advertisement: advertisementWriteScope(actor) } } },
-      { propertyLinks: { some: {} }, documentTypeCode: "photo" },
-      { propertyLinks: { some: { property: ownerContactsScope(actor) } } },
+    AND: [
+      { clientLinks: { none: { client: { NOT: clientScope(actor) } } } },
+      { needLinks: { none: { need: { NOT: need } } } },
+      { showingLinks: { none: { showing: { NOT: showing } } } },
+      { dealLinks: { none: { deal: { NOT: deal } } } },
+      { agreementLinks: { none: { agreement: { NOT: agreement } } } },
+      { offerLinks: { none: { offer: { NOT: offer } } } },
+      { OR: [
+        { documentTypeCode: "photo" },
+        { AND: [
+          { propertyLinks: { none: { property: { NOT: ownerContactsScope(actor) } } } },
+          { advertisementLinks: { none: { advertisement: { NOT: advertisementWriteScope(actor) } } } },
+        ] },
+      ] },
+      { OR: [
+        { clientLinks: { some: { client: clientScope(actor) } } },
+        { needLinks: { some: { need } } },
+        { showingLinks: { some: { showing } } },
+        { dealLinks: { some: { deal } } },
+        { agreementLinks: { some: { agreement } } },
+        { offerLinks: { some: { offer } } },
+        { advertisementLinks: { some: {} }, documentTypeCode: "photo" },
+        { advertisementLinks: { some: { advertisement: advertisementWriteScope(actor) } } },
+        { propertyLinks: { some: {} }, documentTypeCode: "photo" },
+        { propertyLinks: { some: { property: ownerContactsScope(actor) } } },
+      ] },
     ],
   };
 }

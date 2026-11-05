@@ -56,10 +56,10 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
   const updatedAt = need.updatedAt.toISOString();
   const openTasks = tasks.filter((t) => t.status === "planned" || t.status === "in_progress").sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime());
   const isOpen = need.status === "active" || need.status === "paused";
-  const primary = clientVisible ? need.client.contacts[0] : undefined;
+  const primary = clientVisible && need.client ? need.client.contacts[0] : undefined;
   const rejectionOptions = dictOptions(dicts, "match_rejection_reason");
   const channels = dictOptions(dicts, "lead_channel");
-  const newTaskHref = clientVisible ? `/tasks/new?needId=${id}&clientId=${need.client.id}` : `/tasks/new?needId=${id}`;
+  const newTaskHref = clientVisible && need.client ? `/tasks/new?needId=${id}&clientId=${need.client.id}` : `/tasks/new?needId=${id}`;
 
   return (
     <div>
@@ -68,7 +68,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
         title={needTitle(dicts, need)}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            {clientVisible ? (
+            {clientVisible && need.client ? (
               <Link href={`/clients/${need.client.id}`} className="link font-medium">
                 {need.client.displayName}
               </Link>
@@ -86,7 +86,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
             <Link className="btn btn-primary" href={`${base}/matching`}>
               Подбор объектов
             </Link>
-            {clientVisible ? (
+            {clientVisible && need.client ? (
               <NeedCommunicationButton
                 clientId={need.client.id}
                 needId={id}
@@ -114,7 +114,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
         }
       />
 
-      {need.client.status === "archived" && clientVisible ? <div className="alert alert-warning mb-3">Клиент в архиве.</div> : null}
+      {need.client?.status === "archived" && clientVisible && need.client ? <div className="alert alert-warning mb-3">Клиент в архиве.</div> : null}
 
       <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
         <div className="space-y-3 lg:col-span-2">
@@ -409,7 +409,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
           bodyClassName=""
           title="Коммуникации"
           actions={
-            clientVisible ? (
+            clientVisible && need.client ? (
               <NeedCommunicationButton
                 clientId={need.client.id}
                 needId={id}

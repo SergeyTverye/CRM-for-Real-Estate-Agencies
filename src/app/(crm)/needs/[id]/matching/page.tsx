@@ -92,7 +92,7 @@ export default async function MatchingPage({ params, searchParams }: { params: P
         title={`Подбор: ${needTitle(dicts, need)}`}
         subtitle={
           <span className="flex flex-wrap items-center gap-2">
-            {clientVisible ? (
+            {clientVisible && need.client ? (
               <Link className="link" href={`/clients/${need.client.id}`}>
                 {need.client.displayName}
               </Link>

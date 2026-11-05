@@ -113,7 +113,7 @@ export default async function NeedsPage({ searchParams }: { searchParams: Promis
                   return (
                     <tr key={n.id}>
                       <td>
-                        {n.clientVisible ? (
+                        {n.clientVisible && n.client ? (
                           <Link href={`/clients/${n.client.id}`} className="link">
                             {n.client.displayName}
                           </Link>

@@ -32,7 +32,7 @@ export default async function ShowingCardPage({ params }: { params: Promise<{ id
   const tasks = await listTasksLinkedTo(actor, { showingId: id }, { includeClosed: true, take: 50 });
   const planned = s.status === "planned";
   const needOpen = ["active", "paused"].includes(s.need.status);
-  const clientName = clientVisible ? s.need.client.displayName : "Клиент (нет доступа)";
+  const clientName = clientVisible ? s.need.client?.displayName : "Клиент (нет доступа)";
 
   return (
     <div>

@@ -34,7 +34,7 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
   const canChange = actor.role === "manager" || o.responsibleUserId === actor.userId || o.createdBy === actor.userId;
   const draft = o.status === "draft";
   const archived = o.status === "archived";
-  const clientName = clientVisible ? o.need.client.displayName : "Клиент (нет доступа)";
+  const clientName = clientVisible ? o.need.client?.displayName : "Клиент (нет доступа)";
   const changed = new Set(priceChanged);
   const updatedAt = o.updatedAt.toISOString();
 

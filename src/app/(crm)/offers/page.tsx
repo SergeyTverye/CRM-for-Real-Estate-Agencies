@@ -87,7 +87,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
                     </td>
                     <td>
                       <Link className="link" href={`/needs/${o.need.id}`}>
-                        {o.clientVisible ? o.need.client.displayName : "Клиент (нет доступа)"}
+                        {o.clientVisible ? o.need.client?.displayName : "Клиент (нет доступа)"}
                       </Link>
                     </td>
                     <td>{o._count.items}</td>

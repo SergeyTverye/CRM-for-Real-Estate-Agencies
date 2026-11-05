@@ -1,10 +1,11 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db, transaction, type DbOrTx } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { DomainError, ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import { assertRecordId, parseInput, skipTake, zCode, zExpectedUpdatedAt, zOptDateOnly, zOptMoney, zOptText, zPagination, zUuid } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { canSeeClient, offerScope } from "@/modules/access/domain/scopes";
+import { canSeeClient, clientScope, documentScope, offerScope } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { insertTask } from "@/modules/tasks/application/task-service";
@@ -248,7 +249,7 @@ export async function listOffers(actor: Actor, raw: unknown) {
   if (f.status) and.push({ status: f.status });
   if (f.needId) and.push({ clientNeedId: f.needId });
   if (f.responsibleUserId && isManager(actor)) and.push({ responsibleUserId: f.responsibleUserId });
-  if (f.q) and.push({ OR: [{ title: { contains: f.q, mode: "insensitive" } }, { need: { client: { displayName: { contains: f.q, mode: "insensitive" } } } }] });
+  if (f.q) and.push({ OR: [{ title: { contains: f.q, mode: "insensitive" } }, { need: { client: { AND: [clientScope(actor), { displayName: { contains: f.q, mode: "insensitive" } }] } } }] });
   const where: Prisma.CommercialOfferWhereInput = { AND: and };
   const [rows, total] = await Promise.all([
     db.commercialOffer.findMany({
@@ -264,7 +265,7 @@ export async function listOffers(actor: Actor, raw: unknown) {
     }),
     db.commercialOffer.count({ where }),
   ]);
-  return { items: rows.map((r) => ({ ...r, clientVisible: canSeeClient(actor, r.need.client) })), total, page: f.page, pageSize: f.pageSize };
+  return { items: rows.map((r) => ({ ...r, need: redactClientLink(actor, r.need), clientVisible: canSeeClient(actor, r.need.client) })), total, page: f.page, pageSize: f.pageSize };
 }
 
 export async function getOffer(actor: Actor, id: string) {
@@ -280,12 +281,12 @@ export async function getOffer(actor: Actor, id: string) {
         orderBy: { position: "asc" },
         include: { property: { select: { id: true, addressText: true, price: true, area: true, status: true } } },
       },
-      documentLinks: { select: { document: { select: { id: true, originalName: true, createdAt: true, legalEntityId: true, archivedAt: true } } } },
+      documentLinks: { where: { document: documentScope(actor) }, select: { document: { select: { id: true, originalName: true, createdAt: true, legalEntityId: true, archivedAt: true } } } },
     },
   });
   if (!o) throw new NotFoundError();
   return {
-    offer: o,
+    offer: { ...o, need: redactClientLink(actor, o.need) },
     clientVisible: canSeeClient(actor, o.need.client),
     // Расхождение snapshot и текущей цены — для подсказки пользователю, snapshot не меняется.
     priceChanged: o.items.filter((i) => i.priceSnapshot !== null && i.property.price !== null && !i.priceSnapshot.equals(i.property.price)).map((i) => i.id),

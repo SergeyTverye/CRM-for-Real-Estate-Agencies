@@ -66,7 +66,7 @@ export default async function NewTaskPage({ searchParams }: { searchParams: Prom
     if (kind === "client") label = (await orNull(() => getClientCard(actor, id)))?.displayName ?? null;
     if (kind === "need") {
       const card = await orNull(() => getNeedCard(actor, id));
-      label = card ? `${card.need.client.displayName}: ${dictLabel(dicts, "need_operation_type", card.need.operationType)} · ${dictLabel(dicts, "property_type", card.need.propertyType)}` : null;
+      label = card ? `${card.need.client?.displayName ?? "Клиент (нет доступа)"}: ${dictLabel(dicts, "need_operation_type", card.need.operationType)} · ${dictLabel(dicts, "property_type", card.need.propertyType)}` : null;
     }
     if (kind === "property") label = (await orNull(() => getPropertyCard(actor, id)))?.property.addressText ?? null;
     if (kind === "showing") {

@@ -1,3 +1,4 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db, transaction, type DbOrTx, type Tx } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
@@ -18,7 +19,7 @@ import { assertRecordId,
   zUuid,
 } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { canSeeClient, clientScope, dealScope } from "@/modules/access/domain/scopes";
+import { canSeeClient, clientScope, dealScope, agreementScope } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { insertTask } from "@/modules/tasks/application/task-service";
 import { advanceNeedStage, loadAccessibleNeed } from "@/modules/needs/application/need-service";
@@ -357,7 +358,7 @@ export async function listDeals(actor: Actor, raw: unknown) {
   if (f.propertyId) and.push({ propertyId: f.propertyId });
   if (f.from) and.push({ openedAt: { gte: f.from } });
   if (f.to) and.push({ openedAt: { lt: new Date(f.to.getTime() + 86_400_000) } });
-  if (f.q) and.push({ OR: [{ property: { addressText: { contains: f.q, mode: "insensitive" } } }, { parties: { some: { externalPartyName: { contains: f.q, mode: "insensitive" } } } }] });
+  if (f.q) and.push({ OR: [{ property: { addressText: { contains: f.q, mode: "insensitive" } } }, { parties: { some: { externalPartyName: { contains: f.q, mode: "insensitive" }, OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] });
   const where: Prisma.DealWhereInput = { AND: and };
   const [rows, total] = await Promise.all([
     db.deal.findMany({
@@ -396,14 +397,15 @@ export async function getDeal(actor: Actor, id: string) {
       legalEntity: { select: { id: true, displayName: true, entityType: true } },
       parties: { orderBy: { createdAt: "asc" }, include: { client: { select: { id: true, displayName: true, responsibleUserId: true } } } },
       commissions: { orderBy: { createdAt: "asc" }, include: { payer: { select: { id: true, partyRole: true, externalPartyName: true, client: { select: { displayName: true, responsibleUserId: true } } } } } },
-      agreements: { where: { archivedAt: null }, select: { id: true, agreementType: true, status: true, agreementNumber: true, validUntil: true } },
+      agreements: { where: { archivedAt: null, ...agreementScope(actor) }, select: { id: true, agreementType: true, status: true, agreementNumber: true, validUntil: true } },
     },
   });
   if (!deal) throw new NotFoundError();
   return {
     deal: {
       ...deal,
-      parties: deal.parties.map((p) => ({ ...p, clientVisible: p.client ? canSeeClient(actor, p.client) : false })),
+      commissions: deal.commissions.map((c) => ({ ...c, payer: c.payer ? { ...redactClientLink(actor, c.payer), externalPartyName: c.payer.client && !canSeeClient(actor, c.payer.client) ? null : c.payer.externalPartyName } : null })),
+      parties: deal.parties.map((p) => ({ ...redactClientLink(actor, p), externalPartyName: p.client && !canSeeClient(actor, p.client) ? null : p.externalPartyName, comment: p.client && !canSeeClient(actor, p.client) ? null : p.comment, clientVisible: p.client ? canSeeClient(actor, p.client) : false })),
     },
     canEdit: isManager(actor) || deal.responsibleUserId === actor.userId,
     postdealTemplates: postdealTemplatesFor(deal.property.operationType),

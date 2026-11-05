@@ -30,7 +30,7 @@ const dayLabel = new Intl.DateTimeFormat("ru-RU", { weekday: "long", day: "numer
 const timeLabel = (d: Date, zone: string) => new Intl.DateTimeFormat("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: zone }).format(d);
 
 function clientLabel(s: ShowingRow) {
-  return s.clientVisible ? s.need.client.displayName : "Клиент (нет доступа)";
+  return s.clientVisible ? s.need.client?.displayName : "Клиент (нет доступа)";
 }
 
 export default async function ShowingsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {

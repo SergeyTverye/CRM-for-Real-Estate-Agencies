@@ -1,3 +1,4 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db, transaction } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
@@ -209,7 +210,7 @@ export async function listShowings(actor: Actor, raw: unknown) {
     db.showing.count({ where }),
   ]);
   return {
-    items: rows.map((r) => ({ ...r, clientVisible: canSeeClient(actor, r.need.client) })),
+    items: rows.map((r) => ({ ...r, need: redactClientLink(actor, r.need), clientVisible: canSeeClient(actor, r.need.client) })),
     total,
     page: f.page,
     pageSize: f.pageSize,
@@ -237,5 +238,5 @@ export async function getShowing(actor: Actor, showingId: string) {
     },
   });
   if (!s) throw new NotFoundError();
-  return { showing: s, clientVisible: canSeeClient(actor, s.need.client) };
+  return { showing: { ...s, need: redactClientLink(actor, s.need) }, clientVisible: canSeeClient(actor, s.need.client) };
 }

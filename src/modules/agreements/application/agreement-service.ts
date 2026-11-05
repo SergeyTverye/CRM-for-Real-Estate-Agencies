@@ -1,3 +1,4 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db, transaction, type DbOrTx } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
@@ -6,7 +7,7 @@ import { addDays, todayAsDateOnly } from "@/shared/time";
 import { ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import { assertRecordId, parseInput, skipTake, zCode, zExpectedUpdatedAt, zOptDateOnly, zOptMoney, zOptText, zPagination, zUuid, zOptBool } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { agreementScope, canEditProperty, canSeeClient, clientScope, dealScope } from "@/modules/access/domain/scopes";
+import { agreementScope, canEditProperty, canSeeClient, clientScope, taskScope, dealScope } from "@/modules/access/domain/scopes";
 import { writeAudit, diffFields } from "@/modules/audit/application/audit";
 import { assertDictionaryCode } from "@/modules/dictionaries/application/dictionaries-service";
 import { insertTask } from "@/modules/tasks/application/task-service";
@@ -197,7 +198,7 @@ export async function listAgreements(actor: Actor, raw: unknown) {
   if (f.clientId) and.push({ clientId: f.clientId });
   if (f.propertyId) and.push({ propertyId: f.propertyId });
   if (f.dealId) and.push({ dealId: f.dealId });
-  if (f.q) and.push({ OR: [{ agreementNumber: { contains: f.q, mode: "insensitive" } }, { property: { addressText: { contains: f.q, mode: "insensitive" } } }, { client: { displayName: { contains: f.q, mode: "insensitive" } } }] });
+  if (f.q) and.push({ OR: [{ agreementNumber: { contains: f.q, mode: "insensitive" } }, { property: { addressText: { contains: f.q, mode: "insensitive" } } }, { client: { AND: [clientScope(actor), { displayName: { contains: f.q, mode: "insensitive" } }] } }] });
   const where: Prisma.AgreementWhereInput = { AND: and };
   const [rows, total] = await Promise.all([
     db.agreement.findMany({
@@ -210,14 +211,14 @@ export async function listAgreements(actor: Actor, raw: unknown) {
         deal: { select: { id: true } },
         responsible: { select: { id: true, displayName: true } },
         legalEntity: { select: { id: true, displayName: true, entityType: true } },
-        taskLinks: { where: { task: { status: { in: ["planned", "in_progress"] } } }, take: 1, orderBy: { task: { dueAt: "asc" } }, select: { task: { select: { id: true, title: true, dueAt: true } } } },
+        taskLinks: { where: { task: { status: { in: ["planned", "in_progress"] }, ...taskScope(actor) } }, take: 1, orderBy: { task: { dueAt: "asc" } }, select: { task: { select: { id: true, title: true, dueAt: true } } } },
       },
     }),
     db.agreement.count({ where }),
   ]);
   return {
     items: rows.map((r) => ({
-      ...r,
+      ...redactClientLink(actor, r),
       clientVisible: r.client ? canSeeClient(actor, r.client) : false,
       isExpired: r.status === "signed" && r.validUntil !== null && r.validUntil < today,
       expiresSoon: r.status === "signed" && r.validUntil !== null && r.validUntil >= today && r.validUntil <= addDays(today, cfg.AGREEMENT_EXPIRY_WARNING_DAYS),
@@ -241,5 +242,5 @@ export async function getAgreement(actor: Actor, id: string) {
     },
   });
   if (!a) throw new NotFoundError();
-  return { agreement: a, clientVisible: a.client ? canSeeClient(actor, a.client) : false };
+  return { agreement: redactClientLink(actor, a), clientVisible: a.client ? canSeeClient(actor, a.client) : false };
 }

@@ -1,10 +1,11 @@
+import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
 import { db } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { getConfig } from "@/shared/config/env";
-import { parseInput, skipTake, zCode, zPagination, zUuid, type Page } from "@/shared/validation";
+import { parseInput, skipTake, zCode, zPagination, zUuid } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { needScope, showingScope, communicationScope, offerScope, canSeeClient } from "@/modules/access/domain/scopes";
+import { needScope, showingScope, communicationScope, offerScope, canSeeClient, clientScope, taskScope } from "@/modules/access/domain/scopes";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { listTasksLinkedTo } from "@/modules/tasks/application/task-queries";
 import { loadAccessibleNeed } from "./need-service";
@@ -44,7 +45,7 @@ export async function listNeeds(actor: Actor, raw: unknown) {
   if (f.propertyType) and.push({ propertyType: f.propertyType });
   if (f.responsibleUserId && isManager(actor)) and.push({ responsibleUserId: f.responsibleUserId });
   if (f.clientId) and.push({ clientId: f.clientId });
-  if (f.q) and.push({ OR: [{ client: { displayName: { contains: f.q, mode: "insensitive" } } }, { district: { contains: f.q, mode: "insensitive" } }, { locationText: { contains: f.q, mode: "insensitive" } }] });
+  if (f.q) and.push({ OR: [{ client: { AND: [clientScope(actor), { displayName: { contains: f.q, mode: "insensitive" } }] } }, { district: { contains: f.q, mode: "insensitive" } }, { locationText: { contains: f.q, mode: "insensitive" } }] });
   if (f.withoutNextAction) and.push({ status: { in: ["active", "paused"] }, taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } });
   if (f.stale) and.push(staleNeedWhere(new Date(Date.now() - getConfig().NEED_INACTIVITY_DAYS * 86_400_000)));
   const where: Prisma.ClientNeedWhereInput = { AND: and };
@@ -57,7 +58,7 @@ export async function listNeeds(actor: Actor, raw: unknown) {
         client: { select: { id: true, displayName: true, responsibleUserId: true } },
         responsible: { select: { id: true, displayName: true } },
         taskLinks: {
-          where: { task: { status: { in: [...OPEN_TASK_STATUSES] } } },
+          where: { task: { status: { in: [...OPEN_TASK_STATUSES] }, ...taskScope(actor) } },
           orderBy: { task: { dueAt: "asc" } },
           take: 1,
           select: { task: { select: { id: true, title: true, dueAt: true } } },
@@ -67,8 +68,8 @@ export async function listNeeds(actor: Actor, raw: unknown) {
     }),
     db.clientNeed.count({ where }),
   ]);
-  const page: Page<(typeof rows)[number] & { clientVisible: boolean }> = {
-    items: rows.map((r) => ({ ...r, clientVisible: canSeeClient(actor, r.client) })),
+  const page = {
+    items: rows.map((r) => ({ ...redactClientLink(actor, r), clientVisible: canSeeClient(actor, r.client) })),
     total,
     page: f.page,
     pageSize: f.pageSize,
@@ -110,7 +111,7 @@ export async function getNeedCard(actor: Actor, needId: string) {
     },
   });
   const tasks = await listTasksLinkedTo(actor, { needId }, { includeClosed: true, take: 50 });
-  return { need, clientVisible: canSeeClient(actor, need.client), tasks };
+  return { need: { ...redactClientLink(actor, need), communications: need.communications.map((c) => ({ ...c, clientId: canSeeClient(actor, need.client) ? c.clientId : null })) }, clientVisible: canSeeClient(actor, need.client), tasks };
 }
 
 export type NeedCard = Awaited<ReturnType<typeof getNeedCard>>;
