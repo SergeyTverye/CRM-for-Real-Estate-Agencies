@@ -21,3 +21,7 @@ npx tsc --noEmit -p scripts/search-quality/tsconfig.json
 ```
 
 Отчёт с JSON и ограничениями покрытия: `docs/vkr/search-quality.md`. Сети, AI, БД и env-секретов для REPLAY не требуется. Пакеты не устанавливались.
+
+## Расширение v3.1
+
+live-v31-2026-11-05.json — отдельные 20 новых LIVE-URL, ручные четыре вердикта, 8 известных дат. baseline-v31.json заморожен перед исправлениями negation/operation. Старые 49 и их fingerprint не менялись. Команда `npx tsx scripts/search-quality/evaluate.ts --v31` выполняет оба набора; результат — docs/vkr/search-quality-v31-metrics.json. Два оставшихся расхождения unknown-operation отражены честно в отчёте.

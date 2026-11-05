@@ -4,6 +4,7 @@ import { residentialPurposeContradiction } from "./purpose";
 import { convertPrice } from "./prices";
 import { freshnessState } from "./freshness";
 import { FEATURE_DEFINITIONS, type FeatureKey } from "./filter-catalog";
+import { describedUndergroundFloor } from "./floor";
 
 const featureRules = [
   { key: "separate_entrance", request: /отдельн\S*\s+вход/iu, fact: /отдельн\S*\s+вход\S*/iu },
@@ -34,7 +35,7 @@ export function evaluateFeature(criterion: string, listing: NormalizedListing): 
     if (!match) continue;
     const prefix = clause.slice(0, match.index);
     const suffix = clause.slice(match.index + match[0].length);
-    const negated = /(?:^|\s)(?:нет|без|не|отсутствует|отсутствуют)\s*(?:\S+\s+){0,2}$/iu.test(prefix) || /^\s*(?:нет|отсутствует|отсутствуют|не\s+(?:имеется|предусмотрен|оборудован|планиру|будет|будут|возмож))/iu.test(suffix);
+    const negated = /(?:^|\s)(?:нет|без|не|отсутствует|отсутствуют)(?:\s+\S+){0,2}\s+$/iu.test(prefix) || /^\s*(?:нет|отсутствует|отсутствуют)(?=$|[^\p{L}])|^\s*не\s+(?:имеется|предусмотрен|оборудован|планиру|будет|будут|возмож)/iu.test(suffix);
     // Explicit absence wins over hypothetical/future language in the same clause.
     if (!negated && /можно|возможн|планиру|проект|перспектив|будет|будут|при\s+необходимости/iu.test(clause)) continue;
     const numeric = match[1] ? Number(match[1].replace(",", ".")) : null;
@@ -52,10 +53,20 @@ function summarize(criteria: CriterionEvaluation[], preferences: CriterionEvalua
   };
 }
 export function evaluateListing(listing: NormalizedListing, filters: SearchFilters, now = new Date()): ListingEvaluation {
+  const describedFloor = describedUndergroundFloor(listing.description);
+  if (describedFloor) listing = { ...listing, floor: describedFloor };
+  let operationFromText = false;
+  if (!listing.operation) {
+    const text = [listing.title, listing.description].filter(Boolean).join("\n");
+    const rent = /(?<![\p{L}])(?:сда[её]м|сда[её]тся|сдам|сдаю|аренда|в\s+аренду)(?![\p{L}])/iu.test(text) && !/уже\s+сда[её]тся|(?:сдан[оаы]?|сда[её]тся)\s+(?:в\s+аренду\s+)?(?:арендатор|надежн|надёжн)|(?:действующ|текущ|есть)\S*\s+арендатор/iu.test(text);
+    const sale = /(?<![\p{L}])(?:прода[её]тся|продам|продаю|прода[её]м|продажа|в\s+продаже)(?![\p{L}])/iu.test(text);
+    if (rent !== sale) { listing = { ...listing, operation: rent ? "rent" : "sale" }; operationFromText = true; }
+  }
   const criteria: CriterionEvaluation[] = [];
   const add = (criterion: string, known: boolean, matches: boolean, evidence: string) => criteria.push({ criterion, state: !known ? "unknown" : matches ? "matched" : "contradicted", source: "structured", evidence });
   add("city", !!listing.city, normalizeGeography(listing.city ?? "") === normalizeGeography(filters.city), listing.city ?? "Город неизвестен");
-  add("operation", !!listing.operation, listing.operation === filters.operation, listing.operation ?? "Операция неизвестна");
+  if (operationFromText) criteria.push({criterion:"operation",state:listing.operation === filters.operation ? "matched" : "contradicted",source:"rule",evidence:listing.description.slice(0,300)});
+  else add("operation", !!listing.operation, listing.operation === filters.operation, listing.operation ?? "Операция неизвестна");
   const residentialPurpose = residentialPurposeContradiction(listing);
   if (residentialPurpose) criteria.push(residentialPurpose);
   else if (filters.purposes.length) add("purpose", !!listing.purpose, filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? ""))), listing.purpose ?? "Назначение неизвестно");

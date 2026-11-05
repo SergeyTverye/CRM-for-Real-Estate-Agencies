@@ -1,0 +1,1131 @@
+{
+  "mode": "REPLAY",
+  "sourceMode": "LIVE",
+  "collectedOn": "2026-11-05",
+  "sourceEvidence": "docs/vkr/live-search-v31-evidence.json",
+  "manualAnnotation": "Read public excerpts independently of evaluator; one agent, no independent human adjudication",
+  "listings": [
+    {
+      "provenance": {
+        "listingId": "c86cac81-624c-4d16-88a9-37aab98825ff",
+        "snapshotId": "0a69f26c-2cd2-448e-991b-efee69b49ce4",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529024",
+        "area": 112.67,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "8",
+          "kind": "above_ground",
+          "number": 8
+        },
+        "price": "51000000.00",
+        "title": "Продается офис, 112.67 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "Красный проспект, 101/1",
+        "purpose": "office",
+        "district": "Заельцовский",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "452649.33",
+          "calculated": true
+        },
+        "description": "Помещение на первой линии Красного проспекта рядом с Ройял Парк.\nИдеальная транспортная развязка, 2 минуты пешком до метро, быстрый выезд на главные артерии города.\nОтель станет новым центром притяжения горожан.\nЛокация:\nПлощадь Калинина — место притяжения огромного количества людей.\nВ месяц:\n1 800 000 автомобилей\n>500 000 пешеходов\n~900 000 пассажиро...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86529024",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V01",
+      "truth": {
+        "expected": "RRRR",
+        "reason": "51 млн выше верхней границы 50 млн, офис этаж 8.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+        "snapshotId": "0fb2bddd-aca0-4e15-bcd7-bf1f7544d29c",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079",
+        "area": 90.42,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "8",
+          "kind": "above_ground",
+          "number": 8
+        },
+        "price": "41000000.00",
+        "title": "Офис на продажу, 90.42 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "Красный проспект, 101/1",
+        "purpose": "office",
+        "district": "Заельцовский",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "453439.50",
+          "calculated": true
+        },
+        "description": "8 этаж в бизнес-центре на первой линии Красного проспекта;\n91 квадрат;\nотдельный санузел;\nО проекте:\nпервая линия Красного проспекта;\nотель уровня 5 звезд;\nсобственный бизнес-центр при отеле;\nЛокация:\nПлощадь Калинина — место притяжения огромного количества людей.\nВ месяц:\n1 800 000 автомобилей\n>500 000 пешеходов\n~900 000 пассажиров станци...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86529079",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V02",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Офис 90,42 м², описание округляет до 91, этаж 8; не первый этаж.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "b40ca619-4abb-4730-8a35-6a90de772236",
+        "snapshotId": "05a14671-db00-4f6e-8c01-26b2828d685f",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528525",
+        "area": 365.9,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "17",
+          "kind": "above_ground",
+          "number": 17
+        },
+        "price": "73869999.00",
+        "title": "Продаю офис, 365.9 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Ленина, 21/1к4",
+        "purpose": "office",
+        "district": "Железнодорожный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "201885.76",
+          "calculated": true
+        },
+        "description": "Номер объекта: 703830. Новый офисный блок - 327,5 кв.м. в БЦ Класса \"А\"\nТолько что сданный БЦ.\nЕдинственный БЦ В городе с парковкой на 750 машиномест.\n73 870 000 - НДС 22% уже включено в стоимость\nСамый центр города. Вид на оперный театр, площадь Ленина и реку.\n2 станции метро и 2 остановки.\n-Самые высокие потолки в коммерческих офисах в город...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528525",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V03",
+      "truth": {
+        "expected": "RRRR",
+        "reason": "Цена 73,87 млн превышает бюджет; описание 327,5 против поля 365,9 м².",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "47ead3ef-50da-4da4-9d69-a0233962b777",
+        "snapshotId": "5aaf8c16-cbd2-4160-aaa8-35db3eaef371",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528527",
+        "area": 120.1,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "17",
+          "kind": "above_ground",
+          "number": 17
+        },
+        "price": "28532000.00",
+        "title": "Продажа офиса, 120.1 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Ленина, 21/1к4",
+        "purpose": "office",
+        "district": "Железнодорожный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "237568.69",
+          "calculated": true
+        },
+        "description": "Номер объекта: 703828. Новый офис - 120,2 кв.м. в БЦ Класса \"А\"\nТолько что сданный БЦ.\nЕдинственный БЦ В городе с парковкой на 750 машиномест.\n28 532 000 - НДС 22% уже включено в стоимость\nСамый центр города. Вид на оперный театр, площадь Ленина и реку.\n2 станции метро и 2 остановки.\n-Самые высокие потолки в коммерческих офисах в городе - 3,3...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528527",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V04",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Офис 120,1 м²; текст 120,2, этаж 17; числовое расхождение не скрыто.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "6d38baf4-d2b1-4c2e-8343-21a386303c2d",
+        "snapshotId": "d17126b7-3bc3-49b3-a2c1-d9032c7a2e0d",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528505",
+        "area": 86.1,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "17",
+          "kind": "above_ground",
+          "number": 17
+        },
+        "price": "20347399.00",
+        "title": "Продается офис, 86.1 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Ленина, 21/1к4",
+        "purpose": "office",
+        "district": "Железнодорожный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "236322.87",
+          "calculated": true
+        },
+        "description": "Номер объекта: 703827. Новый офис - 86,1 кв.м. в БЦ Класса \"А\"\nТолько что сданный БЦ.\nЕдинственный БЦ В городе с парковкой на 750 машиномест.\n20 347 400 - НДС 22% уже включено в стоимость\nСамый центр города. Вид на оперный театр, площадь Ленина и реку.\n2 станции метро и 2 остановки.\n-Самые высокие потолки в коммерческих офисах в городе - 3,3...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528505",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V05",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Офис 86,1 м², этаж 17; текст цены отличается на 1 рубль.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "442fdf76-b3c9-4b5e-9483-c541df92a524",
+        "snapshotId": "5e45cffa-ab04-47ca-a029-7048af7d746f",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529524",
+        "area": 253,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "22",
+          "kind": "above_ground",
+          "number": 22
+        },
+        "price": "63900000.00",
+        "title": "Офис на продажу, 253 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "Депутатская улица, 46",
+        "purpose": "office",
+        "district": "Центральный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "252569.17",
+          "calculated": true
+        },
+        "description": "К продаже представлен уникальный офис в самом центре г. Новосибирска в деловом \"Ситицентре\". Площадь эксклюзивного пространства 253 м², сочетающего в себе стиль, изысканность, престиж, удобство, роскошь и комфорт.\nМестоположение: В двух пеших минутах от станции метро Площадь Ленина.\nЭтаж: 22. В здании делового центра установлены скоростные лифты.\nКачеств...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86529524",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V06",
+      "truth": {
+        "expected": "RRRR",
+        "reason": "Офис 253 м² на этаже 22; 63,9 млн вне бюджета.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "2ee044bb-3004-4f30-a874-fa824407cef1",
+        "snapshotId": "3e98d358-c1b7-420a-a6b7-0f6e67cc4cd0",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529013",
+        "area": 34.44,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "2",
+          "kind": "above_ground",
+          "number": 2
+        },
+        "price": "2700000.00",
+        "title": "Продается офис, 34.44 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Чаплыгина, 1",
+        "purpose": "office",
+        "district": "Железнодорожный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "78397.21",
+          "calculated": true
+        },
+        "description": "Код объекта: 2120204.\nУникальное предложение для вашего бизнеса или сдачи в аренду!\nПродаётся офис в центре Новосибирска с идеальной транспортной доступностью.\nОфисное помещение расположено на втором этаже кирпичного здания.\nОбщая площадь составляет 34,44 кв. м., при этом само помещение 28.5 кв.м., что позволяет эффективно организовать рабочее пространство.\nЗдани...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86529013",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V07",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Прямо продажа офиса 34,44 м², этаж 2; 28,5 м² полезная площадь не общая.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "4df54c2c-5eee-471f-99e6-b2aa8dad64a0",
+        "snapshotId": "a1b4b330-87f8-4984-bb1f-18f2c15dc702",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528980",
+        "area": 82.1,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "5",
+          "kind": "above_ground",
+          "number": 5
+        },
+        "price": "11000000.00",
+        "title": "Продаю офис, 82.1 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Крылова, 36",
+        "purpose": "office",
+        "district": "Центральный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "133982.95",
+          "calculated": true
+        },
+        "description": "Код объекта: 2139194.\nПредлагается к продаже офис в центре города.\nТехническая характеристика:\n• Офис на 5-лм этаже БЦ \"На Крылова\".\n• Общая площадь 82,1 м2 .\n• 2 окна.\n• Свободная планировка.\n• сан узел на этаже.\n• Два лифта.\nИнфраструктурная характеристика:\n• БЦ расположен в центре города в 5 минутах ходьбы от станции метро Маршала Покрышкина....",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528980",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V08",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Офис 82,1 м² в БЦ На Крылова, этаж 5.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "6c4c0706-8c24-4c4e-b01c-6f28544326d1",
+        "snapshotId": "e90d05b2-8f3b-4ef8-ba60-23f34a8e20e3",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528782",
+        "area": 170,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "4",
+          "kind": "above_ground",
+          "number": 4
+        },
+        "price": "15900000.00",
+        "title": "Продам офис, 170 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Кирова, 113",
+        "purpose": "office",
+        "district": "Октябрьский",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "93529.41",
+          "calculated": true
+        },
+        "description": "Код объекта: 2232502.\nПредлагается к покупке офисное помещение площадью 170 м² по адресу: ул. Кирова, 113 — отличное решение для развития собственного бизнеса или инвестиций в коммерческую недвижимость.\nОфис расположен на 4 этаже административного здания. Просторная и функциональная площадь позволяет организовать комфортное рабочее пространство, разместит...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528782",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V09",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Офис 170 м² на Кирова 113, административное здание, этаж 4.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "40ece691-b3fa-4d04-8426-f98e94b64256",
+        "snapshotId": "9e3207a4-f79e-4fb4-8f24-8db4c2aed22c",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528929",
+        "area": 60.6,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "3",
+          "kind": "above_ground",
+          "number": 3
+        },
+        "price": "10500000.00",
+        "title": "Продажа офиса, 60.6 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "Советская улица, 64",
+        "purpose": "office",
+        "district": "Центральный",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "173267.33",
+          "calculated": true
+        },
+        "description": "Лучшее предложение на локации БЦ на Советской, 64\nВаш готовый арендный бизнес в центре города: Ваш доход без хлопот\nПредлагаем к продаже готовый арендный бизнес в самом сердце города\nЛокация: г. Новосибирск, ул. Советская, 64, БЦ на Советской 64\nПлощадь: 60,6 м2 (офис 58,8 м2, сан.узел 1,8 м2)\nНадежный и актуальный бьюти арендатор, идеальный вариан...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528929",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V10",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Готовый арендный бизнес продаётся; не аренда лота, офис 60,6 м², этаж 3.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "d5bcaf39-4516-4753-80c2-c29c7945d732",
+        "snapshotId": "36c9b805-9e3d-4689-afad-a30aaf323fa9",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528546",
+        "area": 52.4,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "7",
+          "kind": "above_ground",
+          "number": 7
+        },
+        "price": "7000000.00",
+        "title": "Офис на продажу, 52.4 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Станиславского, 2/3",
+        "purpose": "office",
+        "district": "Ленинский",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "133587.79",
+          "calculated": true
+        },
+        "description": "Код объекта: 2279006.\nУникальное предложение для вашего бизнеса: просторный и современный офис в Новосибирске!\nПродаётся офис площадью 52,4 кв. м на седьмом этаже девятиэтажного кирпично-монолитного здания по адресу улица Станиславского, 2/3. Здание построено в 2022 году, поэтому вы можете быть уверены в его высоком качестве и соответствии всем современны...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86528546",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V11",
+      "truth": {
+        "expected": "CRRR",
+        "reason": "Офис 52,4 м², этаж 7; возраст здания не дата публикации.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+        "snapshotId": "36947ab4-7e61-45c3-a561-977486f89388",
+        "searchRunId": "dc3d6158-c705-4a94-a655-9a6449da5250",
+        "fetchedAt": "2026-11-05T22:14:06.520Z"
+      },
+      "input": {
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529373",
+        "area": 75.1,
+        "city": "Новосибирск",
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "6000000.00",
+        "title": "Продается офис, 75.1 м2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "onrealt",
+        "address": "улица Пархоменко, 29",
+        "purpose": "office",
+        "district": "Ленинский",
+        "fetchedAt": "2026-11-05T22:14:06.520Z",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "dateSource": "unknown",
+        "pricePerM2": {
+          "unit": "per_m2",
+          "amount": "79893.48",
+          "calculated": true
+        },
+        "description": "Код объекта: 1782424.\nСРОЧНАЯ ПРОДАЖА! Инвестиционный офис в \"Крымскай\" — цена снижена до 6 млн руб.!\nГотовый объект 75 м² с отдельным входом и охраной. Покупаете не просто метры, а действующий бизнес-актив с прогнозируемой доходностью.\nПочему это лучшая сделка в вашем портфеле?\n• Ставка аренды от 800 руб./м² — сейчас это ниже рынка, но мы подбирае...",
+        "firstSeenAt": "2026-11-05T22:14:06.520Z",
+        "publishedAt": null,
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "unknown",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "86529373",
+        "sourceUpdatedAt": null,
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V12",
+      "truth": {
+        "expected": "CRRC",
+        "reason": "Инвестиционный офис 75,1 м² на первом этаже, существующий отдельный вход; продажа не аренда.",
+        "trueType": "commercial",
+        "publicationDate": null
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "2fdb8bf8-42e9-4d12-9553-184ecd14d383",
+        "snapshotId": "e6c0d226-c043-4eb9-baa4-c0901076ddf6",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935630221/",
+        "area": 40,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "80000.00",
+        "title": "40 м² · торговое помещение · 1 этаж из 1",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "СРОЧНО! АРЕНДА торгового помещения с постоянным сформированным пешеходным трафиком! В аренду предлагается коммерческое помещение площадью 40 м на первом этаже здания общей площадью 900 м. Ключевым преимуществом объекта является его расположение в",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:47:29.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935630221",
+        "sourceUpdatedAt": "2026-11-05T13:38:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V13",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "Прямо АРЕНДА торгового помещения 40 м², первый этаж; вход, город и период ставки неизвестны.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:47:29.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "b6e12ff7-0836-41df-ba2d-5b16d6b7c79a",
+        "snapshotId": "931d76e0-eca1-4dc8-aee3-7ef2a877d4c2",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935608092/",
+        "area": 75,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "97500.00",
+        "title": "75 м² · торговое помещение · 1 этаж из 10",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "СДАЁТСЯ КОММЕРЧЕСКОЕ ПОМЕЩЕНИЕ 75 м В ЖК «ПРОСТОРНЫЙ» Предлагается в аренду коммерческое помещение площадью 75 м по адресу: ул. Сотникова, 14, ЖК «Просторный».  Перспективная локация с развитой жилой застройкой и необходимой инфраструктурой. В",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:49:06.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935608092",
+        "sourceUpdatedAt": "2026-11-05T14:11:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V14",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "Аренда коммерческого помещения в ЖК, не квартиры; этаж 1, неизвестный вход и период.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:49:06.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "ade464ef-384f-4101-80fb-9af58ad565b5",
+        "snapshotId": "6be4ff9f-5a34-413f-bdae-a12068c4633c",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935629234/",
+        "area": 173,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "180000.00",
+        "title": "173 м² · торговое помещение · 1 этаж из 9",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "Помещение свободного назначенияна первом этаже жилого дома площадью 173 м2, площадь торгового зала 108 м2 -Высота потолков 3 метра. -Полноценные окна. -Принудительная вентиляция, пoжaрная сигнализация. -Выделенные мощности 15 кВт. -Кондиционер,",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:48:27.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935629234",
+        "sourceUpdatedAt": "2026-11-05T13:05:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V15",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "Торговый зал 108 м² внутри лота 173 м²; коммерция в жилом доме не жилой лот; аренда не доказана текстом.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:48:27.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "70866228-4855-4914-8530-b87ce32e6711",
+        "snapshotId": "e4d3040e-5aa3-48f5-af86-7cde2d296f44",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935608064/",
+        "area": 231.1,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "270000.00",
+        "title": "231,1 м² · торговое помещение",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "Аренда помещения 231.1 м у метро Площадь Маркса (цокольный этаж, отдельный вход) - Площадь: 231.1 м, цокольный этаж в кирпичном здании (1/3 этажей). - Локация: 30 секунд до выхода метро «Площадь Маркса»  максимальный пешеходный/автотрафик. -",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:49:09.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935608064",
+        "sourceUpdatedAt": "2026-11-05T14:18:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V16",
+      "truth": {
+        "expected": "RRRR",
+        "reason": "Явный цоколь в описании против floor=1; строгая торговля первого этажа исключается.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:49:09.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "7fe1a80e-ccd4-49e8-a781-ad757ca40ab3",
+        "snapshotId": "5e0c9867-3349-4dce-8fa9-724ef933ea66",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935629260/",
+        "area": 290,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "435000.00",
+        "title": "290 м² · торговое помещение · 1 этаж из 2",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "Сдаётся в аренду помещение 320 кв.м с разрешённым использованием под объекты для продажи товаров. При необходимости возможно разделение на два блока с отдельным входом: 65,8 кв.м и 183,6 кв.м. Для сезонных задач есть возможность аренды помещения на",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:48:38.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935629260",
+        "sourceUpdatedAt": "2026-11-05T13:48:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V17",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "Торговое использование, аренда; текст 320 против поля 290 м²; разделение с входом только возможно.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:48:38.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "98fed407-eec9-4d4b-995c-336a603bef85",
+        "snapshotId": "a3f30026-d48b-4c6f-8d22-10d07d8fa846",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935607349/",
+        "area": 111,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "100000.00",
+        "title": "111 м² · торговое помещение · 1 этаж из 1",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "В аренду предлагается помещение свободного назначения площадью 109 кв.м. на первой линии улицы Большой. Объект расположен в новом здании, построенном специально для коммерческого использования, что гарантирует современные инженерные коммуникации и",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:49:10.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935607349",
+        "sourceUpdatedAt": "2026-11-05T14:07:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V18",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "Аренда ПСН для коммерческого использования, поле 111 против текста 109 м²; вход неизвестен.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:49:10.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "f58cf5cb-c131-4ac9-a93b-9e02b9a4b12d",
+        "snapshotId": "6fd199eb-c5cb-4be9-825a-bd908e1bb8b1",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155919935629206/",
+        "area": 308.4,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "400400.00",
+        "title": "308,4 м² · торговое помещение · 1 этаж из 24",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "АРЕНДА Помещение свободного назначения площадью 308,4 кв.м. расположено на первом этаже жилого комплекса «Облака». Ключевым преимуществом объекта является его планировка «open space» с высотой потолков 4 метра, что создает ощущение простора и",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-08-04T02:48:07.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155919935629206",
+        "sourceUpdatedAt": "2026-11-05T14:12:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V19",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "АРЕНДА ПСН на первом этаже ЖК; коммерческая планировка, неизвестные город/период/вход.",
+        "trueType": "commercial",
+        "publicationDate": "2026-08-04T02:48:07.000Z"
+      }
+    },
+    {
+      "provenance": {
+        "listingId": "d1d873d9-78f2-4b4b-ac8b-1a06989bd8bf",
+        "snapshotId": "8257de1f-61aa-44e0-916f-f6c682b702bb",
+        "searchRunId": "77a3beef-a297-484c-a5cd-e748e7e227a2",
+        "fetchedAt": "2026-11-05T22:29:16.685Z"
+      },
+      "input": {
+        "url": "https://realty.yandex.ru/offer/1520155918988281323/",
+        "area": 56.6,
+        "city": null,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "price": "101808.00",
+        "title": "56,6 м² · торговое помещение · 1 этаж из 20",
+        "images": [],
+        "seller": {
+          "type": "unknown"
+        },
+        "source": "yandex",
+        "address": null,
+        "purpose": "retail",
+        "district": null,
+        "fetchedAt": "2026-11-05T22:29:16.685Z",
+        "operation": null,
+        "priceUnit": null,
+        "dateSource": "yandex:structured:publication",
+        "pricePerM2": null,
+        "description": "Торговая площадь 56,6 м в небоскрёбе «Тихомиров»  отдельный вход, потолки 4 м, 50 кВт ул. Военная, 51. 1-й этаж. 56,6 квадрата торговой площади с отдельным входом с улицы, высокими потолками 4 метра и мощностью 50 кВт  не «база под твой вкус», а",
+        "firstSeenAt": "2026-11-05T22:29:16.685Z",
+        "publishedAt": "2026-10-14T12:17:17.000Z",
+        "sourceMethod": "scraper",
+        "sourceUnitId": null,
+        "datePrecision": "exact",
+        "lastCheckedAt": null,
+        "purposeSource": "rule",
+        "sourceListingId": "1520155918988281323",
+        "sourceUpdatedAt": "2026-11-05T14:00:00.000Z",
+        "structuredFeatures": {},
+        "identityNeedsReview": false,
+        "possibleDuplicateKeys": []
+      },
+      "id": "V20",
+      "truth": {
+        "expected": "RRNR",
+        "reason": "Торговая площадь 56,6 м², первый этаж, отдельный вход; операция и период ставки неизвестны.",
+        "trueType": "commercial",
+        "publicationDate": "2026-10-14T12:17:17.000Z"
+      }
+    }
+  ],
+  "duplicatePairs": [
+    {
+      "a": "V04",
+      "b": "V05",
+      "expected": "distinct",
+      "reason": "Один БЦ и шаблон текста, разные площадь и цена, не одно помещение."
+    },
+    {
+      "a": "V13",
+      "b": "V14",
+      "expected": "distinct",
+      "reason": "Разные адреса и площади; не дубль по назначению."
+    }
+  ]
+}

@@ -183,3 +183,36 @@ Seed повторён; состав v3.1, число версий и докум�
 | [mobile-planner.png](../screenshots/vkr/v31/mobile-planner.png) | Мобильный планер 390 px | 390×900 | 2026-11-05T22:30:49.036Z |
 | [mobile-call-log.png](../screenshots/vkr/v31/mobile-call-log.png) | Ручная регистрация звонка на мобильном экране 390 px | 390×900 | 2026-11-05T22:30:32.164Z |
 <!-- v31-demo:end -->
+
+
+## v3.1 — живые испытания поиска (отдельно от DEMO-каталога)
+
+Все перечисленные кадры визуально просмотрены; время UTC берётся из metadata файлов, не из подписи локального времени UI. Full-page кадры поиска длинные; для печати предпочтительны локальные фрагменты/отдельные диалоги. Никаких cookies, DevTools или ПДн продавцов. Подлинность режимов уточнена ниже.
+
+| Кадр | Режим и содержание | UTC записи |
+|---|---|---|
+| [search-filters](../screenshots/vkr/v31/search-filters.png) | LIVE · форма аренды, районы, первый этаж, вход, ИЛИ назначений; до отправки | 2026-11-05T22:15:33.737Z |
+| [search-applied-logic](../screenshots/vkr/v31/search-applied-logic.png) | LIVE · применённая логика ИЛИ/И, без подмены значений | 2026-11-05T22:15:33.869Z |
+| [search-freshness](../screenshots/vkr/v31/search-freshness.png) | REPLAY текущего LIVE · неизвестные даты отдельно от свежих | 2026-11-05T22:40:05.768Z |
+| [search-sorting](../screenshots/vkr/v31/search-sorting.png) | REPLAY текущего LIVE · серверная сортировка и таблица | 2026-11-05T22:27:09.525Z |
+| [search-source-statuses](../screenshots/vkr/v31/search-source-statuses.png) | REPLAY текущего LIVE · реальные статусы, получено/принято, глубина | 2026-11-05T22:56:59.855Z |
+| [search-duplicates-group](../screenshots/vkr/v31/search-duplicates-group.png) | REPLAY текущего LIVE · вероятная пара OnRealt, не доказанный merge | 2026-11-05T22:59:07.965Z |
+| [search-duplicate-decision](../screenshots/vkr/v31/search-duplicate-decision.png) | REPLAY текущего LIVE · решение сотрудника отложить с датой/автором | 2026-11-05T23:01:12.310Z |
+| [search-compare-ai](../screenshots/vkr/v31/search-compare-ai.png) | LIVE AI · сравнение трёх сохранённых реальных объявлений | 2026-11-05T22:36:24.053Z |
+| [search-analysis-cache](../screenshots/vkr/v31/search-analysis-cache.png) | LIVE/cache · повтор unknown-анализа из кеша | 2026-11-05T22:36:17.508Z |
+| [search-export-dialog](../screenshots/vkr/v31/search-export-dialog.png) | REPLAY текущего LIVE · колонки/формат/область экспорта | 2026-11-05T22:27:13.421Z |
+| [search-export-xlsx-native](../screenshots/vkr/v31/search-export-xlsx-native.png) | REPLAY · native artifact-tool render скачанного XLSX без правки; видны узкие обрезанные колонки | 2026-11-05T22:46:01.449Z |
+| [search-export-xlsx](../screenshots/vkr/v31/search-export-xlsx.png) | REPLAY · читаемая HTML-проекция значений того же XLSX через ExcelJS; не Microsoft Excel screenshot | 2026-11-05T22:42:26.377Z |
+| [search-cancel](../screenshots/vkr/v31/search-cancel.png) | REPLAY · controlled queued SearchRun при остановленном воркере; отмена и source cancelled в журнале | 2026-11-05T22:45:52.103Z |
+| [captcha-stand-session](../screenshots/vkr/v31/captcha-stand-session.png) | REPLAY/стенд · настоящий BrowserSessionView и тестовая проверка | 2026-11-05T22:31:04.279Z |
+| [captcha-stand-completed](../screenshots/vkr/v31/captcha-stand-completed.png) | REPLAY/стенд · продолжение завершено, page закрыт | 2026-11-05T22:31:05.686Z |
+| [cian-blocked-fallback](../screenshots/vkr/v31/cian-blocked-fallback.png) | REPLAY результата нового LIVE · Циан HTTP403, fallback доступен | 2026-11-05T22:57:00.065Z |
+| [add-by-url](../screenshots/vkr/v31/add-by-url.png) | LIVE/manual · реальный OnRealt URL, ручной запасной путь сохранён | 2026-11-05T22:22:10.582Z |
+| [blocked-import-dialog](../screenshots/vkr/v31/blocked-import-dialog.png) | REPLAY LIVE blocked · официальный импорт CSV/XLSX/XML | 2026-11-05T22:57:00.532Z |
+| [collection-from-search](../screenshots/vkr/v31/collection-from-search.png) | REPLAY текущего LIVE · 24 внешних объявления в свободную подборку | 2026-11-05T22:44:19.636Z |
+| [ai-chat-live](../screenshots/vkr/v31/ai-chat-live.png) | LIVE · новый платный prepare_task, точный ISO, предпросмотр | 2026-11-05T22:29:59.118Z |
+| [ai-chat-live-confirmed](../screenshots/vkr/v31/ai-chat-live-confirmed.png) | LIVE history · подтверждённая Task, повторный просмотр без оплаты | 2026-11-05T23:06:03.778Z |
+
+| [collection-to-offer](../screenshots/vkr/v31/collection-to-offer.png) | REPLAY текущего LIVE + DEMO need · черновик КП, 1 объект, 90,42 м²/41 млн ₽ | 2026-11-05T23:07:31.234Z |
+
+Итоговые SHA256 и фактическое время всех 22 просмотренных кадров потока поиска: [manifest](live-search-v31-screenshots.json). search-cancel.png переснят после успешной **REPLAY**-отмены (source cancelled, cancelRequested=true), не LIVE-отмена.

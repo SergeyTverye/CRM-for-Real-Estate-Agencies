@@ -1,0 +1,37 @@
+{
+  "mode": "REPLAY / controlled queued SearchRun, worker stopped",
+  "utc": "2026-11-05T23:15:35.470Z",
+  "sourceRequests": 0,
+  "status": 200,
+  "body": {
+    "id": "4999fd03-0680-45c7-bfe7-443571889138",
+    "status": "partial",
+    "progress": {
+      "phase": "queued"
+    },
+    "deadlineAt": "2026-11-05T23:18:17.431Z",
+    "cancelRequested": true,
+    "heartbeatAt": null,
+    "incompleteReason": "Поиск отменён сотрудником; полученные данные сохранены",
+    "sources": [
+      {
+        "requestedCount": 1,
+        "receivedCount": 0,
+        "acceptedCount": 0,
+        "depthReached": 0,
+        "retryAfterAt": null,
+        "statusReasonRu": null,
+        "needsUserAction": false,
+        "id": "a6cd9790-3649-41c9-9b5d-1159ca68d957",
+        "runId": "4999fd03-0680-45c7-bfe7-443571889138",
+        "source": "onrealt",
+        "status": "cancelled",
+        "resultCount": 0,
+        "reason": null,
+        "durationMs": null,
+        "browserSession": null,
+        "browserSessionAction": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,118 @@
+[
+  {
+    "sort": "price",
+    "direction": "asc",
+    "status": 200,
+    "total": 24,
+    "ids": [
+      "2ee044bb-3004-4f30-a874-fa824407cef1",
+      "bfb7ad22-b62e-41a1-b165-83e91c6deb29",
+      "102bf0b3-5177-43e2-bfaf-dcbc9a70f930",
+      "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+      "d5bcaf39-4516-4753-80c2-c29c7945d732",
+      "3a080efd-164b-4a06-aa89-2eae5ffb3fc9",
+      "3f9a032c-c389-4d36-b4b5-ca8166b251e9",
+      "be2e29af-1994-4516-b3bd-6ab30df81b51",
+      "40ece691-b3fa-4d04-8426-f98e94b64256",
+      "4df54c2c-5eee-471f-99e6-b2aa8dad64a0"
+    ]
+  },
+  {
+    "sort": "price",
+    "direction": "desc",
+    "status": 200,
+    "total": 24,
+    "ids": [
+      "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+      "47ead3ef-50da-4da4-9d69-a0233962b777",
+      "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+      "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+      "6d38baf4-d2b1-4c2e-8343-21a386303c2d",
+      "24e08a38-9c16-4cee-8442-d9812f19e2a0",
+      "82d4f59d-af0e-4090-84f1-95f3bb80b4d5",
+      "4857dec2-c0e1-481d-a688-9bfe2155171d",
+      "f9a44f09-c16b-4ba3-a76a-49f69f7df524",
+      "6c4c0706-8c24-4c4e-b01c-6f28544326d1"
+    ]
+  },
+  {
+    "sort": "price_per_m2",
+    "direction": "asc",
+    "status": 200,
+    "total": 24,
+    "ids": [
+      "be2e29af-1994-4516-b3bd-6ab30df81b51",
+      "102bf0b3-5177-43e2-bfaf-dcbc9a70f930",
+      "bfb7ad22-b62e-41a1-b165-83e91c6deb29",
+      "2ee044bb-3004-4f30-a874-fa824407cef1",
+      "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+      "e931b1b5-72b6-442a-864b-a23b85d8f780",
+      "6c4c0706-8c24-4c4e-b01c-6f28544326d1",
+      "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+      "82d4f59d-af0e-4090-84f1-95f3bb80b4d5",
+      "d5bcaf39-4516-4753-80c2-c29c7945d732"
+    ]
+  },
+  {
+    "sort": "area",
+    "direction": "asc",
+    "status": 200,
+    "total": 24,
+    "ids": [
+      "2ee044bb-3004-4f30-a874-fa824407cef1",
+      "3f9a032c-c389-4d36-b4b5-ca8166b251e9",
+      "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+      "4857dec2-c0e1-481d-a688-9bfe2155171d",
+      "d5bcaf39-4516-4753-80c2-c29c7945d732",
+      "f9a44f09-c16b-4ba3-a76a-49f69f7df524",
+      "24e08a38-9c16-4cee-8442-d9812f19e2a0",
+      "40ece691-b3fa-4d04-8426-f98e94b64256",
+      "7fc9bccc-1a9d-4bc9-9b6d-9fc683e4e2f9",
+      "3a080efd-164b-4a06-aa89-2eae5ffb3fc9"
+    ]
+  },
+  {
+    "sort": "first_seen",
+    "direction": "asc",
+    "status": 200,
+    "total": 24,
+    "ids": [
+      "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+      "2d400b6c-813b-4ad2-8b3c-848cffa30b41",
+      "be2e29af-1994-4516-b3bd-6ab30df81b51",
+      "3a080efd-164b-4a06-aa89-2eae5ffb3fc9",
+      "f9a44f09-c16b-4ba3-a76a-49f69f7df524",
+      "4857dec2-c0e1-481d-a688-9bfe2155171d",
+      "40ece691-b3fa-4d04-8426-f98e94b64256",
+      "24e08a38-9c16-4cee-8442-d9812f19e2a0",
+      "d5bcaf39-4516-4753-80c2-c29c7945d732",
+      "102bf0b3-5177-43e2-bfaf-dcbc9a70f930"
+    ]
+  },
+  {
+    "pagination": true,
+    "rows": 24,
+    "unique": 24,
+    "pass": true
+  },
+  {
+    "export": "xlsx",
+    "scope": "all",
+    "status": "downloaded"
+  },
+  {
+    "export": "xlsx",
+    "scope": "selected",
+    "status": "downloaded"
+  },
+  {
+    "export": "csv",
+    "scope": "all",
+    "status": "downloaded"
+  },
+  {
+    "export": "csv",
+    "scope": "selected",
+    "status": "downloaded"
+  }
+]

@@ -1,0 +1,156 @@
+{
+  "before": {
+    "mode": "REPLAY",
+    "sourceMode": "LIVE",
+    "networkCalls": 0,
+    "aiCalls": 0,
+    "newUrls": 20,
+    "knownPublicationDates": 8,
+    "totals": {
+      "cases": 80,
+      "falseInclusions": 8,
+      "falseExclusions": 1,
+      "falseConfirmed": 0,
+      "exactVerdictErrors": 9
+    },
+    "errors": [
+      {
+        "id": "V13",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935630221/",
+        "reason": "Прямо АРЕНДА торгового помещения 40 м², первый этаж; вход, город и период ставки неизвестны."
+      },
+      {
+        "id": "V14",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935608092/",
+        "reason": "Аренда коммерческого помещения в ЖК, не квартиры; этаж 1, неизвестный вход и период."
+      },
+      {
+        "id": "V15",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935629234/",
+        "reason": "Торговый зал 108 м² внутри лота 173 м²; коммерция в жилом доме не жилой лот; аренда не доказана текстом."
+      },
+      {
+        "id": "V16",
+        "query": "retail-rent",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935608064/",
+        "reason": "Явный цоколь в описании против floor=1; строгая торговля первого этажа исключается."
+      },
+      {
+        "id": "V16",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935608064/",
+        "reason": "Явный цоколь в описании против floor=1; строгая торговля первого этажа исключается."
+      },
+      {
+        "id": "V17",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935629260/",
+        "reason": "Торговое использование, аренда; текст 320 против поля 290 м²; разделение с входом только возможно."
+      },
+      {
+        "id": "V18",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935607349/",
+        "reason": "Аренда ПСН для коммерческого использования, поле 111 против текста 109 м²; вход неизвестен."
+      },
+      {
+        "id": "V19",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935629206/",
+        "reason": "АРЕНДА ПСН на первом этаже ЖК; коммерческая планировка, неизвестные город/период/вход."
+      },
+      {
+        "id": "V20",
+        "query": "retail-rent",
+        "expected": "needs_review",
+        "actual": "rejected",
+        "url": "https://realty.yandex.ru/offer/1520155918988281323/",
+        "reason": "Торговая площадь 56,6 м², первый этаж, отдельный вход; операция и период ставки неизвестны."
+      }
+    ],
+    "duplicatePairs": [
+      {
+        "a": "V04",
+        "b": "V05",
+        "expected": "distinct",
+        "reason": "Один БЦ и шаблон текста, разные площадь и цена, не одно помещение.",
+        "predicted": false
+      },
+      {
+        "a": "V13",
+        "b": "V14",
+        "expected": "distinct",
+        "reason": "Разные адреса и площади; не дубль по назначению.",
+        "predicted": false
+      }
+    ]
+  },
+  "after": {
+    "mode": "REPLAY",
+    "sourceMode": "LIVE",
+    "networkCalls": 0,
+    "aiCalls": 0,
+    "newUrls": 20,
+    "knownPublicationDates": 8,
+    "totals": {
+      "cases": 80,
+      "falseInclusions": 2,
+      "falseExclusions": 0,
+      "falseConfirmed": 0,
+      "exactVerdictErrors": 2
+    },
+    "errors": [
+      {
+        "id": "V15",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155919935629234/",
+        "reason": "Торговый зал 108 м² внутри лота 173 м²; коммерция в жилом доме не жилой лот; аренда не доказана текстом."
+      },
+      {
+        "id": "V20",
+        "query": "commercial-sale",
+        "expected": "rejected",
+        "actual": "needs_review",
+        "url": "https://realty.yandex.ru/offer/1520155918988281323/",
+        "reason": "Торговая площадь 56,6 м², первый этаж, отдельный вход; операция и период ставки неизвестны."
+      }
+    ],
+    "duplicatePairs": [
+      {
+        "a": "V04",
+        "b": "V05",
+        "expected": "distinct",
+        "reason": "Один БЦ и шаблон текста, разные площадь и цена, не одно помещение.",
+        "predicted": false
+      },
+      {
+        "a": "V13",
+        "b": "V14",
+        "expected": "distinct",
+        "reason": "Разные адреса и площади; не дубль по назначению.",
+        "predicted": false
+      }
+    ]
+  }
+}

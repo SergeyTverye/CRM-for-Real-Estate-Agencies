@@ -1,0 +1,115 @@
+{
+  "visuallyReviewed": true,
+  "files": [
+    {
+      "path": "docs/screenshots/vkr/v31/search-filters.png",
+      "sha256": "bbe4f9551e9d1446ad208c4c0a9f4ae255df8fd220275a77199b949a81b06474",
+      "utc": "2026-11-05T22:15:33.737Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-applied-logic.png",
+      "sha256": "e04b1e913f4e82819aeaa19b39c177f775880f77f501b45d7b23e76e7dc7af81",
+      "utc": "2026-11-05T22:15:33.869Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-freshness.png",
+      "sha256": "fd8e95860aa8810ee06dbb22249a7f3cc4c49b4be9e13d3b53e743e0d89f3281",
+      "utc": "2026-11-05T22:40:05.768Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-sorting.png",
+      "sha256": "ff2894a217b22fdc6b23edbf7474b5b99690392f08884ff10d307b75c6f3a2bb",
+      "utc": "2026-11-05T22:27:09.525Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-source-statuses.png",
+      "sha256": "0109eb4373f58769ab6caeba7239bfbf4afb90aa8c2ea0ebf52a39133e7f0bd1",
+      "utc": "2026-11-05T22:56:59.855Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-duplicates-group.png",
+      "sha256": "f048edfdfa410158bccb610ad122bdb492dd799751cb6bb66b18f628167559dc",
+      "utc": "2026-11-05T22:59:07.965Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-duplicate-decision.png",
+      "sha256": "180201872cca32d42630fcf04ee9876277011dc6564f26caceaba429a3c06854",
+      "utc": "2026-11-05T23:01:12.310Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-compare-ai.png",
+      "sha256": "7acdf8d138a0ca0e10e741bd5235a6e3ed394a7b461a0ad68beb51fbef44e478",
+      "utc": "2026-11-05T22:36:24.053Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-analysis-cache.png",
+      "sha256": "112d367f8dfd29bb75938b4f97a4dc5b0e19c4f6e035a3711b67133a3488b140",
+      "utc": "2026-11-05T22:36:17.508Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-export-dialog.png",
+      "sha256": "830a5508aab12b5ab969f3109e9f294cb06f495046626eeb5bd41c8f1e6362d0",
+      "utc": "2026-11-05T22:27:13.421Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-export-xlsx-native.png",
+      "sha256": "96b028f3f1d2228dabfa8eef79cc708babf0a29dee3af2427b0ed1898b5eafcd",
+      "utc": "2026-11-05T22:46:01.449Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-export-xlsx.png",
+      "sha256": "5420741226553b2a1ea7d6dd235f9f37982533221db0f29be0636b8d5704301f",
+      "utc": "2026-11-05T22:42:26.377Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/search-cancel.png",
+      "sha256": "2ab5be11d7f7f7ebc97ba05cc33ae2966addc047fbaed6a4db74c23113af6252",
+      "utc": "2026-11-05T23:15:35.470Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/captcha-stand-session.png",
+      "sha256": "d23d17603b154260311a158d3c712b7769d8c65b55cb81ffa8178eac63dbdcad",
+      "utc": "2026-11-05T22:31:04.279Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/captcha-stand-completed.png",
+      "sha256": "5bc77d7854b083f30726d05b0e32e7c5df9598069eac68ea9c7204b182189625",
+      "utc": "2026-11-05T22:31:05.686Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/cian-blocked-fallback.png",
+      "sha256": "0109eb4373f58769ab6caeba7239bfbf4afb90aa8c2ea0ebf52a39133e7f0bd1",
+      "utc": "2026-11-05T22:57:00.065Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/add-by-url.png",
+      "sha256": "7bd93a9e60f53731676cd567d3bd275006cd7cb9ea8b4d6c39edbf82c270c8d0",
+      "utc": "2026-11-05T22:22:10.582Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/blocked-import-dialog.png",
+      "sha256": "edceaaa68d802d6401fe2d5bd88d09cb2b6a752510eca98235b3b91893582300",
+      "utc": "2026-11-05T22:57:00.532Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/collection-from-search.png",
+      "sha256": "4d876efd8cb85a39999dbd33d885892e2b98a3324e4c61a50f19837ea9db2430",
+      "utc": "2026-11-05T22:44:19.636Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/collection-to-offer.png",
+      "sha256": "9ad51bc4ef852fa0fd44e6996afe1fb2feb45a8fb4536f6eac910f336a0aac9b",
+      "utc": "2026-11-05T23:07:31.234Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/ai-chat-live.png",
+      "sha256": "f97f4bfd142bdc0da16a0a93a8ae133a8d02b6ee7d885a23d6e133ec4909595f",
+      "utc": "2026-11-05T22:29:59.118Z"
+    },
+    {
+      "path": "docs/screenshots/vkr/v31/ai-chat-live-confirmed.png",
+      "sha256": "091f388a8b3992ddb0cebac8cbaada347fb741033bce95c4b898c19109b0e945",
+      "utc": "2026-11-05T23:06:03.778Z"
+    }
+  ]
+}

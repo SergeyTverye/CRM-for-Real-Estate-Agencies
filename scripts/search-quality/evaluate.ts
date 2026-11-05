@@ -98,4 +98,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   console.table(Object.entries(current.perQuery).map(([query, m]) => ({ query, ...m })));
   if (process.argv.includes("--write")) writeFileSync(reportPath, renderReport(baseline, current));
   console.log(JSON.stringify(current, null, 2));
+  if (process.argv.includes("--v31")) void import("./evaluate-v31").then(m => m.runV31());
 }

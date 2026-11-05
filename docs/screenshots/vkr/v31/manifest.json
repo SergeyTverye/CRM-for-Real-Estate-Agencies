@@ -1,0 +1,465 @@
+[
+  {
+    "file": "planner-day.png",
+    "description": "Планер: День, цвета и легенда",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:31.796Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "aa848976b2b2941c580dab7f564c927bffb659904949e368f9be528c113e12da",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.135Z"
+  },
+  {
+    "file": "planner-week.png",
+    "description": "Планер: Неделя, цвета и легенда",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:34.066Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "9f6ba271db12c793349e9f494738557a088495e10d3944658fca277823993643",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.138Z"
+  },
+  {
+    "file": "planner-month.png",
+    "description": "Планер: Месяц, цвета и легенда",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:36.004Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "047343efbc9c912b5fffd49eb7b27a578c7f7764c738e413fb18c86ad6fd9bab",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.141Z"
+  },
+  {
+    "file": "planner-3months.png",
+    "description": "Планер: Три месяца, цвета и легенда",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:45.547Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "c0ff894a74b65ceb12fdb6ced0588057034a29c3b19c1dd44e8b46f5bd683b8e",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.143Z"
+  },
+  {
+    "file": "planner-filters-employee.png",
+    "description": "Фильтр по сотруднику",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:47.457Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "c6db87c7ec9cceb333d4846a27515329e848c55aafe28362ca98b338a9da6813",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.145Z"
+  },
+  {
+    "file": "planner-settings-threshold.png",
+    "description": "Порог близкого срока: 24 часа, форма руководителя без изменения настройки",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:47.671Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "d59f99a1e5b1cb41c552e88830d3cf70e18b3a6ec219ee8fb019443f8415cbf0",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.146Z"
+  },
+  {
+    "file": "task-checklist.png",
+    "description": "Чек-лист, сроки и прогресс",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:31:20.924Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/tasks/008dd468-6be0-4f53-a616-3c2e6f219961",
+    "sha256": "050c1140d87405d74f9c6fd4d0f89f597a709e93a1d253c94dc770772b82b644",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.148Z"
+  },
+  {
+    "file": "task-complete-warning.png",
+    "description": "Сервер отклоняет завершение с обязательными открытыми пунктами; явное подтверждение ещё не дано",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:31:32.298Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/tasks/008dd468-6be0-4f53-a616-3c2e6f219961",
+    "sha256": "a9fe7fddf396bf5923a09b4b4fa7293f8e556c49ad958311897d21a9cb0be42b",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.150Z"
+  },
+  {
+    "file": "bulk-tasks-preview.png",
+    "description": "Предпросмотр двух задач; записи не создаются до подтверждения",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:31:54.477Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/tasks",
+    "sha256": "03d5e088fcbc1f9adbedc0843692cf149f92e8dc1606f7fd285db7c03b99be1d",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.153Z"
+  },
+  {
+    "file": "recurrence-quarter.png",
+    "description": "Квартальный контроль договора: следующий экземпляр после выполнения, форма без сохранения",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:32:07.984Z",
+    "sha": "9f34871a234d5f5b9da46f018d8f1f33d38db99b",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/tasks/new",
+    "sha256": "320321c72a9bff6b7bc6ca65ad55358c059ad6f3d7a9d602cac5d3d3815d9e0d",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.154Z"
+  },
+  {
+    "file": "call-log-form.png",
+    "description": "Ручной разовый звонок: источник и итог без создания клиента",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:31.715Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/today",
+    "sha256": "9ef48f10e754314c33da4656f15dc056a560b8a102a7f25e6eb5100570bd76a3",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.156Z"
+  },
+  {
+    "file": "call-log-spam.png",
+    "description": "Спам без Client и потребности; форма до сохранения",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:32.016Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/today",
+    "sha256": "20c9ab01e84076b68372b919390190924ce3373ac02138a752119737be659f89",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.157Z"
+  },
+  {
+    "file": "call-sources-stats.png",
+    "description": "Источники и итоги звонков, числители и знаменатели на первичных синтетических записях",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:31:06.481Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/reports/sources?from=2026-11-01&to=2026-11-30",
+    "sha256": "2fca0f85373543437ab383f505d76cb6046fc1d0d25e33c8d889d75130559668",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.159Z"
+  },
+  {
+    "file": "client-timeline.png",
+    "description": "Таймлайн клиента: первичные события, документы, задачи, подборка",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:22:59.343Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/clients/ebcb12b7-c5ab-4dec-a698-a6a0dbbcc50c?tab=history",
+    "sha256": "64cfd6afa6e34704cbebdbd293cf73d903a0687b0c52990789e505fa01134500",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.160Z"
+  },
+  {
+    "file": "client-timeline-filtered-need.png",
+    "description": "История по выбранной потребности клиента",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:23:03.202Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/clients/ebcb12b7-c5ab-4dec-a698-a6a0dbbcc50c?tab=history&needId=a08ef8af-f360-4f52-a39b-856b7f924c59",
+    "sha256": "6a3f585e6c467c27d530985f84b4775f221bed4c7639f070e4dbf1fe8d9efcc1",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.162Z"
+  },
+  {
+    "file": "collections-list.png",
+    "description": "Именованные подборки с клиентом и без клиента",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:28:04.632Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/collections",
+    "sha256": "c123cab0efd7471b23f28c18c69b418a80e1e9f36687aba6a4a9a79734220753",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.164Z"
+  },
+  {
+    "file": "collection-detail.png",
+    "description": "Состав, комментарии, статусы и связь с потребностью",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:28:17.075Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/collections/1f214371-ab08-41a5-aad7-85b308ab26f6",
+    "sha256": "e6e5a6498ca97158b7561726a9e67a395f73d4b1c32f191a84f4c8ad8dfed3ae",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.165Z"
+  },
+  {
+    "file": "collection-link-need.png",
+    "description": "Выбор потребности для независимой подборки; привязка ещё не выполнена",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:28:27.450Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/collections/18fe4dc5-a6cf-4ead-a36d-2b86c70359a4",
+    "sha256": "2347a2203c8ea9104beea036ef53dfc1dcc5aad41d12831291d8e4e6aff7dba9",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.167Z"
+  },
+  {
+    "file": "templates-list.png",
+    "description": "Четыре режима шаблонизатора, текущие версии",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:22:19.457Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/templates",
+    "sha256": "b31205ba6f470350a94bc55da97f3ad1bad21fe495f924dc2042b8b94da10386",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.169Z"
+  },
+  {
+    "file": "template-versions.png",
+    "description": "История двух версий и манифест",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:22:37.387Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/templates/df29b082-764a-48c4-98e9-00fd7b56aefb",
+    "sha256": "4b7883e57e22e06d53a3f45e8177e60f7d41d55e2303ab53c3a380183e4722fe",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.170Z"
+  },
+  {
+    "file": "template-preview.png",
+    "description": "Проверка исходной записи и явное подтверждение формирования",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:22:50.883Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/clients/ebcb12b7-c5ab-4dec-a698-a6a0dbbcc50c",
+    "sha256": "cf7dc40d1ff6f7d14066af9331c65bca59a07318f795db0802f41d7dfc961e22",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.173Z"
+  },
+  {
+    "file": "generated-docx.png",
+    "description": "DEMO · настоящий сформированный DOCX, LibreOffice → PDF → Poppler PNG, страница 1/1; без правки содержимого",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:21:32.485Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "renderer": "LibreOffice + pdftoppm + Sharp contain",
+    "sourceChecksum": "2e669231fe43f4420e7192cf0e2fb181be70ebca66bc8d9284b86fd6e9e7ff45",
+    "pdfChecksum": "77dd19a33c34976d3224eff39ebd2e062f1f90aa8235f3d42c9c72632a344172",
+    "sha256": "d09c2d794235157cee2da5c64e4c7429cf29a5819fff7079a918ddf0ae1daa68",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.175Z"
+  },
+  {
+    "file": "generated-xlsx.png",
+    "description": "DEMO · настоящий сформированный XLSX, LibreOffice → PDF → Poppler PNG, страница 1/1; без правки содержимого",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:21:38.263Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "renderer": "LibreOffice + pdftoppm + Sharp contain",
+    "sourceChecksum": "b3509aa535c9b3adadf4d791dbd5207c7a8859e660f3409a473b3c79f8fbf140",
+    "pdfChecksum": "53b9ae965c8ec5f27ca169dd398e4d972a79a2fc4483ec6d4b8e0ee907928504",
+    "sha256": "f86f238ebd09077680e0f295de4c5060520c27a7d17b2688d36c7193b2d46d10",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.177Z"
+  },
+  {
+    "file": "ai-chat-panel.png",
+    "description": "Личная история DEMO-провайдера, без внешнего вызова",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:31:40.903Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/clients/ebcb12b7-c5ab-4dec-a698-a6a0dbbcc50c",
+    "sha256": "04f5eb96a662a2dcd5876d7e4be45ac56d741da02c13a3213665f727a3ff36f0",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.180Z"
+  },
+  {
+    "file": "ai-chat-draft-confirm.png",
+    "description": "Предпросмотр черновика перед явным подтверждением; задача не создана",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:31:41.570Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "REALTOR1",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "url": "/clients/ebcb12b7-c5ab-4dec-a698-a6a0dbbcc50c",
+    "sha256": "04f5eb96a662a2dcd5876d7e4be45ac56d741da02c13a3213665f727a3ff36f0",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.181Z"
+  },
+  {
+    "file": "mobile-planner.png",
+    "description": "Мобильный планер 390 px",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:49.036Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 390,
+      "height": 900
+    },
+    "url": "/calendar",
+    "sha256": "60afa8d33359f12224c952276872989d781edcf9a3c1e9f2d6cda693e5eb61c8",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.183Z"
+  },
+  {
+    "file": "mobile-call-log.png",
+    "description": "Ручная регистрация звонка на мобильном экране 390 px",
+    "mode": "DEMO · синтетика crm_demo; без новых внешних вызовов",
+    "date": "2026-11-05T22:30:32.164Z",
+    "sha": "a3cc40e8e5e23c95f842c52bb3b04a0fe7b970fe",
+    "workingTree": "uncommitted changes; base HEAD only",
+    "role": "MANAGER",
+    "viewport": {
+      "width": 390,
+      "height": 900
+    },
+    "url": "/today",
+    "sha256": "15ccb2a3e89c6b8ee5df9c54ed6ffde6f8b2798e4962f9f8016f47ffa79dd923",
+    "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
+    "reviewedAt": "2026-11-05T22:35:36.185Z"
+  }
+]

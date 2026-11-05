@@ -1,0 +1,176 @@
+{
+  "mode": "REPLAY of current LIVE",
+  "status": 200,
+  "group": {
+    "id": "0747350c-12bb-46dd-9ef6-16c1522143ac",
+    "status": "deferred",
+    "updatedAt": "2026-11-05T23:00:55.640Z",
+    "members": [
+      {
+        "listingId": "6c44499b-a757-4a66-83d3-2ddfcd9efc5a",
+        "releasedAt": null,
+        "listing": {
+          "id": "6c44499b-a757-4a66-83d3-2ddfcd9efc5a",
+          "source": "onrealt",
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632978",
+          "address": "2-я Станционная улица, 30к16",
+          "area": "670",
+          "floor": 1,
+          "price": "335000",
+          "priceUnit": null,
+          "sellerType": "unknown",
+          "availability": "unknown",
+          "checkedAt": null,
+          "priceHistory": [
+            {
+              "at": "2026-11-05T22:18:51.564Z",
+              "price": "335000",
+              "priceUnit": null
+            }
+          ]
+        }
+      },
+      {
+        "listingId": "83701a68-50bb-490e-962d-d54b535e2b2b",
+        "releasedAt": null,
+        "listing": {
+          "id": "83701a68-50bb-490e-962d-d54b535e2b2b",
+          "source": "onrealt",
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632959",
+          "address": "2-я Станционная улица, 30к16",
+          "area": "670",
+          "floor": 1,
+          "price": "335000",
+          "priceUnit": null,
+          "sellerType": "unknown",
+          "availability": "unknown",
+          "checkedAt": null,
+          "priceHistory": [
+            {
+              "at": "2026-11-05T22:18:51.564Z",
+              "price": "335000",
+              "priceUnit": null
+            }
+          ]
+        }
+      }
+    ],
+    "evidence": {
+      "pairs": [
+        {
+          "a": "6c44499b-a757-4a66-83d3-2ddfcd9efc5a",
+          "b": "83701a68-50bb-490e-962d-d54b535e2b2b",
+          "probable": true,
+          "score": 80,
+          "features": [
+            {
+              "feature": "Город",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Улица",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Дом",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Корпус",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Строение",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Помещение",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Операция",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Этаж",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Тип этажа",
+              "state": "matched",
+              "explanation": "Значения совпадают"
+            },
+            {
+              "feature": "Площадь",
+              "state": "matched",
+              "explanation": "Допуск: максимум из 2 м² и 3% большей площади"
+            },
+            {
+              "feature": "Назначение",
+              "state": "matched",
+              "explanation": "Есть общее назначение"
+            },
+            {
+              "feature": "Цена",
+              "state": "unknown",
+              "explanation": "Цена — вспомогательный признак, не доказательство идентичности"
+            },
+            {
+              "feature": "Признак: separate_entrance",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Признак: ceiling_height",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Признак: power_kw",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Признак: gates",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Признак: wet_point",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Признак: first_line",
+              "state": "unknown",
+              "explanation": "Недостаточно сведений"
+            },
+            {
+              "feature": "Вывод",
+              "state": "matched",
+              "explanation": "Вероятное совпадение; требуется решение сотрудника"
+            }
+          ]
+        }
+      ]
+    },
+    "decisions": [
+      {
+        "id": "56893f13-ece8-4223-b805-7743c57576cd",
+        "decision": "defer",
+        "decidedAt": "2026-11-05T23:00:55.655Z",
+        "decider": {
+          "displayName": "Испытания поиска v3.1"
+        }
+      }
+    ]
+  }
+}

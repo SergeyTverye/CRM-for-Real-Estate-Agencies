@@ -1,0 +1,176 @@
+{
+  "mode": "REPLAY of LIVE",
+  "status": 200,
+  "body": {
+    "results": [
+      {
+        "id": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "2d400b6c-813b-4ad2-8b3c-848cffa30b41",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "be2e29af-1994-4516-b3bd-6ab30df81b51",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "3a080efd-164b-4a06-aa89-2eae5ffb3fc9",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "f9a44f09-c16b-4ba3-a76a-49f69f7df524",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "4857dec2-c0e1-481d-a688-9bfe2155171d",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "40ece691-b3fa-4d04-8426-f98e94b64256",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "24e08a38-9c16-4cee-8442-d9812f19e2a0",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "d5bcaf39-4516-4753-80c2-c29c7945d732",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "102bf0b3-5177-43e2-bfaf-dcbc9a70f930",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "e931b1b5-72b6-442a-864b-a23b85d8f780",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "6c4c0706-8c24-4c4e-b01c-6f28544326d1",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "2ee044bb-3004-4f30-a874-fa824407cef1",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "3f9a032c-c389-4d36-b4b5-ca8166b251e9",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "a91e8e33-7b62-4534-bbb7-d78022ac7abb",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "4df54c2c-5eee-471f-99e6-b2aa8dad64a0",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "47ead3ef-50da-4da4-9d69-a0233962b777",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "6d38baf4-d2b1-4c2e-8343-21a386303c2d",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "82d4f59d-af0e-4090-84f1-95f3bb80b4d5",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "7fc9bccc-1a9d-4bc9-9b6d-9fc683e4e2f9",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      },
+      {
+        "id": "bfb7ad22-b62e-41a1-b165-83e91c6deb29",
+        "success": true,
+        "value": {
+          "added": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "mode": "LIVE",
+  "results": [
+    {
+      "kind": "batch",
+      "status": 200,
+      "body": {
+        "items": [
+          {
+            "listingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+            "source": "onrealt",
+            "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079",
+            "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+            "ruleChecks": [
+              {
+                "criterion": "city",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "Новосибирск"
+              },
+              {
+                "criterion": "operation",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "sale"
+              },
+              {
+                "criterion": "purpose",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "office"
+              },
+              {
+                "criterion": "priceUnit",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "rub_total"
+              },
+              {
+                "criterion": "price",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "41000000 rub_total; rub_total"
+              },
+              {
+                "criterion": "area",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "90.42"
+              },
+              {
+                "criterion": "floor",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "8"
+              },
+              {
+                "criterion": "удобная планировка",
+                "state": "unknown",
+                "source": "rule",
+                "evidence": "Нет подтверждающих сведений"
+              }
+            ],
+            "cacheHit": false,
+            "evidence": [
+              {
+                "criterion": "удобная планировка",
+                "result": "unknown",
+                "quote": null,
+                "source": "ai",
+                "reason": "В описании нет точного подтверждения; уточните у продавца."
+              }
+            ],
+            "unresolved": [
+              "удобная планировка"
+            ]
+          }
+        ],
+        "limit": 2,
+        "model": "aliceai-llm-flash/latest",
+        "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения."
+      }
+    },
+    {
+      "kind": "repeat",
+      "status": 200,
+      "body": {
+        "items": [
+          {
+            "listingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+            "source": "onrealt",
+            "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079",
+            "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+            "ruleChecks": [
+              {
+                "criterion": "city",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "Новосибирск"
+              },
+              {
+                "criterion": "operation",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "sale"
+              },
+              {
+                "criterion": "purpose",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "office"
+              },
+              {
+                "criterion": "priceUnit",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "rub_total"
+              },
+              {
+                "criterion": "price",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "41000000 rub_total; rub_total"
+              },
+              {
+                "criterion": "area",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "90.42"
+              },
+              {
+                "criterion": "floor",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "8"
+              },
+              {
+                "criterion": "удобная планировка",
+                "state": "unknown",
+                "source": "rule",
+                "evidence": "Нет подтверждающих сведений"
+              }
+            ],
+            "cacheHit": true,
+            "evidence": [
+              {
+                "quote": null,
+                "reason": "В описании нет точного подтверждения; уточните у продавца.",
+                "result": "unknown",
+                "source": "ai",
+                "criterion": "удобная планировка"
+              }
+            ],
+            "unresolved": [
+              "удобная планировка"
+            ]
+          }
+        ],
+        "limit": 2,
+        "model": "aliceai-llm-flash/latest",
+        "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения."
+      }
+    },
+    {
+      "kind": "compare-three",
+      "status": 200,
+      "body": {
+        "text": "Объект по адресу Красный проспект, 101/1 имеет площадь 90,42 квадратных метра, расположен на 8 этаже, продаётся за 41 000 000 рублей. Объект по адресу Большевистская улица, 35 имеет площадь 72 квадратных метра, расположен на 14 этаже, продаётся за 12 500 000 рублей. Объект по адресу улица Связистов, 158 имеет площадь 223 квадратных метра, расположен на 1 этаже, продаётся за 10 500 000 рублей.\n\nСведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+        "mode": "live",
+        "testingMode": false,
+        "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+        "usage": {
+          "inputTokens": 486,
+          "outputTokens": 132
+        },
+        "webSearchCalls": 0,
+        "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+        "tradeoffs": [
+          {
+            "listingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+            "points": [
+              {
+                "comparedListingId": "2d400b6c-813b-4ad2-8b3c-848cffa30b41",
+                "area": "Больше площади, чем у другого выбранного варианта.",
+                "price": "Цена выше: оцените дополнительную нагрузку на бюджет."
+              },
+              {
+                "comparedListingId": "be2e29af-1994-4516-b3bd-6ab30df81b51",
+                "area": "Меньше площади, чем у другого выбранного варианта.",
+                "price": "Цена выше: оцените дополнительную нагрузку на бюджет."
+              }
+            ]
+          },
+          {
+            "listingId": "2d400b6c-813b-4ad2-8b3c-848cffa30b41",
+            "points": [
+              {
+                "comparedListingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+                "area": "Меньше площади, чем у другого выбранного варианта.",
+                "price": "Цена ниже: остаётся больше бюджета на остальные расходы."
+              },
+              {
+                "comparedListingId": "be2e29af-1994-4516-b3bd-6ab30df81b51",
+                "area": "Меньше площади, чем у другого выбранного варианта.",
+                "price": "Цена выше: оцените дополнительную нагрузку на бюджет."
+              }
+            ]
+          },
+          {
+            "listingId": "be2e29af-1994-4516-b3bd-6ab30df81b51",
+            "points": [
+              {
+                "comparedListingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+                "area": "Больше площади, чем у другого выбранного варианта.",
+                "price": "Цена ниже: остаётся больше бюджета на остальные расходы."
+              },
+              {
+                "comparedListingId": "2d400b6c-813b-4ad2-8b3c-848cffa30b41",
+                "area": "Больше площади, чем у другого выбранного варианта.",
+                "price": "Цена ниже: остаётся больше бюджета на остальные расходы."
+              }
+            ]
+          }
+        ],
+        "questions": [
+          {
+            "listingId": "1f64ffcd-d337-4d8d-9168-656c9410fcf7",
+            "questions": [
+              "Уточните: удобная планировка",
+              "Кто собственник? Как подтверждены полномочия?",
+              "Доступно ли помещение сейчас?"
+            ]
+          },
+          {
+            "listingId": "2d400b6c-813b-4ad2-8b3c-848cffa30b41",
+            "questions": [
+              "Уточните: удобная планировка",
+              "Кто собственник? Как подтверждены полномочия?",
+              "Доступно ли помещение сейчас?"
+            ]
+          },
+          {
+            "listingId": "be2e29af-1994-4516-b3bd-6ab30df81b51",
+            "questions": [
+              "Уточните: удобная планировка",
+              "Кто собственник? Как подтверждены полномочия?",
+              "Доступно ли помещение сейчас?"
+            ]
+          }
+        ],
+        "draftOnly": true
+      }
+    }
+  ]
+}

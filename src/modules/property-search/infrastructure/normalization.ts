@@ -1,6 +1,6 @@
 import type RealEstateScraper from "real-estate-scrapper";
 import { parseExternalUrl } from "@/shared/net/ssrf";
-import { parseFloor } from "../domain/floor";
+import { parseFloor, describedUndergroundFloor } from "../domain/floor";
 import type { NormalizedListing, PriceUnit, Purpose } from "../domain/types";
 
 import { listingFields } from "./listing-fields";
@@ -28,6 +28,7 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
   // Known package/API sign defects: an explicit basement description invalidates a positive floor.
   const basement = raw.description?.match(/(?:^|[.;\n])\s*(?:этаж\s*[:—-]?\s*)?(цоколь\S*|полуподвал\S*|подвал\S*)\s*(?:этаж|помещени\S*)?(?=[\s,.;]|$)/iu);
   if (basement) floor = parseFloor(basement[1]);
+  floor = describedUndergroundFloor(raw.description ?? "") ?? floor;
   const price = raw.price !== null && Number.isFinite(raw.price) && raw.price >= 0 && raw.price < 1e15 ? raw.price.toFixed(2) : null;
   const dates = extractListingDates(raw.source, raw, { id: raw.parentId ?? raw.id, url }, fetchedAt);
   const extended = raw as RealEstateScraper.Listing & Partial<ListingDates>;

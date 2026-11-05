@@ -1,0 +1,29 @@
+{
+  "mode": "DEMO",
+  "checkedAt": "2026-11-05T22:33:24.711Z",
+  "status": "PASS",
+  "tasks": 96,
+  "months": [
+    "2026-11",
+    "2026-12",
+    "2027-01"
+  ],
+  "priorities": 3,
+  "checklist": 10,
+  "checklistTasks": 3,
+  "calls": 16,
+  "sources": 4,
+  "outcomesPerSource": 4,
+  "collections": 2,
+  "templates": 4,
+  "versionsPerTemplate": 2,
+  "generatedDocuments": 4,
+  "documentCollectionLinks": 2,
+  "chatMessages": 2,
+  "proposedActions": 1,
+  "repeatedSeed": "PASS · same fixture counts and template versions",
+  "externalCallsByV31Seed": 0,
+  "browserErrors": 0,
+  "screenshotCount": 27,
+  "note": "DEMO only; live-search evidence is maintained by another agent. Base HEAD is not the final release SHA."
+}

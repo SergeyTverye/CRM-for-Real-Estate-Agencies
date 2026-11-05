@@ -1,0 +1,56 @@
+{
+  "mode": "LIVE",
+  "sessions": [
+    {
+      "id": "739cbcfe-e159-4dc3-b014-a5e285cfcc92",
+      "ownerUserId": "9facca46-2d7c-4ff8-a72c-ae78cd4ae052",
+      "title": "[PERSON] черновик задачи «[PERSON] условия аренды [PERSON] v3.1» для т",
+      "contextType": "client",
+      "contextId": "e88df87c-d5e4-4658-a768-be50777c71e3",
+      "createdAt": "2026-11-05T22:29:44.663Z",
+      "updatedAt": "2026-11-05T22:29:58.579Z",
+      "archivedAt": null,
+      "pendingActions": [
+        {
+          "id": "f63b8982-9a1d-44b1-8cf6-cc69f97b0694",
+          "sessionId": "739cbcfe-e159-4dc3-b014-a5e285cfcc92",
+          "actionType": "task",
+          "payload": {
+            "dueAt": "2026-11-10T05:00:00.000Z",
+            "title": "[PERSON] условия аренды [PERSON] v3.1",
+            "clientId": "e88df87c-d5e4-4658-a768-be50777c71e3",
+            "description": "[PERSON] аренды [PERSON] v3.1"
+          },
+          "status": "confirmed",
+          "decidedBy": "9facca46-2d7c-4ff8-a72c-ae78cd4ae052",
+          "decidedAt": "2026-11-05T22:31:55.535Z",
+          "createdAt": "2026-11-05T22:29:55.056Z",
+          "expiresAt": "2026-11-06T22:29:55.039Z"
+        }
+      ],
+      "messages": [
+        {
+          "content": " Задача «[PERSON] условия аренды [PERSON] v3.1» подготовлена как черновик и ожидает подтверждения сотрудника.",
+          "toolArgs": []
+        },
+        {
+          "content": "Задача создана сотрудником.",
+          "toolArgs": [
+            {
+              "id": "baa05ebe-6906-48c0-b982-ff303c9b1e73",
+              "href": "/tasks/baa05ebe-6906-48c0-b982-ff303c9b1e73",
+              "label": "Открыть задачу"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "records": [
+    {
+      "id": "baa05ebe-6906-48c0-b982-ff303c9b1e73",
+      "title": "[PERSON] условия аренды [PERSON] v3.1",
+      "dueAt": "2026-11-10T05:00:00.000Z"
+    }
+  ]
+}

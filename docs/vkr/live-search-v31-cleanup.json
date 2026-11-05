@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-05T23:10:08.169Z",
+  "settingsRestored": true,
+  "originalBudgetRub": "1000",
+  "paidCalls": 4,
+  "webSearchCalls": 0,
+  "chargedRub": "0.345700",
+  "userDeactivated": true,
+  "activeTrialSessions": 0,
+  "initialLoginSessionsRevoked": 1,
+  "readOnlyReshootCompleted": true,
+  "controlledReplayCancelConfirmed": true,
+  "server3415Stopped": true,
+  "searchWorkerStopped": true
+}

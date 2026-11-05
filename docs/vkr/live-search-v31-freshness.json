@@ -1,0 +1,30 @@
+[
+  {
+    "mode": "published",
+    "period": "7",
+    "status": 200,
+    "total": 0,
+    "unknown": 31
+  },
+  {
+    "mode": "published",
+    "period": "30",
+    "status": 200,
+    "total": 0,
+    "unknown": 31
+  },
+  {
+    "mode": "first_seen",
+    "period": "7",
+    "status": 200,
+    "total": 51,
+    "unknown": 31
+  },
+  {
+    "mode": "first_seen",
+    "period": "30",
+    "status": 200,
+    "total": 51,
+    "unknown": 31
+  }
+]
