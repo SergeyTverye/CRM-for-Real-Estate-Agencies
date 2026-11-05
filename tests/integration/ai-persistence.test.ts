@@ -9,7 +9,7 @@ import { getAiSettings, getAiUsage, updateAiSettings } from "@/modules/ai/applic
 import { seedAiTariffs } from "@/modules/ai/application/seed-ai";
 import type { AiSettingsInput } from "@/modules/ai/domain/settings";
 let users: TestUsers;
-beforeEach(async () => { resetConfigCache(); await resetDatabase(); users = await seedBase();
+beforeEach(async () => { vi.stubEnv("AI_ENABLED", "true"); vi.stubEnv("YANDEX_AI_MAX_MONTHLY_COST_RUB", "1000"); resetConfigCache(); await resetDatabase(); users = await seedBase();
   await db.aiSetting.create({ data: { aiEnabled: true, perUserDailyLimit: 100, perJobLimit: 100, dailyLimit: 100, monthlyBudgetRub: "2.50" } }); });
 afterEach(() => { vi.unstubAllEnvs(); resetConfigCache(); });
 const tariff = { id: "test", model: "test/latest", effectiveFrom: new Date("2020-01-01Z"), inputMicrosPerMillion: 1000000n,

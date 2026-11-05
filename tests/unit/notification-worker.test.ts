@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({ standby:false, locked:true, due:new Date("2026-11-05T03:00:00Z"), owner:"u", open:true,
+  transactions:0, lockQueries:0,
   rows:[] as { id:string; recipientUserId:string; sourceId:string; kind:string; dedupKey:string; state:string; triggerAt:Date; snoozedUntil:Date|null }[] }));
 vi.mock("@/shared/config/env",()=>({ getConfig:()=>({ isReadOnlyInstance:state.standby,APP_TIMEZONE:"Asia/Novosibirsk" }) }));
 vi.mock("@/shared/db/client",()=>({
   disconnectDb:vi.fn(),
-  transaction:async (fn:(tx:unknown)=>Promise<unknown>)=>fn({
-    $queryRaw:async()=>[{locked:state.locked}],
+  transaction:async (fn:(tx:unknown)=>Promise<unknown>)=>{state.transactions++;return fn({
+    $queryRaw:async()=>{state.lockQueries++;return [{locked:state.locked}];},
     user:{findMany:async()=>[{id:"u",notificationPreference:{leadMinutes:15}},{id:"v",notificationPreference:{leadMinutes:0}}]},
     task:{findMany:async()=>state.open ? [{id:"t",responsibleUserId:state.owner,dueAt:state.due,createdAt:new Date("2026-11-01T03:00:00Z"),taskType:"call_or_contact",recurrenceKind:"none"}] : []},
     showing:{findMany:async()=>[]},agreement:{findMany:async()=>[]},calendarEvent:{findMany:async()=>[]},
@@ -19,11 +20,11 @@ vi.mock("@/shared/db/client",()=>({
         return{count};
       },
     },
-  }),
+  });},
 }));
 import { generateNotifications } from "@/modules/notifications/application/notification-generator";
 describe("notification worker reconciliation (in-memory persistence contract)",()=>{
-  beforeEach(()=>{state.rows=[];state.standby=false;state.locked=true;state.open=true;state.owner="u";state.due=new Date("2026-11-05T03:00Z");});
+  beforeEach(()=>{state.rows=[];state.transactions=0;state.lockQueries=0;state.standby=false;state.locked=true;state.open=true;state.owner="u";state.due=new Date("2026-11-05T03:00Z");});
   it("catches up and never duplicates delivered rows across ticks",async()=>{
     const now=new Date("2026-11-06");
     expect((await generateNotifications(now)).delivered).toBe(2);
@@ -47,8 +48,10 @@ describe("notification worker reconciliation (in-memory persistence contract)",(
     expect(state.due.toISOString()).toBe("2026-11-05T03:00:00.000Z");
   });
   it("does no work on standby or without the advisory lock",async()=>{
-    state.standby=true;expect((await generateNotifications()).active).toBe(false);
-    state.standby=false;state.locked=false;expect((await generateNotifications()).locked).toBe(false);
+    state.standby=true;expect(await generateNotifications()).toMatchObject({active:false,delivered:0});
+    expect(state.transactions).toBe(0);
+    state.standby=false;state.locked=false;expect(await generateNotifications()).toMatchObject({active:true,locked:false,delivered:0});
+    expect(state.transactions).toBe(1);expect(state.lockQueries).toBe(1);
     expect(state.rows).toHaveLength(0);
   });
   it("dismisses pending notifications on completion or reassignment",async()=>{

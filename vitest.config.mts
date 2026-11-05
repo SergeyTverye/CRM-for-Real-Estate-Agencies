@@ -15,11 +15,14 @@ const tmp = path.join(os.tmpdir(), `crm-test-${process.pid}`);
 const env = {
   NODE_ENV: "test",
   DATABASE_URL: TEST_DB,
-  APP_TIMEZONE: "Europe/Moscow",
+  APP_TIMEZONE: "Asia/Novosibirsk",
   FILE_STORAGE_PATH: path.join(tmp, "files"),
   IMPORT_STAGING_PATH: path.join(tmp, "import-staging"),
   BACKUP_PATH: path.join(tmp, "backups"),
   LOG_LEVEL: "silent",
+  AI_ENABLED: "false",
+  SCRAPER_ENABLED: "false",
+  SCRAPER_DEMO_FIXTURES: "false",
   MAX_UPLOAD_MB: "2",
 };
 
@@ -27,6 +30,9 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "src") } },
   test: {
     env,
+    // All database projects share one database and reset their fixtures.
+    fileParallelism: false,
+    maxWorkers: 1,
     projects: [
       {
         extends: true,

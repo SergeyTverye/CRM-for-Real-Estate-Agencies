@@ -16,7 +16,7 @@ export const E2E_PASSWORDS = {
 const serverEnv = {
   NODE_ENV: "production",
   DATABASE_URL: E2E_DB,
-  APP_TIMEZONE: "Europe/Moscow",
+  APP_TIMEZONE: "Asia/Novosibirsk",
   DEPLOYMENT_ID: "6f1c2a3b-4d5e-4f60-8a7b-9c0d1e2f3a4b",
   INSTANCE_ID: "e2e",
   FILE_STORAGE_PATH: "./data/e2e/files",
@@ -38,7 +38,7 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
     locale: "ru-RU",
-    timezoneId: "Europe/Moscow",
+    timezoneId: "Asia/Novosibirsk",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     viewport: { width: 1440, height: 900 },
