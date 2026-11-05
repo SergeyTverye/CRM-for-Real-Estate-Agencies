@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": { "incremental": false },
+  "include": [
+    "../../../src/modules/property-search/domain/**/*.ts",
+    "../../../src/modules/property-search/infrastructure/**/*.ts",
+    "../../../src/shared/net/ssrf.ts",
+    "./*.test.ts"
+  ]
+}

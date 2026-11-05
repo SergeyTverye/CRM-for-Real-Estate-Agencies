@@ -1,0 +1,45 @@
+{
+  "source": "youla",
+  "query": {},
+  "timestamp": "2026-11-05T09:00:00.000Z",
+  "total": 1,
+  "results": [
+    {
+      "id": "synthetic-101",
+      "source": "youla",
+      "title": "Торговое помещение 100 м²",
+      "price": 15000000,
+      "priceText": "15 000 000 ₽",
+      "address": "Москва, Тверской район, улица Примерная, 10",
+      "rooms": null,
+      "area": 100,
+      "floor": 1,
+      "url": "https://youla.ru/synthetic-101",
+      "images": [
+        "https://youla.ru/synthetic.jpg"
+      ],
+      "description": "Отдельный вход. Витрина. Первая линия. Мощность 50 кВт. Потолки 4 м. Мокрая точка. Ворота.",
+      "phone": null,
+      "city": "Москва",
+      "district": "Тверской",
+      "propertyType": "retail",
+      "category": "commercial",
+      "deal": "sale",
+      "sellerType": "owner",
+      "floorType": "aboveGround",
+      "timestamp": "2026-11-05T09:00:00.000Z"
+    }
+  ],
+  "errors": [],
+  "pages": [
+    {
+      "source": "youla",
+      "page": 1,
+      "total": 1,
+      "hasNext": false,
+      "nextUrl": null,
+      "errors": []
+    }
+  ],
+  "partial": false
+}
