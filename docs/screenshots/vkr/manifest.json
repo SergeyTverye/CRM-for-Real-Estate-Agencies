@@ -1,0 +1,173 @@
+[
+  {
+    "file": "01-today.png",
+    "scenario": "Ежедневные задачи, просрочки и ближайшие действия",
+    "date": "2026-11-05T01:50:23.672Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/today",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "02-client-card.png",
+    "scenario": "Карточка синтетического клиента ООО «Сибирь Коммерция 1»",
+    "date": "2026-11-05T01:50:23.940Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/clients/ed9d23dd-4b6c-4fe1-9262-9e9f7dcbe62a",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "03-need-card.png",
+    "scenario": "Активная потребность и обязательное следующее действие",
+    "date": "2026-11-05T01:50:24.287Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/needs/2d95fe9e-eb12-4bb7-8568-46f604fedfdc",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "04-property-search-filters.png",
+    "scenario": "Ручные условия поиска: Москва, торговля, первый этаж, 80–150 м²",
+    "date": "2026-11-05T01:50:24.685Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/property-search?needId=2d95fe9e-eb12-4bb7-8568-46f604fedfdc",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "05-property-search-ai-adjust.png",
+    "scenario": "Ручная корректировка фильтров при выключенном ИИ; ответ ИИ не имитируется",
+    "date": "2026-11-05T01:50:24.817Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/property-search?needId=2d95fe9e-eb12-4bb7-8568-46f604fedfdc",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "06-source-failure.png",
+    "scenario": "Частичный отказ HTTP 429; успешные результаты Циан сохранены; ТЕСТОВЫЙ РЕЖИМ",
+    "date": "2026-11-05T01:50:25.178Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/property-search?needId=2d95fe9e-eb12-4bb7-8568-46f604fedfdc",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "08-selection.png",
+    "scenario": "Кандидаты подборки и отдельная связь с каталогом CRM",
+    "date": "2026-11-05T01:50:25.407Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/needs/2d95fe9e-eb12-4bb7-8568-46f604fedfdc",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "09-property-gallery.png",
+    "scenario": "Галерея синтетических фотографий и главное фото",
+    "date": "2026-11-05T01:50:25.850Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/properties/401d23ee-e92f-475a-824f-0c2ed78e5e60?tab=photos",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "09b-lightbox.png",
+    "scenario": "Увеличение подлинного файла из StorageAdapter",
+    "date": "2026-11-05T01:50:25.965Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/properties/401d23ee-e92f-475a-824f-0c2ed78e5e60?tab=photos",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "10-offer.png",
+    "scenario": "Структурированное КП с тремя объектами и сохранёнными снимками",
+    "date": "2026-11-05T01:50:26.249Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/offers/6bee2633-00df-48b2-ba90-0fda3a733660",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "10b-offer-print.png",
+    "scenario": "Печатный HTML КП: реальный print CSS, нейтральный шаблон",
+    "date": "2026-11-05T01:50:26.597Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/offers/6bee2633-00df-48b2-ba90-0fda3a733660/print",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "11-calendar-week.png",
+    "scenario": "Неделя: задачи, показы, встречи в Asia/Novosibirsk",
+    "date": "2026-11-05T01:50:26.890Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/calendar",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "12-notifications.png",
+    "scenario": "Внутренние уведомления из демонстрационной БД",
+    "date": "2026-11-05T01:50:27.075Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/notifications",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "13-deal-documents-checklist.png",
+    "scenario": "Статусы документов сделки и связи с файлами",
+    "date": "2026-11-05T01:50:27.515Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/deals/6aa22575-7647-4c73-a96e-4bf8771c73fe",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "16-mobile-today.png",
+    "scenario": "Сегодня на мобильном экране 390 px",
+    "date": "2026-11-05T01:50:27.744Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/today",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "14-report-kpi.png",
+    "scenario": "KPI руководителя за фиксированный период 01.09–31.12.2026",
+    "date": "2026-11-05T01:50:28.463Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "manager",
+    "url": "/reports?from=2026-09-01&to=2026-12-31",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "14b-report-drilldown.png",
+    "scenario": "Переход из KPI в первичные записи с теми же границами",
+    "date": "2026-11-05T01:50:28.699Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "manager",
+    "url": "/reports/detail?from=2026-09-01&to=2026-12-31&metric=newRequests",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "15-settings-ai.png",
+    "scenario": "Настройки и ограничения ИИ, доступные руководителю",
+    "date": "2026-11-05T01:50:29.239Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "manager",
+    "url": "/settings/ai",
+    "mode": "Демо-фикстуры площадок; AI выключен; синтетические данные crm_demo"
+  },
+  {
+    "file": "07-web-fallback.png",
+    "scenario": "ТЕСТОВЫЙ РЕЖИМ: полный отказ скрапера → записанный веб-резерв, требуется проверка",
+    "date": "2026-11-05T01:50:32.407Z",
+    "sha": "66af4875e31d4822fa73826b632e5cef28e265c9",
+    "role": "realtor1",
+    "url": "/property-search",
+    "mode": "ТЕСТИРОВАНИЕ: FixtureScraperAdapter + FakeResponsesProvider; живого AI/веб-сбора нет"
+  }
+]

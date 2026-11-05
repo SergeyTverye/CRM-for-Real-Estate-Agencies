@@ -1,0 +1,18 @@
+.page { display: grid; gap: 1rem; min-width: 0; }
+.page h1 { font-size: 1.5rem; font-weight: 600; }
+.page h2, .page legend { font-size: 1rem; font-weight: 600; }
+.page p, .page small { color: #475569; }
+.page fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; padding: 1rem; border: 1px solid #cbd5e1; border-radius: .5rem; background: white; }
+.page legend { padding-inline: .5rem; }
+.page label { display: block; min-width: 0; }
+.page label:has(input[type="checkbox"]) { display: inline-flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.page input:not([type="checkbox"]), .page select { display: block; width: 100%; margin-top: .375rem; padding: .5rem .75rem; border: 1px solid #cbd5e1; border-radius: .375rem; background: white; }
+.page small { display: block; margin-top: .25rem; }
+.page fieldset > div, .page fieldset > p { grid-column: 1 / -1; }
+.page fieldset > div { display: flex; flex-wrap: wrap; gap: .75rem; }
+.page table { display: block; width: 100%; overflow-x: auto; border: 1px solid #cbd5e1; border-radius: .5rem; background: white; border-collapse: collapse; }
+.page th, .page td { padding: .65rem .75rem; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; overflow-wrap: anywhere; min-width: 6rem; }
+.page th { background: #f1f5f9; font-weight: 600; }
+.page form[method="get"] { display: flex; align-items: end; gap: .75rem; }
+.page form[method="get"] button { padding: .5rem .75rem; border: 1px solid #cbd5e1; border-radius: .375rem; background: white; }
+@media (max-width: 640px) { .page fieldset { grid-template-columns: minmax(0, 1fr); } }

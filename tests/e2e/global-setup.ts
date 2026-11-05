@@ -1,10 +1,11 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import pg from "pg";
 
 const E2E_DB = process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";
 
-/** Чистая БД для E2E: пересоздание, миграции, seed (пароли без обязательной смены, демо-данные). */
+/** Только crm_e2e. Копируем применённую схему crm_demo, без generate/migrate. */
 export default async function globalSetup() {
+  if (new URL(E2E_DB).pathname !== "/crm_e2e") throw new Error("E2E requires isolated crm_e2e database");
   const admin = new pg.Client({ connectionString: E2E_DB.replace(/\/crm_e2e$/, "/crm_test") });
   await admin.connect();
   await admin.query("DROP DATABASE IF EXISTS crm_e2e WITH (FORCE)");
@@ -20,6 +21,12 @@ export default async function globalSetup() {
     SEED_MUST_CHANGE_PASSWORD: "false",
     SEED_DEMO_DATA: "true",
   };
-  execSync("npx prisma migrate deploy", { env, stdio: "pipe" });
-  execSync("npx prisma db seed", { env, stdio: "pipe" });
+  const container = process.env.E2E_DB_CONTAINER ?? "crm-test-testdb-1";
+  const schema = execFileSync("docker", ["exec", container, "pg_dump", "-U", "crm", "-d", "crm_demo", "--schema-only", "--no-owner", "--no-privileges"], { maxBuffer: 10 * 1024 * 1024 });
+  execFileSync("docker", ["exec", "-i", container, "psql", "-U", "crm", "-d", "crm_e2e", "-v", "ON_ERROR_STOP=1"], { input: schema, stdio: ["pipe", "pipe", "pipe"] });
+  execFileSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "prisma/seed.ts"], { env, stdio: "pipe" });
+  const db = new pg.Client({ connectionString: E2E_DB });
+  await db.connect();
+  await db.query("UPDATE ai_settings SET scraper_enabled=true, enabled_sources=ARRAY['cian','mirkvartir','avito'], ai_enabled=false");
+  await db.end();
 }

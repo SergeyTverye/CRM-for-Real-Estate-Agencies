@@ -3,12 +3,13 @@ import { requirePageActor } from "@/server/page-auth";
 import { getAiSettings, getAiUsage } from "@/modules/ai/application/settings-service";
 import { AiSettingsForm } from "./ai-settings-form";
 import { labelOf } from "@/shared/codebook";
+import styles from "./settings.module.css";
 
 export default async function AiSettingsPage({ searchParams }: { searchParams: Promise<{ month?: string; page?: string }> }) {
   const actor = await requirePageActor({ manager: true });
   const query = await searchParams;
   const [data, usage] = await Promise.all([getAiSettings(actor), getAiUsage(actor, { month: query.month, page: query.page })]);
-  return <div className="stack">
+  return <div className={styles.page}>
     <h1>ИИ и источники поиска</h1>
     <p>ENV задаёт предельные разрешения и лимиты. Неизвестный расход сохраняет резерв; повтор платного запроса требует нового разрешения.</p>
     <AiSettingsForm key={data.setting.updatedAt} data={data} />

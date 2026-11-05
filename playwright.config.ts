@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Browser E2E/smoke (ТЗ 10, 31.1): production-сборка приложения на отдельной БД crm_e2e
- * (подготавливается tests/e2e/global-setup.ts: чистая схема → миграции → seed с демо-данными).
+ * (global-setup: копия применённой схемы crm_demo → seed с демо-данными; без migrate/generate).
  */
 const PORT = Number(process.env.E2E_PORT ?? 3200);
 const E2E_DB = process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";
@@ -24,6 +24,10 @@ const serverEnv = {
   BACKUP_PATH: "./data/e2e/backups",
   COOKIE_SECURE: "false",
   LOG_LEVEL: "warn",
+  SCRAPER_DEMO_FIXTURES: "true",
+  SCRAPER_ENABLED: "true",
+  AI_ENABLED: "false",
+  YANDEX_WEB_SEARCH_ENABLED: "false",
   PORT: String(PORT),
 };
 
@@ -33,7 +37,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  timeout: 60_000,
+  timeout: 120_000,
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
