@@ -36,6 +36,10 @@ it("exports A4 PDF and DOCX with authorized gallery, requisites, comparison and 
   const html = offerHtml(print);
   expect(html).toContain("Введение &lt;без HTML&gt;"); expect(html).toContain("Сравнение объектов"); expect(html).not.toContain("999999");
   expect(html).not.toMatch(/<img[^>]+src="https?:/);
+  // Comparison and contact details belong to the cover, before the object pages.
+  expect(html.indexOf("<h2>Сравнение объектов")).toBeLessThan(html.indexOf('<section class="object">'));
+  expect(html.indexOf("Ваш ответственный специалист")).toBeLessThan(html.indexOf('<section class="object">'));
+  expect(html).toContain('class="thumbnail"');
   const doc = await generateOfferDocument(u.realtor1, o.id, "https://crm.test");
   const file = await openDocumentForDownload(u.realtor1, doc.id);
   const chunks: Buffer[] = []; for await (const chunk of file.stream) chunks.push(Buffer.from(chunk));
@@ -43,6 +47,8 @@ it("exports A4 PDF and DOCX with authorized gallery, requisites, comparison and 
   const xml = strFromU8(zip["word/document.xml"]!);
   for (const value of ["Снимок адреса", "123 456", "Сравнение объектов", "Примечание для клиента", "0000000000", "Центральный", "Цена за м²"]) expect(xml).toContain(value);
   expect(xml).not.toContain("999999"); expect(xml).toContain("w:pageBreakBefore"); expect(xml).toContain("w:tblHeader"); expect(xml).toContain('w:w="11906"');
+  expect(xml.indexOf("Сравнение объектов")).toBeLessThan(xml.indexOf("w:pageBreakBefore"));
+  expect(xml.indexOf("Ваш ответственный специалист")).toBeLessThan(xml.indexOf("w:pageBreakBefore"));
   expect(Object.keys(zip).filter(key => key.startsWith("word/media/")).length).toBeGreaterThanOrEqual(4);
   const cookie = await sessionCookieFor(u.realtor1);
   const response = await pdfGet(apiRequest("GET", `/api/v1/offers/${o.id}/pdf`, { cookie }), routeParams({ id: o.id }));

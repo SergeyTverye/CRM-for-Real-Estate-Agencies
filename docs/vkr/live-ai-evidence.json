@@ -6964,6 +6964,708 @@
     "cianBrowserStatusNote": "The recorded run used an intermediate adapter that mapped a small CAPTCHA page to HTTP 403. This is a policy classification, not proof of the original browser HTTP status. Final parser guard emits ACCESS_BLOCKED/CIAN_ACCESS_CHALLENGE without synthesizing an HTTP status; covered by unit regression, no further live run.",
     "screenshots": [
       {
+        "file": "docs/screenshots/vkr/live-ai/31-web-corrected.png",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "date": "2026-11-05T13:36:29.322Z",
+        "sourceTime": "2026-11-05T12:38:05.494Z",
+        "sha256": "b04b758001a369d144c0e6ef317763c4d63e74a86bdc27d50fcdebfe180eb6bb"
+      },
+      {
+        "file": "docs/screenshots/vkr/live-ai/33-timeout-recovery.png",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "date": "2026-11-05T13:36:33.674Z",
+        "sourceTime": "2026-11-05T12:34:30.026Z",
+        "sha256": "af905dab7e1d9f7ce16d2f19f5784b60a8905d99b13255bfa509bae17e4e3555"
+      },
+      {
+        "file": "docs/screenshots/vkr/live-ai/34-auto-web-cards.png",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "date": "2026-11-05T13:36:35.695Z",
+        "sourceTime": "2026-11-05T12:40:42.003Z",
+        "sha256": "6ae4422567431ab7cbcf2d925218317f0805b6405a51e17f089a54549f5489c9"
+      },
+      {
+        "file": "docs/screenshots/vkr/live-ai/36-preserved-after-restart.png",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "date": "2026-11-05T13:44:58.032Z",
+        "sourceTime": "2026-11-05T12:38:05.494Z",
+        "sha256": "3e72c763de20c6328e854e25d011e12f736b495b4f83cd26200bb901c57a4ea8"
+      },
+      {
+        "file": "docs/screenshots/vkr/live-ai/37-empty-live.png",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "date": "2026-11-05T13:36:37.536Z",
+        "sourceTime": "2026-11-05T12:42:14.739Z",
+        "sha256": "5b9b4c5d900ead2754ecb1dc8a98e4d6048a4f8817c1c0669eb0c25f91c6d966"
+      }
+    ],
+    "finalBudgetRub": "1000",
+    "webCardsFound": 0
+  },
+  "totals": {
+    "input": 8280,
+    "output": 2610,
+    "web": 5,
+    "other": 12,
+    "toolCalls": 5,
+    "rub": "5.925000",
+    "runs": 10,
+    "calls": 17,
+    "cloudBillingAvailable": false
+  },
+  "totalsBeforePolish": {
+    "input": 6065,
+    "output": 1968,
+    "web": 5,
+    "other": 8,
+    "toolCalls": 5,
+    "rub": "5.575100",
+    "runs": 10,
+    "calls": 13,
+    "cloudBillingAvailable": false
+  },
+  "polishCapture": {
+    "updatedAt": "2026-11-05T13:45:35.453784Z",
+    "host": "localhost:3390",
+    "distDir": ".next-shots",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "savedReplayAiEnabled": false,
+    "newParseCalls": 4,
+    "newWebCalls": 0,
+    "newScraperRuns": 0,
+    "usage": [
+      {
+        "id": "96d89890-9bf2-44cf-a0fa-91493880461a",
+        "time": "2026-11-05T13:34:21.279Z",
+        "jobId": "a36aa397-2407-4da4-a2b4-fad74977453e",
+        "type": "parse",
+        "status": "success",
+        "input": 543,
+        "output": 137,
+        "webSearchCalls": 0,
+        "chargedRub": "0.0817"
+      },
+      {
+        "id": "eb2a3dc7-d2c9-4be4-a6a6-07ae5c7db461",
+        "time": "2026-11-05T13:34:27.091Z",
+        "jobId": "3c6bad80-aaf3-4729-9a84-746651721c30",
+        "type": "parse",
+        "status": "success",
+        "input": 555,
+        "output": 164,
+        "webSearchCalls": 0,
+        "chargedRub": "0.0883"
+      },
+      {
+        "id": "4dac203f-6b11-4764-a0e1-c77203db44b3",
+        "time": "2026-11-05T13:34:31.870Z",
+        "jobId": "9ffda209-77fb-4931-bf62-b8e4a1a0040e",
+        "type": "parse",
+        "status": "success",
+        "input": 532,
+        "output": 174,
+        "webSearchCalls": 0,
+        "chargedRub": "0.088"
+      },
+      {
+        "id": "eea6f8fe-e20a-402d-a998-194bc815e6cb",
+        "time": "2026-11-05T13:34:39.457Z",
+        "jobId": "3a38bced-5c0d-4b15-be9a-a3e6e9ad04eb",
+        "type": "parse",
+        "status": "success",
+        "input": 585,
+        "output": 167,
+        "webSearchCalls": 0,
+        "chargedRub": "0.0919"
+      }
+    ],
+    "addedCostCrmRub": "0.3499",
+    "cloudBillingAvailable": false,
+    "parseAttempts": [
+      {
+        "time": "2026-11-05T13:31:40.494Z",
+        "query": "Продажа офиса в Новосибирске, площадь от 30 до 500 м², цена от 1000000 до 50000000 рублей, любой этаж, любые районы, все продавцы",
+        "status": "attempted",
+        "budgetRub": "250",
+        "http": 409,
+        "result": {
+          "error": {
+            "code": "AI_UNAVAILABLE",
+            "message": "Разбор с ИИ недоступен или лимит исчерпан. Ручная форма доступна.",
+            "correlationId": "c9ec58c3-4996-457a-bb3a-e346fb66f470"
+          }
+        },
+        "completedAt": "2026-11-05T13:31:42.345Z"
+      },
+      {
+        "time": "2026-11-05T13:34:19.876Z",
+        "query": "Продажа офиса в Новосибирске, площадь от 30 до 500 м², цена от 1000000 до 50000000 рублей, любой этаж, любые районы, все продавцы",
+        "status": "attempted",
+        "budgetRub": "250",
+        "http": 200,
+        "result": {
+          "filters": {
+            "city": "Новосибирск",
+            "operation": "sale",
+            "priceUnit": "rub_total",
+            "purposes": [
+              "office"
+            ],
+            "floorMode": "any",
+            "priceFrom": "1000000",
+            "priceTo": "50000000",
+            "areaFrom": 30,
+            "areaTo": 500,
+            "districts": [],
+            "seller": "all",
+            "requiredFeatures": [],
+            "preferredFeatures": [],
+            "sources": [
+              "cian",
+              "mirkvartir",
+              "onrealt",
+              "domclick",
+              "yandex",
+              "youla",
+              "avito"
+            ]
+          },
+          "clarificationQuestion": null,
+          "mode": "live",
+          "testingMode": false,
+          "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+          "usage": {
+            "inputTokens": 543,
+            "outputTokens": 137
+          },
+          "webSearchCalls": 0
+        },
+        "completedAt": "2026-11-05T13:34:26.423Z"
+      },
+      {
+        "time": "2026-11-05T13:34:26.683Z",
+        "query": "Аренда торговли или ПСН в Новосибирске, Центральный или Заельцовский район, строго первый этаж, 50–200 м², от 50000 до 250000 рублей в месяц, только собственник; обязательный отдельный вход, желательна мокрая точка",
+        "status": "attempted",
+        "budgetRub": "250",
+        "http": 200,
+        "result": {
+          "filters": {
+            "city": "Новосибирск",
+            "operation": "rent",
+            "priceUnit": "rub_month",
+            "purposes": [
+              "retail",
+              "psn_universal"
+            ],
+            "floorMode": "first_floor_only",
+            "priceFrom": "50000",
+            "priceTo": "250000",
+            "areaFrom": 50,
+            "areaTo": 200,
+            "districts": [
+              "Центральный",
+              "Заельцовский"
+            ],
+            "seller": "confirmed_owner_only",
+            "requiredFeatures": [
+              "separate_entrance"
+            ],
+            "preferredFeatures": [
+              "wet_point"
+            ],
+            "sources": [
+              "cian",
+              "mirkvartir",
+              "onrealt",
+              "domclick",
+              "yandex",
+              "youla",
+              "avito"
+            ]
+          },
+          "clarificationQuestion": null,
+          "mode": "live",
+          "testingMode": false,
+          "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+          "usage": {
+            "inputTokens": 555,
+            "outputTokens": 164
+          },
+          "webSearchCalls": 0
+        },
+        "completedAt": "2026-11-05T13:34:31.289Z"
+      },
+      {
+        "time": "2026-11-05T13:34:31.542Z",
+        "query": "Добавь обязательную витрину и исключи цоколь, остальные условия сохрани",
+        "status": "attempted",
+        "budgetRub": "250",
+        "http": 200,
+        "result": {
+          "filters": {
+            "city": "Новосибирск",
+            "operation": "rent",
+            "priceUnit": "rub_month",
+            "purposes": [
+              "retail",
+              "psn_universal"
+            ],
+            "floorMode": "first_floor_only",
+            "priceFrom": "50000",
+            "priceTo": "250000",
+            "areaFrom": 50,
+            "areaTo": 200,
+            "districts": [
+              "Центральный",
+              "Заельцовский"
+            ],
+            "seller": "confirmed_owner_only",
+            "requiredFeatures": [
+              "separate_entrance",
+              "showcase"
+            ],
+            "preferredFeatures": [
+              "wet_point"
+            ],
+            "sources": [
+              "cian",
+              "mirkvartir",
+              "onrealt",
+              "domclick",
+              "yandex",
+              "youla",
+              "avito"
+            ]
+          },
+          "clarificationQuestion": null,
+          "mode": "live",
+          "testingMode": false,
+          "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+          "usage": {
+            "inputTokens": 532,
+            "outputTokens": 174
+          },
+          "webSearchCalls": 0
+        },
+        "completedAt": "2026-11-05T13:34:38.880Z"
+      },
+      {
+        "time": "2026-11-05T13:34:39.125Z",
+        "query": "Новый поиск: аренда склада или производства в Новосибирске, Ленинский или Октябрьский район, 200–1000 м², 100000–600000 рублей в месяц, без подвала и цоколя, все продавцы, обязательно ворота и мощность от 50 кВт",
+        "status": "attempted",
+        "budgetRub": "250",
+        "http": 200,
+        "result": {
+          "filters": {
+            "city": "Новосибирск",
+            "operation": "rent",
+            "priceUnit": "rub_month",
+            "purposes": [
+              "production",
+              "warehouse"
+            ],
+            "floorMode": "exclude_basement_and_semi_basement",
+            "priceFrom": "100000",
+            "priceTo": "600000",
+            "areaFrom": 200,
+            "areaTo": 1000,
+            "districts": [
+              "Ленинский",
+              "Октябрьский"
+            ],
+            "seller": "all",
+            "requiredFeatures": [
+              "gates",
+              "power_from_50_kW"
+            ],
+            "preferredFeatures": [],
+            "sources": [
+              "cian",
+              "mirkvartir",
+              "onrealt",
+              "domclick",
+              "yandex",
+              "youla",
+              "avito"
+            ]
+          },
+          "clarificationQuestion": null,
+          "mode": "live",
+          "testingMode": false,
+          "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+          "usage": {
+            "inputTokens": 585,
+            "outputTokens": 167
+          },
+          "webSearchCalls": 0
+        },
+        "completedAt": "2026-11-05T13:34:45.415Z"
+      }
+    ],
+    "screenshots": [
+      {
+        "file": "live-ai/01-query.png",
+        "scenario": "Русский запрос перед новым LIVE parse",
+        "date": "2026-11-05T13:34:19.873Z",
+        "sourceTime": "2026-11-05T13:34:19.781Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "2f02bdceb6dbb703e460bc23f9fb2e72a1cc33ac6e9c9ce4fc746b22260b5435",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/02-ai-parsed-filters.png",
+        "scenario": "Новый LIVE parse русского запроса",
+        "date": "2026-11-05T13:34:26.570Z",
+        "sourceTime": "2026-11-05T13:34:26.423Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "9ab7490759fa761362c0dc3dd4e08b57c5830ceb2f5798bf9fd89219037f5f5b",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/12-rent-query.png",
+        "scenario": "Русский запрос перед новым LIVE parse",
+        "date": "2026-11-05T13:34:26.681Z",
+        "sourceTime": "2026-11-05T13:34:26.597Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "d704b9fc8f9f289f1098793b62494d424b18e6bb6945453c9dd408154af8fd86",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/13-rent-parsed.png",
+        "scenario": "Новый LIVE parse русского запроса",
+        "date": "2026-11-05T13:34:31.438Z",
+        "sourceTime": "2026-11-05T13:34:31.289Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "22dbb343c109c82d0d357eeb782d65d68232859e1f5db7b7f79d26883cf3599a",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/14-refinement-query.png",
+        "scenario": "Русский запрос перед новым LIVE parse",
+        "date": "2026-11-05T13:34:31.540Z",
+        "sourceTime": "2026-11-05T13:34:31.463Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "0bd1a17e9153a12eb4485a1b0f883076ebbc7c31cbe09c1b21cafb1994fa9b1c",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/15-refinement-parsed.png",
+        "scenario": "Новый LIVE parse русского запроса",
+        "date": "2026-11-05T13:34:39.020Z",
+        "sourceTime": "2026-11-05T13:34:38.880Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "86054f9b5b29f5ac0acd05a8adac0c33fcab49491dff9b2f79598ac6d92c0093",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/16-warehouse-query.png",
+        "scenario": "Русский запрос перед новым LIVE parse",
+        "date": "2026-11-05T13:34:39.123Z",
+        "sourceTime": "2026-11-05T13:34:39.047Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "c7fa9834efb7dc7bf54fa93d61b8fb7dc30a595fe508e07fab3f16f91b09e7ac",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/17-warehouse-parsed.png",
+        "scenario": "Новый LIVE parse русского запроса",
+        "date": "2026-11-05T13:34:45.588Z",
+        "sourceTime": "2026-11-05T13:34:45.415Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search",
+        "mode": "LIVE new parse; no web",
+        "sha256": "6e1b725ed102ba62713806c863d960843d202752a655f89a1f945071711fb4ff",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/04-live-results.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:15.868Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "1270e0881f9884a295840cc3c4a43dc1d994da962315dccc8e904037666ca3e9",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/06-source-statuses.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:21.085Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "3ff7df9e851032b6d71af567e3956a08f512d41a78f087df0c0c6d6e4246b764",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/19-rent-results.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:24.172Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:04:09.444Z",
+        "runId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "sha256": "c1697711d563d80fa83c9aa475c6448198a96209e81f8032e1ff98a31b4235b2",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/25-repeat-results.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:26.769Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=b2935476-406d-415c-a960-10958ae655d8",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:08:05.251Z",
+        "runId": "b2935476-406d-415c-a960-10958ae655d8",
+        "sha256": "17ade971318afb81454a770a058241804e5a923b8f0e3d9b27f867c29b7f0c7c",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/31-web-corrected.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:29.322Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=bce2a997-e54a-4ac6-9c8b-564f5e9845ac",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:38:05.494Z",
+        "runId": "bce2a997-e54a-4ac6-9c8b-564f5e9845ac",
+        "sha256": "b04b758001a369d144c0e6ef317763c4d63e74a86bdc27d50fcdebfe180eb6bb",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/33-timeout-recovery.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:33.674Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=57520939-7d91-41e3-a180-19c6485071a6",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:34:30.026Z",
+        "runId": "57520939-7d91-41e3-a180-19c6485071a6",
+        "sha256": "af905dab7e1d9f7ce16d2f19f5784b60a8905d99b13255bfa509bae17e4e3555",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/34-auto-web-cards.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:35.695Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=81a98519-3f49-4597-9828-20214c751e5b",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:40:42.003Z",
+        "runId": "81a98519-3f49-4597-9828-20214c751e5b",
+        "sha256": "6ae4422567431ab7cbcf2d925218317f0805b6405a51e17f089a54549f5489c9",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/37-empty-live.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:37.536Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=1a231df9-3099-4a45-85f4-fbc8c37b2e30",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:42:14.739Z",
+        "runId": "1a231df9-3099-4a45-85f4-fbc8c37b2e30",
+        "sha256": "5b9b4c5d900ead2754ecb1dc8a98e4d6048a4f8817c1c0669eb0c25f91c6d966",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/30-empty-results.png",
+        "scenario": "Сохранённый результат LIVE SearchRun",
+        "date": "2026-11-05T13:36:39.363Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=1c0d904b-604e-4c0d-b484-53f0ead97c7e",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:16:02.671Z",
+        "runId": "1c0d904b-604e-4c0d-b484-53f0ead97c7e",
+        "sha256": "1aa58ff7170742cdcd141a94855820aa3a8b6ccb4b2d084e99f3d1cb8ffe7f6a",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/26-comparison.png",
+        "scenario": "Сравнение двух сохранённых LIVE объявлений",
+        "date": "2026-11-05T13:36:49.692Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "2744cc1559e0ce6903df8954cf1af2c429b89d9c2b6d276297c4b71467579917",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/09-selection.png",
+        "scenario": "Сохранённая подборка LIVE",
+        "date": "2026-11-05T13:36:56.610Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/needs/2d95fe9e-eb12-4bb7-8568-46f604fedfdc",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "ff958b9c9563b780ad8b3e7313676a0215e2ad80b83cc337f74bf14d00283a00",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/10-offer.png",
+        "scenario": "КП из сохранённой LIVE подборки",
+        "date": "2026-11-05T13:37:00.108Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/offers/a4a73c92-cf4d-472c-860c-17b58ea557e7",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "fddf2db7248af72aaaf3b8417df7b514275fe2cb4c5ecdcee5b2a1c0610762b9",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/11-offer-print.png",
+        "scenario": "Печатный A4 сохранённого LIVE КП",
+        "date": "2026-11-05T13:37:03.148Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/offers/a4a73c92-cf4d-472c-860c-17b58ea557e7/print",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "c3969f0bde9c2a951c680555a7fbd9c18359e00347ab1983249f302abd100df2",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "10-offer.png",
+        "scenario": "DEMO КП из трёх объектов со снимками",
+        "date": "2026-11-05T13:38:09.334Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/offers/e965f7ec-e3f4-469b-a0ca-b18adf67a8d3",
+        "mode": "DEMO; crm_demo; AI_ENABLED=false",
+        "sha256": "4d5bd01faa6f420588a0076e9cc4699fc1b404f7bcfd7f2acdc20dcd00d66487",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "10c-offer-pdf-page1.png",
+        "scenario": "DEMO A4 PDF страница 1",
+        "date": "2026-11-05T13:38:16.295Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/api/v1/offers/e965f7ec-e3f4-469b-a0ca-b18adf67a8d3/pdf",
+        "mode": "DEMO; Poppler render",
+        "sha256": "3c22889fc3555419d999712d903f89d97f4507b9d5607553cd54c5e397be92b7",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "10d-offer-pdf-page2.png",
+        "scenario": "DEMO A4 PDF страница 2",
+        "date": "2026-11-05T13:38:16.297Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/api/v1/offers/e965f7ec-e3f4-469b-a0ca-b18adf67a8d3/pdf",
+        "mode": "DEMO; Poppler render",
+        "sha256": "ccc89eb0962d14c32fc746e17aabd5e1483668f69fec64680505449e843907e3",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "10b-offer-print.png",
+        "scenario": "Титульная страница A4 и единая панель действий",
+        "date": "2026-11-05T13:38:19.166Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/offers/e965f7ec-e3f4-469b-a0ca-b18adf67a8d3/print",
+        "mode": "DEMO; crm_demo; AI_ENABLED=false",
+        "sha256": "6697bfaf3e65f29b3872fc98c4cd5c13bed7659298e22e8ad776c3a03a18e7b0",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/05-evidence.png",
+        "scenario": "Сохранённые доказательства критериев",
+        "date": "2026-11-05T13:44:54.688Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "73fe0408f948cd1cae0831286455ff142cf673c570f8c25c06e91db444001010",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/08-bookmarks.png",
+        "scenario": "Сохранённые закладки LIVE",
+        "date": "2026-11-05T13:44:55.257Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T11:53:10.129Z",
+        "runId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "sha256": "b6660c5bfb8f17c9145845cc0d32e1380f02f94d8e799732099594284d79c024",
+        "visuallyReviewed": true
+      },
+      {
+        "file": "live-ai/36-preserved-after-restart.png",
+        "scenario": "Сохранённые результаты запуска доступны после рестарта без AI",
+        "date": "2026-11-05T13:44:58.032Z",
+        "sha": "9e2b71b32fe39cb9dd09866e27f1da6edfe99dce",
+        "role": "realtor1",
+        "url": "/property-search?runId=bce2a997-e54a-4ac6-9c8b-564f5e9845ac",
+        "mode": "LIVE saved replay; AI_ENABLED=false; no new calls",
+        "sourceTime": "2026-11-05T12:38:05.494Z",
+        "runId": "bce2a997-e54a-4ac6-9c8b-564f5e9845ac",
+        "sha256": "3e72c763de20c6328e854e25d011e12f736b495b4f83cd26200bb901c57a4ea8",
+        "visuallyReviewed": true
+      }
+    ],
+    "deduplicatedAliases": {
+      "24-repeat-confirm.png": "23-repeat-confirm.png",
+      "31-web-cards.png": "31-web-corrected.png",
+      "32-cian-status.png": "31-web-corrected.png",
+      "21-manual-web-browser.png": "31-web-corrected.png",
+      "07-web-fallback-live.png": "34-auto-web-cards.png",
+      "28-fallback-statuses.png": "34-auto-web-cards.png",
+      "22-preserved-bookmarks.png": "08-bookmarks.png"
+    },
+    "supersededScreenshotReferences": [
+      {
         "file": "docs/screenshots/vkr/live-ai/31-web-cards.png",
         "mode": "LIVE",
         "sha256": "96b57e72a2b184076465a7a9c2419c2929b8fe32a6d05221957e69240f8bac75"
@@ -6993,19 +7695,6 @@
         "mode": "LIVE",
         "sha256": "e399a3526f8e031bae3f1ee00378f3461d6e4aacc63c833b940174f3dc86be1d"
       }
-    ],
-    "finalBudgetRub": "1000",
-    "webCardsFound": 0
-  },
-  "totals": {
-    "input": 6065,
-    "output": 1968,
-    "web": 5,
-    "other": 8,
-    "toolCalls": 5,
-    "rub": "5.575100",
-    "runs": 10,
-    "calls": 13,
-    "cloudBillingAvailable": false
+    ]
   }
 }
