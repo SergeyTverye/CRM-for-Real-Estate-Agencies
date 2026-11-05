@@ -19,6 +19,7 @@
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "db:seed:demo": "tsx scripts/demo/seed-demo.ts",
     "db:migrate:dev": "prisma migrate dev",
     "import:sample": "tsx scripts/dev/generate-import-sample.ts",
     "dev:webpack": "next dev --webpack",
