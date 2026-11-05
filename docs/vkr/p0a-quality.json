@@ -1,0 +1,49 @@
+{
+  "mode": "REPLAY",
+  "sourceMode": "LIVE",
+  "networkCalls": 0,
+  "aiCalls": 0,
+  "newUrls": 20,
+  "knownPublicationDates": 8,
+  "totals": {
+    "cases": 80,
+    "falseInclusions": 2,
+    "falseExclusions": 0,
+    "falseConfirmed": 0,
+    "exactVerdictErrors": 2
+  },
+  "errors": [
+    {
+      "id": "V15",
+      "query": "commercial-sale",
+      "expected": "rejected",
+      "actual": "needs_review",
+      "url": "https://realty.yandex.ru/offer/1520155919935629234/",
+      "reason": "Торговый зал 108 м² внутри лота 173 м²; коммерция в жилом доме не жилой лот; аренда не доказана текстом."
+    },
+    {
+      "id": "V20",
+      "query": "commercial-sale",
+      "expected": "rejected",
+      "actual": "needs_review",
+      "url": "https://realty.yandex.ru/offer/1520155918988281323/",
+      "reason": "Торговая площадь 56,6 м², первый этаж, отдельный вход; операция и период ставки неизвестны."
+    }
+  ],
+  "duplicatePairs": [
+    {
+      "a": "V04",
+      "b": "V05",
+      "expected": "distinct",
+      "reason": "Один БЦ и шаблон текста, разные площадь и цена, не одно помещение.",
+      "predicted": false
+    },
+    {
+      "a": "V13",
+      "b": "V14",
+      "expected": "distinct",
+      "reason": "Разные адреса и площади; не дубль по назначению.",
+      "predicted": false
+    }
+  ]
+}

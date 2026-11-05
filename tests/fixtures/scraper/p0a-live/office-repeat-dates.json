@@ -1,0 +1,638 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "scenario": "office-repeat",
+  "runId": "2266b6ee-8926-405f-9c22-4f8fb8757953",
+  "rows": [
+    {
+      "source": "onrealt",
+      "id": "86529080",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529080",
+      "publishedAt": "2026-08-18T01:55:00.000Z",
+      "sourceUpdatedAt": null,
+      "dateSource": "onrealt:html_label:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529082",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529082",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529024",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529024",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529079",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528506",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528506",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528525",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528525",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528527",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528527",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528505",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528505",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529524",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529524",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529013",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529013",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528982",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528982",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528767",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528767",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528410",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528410",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529376",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529376",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528976",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528980",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528980",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528782",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528782",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528929",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528929",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528546",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528546",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528882",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529227",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529227",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529231",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529231",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529072",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529072",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86529373",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529373",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "onrealt",
+      "id": "86528508",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528508",
+      "publishedAt": null,
+      "sourceUpdatedAt": null,
+      "dateSource": "unknown",
+      "datePrecision": "unknown"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542480297059",
+      "url": "https://realty.yandex.ru/offer/3961425542480297059/",
+      "publishedAt": "2024-09-12T09:36:18.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:55:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130613984",
+      "url": "https://realty.yandex.ru/offer/7567068812130613984/",
+      "publishedAt": "2026-09-22T07:01:58.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:24:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3964472179315657925",
+      "url": "https://realty.yandex.ru/offer/3964472179315657925/",
+      "publishedAt": "2025-02-14T11:25:46.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:41:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481186231",
+      "url": "https://realty.yandex.ru/offer/3961425542481186231/",
+      "publishedAt": "2024-07-22T06:45:09.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:02:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3964472179315657924",
+      "url": "https://realty.yandex.ru/offer/3964472179315657924/",
+      "publishedAt": "2025-02-14T11:25:46.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:26:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130590147",
+      "url": "https://realty.yandex.ru/offer/7567068812130590147/",
+      "publishedAt": "2026-10-02T08:49:46.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:46:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481186144",
+      "url": "https://realty.yandex.ru/offer/3961425542481186144/",
+      "publishedAt": "2024-07-22T06:45:02.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:25:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3964472179315657927",
+      "url": "https://realty.yandex.ru/offer/3964472179315657927/",
+      "publishedAt": "2025-02-14T11:25:46.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:15:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130613986",
+      "url": "https://realty.yandex.ru/offer/7567068812130613986/",
+      "publishedAt": "2026-09-22T07:01:53.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:36:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3964472179320093904",
+      "url": "https://realty.yandex.ru/offer/3964472179320093904/",
+      "publishedAt": "2025-01-20T07:26:38.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:06:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481186045",
+      "url": "https://realty.yandex.ru/offer/3961425542481186045/",
+      "publishedAt": "2024-07-22T06:45:12.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:51:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130648645",
+      "url": "https://realty.yandex.ru/offer/7567068812130648645/",
+      "publishedAt": "2026-10-02T08:49:48.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:42:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481186022",
+      "url": "https://realty.yandex.ru/offer/3961425542481186022/",
+      "publishedAt": "2024-07-22T06:45:05.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:03:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130643997",
+      "url": "https://realty.yandex.ru/offer/7567068812130643997/",
+      "publishedAt": "2026-09-22T07:01:54.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:23:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481186113",
+      "url": "https://realty.yandex.ru/offer/3961425542481186113/",
+      "publishedAt": "2024-07-22T06:45:01.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:27:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3964472179320093628",
+      "url": "https://realty.yandex.ru/offer/3964472179320093628/",
+      "publishedAt": "2023-12-01T03:21:14.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:54:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481185211",
+      "url": "https://realty.yandex.ru/offer/3961425542481185211/",
+      "publishedAt": "2024-09-20T10:52:56.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:31:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "3961425542481186177",
+      "url": "https://realty.yandex.ru/offer/3961425542481186177/",
+      "publishedAt": "2024-07-22T06:45:01.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:44:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130590150",
+      "url": "https://realty.yandex.ru/offer/7567068812130590150/",
+      "publishedAt": "2026-10-02T08:49:44.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:37:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "7567068812130617950",
+      "url": "https://realty.yandex.ru/offer/7567068812130617950/",
+      "publishedAt": "2026-09-22T07:01:58.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:04:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "371319585",
+      "url": "https://cre.mirkvartir.ru/371319585/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-03T06:01:04.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "371319619",
+      "url": "https://cre.mirkvartir.ru/371319619/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-03T06:01:04.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "371319620",
+      "url": "https://cre.mirkvartir.ru/371319620/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-03T06:01:04.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "361166102",
+      "url": "https://cre.mirkvartir.ru/361166102/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:01:56.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "361166103",
+      "url": "https://cre.mirkvartir.ru/361166103/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:01:56.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "361166104",
+      "url": "https://cre.mirkvartir.ru/361166104/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:01:56.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "360670693",
+      "url": "https://cre.mirkvartir.ru/360670693/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:02:23.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "362926194",
+      "url": "https://cre.mirkvartir.ru/362926194/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-06-19T04:01:50.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "370094040",
+      "url": "https://cre.mirkvartir.ru/370094040/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-17T21:20:26.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "363048946",
+      "url": "https://cre.mirkvartir.ru/363048946/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-06-27T15:43:45.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "365081772",
+      "url": "https://cre.mirkvartir.ru/365081772/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-25T02:21:49.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369942050",
+      "url": "https://cre.mirkvartir.ru/369942050/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-14T05:41:43.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "362977983",
+      "url": "https://cre.mirkvartir.ru/362977983/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-07-06T07:20:19.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "365308612",
+      "url": "https://cre.mirkvartir.ru/365308612/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-18T03:25:47.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "362902425",
+      "url": "https://cre.mirkvartir.ru/362902425/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-18T13:41:46.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "371403753",
+      "url": "https://cre.mirkvartir.ru/371403753/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-17T13:45:54.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "367175558",
+      "url": "https://cre.mirkvartir.ru/367175558/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-03T18:02:33.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "362969888",
+      "url": "https://cre.mirkvartir.ru/362969888/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-11T13:22:07.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "360758658",
+      "url": "https://cre.mirkvartir.ru/360758658/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:00:37.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "370432671",
+      "url": "https://cre.mirkvartir.ru/370432671/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-21T08:01:14.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "363043891",
+      "url": "https://cre.mirkvartir.ru/363043891/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-13T00:40:39.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "360758659",
+      "url": "https://cre.mirkvartir.ru/360758659/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:01:55.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369638218",
+      "url": "https://cre.mirkvartir.ru/369638218/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-09T14:00:33.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369638217",
+      "url": "https://cre.mirkvartir.ru/369638217/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-09T14:00:33.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "368584782",
+      "url": "https://cre.mirkvartir.ru/368584782/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-03T06:40:26.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    }
+  ]
+}

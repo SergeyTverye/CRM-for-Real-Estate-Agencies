@@ -34,3 +34,14 @@
 - v3.1 закоммичено: схема (8f3cdf8), адаптеры (be4ca15), CAPTCHA HITL (201f5ce), планер (8056695), звонки/таймлайн (44c837f), подборки (318c0d6), дубли (1ee7767), сервер поиска (c5d70cb), AI-чат (66214c9), шаблоны (97ee958), AI-анализ (4971e60), фиксы (c9fb7f2), UI поиска (73bb0c3).
 - Эталон качества: ложные включения 21->12, дубли 0/3->3/3. Ревью Beam P1/адаптеры и тест Iceman P0-B/C — без блокеров, находки исправлены.
 - В работе: живые испытания поиска, регрессия/backup/чистое развёртывание, DEMO-скриншоты.
+
+## 2026-11-06 — CAPTCHA HITL production-интеграция (SR-06)
+- Подключён ProductionInteractiveSearchAdapter: URL из filters/depthParams задания, тот же page/context, штатный parser, сохранение в исходный SearchRun; повторная блокировка сохраняет прочитанные карточки и даёт ручной путь.
+- SearchRun cancellation закрывает сессии; progress показывает связь source/session; viewer возвращается в тот же поиск. Исправлен небезопасный native HTTP redirect браузера; добавлена регрессия.
+- Docker app/search-worker: chromium-sandbox + официальный seccomp, non-root, 2 GiB/pids 256/shm 256 MiB, ephemeral tmpfs /tmp; общий PostgreSQL лимит активных сессий. По умолчанию разрешённые для продолжения источники пусты (BROWSER_SESSION_ALLOWED_SOURCES).
+- Проверки: tsc/lint/Compose/build PASS, unit 493/493, integration 26/26 (стандартный 30 с; также PASS с 90 с после первоначального timeout экспорта под build-нагрузкой), browser 6/6, финальный Docker image без mount src — 6/6. Доказательства: docs/integrations/captcha-hitl-production.json, AT-05/06 PASS на DEMO-стенде; AT-17/18 не подменяются этим прогоном.
+- Новых отдельных LIVE smoke, npm-зависимостей, изменений схемы/миграций и Git commit/checkout/stash/reset/switch не было. Временные HITL-контейнеры завершены; production/demo DB не изменялись. Чужие параллельные изменения сохранены.
+
+- LIVE-поиск v3.1: 8 запусков UI на crm_demo:3415, 0 web_search, 4 AI HTTP-вызова/0.345700 ₽. Реальные OnRealt/Яндекс + blocked Циан403/Авито439/Домклик401; CAPTCHA REPLAY-стенд PASS. 20 новых размеченных URL, метрики 8→2 false inclusion/1→0 exclusion, старый эталон 21→9 false inclusion. Исправлены basement conflict/небоскрёб/explicit operation с регрессиями; unit 457/457, integration 49/49, tsc/lint PASS. Подборка→need→экспорт→КП локально PASS; XLSX визуально PARTIAL. Бюджет и сессии восстановлены/отозваны, процессы остановлены. Полный протокол docs/vkr/live-search-v31.md; Git commit/migration/install не выполнялись.
+
+- Уточнение приёмки отмены: первичная LIVE-запись cancelRequested=false, поэтому LIVE PARTIAL. Дополнительный controlled REPLAY queued-run при остановленном worker подтвердил cancelRequested=true/source cancelled, без новых запросов к площадкам. Финальный снимок помечен REPLAY. Свой повторный сервер 3415 остановлен, tsconfig include удалены, активных временных сессий нет.

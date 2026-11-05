@@ -1,0 +1,422 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "scenario": "retail-rent",
+  "runId": "35d373a7-7474-4bcb-9d28-6df12fb1e8ba",
+  "rows": [
+    {
+      "source": "yandex",
+      "id": "7567073991544083706",
+      "url": "https://realty.yandex.ru/offer/7567073991544083706/",
+      "publishedAt": "2026-09-21T10:16:34.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:31:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1118728564463297466",
+      "url": "https://realty.yandex.ru/offer/1118728564463297466/",
+      "publishedAt": "2026-09-08T14:16:27.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:46:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935630286",
+      "url": "https://realty.yandex.ru/offer/1520155919935630286/",
+      "publishedAt": "2026-08-04T02:47:34.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:52:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935607283",
+      "url": "https://realty.yandex.ru/offer/1520155919935607283/",
+      "publishedAt": "2026-08-04T02:49:16.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:51:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935630193",
+      "url": "https://realty.yandex.ru/offer/1520155919935630193/",
+      "publishedAt": "2026-08-04T02:47:31.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:17:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155918988281323",
+      "url": "https://realty.yandex.ru/offer/1520155918988281323/",
+      "publishedAt": "2026-10-14T12:17:17.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:00:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935608182",
+      "url": "https://realty.yandex.ru/offer/1520155919935608182/",
+      "publishedAt": "2026-08-04T02:48:24.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:27:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935629260",
+      "url": "https://realty.yandex.ru/offer/1520155919935629260/",
+      "publishedAt": "2026-08-04T02:48:38.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:48:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935608214",
+      "url": "https://realty.yandex.ru/offer/1520155919935608214/",
+      "publishedAt": "2026-08-04T02:48:50.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:59:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935629357",
+      "url": "https://realty.yandex.ru/offer/1520155919935629357/",
+      "publishedAt": "2026-08-04T02:47:51.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:39:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935630221",
+      "url": "https://realty.yandex.ru/offer/1520155919935630221/",
+      "publishedAt": "2026-08-04T02:47:29.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:38:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935608092",
+      "url": "https://realty.yandex.ru/offer/1520155919935608092/",
+      "publishedAt": "2026-08-04T02:49:06.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:11:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935607349",
+      "url": "https://realty.yandex.ru/offer/1520155919935607349/",
+      "publishedAt": "2026-08-04T02:49:10.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:07:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935629234",
+      "url": "https://realty.yandex.ru/offer/1520155919935629234/",
+      "publishedAt": "2026-08-04T02:48:27.000Z",
+      "sourceUpdatedAt": "2026-11-05T13:05:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935608064",
+      "url": "https://realty.yandex.ru/offer/1520155919935608064/",
+      "publishedAt": "2026-08-04T02:49:09.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:18:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935629206",
+      "url": "https://realty.yandex.ru/offer/1520155919935629206/",
+      "publishedAt": "2026-08-04T02:48:07.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:12:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935630313",
+      "url": "https://realty.yandex.ru/offer/1520155919935630313/",
+      "publishedAt": "2026-08-04T02:47:06.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:29:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935629237",
+      "url": "https://realty.yandex.ru/offer/1520155919935629237/",
+      "publishedAt": "2026-08-04T02:48:11.000Z",
+      "sourceUpdatedAt": "2026-11-05T14:07:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "1520155919935629290",
+      "url": "https://realty.yandex.ru/offer/1520155919935629290/",
+      "publishedAt": "2026-08-04T02:47:54.000Z",
+      "sourceUpdatedAt": "2026-11-06T06:57:00.000Z",
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "6466545305890108552",
+      "url": "https://realty.yandex.ru/offer/6466545305890108552/",
+      "publishedAt": "2026-10-27T08:31:29.000Z",
+      "sourceUpdatedAt": null,
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "yandex",
+      "id": "4636405646918447872",
+      "url": "https://realty.yandex.ru/offer/4636405646918447872/",
+      "publishedAt": "2026-09-06T15:16:36.000Z",
+      "sourceUpdatedAt": null,
+      "dateSource": "yandex:structured:publication",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "362899073",
+      "url": "https://arendacre.mirkvartir.ru/362899073/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-07-21T11:41:11.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "368762366",
+      "url": "https://arendacre.mirkvartir.ru/368762366/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-28T03:01:54.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "365884760",
+      "url": "https://arendacre.mirkvartir.ru/365884760/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-07-16T23:41:23.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369162431",
+      "url": "https://arendacre.mirkvartir.ru/369162431/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-03T06:40:48.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "364711377",
+      "url": "https://arendacre.mirkvartir.ru/364711377/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-27T04:56:55.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "368002998",
+      "url": "https://arendacre.mirkvartir.ru/368002998/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-18T16:43:29.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "371266239",
+      "url": "https://arendacre.mirkvartir.ru/371266239/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-01T19:43:28.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "368006945",
+      "url": "https://arendacre.mirkvartir.ru/368006945/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-18T16:43:29.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "365594728",
+      "url": "https://arendacre.mirkvartir.ru/365594728/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-07-11T05:23:12.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369161851",
+      "url": "https://arendacre.mirkvartir.ru/369161851/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-03T06:40:48.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "365594718",
+      "url": "https://arendacre.mirkvartir.ru/365594718/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-07-11T05:23:12.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369155434",
+      "url": "https://arendacre.mirkvartir.ru/369155434/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-03T06:40:48.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "370021011",
+      "url": "https://arendacre.mirkvartir.ru/370021011/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-16T19:40:42.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "365082036",
+      "url": "https://arendacre.mirkvartir.ru/365082036/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-23T01:41:09.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "371430153",
+      "url": "https://arendacre.mirkvartir.ru/371430153/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-06T23:02:06.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369567689",
+      "url": "https://arendacre.mirkvartir.ru/369567689/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-08T16:00:47.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369458957",
+      "url": "https://arendacre.mirkvartir.ru/369458957/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-07T21:01:12.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "361711436",
+      "url": "https://arendacre.mirkvartir.ru/361711436/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:20:11.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "360667998",
+      "url": "https://arendacre.mirkvartir.ru/360667998/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-04-22T14:20:09.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "369458959",
+      "url": "https://arendacre.mirkvartir.ru/369458959/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-09-07T21:01:12.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "366982740",
+      "url": "https://arendacre.mirkvartir.ru/366982740/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-07-31T16:41:43.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "368085605",
+      "url": "https://arendacre.mirkvartir.ru/368085605/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-10T05:11:35.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "364786884",
+      "url": "https://arendacre.mirkvartir.ru/364786884/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-08-11T06:49:47.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "372660919",
+      "url": "https://arendacre.mirkvartir.ru/372660919/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-10-26T03:53:10.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    },
+    {
+      "source": "mirkvartir",
+      "id": "367289581",
+      "url": "https://arendacre.mirkvartir.ru/367289581/",
+      "publishedAt": null,
+      "sourceUpdatedAt": "2026-11-04T10:47:00.000Z",
+      "dateSource": "mirkvartir:html_label:update",
+      "datePrecision": "exact"
+    }
+  ]
+}

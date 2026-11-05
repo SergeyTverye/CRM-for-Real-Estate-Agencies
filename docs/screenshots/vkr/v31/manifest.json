@@ -461,5 +461,67 @@
     "sha256": "15ccb2a3e89c6b8ee5df9c54ed6ffde6f8b2798e4962f9f8016f47ffa79dd923",
     "visualReview": "PASS · просмотрено агентом DEMO, без наложений и горизонтального переполнения в показанной области",
     "reviewedAt": "2026-11-05T22:35:36.185Z"
+  },
+  {
+    "file": "search-cancel.png",
+    "mode": "REPLAY of session LIVE",
+    "description": "API LIVE cancellation: partial, 55 results, cancelled MIR, queue released; loaded UI",
+    "date": "2026-11-05T23:44:47.139Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1150
+    },
+    "url": "/property-search?runId=dd0e407e-0677-4a9f-8350-3289f4daa497",
+    "sha256": "6855268b2ce359c4b6cfab3f923eeddf465e955eb95fa316953ad0c5e962e09e",
+    "sha": "8689bb27fec6f5d1d88472f61daa68f399ac9ae4",
+    "workingTree": "uncommitted P0-A changes; SHA is base HEAD",
+    "role": "MANAGER",
+    "evidence": "docs/vkr/p0a-closure-evidence.json"
+  },
+  {
+    "file": "search-duplicates-group.png",
+    "mode": "REPLAY of session LIVE",
+    "description": "Real probable OnRealt + MIR group, same area/floor/price; no automatic confirmation",
+    "date": "2026-11-05T23:44:51.211Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1150
+    },
+    "url": "/property-search?runId=2266b6ee-8926-405f-9c22-4f8fb8757953",
+    "sha256": "e75f3ff3da2a65d54248b77711ac4b33f3186279a796243a0835552c930523ee",
+    "sha": "8689bb27fec6f5d1d88472f61daa68f399ac9ae4",
+    "workingTree": "uncommitted P0-A changes; SHA is base HEAD",
+    "role": "MANAGER",
+    "evidence": "docs/vkr/p0a-closure-evidence.json"
+  },
+  {
+    "file": "search-repeat-novelty.png",
+    "mode": "REPLAY of session LIVE",
+    "description": "True new URL in repeated SavedSearch; 2 new of 70, unchanged listings stay known, no observed price changes",
+    "date": "2026-11-05T23:44:52.902Z",
+    "viewport": {
+      "width": 1600,
+      "height": 1150
+    },
+    "url": "/property-search?runId=2266b6ee-8926-405f-9c22-4f8fb8757953",
+    "sha256": "108968a88918dcc4cdc1f8e86637a1ea4d0068c40a2c428e912de185a7b20b79",
+    "sha": "8689bb27fec6f5d1d88472f61daa68f399ac9ae4",
+    "workingTree": "uncommitted P0-A changes; SHA is base HEAD",
+    "role": "MANAGER",
+    "evidence": "docs/vkr/p0a-closure-evidence.json"
+  },
+  {
+    "file": "search-export-xlsx.png",
+    "mode": "REPLAY · native XLSX exported from session LIVE",
+    "description": "Contact sheet: native LibreOffice PDF pages 1,2,4,5 of 8; whitespace trimmed, proportional resize; no content edits or HTML projection",
+    "renderer": "LibreOffice 25.8.4.2 → PDF → pdftoppm → Sharp contact sheet",
+    "date": "2026-11-05T23:49:23.056Z",
+    "sourceChecksum": "867fe6a27defe409d0930dafecb9f159e6d1edeb65e6c259face669136a53ac0",
+    "pdfChecksum": "7756a9f1038798e578e6a38afc140234157544a21b1cbb1479d51ddb4af1c13c",
+    "sha256": "58dcbd0be2310589e24c15948bc5dd1b779b76ee4c632965fbfdacce72dc0d28",
+    "sha": "8689bb27fec6f5d1d88472f61daa68f399ac9ae4",
+    "workingTree": "uncommitted P0-A changes; SHA is base HEAD",
+    "role": "MANAGER",
+    "evidence": "docs/vkr/p0a-closure-evidence.json"
   }
 ]

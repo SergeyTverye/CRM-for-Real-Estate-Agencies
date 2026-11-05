@@ -1,0 +1,430 @@
+{
+  "mode": "LIVE",
+  "startedAt": "2026-11-05T23:29:09.834Z",
+  "port": 3421,
+  "distDir": ".next-3421",
+  "database": "crm_demo",
+  "searchCap": 6,
+  "aiCalls": 0,
+  "webSearchCalls": 0,
+  "runs": [
+    {
+      "id": "f44b88c6-4346-4e41-a038-2a2fcb935bff",
+      "scenario": "office-first",
+      "mode": "LIVE",
+      "startedAt": "2026-11-05T23:29:24.658Z",
+      "finishedAt": "2026-11-05T23:29:51.914Z",
+      "status": "completed",
+      "cancelRequested": false,
+      "lockReleased": true,
+      "results": 70,
+      "isNew": 70,
+      "priceChanged": 0,
+      "sources": [
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 25,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 20,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 25,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        }
+      ],
+      "dates": [
+        {
+          "source": "onrealt",
+          "total": 25,
+          "publicationUnknownBefore": 25,
+          "publicationUnknownAfter": 22,
+          "anyDateUnknownBefore": 25,
+          "anyDateUnknownAfter": 22
+        },
+        {
+          "source": "yandex",
+          "total": 20,
+          "publicationUnknownBefore": 0,
+          "publicationUnknownAfter": 0,
+          "anyDateUnknownBefore": 0,
+          "anyDateUnknownAfter": 0
+        },
+        {
+          "source": "mirkvartir",
+          "total": 25,
+          "publicationUnknownBefore": 25,
+          "publicationUnknownAfter": 25,
+          "anyDateUnknownBefore": 25,
+          "anyDateUnknownAfter": 0
+        }
+      ]
+    },
+    {
+      "id": "35d373a7-7474-4bcb-9d28-6df12fb1e8ba",
+      "scenario": "retail-rent",
+      "mode": "LIVE",
+      "startedAt": "2026-11-05T23:32:20.974Z",
+      "finishedAt": "2026-11-05T23:32:47.580Z",
+      "status": "completed",
+      "cancelRequested": false,
+      "lockReleased": true,
+      "results": 46,
+      "isNew": 46,
+      "priceChanged": 0,
+      "sources": [
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 0,
+          "reason": null
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 21,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 25,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        }
+      ],
+      "dates": [
+        {
+          "source": "onrealt",
+          "total": 0,
+          "publicationUnknownBefore": 0,
+          "publicationUnknownAfter": 0,
+          "anyDateUnknownBefore": 0,
+          "anyDateUnknownAfter": 0
+        },
+        {
+          "source": "yandex",
+          "total": 21,
+          "publicationUnknownBefore": 0,
+          "publicationUnknownAfter": 0,
+          "anyDateUnknownBefore": 0,
+          "anyDateUnknownAfter": 0
+        },
+        {
+          "source": "mirkvartir",
+          "total": 25,
+          "publicationUnknownBefore": 25,
+          "publicationUnknownAfter": 25,
+          "anyDateUnknownBefore": 25,
+          "anyDateUnknownAfter": 0
+        }
+      ]
+    },
+    {
+      "id": "2266b6ee-8926-405f-9c22-4f8fb8757953",
+      "scenario": "office-repeat",
+      "mode": "LIVE",
+      "startedAt": "2026-11-05T23:34:09.104Z",
+      "finishedAt": "2026-11-05T23:34:54.385Z",
+      "status": "completed",
+      "cancelRequested": false,
+      "lockReleased": true,
+      "results": 70,
+      "isNew": 2,
+      "priceChanged": 0,
+      "sources": [
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 25,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 20,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 25,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        }
+      ],
+      "dates": [
+        {
+          "source": "onrealt",
+          "total": 25,
+          "publicationUnknownBefore": 25,
+          "publicationUnknownAfter": 24,
+          "anyDateUnknownBefore": 25,
+          "anyDateUnknownAfter": 24
+        },
+        {
+          "source": "yandex",
+          "total": 20,
+          "publicationUnknownBefore": 0,
+          "publicationUnknownAfter": 0,
+          "anyDateUnknownBefore": 0,
+          "anyDateUnknownAfter": 0
+        },
+        {
+          "source": "mirkvartir",
+          "total": 25,
+          "publicationUnknownBefore": 25,
+          "publicationUnknownAfter": 25,
+          "anyDateUnknownBefore": 25,
+          "anyDateUnknownAfter": 0
+        }
+      ]
+    },
+    {
+      "id": "e862d2b7-0034-439a-babd-2a8856c081f2",
+      "scenario": "cancel-after-partial",
+      "mode": "DEMO intercepted by parallel worker; not LIVE evidence",
+      "startedAt": "2026-11-05T23:37:57.390Z",
+      "status": "completed",
+      "cancelRequested": false,
+      "results": 3,
+      "sources": [
+        {
+          "source": "onrealt",
+          "status": "success",
+          "reason": "Записанный ответ площадки",
+          "resultCount": 1
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "reason": "Записанный ответ площадки",
+          "resultCount": 1
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "reason": "Записанный ответ площадки",
+          "resultCount": 1
+        }
+      ]
+    },
+    {
+      "id": "dd0e407e-0677-4a9f-8350-3289f4daa497",
+      "scenario": "cancel-live-after-partial",
+      "mode": "LIVE",
+      "startedAt": "2026-11-05T23:40:56.585Z",
+      "cancelApiSucceeded": true,
+      "status": "partial",
+      "cancelRequested": true,
+      "results": 55,
+      "lockReleased": true,
+      "finishedAt": "2026-11-05T23:42:08.813Z",
+      "sources": [
+        {
+          "source": "onrealt",
+          "status": "error",
+          "resultCount": 0,
+          "reason": "onrealt: FETCH_FAILED"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 55,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "cancelled",
+          "resultCount": 0,
+          "reason": "mirkvartir: ABORTED"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "search-cancel.png",
+      "mode": "REPLAY of session LIVE",
+      "description": "API LIVE cancellation: partial, 55 results, cancelled MIR, queue released; loaded UI",
+      "date": "2026-11-05T23:44:47.139Z",
+      "viewport": {
+        "width": 1600,
+        "height": 1150
+      },
+      "url": "/property-search?runId=dd0e407e-0677-4a9f-8350-3289f4daa497",
+      "sha256": "6855268b2ce359c4b6cfab3f923eeddf465e955eb95fa316953ad0c5e962e09e"
+    },
+    {
+      "file": "search-duplicates-group.png",
+      "mode": "REPLAY of session LIVE",
+      "description": "Real probable OnRealt + MIR group, same area/floor/price; no automatic confirmation",
+      "date": "2026-11-05T23:44:51.211Z",
+      "viewport": {
+        "width": 1600,
+        "height": 1150
+      },
+      "url": "/property-search?runId=2266b6ee-8926-405f-9c22-4f8fb8757953",
+      "sha256": "e75f3ff3da2a65d54248b77711ac4b33f3186279a796243a0835552c930523ee"
+    },
+    {
+      "file": "search-repeat-novelty.png",
+      "mode": "REPLAY of session LIVE",
+      "description": "True new URL in repeated SavedSearch; 2 new of 70, unchanged listings stay known, no observed price changes",
+      "date": "2026-11-05T23:44:52.902Z",
+      "viewport": {
+        "width": 1600,
+        "height": 1150
+      },
+      "url": "/property-search?runId=2266b6ee-8926-405f-9c22-4f8fb8757953",
+      "sha256": "108968a88918dcc4cdc1f8e86637a1ea4d0068c40a2c428e912de185a7b20b79"
+    },
+    {
+      "file": "search-export-xlsx.png",
+      "mode": "REPLAY · native XLSX exported from session LIVE",
+      "description": "Contact sheet: native LibreOffice PDF pages 1,2,4,5 of 8; whitespace trimmed, proportional resize; no content edits or HTML projection",
+      "renderer": "LibreOffice 25.8.4.2 → PDF → pdftoppm → Sharp contact sheet",
+      "date": "2026-11-05T23:49:23.056Z",
+      "sourceChecksum": "867fe6a27defe409d0930dafecb9f159e6d1edeb65e6c259face669136a53ac0",
+      "pdfChecksum": "7756a9f1038798e578e6a38afc140234157544a21b1cbb1479d51ddb4af1c13c",
+      "sha256": "58dcbd0be2310589e24c15948bc5dd1b779b76ee4c632965fbfdacce72dc0d28"
+    }
+  ],
+  "budget": {
+    "temporaryRub": 100,
+    "priorRub": "1000"
+  },
+  "cleanup": {
+    "settingsRestored": true,
+    "budgetRub": "1000",
+    "userDeactivated": true,
+    "activeSessions": 0,
+    "ownServerStopped": true,
+    "localWorkerFinished": true,
+    "tsconfigRestored": true
+  },
+  "finishedAt": "2026-11-05T23:42:32.206Z",
+  "duplicates": [
+    {
+      "id": "3b39c4ce-508e-4234-9fd9-5656b4343283",
+      "status": "probable",
+      "members": [
+        {
+          "source": "onrealt",
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528505",
+          "releasedAt": null
+        },
+        {
+          "source": "mirkvartir",
+          "url": "https://cre.mirkvartir.ru/369638218/",
+          "releasedAt": null
+        }
+      ]
+    },
+    {
+      "id": "5095c2ed-dbc9-4ca7-aaa3-9c00d35fb3e7",
+      "status": "probable",
+      "members": [
+        {
+          "source": "mirkvartir",
+          "url": "https://cre.mirkvartir.ru/369638217/",
+          "releasedAt": null
+        },
+        {
+          "source": "onrealt",
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528509",
+          "releasedAt": null
+        }
+      ]
+    }
+  ],
+  "exports": [
+    {
+      "format": "xlsx",
+      "scope": "all",
+      "checksum": "2c7d6235e90ec49118333912972c73a598b8fb1678349e8dcdcf8c7bf2f08f55",
+      "bytes": 19393
+    },
+    {
+      "format": "xlsx",
+      "scope": "selected",
+      "checksum": "867fe6a27defe409d0930dafecb9f159e6d1edeb65e6c259face669136a53ac0",
+      "bytes": 10247
+    },
+    {
+      "format": "csv",
+      "scope": "all",
+      "checksum": "b130748ef75e41f4182a268078367ecbcd679b12f9cb52cc84513daad3c7e273",
+      "bytes": 28365
+    },
+    {
+      "format": "csv",
+      "scope": "selected",
+      "checksum": "753da3555f750cce02378145486e84c968a574b42d0eb3c38a9df284ce360b80",
+      "bytes": 2286
+    }
+  ],
+  "liveNovelty": {
+    "runId": "2266b6ee-8926-405f-9c22-4f8fb8757953",
+    "new": 2,
+    "known": 68,
+    "priceChanged": 0
+  },
+  "queueAfterCancellation": {
+    "lockedRunning": 0,
+    "pendingForUser": 0
+  },
+  "noveltyScreenshot": {
+    "listingId": "dd0c210a-b83b-499d-bbf0-2255054bdc91",
+    "verdict": "rejected",
+    "newBadgeObserved": true
+  },
+  "limitAccounting": {
+    "searchEnqueues": 5,
+    "liveRuns": 4,
+    "interceptedDemo": 1,
+    "maxSearchRuns": 6,
+    "aiCalls": 0,
+    "maxAiCalls": 4,
+    "webSearchCalls": 0,
+    "chargedRub": 0
+  },
+  "verification": {
+    "unitSearch": 480,
+    "extraDetailBudget": 2,
+    "integrationSearch": 20,
+    "duplicatesAndAuthorization": 12,
+    "typecheck": "PASS",
+    "eslint": "PASS",
+    "quality": {
+      "cases": 80,
+      "falseInclusions": 2,
+      "falseExclusions": 0,
+      "falseConfirmed": 0,
+      "exactVerdictErrors": 2
+    }
+  },
+  "sha": "8689bb27fec6f5d1d88472f61daa68f399ac9ae4",
+  "workingTree": "uncommitted P0-A changes; SHA is base HEAD",
+  "noveltyVerification": {
+    "sameSavedSearch": true,
+    "knownUrls": 68,
+    "knownFlagsCorrect": true,
+    "newUrls": [
+      {
+        "url": "https://realty.yandex.ru/offer/7567068812130590150/",
+        "isNew": true
+      },
+      {
+        "url": "https://realty.yandex.ru/offer/7567068812130617950/",
+        "isNew": true
+      }
+    ],
+    "unchangedPriceFlagCount": 0
+  }
+}

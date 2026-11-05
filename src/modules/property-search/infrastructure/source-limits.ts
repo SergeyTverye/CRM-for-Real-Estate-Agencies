@@ -21,5 +21,6 @@ export function resolveSourceDepth(source: Source, options: DepthOptions = {}, b
   const pagesCeiling = bounded(process.env[`${prefix}MAX_PAGES`], safe.maxPages, safe.maxPages);
   const limitCeiling = bounded(process.env[`${prefix}MAX_LISTINGS`], safe.limit, safe.limit);
   const maxPages = bounded(options.maxPages, 2, pagesCeiling), limit = bounded(options.limit, 100, limitCeiling);
-  return { maxPages, limit, estimatedRequests: maxPages * Math.max(1, branches) * safe.requestsPerPage + safe.setupRequests, dateSortSupported: false };
+  const dateDetails = source === "onrealt" ? Math.min(3, limit) : 0;
+  return { maxPages, limit, estimatedRequests: maxPages * Math.max(1, branches) * safe.requestsPerPage + safe.setupRequests + dateDetails, dateSortSupported: false };
 }

@@ -4,6 +4,7 @@ import { detectAccessChallenge } from "./source-response";
 
 /** Extend the installed parsers in our adapter, without patching node_modules. */
 export function extendSourceParsers(client: RealEstateScraper): RealEstateScraper {
+  let dateDetailRequests = 0;
   for (const parser of Object.values(client.parsers)) {
     const fetch = parser.fetch.bind(parser), searchPage = parser.searchPage.bind(parser), parse = parser.parsePage.bind(parser);
     let documents: { payload: unknown; fetchedAt: string }[] = [];
@@ -35,6 +36,19 @@ export function extendSourceParsers(client: RealEstateScraper): RealEstateScrape
         }
         return { ...raw, ...fields };
       });
+      // OnRealt exposes "добавлено" on the detail page, absent from its SERP.
+      // At most three extra public GETs per job, no retries and no bypass.
+      for (let index = 0; index < page.results.length && dateDetailRequests < 3; index++) {
+        const raw = page.results[index]!;
+        if (raw.source !== "onrealt" || (raw as typeof raw & { publishedAt?: string | null }).publishedAt || query?.signal?.aborted) continue;
+        dateDetailRequests++;
+        try {
+          const detail = await parser.fetch(raw.url, { signal: query?.signal });
+          const payload = detail && typeof detail === "object" && "data" in detail ? detail.data : detail;
+          const dates = extractListingDates(raw.source, payload, { id: raw.id, url: raw.url }, new Date().toISOString());
+          if (dates.publishedAt || dates.sourceUpdatedAt) page.results[index] = { ...raw, ...dates };
+        } catch { break; /* Preserve SERP results; do not repeat a failed detail request. */ }
+      }
       documents = [];
       return page;
     };

@@ -9,6 +9,7 @@ import { GET as catalogApi } from "@/app/api/v1/property-search/filter-catalog/r
 import { SearchFilters, type NormalizedListing, type SearchResult } from "@/modules/property-search/domain/types";
 import { enqueueSearch, processSearchQueue, recoverSearchQueue, cancelSearch } from "@/modules/property-search/application/search-queue";
 import { exportSearch } from "@/modules/property-search/application/export-service";
+import { saveSearch } from "@/modules/property-search/application/listing-service";
 import { querySearchResults, SORTS } from "@/modules/property-search/queries/results-query";
 import { bulkSearchAction } from "@/modules/property-search/application/bulk-service";
 import { importSearchFeed, createListingFromUrl } from "@/modules/property-search/application/manual-import-service";
@@ -196,6 +197,22 @@ describe("v3.1 queue, results, export and authorization", () => {
     const results = await querySearchResults(users.realtor1, third.id);
     expect(results.rows).toHaveLength(2); expect(results.rows.every(row => row.isNew === false)).toBe(true);
     expect(results.rows.find(row => row.source === "avito")).toMatchObject({ priceChanged: true });
+  });
+  it("identical saved profile preserves novelty and flags only an observed compatible price change", async () => {
+    const saved = await saveSearch(users.realtor1, { name: "Синтетический повтор", filters, sources: ["cian"] });
+    const launch = (key: string) => enqueueSearch(users.realtor1, { filters, sources: ["cian"], savedSearchId: saved.id, idempotencyKey: key });
+    const first = await launch("saved-profile-first"); await processSearchQueue({ scraper: adapter() });
+    const second = await launch("saved-profile-unchanged"); await processSearchQueue({ scraper: adapter() });
+    expect((await querySearchResults(users.realtor1, first.id)).rows[0]).toMatchObject({ isNew: true, priceChanged: false });
+    expect((await querySearchResults(users.realtor1, second.id)).rows[0]).toMatchObject({ isNew: false, priceChanged: false });
+    const third = await launch("saved-profile-price"); await processSearchQueue({ scraper: adapter([listing("one", "12000")]) });
+    expect((await querySearchResults(users.realtor1, third.id)).rows[0]).toMatchObject({ isNew: false, priceChanged: true });
+    const file = await exportSearch(users.realtor1, third.id, { format: "xlsx", columns: ["url", "publishedAt", "area", "price"] });
+    const book = new ExcelJS.Workbook(); await book.xlsx.load(Buffer.from(file.bytes) as never);
+    const sheet = book.worksheets[0]!;
+    expect(sheet.getCell("A2").hyperlink).toBe("https://cian.ru/synthetic/one");
+    expect(sheet.getCell("B2").value).toBeInstanceOf(Date);
+    expect(sheet.getCell("C2").value).toBe(100); expect(sheet.getCell("D2").value).toBe(12000);
   });
   it("groups after ingestion and exports every active group URL even when only one listing is selected", async () => {
     const run = await enqueue("group-ingestion", ["cian", "avito"]);

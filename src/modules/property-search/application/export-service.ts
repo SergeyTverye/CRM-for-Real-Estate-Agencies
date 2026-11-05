@@ -1,4 +1,4 @@
-import { tabularExport } from "@/modules/export/application/tabular-export";
+import { tabularExport, type ExportColumnType } from "@/modules/export/application/tabular-export";
 export { escapeSpreadsheet, csvCell } from "@/modules/export/application/tabular-export";
 import { z } from "zod";
 import { db } from "@/shared/db/client";
@@ -46,7 +46,8 @@ export async function exportSearch(actor: Actor, runId: string, raw: unknown) {
     return input.columns.map(c => record[c]);
   });
   const header = input.columns.map(c => EXPORT_COLUMNS[c]);
-  const bytes = await tabularExport(input.format, header, values, "Результаты поиска");
+  const columnTypes = input.columns.map((column): ExportColumnType => ["publishedAt", "firstSeenAt", "lastCheckedAt"].includes(column) ? "date" : ["price", "pricePerM2Rub"].includes(column) ? "money" : column === "area" ? "number" : ["url", "photos"].includes(column) ? "url" : "text");
+  const bytes = await tabularExport(input.format, header, values, "Результаты поиска", columnTypes);
   const log = await db.searchExport.create({ data: { userId: actor.userId, format: input.format, scope: ids ? "selected" : "all_filtered", params: jsonValue({ runId, query: input.query ?? {}, ids: ids ?? null, revision: first.revision }), columns: input.columns, rowCount: rows.length } });
   return { bytes, exportId: log.id, filename: `property-search.${input.format}`, contentType: input.format === "csv" ? "text/csv; charset=utf-8" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
 }

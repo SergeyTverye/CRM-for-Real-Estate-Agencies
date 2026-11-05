@@ -1,4 +1,5 @@
 import { safeRequest, type SafeRequestOptions } from "../../../shared/net/ssrf";
+import { compressedScraperRequest } from "./compressed-http";
 
 type Response = Awaited<ReturnType<typeof safeRequest>>;
 const siteDomains = ["cian.ru", "avito.ru", "youla.ru", "yandex.ru", "onrealt.ru", "domclick.ru", "mirkvartir.ru"];
@@ -9,6 +10,10 @@ function siteDomain(url: URL): string | undefined {
 /** Canonical search routes observed in the sites' own 301 Location headers. */
 export function canonicalScraperUrl(raw: string): string {
   const url = new URL(raw);
+  if (url.hostname === "onrealt.ru") {
+    // Public navigation form /core/send_form.php, observed 06.11.2026.
+    url.pathname = url.pathname.replace(/\/arenda-torgovoj-ploshchadi(?=\/|$)/u, "/arenda-torgovyh-ploshchadej");
+  }
   if (url.hostname === "realty.yandex.ru" && /\/kommercheskaya-nedvizhimost\/$/u.test(url.pathname)) {
     const types = url.searchParams.getAll("commercialType");
     const route = ({ OFFICE: "ofis", RETAIL: "torgovoe-pomeshchenie", WAREHOUSE: "sklad", FREE_PURPOSE: "pomeshchenie-svobodnogo-naznacheniya", MANUFACTURING: "proizvodstvennoe-pomeshchenie" } as Record<string, string>)[types[0] ?? ""];
@@ -42,7 +47,8 @@ export async function scraperHttpRequest(raw: string, options: SafeRequestOption
     if (remaining <= 0) throw new Error("NETWORK_TIMEOUT_OR_ABORT");
     options.beforeRequest?.(url.href);
     // safeRequest repeats DNS/private-IP validation and pins every individual hop.
-    const response = await safeRequest(url.href, { ...options, method, body, headers, timeoutMs: remaining, followRedirects: false });
+    const request = domain === "mirkvartir.ru" ? compressedScraperRequest : safeRequest;
+    const response = await request(url.href, { ...options, method, body, headers, timeoutMs: remaining, followRedirects: false });
     options.onResponse?.(response);
     if (![301, 302, 303, 307, 308].includes(response.status) || !response.headers.location) return response;
     if (redirects >= 3) throw new Error("SCRAPER_REDIRECT_LIMIT");

@@ -32,7 +32,7 @@ export function parseSourceDate(value: unknown, fetchedAt: string): { at: string
   const absolute = text.match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/u);
   const russian = text.match(/^(\d{1,2})\.(\d{2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/u);
   if (russian) return parseSourceDate(`${russian[3]}-${russian[2]}-${russian[1]!.padStart(2, "0")}${russian[4] ? `T${russian[4]!.padStart(2, "0")}:${russian[5]}:00+07:00` : ""}`, fetchedAt);
-  const named = text.match(/^(\d{1,2})\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+(\d{4}))?(?:,?\s+(?:в\s+)?(\d{1,2}):(\d{2}))?$/u);
+  const named = text.match(/^(\d{1,2})\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)(?:\s+(\d{4})(?:\s*г\.?)?)?(?:,?\s+(?:в\s+)?(\d{1,2}):(\d{2}))?$/u);
   if (named) {
     const month = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"].indexOf(named[2]!) + 1;
     let year = Number(named[3] ?? local.getUTCFullYear());
@@ -97,18 +97,30 @@ export function extractListingDates(source: Source, payload: unknown, identity: 
     try { walk(JSON.parse(text)); } catch { embeddedJson(text).forEach(value => walk(value)); }
   });
   $("[data-state],[data-bem]").each((_, el) => { for (const attr of ["data-state", "data-bem"]) { try { walk(JSON.parse($(el).attr(attr) ?? "")); } catch { /* Not JSON. */ } } });
+  // A detail page is bound by its canonical URL, never by the document's arbitrary dates.
+  const canonical = $("link[rel='canonical']").attr("href");
+  let ownDetail = false;
+  try { ownDetail = !!canonical && new URL(canonical, identity.url).pathname.replace(/\/$/u, "") === new URL(identity.url).pathname.replace(/\/$/u, ""); } catch { /* Not a detail page. */ }
+  const ownOnRealt = source === "onrealt" && !!identity.id && $("[role-element='ad'][id-element]").toArray().some(el => $(el).attr("id-element") === identity.id);
+  if (source === "onrealt" && (ownDetail || ownOnRealt)) {
+    const label = $(".add-time").first().text().trim();
+    if (/^добавлено\s/iu.test(label)) assign({ datePublished: label.replace(/^добавлено\s+/iu, "") }, "html_label");
+  }
   $("a[href]").each((_, el) => {
     let matches = false;
     try { matches = new URL($(el).attr("href")!, identity.url).pathname === new URL(identity.url).pathname; } catch { return; }
     if (!matches) return;
     const card = $(el).closest("article,[data-id],[data-name='CardComponent'],[data-testid='offer-card'],.ad-item-container,.offer-card,.card");
     if (!card.length) return;
+    // MIR's public card shows its source date beside the listing ID. It is not
+    // labelled publication vs refresh: preserve it as sourceUpdatedAt only.
+    if (source === "mirkvartir") card.find("time[datetime]").each((_, el) => assign({ dateModified: $(el).attr("datetime") }, "html_label"));
     card.find("[itemprop='datePublished'],[itemprop='dateModified'],time,[data-testid*='date'],[data-marker*='date'],[class*='date'],[class*='Date'],[class*='publish'],[class*='update']").each((_, date) => {
       const element = $(date), label = element.text().trim();
       const update = element.attr("itemprop") === "dateModified" || /обновлен|обновлён|update/iu.test(label + " " + element.attr("class"));
       const explicitPublication = element.attr("itemprop") === "datePublished" || /опубликован|размещен|размещён/iu.test(label);
       if (!update && !explicitPublication) return; // Unlabelled date may be a promotion.
-      assign({ [update ? "dateModified" : "datePublished"]: element.attr("datetime") || element.attr("content") || label.replace(/^.*?(?:сегодня|вчера|\d+\s+(?:день|дня|дней)\s+назад)/iu, match => match.match(/сегодня|вчера|\d+\s+(?:день|дня|дней)\s+назад/iu)![0]) }, "html_label");
+      assign({ [update ? "dateModified" : "datePublished"]: element.attr("datetime") || element.attr("content") || label.replace(/^.*?(?:опубликован[оа]?|размещ[её]н[оа]?|обновл[её]н[оа]?)\s*:?\s*/iu, "") }, "html_label");
     });
   });
   return result;
