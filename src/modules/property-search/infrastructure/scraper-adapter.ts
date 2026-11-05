@@ -4,6 +4,9 @@ import { safeRequest } from "@/shared/net/ssrf";
 import { SearchFilters, type SearchResult, type Source, type SourceRun } from "../domain/types";
 import { evaluateListing } from "../domain/evaluation";
 import { deduplicateListings, normalizeListing } from "./normalization";
+import { buildScraperQuery, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
+import { scraperHttpRequest } from "./scraper-http";
+export { buildScraperQuery } from "./source-filters";
 
 export interface ScraperAdapter { search(input: unknown): Promise<SearchResult>; }
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
@@ -24,16 +27,10 @@ export interface ScraperOptions {
   browser?: RealEstateScraper.BrowserOptions;
   factory?: ScraperFactory;
 }
-const purposeMap = { retail: "retail", psn_universal: "freePurpose", free_purpose: "freePurpose", office: "office", production: "industrial", warehouse: "warehouse" } as const;
-/** Price/owner/floor/district stay local: package filters can discard unknown candidates. */
-export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"]): RealEstateScraper.Query {
-  return { city: filters.city, category: "commercial", types: filters.purposes.length ? [...new Set(filters.purposes.map(p => purposeMap[p]))] : ["commercial"], deal: filters.operation,
-    sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages: 2, limit: 100, signal, sourceOptions };
-}
 const transport: RealEstateScraper.Transport = async request => {
   if (!["GET", "POST"].includes(request.method.toUpperCase())) throw new Error("UNSUPPORTED_METHOD");
   const body = request.data === undefined ? undefined : typeof request.data === "string" ? request.data : JSON.stringify(request.data);
-  const response = await safeRequest(request.url, { method: request.method.toUpperCase() as "GET" | "POST", headers: request.headers, body, signal: request.signal, timeoutMs: request.timeout, maxBytes: 10_000_000 });
+  const response = await scraperHttpRequest(request.url, { method: request.method.toUpperCase() as "GET" | "POST", headers: request.headers, body, signal: request.signal, timeoutMs: request.timeout, maxBytes: 10_000_000 });
   const text = response.data.toString("utf8");
   let data: unknown = text;
   if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch { /* Parser reports invalid payload. */ } }
@@ -67,12 +64,6 @@ export const defaultScraperFactory: ScraperFactory = async config => {
     return { searchSite: client.searchSite.bind(client), close: launched.close };
   } catch (error) { await launched.close(); throw error; }
 };
-function classify(errors: { code?: string; status?: number }[]): SourceRun["status"] {
-  if (errors.some(e => e.code === "ACCESS_BLOCKED" || e.status === 403 || e.status === 429)) return "blocked";
-  if (errors.some(e => /TIMEOUT|ABORTED|ETIMEDOUT/u.test(e.code ?? ""))) return "timeout";
-  if (errors.length && errors.every(e => ["UNSUPPORTED_FILTER", "DISTRICT_RESOLUTION_REQUIRED", "NOT_APPLICABLE"].includes(e.code ?? ""))) return "unsupported_filter";
-  return "error";
-}
 function positiveInt(value: unknown, fallback: number): number { const number = Number(value ?? fallback); if (!Number.isSafeInteger(number) || number < 1) throw new Error("INVALID_SCRAPER_LIMIT"); return number; }
 // Shared process-wide limiter for production adapters; tests may inject an isolated limiter.
 let productionLimiter: ScraperJobLimiter | undefined;
@@ -93,8 +84,10 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
   private async runSource(source: Source, filters: SearchFilters) {
     const empty = (status: SourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason } satisfies SourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
     if (!(this.options.enabled ?? process.env.SCRAPER_ENABLED === "true") || this.options.enabledSources && !this.options.enabledSources.includes(source)) return empty("disabled", "Источник отключён");
-    const geography = this.options.sourceOptions?.[source];
-    if (filters.city.toLocaleLowerCase("ru") !== "москва" && ((source === "domclick" && !geography?.address && !geography?.url) || (source === "avito" && !geography?.locationId && !geography?.url) || (source === "mirkvartir" && !geography?.locationIds && !geography?.url))) return empty("unsupported_filter", "Для города требуется проверенный идентификатор географии площадки в server sourceOptions");
+    const query = buildScraperQuery(filters, source, new AbortController().signal, this.options.sourceOptions);
+    const geography = query.sourceOptions?.[source];
+    const missingGeography = source === "domclick" && !geography?.address && !geography?.params?.address ? "address" : source === "avito" && !geography?.locationId ? "locationId" : source === "mirkvartir" && !geography?.locationIds ? "locationIds" : null;
+    if (missingGeography && !geography?.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${missingGeography}`);
     return this.limiter.run(async () => {
       const controller = new AbortController(); let timer: ReturnType<typeof setTimeout> | undefined;
       let client: ScraperClient | undefined;
@@ -115,10 +108,10 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         const status: SourceRun["status"] = errors.length ? successfulPage || listings.length ? "partial" : classify(errors) : invalid || result.partial ? "partial" : "success";
         const limited = result.pages.some(p => p.hasNext === true || p.truncated);
         return { listings, run: { source, status, resultCount: listings.length,
-          reason: errors.length ? errors.map(e => `${e.code}${e.status ? ` HTTP ${e.status}` : ""}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Выборка ограничена бюджетом страниц/результатов" : null } satisfies SourceRun };
+          reason: errors.length ? errors.map(scraperErrorReason).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Выборка ограничена бюджетом страниц/результатов" : null } satisfies SourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
-        return empty(classify([info]), info.code ?? "SCRAPER_ERROR");
+        return empty(classify([info]), scraperErrorReason(info));
       } finally {
         if (timer) clearTimeout(timer);
         controller.abort();

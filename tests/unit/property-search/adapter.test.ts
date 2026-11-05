@@ -50,10 +50,26 @@ describe("seven source contract fixtures (synthetic, offline)", () => {
     await Promise.all([instance.search({ city: "Москва", operation: "sale", sources: ["cian", "youla"] }), instance.search({ city: "Москва", operation: "sale", sources: ["onrealt"] })]);
     expect(maximum).toBe(1);
   });
-  it("does not silently search Moscow when Novosibirsk lacks location ids", async () => {
+  it("does not silently search Moscow when an unknown city lacks location ids", async () => {
     const { instance, factory } = adapter(async s => fixture(s));
-    const result = await instance.search({ operation: "sale", sources: ["domclick", "avito", "mirkvartir"] });
+    const result = await instance.search({ city: "Неизвестный город", operation: "sale", sources: ["domclick", "avito", "mirkvartir"] });
     expect(result.sources.every(s => s.status === "unsupported_filter")).toBe(true); expect(factory).not.toHaveBeenCalled();
+    expect(result.sources.map(s => s.reason)).toEqual([
+      "Фильтр city: требуется sourceOptions.domclick.address",
+      "Фильтр city: требуется sourceOptions.avito.locationId",
+      "Фильтр city: требуется sourceOptions.mirkvartir.locationIds",
+    ]);
+  });
+  it("passes Novosibirsk geography to the factory client", async () => {
+    const searchSite = vi.fn(async (source: Source) => fixture(source));
+    const { instance } = adapter(searchSite);
+    const result = await instance.search({ operation: "sale", purposes: ["office"], sources: ["domclick", "avito", "mirkvartir"] });
+    expect(result.sources.every(s => s.status === "success")).toBe(true);
+    expect(searchSite).toHaveBeenCalledWith("avito", expect.objectContaining({ sourceOptions: { avito: { citySlug: "novosibirsk", locationId: 641780 } } }));
+  });
+  it("does not call a failed first page partial or expose upstream payloads", async () => {
+    const { instance } = adapter(async source => ({ ...fixture(source), results: [], pages: [], errors: [{ source, page: 1, code: "PARSE_FAILED", error: "private seller payload" }] }));
+    expect((await instance.search({ operation: "sale", sources: ["cian"] })).sources[0]).toMatchObject({ status: "error", resultCount: 0, reason: "PARSE_FAILED" });
   });
   it("disabled does not launch browser", async () => {
     const { instance, factory } = adapter(async s => fixture(s), { enabled: false });

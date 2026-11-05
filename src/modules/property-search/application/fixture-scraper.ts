@@ -8,7 +8,7 @@ import type { ScraperAdapter, ScraperOptions } from "../infrastructure/scraper-a
 
 /** No network requests; fixtures are synthetic, recorded parser outputs. */
 export class FixtureScraperAdapter implements ScraperAdapter {
-  constructor(private options: ScraperOptions, private scenario = "success") {}
+  constructor(private options: ScraperOptions, private scenario = "success", private fixtureDirectory = "tests/fixtures/scraper") {}
   async search(raw: unknown): Promise<SearchResult> {
     const filters = SearchFilters.parse(raw);
     const listings = [] as ReturnType<typeof normalizeListing>[];
@@ -20,7 +20,7 @@ export class FixtureScraperAdapter implements ScraperAdapter {
       if (this.scenario === "failure" || this.scenario === "partial" && index > 0) {
         sources.push({ source, status: "blocked", resultCount: 0, reason: "Записанный ответ: HTTP 429" }); continue;
       }
-      const fixture = JSON.parse(await readFile(path.join(process.cwd(), "tests/fixtures/scraper", `${source}.json`), "utf8")) as { results: RealEstateScraper.Listing[] };
+      const fixture = JSON.parse(await readFile(path.join(process.cwd(), this.fixtureDirectory, `${source}.json`), "utf8")) as { results: RealEstateScraper.Listing[] };
       const rows = this.scenario === "empty" ? [] : fixture.results.map(row => normalizeListing(row, new Date().toISOString()));
       listings.push(...rows);
       sources.push({ source, status: "success", resultCount: rows.length, reason: "Записанный ответ площадки" });
