@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: process.env.CRM_DOCKER_BUILD === "1" },
   reactStrictMode: true,
   // pino и argon2 — нативные/серверные пакеты, не бандлим их.
-  serverExternalPackages: ["pino", "@node-rs/argon2", "exceljs", "pg"],
+  serverExternalPackages: ["pino", "@node-rs/argon2", "exceljs", "pg", "playwright-core"],
   async headers() {
     // В dev-режиме CSP не применяется: dev-сервер Next.js использует eval и HMR-websocket.
     const headers = process.env.NODE_ENV === "production" ? securityHeaders : securityHeaders.filter((h) => h.key !== "Content-Security-Policy");

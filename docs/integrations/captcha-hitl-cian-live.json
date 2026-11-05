@@ -1,0 +1,15 @@
+{
+  "mode": "LIVE",
+  "at": "2026-11-05T16:37:11.105Z",
+  "source": "cian",
+  "attempts": 1,
+  "solved": false,
+  "resumed": false,
+  "challengeVisible": false,
+  "status": "BLOCKED",
+  "frameAvailable": true,
+  "screenshot": "captcha-hitl-cian-live.png",
+  "accessBlocked": true,
+  "blockingKind": "waf",
+  "visualObservation": "Suspicious traffic / cian_waf_block; no solvable CAPTCHA displayed"
+}
