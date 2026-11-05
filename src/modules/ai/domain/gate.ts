@@ -5,6 +5,7 @@ export interface AiLimits {
   enabled: boolean; webEnabled: boolean; autoFallback: boolean;
   requestsPerUserHour: number; requestsPerUserDay: number; callsPerJob: number;
   webCallsPerJob: number; webJobsPerUserDay: number; monthlyBudgetMicros: bigint;
+  requestsPerDay?: number;
 }
 export interface AiUser { userId: string; active: boolean }
 export interface AiJob {
@@ -23,6 +24,7 @@ export interface AiReservation {
 export interface AiUsageSnapshot {
   userHourCalls: number; userDayCalls: number; jobCalls: number; jobWebCalls: number;
   userDayWebJobIds: string[]; monthCommittedMicros: bigint;
+  dayCalls?: number;
 }
 export interface AiLedgerTransaction {
   find(requestId: string): Promise<AiReservation | null>;
@@ -30,7 +32,7 @@ export interface AiLedgerTransaction {
   insert(reservation: AiReservation): Promise<void>;
   update(reservation: AiReservation): Promise<void>;
 }
-/** SERIALIZABLE transaction + shared budget/counter locks; retry serialization conflicts internally.
+/** Serializable budget operation: shared transaction-scoped lock or SERIALIZABLE with retry.
  * find/usage/insert/update MUST share the transaction, requestId has a UNIQUE constraint.
  * No prompt/response/credentials in this ledger. Reserved calls consume quotas immediately.
  */
@@ -51,6 +53,7 @@ export function effectiveLimits(env: AiLimits, ui: Partial<AiLimits>): AiLimits 
     requestsPerUserHour: n("requestsPerUserHour"), requestsPerUserDay: n("requestsPerUserDay"), callsPerJob: n("callsPerJob"),
     webCallsPerJob: n("webCallsPerJob"), webJobsPerUserDay: n("webJobsPerUserDay"),
     monthlyBudgetMicros: ui.monthlyBudgetMicros === undefined || env.monthlyBudgetMicros < ui.monthlyBudgetMicros ? env.monthlyBudgetMicros : ui.monthlyBudgetMicros,
+    requestsPerDay: Math.min(env.requestsPerDay ?? Number.MAX_SAFE_INTEGER, ui.requestsPerDay ?? Number.MAX_SAFE_INTEGER),
   };
 }
 export function periodKeys(now: Date, timeZone: string) {
@@ -84,6 +87,7 @@ export class AiGate {
       const keys = periodKeys(now, this.timeZone);
       const usage = await tx.usage({ userId: user.userId, jobId: job.id, hourSince: new Date(now.getTime() - 3600000), ...keys });
       if (usage.userHourCalls >= limits.requestsPerUserHour || usage.userDayCalls >= limits.requestsPerUserDay || usage.jobCalls >= limits.callsPerJob) throw new AiError("AI_RATE_LIMIT");
+      if ((usage.dayCalls ?? 0) >= (limits.requestsPerDay ?? Number.MAX_SAFE_INTEGER)) throw new AiError("AI_RATE_LIMIT");
       if (callType === "web_search" && (usage.jobWebCalls + job.estimatedWebCalls > limits.webCallsPerJob || (!usage.userDayWebJobIds.includes(job.id) && usage.userDayWebJobIds.length >= limits.webJobsPerUserDay))) throw new AiError("AI_WEB_LIMIT");
       if (usage.monthCommittedMicros + estimatedMicros > limits.monthlyBudgetMicros) throw new AiError("AI_BUDGET_EXHAUSTED");
       const reservation: AiReservation = {
@@ -93,6 +97,18 @@ export class AiGate {
       };
       await tx.insert(reservation);
       return reservation;
+    });
+  }
+
+  async release(requestId: string): Promise<void> {
+    // Only callers with evidence that dispatch never happened may use this method.
+    await this.ledger.atomic(async (tx) => {
+      const r = await tx.find(requestId);
+      if (!r) throw new AiError("AI_RESERVATION_NOT_FOUND");
+      if (r.state === "settled") return;
+      const finishedAt = this.clock();
+      await tx.update({ ...r, state: "settled", outcome: "error", chargedMicros: 0n, actualMicros: 0n, estimated: false,
+        usage: { inputTokens: 0, outputTokens: 0 }, webSearchCalls: 0, finishedAt, durationMs: Math.max(0, +finishedAt - +r.createdAt) });
     });
   }
 

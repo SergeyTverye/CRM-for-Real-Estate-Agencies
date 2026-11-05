@@ -1,10 +1,34 @@
 import { describe, expect, it, vi } from "vitest";
 import { YandexResponsesClient } from "@/modules/ai/infrastructure/yandex-responses-client";
 import { redactContacts, publicSourceUrl } from "@/modules/ai/domain/contracts";
+import { logger } from "@/shared/logging/logger";
 
 const request = { model: "demo-model", input: "synthetic", instructions: "JSON only", maxOutputTokens: 100 };
 const config = { apiKey: "synthetic-key-for-tests", folder: "synthetic-folder", baseUrl: "https://ai.api.cloud.yandex.net/v1", timeoutMs: 1000 };
 describe("YandexResponsesClient", () => {
+  it("logs only allowlisted error codes and incomplete reasons, never messages or payloads", async () => {
+    const log = vi.spyOn(logger, "warn").mockImplementation(() => {});
+    try {
+      const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ status: "failed", error: { code: "invalid_json_schema", message: "synthetic-key-for-tests private prompt" },
+        incomplete_details: { reason: "max_output_tokens", prompt: "private prompt" } }));
+      await expect(new YandexResponsesClient(config, fetcher).respond({ ...request, responseSchema: { type: "object" }, responseSchemaStrict: true })).rejects.toThrow("AI_INCOMPLETE_RESPONSE");
+      expect(JSON.parse(fetcher.mock.calls[0]![1]!.body as string).text.format.strict).toBe(true);
+      expect(log.mock.calls[0]?.[0]).toMatchObject({ error: { code: "invalid_json_schema" }, incomplete_details: { reason: "max_output_tokens" } });
+      expect(JSON.stringify(log.mock.calls)).not.toMatch(/private prompt|synthetic-key-for-tests|message/);
+    } finally { log.mockRestore(); }
+  });
+  it("places JSON Schema under text.format as documented, without enabling it implicitly", async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ status: "completed", output_text: "{}", error: {} }));
+    await new YandexResponsesClient(config, fetcher).respond({ ...request, responseSchema: { type: "object" } });
+    const body = JSON.parse(fetcher.mock.calls[0]![1]!.body as string);
+    expect(body.text.format).toEqual({ type: "json_schema", name: "crm_result", schema: { type: "object" }, strict: false });
+    expect(body).not.toHaveProperty("response_format");
+  });
+  it("treats HTTP 200 failed status as failure, never as valid model output", async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ status: "failed", usage: { input_tokens: 0, output_tokens: 0 }, output_text: "{}" }));
+    await expect(new YandexResponsesClient(config, fetcher).respond(request)).rejects.toThrow("AI_INCOMPLETE_RESPONSE");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
   it("sends Api-Key/project, gpt URI and store=false; extracts usage, citations and web calls", async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ status: "completed", usage: { input_tokens: 20, output_tokens: 10 }, output: [
       { type: "web_search_call", action: { sources: [{ url: "https://example.com/listing" }] } },

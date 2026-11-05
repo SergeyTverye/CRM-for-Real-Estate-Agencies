@@ -12,6 +12,8 @@
  */
 import { config as loadEnv } from "dotenv";
 import { randomBytes } from "node:crypto";
+import { seedAiTariffs } from "../src/modules/ai/application/seed-ai";
+import { lockAi, singleton } from "../src/modules/ai/infrastructure/prisma-repositories";
 import { getDb, disconnectDb } from "../src/shared/db/client";
 import { hashPassword } from "../src/modules/auth/infrastructure/password-hasher";
 import { passwordPolicyErrors } from "../src/modules/auth/domain/password-policy";
@@ -96,6 +98,7 @@ async function main() {
   const dict = await seedDictionaries();
   const le = await seedLegalEntities();
   await seedUsers();
+  await db.$transaction(async (tx) => { await lockAi(tx); await singleton(tx); await seedAiTariffs(tx); });
   console.log(`seed: справочники +${dict}, юрлица +${le}`);
   if (process.env.SEED_DEMO_DATA === "true") {
     const demo = await seedDemoData(db);

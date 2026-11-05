@@ -31,7 +31,7 @@ export interface WebSearchTool {
   search_context_size: "low" | "medium" | "high";
   filters: { allowed_domains?: string[]; user_location?: { region: string } };
 }
-export interface AiRequest { model: string; instructions: string; input: string; maxOutputTokens: number; tools?: WebSearchTool[] }
+export interface AiRequest { model: string; instructions: string; input: string; maxOutputTokens: number; tools?: WebSearchTool[]; responseSchema?: Record<string, unknown>; responseSchemaStrict?: boolean }
 export interface AiResponse {
   text: string; model: string; usage?: TokenUsage; webSearchCalls: number; sourceUrls: string[];
   mode: "live" | "test";

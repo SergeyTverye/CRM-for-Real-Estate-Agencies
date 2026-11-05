@@ -1,12 +1,14 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import {
-  AiError, descriptionInputSchema, descriptionResultSchema, parseResultSchema,
+  AiError, descriptionInputSchema, descriptionResultSchema,
   publicSourceUrl, redactContacts, searchFiltersSchema, webResultSchema,
   type AiRequest, type AiResponse, type CallType, type ResponsesProvider, type WebSearchTool,
 } from "../domain/contracts";
 import { AiGate, type AiUser } from "../domain/gate";
 import type { TariffRepository } from "../domain/cost";
+import { decodeAiJson } from "../domain/decode-json";
+import { decodeParseResult, providerParseSchema, providerParseInstructions } from "../domain/provider-parse";
 
 export interface AiCallContext {
   user: AiUser; jobId: string; ownerUserId: string; requestId: string;
@@ -28,10 +30,12 @@ export class SearchAi {
 
   private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[]): Promise<AiResponse> {
     const model = type === "web_search" ? this.config.webModel || this.config.model : this.config.model;
-    const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens: this.config.maxOutputTokens, ...(tools ? { tools } : {}) };
+    const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens: this.config.maxOutputTokens,
+      ...(type === "parse" ? { responseSchema: providerParseSchema, responseSchemaStrict: true } : {}),
+      ...(tools ? { tools } : {}) };
     const tariff = await this.tariffs.findEffective(model, this.clock());
     if (!tariff) throw new AiError("AI_TARIFF_UNAVAILABLE");
-    const inputTokens = Buffer.byteLength(request.input + instructions, "utf8") + 1024 + (tools ? tariff.webInputTokenAllowance : 0);
+    const inputTokens = Buffer.byteLength(request.input + instructions + JSON.stringify(request.responseSchema ?? {}), "utf8") + 1024 + (tools ? tariff.webInputTokenAllowance : 0);
     await this.gate.check(type, context.user, {
       id: context.jobId, ownerUserId: context.ownerUserId, requestId: context.requestId,
       fingerprint: createHash("sha256").update(JSON.stringify(request)).digest("hex"), model, tariff,
@@ -40,27 +44,34 @@ export class SearchAi {
     });
     let response: AiResponse;
     try { response = await this.provider.respond(request); }
-    catch {
+    catch (error) {
       // A timeout/transport failure can still have been charged. Never release its reserve.
-      await this.gate.settle(context.requestId, { outcome: "error" });
+      if (error instanceof AiError && ["AI_NOT_CONFIGURED", "AI_INVALID_REQUEST"].includes(error.code)) await this.gate.release(context.requestId);
+      else await this.gate.settle(context.requestId, { outcome: "error" });
       throw new AiError("AI_CALL_FAILED");
+    }
+    try {
+      if (type === "parse") decodeParseResult(response.text);
+      else if (type === "description") this.decode(descriptionResultSchema, response.text);
+      else this.decode(webResultSchema, response.text);
+    } catch {
+      await this.gate.settle(context.requestId, { usage: response.usage, webSearchCalls: response.webSearchCalls, outcome: "error" });
+      throw new AiError("AI_INVALID_JSON_RESULT");
     }
     await this.gate.settle(context.requestId, { usage: response.usage, webSearchCalls: response.webSearchCalls, outcome: "success" });
     return response;
   }
 
   private decode<T>(schema: z.ZodType<T>, text: string): T {
-    try { return schema.parse(JSON.parse(text)); }
-    catch { throw new AiError("AI_INVALID_JSON_RESULT"); }
+    return decodeAiJson(schema, text);
   }
 
   async parseSearchQuery(context: AiCallContext, rawInput: unknown) {
     const input = z.object({ query: z.string().trim().min(1).max(4000), currentFilters: searchFiltersSchema.optional() }).strict().parse(rawInput);
     const safe = { query: redactContacts(input.query), currentFilters: input.currentFilters ? this.safeFilters(input.currentFilters) : undefined };
-    const schema = z.toJSONSchema(parseResultSchema, { unrepresentable: "any" });
     const response = await this.call("parse", context, safe,
-      `${untrusted} Разбери русский запрос коммерческой недвижимости. Последующая фраза изменяет currentFilters; сохрани остальные условия. Новосибирск по умолчанию. Цена — десятичная строка в рублях. Назначения и районы — ИЛИ, группы — И. Не додумывай критические условия: если неясны операция, единица аренды или смысл ограничения, верни filters=null и clarificationQuestion на русском. Результат — только предложение для подтверждения пользователем. JSON Schema: ${JSON.stringify(schema)}`);
-    return { ...this.decode(parseResultSchema, response.text), ...this.metadata(response) };
+      `${untrusted} ${providerParseInstructions}`);
+    return { ...decodeParseResult(response.text), ...this.metadata(response) };
   }
 
   async analyzeDescriptions(context: AiCallContext, rawInput: unknown) {

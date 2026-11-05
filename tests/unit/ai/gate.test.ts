@@ -19,6 +19,20 @@ function fixture(overrides: Partial<AiLimits> = {}) {
 }
 
 describe("AiGate atomic reservations", () => {
+  it("releases a verified pre-dispatch reservation exactly once, without resetting the attempt quota", async () => {
+    const { gate, ledger } = fixture();
+    await gate.check("parse", user, job());
+    await gate.release("r"); await gate.release("r");
+    await gate.settle("r", { usage: { inputTokens: 999, outputTokens: 999 }, outcome: "success" });
+    const row = await ledger.atomic((tx) => tx.find("r"));
+    expect(row).toMatchObject({ state: "settled", outcome: "error", chargedMicros: 0n, actualMicros: 0n });
+    await expect(gate.check("parse", user, job())).rejects.toThrow("AI_ALREADY_RESERVED");
+  });
+  it("enforces the agency daily ceiling across users and jobs", async () => {
+    const { gate } = fixture({ requestsPerDay: 1 });
+    await gate.check("parse", user, job());
+    await expect(gate.check("parse", { userId: "v", active: true }, { ...job("r2", "j2"), ownerUserId: "v" })).rejects.toThrow("AI_RATE_LIMIT");
+  });
   it("denies disabled AI before any reservation", async () => {
     await expect(fixture({ enabled: false }).gate.check("parse", user, job())).rejects.toThrow("AI_DISABLED");
   });

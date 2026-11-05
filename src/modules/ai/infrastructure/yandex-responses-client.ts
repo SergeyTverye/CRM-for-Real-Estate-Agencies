@@ -1,10 +1,12 @@
 import { z } from "zod";
 import { AiError, publicSourceUrl, type AiRequest, type AiResponse, type ResponsesProvider } from "../domain/contracts";
+import { logger } from "@/shared/logging/logger";
 
 const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const responseSchema = z.object({
   status: z.enum(["completed", "incomplete", "failed", "in_progress", "queued", "cancelled"]).optional(),
   error: z.unknown().optional(), model: z.string().optional(), output_text: z.string().optional(),
+  incomplete_details: z.unknown().optional(),
   usage: z.object({ input_tokens: count, output_tokens: count }).nullish(),
   output: z.array(z.object({
     type: z.string(), status: z.string().optional(),
@@ -35,6 +37,7 @@ export class YandexResponsesClient implements ResponsesProvider {
         headers: { Authorization: `Api-Key ${this.config.apiKey}`, "OpenAI-Project": this.config.folder, "x-folder-id": this.config.folder, "Content-Type": "application/json" },
         body: JSON.stringify({ model, instructions: request.instructions, input: request.input,
           store: false, stream: false, max_output_tokens: request.maxOutputTokens,
+          ...(request.responseSchema ? { text: { format: { type: "json_schema", name: "crm_result", schema: request.responseSchema, strict: request.responseSchemaStrict ?? false } } } : {}),
           ...(request.tools ? { tools: request.tools, max_tool_calls: 1 } : {}),
         }),
       });
@@ -57,7 +60,17 @@ export class YandexResponsesClient implements ResponsesProvider {
       const parsed = responseSchema.safeParse(JSON.parse(new TextDecoder().decode(bytes)));
       if (!parsed.success) throw new AiError("AI_INVALID_RESPONSE");
       const data = parsed.data;
-      if (data.error || (data.status && data.status !== "completed")) throw new AiError("AI_INCOMPLETE_RESPONSE");
+      const providerError = data.error as { code?: unknown; message?: unknown } | null | undefined;
+      if (providerError?.code || providerError?.message || (data.status && data.status !== "completed")) {
+        // Never log error.message or arbitrary provider strings: they can echo input/credentials.
+        const codes = ["invalid_request_error", "invalid_json_schema", "invalid_schema", "unsupported_parameter", "unsupported_value", "model_not_found", "server_error", "rate_limit_exceeded", "content_filter", "invalid_prompt", "invalid_request", "internal_error"];
+        const reasons = ["max_output_tokens", "content_filter", "max_tool_calls"];
+        const details = data.incomplete_details as { reason?: unknown } | null | undefined;
+        logger.warn({ status: data.status ?? "unknown", model: request.model,
+          error: { code: typeof providerError?.code === "string" && codes.includes(providerError.code) ? providerError.code : providerError?.code == null ? null : "unrecognized_code" },
+          incomplete_details: { reason: typeof details?.reason === "string" && reasons.includes(details.reason) ? details.reason : details?.reason == null ? null : "unrecognized_reason" } }, "AI provider did not complete");
+        throw new AiError("AI_INCOMPLETE_RESPONSE");
+      }
       const contents = data.output.filter((o) => o.type === "message").flatMap((o) => o.content ?? []);
       if (contents.some((c) => c.type === "refusal")) throw new AiError("AI_REFUSED");
       const text = contents.filter((c) => c.type === "output_text").map((c) => c.text ?? "").join("") || data.output_text || "";
