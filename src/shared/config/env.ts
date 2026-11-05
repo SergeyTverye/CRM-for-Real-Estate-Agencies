@@ -45,7 +45,7 @@ const schema = z
     APP_PORT: int(3000, 1, 65535),
     APP_VERSION: z.string().default("dev"),
     APP_COMMIT: z.string().default("unknown"),
-    APP_TIMEZONE: z.string().optional(),
+    APP_TIMEZONE: z.string().default("Asia/Novosibirsk"),
 
     DEPLOYMENT_MODE: z.enum(["server", "portable"]).default("server"),
     DEPLOYMENT_ID: z.string().uuid().optional(),
@@ -72,6 +72,31 @@ const schema = z
 
     BACKUP_TARGETS: z.string().default(""),
     AI_ENABLED: bool(false),
+    YANDEX_CLOUD_API_KEY: z.string().default(""),
+    YANDEX_CLOUD_FOLDER: z.string().regex(/^[a-zA-Z0-9_-]+$/).default("b1gsj611qbf7re0rfcde"),
+    YANDEX_CLOUD_MODEL: z.string().min(1).default("aliceai-llm-flash/latest"),
+    YANDEX_CLOUD_WEB_MODEL: z.string().default(""),
+    YANDEX_CLOUD_BASE_URL: z.literal("https://ai.api.cloud.yandex.net/v1").default("https://ai.api.cloud.yandex.net/v1"),
+    YANDEX_AI_STORE_RESPONSES: z.enum(["false", "0", "no"]).optional().transform(() => false as const),
+    YANDEX_AI_MAX_OUTPUT_TOKENS: int(1800, 1, 32768),
+    YANDEX_AI_TIMEOUT_MS: int(30000, 100, 120000),
+    YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR: int(30, 0, 10000),
+    YANDEX_AI_MAX_MONTHLY_COST_RUB: z.string().regex(/^\d+(?:\.\d{1,6})?$/).default("1000"),
+    YANDEX_WEB_SEARCH_ENABLED: bool(false),
+    YANDEX_WEB_SEARCH_AUTO_FALLBACK: bool(false),
+    YANDEX_WEB_SEARCH_CONTEXT_SIZE: z.enum(["low", "medium", "high"]).default("low"),
+    YANDEX_WEB_SEARCH_REGION: z.string().regex(/^\d+$/).default("65"),
+    YANDEX_WEB_SEARCH_MAX_CALLS_PER_JOB: int(1, 0, 100),
+    YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY: int(3, 0, 1000),
+    YANDEX_WEB_SEARCH_ALLOWED_DOMAINS: z.string().default("").refine((v) => {
+      const domains = v.split(",").map((s) => s.trim()).filter(Boolean);
+      return domains.length <= 5 && domains.every((s) => /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/i.test(s));
+    }, "Допустимо до 5 доменов без схемы и пути"),
+    SCRAPER_ENABLED: bool(false),
+    SCRAPER_BROWSER_ENABLED: bool(true),
+    SCRAPER_JOB_TIMEOUT_MS: int(180000, 1000, 600000),
+    SCRAPER_MAX_CONCURRENT_JOBS: int(1, 1, 10),
+    SCRAPER_RESULT_TTL_HOURS: int(24, 1, 720),
   })
   .superRefine((env, ctx) => {
     if (env.APP_TIMEZONE && !isValidTimeZone(env.APP_TIMEZONE)) {
@@ -96,9 +121,9 @@ export type AppConfig = ReturnType<typeof buildConfig>;
 function buildConfig(raw: z.infer<typeof schema>) {
   return {
     ...raw,
-    // В dev/test допустим фиксированный часовой пояс и идентификаторы;
-    // в production они обязательны (см. superRefine).
-    APP_TIMEZONE: raw.APP_TIMEZONE ?? "Europe/Moscow",
+    // Рабочий часовой пояс по умолчанию — Новосибирск (ТЗ v2.4.1 §5).
+    // В production идентификаторы обязательны (см. superRefine).
+    APP_TIMEZONE: raw.APP_TIMEZONE,
     DEPLOYMENT_ID: raw.DEPLOYMENT_ID ?? DEV_DEPLOYMENT_ID,
     INSTANCE_ID: raw.INSTANCE_ID ?? "dev-instance",
     uploadAllowedExtensions: raw.UPLOAD_ALLOWED_EXTENSIONS.split(",")
