@@ -137,7 +137,7 @@ export async function loadAccessibleNeed(tx: Tx | typeof db, actor: Actor, needI
   return need;
 }
 
-const updateParamsSchema = needParamsSchema.and(z.object({ expectedUpdatedAt: zExpectedUpdatedAt }));
+const updateParamsSchema = needParamsSchema.and(z.object({ expectedUpdatedAt: zExpectedUpdatedAt, nextAction: nextActionSchema.optional() }));
 
 /** Изменение параметров потребности (без смены статуса/этапа), с optimistic concurrency. */
 export async function updateNeedParams(actor: Actor, needId: string, input: unknown): Promise<{ id: string }> {
@@ -145,9 +145,14 @@ export async function updateNeedParams(actor: Actor, needId: string, input: unkn
   return transaction(async (tx) => {
     const need = await loadAccessibleNeed(tx, actor, needId);
     await validateNeedDictionaries(data, need as unknown as Partial<NeedParams>);
-    const { expectedUpdatedAt, ...params } = data;
+    const { expectedUpdatedAt, nextAction, ...params } = data;
     const res = await tx.clientNeed.updateMany({ where: { id: needId, updatedAt: expectedUpdatedAt }, data: params });
     if (res.count === 0) throw new StaleUpdateError();
+    if (nextAction) {
+      const responsibleUserId = await resolveTaskResponsible(tx, actor, nextAction.responsibleUserId, need.responsibleUserId);
+      await insertTask(tx, actor.userId, { ...nextAction, responsibleUserId }, { needIds: [needId], clientIds: [need.clientId] });
+    }
+    await assertNeedInvariants(tx, [needId]);
     return { id: needId };
   });
 }

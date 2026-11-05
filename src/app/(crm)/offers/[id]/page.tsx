@@ -1,3 +1,5 @@
+import { OfferAiButtons } from "@/ui/domain/ai-p2-drafts";
+import { p2Available } from "@/modules/ai/application/p2-service";
 import { RevisionButton } from "./revision-button";
 import { PdfButton } from "./pdf-button";
 import Link from "next/link";
@@ -21,6 +23,7 @@ export const metadata = { title: "Коммерческое предложени�
 
 export default async function OfferCardPage({ params }: { params: Promise<{ id: string }> }) {
   const actor = await requirePageActor();
+  const aiEnabled = await p2Available(actor);
   const { id } = await params;
   let data;
   try {
@@ -56,6 +59,7 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
         }
         actions={
           <>
+            <OfferAiButtons offerId={id} enabled={aiEnabled && draft && clientVisible} />
             <Link className="btn" href={`/offers/${id}/print`}>Предпросмотр / печать</Link>
             <PdfButton id={id} />
             <RevisionButton id={id} updatedAt={updatedAt} />

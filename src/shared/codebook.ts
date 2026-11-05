@@ -22,7 +22,7 @@ export const CODEBOOK = {
   searchRunStatus: { pending: "Ожидает", running: "Выполняется", success: "Успешно", partial: "Частично", error: "Ошибка", cancelled: "Отменён" },
   searchSourceStatus: { success: "Успешно", partial: "Частично", blocked: "Заблокирован", timeout: "Тайм-аут", unsupported_filter: "Фильтр не поддерживается", error: "Ошибка", disabled: "Отключён" },
   searchVerdict: { confirmed: "Подтверждён", needs_review: "Требует проверки", rejected: "Исключён" },
-  aiCallType: { parse: "Разбор запроса", description: "Анализ описания", web_search: "Веб-поиск" },
+  aiCallType: { call_note: "Разбор заметки", offer_text: "Текст КП", parse: "Разбор запроса", description: "Анализ описания", web_search: "Веб-поиск" },
   aiUsageStatus: { pending: "Ожидает", running: "Выполняется", success: "Успешно", error: "Ошибка", cancelled: "Отменён" },
   aiReservationStatus: { reserved: "Зарезервировано", settled: "Учтено", released: "Освобождено" },
   aiSearchContextSize: { low: "Малый", medium: "Средний", high: "Большой" },

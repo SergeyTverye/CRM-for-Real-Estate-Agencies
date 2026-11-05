@@ -1,3 +1,5 @@
+import { CallNoteButton } from "@/ui/domain/ai-p2-drafts";
+import { p2Available } from "@/modules/ai/application/p2-service";
 import Link from "next/link";
 import { NeedSelectionPanel } from "../../property-search/need-selection-panel";
 import { notFound } from "next/navigation";
@@ -39,6 +41,7 @@ function transition(from: string | null, to: string | null, render: (c: string |
 
 export default async function NeedCardPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
   const actor = await requirePageActor();
+  const aiEnabled = await p2Available(actor);
   const { id } = await params;
   const { tab = "matches" } = await searchParams;
   let card;
@@ -84,6 +87,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
         }
         actions={
           <>
+            <CallNoteButton timeZone={zone} context={{kind:"need",id}} enabled={aiEnabled && clientVisible} />
             <Link className="btn btn-primary" href={`${base}/matching`}>
               Подбор объектов
             </Link>
