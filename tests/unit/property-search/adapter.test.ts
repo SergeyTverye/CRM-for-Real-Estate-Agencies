@@ -50,6 +50,24 @@ describe("seven source contract fixtures (synthetic, offline)", () => {
     await Promise.all([instance.search({ city: "Москва", operation: "sale", sources: ["cian", "youla"] }), instance.search({ city: "Москва", operation: "sale", sources: ["onrealt"] })]);
     expect(maximum).toBe(1);
   });
+  it("uses one deadline including queue time, retains earlier results, and recovers on the next job", async () => {
+    let hanging = true;
+    const calls: Source[] = [];
+    const { instance, close } = adapter(async source => {
+      calls.push(source);
+      if (hanging && source === "youla") return new Promise(() => {});
+      return fixture(source);
+    }, { jobTimeoutMs: 40, limiter: new ScraperJobLimiter(1) });
+    const result = await instance.search({ city: "Москва", operation: "sale", sources: ["cian", "youla", "onrealt"] });
+    expect(result.sources.map(s => s.status)).toEqual(["success", "timeout", "timeout"]);
+    expect(result.listings).toHaveLength(1);
+    expect(calls).toEqual(["cian", "youla"]);
+    expect(close).toHaveBeenCalledTimes(2);
+    hanging = false;
+    const recovered = await instance.search({ city: "Москва", operation: "sale", sources: ["onrealt"] });
+    expect(recovered.sources[0]?.status).toBe("success");
+    expect(recovered.listings).toHaveLength(1);
+  });
   it("does not silently search Moscow when an unknown city lacks location ids", async () => {
     const { instance, factory } = adapter(async s => fixture(s));
     const result = await instance.search({ city: "Неизвестный город", operation: "sale", sources: ["domclick", "avito", "mirkvartir"] });

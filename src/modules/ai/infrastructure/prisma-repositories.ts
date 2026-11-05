@@ -85,10 +85,11 @@ export class PrismaAiLedger implements AiLedgerRepository {
         if (usage.userHourCalls >= limits.requestsPerUserHour || usage.userDayCalls >= limits.requestsPerUserDay || usage.jobCalls >= limits.callsPerJob || (usage.dayCalls ?? 0) >= (limits.requestsPerDay ?? Infinity)) throw new AiError("AI_RATE_LIMIT");
         if (r.callType === "web_search" && (usage.jobWebCalls + r.estimatedWebCalls > limits.webCallsPerJob ||
           (!usage.userDayWebJobIds.includes(r.jobId) && usage.userDayWebJobIds.length >= limits.webJobsPerUserDay))) throw new AiError("AI_WEB_LIMIT");
-        const run = await tx.searchRun.findFirst({ where: { id: r.jobId, userId: r.userId } });
+        const standalone = r.callType === "call_note" || r.callType === "offer_text";
+        const run = standalone ? null : await tx.searchRun.findFirst({ where: { id: r.jobId, userId: r.userId } });
         const user = await tx.user.findFirst({ where: { id: r.userId, isActive: true } });
-        if (!run || !user) throw new AiError("AI_FORBIDDEN");
-        await tx.aiUsageLog.create({ data: { id: key(r.requestId), userId: r.userId, searchRunId: r.jobId, callType: r.callType,
+        if ((!standalone && !run) || !user) throw new AiError("AI_FORBIDDEN");
+        await tx.aiUsageLog.create({ data: { id: key(r.requestId), userId: r.userId, searchRunId: standalone ? null : r.jobId, callType: r.callType,
           model: r.model, estimatedCostRub: centsCeil(r.estimatedMicros), status: "running", result: encode(r), createdAt: r.createdAt,
           reservations: { create: { amountRub: centsCeil(r.estimatedMicros), status: "reserved" } } } });
       },

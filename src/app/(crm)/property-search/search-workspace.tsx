@@ -27,8 +27,8 @@ const statusLabels: Record<string, string> = { success: "Успешно", partia
 const split = (text: string) => text.split(/[;\n]/).map(s => s.trim()).filter(Boolean);
 const numberText = (v: string | number | null | undefined) => v === null || v === undefined ? "—" : Number(v).toLocaleString("ru-RU");
 
-export function SearchWorkspace({ initialFilters, initialNeedId, initialNeed, demoMode, aiEnabled, manualWebAllowed }: {
-  initialFilters: SearchFilters; initialNeedId?: string; initialNeed?: NeedChoice; demoMode: boolean; aiEnabled: boolean; manualWebAllowed: boolean;
+export function SearchWorkspace({ initialFilters, initialRun, initialNeedId, initialNeed, demoMode, aiEnabled, manualWebAllowed }: {
+  initialFilters: SearchFilters; initialRun?: Run; initialNeedId?: string; initialNeed?: NeedChoice; demoMode: boolean; aiEnabled: boolean; manualWebAllowed: boolean;
 }) {
   const [filters, setFilters] = useState(initialFilters);
   const [needId, setNeedId] = useState(initialNeedId ?? "");
@@ -43,7 +43,7 @@ export function SearchWorkspace({ initialFilters, initialNeedId, initialNeed, de
   const [limits, setLimits] = useState<{ modes: { ai: boolean; manualWeb: boolean }; remaining: { hour: number; day: number; webJobsToday: number; monthlyBudgetRub?: string }; budgetAvailable: boolean } | null>(null);
   const [query, setQuery] = useState("");
   const [clarification, setClarification] = useState("");
-  const [run, setRun] = useState<Run | null>(null);
+  const [run, setRun] = useState<Run | null>(initialRun ?? null);
   const [tab, setTab] = useState("confirmed");
   const [view, setView] = useState("cards");
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -65,7 +65,8 @@ export function SearchWorkspace({ initialFilters, initialNeedId, initialNeed, de
       return apiCall<Run>("POST", "/api/v1/property-search/runs", { filters: checked.data, sources: checked.data.sources, needId: nextNeedId || undefined, savedSearchId: nextSavedId, confirmedPaid, demoScenario: scenario });
     });
     setPhase(null);
-    if (result) { setComparison([]); setRun(result); setDirty(false); setFeedback("Поиск завершён"); setTab("confirmed"); }
+    if (result) { setComparison([]); setRun(result); setDirty(false); setFeedback("Поиск завершён"); setTab("confirmed");
+      const url = new URL(window.location.href); url.searchParams.set("runId", result.id); window.history.replaceState(null, "", url); }
   }
   async function openTab(value: string) {
     setTab(value);

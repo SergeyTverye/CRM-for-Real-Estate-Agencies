@@ -29,7 +29,7 @@ async function needFor(actor = users.realtor1) { const client = await makeClient
 async function gatedAi() {
   process.env.AI_ENABLED = "true"; process.env.YANDEX_WEB_SEARCH_ENABLED = "true"; process.env.YANDEX_WEB_SEARCH_AUTO_FALLBACK = "true"; resetConfigCache();
   await db.aiSetting.updateMany({ data: { aiEnabled: true, webSearchManualAllowed: true, webSearchAutoFallback: true } });
-  const provider = new FakeResponsesProvider(() => ({ text: JSON.stringify({ candidates: [{ title: "Объявление требует проверки", url: "https://cian.ru/synthetic-web" }] }), sourceUrls: ["https://cian.ru/synthetic-web"], webSearchCalls: 1 }));
+  const provider = new FakeResponsesProvider(() => ({ text: JSON.stringify({ candidates: [{ title: "Объявление требует проверки", url: "https://cian.ru/sale/commercial/999999999/" }] }), sourceUrls: ["https://cian.ru/sale/commercial/999999999/"], webSearchCalls: 1 }));
   const ai = createSearchAi(getConfig(), { ledger: new InMemoryAiLedger(), settings: { getLimits: async () => ({ enabled: true, webEnabled: true, autoFallback: true }) },
     tariffs: { findEffective: async model => ({ id: "synthetic-tariff", model, effectiveFrom: new Date(0), inputMicrosPerMillion: 1000000n, outputMicrosPerMillion: 1000000n, webSearchMicrosPerCall: 1000000n, webInputTokenAllowance: 1000 }) } }, provider);
   configureSearchAi(async () => ai);
@@ -79,6 +79,17 @@ describe("search application integration", () => {
     const {provider,ai} = await gatedAi();
     const run = await runSearch(users.realtor1,{filters,sources:["cian","avito"],confirmedPaid:true}, {ai,scraper:adapter([listing()],[{source:"cian",status:"success",resultCount:1,reason:null},{source:"avito",status:"blocked",resultCount:0,reason:"HTTP 429"}])});
     expect(run.status).toBe("partial"); expect(run.results).toHaveLength(1); expect(provider.requests).toHaveLength(0);
+  });
+  it("compares repeated partial results and keeps their baseline after total failure", async () => {
+    const saved = await saveSearch(users.realtor1, { name: "Частичная выдача", filters, sources: ["cian", "avito"] });
+    const statuses: SearchResult["sources"] = [{ source: "cian", status: "success", resultCount: 1, reason: null }, { source: "avito", status: "blocked", resultCount: 0, reason: "HTTP 403" }];
+    const first = await runSearch(users.realtor1, { filters, sources: ["cian", "avito"], savedSearchId: saved.id }, { scraper: adapter([listing()], statuses) });
+    expect(first.status).toBe("partial");
+    await runSearch(users.realtor1, { filters, sources: ["cian"], savedSearchId: saved.id }, { scraper: adapter([], [{ source: "cian", status: "timeout", resultCount: 0, reason: "TIMEOUT" }]) });
+    expect((await db.savedSearch.findUniqueOrThrow({ where: { id: saved.id } })).lastSuccessfulRunId).toBe(first.id);
+    const second = await runSearch(users.realtor1, { filters, sources: ["cian", "avito"], savedSearchId: saved.id }, { scraper: adapter([listing("11000000")], statuses) });
+    expect(second.results[0]).toMatchObject({ isNew: false, priceChanged: true });
+    expect((await getSearchRun(users.realtor1, first.id)).results).toHaveLength(1);
   });
   it("full failure auto web once through AiGate; manual retry cannot charge again", async () => {
     const {provider,ai} = await gatedAi();

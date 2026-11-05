@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-05T12:15:26.257Z",
+  "sha": "de1b6d2d7bd6089e3e161470fd20c5cb73b8cf70",
+  "workingTreeChanges": true,
+  "database": "crm_demo",
+  "port": 3360,
+  "distDir": ".next-p2",
+  "provider": "Yandex Responses / aliceai-llm-flash/latest",
+  "usage": [
+    {
+      "id": "1adda148-e960-4d6e-a57b-ee2e2719540a",
+      "callType": "call_note",
+      "status": "success",
+      "inputTokens": 547,
+      "outputTokens": 217,
+      "actualRub": "0.098100",
+      "createdAt": "2026-11-05T12:04:04.610Z"
+    },
+    {
+      "id": "9162f053-1e86-406d-af38-4c48b72ce9e1",
+      "callType": "call_note",
+      "status": "success",
+      "inputTokens": 577,
+      "outputTokens": 231,
+      "actualRub": "0.103900",
+      "createdAt": "2026-11-05T12:07:43.689Z"
+    },
+    {
+      "id": "7acf68b6-6cce-4512-a9d4-bd830f4e0b0a",
+      "callType": "offer_text",
+      "status": "success",
+      "inputTokens": 438,
+      "outputTokens": 69,
+      "actualRub": "0.057600",
+      "createdAt": "2026-11-05T12:08:59.777Z"
+    },
+    {
+      "id": "150df7d2-252f-46f3-a603-83f2d7181fd8",
+      "callType": "offer_text",
+      "status": "success",
+      "inputTokens": 467,
+      "outputTokens": 203,
+      "actualRub": "0.087300",
+      "createdAt": "2026-11-05T12:12:36.370Z"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "docs/screenshots/vkr/live-ai/p2-call-note.png",
+      "sha256": "bdf16b4ec28c1752a4f79e506a4d2097b04255e2e18c1d5b841f8ce251c75af8",
+      "mode": "LIVE"
+    },
+    {
+      "file": "docs/screenshots/vkr/live-ai/p2-offer-text.png",
+      "sha256": "33b68d5fc8cb1a2a22ffd1bab899753feb46c289111679f65db8cf4c22a4474f",
+      "mode": "LIVE"
+    }
+  ],
+  "inputTokens": 2029,
+  "outputTokens": 720,
+  "actualRub": "0.346900",
+  "cloudBillingVerified": false
+}

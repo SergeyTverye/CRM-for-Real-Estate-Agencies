@@ -88,7 +88,9 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
     let timer: ReturnType<typeof setTimeout> | undefined;
     const result: SearchResult = await Promise.race([
       adapter.search(filters),
-      new Promise<SearchResult>(resolve => { timer = setTimeout(() => resolve({ listings: [], sources: filters.sources.map(source => ({ source, status: "timeout", resultCount: 0, reason: "Превышен срок выполнения задания" })) }), settings.config.SCRAPER_JOB_TIMEOUT_MS); }),
+      // The adapter's shared deadline stops new work. Allow its bounded cleanup
+      // to return successful sources rather than discarding them at the deadline.
+      new Promise<SearchResult>(resolve => { timer = setTimeout(() => resolve({ listings: [], sources: filters.sources.map(source => ({ source, status: "timeout", resultCount: 0, reason: "Превышен срок выполнения задания" })) }), settings.config.SCRAPER_JOB_TIMEOUT_MS + 2000); }),
     ]).finally(() => { if (timer) clearTimeout(timer); });
     for (const item of result.listings) {
       // Owner status is trusted only from a separately recorded employee verification.
@@ -115,7 +117,10 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
       const healthy = result.sources.some(s => s.status === "success" || s.status === "partial");
       const status = healthy ? result.sources.every(s => s.status === "success" || s.status === "disabled") ? "success" : "partial" : "error";
       await tx.searchRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), fallbackReason: fallback.reason } });
-      if (input.savedSearchId) await tx.savedSearch.update({ where: { id: input.savedSearchId }, data: { lastRunAt: run.startedAt, ...(status === "success" ? { lastSuccessfulRunId: run.id } : {}) } });
+      // A usable partial run is a successful baseline for the sources that
+      // answered. A blocked companion source must not mark every repeat "new".
+      const comparable = status === "success" || status === "partial" && result.listings.length > 0;
+      if (input.savedSearchId) await tx.savedSearch.update({ where: { id: input.savedSearchId }, data: { lastRunAt: run.startedAt, ...(comparable ? { lastSuccessfulRunId: run.id } : {}) } });
       await searchAudit(tx, actor, "run", "SearchRun", run.id, { status, count: result.listings.length });
     });
     if (fallback.automatic && ai) await performWebSearch(actor, run.id, ai, true);
@@ -135,6 +140,7 @@ async function performWebSearch(actor: Actor, runId: string, ai: SearchAiPort, a
   try {
     const web = await ai.webSearch({ ...aiContext(actor, runId), automaticWeb: automatic, fullTechnicalFailure: automatic }, filters);
     await transaction(async tx => {
+      const persisted = new Set<string>();
       for (const candidate of web.candidates) {
         if (!candidate.originalUrl) continue;
         try { await guardExternalUrl(candidate.originalUrl); } catch { continue; }
@@ -146,8 +152,10 @@ async function performWebSearch(actor: Actor, runId: string, ai: SearchAiPort, a
         const evaluation = evaluateListing(listing, filters);
         evaluation.verdict = "needs_review";
         await persistListing(tx, runId, listing, evaluation, null, "web_search", "web_search");
+        persisted.add(candidate.originalUrl);
       }
-      await tx.searchRunSource.create({ data: { runId, source: "web_search", status: "success", resultCount: web.candidates.length, reason: "Веб-резерв: первоисточники требуют проверки" } });
+      await tx.searchRunSource.create({ data: { runId, source: "web_search", status: "success", resultCount: persisted.size,
+        reason: persisted.size ? "Веб-резерв: первоисточники требуют проверки" : "Веб-поиск выполнен; проверяемых карточек объявлений не найдено" } });
       await tx.searchRun.update({ where: { id: runId }, data: { status: "partial", finishedAt: new Date() } });
       await searchAudit(tx, actor, "web_search", "SearchRun", runId, { automatic });
     });

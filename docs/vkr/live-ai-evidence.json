@@ -1,0 +1,5496 @@
+{
+  "mode": "LIVE",
+  "exportedAt": "2026-11-05T12:23:10.678Z",
+  "cloudBillingAvailable": false,
+  "usage": [
+    {
+      "id": "dea456fd-b5ac-42c3-a557-d76f63abd8cf",
+      "time": "2026-11-05T11:48:14.480Z",
+      "jobId": "f6276e96-c710-4949-abe6-544d4019b9ca",
+      "type": "parse",
+      "model": "aliceai-llm-flash/latest",
+      "input": 434,
+      "output": 139,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.776400",
+      "actualCrmRub": "0.071200",
+      "chargedRub": "0.071200",
+      "status": "success"
+    },
+    {
+      "id": "d38cbfa8-47a4-47c2-a21b-3616f49ba0af",
+      "time": "2026-11-05T12:03:36.914Z",
+      "jobId": "f00b6375-6af8-447b-9d7e-86c6eb8624fb",
+      "type": "parse",
+      "model": "aliceai-llm-flash/latest",
+      "input": 520,
+      "output": 162,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.840500",
+      "actualCrmRub": "0.084400",
+      "chargedRub": "0.084400",
+      "status": "success"
+    },
+    {
+      "id": "4f19e23b-414e-4cb2-a71e-2c4700127e29",
+      "time": "2026-11-05T12:03:43.850Z",
+      "jobId": "333c8def-c01b-42dc-899c-4dbdea639ceb",
+      "type": "parse",
+      "model": "aliceai-llm-flash/latest",
+      "input": 495,
+      "output": 173,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.829200",
+      "actualCrmRub": "0.084100",
+      "chargedRub": "0.084100",
+      "status": "success"
+    },
+    {
+      "id": "ae86df73-231f-428a-af77-666285d0efc7",
+      "time": "2026-11-05T12:03:53.836Z",
+      "jobId": "d043fc42-11e5-4b0a-bdad-226a4d10700a",
+      "type": "parse",
+      "model": "aliceai-llm-flash/latest",
+      "input": 555,
+      "output": 165,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.856000",
+      "actualCrmRub": "0.088500",
+      "chargedRub": "0.088500",
+      "status": "success"
+    },
+    {
+      "id": "34d0ce87-fcf4-4300-a3f4-b5e9a6a18c40",
+      "time": "2026-11-05T12:04:41.365Z",
+      "jobId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+      "type": "description",
+      "model": "aliceai-llm-flash/latest",
+      "input": 372,
+      "output": 97,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.675200",
+      "actualCrmRub": "0.056600",
+      "chargedRub": "0.056600",
+      "status": "success"
+    },
+    {
+      "id": "42711300-e52d-46f1-a2b9-02e5c743b3b6",
+      "time": "2026-11-05T12:04:45.147Z",
+      "jobId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+      "type": "description",
+      "model": "aliceai-llm-flash/latest",
+      "input": 371,
+      "output": 97,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.673100",
+      "actualCrmRub": "0.056500",
+      "chargedRub": "0.056500",
+      "status": "success"
+    },
+    {
+      "id": "fc2ff711-f07e-4266-ad1d-16d028bf1821",
+      "time": "2026-11-05T12:04:51.297Z",
+      "jobId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+      "type": "description",
+      "model": "aliceai-llm-flash/latest",
+      "input": 371,
+      "output": 97,
+      "webSearchCalls": 0,
+      "estimatedRub": "0.675700",
+      "actualCrmRub": "0.056500",
+      "chargedRub": "0.056500",
+      "status": "success"
+    },
+    {
+      "id": "0df8ee4b-0c73-4e99-a53d-3a21a9ff7741",
+      "time": "2026-11-05T12:08:59.562Z",
+      "jobId": "a88b0675-7668-4bc0-82e5-d1e62d3e9b1c",
+      "type": "web_search",
+      "model": "aliceai-llm-flash/latest",
+      "input": 477,
+      "output": 208,
+      "webSearchCalls": 1,
+      "estimatedRub": "14.312700",
+      "actualCrmRub": "1.004300",
+      "chargedRub": "1.004300",
+      "status": "success"
+    },
+    {
+      "id": "6be6e718-ea6f-4924-a648-df947d53f8ed",
+      "time": "2026-11-05T12:11:39.766Z",
+      "jobId": "9e28eae7-3507-4937-8126-b2dccb4fe185",
+      "type": "web_search",
+      "model": "aliceai-llm-flash/latest",
+      "input": 425,
+      "output": 466,
+      "webSearchCalls": 1,
+      "estimatedRub": "14.300200",
+      "actualCrmRub": "1.050700",
+      "chargedRub": "1.050700",
+      "status": "success"
+    },
+    {
+      "id": "f50f57a5-cf94-42ae-af4d-c7d0ee98257e",
+      "time": "2026-11-05T12:19:43.010Z",
+      "jobId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+      "type": "web_search",
+      "model": "aliceai-llm-flash/latest",
+      "input": 477,
+      "output": 203,
+      "webSearchCalls": 1,
+      "estimatedRub": "14.312700",
+      "actualCrmRub": "1.003300",
+      "chargedRub": "1.003300",
+      "status": "success"
+    }
+  ],
+  "runs": [
+    {
+      "id": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+      "time": "2026-11-05T11:53:10.129Z",
+      "filters": {
+        "city": "Новосибирск",
+        "areaTo": 500,
+        "seller": "all",
+        "priceTo": "50000000",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "areaFrom": 30,
+        "purposes": [
+          "office"
+        ],
+        "districts": [],
+        "floorMode": "any",
+        "operation": "sale",
+        "priceFrom": "1000000",
+        "priceUnit": "rub_total",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "webSearchUsed": true,
+      "sources": [
+        {
+          "source": "cian",
+          "status": "error",
+          "count": 0,
+          "reason": "PARSE_FAILED"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "count": 48,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "count": 61,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "domclick",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 401"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "count": 32,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "count": 0,
+          "reason": null
+        },
+        {
+          "source": "avito",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 439"
+        },
+        {
+          "source": "web_search",
+          "status": "success",
+          "count": 0,
+          "reason": "Веб-поиск выполнен; проверяемых карточек объявлений не найдено"
+        }
+      ],
+      "results": [
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Октябрьская магистраль, 3",
+          "priceRub": "79443000.00",
+          "areaM2": 378,
+          "url": "https://cre.mirkvartir.ru/371319585/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Октябрьская магистраль, 3",
+          "priceRub": "103572000.00",
+          "areaM2": 493,
+          "url": "https://cre.mirkvartir.ru/371319619/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Октябрьская магистраль, 3",
+          "priceRub": "183015000.00",
+          "areaM2": 871,
+          "url": "https://cre.mirkvartir.ru/371319620/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина",
+          "priceRub": "20410602.00",
+          "areaM2": 71.5,
+          "url": "https://cre.mirkvartir.ru/361166102/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина",
+          "priceRub": "20158465.00",
+          "areaM2": 64.9,
+          "url": "https://cre.mirkvartir.ru/361166103/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина",
+          "priceRub": "19800197.00",
+          "areaM2": 65.2,
+          "url": "https://cre.mirkvartir.ru/361166104/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Потанинская ул., 14",
+          "priceRub": "33000000.00",
+          "areaM2": 200,
+          "url": "https://cre.mirkvartir.ru/360670693/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Ядринцевская ул., 21",
+          "priceRub": "450000000.00",
+          "areaM2": 2059,
+          "url": "https://cre.mirkvartir.ru/362926194/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Коммунистическая ул., 22",
+          "priceRub": "77000000.00",
+          "areaM2": 705,
+          "url": "https://cre.mirkvartir.ru/370094040/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Советская ул., 49а",
+          "priceRub": "12474000.00",
+          "areaM2": 115.5,
+          "url": "https://cre.mirkvartir.ru/363048946/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, пр-кт Димитрова, 4/1",
+          "priceRub": "14900000.00",
+          "areaM2": 131.2,
+          "url": "https://cre.mirkvartir.ru/365081772/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Советская ул., 19",
+          "priceRub": "23000000.00",
+          "areaM2": 204,
+          "url": "https://cre.mirkvartir.ru/369942050/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Советская ул., 41",
+          "priceRub": "38800000.00",
+          "areaM2": 306.6,
+          "url": "https://cre.mirkvartir.ru/362977983/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Коммунистическая ул., 22",
+          "priceRub": "19100000.00",
+          "areaM2": 170.2,
+          "url": "https://cre.mirkvartir.ru/365308612/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Депутатская ул., 26а",
+          "priceRub": "48000000.00",
+          "areaM2": 366.7,
+          "url": "https://cre.mirkvartir.ru/362902425/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Орджоникидзе, 40а",
+          "priceRub": "4750000.00",
+          "areaM2": 36,
+          "url": "https://cre.mirkvartir.ru/371403753/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина, 2/1",
+          "priceRub": "5250000.00",
+          "areaM2": 37.3,
+          "url": "https://cre.mirkvartir.ru/367175558/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина, 13",
+          "priceRub": "2150000.00",
+          "areaM2": 26.9,
+          "url": "https://cre.mirkvartir.ru/362969888/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Орджоникидзе, 40а",
+          "priceRub": "7031000.00",
+          "areaM2": 64.1,
+          "url": "https://cre.mirkvartir.ru/360758658/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Спартака",
+          "priceRub": "5199999.00",
+          "areaM2": 32,
+          "url": "https://cre.mirkvartir.ru/370432671/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина, 13",
+          "priceRub": "1680000.00",
+          "areaM2": 20.9,
+          "url": "https://cre.mirkvartir.ru/363043891/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Орджоникидзе, 40а",
+          "priceRub": "11884000.00",
+          "areaM2": 111.9,
+          "url": "https://cre.mirkvartir.ru/360758659/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина",
+          "priceRub": "20347399.00",
+          "areaM2": 86.1,
+          "url": "https://cre.mirkvartir.ru/369638218/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина",
+          "priceRub": "157218998.00",
+          "areaM2": 830,
+          "url": "https://cre.mirkvartir.ru/369638217/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Орджоникидзе, 40а",
+          "priceRub": "3990000.00",
+          "areaM2": 35.2,
+          "url": "https://cre.mirkvartir.ru/368584782/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Октябрьская магистраль, 4",
+          "priceRub": "13000000.00",
+          "areaM2": 56.6,
+          "url": "https://cre.mirkvartir.ru/369638728/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, пр-кт Димитрова, 7",
+          "priceRub": "76366400.00",
+          "areaM2": 867.8,
+          "url": "https://cre.mirkvartir.ru/361070929/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Вокзальная магистраль, 8/1",
+          "priceRub": "16000000.00",
+          "areaM2": 67.1,
+          "url": "https://cre.mirkvartir.ru/361628021/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина",
+          "priceRub": "9980000.00",
+          "areaM2": 41.6,
+          "url": "https://cre.mirkvartir.ru/369638215/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина",
+          "priceRub": "28532000.00",
+          "areaM2": 120.1,
+          "url": "https://cre.mirkvartir.ru/369638212/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Мичурина, 12",
+          "priceRub": "6500000.00",
+          "areaM2": 70,
+          "url": "https://cre.mirkvartir.ru/370596058/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, пр-кт Димитрова, 7",
+          "priceRub": "146285000.00",
+          "areaM2": 1721,
+          "url": "https://cre.mirkvartir.ru/361070841/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина",
+          "priceRub": "83932001.00",
+          "areaM2": 433.2,
+          "url": "https://cre.mirkvartir.ru/369638213/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина",
+          "priceRub": "5050000.00",
+          "areaM2": 20.4,
+          "url": "https://cre.mirkvartir.ru/369638216/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ольги Жилиной, 33",
+          "priceRub": "38700000.00",
+          "areaM2": 193.3,
+          "url": "https://cre.mirkvartir.ru/360727619/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Кубановская ул., 36а",
+          "priceRub": "12550000.00",
+          "areaM2": 125,
+          "url": "https://cre.mirkvartir.ru/368640226/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Державина, 13",
+          "priceRub": "12500000.00",
+          "areaM2": 123.7,
+          "url": "https://cre.mirkvartir.ru/361069035/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Сакко и Ванцетти, 77",
+          "priceRub": "28000000.00",
+          "areaM2": 188,
+          "url": "https://cre.mirkvartir.ru/363056257/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, пр-кт Димитрова, 1/1",
+          "priceRub": "4150000.00",
+          "areaM2": 21.7,
+          "url": "https://cre.mirkvartir.ru/368004749/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Челюскинцев, 18/2",
+          "priceRub": "7000000.00",
+          "areaM2": 33.3,
+          "url": "https://cre.mirkvartir.ru/361245689/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Декабристов, 41",
+          "priceRub": "200000000.00",
+          "areaM2": 559.2,
+          "url": "https://cre.mirkvartir.ru/371747763/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Инская ул., 63",
+          "priceRub": "13500000.00",
+          "areaM2": 58.3,
+          "url": "https://cre.mirkvartir.ru/368518824/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Каменская ул.",
+          "priceRub": "287000000.00",
+          "areaM2": 6037.1,
+          "url": "https://cre.mirkvartir.ru/370595771/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Советская ул., 19",
+          "priceRub": "23000000.00",
+          "areaM2": 204,
+          "url": "https://cre.mirkvartir.ru/369579667/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чаплыгина, 13",
+          "priceRub": "3949999.00",
+          "areaM2": 72.9,
+          "url": "https://cre.mirkvartir.ru/366072892/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина, 14",
+          "priceRub": "140000000.00",
+          "areaM2": 1000,
+          "url": "https://cre.mirkvartir.ru/365080858/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Инская ул., 63",
+          "priceRub": "22000000.00",
+          "areaM2": 113,
+          "url": "https://cre.mirkvartir.ru/362992889/"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Комсомольский пр-кт, 24",
+          "priceRub": "7750000.00",
+          "areaM2": 45,
+          "url": "https://cre.mirkvartir.ru/367727678/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "80000000.00",
+          "areaM2": 121,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529080"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "18950000.00",
+          "areaM2": 46.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529082"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "51000000.00",
+          "areaM2": 112.67,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529024"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "41000000.00",
+          "areaM2": 90.42,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "9980000.00",
+          "areaM2": 41.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528506"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "73869999.00",
+          "areaM2": 365.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528525"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "28532000.00",
+          "areaM2": 120.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528527"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "20347399.00",
+          "areaM2": 86.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528505"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Депутатская улица, 46",
+          "priceRub": "63900000.00",
+          "areaM2": 253,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529524"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2700000.00",
+          "areaM2": 34.44,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529013"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "16799999.00",
+          "areaM2": 55.47,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528982"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Коммунистическая улица, 2",
+          "priceRub": "19100000.00",
+          "areaM2": 170.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528767"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Вокзальная магистраль, 18",
+          "priceRub": "15500000.00",
+          "areaM2": 104,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528410"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большевистская улица, 35",
+          "priceRub": "12500000.00",
+          "areaM2": 72,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529376"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "21500000.00",
+          "areaM2": 46.81,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Крылова, 36",
+          "priceRub": "11000000.00",
+          "areaM2": 82.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528980"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Кирова, 113",
+          "priceRub": "15900000.00",
+          "areaM2": 170,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528782"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 64",
+          "priceRub": "10500000.00",
+          "areaM2": 60.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528929"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 2/3",
+          "priceRub": "7000000.00",
+          "areaM2": 52.4,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528546"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Орджоникидзе, 40/1",
+          "priceRub": "12500000.00",
+          "areaM2": 145.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "10500000.00",
+          "areaM2": 223,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529227"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "5100000.00",
+          "areaM2": 103,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529231"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "19250000.00",
+          "areaM2": 60,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529072"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Пархоменко, 29",
+          "priceRub": "6000000.00",
+          "areaM2": 75.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529373"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "83932001.00",
+          "areaM2": 433.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528508"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большевистская улица, 35",
+          "priceRub": "12940000.00",
+          "areaM2": 64.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528422"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дуси Ковальчук, 252/1",
+          "priceRub": "21000000.00",
+          "areaM2": 220,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528761"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "5900000.00",
+          "areaM2": 120,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529226"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Танковая улица, 6",
+          "priceRub": "14950000.00",
+          "areaM2": 106.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528452"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 4",
+          "priceRub": "9780000.00",
+          "areaM2": 71,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528614"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "",
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis-nedorogo"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Немировича-Данченко, 146/1",
+          "priceRub": "12500000.00",
+          "areaM2": 66.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528752"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Димитрова, 7",
+          "priceRub": "3350000.00",
+          "areaM2": 30.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528689"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Аэропорт, 88",
+          "priceRub": "19500000.00",
+          "areaM2": 126.5,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528478"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Красина, 54",
+          "priceRub": "12500000.00",
+          "areaM2": 106.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528781"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дуси Ковальчук, 252/1",
+          "priceRub": "21000000.00",
+          "areaM2": 230,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529028"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Инженерная улица, 7",
+          "priceRub": "19000000.00",
+          "areaM2": 75.5,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528532"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 153",
+          "priceRub": "7500000.00",
+          "areaM2": 48.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528580"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 4А",
+          "priceRub": "38800000.00",
+          "areaM2": 306.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528863"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Кропоткина, 261/2",
+          "priceRub": "10000000.00",
+          "areaM2": 92.8,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528560"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Геодезическая улица, 17/1",
+          "priceRub": "45000000.00",
+          "areaM2": 336,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528434"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "микрорайон Горский, 67",
+          "priceRub": "5600000.00",
+          "areaM2": 77.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528985"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писарева, 102",
+          "priceRub": "8830500.00",
+          "areaM2": 60.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528607"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писарева, 102",
+          "priceRub": "9120000.00",
+          "areaM2": 62.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528625"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 25",
+          "priceRub": "14700000.00",
+          "areaM2": 81.28,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528934"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Комсомольский проспект, 24",
+          "priceRub": "7300000.00",
+          "areaM2": 45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529425"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "5103000.00",
+          "areaM2": 72.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528672"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Маковского, 6",
+          "priceRub": "22000000.00",
+          "areaM2": 113,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528824"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Первомайская улица, 43",
+          "priceRub": "43410000.00",
+          "areaM2": 217.05,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529269"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Дзержинского, 24/1",
+          "priceRub": "16500000.00",
+          "areaM2": 135,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528618"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Первомайская улица, 43",
+          "priceRub": "40853750.00",
+          "areaM2": 233.45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529264"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 25",
+          "priceRub": "20400000.00",
+          "areaM2": 125.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528919"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Николая Островского, 58",
+          "priceRub": "11200000.00",
+          "areaM2": 50.91,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528827"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Семьи Шамшиных, 99",
+          "priceRub": "6500000.00",
+          "areaM2": 56.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529070"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Зыряновская улица, 55к1",
+          "priceRub": "4150000.00",
+          "areaM2": 31.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528605"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Геодезическая улица, 5",
+          "priceRub": "9500000.00",
+          "areaM2": 130,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529511"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Николая Островского, 58",
+          "priceRub": "18200000.00",
+          "areaM2": 83.57,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528815"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2513000.00",
+          "areaM2": 35.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528648"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ватутина, 29",
+          "priceRub": "13900000.00",
+          "areaM2": 52.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528814"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Комсомольский проспект, 24",
+          "priceRub": "8000000.00",
+          "areaM2": 45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528462"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2758000.00",
+          "areaM2": 39.4,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528640"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "21200000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186045/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "17760000.00",
+          "areaM2": 45,
+          "url": "https://realty.yandex.ru/offer/3964472179320093904/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "58040000.00",
+          "areaM2": 116.1,
+          "url": "https://realty.yandex.ru/offer/3964472179315657925/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "32700000.00",
+          "areaM2": 112.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186022/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8631000.00",
+          "areaM2": 41.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130590150/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "36000000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186021/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "114266000.00",
+          "areaM2": 300.7,
+          "url": "https://realty.yandex.ru/offer/7567068812130617950/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "13800000.00",
+          "areaM2": 48.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186113/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "31600000.00",
+          "areaM2": 112.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186109/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8631000.00",
+          "areaM2": 41.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130590172/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "9500000.00",
+          "areaM2": 50,
+          "url": "https://realty.yandex.ru/offer/7567068812130643997/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "55825000.00",
+          "areaM2": 111.7,
+          "url": "https://realty.yandex.ru/offer/3964472179315657924/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "17535000.00",
+          "areaM2": 83.5,
+          "url": "https://realty.yandex.ru/offer/7567068812130590173/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20900000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186144/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "19700000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480296127/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "21400000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480297059/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "14100000.00",
+          "areaM2": 51.8,
+          "url": "https://realty.yandex.ru/offer/3964472179320091946/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "59380000.00",
+          "areaM2": 118.8,
+          "url": "https://realty.yandex.ru/offer/3964472179315657927/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "46874100.00",
+          "areaM2": 120.2,
+          "url": "https://realty.yandex.ru/offer/7567068812130613984/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8610000.00",
+          "areaM2": 41,
+          "url": "https://realty.yandex.ru/offer/7567068812130590176/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "32800000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186108/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "6531000.00",
+          "areaM2": 31.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130648645/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "40700400.00",
+          "areaM2": 104.4,
+          "url": "https://realty.yandex.ru/offer/7567068812130613988/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "1900000.00",
+          "areaM2": 76.3,
+          "url": "https://realty.yandex.ru/offer/1635805458652035328/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "11990000.00",
+          "areaM2": 66.3,
+          "url": "https://realty.yandex.ru/offer/5430628915820570867/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "6900000.00",
+          "areaM2": 53,
+          "url": "https://realty.yandex.ru/offer/5430628918570989667/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "63000000.00",
+          "areaM2": 240.5,
+          "url": "https://realty.yandex.ru/offer/3936755696708953459/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "24640000.00",
+          "areaM2": 112,
+          "url": "https://realty.yandex.ru/offer/3936023035793471937/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "18495000.00",
+          "areaM2": 61.7,
+          "url": "https://realty.yandex.ru/offer/3939986640549968619/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "11200000.00",
+          "areaM2": 130.5,
+          "url": "https://realty.yandex.ru/offer/889555503400285658/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "9279000.00",
+          "areaM2": 103.1,
+          "url": "https://realty.yandex.ru/offer/5828023178660470273/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "57400000.00",
+          "areaM2": 241.6,
+          "url": "https://realty.yandex.ru/offer/3936755696708953458/"
+        }
+      ]
+    },
+    {
+      "id": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+      "time": "2026-11-05T12:04:09.444Z",
+      "filters": {
+        "city": "Новосибирск",
+        "areaTo": 1000,
+        "seller": "all",
+        "priceTo": "600000",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "areaFrom": 200,
+        "purposes": [
+          "production",
+          "warehouse"
+        ],
+        "districts": [
+          "Ленинский",
+          "Октябрьский"
+        ],
+        "floorMode": "exclude_basement_and_semi_basement",
+        "operation": "rent",
+        "priceFrom": "100000",
+        "priceUnit": "rub_month",
+        "requiredFeatures": [
+          "ворота",
+          "мощность от 50 кВт"
+        ],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "webSearchUsed": false,
+      "sources": [
+        {
+          "source": "cian",
+          "status": "error",
+          "count": 0,
+          "reason": "PARSE_FAILED"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "partial",
+          "count": 49,
+          "reason": "NOT_APPLICABLE; назначения: industrial"
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "count": 60,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "domclick",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 401"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "count": 39,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "count": 0,
+          "reason": null
+        },
+        {
+          "source": "avito",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 439"
+        }
+      ],
+      "results": [
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Ленина, 134",
+          "priceRub": "55000.00",
+          "areaM2": 213,
+          "url": "https://arendacre.mirkvartir.ru/367266152/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Фабричная ул.",
+          "priceRub": "452500.00",
+          "areaM2": 905,
+          "url": "https://arendacre.mirkvartir.ru/371430094/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Военная ул., 9/1",
+          "priceRub": "245000.00",
+          "areaM2": 500,
+          "url": "https://arendacre.mirkvartir.ru/372497612/"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Семьи Шамшиных, 20",
+          "priceRub": "300000.00",
+          "areaM2": 300,
+          "url": "https://arendacre.mirkvartir.ru/361069414/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Фабричная ул., 10",
+          "priceRub": "950000.00",
+          "areaM2": 1000,
+          "url": "https://arendacre.mirkvartir.ru/368764669/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Инская ул., 39п",
+          "priceRub": "240000.00",
+          "areaM2": 320,
+          "url": "https://arendacre.mirkvartir.ru/369941470/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Тополевая ул., 9",
+          "priceRub": "60000.00",
+          "areaM2": 200,
+          "url": "https://arendacre.mirkvartir.ru/349678713/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Нарымская ул., 19/1",
+          "priceRub": "323400.00",
+          "areaM2": 660,
+          "url": "https://arendacre.mirkvartir.ru/284354277/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Толмачевское ш., 25/2",
+          "priceRub": "124000.00",
+          "areaM2": 310,
+          "url": "https://arendacre.mirkvartir.ru/371820399/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Дунайская ул., 16/1",
+          "priceRub": "498000.00",
+          "areaM2": 830,
+          "url": "https://arendacre.mirkvartir.ru/363844241/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Сухарная ул., 35",
+          "priceRub": "487500.00",
+          "areaM2": 750,
+          "url": "https://arendacre.mirkvartir.ru/370432356/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Болотная ул.",
+          "priceRub": "160000.00",
+          "areaM2": 560,
+          "url": "https://arendacre.mirkvartir.ru/369728412/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Школьная 2-я, 60",
+          "priceRub": "333320.00",
+          "areaM2": 512.8,
+          "url": "https://arendacre.mirkvartir.ru/360353500/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Сухарная ул., 35",
+          "priceRub": "650000.00",
+          "areaM2": 1000,
+          "url": "https://arendacre.mirkvartir.ru/370432355/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Панфиловцев, 58",
+          "priceRub": "42000.00",
+          "areaM2": 420,
+          "url": "https://arendacre.mirkvartir.ru/368007531/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Пермитина, 24/1",
+          "priceRub": "450000.00",
+          "areaM2": 900,
+          "url": "https://arendacre.mirkvartir.ru/362948296/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Дунайская ул.",
+          "priceRub": "336000.00",
+          "areaM2": 560,
+          "url": "https://arendacre.mirkvartir.ru/363844200/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Почтовый Лог, 10",
+          "priceRub": "59000.00",
+          "areaM2": 276,
+          "url": "https://arendacre.mirkvartir.ru/368884185/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Петухова, 44/1",
+          "priceRub": "253300.00",
+          "areaM2": 298,
+          "url": "https://arendacre.mirkvartir.ru/362908315/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Чехова, 276",
+          "priceRub": "218000.00",
+          "areaM2": 375,
+          "url": "https://arendacre.mirkvartir.ru/370094589/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Даргомыжского",
+          "priceRub": "200000.00",
+          "areaM2": 650,
+          "url": "https://arendacre.mirkvartir.ru/362964542/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Петухова",
+          "priceRub": "351000.00",
+          "areaM2": 702,
+          "url": "https://arendacre.mirkvartir.ru/370719937/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Станционная 2-я, 34а",
+          "priceRub": "84000.00",
+          "areaM2": 400,
+          "url": "https://arendacre.mirkvartir.ru/368585090/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Толмачевская ул., 33/3",
+          "priceRub": "522600.00",
+          "areaM2": 804,
+          "url": "https://arendacre.mirkvartir.ru/365883986/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Сухарная ул., 35н",
+          "priceRub": "166292.00",
+          "areaM2": 210,
+          "url": "https://arendacre.mirkvartir.ru/368426649/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Петухова",
+          "priceRub": "256480.00",
+          "areaM2": 366.4,
+          "url": "https://arendacre.mirkvartir.ru/362950886/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Почтовый Лог, 10",
+          "priceRub": "59000.00",
+          "areaM2": 278,
+          "url": "https://arendacre.mirkvartir.ru/368884186/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Большая ул., 307/1",
+          "priceRub": "533400.00",
+          "areaM2": 889,
+          "url": "https://arendacre.mirkvartir.ru/370721276/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Станционная 2-я, 28/1",
+          "priceRub": "641088.00",
+          "areaM2": 742,
+          "url": "https://arendacre.mirkvartir.ru/371265323/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Писемского, 12",
+          "priceRub": "293400.00",
+          "areaM2": 489,
+          "url": "https://arendacre.mirkvartir.ru/369459432/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Станционная 2-я, 30/1",
+          "priceRub": "335000.00",
+          "areaM2": 670,
+          "url": "https://arendacre.mirkvartir.ru/369459128/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Станционная ул., 78/1",
+          "priceRub": "279900.00",
+          "areaM2": 622,
+          "url": "https://arendacre.mirkvartir.ru/360670700/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Тюменская ул.",
+          "priceRub": "600000.00",
+          "areaM2": 850,
+          "url": "https://arendacre.mirkvartir.ru/368646929/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Толмачевская ул., 19/1",
+          "priceRub": "320000.00",
+          "areaM2": 630,
+          "url": "https://arendacre.mirkvartir.ru/370020178/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Петухова",
+          "priceRub": "323700.00",
+          "areaM2": 498,
+          "url": "https://arendacre.mirkvartir.ru/371403320/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Нижегородская ул.",
+          "priceRub": "370000.00",
+          "areaM2": 740,
+          "url": "https://arendacre.mirkvartir.ru/368646894/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Декабристов, 247",
+          "priceRub": "123993.00",
+          "areaM2": 207,
+          "url": "https://arendacre.mirkvartir.ru/360636597/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Большая ул., 498",
+          "priceRub": "150000.00",
+          "areaM2": 240,
+          "url": "https://arendacre.mirkvartir.ru/369459041/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Толмачевская ул., 19/1",
+          "priceRub": "400000.00",
+          "areaM2": 1000,
+          "url": "https://arendacre.mirkvartir.ru/366981596/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Приграничная ул., 10",
+          "priceRub": "350000.00",
+          "areaM2": 576,
+          "url": "https://arendacre.mirkvartir.ru/360670404/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Писемского, 56",
+          "priceRub": "600500.00",
+          "areaM2": 931,
+          "url": "https://arendacre.mirkvartir.ru/371318987/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Писемского, 56",
+          "priceRub": "656775.00",
+          "areaM2": 875.7,
+          "url": "https://arendacre.mirkvartir.ru/368426233/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Сибиряков-Гвардейцев, 36",
+          "priceRub": "175000.00",
+          "areaM2": 350,
+          "url": "https://arendacre.mirkvartir.ru/367381199/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Мира, 58",
+          "priceRub": "144632.00",
+          "areaM2": 422.9,
+          "url": "https://arendacre.mirkvartir.ru/360666579/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Станционная ул., 60/1",
+          "priceRub": "292500.00",
+          "areaM2": 650,
+          "url": "https://arendacre.mirkvartir.ru/361103983/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Автогенная ул., 126",
+          "priceRub": "91000.00",
+          "areaM2": 206,
+          "url": "https://arendacre.mirkvartir.ru/371403695/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, Бердское ш.",
+          "priceRub": "540000.00",
+          "areaM2": 720,
+          "url": "https://arendacre.mirkvartir.ru/360703863/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Объединения",
+          "priceRub": "175000.00",
+          "areaM2": 500,
+          "url": "https://arendacre.mirkvartir.ru/371748738/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "mirkvartir",
+          "address": "Новосибирск, ул. Писемского",
+          "priceRub": "600495.00",
+          "areaM2": 931,
+          "url": "https://arendacre.mirkvartir.ru/371748561/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 253",
+          "priceRub": "97650.00",
+          "areaM2": 217,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633013"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 253",
+          "priceRub": "135000.00",
+          "areaM2": 300,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633004"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Пермитина, 24/1к2",
+          "priceRub": "450000.00",
+          "areaM2": 900,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633060"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Панфиловцев, 62",
+          "priceRub": "201850.00",
+          "areaM2": 367,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633105"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Панфиловцев, 58",
+          "priceRub": "100.00",
+          "areaM2": 420,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632865"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Игарская улица, 54",
+          "priceRub": "180000.00",
+          "areaM2": 360,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632953"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Игарская улица, 54",
+          "priceRub": "210000.00",
+          "areaM2": 420,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632964"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Толмачёвская улица, 19",
+          "priceRub": "400000.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632924"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Королёва, 40к30",
+          "priceRub": "92000.00",
+          "areaM2": 230,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633132"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Станционная улица, 104",
+          "priceRub": "709806.00",
+          "areaM2": 632,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633133"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 247к7",
+          "priceRub": "124000.00",
+          "areaM2": 207,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632923"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Мира, 58",
+          "priceRub": "144632.00",
+          "areaM2": 422.9,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633150"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Толмачёвская улица, 39",
+          "priceRub": "250000.00",
+          "areaM2": 386,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633063"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 247к3",
+          "priceRub": "320670.00",
+          "areaM2": 206,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633037"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Дунайская улица, 16/7",
+          "priceRub": "630.00",
+          "areaM2": 509,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633212"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Петухова, 51/10А",
+          "priceRub": "224400.00",
+          "areaM2": 561,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632892"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 247к7",
+          "priceRub": "599.00",
+          "areaM2": 207,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633145"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 247к4",
+          "priceRub": "346500.00",
+          "areaM2": 300,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632960"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "2-я Станционная улица, 30к16",
+          "priceRub": "335000.00",
+          "areaM2": 670,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632959"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Светлановская улица, 50/2",
+          "priceRub": "299000.00",
+          "areaM2": 374,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633138"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Семьи Шамшиных, 20",
+          "priceRub": "1800.00",
+          "areaM2": 300,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633099"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Толмачёвское шоссе, 43Ак1",
+          "priceRub": "180000.00",
+          "areaM2": 360,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633024"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "2-я Станционная улица, 30к16",
+          "priceRub": "335000.00",
+          "areaM2": 670,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632978"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большая улица, 310/4",
+          "priceRub": "650000.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633078"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Клубная улица, 110",
+          "priceRub": "300000.00",
+          "areaM2": 600,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633124"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красногорская улица, 6",
+          "priceRub": "350000.00",
+          "areaM2": 800,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633249"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Богдана Хмельницкого, 133",
+          "priceRub": "350.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633083"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Мира, 58",
+          "priceRub": "342.00",
+          "areaM2": 273.5,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633178"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 247к6",
+          "priceRub": "683.00",
+          "areaM2": 500,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633281"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Толмачёвская улица, 33/3",
+          "priceRub": "562800.00",
+          "areaM2": 804,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632984"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Тайгинская улица, 15",
+          "priceRub": "450.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632977"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 13",
+          "priceRub": "55000.00",
+          "areaM2": 213,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632914"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Мира, 61",
+          "priceRub": "206250.00",
+          "areaM2": 375,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632952"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Петухова, 8",
+          "priceRub": "299000.00",
+          "areaM2": 457.5,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633130"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Крамского, 42",
+          "priceRub": "204000.00",
+          "areaM2": 340,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632867"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Станционная улица, 80",
+          "priceRub": "436700.00",
+          "areaM2": 794,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632987"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Петухова, 89В",
+          "priceRub": "343000.00",
+          "areaM2": 624,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632915"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Даргомыжского, 28",
+          "priceRub": "200000.00",
+          "areaM2": 650,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633046"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "2-я Школьная улица, 6",
+          "priceRub": "650.00",
+          "areaM2": 512.8,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633149"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Сибиряков-Гвардейцев, 3",
+          "priceRub": "500.00",
+          "areaM2": 350,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632917"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Оловозаводская улица, 47А",
+          "priceRub": "600.00",
+          "areaM2": 411,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632866"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Выборная улица, 200А",
+          "priceRub": "180000.00",
+          "areaM2": 450,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633108"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Мочищенское шоссе, 19А",
+          "priceRub": "328000.00",
+          "areaM2": 410,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633208"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Станционная улица, 60/1к110",
+          "priceRub": "500.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633049"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Чукотская улица, 2Б",
+          "priceRub": "300.00",
+          "areaM2": 540,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632967"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Днепрогэсовская улица, 2",
+          "priceRub": "350.00",
+          "areaM2": 660,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633286"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Петухова, 44/1",
+          "priceRub": "253300.00",
+          "areaM2": 298,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633088"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дукача, 4В",
+          "priceRub": "700.00",
+          "areaM2": 719,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633006"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Волочаевская улица, 58",
+          "priceRub": "700000.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632869"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писемского, 5",
+          "priceRub": "367200.00",
+          "areaM2": 432,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632883"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Объединения, 3/5",
+          "priceRub": "158000.00",
+          "areaM2": 500,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633187"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Волочаевская улица, 58",
+          "priceRub": "142200.00",
+          "areaM2": 450,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632882"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Северный проезд, 32",
+          "priceRub": "490000.00",
+          "areaM2": 1000,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633231"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Крамского, 35",
+          "priceRub": "600.00",
+          "areaM2": 343,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633000"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Дзержинского, 148",
+          "priceRub": "800.00",
+          "areaM2": 612,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632876"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Декабристов, 247к3",
+          "priceRub": "630.00",
+          "areaM2": 200,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633258"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дунаевского, 16/5",
+          "priceRub": "450.00",
+          "areaM2": 700,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633128"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Бетонная улица, 12к1",
+          "priceRub": "250000.00",
+          "areaM2": 370,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632877"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Светлановская улица, 50/2",
+          "priceRub": "800.00",
+          "areaM2": 615,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632872"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "2-я Станционная улица, 21к3",
+          "priceRub": "30000.00",
+          "areaM2": 250,
+          "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633062"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "270000.00",
+          "areaM2": 551,
+          "url": "https://realty.yandex.ru/offer/1520155919935630345/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "195993.00",
+          "areaM2": 311.1,
+          "url": "https://realty.yandex.ru/offer/1520155919935608148/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "226800.00",
+          "areaM2": 324,
+          "url": "https://realty.yandex.ru/offer/1520155919935629453/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "129000.00",
+          "areaM2": 300,
+          "url": "https://realty.yandex.ru/offer/1520155918985418568/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "483000.00",
+          "areaM2": 700,
+          "url": "https://realty.yandex.ru/offer/1520155919935630222/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "80000.00",
+          "areaM2": 203,
+          "url": "https://realty.yandex.ru/offer/1520155919935629173/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "180000.00",
+          "areaM2": 589,
+          "url": "https://realty.yandex.ru/offer/1520155919935608024/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "115500.00",
+          "areaM2": 210,
+          "url": "https://realty.yandex.ru/offer/2212902704083831269/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "50000.00",
+          "areaM2": 250,
+          "url": "https://realty.yandex.ru/offer/1130904594743559424/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "276000.00",
+          "areaM2": 600,
+          "url": "https://realty.yandex.ru/offer/4746657886138814720/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "147400.00",
+          "areaM2": 335,
+          "url": "https://realty.yandex.ru/offer/5300387900574657633/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "368768.00",
+          "areaM2": 550,
+          "url": "https://realty.yandex.ru/offer/15086408096978176/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "240000.00",
+          "areaM2": 800,
+          "url": "https://realty.yandex.ru/offer/6932260350757168068/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "160080.00",
+          "areaM2": 460,
+          "url": "https://realty.yandex.ru/offer/7567994008092737458/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "150000.00",
+          "areaM2": 560,
+          "url": "https://realty.yandex.ru/offer/1856413944392899385/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "250000.00",
+          "areaM2": 500,
+          "url": "https://realty.yandex.ru/offer/2954261078130439040/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "92000.00",
+          "areaM2": 230,
+          "url": "https://realty.yandex.ru/offer/6932240597643148583/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "329280.00",
+          "areaM2": 560,
+          "url": "https://realty.yandex.ru/offer/6466569044900381538/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "165000.00",
+          "areaM2": 1000,
+          "url": "https://realty.yandex.ru/offer/6963908022731695295/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "124800.00",
+          "areaM2": 208,
+          "url": "https://realty.yandex.ru/offer/2635716729860781056/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "335000.00",
+          "areaM2": 700,
+          "url": "https://realty.yandex.ru/offer/5420393111328385793/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "200000.00",
+          "areaM2": 500,
+          "url": "https://realty.yandex.ru/offer/3633836424874751744/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "450000.00",
+          "areaM2": 1000,
+          "url": "https://realty.yandex.ru/offer/990006864615041536/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "135000.00",
+          "areaM2": 300,
+          "url": "https://realty.yandex.ru/offer/4506180944565576704/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "318065.00",
+          "areaM2": 578.3,
+          "url": "https://realty.yandex.ru/offer/6466593894232158630/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "201850.00",
+          "areaM2": 367,
+          "url": "https://realty.yandex.ru/offer/6932266316669483318/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "126000.00",
+          "areaM2": 270,
+          "url": "https://realty.yandex.ru/offer/8462012300360818490/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "300000.00",
+          "areaM2": 1000,
+          "url": "https://realty.yandex.ru/offer/1422881621612308224/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "360405.00",
+          "areaM2": 800,
+          "url": "https://realty.yandex.ru/offer/6932260290545409516/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "250000.00",
+          "areaM2": 1000,
+          "url": "https://realty.yandex.ru/offer/6963908022731694529/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "420000.00",
+          "areaM2": 1000,
+          "url": "https://realty.yandex.ru/offer/6963908022731695426/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "581000.00",
+          "areaM2": 830,
+          "url": "https://realty.yandex.ru/offer/2967677713982320896/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "112950.00",
+          "areaM2": 251,
+          "url": "https://realty.yandex.ru/offer/396344067751068747/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "400000.00",
+          "areaM2": 1000,
+          "url": "https://realty.yandex.ru/offer/6963908022731696289/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "160160.00",
+          "areaM2": 560,
+          "url": "https://realty.yandex.ru/offer/7567994008092855910/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "110000.00",
+          "areaM2": 330,
+          "url": "https://realty.yandex.ru/offer/7614788109042804736/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "110000.00",
+          "areaM2": 330,
+          "url": "https://realty.yandex.ru/offer/3254942459464678656/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "210000.00",
+          "areaM2": 350,
+          "url": "https://realty.yandex.ru/offer/1856413944391044527/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "200000.00",
+          "areaM2": 400,
+          "url": "https://realty.yandex.ru/offer/8186715413278824960/"
+        }
+      ]
+    },
+    {
+      "id": "b2935476-406d-415c-a960-10958ae655d8",
+      "time": "2026-11-05T12:08:05.251Z",
+      "filters": {
+        "city": "Новосибирск",
+        "areaTo": 500,
+        "seller": "all",
+        "priceTo": "50000000",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "areaFrom": 30,
+        "purposes": [
+          "office"
+        ],
+        "districts": [],
+        "floorMode": "any",
+        "operation": "sale",
+        "priceFrom": "1000000",
+        "priceUnit": "rub_total",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "webSearchUsed": false,
+      "sources": [
+        {
+          "source": "cian",
+          "status": "error",
+          "count": 0,
+          "reason": "PARSE_FAILED"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "error",
+          "count": 0,
+          "reason": "FETCH_FAILED"
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "count": 61,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "domclick",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 401"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "count": 38,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "count": 0,
+          "reason": null
+        },
+        {
+          "source": "avito",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 439"
+        }
+      ],
+      "results": [
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "73869999.00",
+          "areaM2": 365.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528525"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "28532000.00",
+          "areaM2": 120.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528527"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "20347399.00",
+          "areaM2": 86.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528505"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Депутатская улица, 46",
+          "priceRub": "63900000.00",
+          "areaM2": 253,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529524"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2700000.00",
+          "areaM2": 34.44,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529013"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "80000000.00",
+          "areaM2": 121,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529080"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "18950000.00",
+          "areaM2": 46.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529082"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "51000000.00",
+          "areaM2": 112.67,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529024"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "41000000.00",
+          "areaM2": 90.42,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "9980000.00",
+          "areaM2": 41.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528506"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "16799999.00",
+          "areaM2": 55.47,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528982"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Коммунистическая улица, 2",
+          "priceRub": "19100000.00",
+          "areaM2": 170.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528767"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Вокзальная магистраль, 18",
+          "priceRub": "15500000.00",
+          "areaM2": 104,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528410"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большевистская улица, 35",
+          "priceRub": "12500000.00",
+          "areaM2": 72,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529376"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "21500000.00",
+          "areaM2": 46.81,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Крылова, 36",
+          "priceRub": "11000000.00",
+          "areaM2": 82.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528980"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Кирова, 113",
+          "priceRub": "15900000.00",
+          "areaM2": 170,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528782"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 64",
+          "priceRub": "10500000.00",
+          "areaM2": 60.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528929"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 2/3",
+          "priceRub": "7000000.00",
+          "areaM2": 52.4,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528546"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Орджоникидзе, 40/1",
+          "priceRub": "12500000.00",
+          "areaM2": 145.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "10500000.00",
+          "areaM2": 223,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529227"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "5100000.00",
+          "areaM2": 103,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529231"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "19250000.00",
+          "areaM2": 60,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529072"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Пархоменко, 29",
+          "priceRub": "6000000.00",
+          "areaM2": 75.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529373"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "83932001.00",
+          "areaM2": 433.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528508"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большевистская улица, 35",
+          "priceRub": "12940000.00",
+          "areaM2": 64.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528422"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дуси Ковальчук, 252/1",
+          "priceRub": "21000000.00",
+          "areaM2": 220,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528761"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "5900000.00",
+          "areaM2": 120,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529226"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Танковая улица, 6",
+          "priceRub": "14950000.00",
+          "areaM2": 106.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528452"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 4",
+          "priceRub": "9780000.00",
+          "areaM2": 71,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528614"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "",
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis-nedorogo"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Немировича-Данченко, 146/1",
+          "priceRub": "12500000.00",
+          "areaM2": 66.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528752"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Димитрова, 7",
+          "priceRub": "3350000.00",
+          "areaM2": 30.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528689"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Аэропорт, 88",
+          "priceRub": "19500000.00",
+          "areaM2": 126.5,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528478"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Красина, 54",
+          "priceRub": "12500000.00",
+          "areaM2": 106.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528781"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дуси Ковальчук, 252/1",
+          "priceRub": "21000000.00",
+          "areaM2": 230,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529028"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Инженерная улица, 7",
+          "priceRub": "19000000.00",
+          "areaM2": 75.5,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528532"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 153",
+          "priceRub": "7500000.00",
+          "areaM2": 48.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528580"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 4А",
+          "priceRub": "38800000.00",
+          "areaM2": 306.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528863"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Кропоткина, 261/2",
+          "priceRub": "10000000.00",
+          "areaM2": 92.8,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528560"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Геодезическая улица, 17/1",
+          "priceRub": "45000000.00",
+          "areaM2": 336,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528434"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "микрорайон Горский, 67",
+          "priceRub": "5600000.00",
+          "areaM2": 77.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528985"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писарева, 102",
+          "priceRub": "8830500.00",
+          "areaM2": 60.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528607"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писарева, 102",
+          "priceRub": "9120000.00",
+          "areaM2": 62.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528625"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 25",
+          "priceRub": "14700000.00",
+          "areaM2": 81.28,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528934"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Комсомольский проспект, 24",
+          "priceRub": "7300000.00",
+          "areaM2": 45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529425"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "5103000.00",
+          "areaM2": 72.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528672"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Маковского, 6",
+          "priceRub": "22000000.00",
+          "areaM2": 113,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528824"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Первомайская улица, 43",
+          "priceRub": "43410000.00",
+          "areaM2": 217.05,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529269"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Дзержинского, 24/1",
+          "priceRub": "16500000.00",
+          "areaM2": 135,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528618"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Первомайская улица, 43",
+          "priceRub": "40853750.00",
+          "areaM2": 233.45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529264"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 25",
+          "priceRub": "20400000.00",
+          "areaM2": 125.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528919"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Николая Островского, 58",
+          "priceRub": "11200000.00",
+          "areaM2": 50.91,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528827"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Семьи Шамшиных, 99",
+          "priceRub": "6500000.00",
+          "areaM2": 56.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529070"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Зыряновская улица, 55к1",
+          "priceRub": "4150000.00",
+          "areaM2": 31.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528605"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Геодезическая улица, 5",
+          "priceRub": "9500000.00",
+          "areaM2": 130,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529511"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Николая Островского, 58",
+          "priceRub": "18200000.00",
+          "areaM2": 83.57,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528815"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2513000.00",
+          "areaM2": 35.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528648"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ватутина, 29",
+          "priceRub": "13900000.00",
+          "areaM2": 52.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528814"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Комсомольский проспект, 24",
+          "priceRub": "8000000.00",
+          "areaM2": 45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528462"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2758000.00",
+          "areaM2": 39.4,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528640"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20900000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186144/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "21200000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186045/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20600000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186177/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "17760000.00",
+          "areaM2": 45,
+          "url": "https://realty.yandex.ru/offer/3964472179320093904/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20400000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186231/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "55676400.00",
+          "areaM2": 142.8,
+          "url": "https://realty.yandex.ru/offer/7567068812130613986/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "12420000.00",
+          "areaM2": 53.5,
+          "url": "https://realty.yandex.ru/offer/3964472179320093628/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8631000.00",
+          "areaM2": 41.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130590147/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8631000.00",
+          "areaM2": 41.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130590150/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "114266000.00",
+          "areaM2": 300.7,
+          "url": "https://realty.yandex.ru/offer/7567068812130617950/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "36000000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186021/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "15400000.00",
+          "areaM2": 38.6,
+          "url": "https://realty.yandex.ru/offer/3961425542481185211/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "13800000.00",
+          "areaM2": 48.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186113/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "19500000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480296135/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8610000.00",
+          "areaM2": 41,
+          "url": "https://realty.yandex.ru/offer/7567068812130590176/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "46874100.00",
+          "areaM2": 120.2,
+          "url": "https://realty.yandex.ru/offer/7567068812130613984/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "6531000.00",
+          "areaM2": 31.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130648645/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "21400000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480297059/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "19700000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480296127/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "14100000.00",
+          "areaM2": 51.8,
+          "url": "https://realty.yandex.ru/offer/3964472179320091946/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "59380000.00",
+          "areaM2": 118.8,
+          "url": "https://realty.yandex.ru/offer/3964472179315657927/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "32800000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186108/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "40700400.00",
+          "areaM2": 104.4,
+          "url": "https://realty.yandex.ru/offer/7567068812130613988/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "32700000.00",
+          "areaM2": 112.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186022/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "9500000.00",
+          "areaM2": 50,
+          "url": "https://realty.yandex.ru/offer/7567068812130643997/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "58040000.00",
+          "areaM2": 116.1,
+          "url": "https://realty.yandex.ru/offer/3964472179315657925/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "17535000.00",
+          "areaM2": 83.5,
+          "url": "https://realty.yandex.ru/offer/7567068812130590173/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "39546000.00",
+          "areaM2": 101.4,
+          "url": "https://realty.yandex.ru/offer/7567068812130613982/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "55825000.00",
+          "areaM2": 111.7,
+          "url": "https://realty.yandex.ru/offer/3964472179315657924/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "1900000.00",
+          "areaM2": 76.3,
+          "url": "https://realty.yandex.ru/offer/1635805458652035328/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "11990000.00",
+          "areaM2": 66.3,
+          "url": "https://realty.yandex.ru/offer/5430628915820570867/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "6900000.00",
+          "areaM2": 53,
+          "url": "https://realty.yandex.ru/offer/5430628918570989667/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "7990000.00",
+          "areaM2": 54.2,
+          "url": "https://realty.yandex.ru/offer/6466626189539976776/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "18874500.00",
+          "areaM2": 88.5,
+          "url": "https://realty.yandex.ru/offer/3960371506721053248/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8200000.00",
+          "areaM2": 82,
+          "url": "https://realty.yandex.ru/offer/3960473055664275709/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "3100000.00",
+          "areaM2": 50,
+          "url": "https://realty.yandex.ru/offer/2814526310612713472/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "31700000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186141/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "9910000.00",
+          "areaM2": 40,
+          "url": "https://realty.yandex.ru/offer/1536347980387080450/"
+        }
+      ]
+    },
+    {
+      "id": "a88b0675-7668-4bc0-82e5-d1e62d3e9b1c",
+      "time": "2026-11-05T12:08:30.303Z",
+      "filters": {
+        "city": "Новосибирск",
+        "areaTo": 500,
+        "seller": "all",
+        "priceTo": "50000000",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "areaFrom": 30,
+        "purposes": [
+          "office"
+        ],
+        "districts": [],
+        "floorMode": "any",
+        "operation": "sale",
+        "priceFrom": "1000000",
+        "priceUnit": "rub_total",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "webSearchUsed": true,
+      "sources": [
+        {
+          "source": "cian",
+          "status": "error",
+          "count": 0,
+          "reason": "PARSE_FAILED"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "error",
+          "count": 0,
+          "reason": "FETCH_FAILED"
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "count": 61,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "domclick",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 401"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "count": 38,
+          "reason": "Выборка ограничена бюджетом страниц/результатов"
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "count": 0,
+          "reason": null
+        },
+        {
+          "source": "avito",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 429"
+        },
+        {
+          "source": "web_search",
+          "status": "success",
+          "count": 4,
+          "reason": "Веб-резерв: первоисточники требуют проверки"
+        }
+      ],
+      "results": [
+        {
+          "verdict": "rejected",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "80000000.00",
+          "areaM2": 121,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529080"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "18950000.00",
+          "areaM2": 46.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529082"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "51000000.00",
+          "areaM2": 112.67,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529024"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "41000000.00",
+          "areaM2": 90.42,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529079"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "9980000.00",
+          "areaM2": 41.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528506"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "73869999.00",
+          "areaM2": 365.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528525"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "28532000.00",
+          "areaM2": 120.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528527"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "20347399.00",
+          "areaM2": 86.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528505"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Депутатская улица, 46",
+          "priceRub": "63900000.00",
+          "areaM2": 253,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529524"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2700000.00",
+          "areaM2": 34.44,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529013"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "16799999.00",
+          "areaM2": 55.47,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528982"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Коммунистическая улица, 2",
+          "priceRub": "19100000.00",
+          "areaM2": 170.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528767"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Вокзальная магистраль, 18",
+          "priceRub": "15500000.00",
+          "areaM2": 104,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528410"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большевистская улица, 35",
+          "priceRub": "12500000.00",
+          "areaM2": 72,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529376"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "21500000.00",
+          "areaM2": 46.81,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Крылова, 36",
+          "priceRub": "11000000.00",
+          "areaM2": 82.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528980"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Кирова, 113",
+          "priceRub": "15900000.00",
+          "areaM2": 170,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528782"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 64",
+          "priceRub": "10500000.00",
+          "areaM2": 60.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528929"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 2/3",
+          "priceRub": "7000000.00",
+          "areaM2": 52.4,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528546"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Орджоникидзе, 40/1",
+          "priceRub": "12500000.00",
+          "areaM2": 145.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "10500000.00",
+          "areaM2": 223,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529227"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "5100000.00",
+          "areaM2": 103,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529231"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 101/1",
+          "priceRub": "19250000.00",
+          "areaM2": 60,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529072"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Пархоменко, 29",
+          "priceRub": "6000000.00",
+          "areaM2": 75.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529373"
+        },
+        {
+          "verdict": "rejected",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ленина, 21/1к4",
+          "priceRub": "83932001.00",
+          "areaM2": 433.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528508"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Большевистская улица, 35",
+          "priceRub": "12940000.00",
+          "areaM2": 64.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528422"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дуси Ковальчук, 252/1",
+          "priceRub": "21000000.00",
+          "areaM2": 220,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528761"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Связистов, 158",
+          "priceRub": "5900000.00",
+          "areaM2": 120,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529226"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Танковая улица, 6",
+          "priceRub": "14950000.00",
+          "areaM2": 106.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528452"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 4",
+          "priceRub": "9780000.00",
+          "areaM2": 71,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528614"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "",
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis-nedorogo"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Немировича-Данченко, 146/1",
+          "priceRub": "12500000.00",
+          "areaM2": 66.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528752"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Димитрова, 7",
+          "priceRub": "3350000.00",
+          "areaM2": 30.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528689"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Аэропорт, 88",
+          "priceRub": "19500000.00",
+          "areaM2": 126.5,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528478"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Красина, 54",
+          "priceRub": "12500000.00",
+          "areaM2": 106.1,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528781"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Дуси Ковальчук, 252/1",
+          "priceRub": "21000000.00",
+          "areaM2": 230,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529028"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Инженерная улица, 7",
+          "priceRub": "19000000.00",
+          "areaM2": 75.5,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528532"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Красный проспект, 153",
+          "priceRub": "7500000.00",
+          "areaM2": 48.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528580"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Советская улица, 4А",
+          "priceRub": "38800000.00",
+          "areaM2": 306.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528863"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Кропоткина, 261/2",
+          "priceRub": "10000000.00",
+          "areaM2": 92.8,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528560"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Геодезическая улица, 17/1",
+          "priceRub": "45000000.00",
+          "areaM2": 336,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528434"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "микрорайон Горский, 67",
+          "priceRub": "5600000.00",
+          "areaM2": 77.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528985"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писарева, 102",
+          "priceRub": "8830500.00",
+          "areaM2": 60.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528607"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Писарева, 102",
+          "priceRub": "9120000.00",
+          "areaM2": 62.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528625"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 25",
+          "priceRub": "14700000.00",
+          "areaM2": 81.28,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528934"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Комсомольский проспект, 24",
+          "priceRub": "7300000.00",
+          "areaM2": 45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529425"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "5103000.00",
+          "areaM2": 72.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528672"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Маковского, 6",
+          "priceRub": "22000000.00",
+          "areaM2": 113,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528824"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Первомайская улица, 43",
+          "priceRub": "43410000.00",
+          "areaM2": 217.05,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529269"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "проспект Дзержинского, 24/1",
+          "priceRub": "16500000.00",
+          "areaM2": 135,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528618"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Первомайская улица, 43",
+          "priceRub": "40853750.00",
+          "areaM2": 233.45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529264"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Станиславского, 25",
+          "priceRub": "20400000.00",
+          "areaM2": 125.3,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528919"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Николая Островского, 58",
+          "priceRub": "11200000.00",
+          "areaM2": 50.91,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528827"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Семьи Шамшиных, 99",
+          "priceRub": "6500000.00",
+          "areaM2": 56.2,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529070"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Зыряновская улица, 55к1",
+          "priceRub": "4150000.00",
+          "areaM2": 31.7,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528605"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Геодезическая улица, 5",
+          "priceRub": "9500000.00",
+          "areaM2": 130,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529511"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Николая Островского, 58",
+          "priceRub": "18200000.00",
+          "areaM2": 83.57,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528815"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2513000.00",
+          "areaM2": 35.9,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528648"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Ватутина, 29",
+          "priceRub": "13900000.00",
+          "areaM2": 52.6,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528814"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "Комсомольский проспект, 24",
+          "priceRub": "8000000.00",
+          "areaM2": 45,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528462"
+        },
+        {
+          "verdict": "confirmed",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "onrealt",
+          "address": "улица Чаплыгина, 1",
+          "priceRub": "2758000.00",
+          "areaM2": 39.4,
+          "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528640"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "21200000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186045/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20900000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186144/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "17760000.00",
+          "areaM2": 45,
+          "url": "https://realty.yandex.ru/offer/3964472179320093904/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8631000.00",
+          "areaM2": 41.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130590147/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "12420000.00",
+          "areaM2": 53.5,
+          "url": "https://realty.yandex.ru/offer/3964472179320093628/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "13800000.00",
+          "areaM2": 48.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186113/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "19500000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480296135/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20400000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186231/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "20600000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542481186177/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "55676400.00",
+          "areaM2": 142.8,
+          "url": "https://realty.yandex.ru/offer/7567068812130613986/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "15400000.00",
+          "areaM2": 38.6,
+          "url": "https://realty.yandex.ru/offer/3961425542481185211/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8631000.00",
+          "areaM2": 41.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130590150/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "114266000.00",
+          "areaM2": 300.7,
+          "url": "https://realty.yandex.ru/offer/7567068812130617950/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "36000000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186021/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "19700000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480296127/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "21400000.00",
+          "areaM2": 86,
+          "url": "https://realty.yandex.ru/offer/3961425542480297059/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "31600000.00",
+          "areaM2": 112.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186109/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "8610000.00",
+          "areaM2": 41,
+          "url": "https://realty.yandex.ru/offer/7567068812130590176/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "32800000.00",
+          "areaM2": 115.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186108/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "14100000.00",
+          "areaM2": 51.8,
+          "url": "https://realty.yandex.ru/offer/3964472179320091946/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "46874100.00",
+          "areaM2": 120.2,
+          "url": "https://realty.yandex.ru/offer/7567068812130613984/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "6531000.00",
+          "areaM2": 31.1,
+          "url": "https://realty.yandex.ru/offer/7567068812130648645/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "58040000.00",
+          "areaM2": 116.1,
+          "url": "https://realty.yandex.ru/offer/3964472179315657925/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "40700400.00",
+          "areaM2": 104.4,
+          "url": "https://realty.yandex.ru/offer/7567068812130613988/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "32700000.00",
+          "areaM2": 112.5,
+          "url": "https://realty.yandex.ru/offer/3961425542481186022/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "9500000.00",
+          "areaM2": 50,
+          "url": "https://realty.yandex.ru/offer/7567068812130643997/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "55825000.00",
+          "areaM2": 111.7,
+          "url": "https://realty.yandex.ru/offer/3964472179315657924/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "39546000.00",
+          "areaM2": 101.4,
+          "url": "https://realty.yandex.ru/offer/7567068812130613982/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "17535000.00",
+          "areaM2": 83.5,
+          "url": "https://realty.yandex.ru/offer/7567068812130590173/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "1900000.00",
+          "areaM2": 76.3,
+          "url": "https://realty.yandex.ru/offer/1635805458652035328/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "11990000.00",
+          "areaM2": 66.3,
+          "url": "https://realty.yandex.ru/offer/5430628915820570867/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": false,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "6900000.00",
+          "areaM2": 53,
+          "url": "https://realty.yandex.ru/offer/5430628918570989667/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "63000000.00",
+          "areaM2": 240.5,
+          "url": "https://realty.yandex.ru/offer/3936755696708953459/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "24640000.00",
+          "areaM2": 112,
+          "url": "https://realty.yandex.ru/offer/3936023035793471937/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "18495000.00",
+          "areaM2": 61.7,
+          "url": "https://realty.yandex.ru/offer/3939986640549968619/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "9279000.00",
+          "areaM2": 103.1,
+          "url": "https://realty.yandex.ru/offer/5828023178660470273/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "57400000.00",
+          "areaM2": 241.6,
+          "url": "https://realty.yandex.ru/offer/3936755696708953458/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "yandex",
+          "address": "",
+          "priceRub": "26000000.00",
+          "areaM2": 210.4,
+          "url": "https://realty.yandex.ru/offer/9204541398458019073/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://realty.yandex.ru/novosibirsk/kupit/kommercheskaya-nedvizhimost/ofis/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://novosibirsk.restate.ru/kupit-ofis-novosibirsk/"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://vladis.ru/novosibirsk/kupit-commercial-ofis"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://novosibirsk.cian.ru/kupit-ofis-30-metrov/"
+        }
+      ]
+    },
+    {
+      "id": "9e28eae7-3507-4937-8126-b2dccb4fe185",
+      "time": "2026-11-05T12:11:38.812Z",
+      "filters": {
+        "city": "Новосибирск",
+        "seller": "all",
+        "sources": [
+          "domclick",
+          "avito"
+        ],
+        "purposes": [],
+        "districts": [],
+        "floorMode": "any",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "webSearchUsed": true,
+      "sources": [
+        {
+          "source": "domclick",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 401"
+        },
+        {
+          "source": "avito",
+          "status": "blocked",
+          "count": 0,
+          "reason": "ACCESS_BLOCKED HTTP 439"
+        },
+        {
+          "source": "web_search",
+          "status": "success",
+          "count": 4,
+          "reason": "Веб-резерв: первоисточники требуют проверки"
+        }
+      ],
+      "results": [
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://novosibirsk.domclick.ru/pokupka-commerce"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam-ASgBAgICAUSwCNJW"
+        },
+        {
+          "verdict": "needs_review",
+          "isNew": true,
+          "priceChanged": false,
+          "source": "web_search",
+          "address": null,
+          "priceRub": null,
+          "areaM2": null,
+          "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam/magazin-ASgBAgICAkSwCNJWnsMNiNk5?q=%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C+%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%BD%D1%8B%D0%B9+%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81+%D1%81+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%BC"
+        }
+      ]
+    },
+    {
+      "id": "1c0d904b-604e-4c0d-b484-53f0ead97c7e",
+      "time": "2026-11-05T12:16:02.671Z",
+      "filters": {
+        "city": "Новосибирск",
+        "seller": "all",
+        "priceTo": "1",
+        "sources": [
+          "youla"
+        ],
+        "areaFrom": 100000,
+        "purposes": [],
+        "districts": [
+          "Центральный"
+        ],
+        "floorMode": "any",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "success",
+      "webSearchUsed": false,
+      "sources": [
+        {
+          "source": "youla",
+          "status": "success",
+          "count": 0,
+          "reason": null
+        }
+      ],
+      "results": []
+    }
+  ]
+}

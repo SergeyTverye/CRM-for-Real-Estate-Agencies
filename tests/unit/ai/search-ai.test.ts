@@ -28,6 +28,26 @@ describe("SearchAi", () => {
     const { ai } = fixture(() => ({ text: '{"filters":null,"clarificationQuestion":"Уточните единицу цены аренды"}' }));
     expect((await ai.parseSearchQuery(context, { query: "Аренда за 100" })).clarificationQuestion).toContain("единицу");
   });
+  it("honours an explicit all-districts clause even if the provider carries over the need district", async () => {
+    const filters = searchFiltersSchema.parse({ operation: "sale", districts: ["Центральный"] });
+    const f = fixture(() => ({ text: JSON.stringify({ filters, clarificationQuestion: null }) }));
+    const result = await f.ai.parseSearchQuery(context, { query: "Продажа офиса, любые районы, все продавцы", currentFilters: filters });
+    expect(result.filters?.districts).toEqual([]);
+    expect(result.usage).toBeDefined();
+    expect(f.provider.requests).toHaveLength(1);
+  });
+  it("does not clear districts for a negated all-districts request", async () => {
+    const filters = searchFiltersSchema.parse({ operation: "sale", districts: ["Центральный"] });
+    const f = fixture(() => ({ text: JSON.stringify({ filters, clarificationQuestion: null }) }));
+    const result = await f.ai.parseSearchQuery(context, { query: "Нужны не любые районы, только Центральный", currentFilters: filters });
+    expect(result.filters?.districts).toEqual(["Центральный"]);
+  });
+  it("does not weaken first floor when a refinement only excludes the basement", async () => {
+    const filters = searchFiltersSchema.parse({ operation: "sale", floorMode: "first_floor_only" });
+    const f = fixture(() => ({ text: JSON.stringify({ filters: { ...filters, floorMode: "exclude_basement_and_semi_basement" }, clarificationQuestion: null }) }));
+    const result = await f.ai.parseSearchQuery(context, { query: "Добавь витрину и исключи цоколь, остальные условия сохрани", currentFilters: filters });
+    expect(result.filters?.floorMode).toBe("first_floor_only");
+  });
   it.each([
     "not json", '{"filters":{"operation":"sale","priceFrom":1},"clarificationQuestion":null}',
     '{"filters":null,"clarificationQuestion":null}', '{"filters":{"operation":"rent"},"clarificationQuestion":null}',

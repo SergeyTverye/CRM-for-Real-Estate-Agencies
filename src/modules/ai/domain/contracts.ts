@@ -24,7 +24,7 @@ export const webResultSchema = z.object({
   candidates: z.array(z.object({ title: z.string().min(1).max(500), url: z.string().max(2048).nullable() }).strict()).max(50),
 }).strict();
 
-export type CallType = "parse" | "description" | "web_search";
+export type CallType = "parse" | "description" | "web_search" | "call_note" | "offer_text";
 export interface TokenUsage { inputTokens: number; outputTokens: number }
 export interface WebSearchTool {
   type: "web_search";

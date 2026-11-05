@@ -9,6 +9,8 @@ import { AiGate, type AiUser } from "../domain/gate";
 import type { TariffRepository } from "../domain/cost";
 import { decodeAiJson } from "../domain/decode-json";
 import { decodeParseResult, providerParseSchema, providerParseInstructions } from "../domain/provider-parse";
+import { isMarketCatalogue } from "../domain/listing-url";
+import { providerCallNoteSchema, providerOfferTextSchema, callNoteInstructions, decodeCallNote, offerTextSchema, checkOfferNumbers } from "../domain/p2-drafts";
 
 export interface AiCallContext {
   user: AiUser; jobId: string; ownerUserId: string; requestId: string;
@@ -32,6 +34,8 @@ export class SearchAi {
     const model = type === "web_search" ? this.config.webModel || this.config.model : this.config.model;
     const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens: this.config.maxOutputTokens,
       ...(type === "parse" ? { responseSchema: providerParseSchema, responseSchemaStrict: true } : {}),
+      ...(type === "call_note" ? { responseSchema: providerCallNoteSchema, responseSchemaStrict: true } : {}),
+      ...(type === "offer_text" ? { responseSchema: providerOfferTextSchema, responseSchemaStrict: true } : {}),
       ...(tools ? { tools } : {}) };
     const tariff = await this.tariffs.findEffective(model, this.clock());
     if (!tariff) throw new AiError("AI_TARIFF_UNAVAILABLE");
@@ -57,6 +61,8 @@ export class SearchAi {
     }
     try {
       if (type === "parse") decodeParseResult(response.text);
+      else if (type === "call_note") decodeCallNote(response.text);
+      else if (type === "offer_text") checkOfferNumbers(this.decode(offerTextSchema, response.text).text, input);
       else if (type === "description") this.decode(descriptionResultSchema, response.text);
       else this.decode(webResultSchema, response.text);
     } catch {
@@ -71,12 +77,38 @@ export class SearchAi {
     return decodeAiJson(schema, text);
   }
 
+  /** Application caller supplies only sanitized note, never a Client DTO. */
+  async parseCallNote(context: AiCallContext, sanitizedNote: string) {
+    const response = await this.call("call_note", context, { note: sanitizedNote, now: this.clock().toISOString() }, `${untrusted} ${callNoteInstructions}`);
+    const draft = decodeCallNote(response.text);
+    if (draft.filters) {
+      if (!/собственник|владелец|owner/iu.test(sanitizedNote)) draft.filters.seller = "all";
+      if (!draft.filters.sources.length) draft.filters.sources = searchFiltersSchema.parse({operation:"sale"}).sources;
+    }
+    return { ...draft, ...this.metadata(response) };
+  }
+
+  async draftOfferText(context: AiCallContext, facts: unknown, kind: "intro" | "comparison") {
+    const response = await this.call("offer_text", context, { facts, kind }, `${untrusted} Подготовь ${kind === "intro" ? "краткое введение к КП без чисел и диапазонов" : "сравнительное описание объектов: отдельный абзац по каждой позиции с её адресом и характеристиками"} только по переданным снимкам CRM. Не выдумывай факты, преимущества, условия или числа. Не делай вычислений и не обобщай диапазоны площадей и цен. Скопируй числа точно и только для соответствующего объекта, без сокращений тыс/млн. Не нумеруй список. Неизвестное опусти. Не используй личные обращения. Верни JSON {"text":"..."}.`);
+    return { ...this.decode(offerTextSchema, response.text), ...this.metadata(response) };
+  }
+
   async parseSearchQuery(context: AiCallContext, rawInput: unknown) {
     const input = z.object({ query: z.string().trim().min(1).max(4000), currentFilters: searchFiltersSchema.optional() }).strict().parse(rawInput);
     const safe = { query: redactContacts(input.query), currentFilters: input.currentFilters ? this.safeFilters(input.currentFilters) : undefined };
     const response = await this.call("parse", context, safe,
       `${untrusted} ${providerParseInstructions}`);
-    return { ...decodeParseResult(response.text), ...this.metadata(response) };
+    const parsed = decodeParseResult(response.text);
+    // Explicit removal of a geographic restriction wins over a model carrying
+    // over the ClientNeed's district. Restrict this to affirmative whole clauses.
+    if (parsed.filters && /(?:^|[,;.!]\s*)(?:любые|все)\s+районы(?:\s*(?:[,;.!]|$))/iu.test(safe.query))
+      parsed.filters.districts = [];
+    if (parsed.filters && input.currentFilters?.floorMode === "first_floor_only" &&
+      /(?:добавь|исключи|остальные\s+условия\s+сохрани)/iu.test(safe.query) &&
+      /(?:исключи|без)\s+(?:подвал\S*\s*(?:и\s*)?)?цокол/iu.test(safe.query) &&
+      !/новый\s+поиск|любо\S*\s+этаж|не\s+только\s+перв|сними\s+ограничение\s+по\s+этаж/iu.test(safe.query))
+      parsed.filters.floorMode = "first_floor_only";
+    return { ...parsed, ...this.metadata(response) };
   }
 
   async analyzeDescriptions(context: AiCallContext, rawInput: unknown) {
@@ -134,7 +166,7 @@ export class SearchAi {
     const sources = new Set(response.sourceUrls.map(publicSourceUrl).filter(Boolean));
     const candidates = result.candidates.map((c) => {
       const originalUrl = c.url ? publicSourceUrl(c.url) : null;
-      const allowed = originalUrl && (!this.config.allowedDomains.length || this.config.allowedDomains.some((d) => {
+      const allowed = originalUrl && !isMarketCatalogue(originalUrl) && (!this.config.allowedDomains.length || this.config.allowedDomains.some((d) => {
         const host = new URL(originalUrl).hostname; return host === d || host.endsWith(`.${d}`);
       }));
       return { title: redactContacts(c.title), originalUrl: allowed ? originalUrl : null,

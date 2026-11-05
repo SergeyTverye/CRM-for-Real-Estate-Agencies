@@ -77,11 +77,12 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
   }
   async search(input: unknown): Promise<SearchResult> {
     const filters = SearchFilters.parse(input);
-    const runs = await Promise.all([...new Set(filters.sources)].map(source => this.runSource(source, filters)));
+    const deadline = Date.now() + this.timeout;
+    const runs = await Promise.all([...new Set(filters.sources)].map(source => this.runSource(source, filters, deadline)));
     const listings = deduplicateListings(runs.flatMap(r => r.listings));
     return { listings: listings.map(listing => ({ listing, evaluation: evaluateListing(listing, filters) })), sources: runs.map(r => r.run) };
   }
-  private async runSource(source: Source, filters: SearchFilters) {
+  private async runSource(source: Source, filters: SearchFilters, deadline: number) {
     const empty = (status: SourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason } satisfies SourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
     if (!(this.options.enabled ?? process.env.SCRAPER_ENABLED === "true") || this.options.enabledSources && !this.options.enabledSources.includes(source)) return empty("disabled", "Источник отключён");
     const query = buildScraperQuery(filters, source, new AbortController().signal, this.options.sourceOptions);
@@ -89,18 +90,22 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     const missingGeography = source === "domclick" && !geography?.address && !geography?.params?.address ? "address" : source === "avito" && !geography?.locationId ? "locationId" : source === "mirkvartir" && !geography?.locationIds ? "locationIds" : null;
     if (missingGeography && !geography?.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${missingGeography}`);
     return this.limiter.run(async () => {
+      // Queue time belongs to the job deadline too. Never start a new network
+      // request after an earlier source consumed the entire job's budget.
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) return empty("timeout", "Превышен срок выполнения задания");
       const controller = new AbortController(); let timer: ReturnType<typeof setTimeout> | undefined;
       let client: ScraperClient | undefined;
       const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
       const factory = this.options.factory ?? defaultScraperFactory;
       const work = async () => {
-        client = await factory({ timeout: Math.min(this.timeout, 30_000), maxRetries: 0, transport,
+        client = await factory({ timeout: Math.min(remaining, 30_000), maxRetries: 0, transport,
           ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome", ...this.options.browser, sources: [source] } } : {}) });
         if (controller.signal.aborted) { await client.close(); throw { code: "ABORTED" }; }
         return client.searchSite(source, buildScraperQuery(filters, source, controller.signal, this.options.sourceOptions));
       };
       try {
-        const result = await Promise.race([work(), new Promise<never>((_, reject) => { timer = setTimeout(() => { controller.abort(); reject({ code: "TIMEOUT" }); }, this.timeout); })]);
+        const result = await Promise.race([work(), new Promise<never>((_, reject) => { timer = setTimeout(() => { controller.abort(); reject({ code: "TIMEOUT" }); }, remaining); })]);
         const listings: ReturnType<typeof normalizeListing>[] = []; let invalid = 0;
         for (const raw of result.results) { try { if (raw.source !== source) throw new Error("SOURCE_MISMATCH"); listings.push(normalizeListing(raw, result.timestamp)); } catch { invalid++; } }
         const successfulPage = result.pages.some(p => p.errors.length === 0);
