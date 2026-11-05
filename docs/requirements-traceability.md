@@ -87,3 +87,45 @@
 | §7 реестры CSV с фильтрами и RBAC | export/register-export | p1a-workflow, p1a-access | PASS |
 
 Подробности и ограничения: [p1a-working-contour.md](p1a-working-contour.md). Целевой набор — 11/11 PASS; общий typecheck не PASS из-за ошибок параллельного demo seed. Общая готовность релиза здесь не утверждается.
+
+<a id="v241"></a>
+## Дополнение v2.4.1: разделы 2–11
+
+Срез 05.11.2026, feature/tz-v2.4.1 от ba7e6fa. Новое ТЗ имеет приоритет в явно изменённых требованиях; прежние PASS относятся к baseline и не заменяют приёмку расширения. Пути модулей ниже относительно src/modules, если не указано иначе. PASS — конкретные автотесты/протоколы, PARTIAL — указанная незакрытая часть. Общая готовность P1 пока PARTIAL.
+
+| Требование | Модуль / файлы | Тесты / свидетельства | Статус |
+|---|---|---|---|
+| §10.1 SEC | `access/application/redact-client.ts; access/domain/scopes.ts; documents` | [тесты и фактический протокол](acceptance/v241/SEC.md) | PARTIAL |
+| §2 LEAD | `requests/application/request-service.ts; tasks; requests/contact-control` | [тесты и фактический протокол](acceptance/v241/LEAD.md) | PASS |
+| §3, §3.1 SEARCH | `property-search/domain; property-search/application; ai/domain/provider-parse.ts` | [тесты и фактический протокол](acceptance/v241/SEARCH.md) | PARTIAL |
+| §4 SCRAPER | `property-search/infrastructure/scraper-adapter.ts; shared/net/ssrf.ts` | [тесты и фактический протокол](acceptance/v241/SCRAPER.md) | PARTIAL |
+| §4 WEB | `property-search/domain/fallback.ts; application/search-service.ts; ai/domain/gate.ts` | [тесты и фактический протокол](acceptance/v241/WEB.md) | PASS |
+| §5 AI | `ai/application/settings-service.ts; ai/infrastructure; API settings/ai` | [тесты и фактический протокол](acceptance/v241/AI.md) | PASS |
+| §3.2 LINK | `property-search/application/listing-service.ts; matching/application` | [тесты и фактический протокол](acceptance/v241/LINK.md) | PASS |
+| §6 MEDIA | `properties/application/property-media-service.ts; documents/application/property-media-response.ts` | [тесты и фактический протокол](acceptance/v241/MEDIA.md) | PASS |
+| §7 OFFER-DOC | `commercial-offers/application; deals/application/checklist-service.ts; export/application/register-export.ts` | [тесты и фактический протокол](acceptance/v241/OFFER-DOC.md) | PARTIAL |
+| §8 CAL-NOTIF | `calendar/application; notifications/application; src/worker; compose.yaml` | [тесты и фактический протокол](acceptance/v241/CAL-NOTIF.md) | PARTIAL |
+| §10.2 REPORT-PAUSE | `reports/application/report-service.ts; needs/domain; tasks/application` | [тесты и фактический протокол](acceptance/v241/REPORT-PAUSE.md) | PASS |
+| §11 IMPORT | `import/domain/workbook-parser.ts; import/application` | [тесты и фактический протокол](acceptance/v241/IMPORT.md) | PARTIAL |
+| §9, §11 VKR | `docs/vkr; docs/acceptance/v241; scripts/demo; tests/e2e` | [тесты и фактический протокол](acceptance/v241/VKR.md) | PARTIAL |
+| §2 постсделочный набор с выбранными исполнителями/сроками и связями Task | `deals/application`, `tasks/application` | [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [протокол](p1a-working-contour.md) | PASS |
+| §3.1 признаки: structured → rules → AI, отрицания и цитаты | `property-search/domain/evaluation.ts`, `ai/infrastructure/search-ai.ts` | [domain](../tests/unit/property-search/domain.test.ts), [search-ai](../tests/unit/ai/search-ai.test.ts), [скрапер](integrations/scraper.md) | PASS |
+| §3.2 история цены/новизны, сохранённые поиски и версия формы | `property-search/application/search-service.ts`, `listing-service.ts` | [integration](../tests/integration/property-search.test.ts), [протокол](integrations/property-search-application.md) | PASS |
+| §3.2 факты площадки отдельно от проверки сотрудника | `ExternalListingSnapshot`, `ExternalListingVerification`, `listing-service.ts` | [integration](../tests/integration/property-search.test.ts), [протокол](integrations/property-search-application.md) | PASS |
+| §4 семь источников, лимиты географии/пагинации, отсутствие обхода CAPTCHA | `property-search/infrastructure`, `vendor/real-estate-scrapper-2.1.0.tgz` | [adapter unit](../tests/unit/property-search/adapter.test.ts), [ограничения](integrations/scraper.md); live не подтверждён | PARTIAL |
+| §4–5 очищенный AI-ввод, sourceMethod, evidence, без слепого доверия описанию | `property-search/domain/evaluation.ts`, `ai/domain`, `ai/infrastructure` | [search-ai unit](../tests/unit/ai/search-ai.test.ts), [network](../tests/unit/property-search/network.test.ts), [AI-протокол](integrations/yandex-ai.md) | PASS |
+| §5 таймзона, отчётные границы, повторы | `shared/time.ts`, `calendar`, `reports`, `notifications` | [time unit](../tests/unit/time.test.ts), [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [calendar integration](../tests/integration/calendar-notifications.test.ts); итоговый браузерный прогон в процессе | PARTIAL |
+| §6 очередь/повтор файлов, обложка, EXIF, thumbnail и права | `properties/application/property-media-service.ts`, `documents` | [MEDIA](acceptance/v241/MEDIA.md), [restore](operations/docker-v241-verification.md) | PASS |
+| §7 исходные snapshot КП и новая редакция draft, явная отправка | `commercial-offers/application/offer-service.ts` | [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [протокол](p1a-working-contour.md) | PASS |
+| §7 нейтральный HTML/DOCX, реестры CSV и чек-лист | `commercial-offers/application`, `deals/application/checklist-service.ts`, `export/application` | [OFFER-DOC](acceptance/v241/OFFER-DOC.md); визуальная печать/PDF не приняты | PARTIAL |
+| §8 приватность, сроки без фиктивной длительности, отдельные встречи | `calendar/application`, `calendar/domain`, `notifications/application` | [calendar authorization](../tests/authorization/calendar-notifications.test.ts), [unit](../tests/unit/calendar-notifications.test.ts), [протокол](calendar-notifications.md); общий UI в процессе | PARTIAL |
+| §11 обновление документации и материалы защиты | README, IMPLEMENTATION_REPORT, docs/api, docs/vkr, docs/acceptance/v241 | [протокол испытаний](vkr/test-protocol.md), [методика экономики](vkr/economics.md); финальные числа/E2E/скриншоты заполняет координатор | PARTIAL |
+| §9 визуальные токены, 360 px, фокус, работа сотрудников | `src/ui`, `(crm)/layout`, новые страницы | Код; итоговые E2E/скриншоты в процессе, пользовательская проверка не оформлена | PARTIAL |
+| §11 Docker, миграция, backup/restore и worker restart | `compose.yaml`, `Dockerfile`, `scripts/restore-test.sh` | [Docker-протокол](operations/docker-v241-verification.md), вход/файл/галерея восстановлены | PASS |
+| §11 чистая установка именно v2.4.1 | bootstrap/deploy | Docker-протокол проверяет обновление существующего стека; отдельного clean-install протокола нет | PARTIAL |
+| §11 NFR-14 | Индексы, пагинация | Не измерено на согласованном оборудовании | PARTIAL |
+| §11 три одновременных пользователя | app/worker/db | Не измерено; три роли в последовательных тестах не являются нагрузкой | PARTIAL |
+| §11 Playwright и скриншоты | `tests/e2e`, `docs/vkr/screenshots` | В процессе, обновляет координатор | PARTIAL |
+| §11 повтор T01–T10 на финальном SHA | `docs/acceptance/T01.md`–`T10.md` | Модульные регрессии есть; финальная общая сверка в [протоколе](vkr/test-protocol.md) ещё не заполнена | PARTIAL |
+
+Координатор сообщил unit **301/301**, integration+authorization **152/152**; итоговые логи/SHA добавляются в [протокол](vkr/test-protocol.md). Модульные числа не суммируются. Live-площадки SCRAPER — PARTIAL: записанные синтетические ответы и запуск Chromium не доказывают живой сбор. Реальный Excel — PARTIAL по прямому требованию ТЗ. Материалы ВКР и расчёт измеренного/прогнозного эффекта — [docs/vkr](vkr).

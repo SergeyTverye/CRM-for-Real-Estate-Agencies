@@ -16,8 +16,7 @@ Core MVP реализован по инкрементам I0–I5 техниче
 в [`IMPLEMENTATION_REPORT.md`](IMPLEMENTATION_REPORT.md); трассировка требований —
 [`docs/requirements-traceability.md`](docs/requirements-traceability.md).
 
-Нормативный baseline: **ТЗ v1.6.1** — [`tz.md`](tz.md). При расхождении между `tz.md`, README,
-инструкциями для coding-агентов, комментариями в коде или инженерными предположениями приоритет имеет `tz.md`.
+Нормативный baseline: **ТЗ v1.6.1** — [`tz.md`](tz.md). Для расширения действует [ТЗ v2.4.1](ТЗ_CRM_итоговое_v2.4.1_проверено.md): в явно изменённых требованиях оно имеет приоритет. Разделы ниже про исходный core описывают baseline; новое состояние приведено в разделе «Что нового в v2.4.1».
 
 Документация: [инструкция администратора](docs/operations/admin-guide.md) ·
 [инструкция пользователя](docs/user-guide.md) · [модель данных](docs/data-model-mapping.md) ·
@@ -1150,3 +1149,60 @@ IMPLEMENTATION_REPORT.md
 Отдельная лицензия проекта пока не установлена.
 
 До появления файла `LICENSE` условия использования и распространения исходного кода определяются владельцем репозитория.
+
+## Что нового в v2.4.1
+
+Ветка feature/tz-v2.4.1 от ba7e6fa; документационный срез 05.11.2026. Добавлены контроль перспективных обращений, специальная задача возврата pause_return, поиск объектов и подборки, persistent AI-бюджет, галерея, редакции КП, чек-лист сделки, календарь и уведомления. Это расширение P1, поэтому прежнее отнесение любого AI/сбора к будущему scope в разделах baseline относится только к v1.6.1.
+
+Фактическая готовность: [трассировка](docs/requirements-traceability.md#v241), [13 сценариев приёмки](docs/acceptance/v241), [протокол ВКР](docs/vkr/test-protocol.md). Координатор сообщил unit 301/301 и integration+authorization 152/152; итоговый SHA/общие логи ещё заполняются. E2E и скриншоты в процессе. Живые площадки и реальный Excel — PARTIAL; NFR-14 и три одновременных пользователя не измерены. Docker build/миграция/restore с файлами подтверждены [отдельным протоколом](docs/operations/docker-v241-verification.md), чистая установка v2.4.1 этим прогоном не проверена.
+
+### Поиск объектов и ИИ
+
+`/property-search` открывается отдельно или из потребности с needId. Фильтры работают вручную; AI предлагает условия для проверки сотрудником. Закладка → кандидат потребности → явный перенос Property → отдельный факт предложения Match → КП. Нулевой успешный ответ площадки не запускает платный web-резерв; авто допустим только при полном техническом отказе, отдельных разрешениях и бюджете. Статусы источников: success/partial/blocked/timeout/unsupported_filter/error/disabled.
+
+Руководитель: `/settings/ai`, настройки и тарифы; API журнала `/api/v1/ai/usage`, личного остатка `/api/v1/ai/limits`. ENV ограничивает UI. По умолчанию AI, web и скрапер выключены. [Контракт поиска](docs/integrations/property-search-application.md), [скрапер и география](docs/integrations/scraper.md), [Yandex AI и живые проверки](docs/integrations/yandex-ai.md), [API](docs/api.md).
+
+### Календарь и уведомления
+
+`/calendar`: день/неделя/месяц/повестка; Task по сроку, Showing по времени, договорные даты и CalendarEvent. «Сегодня» объединяет действующие источники. Личная занятость другим сотрудникам показывается без названия. `/notifications` и колокольчик: чтение, переход, отложить без изменения срока задачи. Worker доставляет без открытого браузера, догоняет сроки после рестарта, на standby не пишет. Внешние каналы относятся к P3. [Подробности](docs/calendar-notifications.md).
+
+### Новые параметры окружения
+
+Имена и безопасные значения — в [.env.example](.env.example); источник runtime-валидации — `src/shared/config/env.ts`. Ключи задаются только локально на сервере.
+
+| Группа | Переменные / исходные значения |
+|---|---|
+| Часовой пояс | `APP_TIMEZONE=Asia/Novosibirsk`; UTC в БД сохраняется |
+| Доступ к AI | `AI_ENABLED=false`, `YANDEX_CLOUD_API_KEY` пустой, `YANDEX_CLOUD_FOLDER`, `YANDEX_CLOUD_MODEL=aliceai-llm-flash/latest`, `YANDEX_CLOUD_WEB_MODEL` пустой, `YANDEX_CLOUD_BASE_URL=https://ai.api.cloud.yandex.net/v1` |
+| Ограничения AI | `YANDEX_AI_STORE_RESPONSES=false`, `YANDEX_AI_MAX_OUTPUT_TOKENS=1800`, `YANDEX_AI_TIMEOUT_MS=30000`, `YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR=30`, `YANDEX_AI_MAX_MONTHLY_COST_RUB=1000` |
+| Web-поиск | `YANDEX_WEB_SEARCH_ENABLED=false`, `YANDEX_WEB_SEARCH_AUTO_FALLBACK=false`, `YANDEX_WEB_SEARCH_CONTEXT_SIZE=low`, `YANDEX_WEB_SEARCH_REGION=65`, `YANDEX_WEB_SEARCH_MAX_CALLS_PER_JOB=1`, `YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY=3`, `YANDEX_WEB_SEARCH_ALLOWED_DOMAINS` пустой |
+| Скрапер | `SCRAPER_ENABLED=false`, `SCRAPER_BROWSER_ENABLED=true`, `SCRAPER_CHROME_PATH=/usr/bin/chromium` в Docker, `SCRAPER_JOB_TIMEOUT_MS=180000`, `SCRAPER_MAX_CONCURRENT_JOBS=1`, `SCRAPER_RESULT_TTL_HOURS=24` |
+| Записанное демо | `SCRAPER_DEMO_FIXTURES=false`; true — только явно обозначенный тестовый режим |
+| Worker | `NOTIFICATIONS_INTERVAL_MS=15000`, существующий `INSTANCE_ROLE=active/standby` |
+
+Для Новосибирска часть площадок требует серверные location/sourceOptions; без них возвращается unsupported_filter, город не заменяется. Начальный потолок 1000 ₽ — предохранитель, не согласованный бюджет. Месячные/суточные лимиты и тарифы сохраняются в БД. Точные условия — в документации интеграций.
+
+### Команды расширения
+
+```bash
+npm run db:seed:demo                     # только подготовленная локальная crm_demo
+npx tsx src/worker/notifications-worker.ts # локальный worker
+# Штатный Docker entrypoint worker — ops/worker/start.mjs:
+docker compose up -d worker
+docker compose logs --tail=50 worker
+```
+
+Demo seed не применяет миграции и не меняет пароли; его ENV и проверка повторного запуска — [demo-data](docs/vkr/demo-data.md). Для интерактивного демо окружение процесса app задаётся отдельно.
+
+AI-smoke — отдельный opt-in скрипт, npm-команды ai-smoke нет. Примеры ниже выполняют платный синтетический запрос и не входят в обычные тесты. Сначала задайте проверенные тарифы `AI_SMOKE_INPUT_RUB_PER_MILLION`, `AI_SMOKE_OUTPUT_RUB_PER_MILLION`, `AI_SMOKE_TARIFF_EFFECTIVE_FROM`, ключ и разрешённый бюджет; для web дополнительно разрешите web ENV. См. [протокол](docs/integrations/yandex-ai.md).
+
+```bash
+npx tsx --env-file=.env scripts/ai-smoke.ts --live
+npx tsx --env-file=.env scripts/ai-smoke.ts --live --case=rent
+npx tsx --env-file=.env scripts/ai-smoke.ts --live --case=clarification
+npx tsx --env-file=.env scripts/ai-smoke.ts --live --web
+```
+
+Каждая команда — отдельный вызов без автоматического retry, process-local smoke ledger не заменяет production учёт. Агент документации эти команды не запускал.
+
+Материалы защиты: [архитектура](docs/vkr/architecture.md), [ER](docs/vkr/er-diagram.md), [AS-IS/TO-BE](docs/vkr/as-is-to-be.md), [демонстрация](docs/vkr/demo-guide.md), [испытания](docs/vkr/test-protocol.md), [экономика](docs/vkr/economics.md).

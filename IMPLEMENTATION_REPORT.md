@@ -144,3 +144,16 @@ ADR: 0001 модульный монолит, 0002 Prisma как data access, 000
 | СберДиск | профиль WebDAV + обязательный probe | адрес WebDAV/API и учётные данные, успешный probe |
 | Портативный узел на Windows | PowerShell-обёртки `scripts/*.ps1` | тестовый ПК с Docker Desktop/WSL2 |
 | Целевой сервер | Docker-развёртывание | ОС/CPU/RAM/диск и проверка производительности |
+
+## v2.4.1 — срез 05.11.2026
+
+Baseline выше описывает v1.6.1; в P1 v2.4.1 AI/скрапер уже реализованы. Ветка feature/tz-v2.4.1 от ba7e6fa; итоговый SHA: **заполняет координатор**.
+Объём: перспективные обращения, pause_return, поиск/закладки/подборки/перенос, persistent AI-бюджет, галерея, редакции КП, чек-лист, drill-down, календарь/уведомления.
+Архитектура: модульный монолит app + worker + db, одноразовые migrate/backup; SearchAi/AiGate, ScraperAdapter, StorageAdapter, серверный RBAC.
+Решения: отдельные candidate/Property/Match, snapshots КП/поиска, транзакционные бюджетные резервы, ENV-потолки, worker dedupKey; [журнал](docs/implementation-assumptions.md).
+Проверки координатора: unit **301/301**, integration+authorization **152/152**; итоговые общие логи/SHA: **заполняет координатор**.
+[Docker-протокол](docs/operations/docker-v241-verification.md): build/migrate/readiness, Chromium start/close, worker restart без дублей, restore БД/файлов с входом и скачиванием — PASS.
+[AI-протокол](docs/integrations/yandex-ai.md): 3 live parse completed и ранее completed web; были failed parse с неизвестным расходом, полная стоимость не объявляется.
+Ограничения: живые площадки и реальный Excel PARTIAL; чистая установка v2.4.1, NFR-14, три одновременных пользователя и хронометраж не подтверждены; PDF/визуальная печать не приняты.
+Результаты E2E и подлинные скриншоты: **в процессе; заполняет координатор**. P2/P3 не включены; общая готовность P1 пока PARTIAL.
+[Трассировка](docs/requirements-traceability.md#v241), [приёмка: 13 сценариев](docs/acceptance/v241), [ВКР](docs/vkr/test-protocol.md), [API](docs/api.md); экономика отделяет live-токены от прогнозов.

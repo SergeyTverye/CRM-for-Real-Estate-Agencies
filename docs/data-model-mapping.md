@@ -43,8 +43,10 @@
 - Сохраняется существующий AiRun для прежних AI-функций; новый AiUsageLog хранит
   типы parse/description/web_search, токены, расходы и связанные резервы.
   У AiSetting UUID PK и уникальный индекс на константу: более одной строки невозможно.
-  Для атомарного контроля бюджета сервис должен блокировать эту строку в транзакции,
-  учитывать открытые резервы и создавать резерв до внешнего запроса.
+  Атомарный контроль бюджета реализован транзакционной advisory lock `241005`
+  (READ COMMITTED), с учётом открытых резервов до внешнего запроса; см.
+  [протокол ledger](integrations/yandex-ai.md). Уникальный индекс singleton есть в SQL миграции;
+  ранняя фраза AI-протокола об отсутствии DB constraint относится к прежнему срезу.
 - Деньги и резервы — numeric(16,2); тариф за отдельный токен — numeric(16,6).
   Все новые моменты времени — timestamptz(3). Изменяемые формы имеют updatedAt.
 - JSONB разрешён здесь для фильтров, нормализованного публичного снимка,
@@ -68,7 +70,7 @@
 Нормативный источник — раздел 29 ТЗ v1.6.1. Исполняемая реализация — [`prisma/schema.prisma`](../prisma/schema.prisma)
 и миграция [`prisma/migrations/*_baseline_schema`](../prisma/migrations), которая создаёт всю baseline-схему с нуля (ТЗ 29.13).
 
-## Общие правила реализации
+## Общие правила baseline v1.6.1
 
 | Правило ТЗ | Реализация |
 |---|---|
@@ -139,7 +141,7 @@
 - LegalEntity 1:N Deal; nullable FK в Agreement, CommercialOffer, Document.
 - BackupRun M:N BackupRemote через BackupTargetRun; User 1:N AiRun.
 
-## Полный список моделей и внешних ключей (сгенерировано из schema.prisma)
+## Список моделей baseline и внешних ключей (исторический срез v1.6.1)
 
 | Prisma model | Таблица PostgreSQL | Внешние ключи |
 |---|---|---|
@@ -193,4 +195,14 @@
 | `AiRun` | `ai_runs` | requested_by_user_id, output_document_id |
 | `DictionaryItem` | `dictionary_items` | — |
 
-Все внешние ключи проиндексированы (`@@index`), дополнительно — индексы из ТЗ 29.12 и функциональные индексы `lower()` для поиска.
+FK покрываются отдельными или составными индексами; конкретные ограничения расширения заданы в SQL миграции. Дополнительно — индексы baseline ТЗ 29.12 и функциональные индексы `lower()` для поиска.
+
+## Сверка документации v2.4.1
+
+Сверено без изменения схемы/миграций и без generate/migrate: [schema.prisma](../prisma/schema.prisma), [миграция](../prisma/migrations/20261105120000_v241_extensions/migration.sql), [codebook](../src/shared/codebook.ts). Верхняя таблица содержит все новые модели, таблица baseline ниже не является полным перечнем расширенной схемы. ER ключевых связей — [ВКР](vkr/er-diagram.md).
+
+SearchSelection имеет необязательные propertyId/matchId; SavedSearch — необязательный needId и lastSuccessfulRunId. AiBudgetReservation.usageLogId nullable: физическая кардинальность допускает резерв без журнала, штатный ledger создаёт связанный журнал атомарно. AiTariff не связан FK с usage: версия тарифа фиксируется snapshot в result JSONB. Точные micro-RUB хранятся как строки; numeric(16,2) — консервативно округлённая денежная проекция, не основание суммировать точный бюджет через SQL SUM.
+
+У CalendarEvent ответственный — ownerUserId; связи client/need/property/deal nullable. Notification.sourceId — UUID без FK; доступ/приватность восстанавливаются из источника. NotificationPreference.userId уникален. DealChecklistItem уникален по dealId/code, documentId nullable и сервером проверяется принадлежность доступного файла сделке. Историю физических документов/задач сохраняют нормализованные связи.
+
+Подтверждения: [schema integration](../tests/integration/v241-schema.test.ts), [codebook unit](../tests/unit/codebook-migration.test.ts), [AI persistence](../tests/integration/ai-persistence.test.ts), [поиск](integrations/property-search-application.md), [галерея](../src/modules/properties/MEDIA.md). Наличие модели само по себе не означает приёмку UI или живой интеграции.

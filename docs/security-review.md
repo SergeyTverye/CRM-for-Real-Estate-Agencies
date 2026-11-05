@@ -85,3 +85,9 @@ UI изменён только для обработки нового nullable C
 - Логи повторных запусков: `tests/authorization/p0-retest.log`, `tests/authorization/p0-integration-retest.log` (локальные, не включаются в Git).
 
 Изменения схемы и пакеты не нужны. Prisma generate/migrate агентом безопасности не запускались. P0-исправления этой зоны подтверждены PostgreSQL-регрессиями. Новые подборки, уведомления и AI разрабатываются параллельно другими агентами; их будущие application API требуют отдельного SEC-прогона после интеграции. Общий release gate P0, включая backup/restore и прочие зоны, этим отчётом не закрывается.
+
+## Ссылки сверки v2.4.1 для общей приёмки
+
+Документационная сверка 05.11.2026 не заменяет независимый аудит и не меняет результаты P0 выше. Покрытие новых зон: [поиск/RBAC](integrations/property-search-application.md), [AI settings/limits и журнал](integrations/yandex-ai.md), [галерея и документы](../src/modules/properties/MEDIA.md), [календарь/уведомления](calendar-notifications.md), [Docker/restore](operations/docker-v241-verification.md). Ограничения сетевой изоляции Chromium и живых площадок сохранены в [протоколе скрапера](integrations/scraper.md).
+
+Итоговая строка [SEC](acceptance/v241/SEC.md) пока PARTIAL: P0 и отдельные authorization-прогоны подтверждены, общий финальный протокол после объединения всех зон заполняет координатор. Старые OK не переносятся автоматически на новые API. E2E/скриншоты — в процессе; [общий протокол](vkr/test-protocol.md).
