@@ -63,8 +63,17 @@ export function compareListings(a: DuplicateCandidate, b: DuplicateCandidate): P
     eq(`Признак: ${key}`, a.features?.[key], b.features?.[key]);
   // A missing house number is acceptable only with several independent structured corroborations.
   const incompleteAddress = !house && (!aa.house || !bb.house) && floor && purpose && price && a.area === b.area;
-  const probable = compatible && area && (house || incompleteAddress);
-  const score = !probable ? 0 : !house || (!floor && !unit) ? 35 : Math.min(90, 60 + (floor ? 15 : 0) + (unit ? 10 : 0) + (purpose ? 5 : 0));
+  // Floor/unit stated in only one listing is weak evidence: group only when the price corroborates (±5%, same unit).
+  const missing = (x: unknown) => x === null || x === undefined || x === "";
+  const asymmetric = missing(a.floor) !== missing(b.floor) || missing(aa.unit) !== missing(bb.unit);
+  const pa = Number(a.price), pb = Number(b.price);
+  const priceClose = !!a.price && !!b.price && !!a.priceUnit && a.priceUnit === b.priceUnit &&
+    Number.isFinite(pa) && Number.isFinite(pb) && pa > 0 && pb > 0 && Math.abs(pa - pb) <= Math.max(pa, pb) * 0.05;
+  if (asymmetric) add("Этаж/помещение", "unknown", priceClose
+    ? "Этаж или помещение указан только в одном объявлении; совпадение поддержано близкой ценой (±5%)"
+    : "Этаж или помещение указан только в одном объявлении; без подтверждения ценой группа не создаётся");
+  const probable = compatible && area && (house || incompleteAddress) && (!asymmetric || priceClose);
+  const score = !probable ? 0 : asymmetric || !house || (!floor && !unit) ? 35 : Math.min(90, 60 + (floor ? 15 : 0) + (unit ? 10 : 0) + (purpose ? 5 : 0));
   add("Вывод", probable ? "matched" : "contradicted", probable ? "Вероятное совпадение; требуется решение сотрудника" : "Недостаточно оснований для общей группы");
   return { a: a.id, b: b.id, probable, score, features };
 }
