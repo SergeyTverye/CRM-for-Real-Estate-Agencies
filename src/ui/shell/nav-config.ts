@@ -26,6 +26,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/import", label: "Импорт", managerOnly: true },
   { href: "/operations", label: "Эксплуатация", managerOnly: true },
   { href: "/admin", label: "Администрирование", managerOnly: true },
+  { href: "/templates", label: "Шаблоны документов", managerOnly: true },
   { href: "/settings/ai", label: "Настройки ИИ", managerOnly: true },
 ];
 

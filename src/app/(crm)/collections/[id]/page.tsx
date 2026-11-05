@@ -1,3 +1,4 @@
+import { GenerateTemplateButton } from "@/modules/document-templates/presentation/generate-button";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
 import { getCollection } from "@/modules/collections/application/collection-service";
@@ -9,5 +10,5 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
   let card;
   try { card = await getCollection(actor, id); }
   catch (e) { if (e instanceof NotFoundError) notFound(); throw e; }
-  return <div><PageHeader title={card.name} back={{ href: "/collections", label: "Подборки" }} /><CollectionWorkspace card={JSON.parse(JSON.stringify(card))} /></div>;
+  return <div><PageHeader actions={<GenerateTemplateButton entityKind="collection" entityId={id} />} title={card.name} back={{ href: "/collections", label: "Подборки" }} /><CollectionWorkspace card={JSON.parse(JSON.stringify(card))} /></div>;
 }

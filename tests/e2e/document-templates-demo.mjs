@@ -1,0 +1,33 @@
+import { chromium, expect as baseExpect } from "@playwright/test";
+import { parse } from "dotenv";
+import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
+const baseURL = "http://localhost:3410", output = "D:/crm-review/templates";
+const env = parse(readFileSync(".env")); mkdirSync(output, { recursive: true });
+const expect = baseExpect.configure({ timeout: 90000 });
+const browser = await chromium.launch({ headless: true });
+const checks = [], errors = [];
+try {
+  const manager = await browser.newContext({ baseURL, viewport: { width: 1440, height: 1000 } });
+  const login = await manager.request.post("/api/v1/auth/login", { headers: { origin: baseURL }, data: { login: env.SEED_MANAGER_LOGIN ?? "manager", password: env.SEED_MANAGER_PASSWORD } });
+  expect(login.ok()).toBe(true);
+  const page = await manager.newPage(); page.setDefaultTimeout(90000); page.on("pageerror", e => errors.push(e.message));
+  await page.goto("/templates", { waitUntil: "domcontentloaded", timeout: 120000 });
+  await expect(page.getByRole("heading", { name: "Шаблоны документов", exact: true })).toBeVisible();
+  await expect(page.getByText("Проверка AT-15: markdown_docx", { exact: true })).toBeVisible();
+  await page.waitForFunction(() => Array.from(document.querySelectorAll("button")).filter(b => b.textContent === "Загрузить шаблон").some(b => Object.keys(b).some(k => k.startsWith("__reactProps"))));
+  await page.screenshot({ path: `${output}/templates-desktop.png`, fullPage: true }); checks.push("manager list and persisted four formats");
+  await page.getByRole("button", { name: "Загрузить шаблон", exact: true }).click(); await expect(page.getByLabel("YAML-манифест")).toBeVisible();
+  await page.screenshot({ path: `${output}/template-form.png`, fullPage: true }); await page.getByRole("button", { name: "Отменить изменения" }).click();
+  const clientPage = await manager.request.get("/api/v1/clients/pick"); const clients = await clientPage.json(); expect(clients.items.length).toBeGreaterThan(0);
+  await page.goto(`/clients/${clients.items[0].id}`, { waitUntil: "domcontentloaded", timeout: 120000 });
+  await page.waitForFunction(() => Array.from(document.querySelectorAll("button")).filter(b => b.textContent === "Сформировать по шаблону").some(b => Object.keys(b).some(k => k.startsWith("__reactProps"))));
+  await page.getByRole("button", { name: "Сформировать по шаблону", exact: true }).click(); await expect(page.getByRole("dialog")).toBeVisible();
+  const downloadEvent = page.waitForEvent("download"); await page.getByRole("button", { name: "Скачать предпросмотр", exact: true }).click(); const download = await downloadEvent; expect(download.suggestedFilename()).toBe("preview.docx");
+  await page.getByRole("button", { name: "Подтвердить и сохранить документ" }).click(); await expect(page.getByRole("link", { name: "Скачать сохранённый документ" })).toBeVisible();
+  await page.screenshot({ path: `${output}/template-generation.png`, fullPage: true }); checks.push("entity preview explicit confirmation and persisted document");
+  const realtor = await browser.newContext({ baseURL }); const relogin = await realtor.request.post("/api/v1/auth/login", { headers: { origin: baseURL }, data: { login: env.SEED_REALTOR1_LOGIN ?? "realtor1", password: env.SEED_REALTOR1_PASSWORD } }); expect(relogin.ok()).toBe(true);
+  const denied = await realtor.request.get("/api/v1/templates?management=true"); expect(denied.status()).toBe(403); const rpage = await realtor.newPage(); await rpage.goto("/templates"); await expect(rpage).toHaveURL(/\/forbidden/); checks.push("non-manager UI and management API denied");
+  expect(errors).toEqual([]);
+  writeFileSync(`${output}/browser-evidence.json`, JSON.stringify({ checks, errors, database: "crm_demo", timestamp: new Date().toISOString() }, null, 2));
+  console.log(`AT-15 browser PASS: ${checks.length} checks`);
+} finally { await browser.close(); }

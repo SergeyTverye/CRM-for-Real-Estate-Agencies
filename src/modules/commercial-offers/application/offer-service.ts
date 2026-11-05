@@ -1,6 +1,6 @@
 import { redactClientLink } from "@/modules/access/application/redact-client";
 import { z } from "zod";
-import { db, transaction, type DbOrTx } from "@/shared/db/client";
+import { db, transaction, type Tx, type DbOrTx } from "@/shared/db/client";
 import type { Prisma } from "@/generated/prisma/client";
 import { DomainError, ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import { assertRecordId, parseInput, skipTake, zCode, zExpectedUpdatedAt, zOptDateOnly, zOptMoney, zOptText, zPagination, zUuid } from "@/shared/validation";
@@ -67,11 +67,11 @@ async function assertLegalEntity(tx: DbOrTx, id: string | null | undefined) {
   if (!le?.isActive) throw new ValidationError(undefined, { legalEntityId: ["Юридическое лицо не найдено или неактивно"] });
 }
 
-export async function createOffer(actor: Actor, input: unknown): Promise<{ id: string }> {
+export async function createOffer(actor: Actor, input: unknown, existingTx?: Tx): Promise<{ id: string }> {
   const d = parseInput(createSchema, input);
   const ids = d.items.map((i) => i.propertyId);
   if (new Set(ids).size !== ids.length) throw new ValidationError(undefined, { items: ["Объект указан дважды"] });
-  return transaction(async (tx) => {
+  const work = async (tx: Tx) => {
     const need = await loadAccessibleNeed(tx, actor, d.clientNeedId);
     await assertLegalEntity(tx, d.legalEntityId);
     const offer = await tx.commercialOffer.create({
@@ -106,7 +106,8 @@ export async function createOffer(actor: Actor, input: unknown): Promise<{ id: s
       });
     }
     return offer;
-  });
+  };
+  return existingTx ? work(existingTx) : transaction(work);
 }
 
 async function loadOffer(tx: DbOrTx, actor: Actor, id: string) {

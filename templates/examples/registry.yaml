@@ -1,0 +1,18 @@
+schemaVersion: 1
+entityKind: client
+sources: [client, user]
+fields:
+  - path: client.displayName
+    label: Клиент
+    type: text
+    required: true
+  - path: user.displayName
+    label: Сотрудник
+    type: text
+columns:
+  - path: client.displayName
+    title: Клиент
+    width: 45
+  - path: user.displayName
+    title: Сотрудник
+    width: 35

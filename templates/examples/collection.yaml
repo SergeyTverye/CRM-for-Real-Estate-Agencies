@@ -1,0 +1,8 @@
+schemaVersion: 1
+entityKind: collection
+sources: [collection, properties, user]
+fields:
+  - {path: collection.name, label: Подборка, type: text, required: true}
+  - {path: properties.address, label: Адрес, type: text, required: true}
+  - {path: properties.area, label: Площадь, type: area}
+  - {path: properties.price, label: Цена, type: money}

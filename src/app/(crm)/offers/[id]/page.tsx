@@ -1,3 +1,4 @@
+import { GenerateTemplateButton } from "@/modules/document-templates/presentation/generate-button";
 import { OfferAiButtons } from "@/ui/domain/ai-p2-drafts";
 import { p2Available } from "@/modules/ai/application/p2-service";
 import { RevisionButton } from "./revision-button";
@@ -59,6 +60,7 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
         }
         actions={
           <>
+            <GenerateTemplateButton entityKind="offer" entityId={id} />
             <OfferAiButtons offerId={id} enabled={aiEnabled && draft && clientVisible} />
             <Link className="btn" href={`/offers/${id}/print`}>Предпросмотр / печать</Link>
             <PdfButton id={id} />

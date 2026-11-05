@@ -217,9 +217,9 @@ async function clientIdsOfNeeds(tx: Tx | typeof db, needIds: string[]): Promise<
   return [...new Set(needs.map((n) => n.clientId))];
 }
 
-export async function createTask(actor: Actor, input: unknown): Promise<{ id: string }> {
+export async function createTask(actor: Actor, input: unknown, existingTx?: Tx): Promise<{ id: string }> {
   const data = parseInput(taskInputSchema, input);
-  return transaction(async (tx) => {
+  const work = async (tx: Tx) => {
     await assertTaskLinksAccessible(tx, actor, data.links);
     const responsibleUserId = await resolveTaskResponsible(tx, actor, data.responsibleUserId, actor.userId);
     const links: TaskLinks = { ...data.links };
@@ -229,7 +229,8 @@ export async function createTask(actor: Actor, input: unknown): Promise<{ id: st
       await writeAudit(tx, { actorUserId: actor.userId, action: "task.postdeal_created", entityType: "Task", entityId: task.id, after: { taskSubtypeCode: data.taskSubtypeCode, responsibleUserId } });
     }
     return task;
-  });
+  };
+  return existingTx ? work(existingTx) : transaction(work);
 }
 
 async function loadOwnTask(tx: Tx, actor: Actor, taskId: string) {

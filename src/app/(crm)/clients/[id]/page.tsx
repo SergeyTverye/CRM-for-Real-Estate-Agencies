@@ -1,3 +1,4 @@
+import { GenerateTemplateButton } from "@/modules/document-templates/presentation/generate-button";
 import { ClientTimelinePanel } from "./timeline-panel";
 import { searchParamsToObject } from "@/shared/validation";
 import { CallNoteButton } from "@/ui/domain/ai-p2-drafts";
@@ -59,6 +60,7 @@ export default async function ClientCardPage({ params, searchParams }: { params:
         }
         actions={
           <>
+            <GenerateTemplateButton entityKind="client" entityId={id} />
             <CallNoteButton timeZone={zone} context={{kind:"client",id}} enabled={aiEnabled} />
             <Link className="btn btn-primary" href={`/needs/new?clientId=${id}`}>
               + Потребность

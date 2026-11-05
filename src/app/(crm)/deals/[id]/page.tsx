@@ -1,3 +1,4 @@
+import { GenerateTemplateButton } from "@/modules/document-templates/presentation/generate-button";
 import { ChecklistPanel } from "./checklist-panel";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -82,6 +83,7 @@ export default async function DealCardPage({ params }: { params: Promise<{ id: s
         }
         actions={
           <>
+            <GenerateTemplateButton entityKind="deal" entityId={id} />
             <Link className="btn" href={`/agreements/new?dealId=${id}`}>
               + Договор
             </Link>
