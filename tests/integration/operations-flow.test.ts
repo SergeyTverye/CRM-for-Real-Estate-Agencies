@@ -82,13 +82,18 @@ describe("T04: подбор → показ → результат → этап �
     await expect(
       recordShowingResult(u.realtor1, sh.id, { expectedUpdatedAt: await showingVersion(sh.id), status: "completed", resultCode: "rejected", needChange: { status: "closed" } }),
     ).rejects.toBeInstanceOf(ValidationError);
+    await expect(
+      recordShowingResult(u.realtor1, sh.id, { expectedUpdatedAt: await showingVersion(sh.id), status: "completed", resultCode: "rejected", needChange: { status: "closed", stopReasonCode: "no_match" } }),
+    ).rejects.toBeInstanceOf(ValidationError);
+    expect((await db.showing.findUniqueOrThrow({ where: { id: sh.id } })).status).toBe("planned");
+    expect((await db.clientNeed.findUniqueOrThrow({ where: { id: needId } })).status).toBe("active");
     await recordShowingResult(u.realtor1, sh.id, {
       expectedUpdatedAt: await showingVersion(sh.id),
       status: "completed",
       resultCode: "rejected",
-      needChange: { status: "closed", stopReasonCode: "no_match" },
+      needChange: { status: "closed", stopReasonCode: "client_refused" },
     });
-    expect((await db.clientNeed.findUniqueOrThrow({ where: { id: needId } })).status).toBe("closed");
+    expect(await db.clientNeed.findUniqueOrThrow({ where: { id: needId } })).toMatchObject({ status: "closed", stopReasonCode: "client_refused", closedAt: expect.any(Date) });
   });
 });
 

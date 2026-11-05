@@ -1,5 +1,6 @@
 import { beforeEach, expect, it } from "vitest";
 import { strFromU8, unzipSync } from "fflate";
+import sharp from "sharp";
 import { db, makeClient, makeNeed, makeProperty, resetDatabase, seedBase, type TestUsers } from "../helpers/fixtures";
 import { getNeedCard, listNeeds } from "@/modules/needs/application/need-queries";
 import { getRequestCard, listRequests } from "@/modules/requests/application/request-queries";
@@ -144,22 +145,24 @@ it("foreign deal, agreement, showing, offer and task IDs remain inaccessible", a
 });
 
 it.each(["photo", "agreement"] as const)("protected %s file cannot be opened via an additional public property link", async documentTypeCode => {
-  const doc = await storeDocument(u.realtor1.userId, { data: Buffer.from("private synthetic file"), originalName: `${SECRET}.png`, mimeType: "image/png", documentTypeCode, link: { kind: "client", id: clientId }, legalEntityId: null });
+  const data = await sharp({ create: { width: 2, height: 2, channels: 3, background: "#336699" } }).png().toBuffer();
+  const doc = await storeDocument(u.realtor1.userId, { data, originalName: `${SECRET}.png`, mimeType: "image/png", documentTypeCode, link: { kind: "client", id: clientId }, legalEntityId: null });
   await db.documentProperty.create({ data: { documentId: doc.id, propertyId } });
   expect(await listDocumentsFor(u.realtor2, { kind: "property", id: propertyId })).toEqual([]);
   await expect(openDocumentForDownload(u.realtor2, doc.id)).rejects.toMatchObject({ code: "NOT_FOUND" });
   const response = await downloadRoute(apiRequest("GET", `/api/v1/documents/${doc.id}/download`, { cookie: await sessionCookieFor(u.realtor2) }), routeParams({ id: doc.id }));
   expect(response.status).toBe(404);
   const opened = await openDocumentForDownload(u.manager, doc.id);
-  let contents = "";
-  for await (const chunk of opened.stream) contents += chunk.toString();
-  expect(contents).toBe("private synthetic file");
+  const chunks: Buffer[] = [];
+  for await (const chunk of opened.stream) chunks.push(Buffer.from(chunk));
+  expect(await sharp(Buffer.concat(chunks)).raw().toBuffer()).toEqual(await sharp(data).raw().toBuffer());
 });
 
 it("property-only files respect photo classification, grant and immediate revocation", async () => {
   const foreignProperty = (await makeProperty(u.realtor1)).id;
-  const photo = await storeDocument(u.realtor1.userId, { data: Buffer.from("photo"), originalName: "photo.png", mimeType: "image/png", documentTypeCode: "photo", link: { kind: "property", id: foreignProperty }, legalEntityId: null });
-  const scan = await storeDocument(u.realtor1.userId, { data: Buffer.from("scan"), originalName: "scan.png", mimeType: "image/png", documentTypeCode: "agreement", link: { kind: "property", id: foreignProperty }, legalEntityId: null });
+  const data = await sharp({ create: { width: 2, height: 2, channels: 3, background: "#336699" } }).png().toBuffer();
+  const photo = await storeDocument(u.realtor1.userId, { data, originalName: "photo.png", mimeType: "image/png", documentTypeCode: "photo", link: { kind: "property", id: foreignProperty }, legalEntityId: null });
+  const scan = await storeDocument(u.realtor1.userId, { data, originalName: "scan.png", mimeType: "image/png", documentTypeCode: "agreement", link: { kind: "property", id: foreignProperty }, legalEntityId: null });
   (await openDocumentForDownload(u.realtor2, photo.id)).stream.destroy();
   await expect(openDocumentForDownload(u.realtor2, scan.id)).rejects.toMatchObject({ code: "NOT_FOUND" });
   const grant = await db.propertyContactGrant.create({ data: { propertyId: foreignProperty, userId: u.realtor2.userId, grantedBy: u.manager.userId } });

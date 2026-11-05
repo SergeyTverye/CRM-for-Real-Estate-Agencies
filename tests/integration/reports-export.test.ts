@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { unzipSync, strFromU8 } from "fflate";
 import { apiRequest, db, inDays, makeClient, makeNeed, makeProperty, resetDatabase, routeParams, seedBase, sessionCookieFor, type TestUsers } from "../helpers/fixtures";
-import { getManagerReport, countReactivatedClients } from "@/modules/reports/application/report-service";
+import { getManagerReport, getReportDetail, countReactivatedClients } from "@/modules/reports/application/report-service";
 import { exportData } from "@/modules/export/application/export-service";
 import { registerRequest } from "@/modules/requests/application/request-service";
 import { scheduleShowing, recordShowingResult } from "@/modules/showings/application/showing-service";
@@ -27,6 +27,7 @@ describe("T09: управленческий отчёт по контрольно
         occurredAt: new Date().toISOString(),
         channelCode: "phone",
         sourceCode,
+        summary: need ? "Клиент заинтересован в подборе помещения" : "Клиент отказался от дальнейшего подбора",
         client: { mode: "new", client: { displayName: `Клиент ${sourceCode}${Math.random()}`, contacts: [{ contactType: "phone", value: `+7 901 ${Math.floor(Math.random() * 9000000 + 1000000)}` }] } },
         outcome: need
           ? { resultCode: "new_need", need: { operationType: "rent", propertyType: "commercial" }, nextAction: { title: "Позвонить", dueAt: inDays(-1), taskType: "call_or_contact" } }
@@ -57,8 +58,14 @@ describe("T09: управленческий отчёт по контрольно
     expect(kpi.overdue).toBe(await db.task.count({ where: { status: { in: ["planned", "in_progress"] }, dueAt: { lt: new Date() } } }));
     expect(kpi.overdue).toBe(2);
     expect(rep.needs.nextActionShare).toBe(100);
-    // drill-down ссылки ведут на отфильтрованные исходные списки
-    expect(rep.kpis.find((k) => k.key === "newRequests")?.href).toContain(`/requests?from=${plusDays(-1)}&to=${plusDays(2)}`);
+    // Детализация использует тот же период и ведёт к исходным обращениям.
+    const detailUrl = new URL(rep.kpis.find((k) => k.key === "newRequests")!.href!, "http://localhost");
+    expect(detailUrl.pathname).toBe("/reports/detail");
+    expect(Object.fromEntries(detailUrl.searchParams)).toEqual({ from: plusDays(-1), to: plusDays(2), metric: "newRequests" });
+    const detail = await getReportDetail(u.manager, detailUrl.searchParams.get("metric")!, Object.fromEntries(detailUrl.searchParams));
+    expect(detail.total).toBe(kpi.newRequests);
+    expect(detail.rows.map((r) => r.id).sort()).toEqual((await db.leadRequest.findMany()).map((r) => r.id).sort());
+    expect(detail.rows.every((r) => r.href === `/requests/${r.id}`)).toBe(true);
     const realtor1Activity = rep.activity.find((a) => a.user.id === u.realtor1.userId)!;
     expect(realtor1Activity.requests).toBe(3);
     expect(realtor1Activity.showingsCompleted).toBe(1);
