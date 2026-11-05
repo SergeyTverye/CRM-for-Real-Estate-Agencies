@@ -24,6 +24,20 @@ describe("P2 draft boundaries",()=>{
     expect(sanitizeFactContacts("Красный Проспект, 25; улица Ивана Петрова; 80 м²; 100000 ₽; +7 900 123-45-67"))
       .toBe("Красный Проспект, 25; улица Ивана Петрова; 80 м²; 100000 ₽; [PHONE]");
   });
+  it.each(["ул.", "улица", "пр.", "пр-т", "проспект", "пер.", "переулок", "ш.", "шоссе", "пл.", "площадь", "б-р", "бульвар", "наб.", "набережная", "мкр", "район", "р-н"])("preserves a toponym after %s while removing identities outside the address", marker => {
+    const address = `${marker} Ленина 10`;
+    const safe = sanitizeFreeNote(`${address}; Иван Петров просит офис; +7 (900) 123-45-67`, ["Иван Петров", "Ленина"]);
+    expect(safe).toContain(address);
+    expect(safe).not.toMatch(/Иван|Петров|900/iu);
+  });
+  it.each(["Красный Проспект, 25", "улица Ивана Петрова, 10", "ул. Октябрьская Магистраль, 3", "ул. ленина 10", "пр-т Карла Маркса 25/1"])("preserves address construction in a free note: %s", address => {
+    expect(sanitizeFreeNote(`${address}; контакт назар дубровский`, ["Иван Петров"])).toBe(`${address}; [PERSON]`);
+  });
+  it("does not treat a personal name with a number as an address or exempt neighbouring private details", () => {
+    const safe = sanitizeFreeNote("Иван Петров, 25; ул. Ленина 10; паспорт 1234 567890; test@example.com");
+    expect(safe).toContain("ул. Ленина 10");
+    expect(safe).not.toMatch(/Иван|Петров|1234|567890|example/iu);
+  });
   it.each(["80–125 м²", "80 — 125", "80 - 125", "от 80 м² до 125", "от 80,5 м² до 125"])("rejects synthetic range: %s", text => {
     expect(() => checkOfferNumbers(text, { areas: [80, 80.5, 125] })).toThrow("AI_UNSUPPORTED_NUMBERS");
   });

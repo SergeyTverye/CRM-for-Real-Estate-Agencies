@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import evidence from "../../../docs/vkr/live-ai-evidence.json";
 import { isMarketCatalogue, listingUrlRejection } from "@/modules/ai/domain/listing-url";
 describe("web results must identify a listing", () => {
   it.each([
@@ -18,7 +19,7 @@ describe("web results must identify a listing", () => {
 
 
 describe("strict card allowlist", () => {
-  it.each(["sitemap", "search", "catalog", "map", "list"])("rejects navigation segments on every platform: %s", segment => {
+  it.each(["sitemap", "search", "catalog", "map", "list", "nedorogo", "arenda-sklada-nedorogo", "sitemap.xml"])("rejects navigation segments on every platform: %s", segment => {
     for (const host of ["onrealt.ru", "cian.ru", "avito.ru", "domclick.ru", "realty.yandex.ru", "mirkvartir.ru", "youla.ru"]) {
       expect(listingUrlRejection(`https://${host}/novosibirsk/${segment}/12345`)).not.toBeNull();
     }
@@ -28,6 +29,24 @@ describe("strict card allowlist", () => {
     expect(listingUrlRejection(`https://onrealt.ru/novosibirsk/kypit-ofis/12345${suffix}`)).not.toBeNull();
   });
   it("retains known card tracking parameters", () => expect(listingUrlRejection("https://onrealt.ru/novosibirsk/snyat-sklad/12345?utm_source=crm")).toBeNull());
+  it.each(["arenda-sklada", "arenda-ofisa", "arenda-pomeshcheniya", "kypit-sklad", "snyat-torgovuyu-ploshchad", "arenda-proizvodstva"])("accepts OnRealt card slugs without a grammatical allowlist: %s", slug => {
+    expect(listingUrlRejection(`https://onrealt.ru/novosibirsk/${slug}/86529013`)).toBeNull();
+  });
+  const liveUrls = new Set<string>();
+  function collectListings(value: unknown) {
+    if (!value || typeof value !== "object") return;
+    if ("source" in value && "url" in value && typeof value.url === "string" && ["onrealt", "yandex", "mirkvartir"].includes(String(value.source))) liveUrls.add(value.url);
+    for (const child of Object.values(value)) collectListings(child);
+  }
+  collectListings(evidence);
+  it("covers all three live evidence sources", () => {
+    for (const host of ["onrealt.ru", "realty.yandex.ru", "mirkvartir.ru"]) expect([...liveUrls].some(url => new URL(url).hostname.endsWith(host))).toBe(true);
+  });
+  // Evidence also retains one historical false positive: the nedorogo catalogue.
+  // Keep it as a negative regression rather than treating it as a listing.
+  const serviceUrls = [...liveUrls].filter(url => /(?:^|[/-])nedorogo(?:[/-]|$)/u.test(new URL(url).pathname));
+  it.each(serviceUrls)("rejects a service URL retained in evidence %s", url => expect(listingUrlRejection(url)).toBe("CATALOGUE_NOT_LISTING"));
+  it.each([...liveUrls].filter(url => !serviceUrls.includes(url)))("accepts the saved live listing %s", url => expect(listingUrlRejection(url)).toBeNull());
   it.each([
     "https://cian.ru/sale/commercial/123456789/",
     "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/ofis_123456789",

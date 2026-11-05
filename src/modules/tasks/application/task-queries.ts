@@ -80,7 +80,7 @@ function taskIncludeFor(actor: Actor) {
   } satisfies Prisma.TaskInclude;
 }
 
-export function toTaskView(actor: Actor, t: TaskRow, now = new Date()): TaskView {
+export function toTaskView(actor: Actor, t: TaskRow, now = getTodayReferenceTime()): TaskView {
   const links: TaskLinkView[] = [];
   for (const { client } of t.clientLinks) {
     const ok = canSeeClient(actor, client);
@@ -154,7 +154,7 @@ export type TaskFilters = z.input<typeof taskFiltersSchema>;
 
 export async function listTasks(actor: Actor, rawFilters: unknown): Promise<Page<TaskView>> {
   const f = parseInput(taskFiltersSchema, rawFilters);
-  const now = new Date();
+  const now = getTodayReferenceTime();
   const { startTomorrow, weekEnd } = dayBounds(now);
   const and: Prisma.TaskWhereInput[] = [taskScope(actor)];
   const managerAll = isManager(actor) && (f.view === "all" || f.responsibleUserId);

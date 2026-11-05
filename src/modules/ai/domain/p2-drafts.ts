@@ -37,13 +37,25 @@ export function sanitizeCallNote(text: string, names: string[] = []): string {
     .replace(/(?:телефон|тел\.?|мобильный)\s*[:—-]?\s*\+?(?:\d[\s().-]*){6,15}/giu, "[PHONE]")
     .replace(/(?:паспорт|регистраци[яи]|кем выдан|дата рождения)[^\n;]*/giu, "[REDACTED]");
 }
-/** Free note has no trusted public-name vocabulary. Unknown capitalized tokens are
- * removed conservatively, even at the cost of asking for a geographic clarification. */
+/** Only bounded address constructions are exempt from personal-name redaction. */
 export function sanitizeFreeNote(text: string, names: string[] = []): string {
+  const addresses: string[] = [];
+  const marker = "(?:ул\\.?|улица|пр\\.?|пр-т|проспект|пер\\.?|переулок|ш\\.?|шоссе|пл\\.?|площадь|б-р|бульвар|наб\\.?|набережная|мкр\\.?|район|р-н)";
+  const word = "(?:[А-ЯЁ][а-яё]+(?:-[А-ЯЁа-яё]+)*|[0-9]+-[а-яё]+)";
+  const house = "(?:\\s*,?\\s+(?:д\\.?\\s*)?\\d{1,5}(?:[а-яё]|/\\d{1,4})?(?![\\p{L}\\d]))?";
+  // Prefix names require a street marker (Красный Проспект, 25). A personal
+  // name followed by a number alone is not sufficient evidence of an address.
+  const addressPattern = new RegExp(`(?<![\\p{L}\\d])(?:${word}(?:\\s+${word}){0,2}\\s+(?:Проспект|Бульвар|Шоссе|Набережная|Площадь|проспект|бульвар|шоссе|набережная|площадь)|${marker}\\s+(?:${word}(?:\\s+(?:имени\\s+)?${word}){0,3}|[а-яё]+(?:-[а-яё]+)*))${house}`, "gu");
+  const protectedText = text.normalize("NFC").replace(addressPattern, address => {
+    const token = `\uE000${String.fromCodePoint(0xE100 + addresses.length)}\uE001`;
+    addresses.push(address);
+    return token;
+  });
   const safeWords = new Set("новосибирск новосибирске москва москве центральный центральном советский советском ленинский ленинском кировский кировском октябрьский октябрьском дзержинский дзержинском железнодорожный железнодорожном заельцовский заельцовском первомайский первомайском калининский калининском нужен нужна нужно ищет ищем офис склад помещение торговля аренда арендовать купить продажа площадь бюджет район районы только без любой отдельный вход завтра сегодня послезавтра уточнить позвонить требуется до от после для и но неизвестно рублей цена".split(" "));
-  return sanitizeCallNote(text,names)
+  const safe = sanitizeCallNote(protectedText,names)
     .replace(/[А-ЯЁA-Z][а-яёa-z]+/gu, word => safeWords.has(word.toLocaleLowerCase("ru")) ? word : "[PERSON]")
     .replace(/(?<!\p{L})\p{Lu}{2,}(?!\p{L})/gu, word => safeWords.has(word.toLocaleLowerCase("ru")) || ["PERSON","EMAIL","PHONE","REDACTED","ПСН"].includes(word) ? word : "[PERSON]");
+  return safe.replace(/\uE000([\s\S])\uE001/gu, (token, index: string) => addresses[index.codePointAt(0)! - 0xE100] ?? token);
 }
 export const taskDraftSchema = z.object({
   taskType: z.enum(["call_or_contact", "other"]),

@@ -1,6 +1,13 @@
 import { execFileSync } from "node:child_process";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { login } from "./helpers";
+
+async function listingMenu(card: Locator) {
+  const menu = card.locator("details").filter({ has: card.page().locator("summary").filter({ hasText: /^Ещё$/ }) });
+  if (!await menu.evaluate(element => element.hasAttribute("open"))) await menu.locator("summary").click();
+  await expect(menu).toHaveAttribute("open", "");
+  return menu;
+}
 
 async function searchManually(page: Page, scenario = "success") {
   await page.getByLabel("Город", { exact: true }).fill("Новосибирск");
@@ -52,26 +59,30 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   await expect(page).toHaveURL(new RegExp(`/property-search\\?needId=${lead.needId}`));
   await expect(page.getByText("ИИ отключён · ручные фильтры доступны")).toBeVisible();
   await searchManually(page);
-  await page.getByRole("button", { name: "В подборку клиента", exact: true }).first().click();
+  // Earlier gallery tests may have transferred the first result. Keep this whole
+  // flow on one untransferred listing, identified by its public source URL.
+  const untransferred = page.locator("section").filter({ has: page.locator("button").filter({ hasText: /^В каталог CRM$/ }) }).first();
+  const listingUrl = await untransferred.locator('a[target="_blank"]').first().getAttribute("href");
+  expect(listingUrl).toBeTruthy();
+  const listingCard = page.locator("section").filter({ has: page.locator(`a[href=${JSON.stringify(listingUrl)}]`) });
+  await listingCard.getByRole("button", { name: "В подборку клиента", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
   await expect(page.getByText("Изменения сохранены", { exact: true })).toBeVisible();
-  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
-  await page.getByRole("button", { name: "В каталог CRM", exact: true }).first().click();
+  await (await listingMenu(listingCard)).getByRole("button", { name: "В каталог CRM", exact: true }).click();
   await page.getByRole("dialog").getByLabel(/Я проверил первоисточник/).check();
   await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
   await expect(page.getByText("Объект сохранён в каталоге CRM", { exact: true })).toBeVisible();
-  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
-  const propertyHref = await page.getByRole("link", { name: "Открыть объект CRM", exact: true }).first().getAttribute("href");
+  const propertyHref = await (await listingMenu(listingCard)).getByRole("link", { name: "Открыть объект CRM", exact: true }).getAttribute("href");
   const propertyId = propertyHref!.split("/").pop()!;
-  await page.getByRole("button", { name: "Предложить клиенту", exact: true }).first().click();
+  await (await listingMenu(listingCard)).getByRole("button", { name: "Предложить клиенту", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
   await expect(page.getByText("Изменения сохранены", { exact: true })).toBeVisible();
-  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
+  const offerMenu = await listingMenu(listingCard);
   const offered = page.waitForResponse(r => /\/listings\/[^/]+\/offer$/.test(r.url()));
-  await page.getByRole("button", { name: "В КП", exact: true }).first().click();
+  await offerMenu.getByRole("button", { name: "В КП", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
   const offerResponse = await offered;
   expect(offerResponse.ok(), await offerResponse.text()).toBeTruthy();
@@ -172,6 +183,9 @@ test("v2.4.1: частичный отказ площадки сохраняет 
   await searchManually(page, "partial");
   await expect(page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..").locator("..")).toContainText("Заблокирован");
   await expect(page.locator("strong").filter({ hasText: /^Циан$/ }).locator("..").locator("..")).toContainText("Успешно");
-  await expect(page.getByText("Записанный ответ: HTTP 429").first()).toBeVisible();
+  const reason = page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..").locator("..").locator("p[title]");
+  await expect(reason).toBeVisible();
+  await expect(reason).toContainText("Доступ ограничен площадкой");
+  await expect(reason).toHaveAttribute("title", /HTTP 429/);
   await expect(page.getByRole("button", { name: "В закладки", exact: true }).first()).toBeVisible();
 });
