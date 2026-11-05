@@ -13,6 +13,17 @@ const manager = async (): Promise<Actor> => {
 afterAll(() => db.$disconnect());
 
 describe("crm_demo synthetic demonstration acceptance (no reset)", () => {
+  it("provides labelled synthetic issuer requisites and a real PNG logo without duplicates", async () => {
+    const entities = await db.legalEntity.findMany({ where: { isActive: true }, include: { logoDocument: true } });
+    expect(entities.length).toBeGreaterThan(0);
+    for (const entity of entities) {
+      expect(entity.requisites).toMatch(/ДЕМО.*вымышленные/);
+      for (const part of ["ИНН", "ОГРН", "Адрес:", "+7 900 000-00-", "example.ru"]) expect(entity.requisites).toContain(part);
+      expect(entity.logoDocument).toMatchObject({ id: demoId(`issuer-logo:${entity.id}`), originalName: "demo-logo.png", mimeType: "image/png" });
+      expect(entity.logoDocument!.fileSize).toBeGreaterThan(100n);
+    }
+    expect(await db.document.count({ where: { originalName: "demo-logo.png" } })).toBe(entities.length);
+  });
   it("uses synthetic contacts and both realtors; preserves active and paused need invariants", async () => {
     const clients = await db.client.findMany({ where: { notes: { contains: marker } }, include: { contacts: true, needs: true, responsible: true } });
     expect(clients).toHaveLength(25);
@@ -37,7 +48,7 @@ describe("crm_demo synthetic demonstration acceptance (no reset)", () => {
       expect(photos.filter(l => l.isCover)).toHaveLength(1);
       expect(photos.every(l => l.caption?.includes(marker) && l.document.thumbnailStorageKey)).toBe(true);
     }
-    const linked = properties.flatMap(p => p.documentLinks.filter(l => l.kind === "document").map(l => ({ ...l, propertyId: p.id })));
+    const linked = properties.flatMap(p => p.documentLinks.filter(l => l.kind === "document" && l.document.originalName !== "demo-logo.png").map(l => ({ ...l, propertyId: p.id })));
     expect(linked).toHaveLength(8);
     const photo = properties[0]!.documentLinks.find(l => l.kind === "photo")!;
     for (const link of [...linked, { ...photo, propertyId: properties[0]!.id }]) {

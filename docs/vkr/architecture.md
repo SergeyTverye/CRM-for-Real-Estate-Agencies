@@ -64,4 +64,4 @@ sequenceDiagram
 
 Бюджет резервируется до платного вызова. ENV ограничивает разрешения UI. Файлы вне public; PostgreSQL содержит метаданные. Backup восстанавливает БД и файлы совместно. Напоминания создаёт только active instance.
 
-Источники: [поиск](../integrations/property-search-application.md), [AI](../integrations/yandex-ai.md), [календарь](../calendar-notifications.md), [Docker/restore](../operations/docker-v241-verification.md), [compose.yaml](../../compose.yaml). Живой сбор семи площадок не подтверждён; smoke проверяет запуск и закрытие Chromium. Полная egress/sandbox-изоляция браузера этим протоколом не подтверждена.
+Источники: [поиск](../integrations/property-search-application.md), [AI](../integrations/yandex-ai.md), [календарь](../calendar-notifications.md), [Docker/restore](../operations/docker-v241-verification.md), [compose.yaml](../../compose.yaml). [Живой сбор этапа 2](live-ai-trials.md) подтвердил частичную выдачу; доступность всех семи площадок не подтверждена: Циан CAPTCHA, Авито/Домклик blocked. Старый container smoke проверял запуск и закрытие Chromium. Полная egress/sandbox-изоляция браузера этим протоколом не подтверждена.

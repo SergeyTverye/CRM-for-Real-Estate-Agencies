@@ -31,7 +31,7 @@
 
 ## Финальная полировка КП и пересъёмка LIVE
 
-Порт 3390, NEXT_DIST_DIR=.next-shots, webpack dev, devIndicators=false уже установлен в общей конфигурации другим агентом. Viewport этих кадров 1440×1000, ru-RU, Asia/Novosibirsk. DEMO 10/10b/10c/10d пересняты; 10c и 10d — настоящий PDF через html-pdf, страницы 1 и 2. Все четыре страницы PDF и четыре страницы DOCX отрендерены и просмотрены. DEMO LegalEntity не содержит логотипа/реквизитов/телефона; в старом снимке назначения нет — сведения не выдумывались. При заполнении LegalEntity логотип и реквизиты выводятся; это покрыто integration-тестом.
+Порт 3390, NEXT_DIST_DIR=.next-shots, webpack dev, devIndicators=false уже установлен в общей конфигурации другим агентом. Viewport этих кадров 1440×1000, ru-RU, Asia/Novosibirsk. DEMO 10/10b/10c/10d пересняты; 10c и 10d — настоящий PDF через html-pdf, страницы 1 и 2. Все четыре страницы PDF и четыре страницы DOCX отрендерены и просмотрены. Первоначальный прогон был без реквизитов и назначения; это исправлено при пересъёмке на порту 3395, см. ниже. При заполнении LegalEntity логотип и реквизиты выводятся; это покрыто integration-тестом.
 
 [10d-offer-pdf-page2.png](../screenshots/vkr/10d-offer-pdf-page2.png): DEMO, A4 PDF страница 2, кадр 2026-11-05T13:38:16.297Z.
 
@@ -69,3 +69,54 @@
 | [36-preserved-after-restart.png](../screenshots/vkr/live-ai/36-preserved-after-restart.png) | LIVE saved replay; AI_ENABLED=false; no new calls | bce2a997-e54a-4ac6-9c8b-564f5e9845ac · 2026-11-05T12:38:05.494Z | 2026-11-05T13:44:58.032Z |
 
 Удалены повторные кадры; ссылки-замены: `24-repeat-confirm.png` → `23-repeat-confirm.png`; `31-web-cards.png` → `31-web-corrected.png`; `32-cian-status.png` → `31-web-corrected.png`; `21-manual-web-browser.png` → `31-web-corrected.png`; `07-web-fallback-live.png` → `34-auto-web-cards.png`; `28-fallback-statuses.png` → `34-auto-web-cards.png`; `22-preserved-bookmarks.png` → `08-bookmarks.png`. В manifest и SHA256SUMS записаны только существующие PNG; дата неизвестных исходных кадров не выдумывается. Каждый переснятый кадр просмотрен.
+
+## Финальные исправления отображения (порт 3395)
+
+Режим: crm_demo, webpack dev, 1440×1000, ru-RU, Asia/Novosibirsk; AI_ENABLED=false,
+YANDEX_WEB_SEARCH_ENABLED=false, SCRAPER_ENABLED=false. Все POST/PUT/DELETE поиска и ИИ
+дополнительно заблокированы Playwright harness. Новых вызовов Yandex/ИИ/скрапера нет:
+AiUsageLog до/после — 35 записей. Исторические платные испытания выше не изменены.
+
+Выполнено `npx tsx scripts/vkr/polish-screenshots.ts final-only`.
+DEMO 10/10b/10c/10d и пять LIVE-кадров ниже пересняты и просмотрены.
+10c/10d — страницы 1/2 настоящего PDF; PDF и DOCX содержат по четыре страницы A4.
+DOCX проверен через LibreOffice → PDF → Poppler, просмотрены все страницы.
+Полная шапка: синтетические ИНН/ОГРН-образцы с пометкой ДЕМО, адрес,
+телефон +7 900 000-00-.., example.ru и простой PNG, созданный локально через Sharp без ImageGen.
+Seed `npm run db:seed:demo` применён к crm_demo; повторный запуск не создаёт дублей.
+
+Причина пустого назначения: формирование прежнего снимка учитывало только
+Property.commercialPurpose, а демо-объекты имеют Property.propertyType.
+Печать/PDF/DOCX используют снимок назначения в приоритете; только при отсутствии
+значения используют коммерческое назначение/тип Property с русской меткой.
+Исторические снимки цены, адреса, площади и условий не переписаны.
+
+Контракт real-estate-scrapper 2.1.0 проверен локально: yandex/onrealt/mirkvartir
+возвращают address, district и title. Заголовок ранее терялся нормализацией,
+а пустой address="" обходил fallback через `??`. Теперь пробелы/пустые строки
+считаются отсутствием, title сохраняется, читаются вложенные raw/normalized снимки.
+В сохранённых ответах Яндекса адрес действительно пуст, старый title не сохранён:
+без повторного запроса восстановить их нельзя. Показываются «Адрес не указан площадкой»
+и доступный фрагмент описания; для новых снимков — настоящий title. Адрес не выдумывается.
+Продажа без единицы показана «за объект»; аренда — «единица цены не указана»,
+вкладка «Требуют проверки». Критерии, источники доказательств и состояния русифицированы.
+
+На каждом LIVE-кадре сохранена плашка «LIVE-данные, сохранённые при испытании …,
+кадр переснят без новых вызовов». Это повторное отображение сохранённых данных,
+а не новое испытание доступности площадок. SHA — базовый HEAD; изменения ещё не закоммичены.
+
+Проверки: tsc --noEmit; ESLint изменённых TS/TSX; 7 регрессионных тестов отображения,
+85 unit-тестов поиска, 7 demo-тестов; 3 integration/authorization-теста экспорта на crm_test_c.
+Все PASS. Полный Playwright-набор не запускался. Миграций и npm install нет.
+
+| Кадр | Время кадра UTC | Сохранённый источник UTC | SHA256 |
+|---|---|---|---|
+| [10-offer.png](../screenshots/vkr/10-offer.png) | 2026-11-05T14:01:06.375Z | DEMO | `4d5bd01faa6f420588a0076e9cc4699fc1b404f7bcfd7f2acdc20dcd00d66487` |
+| [10b-offer-print.png](../screenshots/vkr/10b-offer-print.png) | 2026-11-05T14:01:13.162Z | DEMO | `cf475593fbaf9275f793ba0e8ea51bc83381ed7078911e8f1c1d00751c3c659e` |
+| [10c-offer-pdf-page1.png](../screenshots/vkr/10c-offer-pdf-page1.png) | 2026-11-05T14:01:10.824Z | DEMO | `9b902a92c63173ecd002cb4bcaea38e8331b700187eed0cf1d7da4a19d753cfd` |
+| [10d-offer-pdf-page2.png](../screenshots/vkr/10d-offer-pdf-page2.png) | 2026-11-05T14:01:10.827Z | DEMO | `cd7eeb21fa9bdb497d3e6922c773cb3e39f891ad7f4375cfb5f94bc0564ab5a8` |
+| [live-ai/04-live-results.png](../screenshots/vkr/live-ai/04-live-results.png) | 2026-11-05T14:04:10.981Z | 2026-11-05T11:53:10.129Z | `262313a46ed84733137ab5d95f7c5a3159befecf96b6f65133b70ca1240bb8fc` |
+| [live-ai/05-evidence.png](../screenshots/vkr/live-ai/05-evidence.png) | 2026-11-05T14:04:22.381Z | 2026-11-05T11:53:10.129Z | `a76069b1ddfafc86c87df9613530e2a88e97c9a0de6e35ad7a25d76a239dd20f` |
+| [live-ai/19-rent-results.png](../screenshots/vkr/live-ai/19-rent-results.png) | 2026-11-05T14:04:15.688Z | 2026-11-05T12:04:09.444Z | `d1346e2003e739607f8760b529b84eb87bad41c4c2e774fe2b1055ee10a55176` |
+| [live-ai/25-repeat-results.png](../screenshots/vkr/live-ai/25-repeat-results.png) | 2026-11-05T14:04:18.352Z | 2026-11-05T12:08:05.251Z | `5a608809863930bf009a40edb0dce2c0d1f0ca160f9c040555bdef1a99659f75` |
+| [live-ai/26-comparison.png](../screenshots/vkr/live-ai/26-comparison.png) | 2026-11-05T14:04:21.589Z | 2026-11-05T11:53:10.129Z | `5d6e7d80191be450496bb101fd31eb7f5dddf0a2ac4088e2720d197d33002e6c` |

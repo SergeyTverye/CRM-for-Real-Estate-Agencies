@@ -5,6 +5,7 @@ import { seedMediaAndOffers, seedDeals, seedGallery } from "./transactions";
 import { seedSearchAndCosts } from "./search";
 import { generateNotifications } from "@/modules/notifications/application/notification-generator";
 import { readNotification } from "@/modules/notifications/application/notification-service";
+import { seedDemoIssuers } from "./issuer";
 
 const districts = ["Центральный", "Железнодорожный", "Заельцовский", "Ленинский", "Октябрьский", "Кировский", "Калининский", "Дзержинский", "Первомайский", "Советский"];
 const types = ["retail", "commercial_premises", "office", "warehouse", "production"];
@@ -125,6 +126,7 @@ async function main() {
     const links = await db.taskNeed.findMany({ where: { clientNeedId: need.id }, select: { taskId: true } });
     await db.taskClient.createMany({ data: links.map(link => ({ taskId: link.taskId, clientId: need.clientId })), skipDuplicates: true });
   }
+  await seedDemoIssuers(ctx);
   await seedMediaAndOffers(ctx);
   await seedDeals(ctx);
   await seedSearchAndCosts(ctx);

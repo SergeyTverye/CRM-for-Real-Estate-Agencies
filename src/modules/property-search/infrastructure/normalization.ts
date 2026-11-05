@@ -3,6 +3,8 @@ import { parseExternalUrl } from "@/shared/net/ssrf";
 import { parseFloor } from "../domain/floor";
 import type { NormalizedListing, PriceUnit, Purpose } from "../domain/types";
 
+import { listingFields } from "./listing-fields";
+
 const purposeMap: Record<string, Purpose> = { retail: "retail", freePurpose: "free_purpose", office: "office", industrial: "production", warehouse: "warehouse" };
 function safeUrl(value: string): string | null { try { return parseExternalUrl(value).href; } catch { return null; } }
 export function parsePriceUnit(text: string | null | undefined, operation: "sale" | "rent" | null): PriceUnit | null {
@@ -14,7 +16,7 @@ export function parsePriceUnit(text: string | null | undefined, operation: "sale
   return null;
 }
 /** Package 2.1.0 already expands Cian grouped listings into #part-N/parentId rows. */
-export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new Date().toISOString()): NormalizedListing {
+export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new Date().toISOString()): NormalizedListing & { title: string | null } {
   const url = safeUrl(raw.url);
   if (!url) throw new Error("INVALID_LISTING_URL");
   const part = new URL(url).hash.match(/^#part-(\d+)$/u)?.[1] ?? null;
@@ -31,7 +33,7 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
     purpose: purposeMap[raw.propertyType ?? ""] ?? null, operation,
     price, priceUnit: parsePriceUnit(raw.priceText, operation),
     area: raw.area !== null && Number.isFinite(raw.area) && raw.area >= 0 ? raw.area : null, floor,
-    city: raw.city, address: raw.address, district: raw.district,
+    ...listingFields(raw),
     seller: { type: raw.sellerType === "owner" || raw.sellerType === "agent" ? raw.sellerType : "unknown" },
     description: raw.description ?? "", images: raw.images.map(safeUrl).filter((u): u is string => u !== null), fetchedAt,
     structuredFeatures: {}, possibleDuplicateKeys: [], identityNeedsReview: !(raw.parentId ?? raw.id) || !!raw.parentId && !part && !raw.id,

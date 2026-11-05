@@ -38,7 +38,7 @@ export async function offerDocx(data: OfferPrintData): Promise<Buffer> {
   ];
   children.push(heading("Сравнение объектов"), new Table({
     width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED, borders,
-    columnWidths: [1400, 2600, 1500, 1200, 1700, 1690],
+    columnWidths: [1300, 2500, 1700, 1200, 1700, 1690],
     rows: [new TableRow({ cantSplit: true, tableHeader: true,
       children: ["Фото / №", "Адрес / район", "Назначение", "Площадь / этаж", "Цена / ставка", "Цена за м²"].map(t => cell(t, true)) }),
       ...data.items.map(i => new TableRow({ cantSplit: true, children: [
@@ -49,7 +49,8 @@ export async function offerDocx(data: OfferPrintData): Promise<Buffer> {
   }));
   if (data.expires) children.push(paragraph(`Предложение действительно до ${data.expires}.`));
   children.push(new Paragraph({ text: "Ваш ответственный специалист", heading: HeadingLevel.HEADING_2 }), paragraph(data.responsible, true));
-  if (data.issuer?.requisites) children.push(paragraph(data.issuer.requisites));
+  const contacts = data.issuer?.requisites?.split("\n").filter(line => /телефон|сайт|email|почта|\+7/iu.test(line)).join("\n");
+  if (contacts) children.push(paragraph(contacts));
   children.push(paragraph("Цена, адрес, площадь и условия зафиксированы в предложении. Фотографии взяты из доступного каталога CRM; материалы внешних площадок доступны по ссылке на первоисточник."));
   for (const i of data.items) {
     children.push(heading(`${i.position}. ${i.address}`, true));

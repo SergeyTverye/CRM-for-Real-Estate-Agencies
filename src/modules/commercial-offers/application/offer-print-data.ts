@@ -1,3 +1,5 @@
+import { db } from "@/shared/db/client";
+import { displayLabel } from "@/shared/codebook";
 import sharp from "sharp";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { getPrintIssuer, getPropertySourceUrl } from "@/modules/export/application/print-data";
@@ -17,8 +19,8 @@ async function image(actor: Actor, id: string, caption: string): Promise<PrintIm
   return { dataUrl: `data:image/png;base64,${data.toString("base64")}`, width: meta.width!, height: meta.height!, caption };
 }
 
-/** Read only saved offer values. Legacy offers never acquire today's property characteristics. */
-export function offerCharacteristics(item: { addressSnapshot: string | null; areaSnapshot: { toString(): string } | null; priceSnapshot: { toString(): string } | null; termsSnapshot: string | null }) {
+/** Saved values win. Only missing legacy purpose may fall back to the catalogue. */
+export function offerCharacteristics(item: { addressSnapshot: string | null; areaSnapshot: { toString(): string } | null; priceSnapshot: { toString(): string } | null; termsSnapshot: string | null }, fallbackPurpose?: string | null) {
   const terms = item.termsSnapshot ?? "";
   const field = (label: string) => terms.split("\n").find(line => line.startsWith(`${label}: `))?.slice(label.length + 2);
   const unit = field("Единица цены");
@@ -29,7 +31,7 @@ export function offerCharacteristics(item: { addressSnapshot: string | null; are
   const canDivide = priceUnit === "₽" || priceUnit === "₽/мес.";
   const perM2 = item.priceSnapshot !== null && item.areaSnapshot !== null && Number(item.areaSnapshot.toString()) > 0 && canDivide
     ? `${num.format(Number(item.priceSnapshot.toString()) / Number(item.areaSnapshot.toString()))} ${priceUnit === "₽/мес." ? "₽/м²/мес." : "₽/м²"}` : "Не определена";
-  return { address: item.addressSnapshot ?? missing, district: field("Район") ?? missing, purpose: field("Назначение") ?? missing,
+  return { address: item.addressSnapshot ?? missing, district: field("Район") ?? missing, purpose: displayLabel("property_type", field("Назначение")?.trim() || fallbackPurpose || missing),
     floor: field("Этаж") ?? terms.match(/этаж\s+(-?\d+(?:\/\d+)?)/)?.[1] ?? missing, area, price, perM2 };
 }
 
@@ -45,7 +47,9 @@ export async function getOfferPrintData(actor: Actor, offerId: string, baseUrl =
       .sort((a, b) => Number(b.isCover) - Number(a.isCover)).slice(0, 4);
     const images: PrintImage[] = [];
     for (const photo of photos) images.push(await image(actor, photo.id, photo.caption ?? "Фото объекта"));
-    items.push({ id: item.id, position: item.position, ...offerCharacteristics(item), terms: item.termsSnapshot,
+    const property = await db.property.findUniqueOrThrow({ where: { id: item.propertyId }, select: { propertyType: true, commercialPurpose: true } });
+    const purpose = property.commercialPurpose ? await db.dictionaryItem.findUnique({ where: { category_code: { category: "commercial_purpose", code: property.commercialPurpose } }, select: { displayName: true } }) : null;
+    items.push({ id: item.id, position: item.position, ...offerCharacteristics(item, purpose?.displayName ?? property.propertyType), terms: item.termsSnapshot,
       comment: item.comment, images, sourceUrl: await getPropertySourceUrl(item.propertyId), propertyUrl: `${baseUrl}/properties/${item.propertyId}` });
   }
   const zone = getConfig().APP_TIMEZONE;

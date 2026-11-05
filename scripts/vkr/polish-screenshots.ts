@@ -7,7 +7,8 @@ import { createHash } from "node:crypto";
 
 async function main() {
 config({ path: [".env.local", ".env"], quiet: true });
-const baseURL = "http://localhost:3390";
+const baseURL = process.env.VKR_BASE_URL ?? "http://localhost:3395";
+const finalOnly = ["final-only", "final-live-only"].includes(process.argv[2] ?? "");
 const output = "docs/screenshots/vkr";
 const evidence = JSON.parse(await readFile("docs/vkr/live-ai-evidence.json", "utf8"));
 const state = JSON.parse(await readFile("data/live-ai-trials-state.json", "utf8"));
@@ -17,7 +18,7 @@ const sha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).tri
 const browser = await chromium.launch();
 const context = await browser.newContext({ baseURL, locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 1000 } });
 // A guard makes accidental billable calls impossible even if UI changes.
-await context.route(/\/api\/v1\/(ai\/|property-search\/(parse|runs(?:\?|$)))/, route =>
+await context.route(/\/api\/v1\/(ai\/|property-search\/)/, route =>
   route.request().method() === "GET" ? route.continue() : route.abort("blockedbyclient"));
 const page = await context.newPage();
 let focusTarget: Locator | undefined;
@@ -98,13 +99,15 @@ try {
     return;
   }
   const demoOffer = manifest.find((r: { file: string }) => r.file === "10-offer.png").url;
-  if (process.argv[2] !== "live-only") {
+  if (!["live-only", "final-live-only"].includes(process.argv[2] ?? "")) {
     await navigate(demoOffer); await shot("10-offer", "DEMO КП из трёх объектов со снимками");
     const pdf = await page.request.get(`/api/v1${demoOffer}/pdf`);
     expect(pdf.ok()).toBeTruthy(); await writeFile("data/polish-offer/demo.pdf", await pdf.body());
     execFileSync("pdftoppm", ["-scale-to", "1600", "-png", "data/polish-offer/demo.pdf", "data/polish-offer/page"]);
     for (const [n, file] of [[1, "10c-offer-pdf-page1"], [2, "10d-offer-pdf-page2"]] as const) {
       await copyFile(`data/polish-offer/page-${n}.png`, `${output}/${file}.png`);
+      const previous = records.findIndex(r => r.file === `${file}.png`);
+      if (previous >= 0) records.splice(previous, 1);
       records.push({ file: `${file}.png`, scenario: `DEMO A4 PDF страница ${n}`, date: new Date().toISOString(), sha, role: "realtor1", url: `/api/v1${demoOffer}/pdf`, mode: "DEMO; Poppler render", sha256: createHash("sha256").update(await readFile(`${output}/${file}.png`)).digest("hex") });
     }
     await navigate(`${demoOffer}/print`);
@@ -128,6 +131,7 @@ try {
       ["30-empty-results", ids[5]],
     ];
     for (const [file, id] of plans) {
+      if (finalOnly && !["04-live-results", "19-rent-results", "25-repeat-results"].includes(file)) continue;
       await run(id);
       await focus(page.getByRole("heading", { name: "Состояние источников", exact: true }));
       if (["04-live-results", "19-rent-results", "25-repeat-results"].includes(file)) {
@@ -146,6 +150,7 @@ try {
     await page.keyboard.press("Escape");
     const detail = page.getByText(/^Доказательства по критериям/).first();
     if (await detail.count()) { await detail.click(); await focus(detail); await shot("live-ai/05-evidence", "Сохранённые доказательства критериев", ids[0]); }
+    if (finalOnly) return;
     await page.getByRole("tab", { name: "Закладки", exact: true }).click();
     await expect(page.getByRole("link", { name: "Источник ↗", exact: true }).first()).toBeVisible();
     await focus(page.getByRole("tablist", { name: "Результаты поиска" }));

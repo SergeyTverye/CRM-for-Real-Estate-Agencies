@@ -20,4 +20,6 @@
 
 ## Фактический результат проверки
 
-05.11.2026, итоговая рабочая копия: `npx playwright test` — 13/13 PASS (31,3 с); `npm test` — 487/487 PASS в 27 файлах; `npx tsc --noEmit` — PASS; `npx eslint . --max-warnings=0` — PASS; `npx next build` — PASS. `git diff --check` — без ошибок. Проверочные серверы остановлены после съёмки. Независимые правки других агентов сохранены.
+05.11.2026, исторический срез полировки этапа 1 (не итог этапа 2): `npx playwright test` — 13/13 PASS (31,3 с); `npm test` — 487/487 PASS в 27 файлах; `npx tsc --noEmit` — PASS; `npx eslint . --max-warnings=0` — PASS; `npx next build` — PASS. `git diff --check` — без ошибок. Проверочные серверы остановлены после съёмки. Независимые правки других агентов сохранены.
+
+Актуальные проверки и ограничения этапа 2 — [приёмка](../acceptance/stage2-live-ai-ux.md), итоговые числа координатора — [test-protocol](test-protocol.md).
