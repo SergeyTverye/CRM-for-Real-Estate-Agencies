@@ -1,4 +1,5 @@
 import { RevisionButton } from "./revision-button";
+import { PdfButton } from "./pdf-button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
@@ -56,6 +57,7 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
         actions={
           <>
             <Link className="btn" href={`/offers/${id}/print`}>Предпросмотр / печать</Link>
+            <PdfButton id={id} />
             <RevisionButton id={id} updatedAt={updatedAt} />
             {!archived ? (
               <ActionButton url={`/api/v1/offers/${id}/document`} label="Сформировать документ (DOCX)" pendingLabel="Формирование…" className="btn btn-primary" />

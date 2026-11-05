@@ -1,95 +1,80 @@
-import { getPrintIssuer, getPropertySourceUrl } from "@/modules/export/application/print-data";
-import { documentImage } from "@/modules/export/application/document-image";
-import { listPropertyMedia } from "@/modules/properties/application/property-media-service";
-import { AlignmentType, ExternalHyperlink, ImageRun, Document, HeadingLevel, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
-import { getConfig } from "@/shared/config/env";
-import { formatDate } from "@/shared/time";
+﻿import { AlignmentType, ExternalHyperlink, ImageRun, Document, HeadingLevel, Packer, Paragraph, Table, TableCell, TableLayoutType, TableRow, TextRun, WidthType } from "docx";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { attachGeneratedDocument } from "@/modules/documents/application/document-service";
 import { DomainError } from "@/shared/errors";
-import { getOffer } from "./offer-service";
+import { BorderStyle } from "docx";
+import { getOfferPrintData, type PrintImage } from "./offer-print-data";
 
-/**
- * Итоговый редактируемый документ КП (DOCX) из структурированной записи CommercialOffer (FR-39, T10).
- * Содержимое строится только из snapshot-полей позиций, а не из текущих карточек Property.
- * Document наследует legal_entity_id предложения и связывается через document_commercial_offers.
- * Контакты собственников в документ не включаются.
- */
-function money(v: { toString(): string } | null): string {
-  if (v === null) return "по запросу";
-  return `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(Number(v.toString()))} ₽`;
+const paragraph = (text: string, bold = false) => new Paragraph({ spacing: { after: 100 }, children: text.split("\n").map((line, index) => new TextRun({ text: line, bold, ...(index ? { break: 1 } : {}) })) });
+const border = { style: BorderStyle.SINGLE, size: 4, color: "D9E1E8" };
+const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+const borders = { top: noBorder, bottom: border, left: noBorder, right: noBorder, insideHorizontal: border, insideVertical: noBorder };
+function cell(text: string, header = false) {
+  return new TableCell({ shading: header ? { fill: "EEF2F6" } : undefined,
+    margins: { top: 90, bottom: 90, left: 100, right: 100 }, children: [paragraph(text, header)] });
 }
-
-function cell(text: string, bold = false) {
-  return new TableCell({ children: [new Paragraph({ children: [new TextRun({ text, bold })] })] });
+function table(rows: string[][], header = false, widths?: number[]) {
+  return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED, borders,
+    columnWidths: widths, rows: rows.map((row, index) => new TableRow({ cantSplit: true, tableHeader: header && index === 0,
+      children: row.map((value, column) => cell(value, header ? index === 0 : column === 0)) })) });
 }
+function photo(p: PrintImage, maxWidth: number, maxHeight: number) {
+  const scale = Math.min(maxWidth / p.width, maxHeight / p.height);
+  return new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 80 }, children: [new ImageRun({
+    type: "png", data: Buffer.from(p.dataUrl.split(",")[1]!, "base64"),
+    transformation: { width: Math.round(p.width * scale), height: Math.round(p.height * scale) },
+    altText: { title: p.caption, description: p.caption, name: p.caption },
+  })] });
+}
+const heading = (text: string, pageBreakBefore = false) => new Paragraph({ text, heading: HeadingLevel.HEADING_1, pageBreakBefore, keepNext: true });
+const link = (url: string, title: string) => new Paragraph({ children: [new TextRun(`${title}: `), new ExternalHyperlink({ link: url, children: [new TextRun({ text: url, style: "Hyperlink" })] })] });
 
+/** Same authorized content as HTML/PDF; no current Property prices or owner contacts. */
 export async function generateOfferDocument(actor: Actor, offerId: string, baseUrl = ""): Promise<{ id: string }> {
-  const { offer } = await getOffer(actor, offerId);
-  if (offer.status === "archived") throw new DomainError("OFFER_ARCHIVED", "Предложение в архиве");
-  const tz = getConfig().APP_TIMEZONE;
-  const issuer = offer.legalEntity ? `${offer.legalEntity.displayName}` : "Агентство недвижимости";
-  const printIssuer = await getPrintIssuer(actor, offer.legalEntityId);
-  const logo = printIssuer?.logoDocumentId ? await documentImage(actor, printIssuer.logoDocumentId) : null;
-  const mediaParagraphs: Paragraph[] = [];
-  for (const item of offer.items) {
-    const photos = (await listPropertyMedia(actor, item.propertyId)).filter(m => m.kind === "photo").slice(0, 5);
-    mediaParagraphs.push(new Paragraph({ children: [new ExternalHyperlink({ link: `${baseUrl}/properties/${item.propertyId}`, children: [new TextRun({ text: item.addressSnapshot ?? "Карточка объекта", style: "Hyperlink" })] })] }));
-    const sourceUrl = await getPropertySourceUrl(item.propertyId);
-    if (sourceUrl) mediaParagraphs.push(new Paragraph({ children: [new ExternalHyperlink({ link: sourceUrl, children: [new TextRun({ text: "Источник объявления", style: "Hyperlink" })] })] }));
-    for (const photo of photos) {
-      const data = await documentImage(actor, photo.id);
-      mediaParagraphs.push(new Paragraph({ children: [new ImageRun({ type: "png", data, transformation: { width: 360, height: 240 } })] }));
-      if (photo.caption) mediaParagraphs.push(new Paragraph(photo.caption));
-    }
+  const data = await getOfferPrintData(actor, offerId, baseUrl);
+  if (data.status === "archived") throw new DomainError("OFFER_ARCHIVED", "Предложение в архиве");
+  const children: (Paragraph | Table)[] = [
+    ...(data.logo ? [photo(data.logo, 115, 65)] : []),
+    paragraph(data.issuer?.displayName ?? "Агентство недвижимости", true),
+    ...(data.issuer?.requisites ? [paragraph(data.issuer.requisites)] : []),
+    paragraph(`Подборка недвижимости · ${data.date}`), heading(data.title),
+    ...data.intro.split("\n").map(line => paragraph(line)),
+    paragraph(`Объектов в предложении: ${data.items.length} · Ответственный: ${data.responsible}`),
+    new Paragraph({ text: "В предложении", heading: HeadingLevel.HEADING_2 }),
+    ...data.items.map(i => paragraph(`${i.position}. ${i.address}\n${i.area} · ${i.price}`)),
+  ];
+  for (const i of data.items) {
+    children.push(heading(`${i.position}. ${i.address}`, true));
+    const [hero, ...extra] = i.images;
+    if (hero) children.push(photo(hero, 650, 250), paragraph(hero.caption));
+    else children.push(paragraph("Фотографии в каталоге не добавлены."));
+    if (extra.length) children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED,
+      borders: { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder, insideHorizontal: noBorder, insideVertical: noBorder },
+      columnWidths: extra.map(() => Math.floor(10090 / extra.length)),
+      rows: [new TableRow({ cantSplit: true, children: extra.map(p => new TableCell({ children: [photo(p, 205, 100), paragraph(p.caption)] })) })] }));
+    children.push(table([["Адрес", i.address], ["Район", i.district], ["Назначение", i.purpose], ["Площадь", i.area], ["Этаж", i.floor], ["Цена / ставка", i.price], ["Цена за м²", i.perM2]], false, [3300, 6790]));
+    if (i.terms) children.push(new Paragraph({ text: "Условия", heading: HeadingLevel.HEADING_2 }), ...i.terms.split("\n").map(line => paragraph(line)));
+    if (i.comment) children.push(new Paragraph({ text: "Примечания", heading: HeadingLevel.HEADING_2 }), ...i.comment.split("\n").map(line => paragraph(line)));
+    children.push(link(i.propertyUrl, "Карточка CRM"));
+    if (i.sourceUrl) children.push(link(i.sourceUrl, "Первоисточник"));
   }
-  const doc = new Document({
-    creator: issuer,
-    title: offer.title ?? "Коммерческое предложение",
-    sections: [
-      {
-        children: [
-          ...(logo ? [new Paragraph({ children: [new ImageRun({ type: "png", data: logo, transformation: { width: 120, height: 80 } })] })] : []),
-          ...(printIssuer?.requisites ? [new Paragraph(printIssuer.requisites)] : []),
-          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: issuer, bold: true })] }),
-          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun(`Дата: ${formatDate(offer.sentAt ?? offer.updatedAt, tz)}`)] }),
-          new Paragraph({ text: offer.title ?? "Коммерческое предложение", heading: HeadingLevel.HEADING_1 }),
-          ...(offer.introText ? offer.introText.split(/\n+/).map((p) => new Paragraph({ text: p })) : []),
-          new Paragraph({ text: "" }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-              new TableRow({ tableHeader: true, children: [cell("№", true), cell("Объект", true), cell("Площадь, м²", true), cell("Стоимость", true), cell("Условия", true)] }),
-              ...offer.items.map(
-                (i) =>
-                  new TableRow({
-                    children: [
-                      cell(String(i.position)),
-                      cell(i.addressSnapshot ?? ""),
-                      cell(i.areaSnapshot ? i.areaSnapshot.toString() : "—"),
-                      cell(money(i.priceSnapshot)),
-                      cell([i.termsSnapshot, i.comment].filter(Boolean).join(". ")),
-                    ],
-                  }),
-              ),
-            ],
-          }),
-          new Paragraph({ text: "" }),
-          ...mediaParagraphs,
-          ...(offer.expiresAt ? [new Paragraph({ text: `Предложение действительно до ${formatDate(offer.expiresAt.toISOString().slice(0, 10), tz)}.` })] : []),
-          new Paragraph({ children: [new TextRun({ text: `Ответственный сотрудник: ${offer.responsible.displayName}`, italics: true })] }),
-        ],
-      },
-    ],
+  children.push(heading("Сравнение объектов", true), table([
+    ["№", "Объект", "Площадь", "Цена / ставка", "Цена за м²"],
+    ...data.items.map(i => [String(i.position), [i.address, i.district, i.purpose].join("\n"), i.area, i.price, i.perM2]),
+  ], true, [650, 3000, 1500, 2600, 2340]));
+  if (data.expires) children.push(paragraph(`Предложение действительно до ${data.expires}.`));
+  children.push(new Paragraph({ text: "Ваш ответственный специалист", heading: HeadingLevel.HEADING_2 }), paragraph(data.responsible, true));
+  if (data.issuer?.requisites) children.push(paragraph(data.issuer.requisites));
+  children.push(paragraph("Цена, адрес, площадь и условия зафиксированы в предложении. Фотографии взяты из доступного каталога CRM; материалы внешних площадок доступны по ссылке на первоисточник."));
+  const doc = new Document({ creator: data.issuer?.displayName ?? "CRM", title: data.title,
+    styles: { default: { document: { run: { font: "Arial", size: 20, color: "172B3E" }, paragraph: { spacing: { after: 100, line: 260 } } },
+      heading1: { run: { font: "Arial", size: 34, color: "172B3E", bold: true }, paragraph: { spacing: { before: 100, after: 220 }, keepNext: true } },
+      heading2: { run: { font: "Arial", size: 23, color: "233E55", bold: true }, paragraph: { spacing: { before: 180, after: 100 }, keepNext: true } } } },
+    sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 850, bottom: 907, left: 907, right: 907 } } }, children }],
   });
   const buffer = await Packer.toBuffer(doc);
-  const safeTitle = (offer.title ?? "КП").replace(/[^\p{L}\p{N} _-]/gu, "").slice(0, 60).trim() || "КП";
-  return attachGeneratedDocument(actor, {
-    data: Buffer.from(buffer),
-    originalName: `${safeTitle}.docx`,
-    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    documentTypeCode: "commercial_offer",
-    link: { kind: "offer", id: offer.id },
-    legalEntityId: offer.legalEntityId,
-  });
+  const safeTitle = data.title.replace(/[^\p{L}\p{N} _-]/gu, "").slice(0, 60).trim() || "КП";
+  return attachGeneratedDocument(actor, { data: Buffer.from(buffer), originalName: `${safeTitle}.docx`,
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", documentTypeCode: "commercial_offer",
+    link: { kind: "offer", id: data.id }, legalEntityId: data.legalEntityId });
 }

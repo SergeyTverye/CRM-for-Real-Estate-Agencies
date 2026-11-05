@@ -41,9 +41,12 @@ const OPERATION_LABEL: Record<string, string> = { sale: "продажа", rent: 
 async function snapshotOf(tx: DbOrTx, propertyId: string) {
   const p = await tx.property.findUnique({
     where: { id: propertyId },
-    select: { id: true, addressText: true, price: true, area: true, operationType: true, floor: true, floorsTotal: true, roomsCount: true, commercialPurpose: true, status: true },
+    select: { id: true, addressText: true, price: true, area: true, operationType: true, floor: true, floorsTotal: true, roomsCount: true, commercialPurpose: true, district: true, status: true },
   });
   if (!p) throw new NotFoundError("Объект не найден");
+  const purpose = p.commercialPurpose ? (await tx.dictionaryItem.findUnique({
+    where: { category_code: { category: "commercial_purpose", code: p.commercialPurpose } }, select: { displayName: true },
+  }))?.displayName ?? p.commercialPurpose : null;
   const terms = [
     OPERATION_LABEL[p.operationType] ?? p.operationType,
     p.floor !== null ? `этаж ${p.floor}${p.floorsTotal ? `/${p.floorsTotal}` : ""}` : null,
@@ -51,7 +54,11 @@ async function snapshotOf(tx: DbOrTx, propertyId: string) {
   ]
     .filter(Boolean)
     .join(", ");
-  return { property: p, snapshot: { priceSnapshot: p.price, addressSnapshot: p.addressText, areaSnapshot: p.area, termsSnapshot: terms || null } };
+  const printDetails = [terms, p.district ? `Район: ${p.district}` : null,
+    purpose ? `Назначение: ${purpose}` : null,
+    p.floor !== null ? `Этаж: ${p.floor}${p.floorsTotal ? `/${p.floorsTotal}` : ""}` : null,
+    `Единица цены: ${p.operationType === "rent" ? "₽/мес." : "₽"}`].filter(Boolean).join("\n");
+  return { property: p, snapshot: { priceSnapshot: p.price, addressSnapshot: p.addressText, areaSnapshot: p.area, termsSnapshot: printDetails } };
 }
 
 async function assertLegalEntity(tx: DbOrTx, id: string | null | undefined) {

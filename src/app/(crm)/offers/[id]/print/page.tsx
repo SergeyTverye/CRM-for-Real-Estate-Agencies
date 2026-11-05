@@ -1,29 +1,21 @@
-import { notFound } from "next/navigation";
-import { NotFoundError } from "@/shared/errors";
-/* eslint-disable @next/next/no-img-element */
+﻿import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { NotFoundError } from "@/shared/errors";
 import { requirePageActor } from "@/server/page-auth";
-import { getOffer } from "@/modules/commercial-offers/application/offer-service";
-import { getPrintIssuer, getPropertySourceUrl } from "@/modules/export/application/print-data";
-import { listPropertyMedia } from "@/modules/properties/application/property-media-service";
-import { PrintIssuer } from "@/modules/export/presentation/issuer";
-import { PrintStyle } from "@/modules/export/presentation/print-style";
-import { fmtMoney, fmtNum } from "@/server/format";
+import { getOfferPrintData } from "@/modules/commercial-offers/application/offer-print-data";
+import { offerHtml } from "@/modules/export/presentation/offer-html";
+import { PdfButton } from "../pdf-button";
+import { PrintPreview } from "./print-preview";
+
 export default async function OfferPrintPage({ params }: { params: Promise<{ id: string }> }) {
-  const actor = await requirePageActor(); const { id } = await params;
-  const { offer } = await getOffer(actor, id).catch(e => { if (e instanceof NotFoundError) notFound(); throw e; });
-  const issuer = await getPrintIssuer(actor, offer.legalEntityId);
-  const positions = await Promise.all(offer.items.map(async i => ({ ...i, sourceUrl: await getPropertySourceUrl(i.propertyId), photos: (await listPropertyMedia(actor, i.propertyId)).filter(m => m.kind === "photo").slice(0, 5) })));
-  return <article className="crm-print space-y-4"><PrintStyle/><PrintIssuer issuer={issuer}/><h1>{offer.title ?? "Коммерческое предложение"}</h1>
-    {offer.introText ? <p className="whitespace-pre-wrap">{offer.introText}</p> : null}
-    {positions.map(i => <section key={i.id}><h2>{i.position}. {i.addressSnapshot}</h2>
-      {i.areaSnapshot !== null ? <p>Площадь: {fmtNum(i.areaSnapshot, "м²")}</p> : null}
-      {i.priceSnapshot !== null ? <p>Цена: {fmtMoney(i.priceSnapshot)}</p> : <p>Цена по запросу</p>}
-      {i.termsSnapshot ? <p>{i.termsSnapshot}</p> : null}{i.comment ? <p>{i.comment}</p> : null}
-      <div className="flex flex-wrap gap-2">{i.photos.map(m => <figure key={m.id}><img src={m.url} alt={m.caption ?? "Фото объекта"} />{m.caption ? <figcaption>{m.caption}</figcaption> : null}</figure>)}</div>
-      <Link className="link" href={`/properties/${i.propertyId}`}>Карточка объекта</Link>
-      {i.sourceUrl ? <p><a href={i.sourceUrl}>Источник объявления</a></p> : null}
-    </section>)}
-    <p>Ответственный: {offer.responsible.displayName}</p><Link className="btn" href={`/offers/${id}`}>Вернуться к КП</Link>
-  </article>;
+  const actor = await requirePageActor();
+  const { id } = await params;
+  const h = await headers();
+  // APP origin is only a hyperlink in exports; it is never requested by the renderer.
+  const host = h.get("host") ?? "localhost";
+  const baseUrl = `${h.get("x-forwarded-proto") === "https" ? "https" : "http"}://${host}`;
+  const data = await getOfferPrintData(actor, id, baseUrl).catch(e => { if (e instanceof NotFoundError) notFound(); throw e; });
+  return <div><div className="mb-4 flex flex-wrap items-center gap-3"><Link className="btn" href={`/offers/${id}`}>Вернуться к КП</Link><PdfButton id={id}/></div>
+    <PrintPreview html={offerHtml(data)}/></div>;
 }
