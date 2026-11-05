@@ -1,4 +1,5 @@
 import { CallNoteButton } from "@/ui/domain/ai-p2-drafts";
+import { NeedCollectionsBlock } from "./collections-block";
 import { p2Available } from "@/modules/ai/application/p2-service";
 import Link from "next/link";
 import { NeedSelectionPanel } from "../../property-search/need-selection-panel";
@@ -494,6 +495,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
         </Card>
       ) : null}
 
+      {clientVisible ? <NeedCollectionsBlock actor={actor} needId={id} /> : null}
       {tab === "tasks" ? <TaskList tasks={tasks} emptyHint="Задач по потребности нет" newHref={newTaskHref} /> : null}
     </div>
   );

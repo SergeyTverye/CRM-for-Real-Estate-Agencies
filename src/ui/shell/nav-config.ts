@@ -12,6 +12,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/needs", label: "Потребности" },
   { href: "/properties", label: "Объекты" },
   { href: "/property-search", label: "Поиск объектов" },
+  { href: "/collections", label: "Подборки" },
   { href: "/showings", label: "Показы" },
   { href: "/tasks", label: "Задачи" },
   { href: "/calendar", label: "Календарь" },
