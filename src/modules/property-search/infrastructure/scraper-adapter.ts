@@ -4,7 +4,7 @@ import { safeRequest } from "@/shared/net/ssrf";
 import { SearchFilters, type SearchResult, type Source, type SourceRun } from "../domain/types";
 import { evaluateListing } from "../domain/evaluation";
 import { deduplicateListings, normalizeListing } from "./normalization";
-import { buildScraperQuery, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
+import { buildScraperQuery, resolveSourceGeography, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
 import { scraperHttpRequest } from "./scraper-http";
 import { extendSourceParsers } from "./parser-extension";
 import { resilientTransport, type AdapterFailure } from "./source-response";
@@ -36,7 +36,7 @@ export interface ScraperAdapter {
   searchDetailed?(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<AdapterSearchResult>;
 }
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
-export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions }) => Promise<ScraperClient>;
+export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions; jobDeadlineAt?: number }) => Promise<ScraperClient>;
 /** A small HTTP-200 challenge is not an empty market or a selector regression. */
 export function isCianAccessChallenge(url: string, data: unknown): boolean {
   const host = new URL(url).hostname;
@@ -88,7 +88,9 @@ const transport: RealEstateScraper.Transport = async request => {
 };
 /** Use the public browser lifecycle API to intercept ALL browser network, including subresources. */
 export const defaultScraperFactory: ScraperFactory = async config => {
-  const { browser, ...provided } = config;
+  const { browser, jobDeadlineAt, ...provided } = config;
+  const deadline = jobDeadlineAt ?? Date.now() + (config.timeout ?? 30000);
+  let requestDeadline = deadline;
   const httpConfig = { ...provided, transport: provided.transport ?? transport, maxRetries: 0 };
   if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig));
   const browserOptions = browser === true ? {} : browser;
@@ -103,7 +105,9 @@ export const defaultScraperFactory: ScraperFactory = async config => {
       const request = route.request();
       try {
         if (!["GET", "POST"].includes(request.method())) { await route.abort(); return; }
-        const response = await safeRequest(request.url(), { method: request.method() as "GET" | "POST", headers: request.headers(), body: request.postData() ?? undefined, signal: browserAbort.signal, timeoutMs: config.timeout, maxBytes: 10_000_000, followRedirects: false });
+        const remaining = Math.min(deadline, requestDeadline) - Date.now();
+        if (remaining <= 0 || browserAbort.signal.aborted) { await route.abort(); return; }
+        const response = await safeRequest(request.url(), { method: request.method() as "GET" | "POST", headers: request.headers(), body: request.postData() ?? undefined, signal: browserAbort.signal, timeoutMs: Math.min(config.timeout ?? 30000, remaining), maxBytes: 10_000_000, followRedirects: false });
         const headers = Object.fromEntries(Object.entries(response.headers).filter(([key, value]) => value !== undefined && !["content-encoding", "content-length", "transfer-encoding"].includes(key)).map(([key, value]) => [key, Array.isArray(value) ? value.join(", ") : String(value)]));
         await route.fulfill({ status: response.status, headers, body: response.data });
       } catch { await route.abort().catch(() => undefined); }
@@ -112,13 +116,15 @@ export const defaultScraperFactory: ScraperFactory = async config => {
     const sourceConfigs = { ...httpConfig.sourceConfigs };
     const browserTransport = RealEstateScraper.createBrowserTransport({ context, timeout: browserOptions.timeout, settleMs: browserOptions.settleMs, waitForSelector: browserOptions.waitForSelector });
     const guardedBrowserTransport: RealEstateScraper.Transport = async request => {
+      requestDeadline = Math.min(deadline, Date.now() + request.timeout);
+      if (requestDeadline <= Date.now()) throw Object.assign(new Error("TIMEOUT"), { code: "TIMEOUT" });
       const abort = () => browserAbort.abort();
       request.signal?.addEventListener("abort", abort, { once: true });
       if (request.signal?.aborted) abort();
       try { return await (request.method.toUpperCase() !== "GET" && !request.browser ? (httpConfig.transport ?? transport)(request) : browserTransport(request)); }
       finally { request.signal?.removeEventListener("abort", abort); }
     };
-    for (const source of sources) sourceConfigs[source] = { ...sourceConfigs[source], transport: resilientTransport(guardedBrowserTransport, source, Date.now() + (config.timeout ?? 30000)) };
+    for (const source of sources) sourceConfigs[source] = { ...sourceConfigs[source], transport: resilientTransport(guardedBrowserTransport, source, deadline) };
     const client = extendSourceParsers(new RealEstateScraper({ ...httpConfig, sourceConfigs }));
     return { searchSite: client.searchSite.bind(client), close: launched.close };
   } catch (error) { await launched.close(); throw error; }
@@ -154,8 +160,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     const empty = (status: AdapterSourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason, ...metadata, ...(status === "needs_user_action" ? { actionUrl: `https://${host}/` } : {}) } satisfies AdapterSourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
     if (signal?.aborted) return empty("cancelled", "Поиск отменён");
     if (!(this.options.enabled ?? process.env.SCRAPER_ENABLED === "true") || this.options.enabledSources && !this.options.enabledSources.includes(source)) return empty("disabled", "Источник отключён");
-    const query = buildScraperQuery(filters, source, new AbortController().signal, this.options.sourceOptions, depth);
-    const geography = query.sourceOptions?.[source];
+    const geography = resolveSourceGeography(filters, source, this.options.sourceOptions);
     const missingGeography = source === "domclick" && !geography?.address && !geography?.params?.address ? "address" : source === "avito" && !geography?.locationId ? "locationId" : source === "mirkvartir" && !geography?.locationIds ? "locationIds" : null;
     if (missingGeography && !geography?.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${missingGeography}`);
     return this.limiter.run(async () => {
@@ -172,7 +177,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
       const factory = this.options.factory ?? defaultScraperFactory;
       const work = async () => {
-        client = await factory({ timeout: Math.min(remaining, 30_000), maxRetries: 0, transport: resilientTransport(transport, source, deadline),
+        client = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, maxRetries: 0, transport: resilientTransport(transport, source, deadline),
           ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
             ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
             ...this.options.browser, sources: [source] } } : {}) });

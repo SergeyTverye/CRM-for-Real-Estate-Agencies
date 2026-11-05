@@ -31,7 +31,7 @@ describe("filters and evidence", () => {
   it("requires recorded owner check even for source owner badge", () => {
     const f = SearchFilters.parse({ city: "Москва", operation: "sale", seller: "confirmed_owner_only" });
     expect(evaluateListing(listing(), f).verdict).toBe("needs_review");
-    const l = listing(); l.seller.ownerVerification = { method: "Звонок", source: "Сотрудник", checkedAt: "2026-11-05T10:00:00Z" };
+    const l = listing(); l.seller.ownerVerification = { method: "Звонок", source: "employee", verifiedBy: "employee-test", checkedAt: "2026-11-05T10:00:00Z" };
     expect(evaluateListing(l, f).verdict).toBe("confirmed");
     l.seller.type = "agent";
     expect(evaluateListing(l, f).verdict).toBe("rejected");

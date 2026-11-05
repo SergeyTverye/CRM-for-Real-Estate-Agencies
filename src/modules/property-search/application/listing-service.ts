@@ -171,7 +171,8 @@ export async function verifyListing(actor: Actor, listingId: string, input: unkn
   await listingById(listingId);
   return transaction(async tx => {
     const row = await tx.externalListingVerification.create({ data: { ...data, nextCheckAt: data.nextCheckAt ? new Date(data.nextCheckAt) : null, listingId, verifiedBy: actor.userId } });
-    await searchAudit(tx, actor, "verified", "ExternalListing", listingId, { verificationId: row.id, availability: data.availability });
+    await tx.externalListing.update({ where: { id: listingId }, data: { lastCheckedAt: row.verifiedAt } });
+    await searchAudit(tx, actor, "verified", "ExternalListing", listingId, { verificationId: row.id, availability: data.availability, method: "employee_check", checkedAt: row.verifiedAt.toISOString() });
     return row;
   });
 }

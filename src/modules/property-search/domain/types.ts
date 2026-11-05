@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { featureConditions } from "./filter-catalog";
+import { freshnessSchema } from "./freshness";
 
 export const SOURCES = ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"] as const;
 export const PURPOSES = ["retail", "psn_universal", "office", "production", "warehouse", "free_purpose"] as const;
@@ -16,7 +18,12 @@ export const SearchFilters = z.object({
   priceFrom: money.optional(), priceTo: money.optional(),
   areaFrom: z.number().finite().nonnegative().optional(), areaTo: z.number().finite().nonnegative().optional(),
   districts: z.array(z.string().trim().min(1).max(120)).max(150).default([]),
-  seller: z.enum(["all", "confirmed_owner_only"]).default("all"),
+  features: featureConditions.optional(),
+  floorFrom: z.number().int().optional(), floorTo: z.number().int().optional(),
+  hasPhotos: z.boolean().optional(),
+  verification: z.enum(["all", "checked", "unchecked"]).optional(),
+  freshness: freshnessSchema.optional(),
+  seller: z.enum(["all", "confirmed_owner_only", "agent"]).default("all"),
   requiredFeatures: z.array(z.string().trim().min(1).max(300)).max(30).default([]),
   preferredFeatures: z.array(z.string().trim().min(1).max(300)).max(30).default([]),
   sources: z.array(z.enum(SOURCES)).max(7).default([...SOURCES]),
@@ -25,6 +32,7 @@ export const SearchFilters = z.object({
   if (v.operation === "sale" && v.priceUnit && v.priceUnit !== "rub_total") ctx.addIssue({ code: "custom", path: ["priceUnit"], message: "Продажа: полная цена в рублях" });
   if (v.priceFrom !== undefined && v.priceTo !== undefined && compareMoney(v.priceFrom, v.priceTo) > 0) ctx.addIssue({ code: "custom", path: ["priceTo"], message: "Цена от превышает цену до" });
   if (v.areaFrom !== undefined && v.areaTo !== undefined && v.areaFrom > v.areaTo) ctx.addIssue({ code: "custom", path: ["areaTo"], message: "Площадь от превышает площадь до" });
+  if (v.floorFrom !== undefined && v.floorTo !== undefined && v.floorFrom > v.floorTo) ctx.addIssue({ code: "custom", path: ["floorTo"], message: "Этаж от превышает этаж до" });
 });
 export type SearchFilters = z.infer<typeof SearchFilters>;
 export const searchFiltersSchema = SearchFilters;
@@ -37,6 +45,9 @@ export type CriterionState = "matched" | "contradicted" | "unknown";
 export interface CriterionEvaluation { criterion: string; state: CriterionState; source: "structured" | "rule" | "ai"; evidence: string; }
 export interface OwnerVerification { source: string; method: string; checkedAt: string; verifiedBy?: string; }
 export interface NormalizedListing {
+  publishedAt?: string | null; sourceUpdatedAt?: string | null; dateSource?: string; datePrecision?: "exact" | "day" | "unknown";
+  firstSeenAt?: string; lastSeenAt?: string; lastCheckedAt?: string | null;
+  sourceCategoryRaw?: string | null; purposeEvidence?: unknown;
   title?: string | null;
   purposeSource?: "structured" | "rule";
   source: Source; sourceListingId: string | null; sourceUnitId: string | null; url: string;

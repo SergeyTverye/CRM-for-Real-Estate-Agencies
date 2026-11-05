@@ -13,10 +13,13 @@ export function residentialPurposeContradiction(listing: NormalizedListing): Cri
       return { criterion: "purpose", state: "contradicted", source: "structured", evidence: `${key}=${value}` };
     }
   }
-  if (listing.purpose && listing.purposeSource !== "rule") return null;
   const text = [listing.title, listing.description].filter(Boolean).join("\n");
+  const legalResidential = /(?:статус|по\s+документам|юридически|оформлен[ао]?\s+как)\s*[:—-]?\s*(?:жилое\s+помещение|квартира)|(?:прода[её]тся|продам|сда[её]тся|сдам)\s+(?:\S+\s+){0,2}квартир\S*/iu.exec(text);
+  if (legalResidential) return { criterion: "purpose", state: "contradicted", source: "rule", evidence: text.slice(Math.max(0, legalResidential.index - 60), legalResidential.index + legalResidential[0].length + 100).trim() };
+  // Legacy snapshots did not record provenance; their inferred purpose cannot override text.
+  if (listing.purpose && listing.purposeSource === "structured") return null;
   const match = residential.exec(text);
-  if (!match || commercial.test(text)) return null;
+  if (!match || commercial.test(text) || /бизнес[\s-]+пространств|делов\S*\s+центр|коммерци[яию]/iu.test(text)) return null;
   // Keep a bounded verbatim fragment centred on the residential signal.
   const evidence = text.slice(Math.max(0, match.index - 60), match.index + match[0].length + 100).trim();
   return { criterion: "purpose", state: "contradicted", source: "rule", evidence };

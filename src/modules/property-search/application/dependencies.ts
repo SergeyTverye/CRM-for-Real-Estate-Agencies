@@ -30,9 +30,9 @@ export async function searchSettings() {
     manualAllowed: config.YANDEX_WEB_SEARCH_ENABLED && !!settings?.webSearchManualAllowed,
     autoFallback: config.YANDEX_WEB_SEARCH_AUTO_FALLBACK && !!settings?.webSearchAutoFallback };
 }
-export function scraperFor(settings: Awaited<ReturnType<typeof searchSettings>>, scenario = "success"): ScraperAdapter {
+export function scraperFor(settings: Awaited<ReturnType<typeof searchSettings>>, scenario = "success", depthOptions: Pick<import("../infrastructure/scraper-adapter").ScraperOptions, "depth" | "sourceDepth"> = {}): ScraperAdapter {
   const options = { enabled: settings.enabled, enabledSources: settings.sources,
     browserEnabled: settings.config.SCRAPER_BROWSER_ENABLED && !!settings.settings?.browserEnabled,
-    jobTimeoutMs: settings.config.SCRAPER_JOB_TIMEOUT_MS, maxConcurrentJobs: settings.config.SCRAPER_MAX_CONCURRENT_JOBS };
+    jobTimeoutMs: settings.config.SCRAPER_JOB_TIMEOUT_MS, maxConcurrentJobs: settings.config.SCRAPER_MAX_CONCURRENT_JOBS, ...depthOptions };
   return settings.config.SCRAPER_DEMO_FIXTURES ? new FixtureScraperAdapter(options, scenario, "tests/fixtures/scraper/demo-novosibirsk") : new RealEstateScraperAdapter(options);
 }

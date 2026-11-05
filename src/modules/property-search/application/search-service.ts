@@ -13,6 +13,8 @@ import { guardExternalUrl } from "@/shared/net/ssrf";
 import { getSearchAi, scraperFor, searchSettings, type SearchAiPort } from "./dependencies";
 import type { ScraperAdapter } from "../infrastructure/scraper-adapter";
 import { stableListingId } from "./listing-identity";
+import { pricePerM2 } from "../domain/prices";
+import { regroupRunListings } from "./duplicate-ingestion";
 
 export const jsonValue = (value: unknown) => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 export const priceUnits = { rub_total: "total", rub_month: "per_month", rub_year: "per_year", rub_m2_month: "per_m2_month", rub_m2_year: "per_m2_year" } as const;
@@ -42,7 +44,7 @@ export async function getSearchRun(actor: Actor, id: string) {
   return { ...run, sources, results: results.map(row => ({ ...row, snapshot: snapshots.find(s => s.listingId === row.listingId)?.normalized ?? null })), demoMode: (await searchSettings()).config.SCRAPER_DEMO_FIXTURES };
 }
 
-async function persistListing(tx: Tx, runId: string, listing: NormalizedListing, evaluation: ListingEvaluation, previousRunId: string | null, sourceMethod: "scraper" | "web_search" = "scraper", sourceOverride?: string) {
+export async function persistListing(tx: Tx, runId: string, listing: NormalizedListing, evaluation: ListingEvaluation, previousRunId: string | null, sourceMethod: "scraper" | "web_search" | "manual" = "scraper", sourceOverride?: string) {
   const source = sourceOverride ?? listing.source;
   listing = { ...listing, sourceListingId: stableListingId(listing.sourceListingId, listing.url),
     identityNeedsReview: listing.identityNeedsReview || !listing.sourceListingId };
@@ -50,18 +52,34 @@ async function persistListing(tx: Tx, runId: string, listing: NormalizedListing,
   // Advisory lock also serializes upserts when the Prisma schema cannot express that index.
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([source, listing.sourceListingId, listing.sourceUnitId])}, 0))`;
   const existing = listing.sourceListingId ? await tx.externalListing.findFirst({ where: { source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId } }) : null;
-  const data = { source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId, url: listing.url, sourceMethod,
+  const perM2 = pricePerM2(listing.price, listing.priceUnit, listing.area);
+  const date = (value?: string | null) => value && Number.isFinite(Date.parse(value)) ? new Date(value) : null;
+  const observations = { publishedAt: date(listing.publishedAt), sourceUpdatedAt: date(listing.sourceUpdatedAt),
+    // Adapter provenance remains verbatim in normalized JSON; SQL uses stable codebook values.
+    dateSource: ["site_published", "site_updated", "relative_label", "first_seen", "unknown"].includes(listing.dateSource ?? "") ? listing.dateSource! : listing.dateSource?.includes("html_label") ? "relative_label" : listing.publishedAt ? "site_published" : listing.sourceUpdatedAt ? "site_updated" : "unknown", datePrecision: listing.datePrecision ?? "unknown",
+    sourceCategoryRaw: listing.sourceCategoryRaw ?? null, purposeEvidence: listing.purposeEvidence ? jsonValue(listing.purposeEvidence) : Prisma.JsonNull,
+    pricePerM2Rub: perM2?.amount ?? null, pricePerM2Unit: perM2?.unit ?? null };
+  const data = { ...observations, fetchedAt: new Date(listing.fetchedAt), source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId, url: listing.url, sourceMethod,
     operation: listing.operation ?? "sale", priceUnit: listing.priceUnit ? priceUnits[listing.priceUnit] : "total", priceRub: listing.price,
     areaM2: listing.area !== null && listing.area > 0 ? listing.area : null, floorRaw: listing.floor.raw, floorNumber: listing.floor.number, purposes: listing.purpose ? [listing.purpose] : [],
     address: listing.address, district: listing.district, city: listing.city ?? "", sellerType: listing.seller.type,
     description: listing.description, images: jsonValue(listing.images), lastSeenAt: new Date(listing.fetchedAt) };
   const row = existing ? await tx.externalListing.update({ where: { id: existing.id }, data: { ...data, lastPrice: existing.priceRub } }) : await tx.externalListing.create({ data: { ...data, firstSeenAt: new Date(listing.fetchedAt) } });
-  const prior = previousRunId ? await tx.externalListingSnapshot.findFirst({ where: { searchRunId: previousRunId, listingId: row.id }, orderBy: { fetchedAt: "desc" } }) : null;
-  await tx.externalListingSnapshot.create({ data: { listingId: row.id, searchRunId: runId, fetchedAt: new Date(listing.fetchedAt), priceRub: listing.price, normalized: jsonValue({ ...listing, source, sourceMethod }) } });
-  const previousResult = previousRunId ? await tx.searchRunResult.findUnique({ where: { runId_listingId: { runId: previousRunId, listingId: row.id } } }) : null;
+  let previousResult = previousRunId ? await tx.searchRunResult.findUnique({ where: { runId_listingId: { runId: previousRunId, listingId: row.id } } }) : null;
+  if (previousRunId && !previousResult) {
+    const run = await tx.searchRun.findUniqueOrThrow({ where: { id: runId } });
+    // A blocked companion source in the latest partial run must not make an old listing new.
+    previousResult = await tx.searchRunResult.findFirst({ where: { listingId: row.id, run: { userId: run.userId, startedAt: { lt: run.startedAt }, ...(run.savedSearchId ? { savedSearchId: run.savedSearchId } : { savedSearchId: null, filters: { equals: run.filters as Prisma.InputJsonValue } }) } }, orderBy: [{ run: { startedAt: "desc" } }, { id: "desc" }] });
+  }
+  const prior = previousResult ? await tx.externalListingSnapshot.findFirst({ where: { searchRunId: previousResult.runId, listingId: row.id }, orderBy: [{ fetchedAt: "desc" }, { id: "asc" }] }) : null;
+  // Replayed work must not duplicate snapshots of the same observation.
+  const snapshot = await tx.externalListingSnapshot.findFirst({ where: { listingId: row.id, searchRunId: runId, fetchedAt: new Date(listing.fetchedAt) } });
+  if (!snapshot) await tx.externalListingSnapshot.create({ data: { ...observations, firstSeenAt: row.firstSeenAt, lastSeenAt: row.lastSeenAt, areaM2: data.areaM2, lastCheckedAt: row.lastCheckedAt,
+    listingId: row.id, searchRunId: runId, fetchedAt: new Date(listing.fetchedAt), priceRub: listing.price, normalized: jsonValue({ ...listing, firstSeenAt: row.firstSeenAt.toISOString(), source, sourceMethod, pricePerM2: perM2 }) } });
+  const comparable = prior?.priceRub !== null && listing.price !== null && !!listing.priceUnit && (prior?.normalized as { priceUnit?: string } | undefined)?.priceUnit === listing.priceUnit;
   await tx.searchRunResult.upsert({ where: { runId_listingId: { runId, listingId: row.id } },
     create: { runId, listingId: row.id, verdict: evaluation.verdict, criteria: jsonValue([...evaluation.criteria, ...evaluation.preferences]), score: evaluation.score,
-      isNew: !previousResult, priceChanged: !!prior && (prior.priceRub?.toString() ?? null) !== (listing.price === null ? null : new Prisma.Decimal(listing.price).toString()) },
+      isNew: !previousResult, priceChanged: !!prior && comparable && prior.priceRub?.toString() !== new Prisma.Decimal(listing.price!).toString() },
     update: { verdict: evaluation.verdict, criteria: jsonValue([...evaluation.criteria, ...evaluation.preferences]), score: evaluation.score } });
 }
 
@@ -124,6 +142,7 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
       await searchAudit(tx, actor, "run", "SearchRun", run.id, { status, count: result.listings.length });
     });
     if (fallback.automatic && ai) await performWebSearch(actor, run.id, ai, true);
+    await regroupRunListings(run.id);
     return getSearchRun(actor, run.id);
   } catch (error) {
     await db.searchRun.update({ where: { id: run.id }, data: { status: "error", finishedAt: new Date(), fallbackReason: "Поиск завершился ошибкой. Сохранённые подборки доступны." } });

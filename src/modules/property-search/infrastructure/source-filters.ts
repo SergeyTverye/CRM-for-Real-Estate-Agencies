@@ -9,7 +9,7 @@ const cities = {
 } as const;
 
 /** Site IDs are independent namespaces. Trusted server options override defaults. */
-export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query {
+export function resolveSourceGeography(filters: SearchFilters, source: Source, sourceOptions?: RealEstateScraper.Query["sourceOptions"]) {
   const city = cities[filters.city.trim().toLocaleLowerCase("ru") as keyof typeof cities];
   const defaults: RealEstateScraper.SourceOptions = city ? {
     citySlug: city.slug,
@@ -18,6 +18,9 @@ export function buildScraperQuery(filters: SearchFilters, source: Source, signal
     ...(source === "domclick" ? { address: city.domclick } : {}),
     ...(source === "mirkvartir" ? { locationIds: city.mirkvartir } : {}),
   } : {};
+  return { ...defaults, ...sourceOptions?.[source] };
+}
+export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query {
   // OnRealt has no all-commercial route; searchSite splits these OR branches.
   const types = filters.purposes.length ? [...new Set(filters.purposes.map(p => purposeMap[p]))]
     : source === "onrealt" ? ["retail", "freePurpose", "office", "industrial", "warehouse"] as const : ["commercial"] as const;
@@ -25,7 +28,7 @@ export function buildScraperQuery(filters: SearchFilters, source: Source, signal
   const { maxPages, limit } = resolveSourceDepth(source, depth);
   return { city: filters.city, category: "commercial", types: [...types], deal: filters.operation,
     sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages, limit, signal,
-    sourceOptions: { ...sourceOptions, [source]: { ...defaults, ...sourceOptions?.[source] } } };
+    sourceOptions: { ...sourceOptions, [source]: resolveSourceGeography(filters, source, sourceOptions) } };
 }
 
 type TechnicalError = { code?: string; status?: number; error?: string; types?: RealEstateScraper.PropertyType[] };

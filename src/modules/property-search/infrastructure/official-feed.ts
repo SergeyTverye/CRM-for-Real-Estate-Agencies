@@ -2,6 +2,7 @@ import ExcelJS from "exceljs";
 import { Readable } from "node:stream";
 import { load } from "cheerio";
 import { unzipSync } from "fflate";
+import { Parser } from "htmlparser2";
 import type { Source } from "../domain/types";
 import { manualListing, manualListingSchema } from "./manual-listing";
 import { extractListingDates } from "./listing-dates";
@@ -23,6 +24,10 @@ export async function importOfficialFeed(bytes: Buffer, options: { format: "csv"
   if (options.format === "xml") {
     const xml = bytes.toString("utf8");
     if (/<!DOCTYPE|<!ENTITY/iu.test(xml)) throw new Error("UNSAFE_FEED_XML");
+    // SAX pass before DOM construction: bound both stack depth and wide inputs.
+    let depth = 0, elements = 0;
+    const guard = new Parser({ onopentag() { if (++depth > 32 || ++elements > 50000) throw new Error("FEED_XML_COMPLEXITY_LIMIT"); }, onclosetag() { depth--; } }, { xmlMode: true, decodeEntities: false });
+    guard.end(xml);
     const $ = load(xml, { xmlMode: true });
     $("offer, Ad").slice(0, limit + 1).each((_, el) => {
       const row: Record<string, string> = {};

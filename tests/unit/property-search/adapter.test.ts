@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import RealEstateScraper from "real-estate-scrapper";
+import { chromium } from "playwright-core";
 import { SOURCES, type Source } from "@/modules/property-search/domain/types";
 import { defaultScraperFactory, RealEstateScraperAdapter, ScraperJobLimiter, type ScraperFactory } from "@/modules/property-search/infrastructure/scraper-adapter";
 import { guardExternalUrl, isPublicIp, parseExternalUrl, safeRequest } from "@/shared/net/ssrf";
+import * as ssrf from "@/shared/net/ssrf";
 afterEach(() => vi.restoreAllMocks());
 
 function fixture(source: Source): RealEstateScraper.SearchResult & { source: Source } {
@@ -15,6 +17,22 @@ function adapter(searchSite: (source: Source) => Promise<ReturnType<typeof fixtu
   return { instance: new RealEstateScraperAdapter({ enabled: true, browserEnabled: false, factory, ...extra }), factory, close };
 }
 describe("seven source contract fixtures (synthetic, offline)", () => {
+  it("browser subrequests consume the remaining absolute deadline and stop when exhausted", async () => {
+    let handle!: (route: { request(): unknown; abort(): Promise<void>; fulfill(input: unknown): Promise<void> }) => Promise<void>;
+    const context = { route: vi.fn(async (_pattern: string, callback: typeof handle) => { handle = callback; }), routeWebSocket: vi.fn(async () => {}) };
+    const close = vi.fn(async () => {});
+    vi.spyOn(chromium, "launch").mockResolvedValue({ newContext: async () => context, close } as never);
+    vi.spyOn(RealEstateScraper, "createBrowserTransport").mockReturnValue(async () => ({ data: "", status: 200 }));
+    const now = Date.now(), clock = vi.spyOn(Date, "now").mockReturnValue(now);
+    const network = vi.spyOn(ssrf, "safeRequest").mockResolvedValue({ status: 200, headers: {}, data: Buffer.from(""), url: "https://www.cian.ru/" });
+    const client = await defaultScraperFactory({ timeout: 30000, jobDeadlineAt: now + 10000, browser: { sources: ["cian"] } });
+    const route = { request: () => ({ url: () => "https://www.cian.ru/", method: () => "GET", headers: () => ({}), postData: () => null }), abort: vi.fn(async () => {}), fulfill: vi.fn(async () => {}) };
+    clock.mockReturnValue(now + 9500); await handle(route);
+    expect(network).toHaveBeenCalledWith("https://www.cian.ru/", expect.objectContaining({ timeoutMs: 500 }));
+    clock.mockReturnValue(now + 10001); await handle(route);
+    expect(route.abort).toHaveBeenCalledOnce(); expect(network).toHaveBeenCalledOnce();
+    await client.close();
+  });
   it.each(SOURCES)("normalizes %s and re-filters on server", async source => {
     const { instance, close } = adapter(async s => fixture(s));
     const result = await instance.search({ city: "Москва", operation: "sale", sources: [source], areaTo: 99 });
@@ -87,7 +105,7 @@ describe("seven source contract fixtures (synthetic, offline)", () => {
   });
   it("does not call a failed first page partial or expose upstream payloads", async () => {
     const { instance } = adapter(async source => ({ ...fixture(source), results: [], pages: [], errors: [{ source, page: 1, code: "PARSE_FAILED", error: "private seller payload" }] }));
-    expect((await instance.search({ operation: "sale", sources: ["cian"] })).sources[0]).toMatchObject({ status: "error", resultCount: 0, reason: "PARSE_FAILED" });
+    expect((await instance.search({ operation: "sale", sources: ["cian"] })).sources[0]).toMatchObject({ status: "error", resultCount: 0, reason: "cian: PARSE_FAILED" });
   });
   it("disabled does not launch browser", async () => {
     const { instance, factory } = adapter(async s => fixture(s), { enabled: false });
@@ -113,10 +131,10 @@ describe("seven source contract fixtures (synthetic, offline)", () => {
     const originalClose = vi.fn(async () => {}), close = vi.fn(async () => {});
     const newContext = vi.fn(async () => context);
     const launched = { context: { close: originalClose }, browser: { newContext }, close } as unknown as Awaited<ReturnType<typeof RealEstateScraper.launchBrowserTransport>>;
-    vi.spyOn(RealEstateScraper, "launchBrowserTransport").mockResolvedValue(launched);
+    vi.spyOn(chromium, "launch").mockResolvedValue({ ...launched.browser, close } as never);
     vi.spyOn(RealEstateScraper, "createBrowserTransport").mockReturnValue(async () => ({ data: "", status: 200 }));
     const client = await defaultScraperFactory({ browser: { channel: "chrome", sources: ["cian"] } });
-    expect(originalClose).toHaveBeenCalledOnce();
+    expect(originalClose).not.toHaveBeenCalled();
     expect(newContext).toHaveBeenCalledWith({ serviceWorkers: "block", locale: "ru-RU" });
     expect(context.route).toHaveBeenCalledWith("**/*", expect.any(Function));
     expect(context.routeWebSocket).toHaveBeenCalledWith("**/*", expect.any(Function));
@@ -124,7 +142,7 @@ describe("seven source contract fixtures (synthetic, offline)", () => {
   });
   it("closes browser if guarded context setup fails", async () => {
     const close = vi.fn(async () => {});
-    vi.spyOn(RealEstateScraper, "launchBrowserTransport").mockResolvedValue({ context: { close: async () => {} }, browser: { newContext: async () => { throw new Error("setup failed"); } }, close } as unknown as Awaited<ReturnType<typeof RealEstateScraper.launchBrowserTransport>>);
+    vi.spyOn(chromium, "launch").mockResolvedValue({ newContext: async () => { throw new Error("setup failed"); }, close } as never);
     await expect(defaultScraperFactory({ browser: true })).rejects.toThrow("setup failed");
     expect(close).toHaveBeenCalledOnce();
   });

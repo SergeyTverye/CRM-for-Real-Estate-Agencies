@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { addListingByUrl, listingSourceUrl, manualListing } from "@/modules/property-search/infrastructure/manual-listing";
 import { importOfficialFeed } from "@/modules/property-search/infrastructure/official-feed";
 import * as http from "@/modules/property-search/infrastructure/scraper-http";
+import { tabularExport } from "@/modules/export/application/tabular-export";
 
 afterEach(() => vi.restoreAllMocks());
 const fetchedAt = "2026-11-05T12:00:00Z";
@@ -43,6 +44,22 @@ describe("SR-05 link/manual fallback", () => {
 });
 
 describe("official feed preview, no external requests or CRM writes", () => {
+  it("rejects deep and wide XML before DOM construction", async () => {
+    for (const xml of ["<x>".repeat(33) + "</x>".repeat(33), "<root>" + "<x/>".repeat(50000) + "</root>"])
+      await expect(importOfficialFeed(Buffer.from(xml), { format: "xml", source: "yandex" })).rejects.toThrow("FEED_XML_COMPLEXITY_LIMIT");
+  });
+  it.each(["=1+1", "+SUM(A1)", "-2+3", "@cmd", "  =1", "\t=1"])("escapes imported formula prefix %j in CSV and XLSX", async address => {
+    const workbook = new ExcelJS.Workbook(), sheet = workbook.addWorksheet("Feed");
+    sheet.addRow(["URL", "Title", "OperationType", "Address"]);
+    sheet.addRow(["https://www.avito.ru/a/101", "Office", "Продам", address]);
+    const imported = await importOfficialFeed(Buffer.from(await workbook.xlsx.writeBuffer()), { format: "xlsx", source: "avito" });
+    const rows = [[imported.listings[0]!.address]];
+    const csv = Buffer.from(await tabularExport("csv", ["Адрес"], rows)).toString();
+    expect(csv).toContain("\"'");
+    const output = new ExcelJS.Workbook(); await output.xlsx.load(Buffer.from(await tabularExport("xlsx", ["Адрес"], rows)) as never);
+    expect(output.worksheets[0]!.getCell("A2").type).toBe(ExcelJS.ValueType.String);
+    expect(output.worksheets[0]!.getCell("A2").text).toMatch(/^'/u);
+  });
   it("recognizes Yandex XML values and independent source dates, excludes seller subtree", async () => {
     const xml = `<realty-feed><offer internal-id="agency-1"><type>продажа</type><commercial-type>офис</commercial-type><url>https://realty.yandex.ru/offer/101/</url><price><value>1500000</value></price><area><value>70.5</value></area><location><locality-name>Новосибирск</locality-name><address>Тестовая 1</address></location><creation-date>2026-11-04T12:00:00+07:00</creation-date><last-update-date>2026-11-05T12:00:00+07:00</last-update-date><sales-agent><name>PRIVATE SELLER</name><phone>PRIVATE PHONE</phone></sales-agent></offer></realty-feed>`;
     const result = await importOfficialFeed(Buffer.from(xml), { format: "xml", source: "yandex", fetchedAt });
