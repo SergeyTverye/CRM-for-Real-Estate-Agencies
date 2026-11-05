@@ -25,7 +25,9 @@ export async function seedSearchAndCosts(ctx: DemoContext) {
       const created = await runSearch(actor, { filters, sources: filters.sources, savedSearchId, needId, confirmedPaid: true, demoScenario: scenario });
       run = await db.searchRun.findUniqueOrThrow({ where: { id: created.id } });
     }
-    if (scenario === "failure" && !await db.searchRunResult.count({ where: { runId: run.id, listing: { sourceMethod: "web_search" } } })) throw new Error("Demo web fallback failed; check demo AI limits/tariffs");
+    // v3.1 correctly rejects the legacy synthetic URL as a catalogue URL.
+    // Keep the recorded zero-card fallback honestly; never fabricate a verified card.
+    if (scenario === "failure" && !await db.searchRunSource.count({ where: { runId: run.id, source: "web_search", status: "success" } })) throw new Error("Demo web fallback failed; check demo AI limits/tariffs");
     if (run.fallbackReason !== label) await db.searchRun.update({ where: { id: run.id }, data: { fallbackReason: label } });
     for (const source of await db.searchRunSource.findMany({ where: { runId: run.id } })) {
       if (!source.reason?.includes(marker)) await db.searchRunSource.update({ where: { id: source.id }, data: { reason: `${marker} ДЕМО / записанный ответ. ${source.reason ?? ""}` } });

@@ -131,3 +131,55 @@ Property.commercialPurpose, а демо-объекты имеют Property.prope
 | [live-ai/19-rent-results.png](../screenshots/vkr/live-ai/19-rent-results.png) | 2026-11-05T14:04:15.688Z | 2026-11-05T12:04:09.444Z | `d1346e2003e739607f8760b529b84eb87bad41c4c2e774fe2b1055ee10a55176` |
 | [live-ai/25-repeat-results.png](../screenshots/vkr/live-ai/25-repeat-results.png) | 2026-11-05T14:04:18.352Z | 2026-11-05T12:08:05.251Z | `5a608809863930bf009a40edb0dce2c0d1f0ca160f9c040555bdef1a99659f75` |
 | [live-ai/26-comparison.png](../screenshots/vkr/live-ai/26-comparison.png) | 2026-11-05T14:04:21.589Z | 2026-11-05T11:53:10.129Z | `5d6e7d80191be450496bb101fd31eb7f5dddf0a2ac4088e2720d197d33002e6c` |
+
+<!-- v31-demo:start -->
+## v3.1 DEMO
+
+Дата проверки: 06.11.2026. Все 27 кадров — синтетическая crm_demo, ru-RU, Asia/Novosibirsk. Desktop 1440×900, mobile 390×900. Режим DEMO указан в этом описании и manifest; в AI-чате также видна явная пометка DEMO-провайдера. Новых платных AI/веб/скрапер-вызовов этим прогоном нет. Скриншоты поиска ведёт отдельный агент.
+
+96 задач охватывают ноябрь 2026 — январь 2027; три приоритета, 10 пунктов чек-листов у трёх задач, недельный/квартальный/годовой повторы. 16 звонков: четыре источника × четыре итога, включая спам, ошибочный, разовый и перспективный. Неперспективные звонки не связаны с Client/Need. Две личные подборки с тремя объектами каждая: независимая и связанная с потребностью. Четыре шаблона из templates/examples, по две версии и четыре сохранённых документа; два DocumentCollection FK. История AI содержит два синтетических сообщения и один неподтверждённый черновик.
+
+Seed повторён; состав v3.1, число версий и документов не изменились: [проверка](../screenshots/vkr/v31/demo-data-verification.json). База и хранилище восстановлены после остановки локального tmpfs; чужие LIVE-испытания этим DEMO-прогоном не подтверждаются.
+
+Настоящие сформированные DOCX/XLSX прочитаны из StorageAdapter с проверкой checksum. Все четыре режима отрендерены LibreOffice → PDF → Poppler PNG, по одной странице каждый; DOCX дополнительно проверен штатным render_docx.py. generated-docx/generated-xlsx — страница 1/1 с сохранением пропорций на 1440×900. Файлы в CRM не заменялись картинками.
+
+Формы на кадрах — до сохранения: массовые задачи, квартальный повтор, привязка независимой подборки и AI-действие не подтверждены. Отклонённое завершение задачи действительно получило 422 OPEN_REQUIRED_CHECKLIST. Порог показан в форме без записи настройки. Мобильные формы и календарь прокручиваются штатно; снимок показывает текущий viewport.
+
+Точечные UI-исправления: рабочие часы календаря видны во внутренней прокрутке; длинные дневные счётчики и фильтры сворачиваются; toolbar адаптирован к 390 px; расширен выбор потребности; исправлен повторный выбор клиента в массовых задачах; выровнены колонки/названия форматов шаблонов; необязательный контекст звонка свёрнут. Каждый из 27 кадров просмотрен.
+
+Проверки: tsc --noEmit; целевой ESLint; 34 unit-теста планера/шаблонов; 7 read-only DEMO-тестов с фактическим хранилищем; inspect-v31; browser modes planner/tasks/recurrence/calls/collections/templates/timeline/chat — без pageerror. Это проверка DEMO и визуального среза общей рабочей копии, не production build/UAT/приёмка финального SHA.
+
+Воспроизведение: явный DATABASE_URL на crm_demo → npm run db:seed:demo → npx tsx scripts/demo/inspect-v31.ts → npx vitest run --config scripts/demo/demo.vitest.config.mts. Dev-сервер — порт 3416, NEXT_DIST_DIR=.next-3416, AI_ENABLED=false, YANDEX_WEB_SEARCH_ENABLED=false, SCRAPER_ENABLED=false. Затем node scripts/vkr/v31-screenshots.mjs <mode>; экспорт файлов — scripts/demo/export-v31-documents.ts; рендер — scripts/vkr/v31-render-documents.mjs; после визуальной проверки — scripts/vkr/v31-finalize.mjs --reviewed. Для проверки идемпотентности сохраните первый seed-inspection.json как data/v31-shots/seed-first.json и повторите seed/inspect-v31 до финализации. Сессии закрываются через logout в finally. После съёмки сервер 3416 остановлен, временно отключённые must_change_password у трёх новых seed-пользователей восстановлены; добавления .next-3416 удалены из tsconfig, чужие include сохранены. Для повторной съёмки новых seed-пользователей требуется штатная смена временного пароля либо отдельная временная DEMO-сессия.
+
+Даты кадров и базовый HEAD сохранены в [manifest](../screenshots/vkr/v31/manifest.json), контрольные суммы — [SHA256SUMS](../screenshots/vkr/v31/SHA256SUMS). HEAD в manifest относится к основе незакоммиченной общей копии.
+
+| Кадр | Содержание (DEMO) | Размер | Время UTC |
+|---|---|---|---|
+| [planner-day.png](../screenshots/vkr/v31/planner-day.png) | Планер: День, цвета и легенда | 1440×900 | 2026-11-05T22:30:31.796Z |
+| [planner-week.png](../screenshots/vkr/v31/planner-week.png) | Планер: Неделя, цвета и легенда | 1440×900 | 2026-11-05T22:30:34.066Z |
+| [planner-month.png](../screenshots/vkr/v31/planner-month.png) | Планер: Месяц, цвета и легенда | 1440×900 | 2026-11-05T22:30:36.004Z |
+| [planner-3months.png](../screenshots/vkr/v31/planner-3months.png) | Планер: Три месяца, цвета и легенда | 1440×900 | 2026-11-05T22:30:45.547Z |
+| [planner-filters-employee.png](../screenshots/vkr/v31/planner-filters-employee.png) | Фильтр по сотруднику | 1440×900 | 2026-11-05T22:30:47.457Z |
+| [planner-settings-threshold.png](../screenshots/vkr/v31/planner-settings-threshold.png) | Порог близкого срока: 24 часа, форма руководителя без изменения настройки | 1440×900 | 2026-11-05T22:30:47.671Z |
+| [task-checklist.png](../screenshots/vkr/v31/task-checklist.png) | Чек-лист, сроки и прогресс | 1440×900 | 2026-11-05T22:31:20.924Z |
+| [task-complete-warning.png](../screenshots/vkr/v31/task-complete-warning.png) | Сервер отклоняет завершение с обязательными открытыми пунктами; явное подтверждение ещё не дано | 1440×900 | 2026-11-05T22:31:32.298Z |
+| [bulk-tasks-preview.png](../screenshots/vkr/v31/bulk-tasks-preview.png) | Предпросмотр двух задач; записи не создаются до подтверждения | 1440×900 | 2026-11-05T22:31:54.477Z |
+| [recurrence-quarter.png](../screenshots/vkr/v31/recurrence-quarter.png) | Квартальный контроль договора: следующий экземпляр после выполнения, форма без сохранения | 1440×900 | 2026-11-05T22:32:07.984Z |
+| [call-log-form.png](../screenshots/vkr/v31/call-log-form.png) | Ручной разовый звонок: источник и итог без создания клиента | 1440×900 | 2026-11-05T22:30:31.715Z |
+| [call-log-spam.png](../screenshots/vkr/v31/call-log-spam.png) | Спам без Client и потребности; форма до сохранения | 1440×900 | 2026-11-05T22:30:32.016Z |
+| [call-sources-stats.png](../screenshots/vkr/v31/call-sources-stats.png) | Источники и итоги звонков, числители и знаменатели на первичных синтетических записях | 1440×900 | 2026-11-05T22:31:06.481Z |
+| [client-timeline.png](../screenshots/vkr/v31/client-timeline.png) | Таймлайн клиента: первичные события, документы, задачи, подборка | 1440×900 | 2026-11-05T22:22:59.343Z |
+| [client-timeline-filtered-need.png](../screenshots/vkr/v31/client-timeline-filtered-need.png) | История по выбранной потребности клиента | 1440×900 | 2026-11-05T22:23:03.202Z |
+| [collections-list.png](../screenshots/vkr/v31/collections-list.png) | Именованные подборки с клиентом и без клиента | 1440×900 | 2026-11-05T22:28:04.632Z |
+| [collection-detail.png](../screenshots/vkr/v31/collection-detail.png) | Состав, комментарии, статусы и связь с потребностью | 1440×900 | 2026-11-05T22:28:17.075Z |
+| [collection-link-need.png](../screenshots/vkr/v31/collection-link-need.png) | Выбор потребности для независимой подборки; привязка ещё не выполнена | 1440×900 | 2026-11-05T22:28:27.450Z |
+| [templates-list.png](../screenshots/vkr/v31/templates-list.png) | Четыре режима шаблонизатора, текущие версии | 1440×900 | 2026-11-05T22:22:19.457Z |
+| [template-versions.png](../screenshots/vkr/v31/template-versions.png) | История двух версий и манифест | 1440×900 | 2026-11-05T22:22:37.387Z |
+| [template-preview.png](../screenshots/vkr/v31/template-preview.png) | Проверка исходной записи и явное подтверждение формирования | 1440×900 | 2026-11-05T22:22:50.883Z |
+| [generated-docx.png](../screenshots/vkr/v31/generated-docx.png) | DEMO · настоящий сформированный DOCX, LibreOffice → PDF → Poppler PNG, страница 1/1; без правки содержимого | 1440×900 | 2026-11-05T22:21:32.485Z |
+| [generated-xlsx.png](../screenshots/vkr/v31/generated-xlsx.png) | DEMO · настоящий сформированный XLSX, LibreOffice → PDF → Poppler PNG, страница 1/1; без правки содержимого | 1440×900 | 2026-11-05T22:21:38.263Z |
+| [ai-chat-panel.png](../screenshots/vkr/v31/ai-chat-panel.png) | Личная история DEMO-провайдера, без внешнего вызова | 1440×900 | 2026-11-05T22:31:40.903Z |
+| [ai-chat-draft-confirm.png](../screenshots/vkr/v31/ai-chat-draft-confirm.png) | Предпросмотр черновика перед явным подтверждением; задача не создана | 1440×900 | 2026-11-05T22:31:41.570Z |
+| [mobile-planner.png](../screenshots/vkr/v31/mobile-planner.png) | Мобильный планер 390 px | 390×900 | 2026-11-05T22:30:49.036Z |
+| [mobile-call-log.png](../screenshots/vkr/v31/mobile-call-log.png) | Ручная регистрация звонка на мобильном экране 390 px | 390×900 | 2026-11-05T22:30:32.164Z |
+<!-- v31-demo:end -->

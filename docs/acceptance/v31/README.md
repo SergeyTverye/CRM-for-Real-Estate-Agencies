@@ -8,8 +8,8 @@
 | AT-02 | Поиск по свежести | PARTIAL | LIVE-извлечение дат на всех источниках |
 | AT-03 | Сортировки и большие выдачи | PARTIAL | production-сборка и живые большие выдачи |
 | AT-04 | Семь адаптеров | PARTIAL | полный живой HTML replay/селекторы всех семи |
-| AT-05 | CAPTCHA с участием сотрудника | PARTIAL | production-цепочка SearchRun, Docker runtime/sandbox |
-| AT-06 | Отказ и восстановление | PARTIAL | production-регрессия и живые отказы всех источников |
+| AT-05 | CAPTCHA с участием сотрудника | PASS (DEMO) | разрешённый стенд + production Docker; реальные ограничения источников сохраняются |
+| AT-06 | Отказ и восстановление | PASS (DEMO) | очередь + HITL + Docker; общий release gate — AT-17 |
 | AT-07 | Дедупликация | PARTIAL | визуальная проверка страницы поиска после подключения UI |
 | AT-08 | AI-анализ выдачи | PARTIAL | LIVE на более широком наборе; production release gate |
 | AT-09 | Экспорт | PARTIAL | финальная production-сборка и реальные данные |

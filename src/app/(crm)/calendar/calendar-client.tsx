@@ -86,16 +86,16 @@ export function CalendarClient({ timeZone, userId, users, labels, isManager, set
   };
   async function close() { if (!dirty || await requestConfirmation("Закрыть без сохранения? Введённые изменения будут потеряны.")) { setEditing(null); setDirty(false); } }
   return <div className="planner-calendar">
-    <style jsx global>{`.planner-calendar .fc-dayGridQuarter-view .fc-daygrid-day-frame { min-height: 72px; } .planner-calendar .fc-dayGridQuarter-view .fc-scrollgrid-sync-table { height: auto !important; }`}</style>
+    <style jsx global>{`.planner-calendar .fc-dayGridQuarter-view .fc-daygrid-day-frame { min-height: 72px; } .planner-calendar .fc-dayGridQuarter-view .fc-scrollgrid-sync-table { height: auto !important; } .planner-calendar .fc-toolbar { flex-wrap: wrap; gap: 12px; } @media (max-width: 640px) { .planner-calendar .fc-toolbar { flex-direction: column; align-items: stretch; } .planner-calendar .fc-toolbar-title { font-size: 1.1rem; text-align: center; } .planner-calendar .fc-button { padding: .45em .5em; font-size: .85rem; } }`}</style>
     <h1 className="text-2xl font-semibold">Планер</h1><p className="mb-3 text-sm">Часовой пояс: {timeZone}. Срок задачи и показ без длительности — точечные события.</p>
     <div className="mb-3 flex flex-wrap gap-3"><MiniCalendar initial={local(new Date().toISOString())} onSelect={day => { calendar.current?.getApi().gotoDate(day); }} /><BrowserNotificationControls /></div>
     {isManager ? <PlannerSettings initial={setting} onSaved={() => { void apiCall<{ soonThresholdHours: number }>("GET", "/api/v1/calendar/settings").then(s => setSoonHours(s.soonThresholdHours)); refresh(); }} /> : null}
     <p className="mb-3 text-sm" aria-label="Легенда цветов"><span className="text-red-700">Красный — просрочено / критично</span> · <span className="text-yellow-800">Жёлтый — до срока ≤ {soonHours} ч</span> · <span className="text-green-700">Зелёный — под контролем</span> · <span className="text-slate-500">Серый — завершено / отменено</span>. Деловой приоритет указан отдельно.</p>
-    <div className="mb-4 flex flex-wrap gap-2">
+    <details className="mb-4 rounded-md border border-slate-200 bg-white p-3"><summary className="cursor-pointer text-sm font-medium">Фильтры и быстрые действия</summary><div className="mt-3 flex flex-wrap items-end gap-2">
       <button className="btn btn-primary" onClick={() => openNew()}>+ Встреча / личная запись</button>
       <CalendarQuickCreate timeZone={timeZone} users={users} labels={labels} onDone={refresh} />
       <label>Охват <select className="input" value={scope} onChange={e => { setScope(e.target.value); setEmployee(e.target.value === "all" ? "" : userId); }}><option value="mine">Мои</option><option value="all">Все доступные</option><option value="employee">Сотрудник</option></select></label>
-      {scope === "employee" ? <label>Сотрудник <select className="input" value={employee} onChange={e => setEmployee(e.target.value)}>{users.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}</select></label> : null}
+      {scope === "employee" ? <label>Сотрудник <select aria-label="Сотрудник планера" className="input" value={employee} onChange={e => setEmployee(e.target.value)}>{users.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}</select></label> : null}
       <div className="w-64"><label className="text-sm">Клиент</label><EntityPicker<LinkPick> url="/api/v1/calendar/links?type=clientId" value={client} onChange={setClient} render={c => c.label} placeholder="Поиск по названию клиента…" /></div>
       <label>Приоритет <select className="input" value={priority} onChange={e => setPriority(e.target.value)}><option value="">Все</option>{optionsOf("taskPriority").map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>
       <label>Срок <select className="input" value={deadline} onChange={e => setDeadline(e.target.value)}><option value="">Все сроки</option><option value="overdue">Просрочено / критично</option><option value="soon">Скоро</option><option value="controlled">Под контролем</option><option value="closed">Завершено / отменено</option></select></label>
@@ -103,15 +103,17 @@ export function CalendarClient({ timeZone, userId, users, labels, isManager, set
       <label>Статус <select className="input" value={status} onChange={e => setStatus(e.target.value)}><option value="">Все</option>{[...optionsOf("taskStatus"), { value: "scheduled", label: "Встреча" }, { value: "busy", label: "Занято" }, { value: "signed", label: "Подписанный договор" }, { value: "draft", label: "Черновик договора" }, { value: "expired", label: "Истёкший договор" }].map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></label>
       <button className="btn" onClick={refresh}>Обновить</button>
     </div>
+    </details>
     <FormErrorBanner error={action.error} onRetry={() => { close(); refresh(); }} />
     {notice ? <p className="alert alert-warning mb-3" role="status">{notice}</p> : null}
     {loading ? <p role="status">Загрузка календаря…</p> : empty ? <p>В выбранном периоде событий нет. Выберите свободное время для создания встречи.</p> : null}
-    <p className="mb-2 text-sm" role="status">Событий в периоде: {counts.reduce((s,d) => s+d.total,0)}. {counts.length ? `По дням: ${counts.map(d => `${d.day.slice(8)}.${d.day.slice(5,7)} — ${d.total}`).join("; ")}` : ""}</p>
+    <p className="mb-2 text-sm" role="status">Событий в периоде: {counts.reduce((s,d) => s+d.total,0)}.</p>
+    <details className="mb-2 text-sm"><summary>Нагрузка по дням</summary><p className="mt-2 text-slate-600">{counts.map(d => `${d.day.slice(8)}.${d.day.slice(5,7)} — ${d.total}`).join("; ") || "Нет событий"}</p></details>
     <details className="mb-3 text-sm"><summary>Нагрузка по неделям</summary>{Object.entries(counts.reduce<Record<string,number>>((result, day) => { const date = new Date(`${day.day}T00:00:00Z`); date.setUTCDate(date.getUTCDate()-(date.getUTCDay()+6)%7); const key = date.toISOString().slice(0,10); result[key] = (result[key] ?? 0)+day.total; return result; }, {})).map(([week,total]) => <p key={week}>Неделя с {week.split("-").reverse().join(".")}: {total}</p>)}</details>
     <FullCalendar ref={calendar} plugins={[dayGrid, timeGrid, list, interaction]} locale={ru} timeZone="UTC" initialView="timeGridWeek"
       views={{ dayGridQuarter: { type: "dayGrid", duration: { months: 3 }, dateIncrement: { months: 3 }, buttonText: "Три месяца" } }}
       headerToolbar={{ left: "prev,next today", center: "title", right: "timeGridDay,timeGridWeek,dayGridMonth,dayGridQuarter" }}
-      height="auto" firstDay={1} now={local(new Date().toISOString())} lazyFetching={false} selectable eventDurationEditable={false} forceEventDuration={false} displayEventEnd={false}
+      height={680} firstDay={1} now={local(new Date().toISOString())} lazyFetching={false} selectable eventDurationEditable={false} forceEventDuration={false} displayEventEnd={false}
       slotMinTime="00:00:00" slotMaxTime="24:00:00" scrollTime="08:00:00"
       eventMaxStack={3} dayMaxEvents={3} moreLinkText={n => `+ещё ${n}`} moreLinkContent={({ num }) => `+ещё ${num}`}
       eventDidMount={({ el, event }) => { const item = event.extendedProps.item as CalendarItem | undefined; el.title = `${event.title}${item?.tone ? ` · ${({ red: "Просрочено / критично", yellow: "Скоро", green: "Под контролем", gray: "Завершено / отменено" })[item.tone]}` : " · Выбрать день для подробностей"}`; }}

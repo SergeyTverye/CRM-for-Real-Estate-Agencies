@@ -19,7 +19,7 @@ export function BulkTasks({ timeZone }: { timeZone: string }) {
       const result = await apiCall<{ count: number }>("POST", "/api/v1/tasks/bulk", { ...payload, confirmed: true, previewToken: preview.previewToken });
       setNotice(`Создано задач: ${result.count}`); setOpen(false); setClients([]); router.refresh(); return true;
     }); }}><FormErrorBanner error={action.error} />
-      <Field label="Клиенты (до 100)"><EntityPicker<Client> value={null} url="/api/v1/clients/pick" render={c => c.displayName} onChange={c => { if (c && !clients.some(i => i.id === c.id)) setClients(v => [...v,c]); setPreview(null); }} /></Field>
+      <Field label="Клиенты (до 100)"><EntityPicker<Client> key={clients.length} value={null} url="/api/v1/clients/pick" render={c => c.displayName} onChange={c => { if (c && !clients.some(i => i.id === c.id)) setClients(v => [...v,c]); setPreview(null); }} /></Field>
       <ul>{clients.map(c => <li key={c.id}>{c.displayName} <button className="btn btn-sm" type="button" onClick={() => { setClients(v => v.filter(i => i.id !== c.id)); setPreview(null); }}>Убрать</button></li>)}</ul>
       <Field label="Что сделать" required><input className="input" required maxLength={300} value={title} onChange={e => { setTitle(e.target.value); setPreview(null); }} /></Field>
       <Field label="Срок" required><DateTimeInput timeZone={timeZone} value={dueAt} onChange={v => { setDueAt(v); setPreview(null); }} /></Field>

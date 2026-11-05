@@ -109,7 +109,9 @@ describe("crm_demo synthetic demonstration acceptance (no reset)", () => {
     expect(runs.some(r => r.sources.some(s => s.status === "blocked") && r.sources.some(s => s.source !== "web_search" && s.status === "success"))).toBe(true);
     const fallback = runs.find(r => r.webSearchUsed)!;
     expect(fallback.sources.filter(s => s.source !== "web_search").every(s => s.status === "blocked")).toBe(true);
-    expect(fallback.results.some(r => r.listing.sourceMethod === "web_search" && r.verdict === "needs_review")).toBe(true);
+    const webCards = fallback.results.filter(r => r.listing.sourceMethod === "web_search");
+    expect(webCards.every(r => r.verdict === "needs_review")).toBe(true);
+    if (!webCards.length) expect(fallback.sources.find(s => s.source === "web_search")).toMatchObject({ status: "success", resultCount: 0, reason: expect.stringContaining("CATALOGUE_NOT_LISTING") });
     expect(runs.every(r => r.sources.every(s => s.reason?.includes(marker)))).toBe(true);
     expect(await db.savedSearch.count({ where: { name: { startsWith: marker } } })).toBe(2);
     expect(await db.searchBookmark.count()).toBeGreaterThanOrEqual(2);

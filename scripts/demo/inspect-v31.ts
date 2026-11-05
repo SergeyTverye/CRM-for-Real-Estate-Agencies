@@ -1,5 +1,30 @@
 import { db, demoId } from "./context";
+import assert from "node:assert/strict";
+import { writeFile, mkdir } from "node:fs/promises";
 async function main() {
-  console.log({ tasks: await db.task.count({where:{description:{contains:"DEMO v3.1"}}}), checklist: await db.taskChecklistItem.count(), calls: await db.leadRequest.count({where:{id:demoId("v31:call:0")}}), collections: await db.propertyCollection.count({where:{name:{startsWith:"DEMO"}}}), templates: await db.documentTemplate.count({where:{code:{startsWith:"demo_v31"}}}), chat:await db.aiChatSession.count({where:{id:demoId("v31:chat")}}) });
+  const tasks = await db.task.findMany({ where: { id: { in: Array.from({ length: 96 }, (_, i) => demoId(`v31:task:${i}`)) } }, orderBy: { dueAt: "asc" } });
+  assert.equal(tasks.length, 96);
+  assert.deepEqual([...new Set(tasks.map(t => t.dueAt!.toISOString().slice(0, 7)))], ["2026-11", "2026-12", "2027-01"]);
+  assert.equal(new Set(tasks.map(t => t.priority)).size, 3);
+  assert(tasks.some(t => t.recurrenceKind === "monthly" && t.recurrenceInterval === 3));
+  assert.equal(new Set(tasks.filter(t => [1, 33, 63].some(i => t.id === demoId(`v31:task:${i}`))).map(t => t.dueAt!.toISOString().slice(0, 7))).size, 3);
+  const checklist = await db.taskChecklistItem.findMany({ where: { taskId: demoId("v31:task:1") } });
+  assert.equal(checklist.length, 4); assert(checklist.some(c => c.required && c.status === "open"));
+  for (const taskIndex of [33, 63]) assert.equal(await db.taskChecklistItem.count({ where: { taskId: demoId(`v31:task:${taskIndex}`) } }), 3);
+  const calls = await db.leadRequest.findMany({ where: { id: { in: Array.from({ length: 16 }, (_, i) => demoId(`v31:call:${i}`)) } } });
+  assert.equal(calls.length, 16);
+  for (const source of ["cian", "avito", "referral", "website"]) assert.equal(new Set(calls.filter(c => c.sourceCode === source).map(c => c.outcomeCode)).size, 4);
+  assert(calls.filter(c => c.outcomeCode !== "prospective").every(c => c.clientId === null && c.clientNeedId === null));
+  const collections = await db.propertyCollection.findMany({ where: { id: { in: [demoId("v31:collection:0"), demoId("v31:collection:1")] } }, orderBy: { name: "asc" }, include: { needs: true, items: true } });
+  assert.equal(collections.length, 2); assert(collections.some(c => !c.needs.length)); assert(collections.some(c => c.needs.length === 1)); assert(collections.every(c => c.items.length === 3));
+  const templates = await db.documentTemplate.findMany({ where: { code: { startsWith: "demo_v31_" } }, orderBy: { code: "asc" }, include: { versions: true } });
+  assert.equal(templates.length, 4); assert(templates.every(t => t.versions.length === 2));
+  const documents = await db.document.findMany({ where: { id: { in: ["markdown_docx", "docx", "xlsx", "xlsx_registry"].map(f => demoId(`v31:document:${f}`)) } }, include: { collectionLinks: true } });
+  assert.equal(documents.length, 4); assert(documents.every(d => d.fileSize > 0n && d.templateVersionId && d.valuesSnapshot));
+  assert.equal(documents.filter(d => d.collectionLinks.length).length, 2);
+  const chat = await db.aiChatSession.findUniqueOrThrow({ where: { id: demoId("v31:chat") }, include: { messages: true, pendingActions: true } });
+  assert.equal(chat.messages.length, 2); assert(chat.messages.some(m => m.content.includes("DEMO-провайдер"))); assert.equal(chat.pendingActions.length, 1); assert.equal(chat.pendingActions[0]!.status, "proposed");
+  const result = { mode: "DEMO", checkedAt: new Date().toISOString(), status: "PASS", tasks: tasks.length, months: ["2026-11", "2026-12", "2027-01"], priorities: 3, checklist: checklist.length + 6, checklistTasks: 3, calls: calls.length, sources: 4, outcomesPerSource: 4, collections: collections.length, templates: templates.length, versionsPerTemplate: 2, generatedDocuments: documents.length, documentCollectionLinks: 2, chatMessages: chat.messages.length, proposedActions: chat.pendingActions.length };
+  await mkdir("data/v31-shots", { recursive: true }); await writeFile("data/v31-shots/seed-inspection.json", JSON.stringify(result, null, 2) + "\n"); console.log(result);
 }
-main().catch(e=>console.log({code:e.code, message:String(e.message).split("\n").slice(-3).join(" ")})).finally(()=>db.$disconnect());
+main().catch(e=>{ console.error({ code:e.code, message:String(e.message).replace(/postgres(?:ql)?:\/\/\S+/g, "[REDACTED]").split("\n").slice(-3).join(" ") }); process.exitCode=1; }).finally(()=>db.$disconnect());

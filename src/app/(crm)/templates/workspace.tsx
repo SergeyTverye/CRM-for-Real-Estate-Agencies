@@ -7,6 +7,7 @@ import { FormErrorBanner } from "@/ui/form";
 import { Modal } from "@/ui/client-kit";
 import { FIELD_CATALOG } from "@/modules/document-templates/domain/manifest";
 
+const formatLabel: Record<string, string> = { markdown_docx: "Markdown → DOCX", docx: "DOCX", xlsx: "XLSX", xlsx_registry: "Реестр XLSX" };
 type Item = { id: string; name: string; code: string; format: string; status: string; updatedAt: string; version?: number; description: string | null; manifestYaml?: string; compatibilityNote?: string | null };
 const DEFAULT_MANIFEST = 'schemaVersion: 1\nentityKind: client\nsources: [client, user]\nfields:\n  - path: client.displayName\n    label: Клиент\n    type: text\n    required: true\n';
 export function TemplateManager({ items }: { items: Item[] }) {
@@ -16,7 +17,7 @@ export function TemplateManager({ items }: { items: Item[] }) {
   return <div className="space-y-4">
     <button className="btn btn-primary" onClick={() => setEditing("new")}>Загрузить шаблон</button>
     <FormErrorBanner error={action.error} />
-    {!items.length ? <p>Шаблонов пока нет. Загрузите первый шаблон и описание полей.</p> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr><th>Название</th><th>Формат / версия</th><th>Состояние</th><th>Действия</th></tr></thead><tbody>{items.map(item => <tr key={item.id} className="border-b"><td className="p-3">{item.name}<p className="text-muted">{item.description}</p></td><td>{item.format} / {item.version}</td><td>{{ active: "Действует", disabled: "Отключён", archived: "Архив" }[item.status]}</td><td><div className="flex flex-wrap gap-2">
+    {!items.length ? <p>Шаблонов пока нет. Загрузите первый шаблон и описание полей.</p> : <div className="overflow-x-auto"><table className="table w-full text-sm"><thead><tr><th>Название</th><th>Формат / версия</th><th>Состояние</th><th>Действия</th></tr></thead><tbody>{items.map(item => <tr key={item.id} className="border-b"><td className="p-3">{item.name}<p className="text-muted">{item.description}</p></td><td className="whitespace-nowrap">{formatLabel[item.format] ?? item.format} · v{item.version}</td><td>{{ active: "Действует", disabled: "Отключён", archived: "Архив" }[item.status]}</td><td><div className="flex flex-wrap gap-2">
       <a className="btn btn-sm" href={`/templates/${item.id}`}>История и поля</a>
       <a className="btn btn-sm" href={`/api/v1/templates/${item.id}/preview`}>Проверить / скачать предпросмотр</a>
       {item.status !== "archived" && <button className="btn btn-sm" onClick={async () => { const detail = await action.run(() => apiCall<{ versions: { markdownBody: string | null }[] }>("GET", `/api/v1/templates/${item.id}`)); if (detail) setEditing({ ...item, ...({ markdownBody: detail.versions[0]?.markdownBody } as object) }); }}>Новая версия</button>}
@@ -32,7 +33,7 @@ export function TemplateManager({ items }: { items: Item[] }) {
         <label className="block">Стабильный код<input className="input" name="code" required defaultValue={row?.code} readOnly={!!row} pattern="[a-z][a-z0-9_-]+" /></label>
         <label className="block">Название<input className="input" name="name" required defaultValue={row?.name} /></label>
         <label className="block">Описание<input className="input" name="description" defaultValue={row?.description ?? ""} /></label>
-        <label className="block">Формат<select className="input" name="format" defaultValue={row?.format ?? "markdown_docx"} aria-readonly={!!row}>{(row ? [row.format] : ["markdown_docx", "docx", "xlsx", "xlsx_registry"]).map(f => <option key={f}>{f}</option>)}</select></label>
+        <label className="block">Формат<select className="input" name="format" defaultValue={row?.format ?? "markdown_docx"} aria-readonly={!!row}>{(row ? [row.format] : ["markdown_docx", "docx", "xlsx", "xlsx_registry"]).map(f => <option key={f} value={f}>{formatLabel[f] ?? f}</option>)}</select></label>
         <label className="block">YAML-манифест<textarea className="input font-mono" rows={10} name="manifestYaml" required defaultValue={row?.manifestYaml ?? DEFAULT_MANIFEST} /></label>
         <label className="block">Markdown (для Markdown → DOCX)<textarea className="input" rows={6} name="markdownBody" defaultValue={(row as Item & { markdownBody?: string })?.markdownBody ?? "# Карточка клиента\n\nКлиент: {{client.displayName}}"} /></label>
         <label className="block">Файл DOCX / XLSX (до 5 МБ)<input type="file" name="file" accept=".docx,.xlsx" /></label>

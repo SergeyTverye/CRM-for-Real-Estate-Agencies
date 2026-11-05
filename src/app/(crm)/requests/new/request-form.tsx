@@ -301,6 +301,7 @@ function RequestFormInner({
         <Field label="Объект, о котором обращение" error={fieldError("propertyId") ?? fieldError("advertisementId")} hint={property ? undefined : "Необязательно. Если звонят по объекту или объявлению — выберите его."}>
           <PropertyPicker value={property} onChange={(p) => void changeProperty(p)} />
         </Field>
+        <details className="rounded-md border border-slate-200 p-3" open={advertisementId || external ? true : undefined}><summary className="cursor-pointer text-sm font-medium">Дополнительный контекст: объявления</summary><div className="mt-3 space-y-3">
         <Field label="Объявление агентства" error={fieldError("advertisementId")}>
           <EntityPicker url="/api/v1/requests/pick-context?kind=advertisement" value={advertisement} onChange={async (ad) => {
             setAdvertisement(ad); setProperty(null); setPreview(null);
@@ -310,6 +311,7 @@ function RequestFormInner({
         <Field label="Внешнее объявление" error={fieldError("externalListingId")}>
           <EntityPicker url="/api/v1/requests/pick-context?kind=external" value={external} onChange={setExternal} render={(ad) => ad.label} placeholder="Источник или адрес внешнего объявления…" />
         </Field>
+        </div></details>
         {advertisementId ? <div className="text-xs text-slate-500">Обращение по объявлению агентства (из ссылки).</div> : null}
         {preview ? (
           <div className="alert alert-info">
