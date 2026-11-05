@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- authenticated property media */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
@@ -10,7 +11,8 @@ import { fmtDate, fmtDateOnly, fmtDateTime, fmtMoney, fmtNum, tz } from "@/serve
 import { loadDictionaries } from "@/server/options";
 import { Badge, Card, Dl, EmptyState, PageHeader, StatusBadge, Tabs } from "@/ui/components";
 import { ActionButton, QuickFormButton } from "@/ui/client-kit";
-import { DocumentsPanel } from "@/ui/domain/documents-panel";
+import { listPropertyMedia } from "@/modules/properties/application/property-media-service";
+import { PropertyGallery } from "../property-gallery";
 import { AddOwnerButton, ReassignPropertyButton, RequestAccessButton } from "@/ui/domain/property-actions";
 
 export const metadata = { title: "Объект" };
@@ -29,6 +31,8 @@ export default async function PropertyCardPage({ params, searchParams }: { param
   });
   const dicts = await loadDictionaries();
   const p = card.property;
+  const media = await listPropertyMedia(actor, id, true);
+  const cover = media.find((m) => m.isCover) ?? media.find((m) => m.kind === "photo" && !m.archived);
   const isManager = actor.role === "manager";
   const zone = tz();
   const base = `/properties/${id}`;
@@ -129,6 +133,7 @@ export default async function PropertyCardPage({ params, searchParams }: { param
         </Card>
       ) : null}
 
+      {cover ? <a href={`${base}?tab=photos`}><img src={cover.url} alt={cover.caption || p.addressText} className="mb-4 max-h-72 w-full rounded object-contain" /></a> : null}
       <Tabs
         basePath={base}
         current={tab}
@@ -138,6 +143,7 @@ export default async function PropertyCardPage({ params, searchParams }: { param
           { key: "ads", label: "Реклама", count: activeAds },
           { key: "agreements", label: "Договоры", count: p.agreements.length },
           { key: "matches", label: "Подборы и показы", count: card.matches.length + p.showings.length },
+          { key: "photos", label: "Фотографии" },
           { key: "documents", label: "Документы" },
         ]}
       />
@@ -514,7 +520,7 @@ export default async function PropertyCardPage({ params, searchParams }: { param
         </div>
       ) : null}
 
-      {tab === "documents" ? <DocumentsPanel actor={actor} link={{ kind: "property", id }} /> : null}
+      {tab === "photos" || tab === "documents" ? <PropertyGallery propertyId={id} items={media} canEdit={card.canEdit} kind={tab === "photos" ? "photo" : "document"} /> : null}
     </div>
   );
 }

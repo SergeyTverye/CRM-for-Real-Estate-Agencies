@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { MediaUploadQueue, useMediaQueue } from "./media-upload";
 import { useRouter } from "next/navigation";
 import { apiCall } from "@/ui/api-client";
 import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
@@ -110,11 +112,14 @@ export function PropertyForm({
   options: PropertyFormOptions;
 }) {
   const router = useRouter();
+  const queue = useMediaQueue();
+  const [savedId, setSavedId] = useState<string>();
+  const submitting = useRef(false);
   const [initial] = useState(() => initialProp ?? emptyProperty());
   const [v, setV] = useState(initial);
   const { pending, error, run, fieldError, setError } = useApiAction();
   const dirty = JSON.stringify(v) !== JSON.stringify(initial);
-  useUnsavedChangesWarning(dirty && !pending);
+  useUnsavedChangesWarning(dirty && !savedId && !pending && !queue.busy);
   const set = <K extends keyof PropertyFormValue>(k: K, value: PropertyFormValue[K]) => setV((s) => ({ ...s, [k]: value }));
 
   const unknownType = v.propertyType !== "" && !KNOWN_TYPES.includes(v.propertyType);
@@ -130,6 +135,13 @@ export function PropertyForm({
   );
 
   async function submit() {
+    if (submitting.current || queue.busy) return;
+    if (savedId) {
+      submitting.current = true;
+      try { if (await queue.upload(savedId)) { router.push(`/properties/${savedId}`); router.refresh(); } }
+      finally { submitting.current = false; }
+      return;
+    }
     if (phoneInDescription) {
       setError({ code: "VALIDATION_ERROR", message: "Проверьте правильность заполнения полей", fieldErrors: { description: ["Уберите телефон из описания — контакты собственника ведутся во вкладке «Собственники»"] } });
       return;
@@ -159,17 +171,17 @@ export function PropertyForm({
       status: v.status,
       description: n(v.description),
     };
-    if (mode === "create") {
-      if (v.responsibleUserId) body.responsibleUserId = v.responsibleUserId;
-      const res = await run(() => apiCall<{ id: string }>("POST", "/api/v1/properties", body));
-      if (res) router.push(`/properties/${res.id}`);
-    } else {
-      const res = await run(() => apiCall("PATCH", `/api/v1/properties/${id}`, { ...body, expectedUpdatedAt: updatedAt }));
-      if (res !== undefined) {
-        router.push(`/properties/${id}`);
-        router.refresh();
+    submitting.current = true;
+    try {
+      if (mode === "create" && v.responsibleUserId) body.responsibleUserId = v.responsibleUserId;
+      const res = await run(() => mode === "create"
+        ? apiCall<{ id: string }>("POST", "/api/v1/properties", body)
+        : apiCall<{ id: string }>("PATCH", `/api/v1/properties/${id}`, { ...body, expectedUpdatedAt: updatedAt }));
+      if (res) {
+        setSavedId(res.id);
+        if (await queue.upload(res.id)) { router.push(`/properties/${res.id}`); router.refresh(); }
       }
-    }
+    } finally { submitting.current = false; }
   }
 
   return (
@@ -182,6 +194,8 @@ export function PropertyForm({
     >
       <FormErrorBanner error={error} />
 
+      {savedId ? <p role="status">Объект сохранён. Повторите загрузку неудачных файлов или <Link className="link" href={`/properties/${savedId}`}>откройте карточку</Link>.</p> : null}
+      <fieldset disabled={pending || queue.busy || Boolean(savedId)} className="space-y-4">
       <Group title="Операция и тип">
         <Field label="Операция" required error={fieldError("operationType")}>
           <SelectInput value={v.operationType} onChange={(x) => set("operationType", x)} options={options.operations} placeholder="Выберите…" invalid={Boolean(fieldError("operationType"))} />
@@ -291,9 +305,11 @@ export function PropertyForm({
         <textarea className={`input min-h-28 ${phoneInDescription ? "input-error" : ""}`} value={v.description} onChange={(e) => set("description", e.target.value)} />
       </Field>
 
+      </fieldset>
+      <MediaUploadQueue queue={queue} propertyId={savedId ?? id} disabled={pending} />
       <div className="flex gap-2">
-        <SubmitButton pending={pending}>{mode === "create" ? "Создать объект" : "Сохранить"}</SubmitButton>
-        <button type="button" className="btn" onClick={() => router.back()}>
+        <SubmitButton pending={pending || queue.busy}>{savedId ? "Повторить загрузку и открыть карточку" : mode === "create" ? "Создать объект" : "Сохранить"}</SubmitButton>
+        <button type="button" className="btn" disabled={pending || queue.busy} onClick={() => { if ((!dirty && !queue.hasPending) || window.confirm("Покинуть форму? Несохранённые изменения и очередь файлов будут потеряны.")) router.back(); }}>
           Отмена
         </button>
       </div>

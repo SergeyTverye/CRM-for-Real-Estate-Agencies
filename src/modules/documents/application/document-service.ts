@@ -21,6 +21,7 @@ import {
 } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { sanitizeFileName, validateUpload } from "../domain/file-policy";
+import { PHOTO_MIMES, preparePropertyImage } from "../domain/property-image";
 
 /**
  * UC-08 UploadOrDownloadDocument (FR-14, ТЗ 20.4, 29.8, 40.8).
@@ -81,14 +82,14 @@ async function assertCanAttach(tx: DbOrTx, actor: Actor, link: DocumentLink): Pr
   }
 }
 
-async function insertLink(tx: Tx, documentId: string, link: DocumentLink) {
+async function insertLink(tx: Tx, documentId: string, link: DocumentLink, documentTypeCode?: string) {
   switch (link.kind) {
     case "client":
       return tx.documentClient.create({ data: { documentId, clientId: link.id } });
     case "need":
       return tx.documentNeed.create({ data: { documentId, clientNeedId: link.id } });
     case "property":
-      return tx.documentProperty.create({ data: { documentId, propertyId: link.id } });
+      return tx.documentProperty.create({ data: { documentId, propertyId: link.id, kind: documentTypeCode === "photo" ? "photo" : "document" } });
     case "showing":
       return tx.documentShowing.create({ data: { documentId, showingId: link.id } });
     case "deal":
@@ -124,8 +125,12 @@ export interface StoreDocumentInput {
  */
 export async function storeDocument(actorUserId: string, input: StoreDocumentInput, auditAction = "document.uploaded"): Promise<{ id: string }> {
   const storage = getStorage();
-  const stored = await storage.put(input.data);
+  const image = input.documentTypeCode === "photo" || (input.link.kind === "property" && PHOTO_MIMES.has(input.mimeType))
+    ? await preparePropertyImage(input.data, input.mimeType) : null;
+  const stored = await storage.put(image?.data ?? input.data);
+  let thumbnailStorageKey: string | undefined;
   try {
+    if (image) thumbnailStorageKey = (await storage.put(image.thumbnail, { prefix: "thumbnails" })).storageKey;
     return await transaction(async (tx) => {
       const doc = await tx.document.create({
         data: {
@@ -135,13 +140,14 @@ export async function storeDocument(actorUserId: string, input: StoreDocumentInp
           fileSize: BigInt(stored.size),
           storageProvider: storage.provider,
           storageKey: stored.storageKey,
+          thumbnailStorageKey,
           checksum: stored.sha256,
           uploadedBy: actorUserId,
           legalEntityId: input.legalEntityId,
         },
         select: { id: true },
       });
-      await insertLink(tx, doc.id, input.link);
+      await insertLink(tx, doc.id, input.link, input.documentTypeCode);
       if (input.legalEntityId || input.link.kind === "deal" || input.link.kind === "agreement") {
         await writeAudit(tx, {
           actorUserId,
@@ -155,6 +161,7 @@ export async function storeDocument(actorUserId: string, input: StoreDocumentInp
     });
   } catch (e) {
     await storage.remove(stored.storageKey).catch((err) => logger.error({ err }, "orphan file cleanup failed"));
+    if (thumbnailStorageKey) await storage.remove(thumbnailStorageKey).catch(() => logger.error("thumbnail cleanup failed"));
     throw e;
   }
 }

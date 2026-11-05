@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element -- authenticated catalogue thumbnails */
+import { propertyCoverUrls } from "@/modules/properties/application/property-media-service";
 import Link from "next/link";
 import { requirePageActor } from "@/server/page-auth";
 import { distinctDistricts, listProperties } from "@/modules/properties/application/property-queries";
@@ -20,6 +22,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
   const [dicts, users, districts] = await Promise.all([loadDictionaries(), userOptions(), distinctDistricts()]);
   const filtered = Object.keys(sp).some((k) => !["page", "pageSize", "sort", "status"].includes(k));
   const now = new Date();
+  const covers = await propertyCoverUrls(actor, res.data?.items.map((p) => p.id) ?? []);
 
   return (
     <div>
@@ -147,6 +150,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
                       <tr key={p.id}>
                         <td>
                           <Link href={`/properties/${p.id}`} className="link font-medium">
+                            {covers[p.id] ? <img src={covers[p.id]} alt="Главное фото" loading="lazy" className="mb-1 h-16 w-24 rounded object-cover" /> : null}
                             {p.addressText}
                           </Link>
                           {p.district ? <div className="text-xs text-slate-500">{p.district}</div> : null}
