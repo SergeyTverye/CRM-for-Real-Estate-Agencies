@@ -19,7 +19,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+    <form method="post" onSubmit={onSubmit} className="space-y-4" noValidate>
       <FormErrorBanner error={error} />
       <div>
         <label className="label" htmlFor="login">

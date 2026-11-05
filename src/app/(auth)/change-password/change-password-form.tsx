@@ -24,7 +24,7 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+    <form method="post" onSubmit={onSubmit} className="space-y-4" noValidate>
       {forced ? <div className="alert alert-info">Вам выдан временный пароль. Задайте собственный пароль, чтобы продолжить работу.</div> : null}
       <FormErrorBanner error={error} />
       <Field label={forced ? "Временный пароль" : "Текущий пароль"} error={fieldError("currentPassword")}>
