@@ -106,7 +106,7 @@ export function Pagination({ page, pageSize, total, basePath, params }: { page: 
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
   return (
-    <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-3 py-2 text-sm text-slate-500">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-3 py-2 text-sm text-slate-500">
       <span>
         {from}–{to} из {total}
       </span>

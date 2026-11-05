@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "./api-client";
 import { useApiAction } from "./hooks";
@@ -64,6 +64,7 @@ export function DateTimeInput({ value, onChange, timeZone, id, invalid }: { valu
       id={id}
       type="datetime-local"
       className={`input ${invalid ? "input-error" : ""}`}
+      aria-invalid={invalid || undefined}
       value={value ? toDateTimeLocalValue(value, timeZone) : ""}
       onChange={(e) => onChange(e.target.value ? fromDateTimeLocalValue(e.target.value, timeZone) : "")}
     />
@@ -72,7 +73,7 @@ export function DateTimeInput({ value, onChange, timeZone, id, invalid }: { valu
 
 export function SelectInput({ value, onChange, options, placeholder, invalid, disabled }: { value: string; onChange: (v: string) => void; options: Option[]; placeholder?: string; invalid?: boolean; disabled?: boolean }) {
   return (
-    <select className={`input ${invalid ? "input-error" : ""}`} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
+    <select className={`input ${invalid ? "input-error" : ""}`} aria-invalid={invalid || undefined} value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}>
       {placeholder !== undefined ? <option value="">{placeholder}</option> : null}
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -145,6 +146,7 @@ export function NextActionFields({
 /** Модальное окно на основе <dialog>. */
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -152,14 +154,14 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
     if (!open && d.open) d.close();
   }, [open]);
   return (
-    <dialog ref={ref} onClose={onClose} className={`m-auto rounded-lg p-0 shadow-xl backdrop:bg-slate-900/40 ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
+    <dialog ref={ref} aria-labelledby={titleId} onClose={onClose} className={`crm-dialog ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
       <div className="card-header">
-        <h2 className="card-title">{title}</h2>
+        <h2 id={titleId} className="card-title">{title}</h2>
         <button type="button" className="btn btn-sm btn-link" onClick={onClose} aria-label="Закрыть">
           ✕
         </button>
       </div>
-      <div className="card-body max-h-[80vh] overflow-y-auto">{open ? children : null}</div>
+      <div className="card-body min-h-0 overflow-y-auto">{open ? children : null}</div>
     </dialog>
   );
 }

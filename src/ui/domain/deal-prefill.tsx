@@ -37,7 +37,7 @@ export function needLabels(dicts: Dictionaries): NeedLabels {
 export async function loadNeedPrefill(actor: Actor, needId: string | undefined) {
   if (!valid(needId)) return null;
   const card = await orNull(() => getNeedCard(actor, needId));
-  if (!card) return null;
+  if (!card || !card.need.client) return null;
   const n = card.need;
   const pick: NeedPick = {
     id: n.id,
@@ -47,7 +47,7 @@ export async function loadNeedPrefill(actor: Actor, needId: string | undefined) 
     status: n.status,
     district: n.district,
     clientVisible: card.clientVisible,
-    client: { id: n.client.id, displayName: n.client.displayName },
+    client: { id: card.need.client.id, displayName: card.need.client.displayName },
   };
   return { pick, card };
 }

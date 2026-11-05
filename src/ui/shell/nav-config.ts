@@ -11,8 +11,11 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/clients", label: "Клиенты" },
   { href: "/needs", label: "Потребности" },
   { href: "/properties", label: "Объекты" },
+  { href: "/property-search", label: "Поиск объектов" },
   { href: "/showings", label: "Показы" },
   { href: "/tasks", label: "Задачи" },
+  { href: "/calendar", label: "Календарь" },
+  { href: "/notifications", label: "Уведомления" },
   { href: "/offers", label: "Предложения" },
   { href: "/deals", label: "Сделки" },
   { href: "/agreements", label: "Договоры" },
@@ -22,6 +25,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/import", label: "Импорт", managerOnly: true },
   { href: "/operations", label: "Эксплуатация", managerOnly: true },
   { href: "/admin", label: "Администрирование", managerOnly: true },
+  { href: "/settings/ai", label: "Настройки ИИ", managerOnly: true },
 ];
 
 /** Быстрые действия кнопки «Создать» (ТЗ 37.2). */

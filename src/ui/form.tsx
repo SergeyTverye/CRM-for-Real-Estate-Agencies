@@ -20,7 +20,7 @@ export function Field({
 }) {
   // <label> оборачивает поле: подпись программно связана с вводом (доступность, автотесты).
   return (
-    <div className={className}>
+    <div className={className} data-invalid={error ? "true" : undefined}>
       <label className="block">
         <span className="label">
           {label}
@@ -29,7 +29,7 @@ export function Field({
         {children}
       </label>
       {hint && !error ? <p className="mt-1 text-xs text-slate-400">{hint}</p> : null}
-      {error ? <p className="field-error">{error}</p> : null}
+      {error ? <p className="field-error" role="alert">{error}</p> : null}
     </div>
   );
 }
@@ -64,7 +64,7 @@ export function FormErrorBanner({ error, onRetry }: { error: ApiErrorBody | null
 
 export function SubmitButton({ pending, children, className }: { pending: boolean; children: React.ReactNode; className?: string }) {
   return (
-    <button type="submit" className={`btn btn-primary ${className ?? ""}`} disabled={pending}>
+    <button type="submit" className={`btn btn-primary ${className ?? ""}`} disabled={pending} aria-busy={pending}>
       {pending ? "Сохранение…" : children}
     </button>
   );

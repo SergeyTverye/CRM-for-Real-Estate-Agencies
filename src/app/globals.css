@@ -8,27 +8,55 @@
   --color-brand-500: #2f6fd6;
   --color-brand-600: #2559b0;
   --color-brand-700: #1e4890;
+  --color-canvas: #f3f5f8;
+  --color-surface: #ffffff;
+  --color-ink: #172435;
+  --color-muted: #526174;
+  --color-line: #dce3eb;
+  --color-focus: #2563eb;
+  --color-success: #166534;
+  --color-danger: #b91c1c;
+  --color-warning: #92400e;
+  --radius-control: 0.375rem;
+  --radius-panel: 0.625rem;
+  --shadow-panel: 0 1px 3px rgb(15 23 42 / 0.04);
+  --shadow-popover: 0 12px 32px -8px rgb(15 23 42 / 0.2);
+  --spacing-control: 2.25rem;
+  --spacing-page: 1.5rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
 }
 
-html, body { background: #f5f6f8; color: #1f2933; }
-body { font-size: 14px; }
+@layer base {
+  html { background: var(--color-canvas); color: var(--color-ink); scroll-padding-top: 5rem; }
+  body { font-size: var(--text-sm); line-height: 1.5; }
+  button, input, select, textarea { font: inherit; }
+  button:not(:disabled), summary { cursor: pointer; }
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-focus); outline-offset: 3px;
+  }
+  :where(input, select, textarea)[aria-invalid="true"] { border-color: var(--color-danger); }
+  ::selection { background: var(--color-brand-100); color: var(--color-ink); }
+  dialog { color: var(--color-ink); }
+}
 
 @layer components {
-  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50; }
-  .btn-primary { @apply border-brand-600 bg-brand-600 text-white hover:bg-brand-700; }
-  .btn-danger { @apply border-red-600 bg-white text-red-700 hover:bg-red-50; }
-  .btn-sm { @apply px-2 py-1 text-xs; }
+  .btn { @apply inline-flex items-center justify-center gap-1.5 min-h-control rounded-control border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-xs transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply border-brand-600 bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-700; }
+  .btn-danger { @apply border-red-600 bg-white text-red-700 hover:bg-red-50 active:bg-red-100; }
+  .btn-sm { @apply min-h-8 px-2.5 py-1 text-xs; }
   .btn-link { @apply border-transparent bg-transparent px-1 text-brand-600 shadow-none hover:bg-transparent hover:underline; }
-  .input { @apply w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100; }
+  .input { @apply min-h-control w-full min-w-0 rounded-control border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500; }
   .input-error { @apply border-red-500 focus:border-red-500 focus:ring-red-100; }
   .label { @apply mb-1 block text-xs font-medium text-slate-600; }
   .field-error { @apply mt-1 text-xs text-red-600; }
-  .card { @apply rounded-lg border border-slate-200 bg-white shadow-xs; }
-  .card-header { @apply flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5; }
+  .card { @apply min-w-0 rounded-panel border border-line bg-surface shadow-panel; }
+  .card-header { @apply flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-2.5; }
   .card-title { @apply text-sm font-semibold text-slate-800; }
   .card-body { @apply p-4; }
-  .table { @apply w-full border-collapse text-left text-sm; }
-  .table th { @apply border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .table { @apply w-full border-collapse text-left text-sm tabular-nums; }
+  .table th { @apply border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold tracking-wide text-slate-600; }
   .table td { @apply border-b border-slate-100 px-3 py-2 align-top; }
   .table tr:hover td { @apply bg-slate-50/70; }
   .badge { @apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap; }
@@ -46,5 +74,67 @@ body { font-size: 14px; }
   .alert-info { @apply border-blue-200 bg-blue-50 text-blue-900; }
   .dl { @apply grid grid-cols-[minmax(140px,max-content)_1fr] gap-x-4 gap-y-1.5 text-sm; }
   .dl dt { @apply text-slate-500; }
-  .dl dd { @apply text-slate-900; }
+  .dl dd { @apply min-w-0 break-words text-slate-900; }
+}
+
+@layer components {
+  .icon-button { @apply inline-flex size-9 items-center justify-center p-0; }
+  .input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  [data-invalid="true"] .input, .input:user-invalid { border-color: var(--color-danger); }
+  [data-invalid="true"] .input:focus, .input[aria-invalid="true"]:focus { --tw-ring-color: var(--color-red-100); border-color: var(--color-danger); }
+  .crm-shell { display: flex; min-height: 100dvh; }
+  .crm-sidebar { position: sticky; top: 0; display: flex; flex-direction: column; width: 244px; height: 100dvh; flex-shrink: 0; background: #172435; color: #d4deeb; }
+  .sidebar-collapsed .crm-sidebar { width: 64px; }
+  .sidebar-brand { display: flex; min-height: 76px; align-items: center; gap: 10px; padding: 16px; font-size: 13px; font-weight: 600; color: white; border-bottom: 1px solid #ffffff12; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 10px 8px; }
+  .sidebar-link { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 7px 12px; border-radius: var(--radius-control); font-size: 13px; }
+  .sidebar-link:hover, .sidebar-toggle:hover { background: #ffffff0c; color: white; }
+  .sidebar-link.is-active { background: #304761; color: white; box-shadow: inset 3px 0 #83b4ff; font-weight: 600; }
+  .sidebar-divider { margin: 10px 10px; border-top: 1px solid #ffffff20; }
+  .sidebar-toggle { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; border-top: 1px solid #ffffff20; font-size: 12px; }
+  .crm-workspace { display: flex; min-width: 0; flex: 1; flex-direction: column; }
+  .crm-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 24px; border-bottom: 1px solid var(--color-line); background: var(--color-surface); }
+  .crm-main { min-width: 0; flex: 1; padding: var(--spacing-page); }
+  .mobile-menu-toggle { display: none; }
+  .skip-link { position: fixed; left: 12px; top: -100px; z-index: 100; padding: 10px 16px; border-radius: var(--radius-control); background: white; color: var(--color-brand-700); }
+  .skip-link:focus { top: 12px; }
+  .notification-count { position: absolute; top: -5px; right: -6px; min-width: 18px; padding: 0 4px; border: 2px solid white; border-radius: 20px; background: var(--color-danger); color: white; font-size: 10px; font-weight: 600; line-height: 16px; }
+  .crm-dialog { margin: auto; max-height: calc(100dvh - 32px); overflow: hidden; padding: 0; border: 1px solid var(--color-line); border-radius: var(--radius-panel); box-shadow: var(--shadow-popover); background: var(--color-surface); }
+  .crm-dialog[open] { display: flex; flex-direction: column; }
+  .crm-dialog::backdrop { background: rgb(15 23 42 / 0.5); }
+  .mobile-navigation { border-radius: var(--radius-panel); background: #172435; color: #d4deeb; }
+  .toast-viewport { position: fixed; right: 24px; bottom: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; width: min(400px, calc(100vw - 32px)); pointer-events: none; }
+  .toast { display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-popover); pointer-events: auto; overflow-wrap: anywhere; }
+  .toast > svg { flex-shrink: 0; }
+  /* Существующие таблицы прокручиваются внутри карточек. */
+  .card > div:has(> .table), .card:has(> .table), .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+  .table th { white-space: nowrap; }
+  .table tbody tr:focus-within td { background: var(--color-brand-50); }
+}
+
+@media (max-width: 1199px) {
+  .crm-header { flex-wrap: wrap; padding: 10px 16px; }
+  .crm-header > :first-child:not(.mobile-menu-toggle) { min-width: 0; }
+  .overdue-indicator { display: none; }
+}
+@media (max-width: 767px) {
+  .crm-sidebar { display: none; }
+  .mobile-menu-toggle { display: inline-flex; }
+  .crm-header { gap: 8px; }
+  .crm-header > .global-search { order: 3; max-width: none; width: 100%; }
+  .shell-actions { min-width: 0; gap: 6px; }
+  .user-menu-name { max-width: 100px; }
+  .user-menu-role { display: none; }
+  .crm-main { padding: 16px 12px; }
+  .card-header, .card-body { padding: 12px; }
+  .table { min-width: 600px; }
+  .dl { grid-template-columns: minmax(100px, 35%) minmax(0, 1fr); column-gap: 12px; }
+  .toast-viewport { right: 16px; bottom: 16px; }
+  .crm-main nav[aria-label="Разделы карточки"] { overflow-x: auto; }
+  .crm-main nav[aria-label="Разделы карточки"] > a { flex-shrink: 0; }
+  .crm-main form[method="get"] > label { min-width: 0; flex: 1 1 140px; }
+  .crm-main form[method="get"] > label > .input { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

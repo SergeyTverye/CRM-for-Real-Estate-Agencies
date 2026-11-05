@@ -12,8 +12,15 @@ function useClickOutside(onOutside: () => void) {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onOutside();
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && ref.current?.contains(document.activeElement)) {
+        onOutside();
+        ref.current.querySelector("button")?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("keydown", onKey); };
   }, [onOutside]);
   return ref;
 }
@@ -51,8 +58,8 @@ export function UserMenu({ displayName, roleLabel }: { displayName: string; role
   return (
     <div className="relative" ref={ref}>
       <button type="button" className="btn" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-        <span className="max-w-40 truncate">{displayName}</span>
-        <span className="text-xs text-slate-400">{roleLabel}</span>
+        <span className="user-menu-name max-w-40 truncate">{displayName}</span>
+        <span className="user-menu-role text-xs text-slate-500">{roleLabel}</span>
       </button>
       {open ? (
         <div className="absolute right-0 z-30 mt-1 w-48 rounded-md border border-slate-200 bg-white py-1 shadow-lg">

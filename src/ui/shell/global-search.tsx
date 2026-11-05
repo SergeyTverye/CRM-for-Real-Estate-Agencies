@@ -61,7 +61,7 @@ export function GlobalSearch() {
   const total = groups.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="relative w-full max-w-xl" ref={boxRef}>
+    <div className="global-search relative w-full max-w-xl" ref={boxRef}>
       <input
         type="search"
         className="input"

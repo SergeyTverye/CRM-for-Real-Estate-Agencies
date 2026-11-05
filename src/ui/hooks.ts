@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiCallError, type ApiErrorBody } from "./api-client";
+import { toast } from "./toast";
 
 /** Выполнение API-действия с состояниями pending/error и обработкой 401/смены пароля. */
 export function useApiAction() {
@@ -15,7 +16,9 @@ export function useApiAction() {
       setPending(true);
       setError(null);
       try {
-        return await fn();
+        const result = await fn();
+        toast("Действие выполнено");
+        return result;
       } catch (e) {
         if (e instanceof ApiCallError) {
           if (e.status === 401 && e.body.code === "UNAUTHENTICATED") {
@@ -27,8 +30,10 @@ export function useApiAction() {
             return undefined;
           }
           setError(e.body);
+          toast(e.body.message, "error");
         } else {
           setError({ code: "CLIENT_ERROR", message: "Непредвиденная ошибка интерфейса" });
+          toast("Непредвиденная ошибка интерфейса", "error");
         }
         return undefined;
       } finally {
