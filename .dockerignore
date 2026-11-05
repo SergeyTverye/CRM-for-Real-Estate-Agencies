@@ -27,3 +27,5 @@ README.md
 secrets
 *.tsbuildinfo
 ТЗ*.md
+
+.next-*

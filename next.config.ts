@@ -23,6 +23,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Отдельный каталог сборки позволяет запускать несколько dev-серверов параллельно (QA/скриншоты).
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   // В Docker-сборке проверка типов выполняется отдельно (npm run typecheck в CI/проверке инкремента);
   // повторный запуск tsc внутри next build на сервере с малым объёмом памяти может завершиться OOM.

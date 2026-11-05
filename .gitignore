@@ -172,3 +172,5 @@ next-env.d.ts
 /docs/vkr/screenshots/tmp/
 
 !/vendor/*.tgz
+
+/.next-*/

@@ -8,6 +8,7 @@ const config = [
     ignores: [
       "src/generated/**",
       ".next/**",
+      ".next-*/**",
       "node_modules/**",
       "data/**",
       "backups/**",
