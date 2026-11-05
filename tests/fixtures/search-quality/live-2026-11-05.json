@@ -1,0 +1,2021 @@
+{
+  "version": 1,
+  "mode": "REPLAY",
+  "sourceMode": "LIVE",
+  "collectedOn": "2026-11-05",
+  "sourceDatabase": "crm_demo",
+  "sourceEvidence": "docs/vkr/live-ai-evidence.json",
+  "sourceEvidenceSha256": "c91ac98fe444c997b18577b3ad446148ff540624787b4794a5bceccfc61dda0d",
+  "populationUniqueUrls": 311,
+  "listings": [
+    {
+      "id": "L01",
+      "provenance": {
+        "listingId": "0345c80e-c470-44d0-a40b-6012c7ac9b5d",
+        "snapshotId": "7b56bd63-e6b4-4459-8348-663a636ee509",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 254
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "284354277",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/284354277/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "323400.00",
+        "priceUnit": null,
+        "area": 660,
+        "floor": {
+          "raw": null,
+          "kind": "unknown",
+          "number": null
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, Нарымская ул., 19/1",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Предлагаем снять склад. Хороший подъезд, рядом транспортная развязка, имеется парковка. Хороший ремонт и все необходимые коммуникации. Возможность подключить телефон и интернет. Объект находиться по адресу- Новосибирск, ул. Нарымская. Площадь- 660 кв. м.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L02",
+      "provenance": {
+        "listingId": "80fdb2fd-8e85-4490-a7cc-cbfce98c614a",
+        "snapshotId": "47cff539-a1de-418e-8e84-c38c007d69cf",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 274
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "349678713",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/349678713/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "60000.00",
+        "priceUnit": null,
+        "area": 200,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, Тополевая ул., 9",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдается в аренду помещение под склад. Отличный подъезд, рядом транспортная развязка, имеется парковка. Качественный ремонт и все необходимые коммуникации. Возможность подключить телефон и интернет. Объект расположен по адресу- Новосибирск, ул. Тополевая. Площадь- 200 кв. м.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L03",
+      "provenance": {
+        "listingId": "73f8d44b-1e0c-4cf4-8c69-2ec9f90ed8d1",
+        "snapshotId": "bd2337b1-1fc0-4a12-aaf4-17a6346a26eb",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 255
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "360353500",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/360353500/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "333320.00",
+        "priceUnit": null,
+        "area": 512.8,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Школьная 2-я, 60",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Предлагаем арендовать склад по адресу- Новосибирск, ул. Школьная 2-я. В здании косметический ремонт. Объект расположен в промышленном районе города. Рядом располагается ТЦ. Площадь- 512.8 кв. м. Удобный подъезд, транспортная доступность, имеется парковка.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L04",
+      "provenance": {
+        "listingId": "d2290603-4ac4-40db-b907-41d93fec0a3c",
+        "snapshotId": "7a2717e6-0acc-4e0d-b8f9-a8ced2dd31a2",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 257
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "360666579",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/360666579/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "144632.00",
+        "priceUnit": null,
+        "area": 422.9,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Мира, 58",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Предлагаем арендовать помещение под склад по адресу- Новосибирск, ул. Мира. В здании хороший ремонт. Объект расположен в доступном районе города. Рядом располагается магазин. Площадь- 422.9 кв. м. Удобный подъезд, транспортная доступность, имеется парковка.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L05",
+      "provenance": {
+        "listingId": "df7cd47f-10a1-4646-b08c-3a609e97930f",
+        "snapshotId": "db3f8104-dc5c-45ea-8ae4-2db9dec51ac4",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 194
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "361069414",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/361069414/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "300000.00",
+        "priceUnit": null,
+        "area": 300,
+        "floor": {
+          "raw": "-1",
+          "kind": "basement",
+          "number": -1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Семьи Шамшиных, 20",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдается в аренду помещение под склад общей площадью 300 кв. м. Охраняемая территория, удобное расположение, электричество, транспортная доступность. Имеются телефонные линии, интернет, парковка.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L06",
+      "provenance": {
+        "listingId": "abbcf4cc-054b-4788-a98b-d41c634770a6",
+        "snapshotId": "568ed27a-6ccc-4777-99eb-1db21484d13c",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 272
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "362908315",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/362908315/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "253300.00",
+        "priceUnit": null,
+        "area": 298,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Петухова, 44/1",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдается в аренду складское помещение. Удобный подъезд, рядом транспортная развязка, имеется парковка. Качественный ремонт и все необходимые коммуникации. Возможность подключить телефон и интернет. Объект расположен по адресу- Новосибирск, ул. Петухова. Площадь- 298 кв. м.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L07",
+      "provenance": {
+        "listingId": "7c151ab3-43e6-469c-8478-969e961b145a",
+        "snapshotId": "f1a81c1d-1f28-4db7-bb19-186881135fcc",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 182
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "366981596",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/366981596/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "400000.00",
+        "priceUnit": null,
+        "area": 1000,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, Толмачевская ул., 19/1",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Предлагаем арендовать склад общей площадью 1000 кв. м. Охраняемая территория, удобное расположение, электроэнергия, пешая доступность. В наличии телефонные линии, интернет, парковка.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L08",
+      "provenance": {
+        "listingId": "3d7188f9-f0a9-486e-85c1-f6940b3b9a63",
+        "snapshotId": "b8342682-ad56-4013-a43c-784280903341",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 265
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "367266152",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/367266152/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "55000.00",
+        "priceUnit": null,
+        "area": 213,
+        "floor": {
+          "raw": "-1",
+          "kind": "basement",
+          "number": -1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Ленина, 134",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдается в аренду складское помещение. Хороший подъезд, рядом транспортная развязка, имеется парковка. Хороший ремонт и все необходимые коммуникации. Возможность подключить телефон и интернет. Объект расположен по адресу- Новосибирск, ул. Ленина. Площадь- 213 кв. м.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L09",
+      "provenance": {
+        "listingId": "28a69083-e77e-4f24-9de7-0a3519f5a436",
+        "snapshotId": "76e92fe5-9c6b-4990-a639-58e44997653f",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 192
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "370432355",
+        "sourceUnitId": null,
+        "url": "https://arendacre.mirkvartir.ru/370432355/",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "650000.00",
+        "priceUnit": null,
+        "area": 1000,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, Сухарная ул., 35",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдается в аренду помещение под склад общей площадью 1000 кв. м. Охраняемая территория, прекрасное расположение, электроэнергия, транспортная доступность. В наличии телефон, интернет, парковка.",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:25.566Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L10",
+      "provenance": {
+        "listingId": "a9f39185-da51-492f-baaf-02c6453ee67b",
+        "snapshotId": "3f5757ca-640f-4f4c-bd67-29e496f3e902",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 251
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "361070929",
+        "sourceUnitId": null,
+        "url": "https://cre.mirkvartir.ru/361070929/",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "76366400.00",
+        "priceUnit": "rub_total",
+        "area": 867.8,
+        "floor": {
+          "raw": "6",
+          "kind": "above_ground",
+          "number": 6
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, пр-кт Димитрова, 7",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "На продажу предлагается помещение под офис площадью- 867.8 кв. м. Удобный подъезд, рядом транспортная развязка, парковка. Имеются телефонные линии, интернет, электричество. Здание располагается в пешей доступности от остановок общественного транспорта",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L11",
+      "provenance": {
+        "listingId": "9e1a1d49-471f-4c60-b460-ab47126683db",
+        "snapshotId": "f0452f06-47d3-452c-9c59-7070aed90993",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 276
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "361166102",
+        "sourceUnitId": null,
+        "url": "https://cre.mirkvartir.ru/361166102/",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "20410602.00",
+        "priceUnit": "rub_total",
+        "area": 71.5,
+        "floor": {
+          "raw": "3",
+          "kind": "above_ground",
+          "number": 3
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Чаплыгина",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "На продажу предлагается помещение под офис. Хороший подъезд, транспортная доступность, имеется парковка. Современный ремонт и все необходимые коммуникации. Возможность подключить телефон и интернет. Объект расположен по адресу- Новосибирск, ул. Чаплыгина. Площадь- 71.5 кв. м.",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L12",
+      "provenance": {
+        "listingId": "ef93fb2f-b1bd-4f7b-bf52-b9a4313b8a50",
+        "snapshotId": "fffa3cd2-76dc-4c7a-b4be-9ca2735171bf",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 215
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "361245689",
+        "sourceUnitId": null,
+        "url": "https://cre.mirkvartir.ru/361245689/",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "7000000.00",
+        "priceUnit": "rub_total",
+        "area": 33.3,
+        "floor": {
+          "raw": "5",
+          "kind": "above_ground",
+          "number": 5
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Челюскинцев, 18/2",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Продается офис площадью- 33.3 кв. м. Хороший подъезд, рядом транспортная развязка, парковка. Имеются телефонная связь, интернет, электричество. Здание размещено в пешей доступности от остановок городского транспорта",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L13",
+      "provenance": {
+        "listingId": "0bfe6d58-1cec-4bce-88f0-769e90b13ac3",
+        "snapshotId": "3a68a7af-f762-48ce-8b3f-716dbcf7b7cd",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 256
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "362969888",
+        "sourceUnitId": null,
+        "url": "https://cre.mirkvartir.ru/362969888/",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "2150000.00",
+        "priceUnit": "rub_total",
+        "area": 26.9,
+        "floor": {
+          "raw": "2",
+          "kind": "above_ground",
+          "number": 2
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Чаплыгина, 13",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "В продаже офисное помещение по адресу- Новосибирск, ул. Чаплыгина. В здании современный ремонт. Объект расположен в промышленном районе города. Рядом располагается магазин. Площадь- 26.94 кв. м. Отличный подъезд, транспортная доступность, имеется парковка.",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L14",
+      "provenance": {
+        "listingId": "430e98a9-0171-4a72-abd2-ff8bd826ece2",
+        "snapshotId": "b38f65d2-af21-4ea7-bbe5-5e1fdc38e35e",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 213
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "362977983",
+        "sourceUnitId": null,
+        "url": "https://cre.mirkvartir.ru/362977983/",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "38800000.00",
+        "priceUnit": "rub_total",
+        "area": 306.6,
+        "floor": {
+          "raw": "5",
+          "kind": "above_ground",
+          "number": 5
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, Советская ул., 41",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "В продаже офис общей площадью- 306.6 кв. м. Удобный подъезд, транспортная доступность, парковка. Имеются телефон, интернет, электричество. Помещение находится в пешей доступности от остановок городского транспорта",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L15",
+      "provenance": {
+        "listingId": "f87e6f52-e6c8-4a1b-ac8b-7ed2a5688fb6",
+        "snapshotId": "d7b72f93-c770-40e3-ac9e-4abe358717e4",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 247
+      },
+      "input": {
+        "source": "mirkvartir",
+        "sourceListingId": "369638215",
+        "sourceUnitId": null,
+        "url": "https://cre.mirkvartir.ru/369638215/",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "9980000.00",
+        "priceUnit": "rub_total",
+        "area": 41.6,
+        "floor": {
+          "raw": "17",
+          "kind": "above_ground",
+          "number": 17
+        },
+        "city": "Новосибирск",
+        "address": "Новосибирск, ул. Ленина",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Продается офис. Удобный подъезд, транспортная доступность, имеется парковка. Косметический ремонт и все необходимые коммуникации. Возможность подключить телефон и интернет. Объект расположен по адресу- Новосибирск, ул. Ленина. Площадь- 41.6 кв. м.",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:24.867Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L16",
+      "provenance": {
+        "listingId": "9e7d688b-eb1d-436e-b6ad-87178004859d",
+        "snapshotId": "68d89fea-dbc3-40b4-a608-89dc0b1bec2b",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 356
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86632865",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632865",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "100.00",
+        "priceUnit": null,
+        "area": 420,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Панфиловцев, 58",
+        "district": "Октябрьский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдам коммерческие помещения от собственника.\nЛЕТНЯЯ АКЦИЯ ДЛЯ НОВЫХ АРЕНДАТОРОВ. 100₽/м2 на первый месяц для легкого старта бизнеса! Оплата за первый месяц 42000 - это не шутка. Успевайте пока действует акция.\nПредлагаем на выбор офисы от 17,7м2 до 81,3м2, склады от 60м2 до 420м.\nСклад 420м2. Коммун",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L17",
+      "provenance": {
+        "listingId": "c8fcdf54-9c6c-4173-9364-82dd4e42b191",
+        "snapshotId": "05bd1e27-68cc-4a14-ba6e-cda5d91d67fe",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 55
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86632914",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632914",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "55000.00",
+        "priceUnit": null,
+        "area": 213,
+        "floor": {
+          "raw": "-1",
+          "kind": "basement",
+          "number": -1
+        },
+        "city": "Новосибирск",
+        "address": "улица Ленина, 13",
+        "district": "Железнодорожный",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдается помещение под склад , ваш бизнес\nАрт. 140479386",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L18",
+      "provenance": {
+        "listingId": "fd3872f5-b066-4a64-8dfc-45c5eb89b781",
+        "snapshotId": "852cd8b2-4199-4969-a633-00e3eecbd20c",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 295
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86632924",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86632924",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "400000.00",
+        "priceUnit": null,
+        "area": 1000,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Толмачёвская улица, 19",
+        "district": "Ленинский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Код объекта: 2280337.\nПредлагается к аренде теплый склад ,на охраняемой территории.\nСклад с пандусом.\nВысота потолков 5 метров .\nВ сумму включены все расходы на содержание и отопление ,электричество по счетчикам .\nСдается под склад ,производство запрещено .\nПо всем вопросам отвечу по телефону .",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L19",
+      "provenance": {
+        "listingId": "7ae33a67-adfd-4323-8d04-40ed73a3cfb7",
+        "snapshotId": "fe526f5c-a876-4643-a373-9fb333e524ab",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 363
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86633004",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633004",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "135000.00",
+        "priceUnit": null,
+        "area": 300,
+        "floor": {
+          "raw": "2",
+          "kind": "above_ground",
+          "number": 2
+        },
+        "city": "Новосибирск",
+        "address": "улица Декабристов, 253",
+        "district": "Октябрьский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Код объекта: 2221670.\nПомещение под теплый склад, офис, чистое производство 300 кв.м.\n450 рублей за кв.м.\nОтдельный вход и въезд со свободным доступом.\nПомещение находится на 3 этаже здания.\n2 ворот для разгрузки, площадка для подъезда и разворота фур.\nНа территории есть большая наземная парковка.\nХ",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L20",
+      "provenance": {
+        "listingId": "b9784967-b49a-4d99-8bd5-1b93a34f2a68",
+        "snapshotId": "717e8cfa-9f9d-4041-8ccb-1e866f82a13f",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 359
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86633078",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633078",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "650000.00",
+        "priceUnit": null,
+        "area": 1000,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Большая улица, 310/4",
+        "district": "Ленинский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Номер объекта: 703785. Склад 1000 м² | Кран-балка 5 т | Ворота под еврофуру | ул. Большая 310/4\nХарактеристики склада:\nПлощадь: 1000 м²\nВысота потолков: 10,5 м\nКран-балка 5 тонн\nВорота под еврофуру\nРазгрузочная рампа\nАнтипылевое покрытие пола\nСклад неотапливаемый\nИнфраструктура и условия:\nЗакрытая о",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L21",
+      "provenance": {
+        "listingId": "70a79875-974d-4815-847d-16367e4c0c71",
+        "snapshotId": "e57efbf3-f823-4216-8fc6-94af133f53da",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 358
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86633088",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633088",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "253300.00",
+        "priceUnit": null,
+        "area": 298,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Петухова, 44/1",
+        "district": "Кировский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдаётся в аренду современное помещение формата Лайт Индастриал площадью от 298 м² на территории бизнес-парка Лидер.\nСклад, производство и офис — в одном блоке. Без разрозненных помещений и лишней логистики.\nЭто не старый склад и не временное решение. Это современное пространство, где бизнес может ра",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L22",
+      "provenance": {
+        "listingId": "36908c8c-8561-4a30-9bc3-c373d65866b8",
+        "snapshotId": "2782b9b1-0563-4f89-adb4-6a7fcb661c8b",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 345
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86633150",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633150",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "144632.00",
+        "priceUnit": null,
+        "area": 422.9,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Мира, 58",
+        "district": "Кировский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Аренда от собственника АО КФ \"НОВОСИБМЕТАЛЛ\"\nПомещения складские неотапливаемые: стены - профлист, пол-бетонные плиты.\n1. Площадью 422,9 кв.м., размер (LxWxH) 6,45х65,56х5,5, 2-е ворот откатных металлических размером (WxL) 3 х4, 2-ое входных дверей металлических.\nСтоимость аренды в месяц за 1 кв.м. ",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L23",
+      "provenance": {
+        "listingId": "a9f681c9-b1d3-41b4-a75c-e54a13b81e13",
+        "snapshotId": "9c256a86-33c9-4c59-960f-01497dde0995",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 316
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86633281",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633281",
+        "title": null,
+        "purpose": "warehouse",
+        "operation": "rent",
+        "price": "683.00",
+        "priceUnit": null,
+        "area": 500,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Декабристов, 247к6",
+        "district": "Октябрьский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Компания-собственник сдаст в аренду под склад или производство нежилое помещение (500 кв.м, 2 этаж. Для погрузо-разгрузочных работ предусмотрены: 2 грузовых лифта, автопандус с доклевеллером. Очень удобная транспортная развязка. На территории комплекса находятся: сеть общепита, ветеринарная служба, ",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:31.262Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L24",
+      "provenance": {
+        "listingId": "f7cf36c6-c6bd-4778-a389-a868eb8ad402",
+        "snapshotId": "27bb458e-4825-43d5-b918-8ab9c241d2da",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 256
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528422",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528422",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "12940000.00",
+        "priceUnit": "rub_total",
+        "area": 64.7,
+        "floor": {
+          "raw": "7",
+          "kind": "above_ground",
+          "number": 7
+        },
+        "city": "Новосибирск",
+        "address": "Большевистская улица, 35",
+        "district": "Октябрьский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "К продаже предлагается офисное помещение на седьмом этаже в БЦ Инские холмы. В помещении выполнен ремонт, есть мокрая точка, и установлен кондиционер. Собственник физ. лицо. Вся цена в договоре! есть офис меньшей площади, или можно купить сразу 2 на этаже!",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L25",
+      "provenance": {
+        "listingId": "96c95b50-bf75-4cfd-a564-b4306ac103ac",
+        "snapshotId": "90ef9a06-ef45-4555-8b48-8105de4e0745",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 273
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528434",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528434",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "45000000.00",
+        "priceUnit": "rub_total",
+        "area": 336,
+        "floor": {
+          "raw": "2",
+          "kind": "above_ground",
+          "number": 2
+        },
+        "city": "Новосибирск",
+        "address": "Геодезическая улица, 17/1",
+        "district": "Ленинский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Предлагается В ПРОДАЖУ отличное офисное помещение , расположенное на 2 этаже административной части жилого дома. До метро Студенческая по прямой 285 метров.\nСостояние хорошее, ремонт свежий, 3 с/у, 3 лоджии.\nПОМЕЩЕНИЕ ТЕПЛОЕ, СВЕТЛОЕ, парковка.\nСобственность ООО, упрощенка",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L26",
+      "provenance": {
+        "listingId": "087f3c0c-dc62-4ca6-bb01-99ce590e4abe",
+        "snapshotId": "04a23638-d2b3-4a02-a16e-5f14dcc9a698",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 356
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528478",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528478",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "19500000.00",
+        "priceUnit": "rub_total",
+        "area": 126.5,
+        "floor": {
+          "raw": "2",
+          "kind": "above_ground",
+          "number": 2
+        },
+        "city": "Новосибирск",
+        "address": "улица Аэропорт, 88",
+        "district": "Заельцовский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Готовый офис с дизайнерским ремонтом, собственной террасой и отдельным входом.\nЧистая продажа. Без обременений и удорожания. Комиссий нет. Ключи сразу после покупки.\nАКЦИОННАЯ ЦЕНА. Время акции ограничено.\nДокументы готовы. Сделка от 1 дня. Оформлена как квартира, но вход отдельный.\nПотолки переменн",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L27",
+      "provenance": {
+        "listingId": "022b55b5-24bd-4605-adc9-deb2bbff972d",
+        "snapshotId": "cac1c247-73a3-46a9-b980-834f5a4efad7",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 345
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528506",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528506",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "9980000.00",
+        "priceUnit": "rub_total",
+        "area": 41.6,
+        "floor": {
+          "raw": "17",
+          "kind": "above_ground",
+          "number": 17
+        },
+        "city": "Новосибирск",
+        "address": "улица Ленина, 21/1к4",
+        "district": "Железнодорожный",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Номер объекта: 703826. Новый офис - 41,6 кв.м. в БЦ Класса \"А\"\nТолько что сданный БЦ.\nЕдинственный БЦ В городе с парковкой на 750 машиномест.\n9 980 000 - НДС 22% уже включено в стоимость\nСамый центр города. Вид на оперный театр, площадь Ленина и реку.\n2 станции метро и 2 остановки.\n-Самые высокие по",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L28",
+      "provenance": {
+        "listingId": "019ace83-9556-42fc-98e1-0b166ff481fd",
+        "snapshotId": "7417810f-cff4-485c-9b9e-fae864c31985",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 353
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528532",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528532",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "19000000.00",
+        "priceUnit": "rub_total",
+        "area": 75.5,
+        "floor": {
+          "raw": "13",
+          "kind": "above_ground",
+          "number": 13
+        },
+        "city": "Новосибирск",
+        "address": "Инженерная улица, 7",
+        "district": "Советский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "УНИКАЛЬНОЕ ПРЕДЛОЖЕНИЕ В САМОМ ДЕВЕЛОПЕРСКОМ И НАУЧНОМ ЦЕНТРЕ НОВОСИБИРСКА!\nПродаются просторные видовые апартаменты площадью 75,5 кв. м на 13 этаже современного многофункционального комплекса бизнес-класса \"Port i7\" (ул. Инженерная, 7).\nИдеальный вариант как для создания премиального представительс",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L29",
+      "provenance": {
+        "listingId": "cc0bc555-222b-4602-887a-65c6febe1000",
+        "snapshotId": "f2392daf-7817-4a57-90b2-3a2c37977c14",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 368
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528560",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528560",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "10000000.00",
+        "priceUnit": "rub_total",
+        "area": 92.8,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Кропоткина, 261/2",
+        "district": "Заельцовский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "К покупке предлагается коммерческое помещение свободного назначения с отдельным входом на первом этаже. Это творческая мастерская, которая буквально пропитана энергетикой и позитивом творца! Продажа возможна как с мебелью и техникой под мастерскую дизайнера, так и в свободном от них виде. На объекте",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L30",
+      "provenance": {
+        "listingId": "ca682c98-0581-46e7-9143-a50b060748e4",
+        "snapshotId": "b823b3f5-39c4-46a5-aa00-e5293a4bac01",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 353
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528614",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528614",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "9780000.00",
+        "priceUnit": "rub_total",
+        "area": 71,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "Советская улица, 4",
+        "district": "Центральный",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Код объекта: 1859022.\nУникальное предложение на рынке коммерческой недвижимости Новосибирска — офис в историческом центре города, идеально подходящий для бизнеса с высоким статусом.\nВозможна продажа в Ипотеку по сниженной ставки !!!\nПодготовлена документация для согласования отдельного входа!!!\nОфис",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L31",
+      "provenance": {
+        "listingId": "082fe0b6-30f6-4523-9992-014ee6d1ce4b",
+        "snapshotId": "bd799d4f-8a36-4871-b40d-a7072628833d",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 352
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528618",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528618",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "16500000.00",
+        "priceUnit": "rub_total",
+        "area": 135,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "проспект Дзержинского, 24/1",
+        "district": "Дзержинский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Код объекта: 2133519.\nОфисное помещение 135 м² | пр. Дзержинского, 24/1 | 150 кВт | 2 входа\nПродаётся помещение свободного назначения на первой линии с мощностью 150 кВт и отдельными входами. Идеально под офис, ритейл, общепит, медицину!\nАдрес: пр. Дзержинского, 24/1, Новосибирск\nЗдание: Кирпичное, ",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L32",
+      "provenance": {
+        "listingId": "7ca351f3-3cf9-46d5-ab38-49c47fd8f767",
+        "snapshotId": "5118055e-9ea8-4c3f-bb7b-b56f4eba547a",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 351
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528863",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528863",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "38800000.00",
+        "priceUnit": "rub_total",
+        "area": 306.6,
+        "floor": {
+          "raw": "5",
+          "kind": "above_ground",
+          "number": 5
+        },
+        "city": "Новосибирск",
+        "address": "Советская улица, 4А",
+        "district": "Центральный",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Код объекта: 2198403.\nОписание\nВ продаже 5-ый этаж в бизнес-центре по ул. Советская 4А.\nБизнес-центр находится в центральной части города, пересечение ул. Советская и ул. Свердлова.\n\"Тихий\" центр, напротив БЦ \"Кронос\".\nИдеальная транспортная развязка.\nНа этаже:\nВыделенные мощности - 20КВт (с возможн",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L33",
+      "provenance": {
+        "listingId": "89f0861f-000e-4a97-bfdf-747fd9a8da84",
+        "snapshotId": "5712e0a8-06de-4432-980d-8d2ee4184a66",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 351
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528882",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "12500000.00",
+        "priceUnit": "rub_total",
+        "area": 145.1,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Орджоникидзе, 40/1",
+        "district": "Центральный",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Продаётся коммерческое помещение цокольный этаж, 145,1 м².\nОбъект расположен в активно развивающемся районе с высокой проходимостью. Подходит для торговли, сферы услуг, офиса или другого коммерческого использования.\nКлючевые преимущества:\nудобная транспортная доступность;\nразвитая инфраструктура;\nсв",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L34",
+      "provenance": {
+        "listingId": "f2d22717-661e-468e-a1d9-43e56e5d3b06",
+        "snapshotId": "cfde2613-8828-40ef-a8f3-81139aecbae6",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 225
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86528919",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528919",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "20400000.00",
+        "priceUnit": "rub_total",
+        "area": 125.3,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": "Новосибирск",
+        "address": "улица Станиславского, 25",
+        "district": "Ленинский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "\"В продаже , площадью 125.3, под номером 44 в новом Доме ЖК \"Лофт Наука\".\" Лофт Наука — современное бизнес-пространство на левом берегу\nНовосибирска для предпринимателей и инвесторов, которые выбирают не просто метры, а среду",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L35",
+      "provenance": {
+        "listingId": "639fa6ed-0a72-45e3-afab-5d605ca465c5",
+        "snapshotId": "b1f9ff3c-0713-4ed1-8eb4-ba1d1cb2da8b",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 358
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "86529376",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529376",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": "12500000.00",
+        "priceUnit": "rub_total",
+        "area": 72,
+        "floor": {
+          "raw": "14",
+          "kind": "above_ground",
+          "number": 14
+        },
+        "city": "Новосибирск",
+        "address": "Большевистская улица, 35",
+        "district": "Октябрьский",
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Арт. 111516657 Продается современное помещение в ЖК \"Инские Холмы\" — 5 минут от метро \"Речной вокзал\"! Шикарный вид на реку с 14 этажа!\nМожем рассмотреть обмен на нежилую недвижимость.\nОсновные преимущества:\nРасположение в центре событий:\nЖК находится на стыке Октябрьского и Центрального районов, вс",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L36",
+      "provenance": {
+        "listingId": "5950bb9f-090d-4e9e-ac53-90a1b2de9eb5",
+        "snapshotId": "5d4efbdb-acb4-4652-9009-873479b5f093",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:37.607Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 245
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "1520155919935608024",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/1520155919935608024/",
+        "title": null,
+        "purpose": "production",
+        "operation": null,
+        "price": "180000.00",
+        "priceUnit": null,
+        "area": 589,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Сдаём производственно-складские помещения - 589 м2 Готовы сдать в аренду как целиком, так и частями! Пpeимущеcтвa лoкации: - В черте города - Густонаселённый микрорайон - Вблизи центральных улиц - Удобные выезды Привлекательность объекта: - Своя",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:37.607Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L37",
+      "provenance": {
+        "listingId": "762ecf53-ba2a-4ac5-aa8e-5415caded7ec",
+        "snapshotId": "34af40ec-a034-4829-8113-2581e9a7c191",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:37.607Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 247
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "1520155919935630222",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/1520155919935630222/",
+        "title": null,
+        "purpose": "production",
+        "operation": null,
+        "price": "483000.00",
+        "priceUnit": null,
+        "area": 700,
+        "floor": {
+          "raw": "2",
+          "kind": "above_ground",
+          "number": 2
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Топовая локация! Помещение в самом центре города, отсюда очень удобно развозить товары на оба берега! Сдается помещение под производство или склад, площадь 700 квадратных метров, но можно поделить, если нужно. На втором этаже. Есть грузовые лифты,",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:37.607Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L38",
+      "provenance": {
+        "listingId": "c3835dd9-ccb0-4d67-ba49-d1b84e562f6d",
+        "snapshotId": "46101b6a-1eba-4cf2-a50e-8fe13d84d51a",
+        "searchRunId": "7349f731-c051-4c69-a772-5a6d3936f2f8",
+        "fetchedAt": "2026-11-05T12:04:37.607Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 242
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "2954261078130439040",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/2954261078130439040/",
+        "title": null,
+        "purpose": "production",
+        "operation": null,
+        "price": "250000.00",
+        "priceUnit": null,
+        "area": 500,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Предлaгaeтcя в аpенду часть 1-огo этажa в здании пpоизвoдcтвеннoгo назнaчeния. Pacположено в прoмышлeннoй зоне Дзеpжинскогo рaйона. Автомобильный заезд с ул. Тpикoтaжнaя, пapковка на теppитоpии. Oстановки oбщeствeннoго тpaнcпоpта в пeшeхoдной",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:04:37.607Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L39",
+      "provenance": {
+        "listingId": "303cb9d0-6fe4-446b-8ac3-46f635869501",
+        "snapshotId": "6ff1789a-9597-4e80-8605-b89898827967",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 250
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "3936023035793471937",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/3936023035793471937/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "24640000.00",
+        "priceUnit": null,
+        "area": 112,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "ЖК «Паскаль»  жилой комплекс комфорт-класса в Октябрьском районе Новосибирска. Проект состоит из трех жилых секций с закрытым зеленым двором и подземным паркингом. В комплексе представлены квартиры от компактных студий до просторных семейных форматов",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L40",
+      "provenance": {
+        "listingId": "6ff92ee7-cda3-44fc-82c2-0b49c87e35f8",
+        "snapshotId": "2c52dec8-9340-4638-a0c0-63cd4b7e49d6",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 248
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "3936755696708953458",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/3936755696708953458/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "57400000.00",
+        "priceUnit": null,
+        "area": 241.6,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Квартира в квартале бизнес-класса «Собрание» у Заельцовского бора. Высокие потолки от 3,3 до 7 м, увеличенные окна и продуманные планировки создают ощущение пространства и света. На этаже - всего от 2 до 5 квартир. В квартале предусмотрены закрытый",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L41",
+      "provenance": {
+        "listingId": "d6cc1859-3a74-444b-a337-019566fdbda7",
+        "snapshotId": "a27d9da5-b93b-4c6b-ab24-ac2e73b94185",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 248
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "3936755696708953459",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/3936755696708953459/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "63000000.00",
+        "priceUnit": null,
+        "area": 240.5,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Квартира в квартале бизнес-класса «Собрание» у Заельцовского бора. Высокие потолки от 3,3 до 7 м, увеличенные окна и продуманные планировки создают ощущение пространства и света. На этаже - всего от 2 до 5 квартир. В квартале предусмотрены закрытый",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L42",
+      "provenance": {
+        "listingId": "eb6e8c89-043b-4f8a-9c8d-057e8ef89ade",
+        "snapshotId": "81c76fec-bbde-4dd9-9f31-f05132587e88",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 250
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "3939986640549968619",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/3939986640549968619/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "18495000.00",
+        "priceUnit": null,
+        "area": 61.7,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "ЖК «Ньютон»  современный комплекс комфорт-класса в 5 минутах езды от пл. Калинина. В продаже квартиры от 24 до 71 м. Есть варианты в готовом и строящемся доме. КВАРТИРЫ: - окна на две стороны - гардеробные - несколько санузлов - высота потолков 2,7 м",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L43",
+      "provenance": {
+        "listingId": "85ade93c-8e03-4bff-af8c-ebe364ba1888",
+        "snapshotId": "5be63b6e-4e7e-46cd-8cfa-be34df4f1261",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 242
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "5430628918570989667",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/5430628918570989667/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "6900000.00",
+        "priceUnit": null,
+        "area": 53,
+        "floor": {
+          "raw": "4",
+          "kind": "above_ground",
+          "number": 4
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Помещение свободного назначения 53 кв. м на 4 этаже торгового центра «Амстердам». Готовое решение для вашего бизнеса: объект уже сдается в аренду и идеально подходит для розничной торговли или оказания услуг благодаря рациональной планировке.",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L44",
+      "provenance": {
+        "listingId": "cccfbb3a-56f8-4ef5-a79f-8543850dbe92",
+        "snapshotId": "91e2acbb-abf4-4834-b39b-669f0632aa96",
+        "searchRunId": "b2935476-406d-415c-a960-10958ae655d8",
+        "fetchedAt": "2026-11-05T12:08:18.036Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 242
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "7567068812130613982",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/7567068812130613982/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "39546000.00",
+        "priceUnit": null,
+        "area": 101.4,
+        "floor": {
+          "raw": null,
+          "kind": "unknown",
+          "number": null
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Юнити Центр  многофункциональный квартал в центре Новосибирска, на улице Семьи Шамшиных. Тринадцатиэтажный жилой дом на 165 квартир, деловой центр и коммерция на первых этажах стоят на одном стилобате. Жилой дом устроен как дом-бутик: лобби с",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:08:18.036Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L45",
+      "provenance": {
+        "listingId": "dbcb94ba-3865-4748-a932-7dd47c5a2e97",
+        "snapshotId": "36e14b60-d1f4-415b-9a8a-decbe44f44ec",
+        "searchRunId": "a88b0675-7668-4bc0-82e5-d1e62d3e9b1c",
+        "fetchedAt": "2026-11-05T12:09:17.218Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 37
+      },
+      "input": {
+        "source": "web_search",
+        "sourceListingId": "url:efe9dc35570a1a378f8f89d7983fdec33122fdb5da04c109747048a26198e154",
+        "sourceUnitId": null,
+        "url": "https://novosibirsk.cian.ru/kupit-ofis-30-metrov/",
+        "title": null,
+        "purpose": null,
+        "operation": null,
+        "price": null,
+        "priceUnit": null,
+        "area": null,
+        "floor": {
+          "raw": null,
+          "kind": "unknown",
+          "number": null
+        },
+        "city": null,
+        "address": null,
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Продажа офисов в Новосибирске на Циан",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:09:17.218Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": true
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L46",
+      "provenance": {
+        "listingId": "844d707c-7c2e-4d69-8718-02d2fdc3feb1",
+        "snapshotId": "ae058b1a-fc1d-433b-b85e-3ebf96d7bac4",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 0
+      },
+      "input": {
+        "source": "onrealt",
+        "sourceListingId": "url:a75e5518c2bf4f8a6fc912eb34c49bbebc439b1222f38d62f75f3cddca52c344",
+        "sourceUnitId": null,
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis-nedorogo",
+        "title": null,
+        "purpose": "office",
+        "operation": "sale",
+        "price": null,
+        "priceUnit": "rub_total",
+        "area": null,
+        "floor": {
+          "raw": null,
+          "kind": "unknown",
+          "number": null
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:31.401Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": true
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L47",
+      "provenance": {
+        "listingId": "6aeefc5a-5b93-431d-abdd-983af90e234a",
+        "snapshotId": "feeac248-7bab-47c6-8f5a-6641063b43dc",
+        "searchRunId": "9e28eae7-3507-4937-8126-b2dccb4fe185",
+        "fetchedAt": "2026-11-05T12:12:01.759Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 57
+      },
+      "input": {
+        "source": "web_search",
+        "sourceListingId": "url:166ecbda67e28c6d790eebbdb53998d8ca69fc2b5d33992abeb16feff66d4454",
+        "sourceUnitId": null,
+        "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam/magazin-ASgBAgICAkSwCNJWnsMNiNk5?q=%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C+%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%BD%D1%8B%D0%B9+%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81+%D1%81+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%BC",
+        "title": null,
+        "purpose": null,
+        "operation": null,
+        "price": null,
+        "priceUnit": null,
+        "area": null,
+        "floor": {
+          "raw": null,
+          "kind": "unknown",
+          "number": null
+        },
+        "city": null,
+        "address": null,
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Торговое помещение с «Магнитом» 339,2 м², ул. Красина, 54",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:12:01.759Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": true
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L48",
+      "provenance": {
+        "listingId": "10a89599-150a-4a6e-8739-0b50a280c36f",
+        "snapshotId": "f9102e98-fca4-443a-af54-5f61df3487ab",
+        "searchRunId": "33f90440-7a66-4d5f-bc8a-dadb0c271906",
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 249
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "889555503400285658",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/889555503400285658/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "11200000.00",
+        "priceUnit": null,
+        "area": 130.5,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Арт. 138590882 Продается стильное коммерческое помещение с панорамным видом на город! Предлагаем к продаже светлое, просторное коммерческое помещение на 19 этаже, которое станет идеальным решением для современного офиса или любого бизнеса, где важны",
+        "images": [],
+        "fetchedAt": "2026-11-05T11:53:39.971Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    },
+    {
+      "id": "L49",
+      "provenance": {
+        "listingId": "9cdae806-d1ab-4166-81b9-6968fe780305",
+        "snapshotId": "6bfc3cd8-4fcf-4c70-aa67-ce781c5970f5",
+        "searchRunId": "a88b0675-7668-4bc0-82e5-d1e62d3e9b1c",
+        "fetchedAt": "2026-11-05T12:08:42.080Z",
+        "sourceMode": "LIVE",
+        "originalDescriptionLength": 244
+      },
+      "input": {
+        "source": "yandex",
+        "sourceListingId": "9204541398458019073",
+        "sourceUnitId": null,
+        "url": "https://realty.yandex.ru/offer/9204541398458019073/",
+        "title": null,
+        "purpose": "office",
+        "operation": null,
+        "price": "26000000.00",
+        "priceUnit": null,
+        "area": 210.4,
+        "floor": {
+          "raw": "1",
+          "kind": "above_ground",
+          "number": 1
+        },
+        "city": null,
+        "address": "",
+        "district": null,
+        "seller": {
+          "type": "unknown"
+        },
+        "description": "Бизнес -центр \"Альянс\" Отдельный офисный блок на 1 этаже. Непосредственно напротив главного входа в здание. Соседи - магазин, мед. центр, нотариальная контора, офисы. Кабинетная система. Нет несущих стен - объект колонного тип (шаг 6 и 3 метра)",
+        "images": [],
+        "fetchedAt": "2026-11-05T12:08:42.080Z",
+        "structuredFeatures": {},
+        "possibleDuplicateKeys": [],
+        "identityNeedsReview": false
+      },
+      "publicationDate": null
+    }
+  ]
+}
