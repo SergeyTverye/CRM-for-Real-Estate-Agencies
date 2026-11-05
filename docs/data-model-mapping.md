@@ -206,3 +206,55 @@ SearchSelection имеет необязательные propertyId/matchId; Save
 У CalendarEvent ответственный — ownerUserId; связи client/need/property/deal nullable. Notification.sourceId — UUID без FK; доступ/приватность восстанавливаются из источника. NotificationPreference.userId уникален. DealChecklistItem уникален по dealId/code, documentId nullable и сервером проверяется принадлежность доступного файла сделке. Историю физических документов/задач сохраняют нормализованные связи.
 
 Подтверждения: [schema integration](../tests/integration/v241-schema.test.ts), [codebook unit](../tests/unit/codebook-migration.test.ts), [AI persistence](../tests/integration/ai-persistence.test.ts), [поиск](integrations/property-search-application.md), [галерея](../src/modules/properties/MEDIA.md). Наличие модели само по себе не означает приёмку UI или живой интеграции.
+
+## Расширения ТЗ v3.1 (одна add-only миграция)
+
+Миграция: `20261106010000_v31_extensions`, получена `prisma migrate diff --from-schema <сохранённая схема v2.4.1> --to-schema prisma/schema.prisma --script`, без shadow DB. SQL дополнен CHECK, partial unique и защитой принадлежности версий/действий. Вся миграция выполняется в транзакции. Новые FK — RESTRICT, PK — UUID, время — timestamptz(3), деньги — numeric(16,2). SearchSelection и старые snapshots не преобразуются.
+
+| Сущность / требование | Prisma model | PostgreSQL table | Кардинальность / ограничения |
+|---|---|---|---|
+| SR-03/04 даты, единицы и сортировка | ExternalListing | external_listings | publishedAt/sourceUpdatedAt nullable; dateSource/datePrecision default unknown; stored pricePerM2Rub + pricePerM2Unit; fetchedAt/lastCheckedAt nullable |
+| Исторические снимки объявления | ExternalListingSnapshot | external_listing_snapshots | N:1 listing; отдельные nullable даты/площадь/цена за м², существующий fetchedAt сохранён |
+| Очередь поиска, отмена, восстановление | SearchRun | search_runs | depthParams/sortParams/progress JSONB; deadline/cancel/lock/heartbeat; nullable UNIQUE idempotencyKey для совместимости истории |
+| Охват и состояние площадки | SearchRunSource | search_run_sources | UNIQUE(runId, source) сохранён; requestedCount/receivedCount/acceptedCount/depthReached неотрицательные; retryAfterAt/statusReasonRu/needsUserAction |
+| Ручная CAPTCHA-сессия | InteractiveBrowserSession | interactive_browser_sessions | N:1 run/User; host без URL path/query/секретов; expiresAt > createdAt; cookies/профиль отсутствуют в модели |
+| Межплощадочные дубли | ListingDuplicateGroup | listing_duplicate_groups | 1:N members/decisions; evidence JSONB; системный статус |
+| Членство в группе дублей | ListingDuplicateMember | listing_duplicate_members | UNIQUE(groupId, listingId); partial UNIQUE(listingId) WHERE releasedAt IS NULL; releasedAt сохраняет историю разъединения |
+| Решение сотрудника о дублях | ListingDuplicateDecision | listing_duplicate_decisions | N:1 group/User; decision/comment/decidedAt; FK защищают историю |
+| Чек-лист задачи | TaskChecklistItem | task_checklist_items | N:1 Task; отдельные responsible/completer; порядок, dueAt, required, result, completedAt, updatedAt |
+| Планер / повторы | Task | tasks | priority дополнен critical; recurrenceKind/Interval/Until и parentTaskId сохранены; recurrenceRule, reminderOffsets (минуты до срока), nullable bulkBatchId |
+| Настройка близкого срока | PlannerSetting | planner_settings | singleton через expression UNIQUE; soonThresholdHours default 24 (1–8760), nullable updatedBy, updatedAt |
+| Массовое создание задач | BulkTaskBatch | bulk_task_batches | UNIQUE idempotencyKey, 1:N tasks, createdBy/createdAt, count > 0, template JSONB |
+| Ручной журнал звонков | LeadRequest | lead_requests | occurredAt/sourceCode/advertisementId/propertyId/summary/responsible/resultCode переиспользованы; добавлены nullable callAt/externalListingId/outcomeCode |
+| Именованная подборка | PropertyCollection | property_collections | N:1 owner; private/team, archivedAt, updatedAt; без обязательной связи с Client |
+| Элемент подборки | PropertyCollectionItem | property_collection_items | N:1 collection; XOR externalListingId/propertyId CHECK; уникальность каждого объекта внутри подборки, порядок, статус/комментарий/причина исключения, addedBy/At, updatedAt |
+| Связь подборки с потребностями | PropertyCollectionNeed | property_collection_needs | M:N Collection/ClientNeed, UNIQUE(collectionId, needId), linkedBy/linkedAt |
+| Шаблон документа | DocumentTemplate | document_templates | UNIQUE code; format/status CHECK; allowedSources text[]; nullable UNIQUE currentVersionId; createdAt/updatedAt |
+| Версия шаблона | DocumentTemplateVersion | document_template_versions | N:1 template; UNIQUE(templateId, version), version > 0; manifestYaml TEXT, optional storageKey/markdownBody, checksum, createdBy/At, compatibilityNote |
+| Происхождение сформированного файла | Document | documents | nullable templateVersionId + valuesSnapshot JSONB; старые метаданные и нормализованные links сохранены |
+| Личный чат | AiChatSession | ai_chat_sessions | N:1 owner; contextType/contextId CHECK (none → NULL, остальные → UUID), archivedAt/updatedAt |
+| Сообщение AI-чата | AiChatMessage | ai_chat_messages | N:1 session; role CHECK; optional toolName/Args/ResultSummary, AiUsageLog, pendingAction; composite FK запрещает действие другого чата |
+| Подтверждение действия | AiPendingAction | ai_pending_actions | N:1 session, nullable decider; proposed/confirmed/rejected/expired; confirmed/rejected требуют автора и даты; optional expiresAt |
+| Кеш анализа | AiAnalysisCache | ai_analysis_caches | UNIQUE cacheKey; N:1 listing, optional AiUsageLog; result JSONB |
+| Журнал экспорта | SearchExport | search_exports | N:1 User, optional Document; format/scope CHECK; params JSONB, columns text[], rowCount >= 0, createdAt |
+
+### Совместимость и контракт прикладных модулей
+
+- Старые статусы поиска `pending/success/error` остаются допустимыми наряду с `queued/running/needs_user_action/completed/partial/failed/cancelled`; переименование исторических записей не выполняется. Новые API должны требовать idempotencyKey от клиента для защищённого запуска; nullable нужен существующим сценариям v2.4.1.
+- Историческая дата публикации остаётся NULL. Новые дата/цена за м² в snapshots не вычисляются из текущей карточки задним числом. pricePerM2Rub — хранимое значение; приложение рассчитывает его только при достаточных данных, атомарно задавая единицу per_m2/per_m2_month/per_m2_year. Неизвестная цена → оба поля NULL.
+- Сортировки ExternalListing/Snapshot имеют индексы (поле, id): publishedAt, sourceUpdatedAt, firstSeenAt, priceRub, areaM2, lastCheckedAt; цена за м² — (pricePerM2Unit, pricePerM2Rub, id), чтобы не смешивать периоды. Очередь индексирована по status/heartbeatAt/startedAt и deadlineAt, источники — status/retryAfterAt. Остальные FK и списки владельца/времени покрыты индексами.
+- Отказ от дубля (group.status = rejected) освобождает memberships триггером, без удаления истории. Разъединение отдельного объявления — запись releasedAt и ListingDuplicateDecision в транзакции. Повторное включение — явное снятие releasedAt; partial unique проверяет конкуренцию между группами. Deferred остаётся активной группой.
+- `Task.parentTaskId` сохраняет прежнее назначение экземпляра повтора. Квартал — monthly + interval 3 (или RRULE FREQ=MONTHLY;INTERVAL=3); год — существующий yearly; будни — recurrenceRule FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR. Окончание — существующий recurrenceUntil или RRULE UNTIL/COUNT. Новые несовместимые recurrenceKind не вводятся; worker должен обрабатывать recurrenceRule перед созданием экземпляров. Snooze/dedupKey остаются в Notification, leadMinutes — в NotificationPreference; reminderOffsets — индивидуальные дополнительные моменты Task.
+- В журнале звонков sourceCode — существующий бизнес-источник рекламы, advertisementId уже FK; отдельный adSource не дублируется. outcomeCode различает spam/wrong/one_time/prospective, resultCode остаётся прежним результатом обработки обращения. callAt nullable позволяет различать журнал звонков и прочие обращения.
+- currentVersionId дополнительно связан composite FK с собственным templateId. Версии/valuesSnapshot не перезаписываются при изменении исходных CRM-записей. Авторы документов, действий и решений связаны FK RESTRICT.
+- AiChatSession.contextId — разрешённый ТЗ полиморфный контекст: приложение проверяет фактическую сущность и RBAC при каждом чтении/tool call. Payload/actionType/allowedSources/cacheKey валидируются приложением; cacheKey вычисляется из хэша описания, критериев и модели. Чат не создаёт отдельный бюджет: используется AiUsageLog/AiGate.
+- Ограничения статусов синхронизированы с CODEBOOK_COLUMNS и проверяются unit + PostgreSQL integration. Наличие таблиц не означает готовность прикладного UI, worker или внешнего источника.
+
+### Проверка миграции v3.1, 05.11.2026
+
+- `prisma validate`, `prisma generate` — PASS.
+- Чистая `crm_test_a`: global setup пересоздал public и применил все четыре миграции; codebook (93), v241-schema (5), v31-schema (8) — **106/106 PASS**. Новый тест: `tests/integration/v31-schema.test.ts`.
+- Резервная копия до изменений: `D:/crm-review/crm_demo_v241.dump`, PostgreSQL custom format, 659929 байт; каталог проверен `pg_restore --list`. Коллизия имени CHECK при первой попытке исправлена; демо восстановлено из исходного дампа перед окончательным deploy. Итоговая миграция транзакционная.
+- Окончательный `prisma migrate deploy` на восстановленной `crm_demo` — PASS. Сверены количество и хэш всех прежних колонок всех **66 таблиц** (кроме служебной истории миграций): полное совпадение до/после. Все **320** исторических объявлений сохранили `publishedAt = NULL`.
+- Машинные результаты вне Git: `D:/crm-review/v31-baseline-manifest.json`, `D:/crm-review/v31-data-preservation.json`. Секретов/содержимого строк в них нет, только имена колонок, количества и хэши.
+- ESLint изменённых TS-файлов и `git diff --check` — PASS. Финальный общий `npx tsc --noEmit` — **PASS, exit 0** (ранние ошибки параллельных модулей устранены их владельцами).

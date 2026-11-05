@@ -27,3 +27,7 @@
 - Документация этапа 2: [приёмка](acceptance/stage2-live-ai-ux.md), user-guide, API, трассировка, README и IMPLEMENTATION_REPORT обновлены; NFR-14 локально, реальный Excel и UAT остаются PARTIAL.
 
 - Этап 2 завершён (05.11.2026): живые испытания Yandex AI (10 подборов, 5 web_search, 12 прочих AI-вызовов этапа поиска + 4 P2 + 4 parse для пересъёмки; ~6,27 руб. по журналу CRM), UI/UX P1, P2 (заметка после звонка, тексты КП), исправления по Iceman/Beam, правило жилого назначения. Итог: unit 1003/1003, integration+authorization 197/197, E2E 16/16 (production), Docker и чистое развёртывание PASS.
+
+## 2026-11-05 — ТЗ v3.1 (ветка feature/tz-v3.1 от 6bbdb7b)
+- Модели: openai/* в OpenCode недоступны, Go-лимит исчерпан -> разработка субагентами gpt-6.1-sol; тест/ревью OpenCode iceman/beam.
+- Волна 1: схема v3.1 (одна миграция), аудит 7 адаптеров, CAPTCHA human-in-the-loop.

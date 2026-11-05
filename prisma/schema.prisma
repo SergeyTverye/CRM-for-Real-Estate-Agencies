@@ -18,6 +18,20 @@ datasource db {
 // ───────────────────────────── Идентификация и доступ ─────────────────────────────
 
 model User {
+  browserSessions          InteractiveBrowserSession[]
+  duplicateDecisions       ListingDuplicateDecision[]
+  taskChecklistResponsible TaskChecklistItem[]         @relation("TaskChecklistResponsible")
+  taskChecklistCompleted   TaskChecklistItem[]         @relation("TaskChecklistCompleted")
+  plannerSettings          PlannerSetting[]
+  bulkTaskBatches          BulkTaskBatch[]
+  propertyCollections      PropertyCollection[]
+  collectionItemsAdded     PropertyCollectionItem[]
+  collectionNeedsLinked    PropertyCollectionNeed[]
+  templateVersions         DocumentTemplateVersion[]
+  aiChatSessions           AiChatSession[]
+  aiActionDecisions        AiPendingAction[]
+  searchExports            SearchExport[]
+
   searchBookmarks        SearchBookmark[]
   searchSelections       SearchSelection[]
   savedSearches          SavedSearch[]
@@ -185,6 +199,11 @@ model ClientContact {
 }
 
 model LeadRequest {
+  callAt            DateTime?        @map("call_at") @db.Timestamptz(3)
+  externalListingId String?          @map("external_listing_id") @db.Uuid
+  outcomeCode       String?          @map("outcome_code")
+  externalListing   ExternalListing? @relation(fields: [externalListingId], references: [id], onDelete: Restrict)
+
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clientId          String?  @map("client_id") @db.Uuid
   clientNeedId      String?  @map("client_need_id") @db.Uuid
@@ -210,6 +229,9 @@ model LeadRequest {
   creator        User            @relation("LeadCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
   communications Communication[]
 
+  @@index([externalListingId])
+  @@index([callAt, responsibleUserId])
+  @@index([outcomeCode, occurredAt])
   @@index([responsibleUserId, occurredAt])
   @@index([sourceCode, occurredAt])
   @@index([statusCode])
@@ -222,6 +244,8 @@ model LeadRequest {
 }
 
 model ClientNeed {
+  collectionLinks PropertyCollectionNeed[]
+
   calendarEvents     CalendarEvent[]
   searchSelections   SearchSelection[]
   savedSearches      SavedSearch[]
@@ -329,6 +353,8 @@ model Communication {
 // ───────────────────────────── Объекты и работа с рынком ─────────────────────────────
 
 model Property {
+  collectionItems PropertyCollectionItem[]
+
   externalListings   ExternalListing[]
   searchSelections   SearchSelection[]
   calendarEvents     CalendarEvent[]
@@ -523,6 +549,12 @@ model Agreement {
 // ───────────────────────────── Задачи и связи задач ─────────────────────────────
 
 model Task {
+  checklistItems  TaskChecklistItem[]
+  recurrenceRule  String?             @map("recurrence_rule")
+  reminderOffsets Int[]               @default([]) @map("reminder_offsets")
+  bulkBatchId     String?             @map("bulk_batch_id") @db.Uuid
+  bulkBatch       BulkTaskBatch?      @relation(fields: [bulkBatchId], references: [id], onDelete: Restrict)
+
   id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   responsibleUserId  String    @map("responsible_user_id") @db.Uuid
   createdBy          String    @map("created_by") @db.Uuid
@@ -555,6 +587,7 @@ model Task {
   agreementLinks     TaskAgreement[]
   offerLinks         TaskCommercialOffer[]
 
+  @@index([bulkBatchId])
   @@index([responsibleUserId, status, dueAt])
   @@index([createdBy])
   @@index([parentTaskId])
@@ -804,6 +837,11 @@ model CommercialOfferItem {
 // ───────────────────────────── Документы и файловые связи ─────────────────────────────
 
 model Document {
+  templateVersionId String?                  @map("template_version_id") @db.Uuid
+  valuesSnapshot    Json?                    @map("values_snapshot")
+  templateVersion   DocumentTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  searchExports     SearchExport[]
+
   thumbnailStorageKey String?             @map("thumbnail_storage_key")
   logoFor             LegalEntity[]       @relation("LegalEntityLogo")
   checklistItems      DealChecklistItem[]
@@ -832,6 +870,7 @@ model Document {
   offerLinks         DocumentCommercialOffer[]
   aiRuns             AiRun[]
 
+  @@index([templateVersionId])
   @@index([uploadedBy])
   @@index([legalEntityId])
   @@map("documents")
@@ -1164,6 +1203,22 @@ model DictionaryItem {
 
 // TZ v2.4.1 extensions; system CHECK constraints and partial indexes live in SQL.
 model ExternalListing {
+  publishedAt       DateTime? @map("published_at") @db.Timestamptz(3)
+  sourceUpdatedAt   DateTime? @map("source_updated_at") @db.Timestamptz(3)
+  dateSource        String    @default("unknown") @map("date_source")
+  datePrecision     String    @default("unknown") @map("date_precision")
+  sourceCategoryRaw String?   @map("source_category_raw")
+  purposeEvidence   Json?     @map("purpose_evidence")
+  pricePerM2Rub     Decimal?  @map("price_per_m2_rub") @db.Decimal(16, 2)
+  pricePerM2Unit    String?   @map("price_per_m2_unit")
+
+  fetchedAt        DateTime?                @map("fetched_at") @db.Timestamptz(3)
+  lastCheckedAt    DateTime?                @map("last_checked_at") @db.Timestamptz(3)
+  duplicateMembers ListingDuplicateMember[]
+  collectionItems  PropertyCollectionItem[]
+  leadRequests     LeadRequest[]
+  analysisCaches   AiAnalysisCache[]
+
   id                      String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   source                  String
   sourceListingId         String?                       @map("source_listing_id")
@@ -1199,12 +1254,33 @@ model ExternalListing {
   selections              SearchSelection[]
   runResults              SearchRunResult[]
 
+  @@index([publishedAt, id])
+  @@index([sourceUpdatedAt, id])
+  @@index([firstSeenAt, id])
+  @@index([priceRub, id])
+  @@index([pricePerM2Unit, pricePerM2Rub, id])
+  @@index([areaM2, id])
+  @@index([lastCheckedAt, id])
   @@index([propertyId])
   @@index([city, operation, lastSeenAt])
   @@map("external_listings")
 }
 
 model ExternalListingSnapshot {
+  publishedAt       DateTime? @map("published_at") @db.Timestamptz(3)
+  sourceUpdatedAt   DateTime? @map("source_updated_at") @db.Timestamptz(3)
+  dateSource        String    @default("unknown") @map("date_source")
+  datePrecision     String    @default("unknown") @map("date_precision")
+  sourceCategoryRaw String?   @map("source_category_raw")
+  purposeEvidence   Json?     @map("purpose_evidence")
+  pricePerM2Rub     Decimal?  @map("price_per_m2_rub") @db.Decimal(16, 2)
+  pricePerM2Unit    String?   @map("price_per_m2_unit")
+
+  firstSeenAt   DateTime? @map("first_seen_at") @db.Timestamptz(3)
+  lastSeenAt    DateTime? @map("last_seen_at") @db.Timestamptz(3)
+  areaM2        Decimal?  @map("area_m2") @db.Decimal(12, 2)
+  lastCheckedAt DateTime? @map("last_checked_at") @db.Timestamptz(3)
+
   id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   listingId   String          @map("listing_id") @db.Uuid
   searchRunId String?         @map("search_run_id") @db.Uuid
@@ -1214,6 +1290,13 @@ model ExternalListingSnapshot {
   listing     ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
   searchRun   SearchRun?      @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
 
+  @@index([publishedAt, id])
+  @@index([sourceUpdatedAt, id])
+  @@index([firstSeenAt, id])
+  @@index([priceRub, id])
+  @@index([pricePerM2Unit, pricePerM2Rub, id])
+  @@index([areaM2, id])
+  @@index([lastCheckedAt, id])
   @@index([listingId, fetchedAt])
   @@index([searchRunId])
   @@map("external_listing_snapshots")
@@ -1303,6 +1386,18 @@ model SavedSearch {
 }
 
 model SearchRun {
+  depthParams      Json                        @default("{}") @map("depth_params")
+  sortParams       Json                        @default("{}") @map("sort_params")
+  deadlineAt       DateTime?                   @map("deadline_at") @db.Timestamptz(3)
+  cancelledAt      DateTime?                   @map("cancelled_at") @db.Timestamptz(3)
+  cancelRequested  Boolean                     @default(false) @map("cancel_requested")
+  progress         Json                        @default("{}")
+  incompleteReason String?                     @map("incomplete_reason")
+  idempotencyKey   String?                     @unique @map("idempotency_key")
+  lockedBy         String?                     @map("locked_by")
+  heartbeatAt      DateTime?                   @map("heartbeat_at") @db.Timestamptz(3)
+  browserSessions  InteractiveBrowserSession[]
+
   id             String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   savedSearchId  String?                   @map("saved_search_id") @db.Uuid
   needId         String?                   @map("need_id") @db.Uuid
@@ -1323,6 +1418,8 @@ model SearchRun {
   snapshots      ExternalListingSnapshot[]
   aiUsageLogs    AiUsageLog[]
 
+  @@index([status, heartbeatAt, startedAt])
+  @@index([deadlineAt])
   @@index([savedSearchId, startedAt])
   @@index([needId])
   @@index([userId, startedAt])
@@ -1330,6 +1427,14 @@ model SearchRun {
 }
 
 model SearchRunSource {
+  requestedCount  Int       @default(0) @map("requested_count")
+  receivedCount   Int       @default(0) @map("received_count")
+  acceptedCount   Int       @default(0) @map("accepted_count")
+  depthReached    Int       @default(0) @map("depth_reached")
+  retryAfterAt    DateTime? @map("retry_after_at") @db.Timestamptz(3)
+  statusReasonRu  String?   @map("status_reason_ru")
+  needsUserAction Boolean   @default(false) @map("needs_user_action")
+
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   runId       String    @map("run_id") @db.Uuid
   source      String
@@ -1340,6 +1445,7 @@ model SearchRunSource {
   run         SearchRun @relation(fields: [runId], references: [id], onDelete: Restrict)
 
   @@unique([runId, source])
+  @@index([status, retryAfterAt])
   @@map("search_run_sources")
 }
 
@@ -1385,6 +1491,9 @@ model AiSetting {
 }
 
 model AiUsageLog {
+  chatMessages   AiChatMessage[]
+  analysisCaches AiAnalysisCache[]
+
   id               String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   callType         String                @map("call_type")
   userId           String                @map("user_id") @db.Uuid
@@ -1517,4 +1626,306 @@ model DealChecklistItem {
   @@index([responsibleUserId])
   @@index([documentId])
   @@map("deal_checklist_items")
+}
+
+// TZ v3.1 additive extensions. Additional invariants are enforced in SQL.
+
+model InteractiveBrowserSession {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  searchRunId    String    @map("search_run_id") @db.Uuid
+  source         String
+  ownerUserId    String    @map("owner_user_id") @db.Uuid
+  status         String    @default("pending")
+  startUrlHost   String    @map("start_url_host")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(3)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(3)
+  lastActivityAt DateTime  @default(now()) @map("last_activity_at") @db.Timestamptz(3)
+  closeReason    String?   @map("close_reason")
+  searchRun      SearchRun @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
+  owner          User      @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+
+  @@index([searchRunId, source])
+  @@index([ownerUserId, status, expiresAt])
+  @@index([status, expiresAt])
+  @@map("interactive_browser_sessions")
+}
+
+model ListingDuplicateGroup {
+  id        String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status    String                     @default("probable")
+  evidence  Json                       @default("{}")
+  createdAt DateTime                   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  members   ListingDuplicateMember[]
+  decisions ListingDuplicateDecision[]
+
+  @@index([status, createdAt])
+  @@map("listing_duplicate_groups")
+}
+
+model ListingDuplicateMember {
+  id         String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId    String                @map("group_id") @db.Uuid
+  listingId  String                @map("listing_id") @db.Uuid
+  releasedAt DateTime?             @map("released_at") @db.Timestamptz(3)
+  group      ListingDuplicateGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  listing    ExternalListing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@unique([groupId, listingId])
+  @@index([listingId])
+  @@map("listing_duplicate_members")
+}
+
+model ListingDuplicateDecision {
+  id        String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId   String                @map("group_id") @db.Uuid
+  decision  String
+  decidedBy String                @map("decided_by") @db.Uuid
+  decidedAt DateTime              @default(now()) @map("decided_at") @db.Timestamptz(3)
+  comment   String?
+  group     ListingDuplicateGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  decider   User                  @relation(fields: [decidedBy], references: [id], onDelete: Restrict)
+
+  @@index([groupId, decidedAt])
+  @@index([decidedBy])
+  @@map("listing_duplicate_decisions")
+}
+
+model TaskChecklistItem {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taskId            String    @map("task_id") @db.Uuid
+  title             String
+  sortOrder         Int       @default(0) @map("sort_order")
+  responsibleUserId String?   @map("responsible_user_id") @db.Uuid
+  dueAt             DateTime? @map("due_at") @db.Timestamptz(3)
+  required          Boolean   @default(false)
+  status            String    @default("open")
+  result            String?
+  completedAt       DateTime? @map("completed_at") @db.Timestamptz(3)
+  completedBy       String?   @map("completed_by") @db.Uuid
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  task              Task      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  responsible       User?     @relation("TaskChecklistResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  completer         User?     @relation("TaskChecklistCompleted", fields: [completedBy], references: [id], onDelete: Restrict)
+
+  @@index([taskId, sortOrder])
+  @@index([responsibleUserId, status, dueAt])
+  @@index([completedBy])
+  @@map("task_checklist_items")
+}
+
+model PlannerSetting {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  soonThresholdHours Int      @default(24) @map("soon_threshold_hours")
+  updatedBy          String?  @map("updated_by") @db.Uuid
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updater            User?    @relation(fields: [updatedBy], references: [id], onDelete: Restrict)
+
+  @@index([updatedBy])
+  @@map("planner_settings")
+}
+
+model BulkTaskBatch {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idempotencyKey String   @unique @map("idempotency_key")
+  createdBy      String   @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  count          Int
+  template       Json
+  creator        User     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  tasks          Task[]
+
+  @@index([createdBy, createdAt])
+  @@map("bulk_task_batches")
+}
+
+model PropertyCollection {
+  id          String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  ownerUserId String                   @map("owner_user_id") @db.Uuid
+  visibility  String                   @default("private")
+  archivedAt  DateTime?                @map("archived_at") @db.Timestamptz(3)
+  createdAt   DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+  owner       User                     @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  items       PropertyCollectionItem[]
+  needs       PropertyCollectionNeed[]
+
+  @@index([ownerUserId, archivedAt, updatedAt])
+  @@index([visibility, archivedAt])
+  @@map("property_collections")
+}
+
+model PropertyCollectionItem {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  collectionId      String             @map("collection_id") @db.Uuid
+  sortOrder         Int                @default(0) @map("sort_order")
+  externalListingId String?            @map("external_listing_id") @db.Uuid
+  propertyId        String?            @map("property_id") @db.Uuid
+  status            String             @default("in_collection")
+  comment           String?
+  exclusionReason   String?            @map("exclusion_reason")
+  addedBy           String             @map("added_by") @db.Uuid
+  addedAt           DateTime           @default(now()) @map("added_at") @db.Timestamptz(3)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  collection        PropertyCollection @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+  externalListing   ExternalListing?   @relation(fields: [externalListingId], references: [id], onDelete: Restrict)
+  property          Property?          @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  creator           User               @relation(fields: [addedBy], references: [id], onDelete: Restrict)
+
+  @@unique([collectionId, externalListingId])
+  @@unique([collectionId, propertyId])
+  @@index([collectionId, sortOrder])
+  @@index([externalListingId])
+  @@index([propertyId])
+  @@index([addedBy])
+  @@map("property_collection_items")
+}
+
+model PropertyCollectionNeed {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  collectionId String             @map("collection_id") @db.Uuid
+  needId       String             @map("need_id") @db.Uuid
+  linkedBy     String             @map("linked_by") @db.Uuid
+  linkedAt     DateTime           @default(now()) @map("linked_at") @db.Timestamptz(3)
+  collection   PropertyCollection @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+  need         ClientNeed         @relation(fields: [needId], references: [id], onDelete: Restrict)
+  linker       User               @relation(fields: [linkedBy], references: [id], onDelete: Restrict)
+
+  @@unique([collectionId, needId])
+  @@index([needId, linkedAt])
+  @@index([linkedBy])
+  @@map("property_collection_needs")
+}
+
+model DocumentTemplate {
+  id               String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String                    @unique
+  name             String
+  format           String
+  description      String?
+  status           String                    @default("active")
+  allowedSources   String[]                  @map("allowed_sources")
+  currentVersionId String?                   @unique @map("current_version_id") @db.Uuid
+  createdAt        DateTime                  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  currentVersion   DocumentTemplateVersion?  @relation("TemplateCurrentVersion", fields: [currentVersionId], references: [id], onDelete: Restrict)
+  versions         DocumentTemplateVersion[] @relation("TemplateVersions")
+
+  @@index([status, name])
+  @@map("document_templates")
+}
+
+model DocumentTemplateVersion {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  templateId        String            @map("template_id") @db.Uuid
+  version           Int
+  manifestYaml      String            @map("manifest_yaml")
+  storageKey        String?           @map("storage_key")
+  markdownBody      String?           @map("markdown_body")
+  checksum          String
+  createdBy         String            @map("created_by") @db.Uuid
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  compatibilityNote String?           @map("compatibility_note")
+  template          DocumentTemplate  @relation("TemplateVersions", fields: [templateId], references: [id], onDelete: Restrict)
+  currentFor        DocumentTemplate? @relation("TemplateCurrentVersion")
+  creator           User              @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  documents         Document[]
+
+  @@unique([templateId, version])
+  @@index([createdBy])
+  @@map("document_template_versions")
+}
+
+model AiChatSession {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerUserId    String            @map("owner_user_id") @db.Uuid
+  title          String
+  contextType    String            @default("none") @map("context_type")
+  contextId      String?           @map("context_id") @db.Uuid
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  archivedAt     DateTime?         @map("archived_at") @db.Timestamptz(3)
+  owner          User              @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  messages       AiChatMessage[]
+  pendingActions AiPendingAction[]
+
+  @@index([ownerUserId, archivedAt, updatedAt])
+  @@index([contextType, contextId])
+  @@map("ai_chat_sessions")
+}
+
+model AiChatMessage {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId         String           @map("session_id") @db.Uuid
+  role              String
+  content           String
+  toolName          String?          @map("tool_name")
+  toolArgs          Json?            @map("tool_args")
+  toolResultSummary String?          @map("tool_result_summary")
+  aiUsageLogId      String?          @map("ai_usage_log_id") @db.Uuid
+  pendingActionId   String?          @map("pending_action_id") @db.Uuid
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  session           AiChatSession    @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  aiUsageLog        AiUsageLog?      @relation(fields: [aiUsageLogId], references: [id], onDelete: Restrict)
+  pendingAction     AiPendingAction? @relation(fields: [pendingActionId], references: [id], onDelete: Restrict)
+
+  @@index([sessionId, createdAt, id])
+  @@index([aiUsageLogId])
+  @@index([pendingActionId])
+  @@map("ai_chat_messages")
+}
+
+model AiPendingAction {
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId  String          @map("session_id") @db.Uuid
+  actionType String          @map("action_type")
+  payload    Json
+  status     String          @default("proposed")
+  decidedBy  String?         @map("decided_by") @db.Uuid
+  decidedAt  DateTime?       @map("decided_at") @db.Timestamptz(3)
+  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt  DateTime?       @map("expires_at") @db.Timestamptz(3)
+  session    AiChatSession   @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  decider    User?           @relation(fields: [decidedBy], references: [id], onDelete: Restrict)
+  messages   AiChatMessage[]
+
+  @@index([sessionId, status])
+  @@index([decidedBy])
+  @@index([status, expiresAt])
+  @@map("ai_pending_actions")
+}
+
+model AiAnalysisCache {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cacheKey     String          @unique @map("cache_key")
+  listingId    String          @map("listing_id") @db.Uuid
+  result       Json
+  aiUsageLogId String?         @map("ai_usage_log_id") @db.Uuid
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  listing      ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  aiUsageLog   AiUsageLog?     @relation(fields: [aiUsageLogId], references: [id], onDelete: Restrict)
+
+  @@index([listingId])
+  @@index([aiUsageLogId])
+  @@map("ai_analysis_caches")
+}
+
+model SearchExport {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  format     String
+  scope      String
+  params     Json
+  columns    String[]
+  rowCount   Int       @map("row_count")
+  documentId String?   @map("document_id") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([documentId])
+  @@map("search_exports")
 }
