@@ -100,6 +100,13 @@ describe("AT-05 controlled Chromium cycle", () => {
     // Chromium can emit a request event for an aborted route; fixture transport rejects every foreign origin.
     expect(externalRequests).toBeLessThanOrEqual(1); expect(t.handle.page.isClosed()).toBe(true);
   });
+  it("never lets Chromium follow an HTTP redirect outside the guarded transport", async () => {
+    const t = await scenario();
+    await t.handle.page.goto(`${t.stand.origin}/redirect-forbidden`).catch(() => undefined);
+    await vi.waitFor(async () => expect((await t.service.get(actor, t.session.id)).status).toBe("failed"));
+    expect(t.blocked).toHaveBeenCalledWith(job.searchRunId, "cian", "navigation_blocked");
+    expect(t.handle.page.isClosed()).toBe(true);
+  });
   it("idle timer actually closes Chromium without any request from CRM", async () => {
     const t = await scenario({ idleMs: 2500, tickMs: 100 });
     await vi.waitFor(() => expect(t.handle.page.isClosed()).toBe(true), { timeout: 5000 });

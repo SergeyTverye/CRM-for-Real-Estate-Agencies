@@ -1,75 +1,61 @@
 # CAPTCHA с участием сотрудника — SR-06 / AT-05 / AT-06
 
-Проверено 05.11.2026, ветка `feature/tz-v3.1`. Нормативная основа: ТЗ v3.1 §2 SR-06, §8–10, §12. Это отдельный модуль интерактивных сессий; регистрация продолжения в основном поиске остаётся задачей агента приложения поиска. Доступность конкретной площадки и право на автоматизированный сбор не следуют из работоспособности браузера.
+Обновлено 06.11.2026. Основа: ТЗ v3.1 SR-06, AT-05/06. Данные проверок **DEMO**: собственный HTTP-стенд, настоящие PostgreSQL, Chromium и маршруты API CRM. Реальные ограничения площадок не снимаются технической работоспособностью браузера.
 
-## Что реализовано
+## Производственная цепочка
 
-`src/modules/browser-sessions/{domain,application,infrastructure}`: серверный жизненный цикл, Playwright/CDP, сетевые ограничения, Prisma-репозиторий и отдельная in-memory реализация для тестов. `/api/v1/browser-sessions/**` использует штатную аутентификацию, CSRF/Origin, блокировку standby, UUID-параметры, JSON-ошибки и `Cache-Control: no-store`. Страница `/browser-sessions/[id]` и компоненты `src/ui/browser-session/` не обращаются к БД.
+1. Durable очередь создаёт `SearchRun` и `SearchRunSource`; адаптер распознаёт проверку как `needs_user_action`. Сохранённые результаты других источников остаются доступны.
+2. На источнике отображается `StartBrowserSession`. POST `/api/v1/browser-sessions` принимает только `{searchRunId,source}`; URL, cookies, flags, profile path и JS от клиента не принимаются.
+3. Production composition root лениво подключает `ProductionInteractiveSearchAdapter` через `attachInteractiveSearchAdapter`. Проверяются владелец SearchRun, доступ к need и статус источника. URL выдачи строится штатным парсером **из сохранённых filters/depthParams задания**, с исходным городом, операцией, назначениями и ограничениями глубины; главная страница площадки не используется. URL/параметры остаются в памяти, в InteractiveBrowserSession записывается только hostname.
+4. Оператор включает разрешённые источники через `BROWSER_SESSION_ALLOWED_SOURCES=cian,...` **после проверки основания доступа**. По умолчанию список пуст. При отсутствии разрешения источник становится `blocked`, API возвращает понятный конфликт и предлагает ссылку/официальный импорт. Включение ENV само по себе не предоставляет разрешение площадки.
+5. Сессия связана с SearchRun FK и с его единственным `(runId,source)`; миграций не понадобилось. `/progress` возвращает последнюю сессию этого источника (id/status/closeReason/expiresAt) только владельцу. Активную проверку можно открыть повторно кнопкой «Вернуться к проверке площадки».
+6. Отдельный Chromium получает временный профиль. CDP отдаёт только последний JPEG; `/frame?after=N` — no-store long-poll до 5 с, 5 запросов/с. Ввод через API: клик/прокрутка, ограниченные клавиши, текст ≤128 символов, 20 команд/с. DOM, cookies, полный URL, CDP endpoint и storage path не выдаются UI.
+7. Пользователь проходит проверку. `isReady` подтверждает распознаваемые карточки/явный нулевой итог конкретным парсером, а не отсутствием слова CAPTCHA. Проверка навигации ограничена 5 с; transient navigation не выдаётся наружу как Playwright exception.
+8. `collect` использует **переданные page/context**: читает текущую выдачу через `real-estate-scrapper.parsers[source].parsePage`, извлекает даты, нормализует карточки. Разрешены следующие страницы в том же контексте, в пределах исходного source-depth и лимита. Второй браузер/HTTP-сеанс не создаётся, CAPTCHA автоматически не решается. JSON/API-only страницы без поддержанного HTML-парсинга безопасно требуют ручного пути.
+9. Application повторно проверяет пользователя/run/need/отмену, URL и фильтры. Транзакционный fence блокирует конкурирующую запись/отмену; результаты и snapshots сохраняются **в исходный SearchRun**. Обновляются result/accepted/received counts, глубина, status, progress; группировка дублей вызывается после commit. Повторное complete не создаёт дублей.
+10. Повторная блокировка прекращает сбор: уже прочитанные валидные страницы сохраняются, источник `blocked`, запуск `partial`, сессия `failed/blocked_again`. Старые snapshots не стираются; UI предлагает добавление по ссылке/официальную выгрузку.
+11. Успех → `completed/search_resumed`, idle 10 минут или общий срок 20 минут → `expired` и источник `blocked`. Отмена задания закрывает его сессии как `cancelled/search_cancelled`, источник `cancelled`. Watchdog видит отмену/деактивацию из другого процесса. При потере процесса GET **и frame polling** закрывают потерянную сессию как `failed/process_lost`. Cookies не восстанавливаются.
+12. Chromium закрывается до I/O БД, профиль удаляется, последний кадр очищается. После аварийного SIGKILL собственные профили старше 21 минуты удаляются reaper при следующем открытии. Возврат из viewer ведёт на `/property-search?runId=...`; штатный опрос progress/results обновляет выдачу после продолжения.
 
-Последовательность:
+## Изоляция и сетевые ограничения
 
-1. Адаптер определяет `needs_user_action`. Модуль сессий сам не переинтерпретирует отсутствие карточек как CAPTCHA.
-2. Поиск показывает `<StartBrowserSession searchRunId={run.id} source={source} />`. POST передаёт **только** эти два поля. Произвольные URL, cookies, browser flags, пути и параметры задания из клиента отвергаются.
-3. `SearchContinuationPort.prepare` проверяет владельца запуска, доступ к связанной потребности, текущее состояние источника и допустимость операции. Возвращает доверенный URL и исходные параметры. В БД сохраняется только hostname, без path/query/fragment.
-4. Атомарно резервируется одна `pending/active` сессия на `(ownerUserId, source)`. Prisma использует PostgreSQL transaction advisory lock; этот контракт обязателен для всех писателей таблицы. Контекст каждого запуска получает отдельный `mkdtemp`-профиль в OS temp, вне Git. Существующие cookies/профили не загружаются.
-5. Headless Chromium запускается через `playwright-core`. `Page.startScreencast` выдаёт JPEG, `Page.screencastFrameAck` подтверждает кадры. В памяти остаётся только последний кадр с sequence; `/frame?after=N` работает как ограниченный long-poll до 5 секунд и отдаёт только новый JPEG в JSON/base64 либо `frame:null`. Запрос прекращается при disconnect/закрытии сессии; после ответа UI делает паузу 500 мс. Canvas не получает DOM/URL/cookies/CDP endpoint площадки. Без `after` API сохраняет возможность немедленного чтения последнего кадра.
-6. Клик/прокрутка/ограниченные клавиши передаются через `Input.dispatchMouseEvent`/`Input.dispatchKeyEvent`, текст через `Input.insertText`. Есть очередь UI; для Unicode/вставки — отдельное маскированное поле с очисткой после отправки. Координаты масштабируются из размеров canvas в 1280×800.
-7. «Готово» или положительная проверка `isReady` запускает `resume` ровно один раз, с **тем же** `page/context` и исходными параметрами. Возобновление обязано повторно проверить доступ и данные и проверить `signal` непосредственно перед записью. Нельзя просто открыть новую HTTP/браузерную сессию: это потеряет результат проверки.
-8. Контекст закрывается, профиль удаляется, последний кадр стирается. Отмена и независимый watchdog прерывают также зависшее продолжение. Повторная проверка/блокировка/ошибка вызывает `blocked`, сохраняя старые результаты; UI предлагает `/import` и `/property-search` для добавления ссылки.
+Только владелец сессии; руководитель также получает 404 на чужую metadata/frame/input/complete/cancel. Все запросы проверяют активную CRM-сессию, POST — same-origin и active instance. Скрытие кнопки не заменяет серверные проверки.
 
-## Права и ограничения
+Service workers, WebSocket, popups, downloads, file chooser и dialogs блокируются. Нет разрешений камеры/микрофона/геолокации, экспорта cookies, HAR/trace/video, автоматического распознавания CAPTCHA и подмены fingerprint. CDN разрешены только для ограниченных GET ресурсов; навигация — на HTTPS:443 домены источника. Каждый HTTP-ресурс проходит hostname policy и DNS-pinned `safeRequest`, включая iframe.
 
-- **Только владелец**, без исключения для руководителя. Даже руководитель получает одинаковый 404 на metadata, frame, input, complete, cancel чужой сессии. Причина: кадры авторизованного кабинета могут содержать личные сведения сотрудника. Руководитель может открыть собственный сеанс в пределах своих прав поиска. Передача владения не поддерживается.
-- Штатный API заново проверяет CRM-сессию на каждом запросе: деактивированный пользователь, logout и обязательная смена пароля не обходятся новым модулем. Продолжение не должно доверять старому Actor без повторной проверки актуального доступа.
-- Ввод: 20 команд/сек, одна незавершённая команда; polling: 5 запросов/сек. Текст ≤128 символов без control characters; координаты ограничены viewport, прокрутка ±1600. Произвольных CDP-команд, JS, clipboard, клавиатурных сочетаний, адресной строки и файлового upload API нет.
-- 10 минут без **ввода**, максимум 20 минут с создания, включая запуск и продолжение. Просмотр кадра/GET не продлевает idle. Независимый interval проверяет сроки, даже когда распознавание/продолжение зависло. `completedAt` фиксирует момент закрытия для любого терминального статуса; `closeReason` — фиксированный машинный код.
-- Тайм-аут browser launch 30 с, навигации 20 с, ограничение Playwright locator 5 с, запрос ресурса 15 с/8 МБ. Экран 1280×800, JPEG quality=65; кадры >800000 base64-символов отбрасываются. Это просмотрщик проверки, без загрузки медиа и управления произвольным браузером.
-- Попытка навигации на чужой домен закрывает сессию. Разрешены HTTPS:443 домены источника; CDN доступны только GET для script/style/font/image, без навигации и POST. Яндекс ограничен `realty.yandex.ru`, общий Яндекс ID и внешние CAPTCHA-провайдеры по умолчанию не добавлены. При необходимости отдельного auth/CAPTCHA-домена требуется проверка владельца источника и точечное расширение серверного allowlist, а не wildcard всего интернета.
-- Service workers, WebSocket, popups, dialogs, file chooser и downloads заблокированы. Разрешения камеры/микрофона/геолокации не выдаются. WebRTC non-proxied UDP отключён, sandbox включён, маскировки fingerprint/user agent нет.
-- **Каждый** HTTP(S)-ресурс, iframe и редирект проходит route-interception, hostname policy и существующий `safeRequest`: все DNS-адреса должны быть публичными, соединение закрепляется за проверенным IP. Запросы не выполняются обычным `route.continue()`; ответ передаётся через `route.fulfill()`. Redirect не следует внутри транспорта, следующая навигация снова проверяется. HTTP cookies обрабатываются Chromium, транспорт не журналирует заголовки.
+**HTTP redirect:** Chromium может следовать перенаправлению перехваченного ответа без повторного route-interception. Поэтому браузер никогда не получает 3xx: допустимая навигация сначала получает инертный 200 с browser-managed Set-Cookie, после commit выполняется отдельный защищённый GET. Не более пяти переходов; чужой домен и redirect ресурса запрещены, POST 307/308 безопасно отклоняется. Это проверено отдельной browser-регрессией. В стендовом browser DI внешний DNS дополнительно запрещён; production SSRF allowlist не расширен.
 
-Allowlist — необходимое ограничение возможностей, а не разрешение на сбор. Проверка оснований доступа находится в доверенном `prepare`; до регистрации порта API создания отвечает 503 с ручным запасным путём.
+В БД/аудите — только статусы, фиксированные причины, run/source/owner и времена. Пароли, auth cookies, введённый текст, HTML, JPEG и Playwright exceptions не журналируются. Cookies существуют только в изолированном Chromium и OS temp-профиле.
 
-## Секреты и эксплуатация
+## Docker и лимиты
 
-В БД — только согласованные поля `InteractiveBrowserSession` и безопасный аудит `browser_session.created/opened/completed/cancelled/expired/failed`. В audit after: `searchRunId`, `source`, `status`, `closeReason`; без полного URL, HTML, кадра, введённого текста, auth/session cookies и Playwright exceptions. Исключения браузера/адаптера заменяются фиксированными кодами до выхода в общий API logger.
+`docker compose build app` собирает один production image для app/search-worker. Chromium, chromium-common и **chromium-sandbox** закреплены одной версией; пользователь node, `chromiumSandbox:true`. Официальный [seccomp-профиль Playwright v1.64.1](https://github.com/microsoft/playwright/blob/v1.64.1/utils/docker/seccomp_profile.json) сохранён в `ops/chrome/seccomp.json`; используется в app/search-worker. Нет `--no-sandbox`, privileged, SYS_ADMIN или seccomp=unconfined. Основание: [Playwright Docker / crawling](https://playwright.dev/docs/docker#crawling-and-scraping).
 
-Cookies присутствуют только в работающем Chromium и его временном профиле. `storageState`, HAR, trace, video, persistent cookie export и сохранение кадров не используются. Профиль закрывается/удаляется при обычном завершении, отказе, отмене и тайм-ауте; ошибка cleanup не объявляется успешным завершением. Зависший launch после отмены тоже закрывается. После SIGKILL немедленный cleanup невозможен: при следующем открытии удаляются только собственные каталоги `crm-browser-session-[A-Za-z0-9]{6}` старше 21 минуты в OS temp, без перехода по symlink и за пределы temp. Для контейнера рекомендуется отдельный ephemeral/tmpfs `/tmp`; его содержимое не включать в backup.
+Для app/search-worker: память 2 GiB, pids 256, shm 256 MiB, `/tmp` — ephemeral tmpfs 512 MiB (nosuid/nodev). Профили `/tmp/crm-browser-session-*` не попадают в файловый том и backup. Chromium ограничивает число renderer-процессов и JS heap. `BROWSER_SESSION_MAX_CONCURRENT=1` по умолчанию, максимум 3; process-local проверка дополнена глобальным PostgreSQL advisory lock/подсчётом активных claims. Конкурирующие процессы не обходят лимит.
 
-Контексты находятся в памяти **одного** Node application worker. PostgreSQL блокировка сериализует claim между процессами, но чужой worker не может обслужить CDP этого процесса. Реплики/cluster-mode без маршрутизации владельца здесь не поддерживаются. После рестарта чтение старой активной сессии помечает её `failed/process_lost`, показывает запасной путь; create владельца также обнаруживает такую запись и разрешает новый claim. Cookies не восстанавливаются, ранее сохранённая выдача не удаляется. `BrowserSessionService.shutdown()` предназначен для graceful shutdown composition root. Watchdog работает, пока жив worker, а не как отдельный daemon.
+Контексты принадлежат одному application process. Несколько реплик Next/cluster-mode без sticky routing владельца не поддерживаются. Search-worker не обслуживает интерактивный CDP: он переводит источник в ожидание, а браузер открывает app по действию сотрудника. При kernel/seccomp запрете sandbox запуск безопасно завершается ошибкой и ручным путём; отключать sandbox автоматически нельзя.
 
-Watchdog использует локальные сроки/активность, а не чтение БД на каждом такте. Chromium закрывается **до** repository/audit I/O: отказ или задержка PostgreSQL не удерживает активный браузер за пределами срока. Терминальная запись и аудит при этом могут сохраниться позже или потребовать восстановления после отказа БД. Это отдельно проверяется регрессией с зависшим репозиторием.
+## Воспроизведение
 
-### HTTP-контракт
+```powershell
+$env:TEST_DATABASE_URL='postgresql://crm:crm_test_password@127.0.0.1:55432/crm_test_d'
+npx vitest run --project integration tests/integration/captcha-hitl-production.test.ts tests/integration/browser-sessions-pg.test.ts tests/integration/property-search-server-v31.test.ts
+npx vitest run --project browser-cycle tests/integration/browser-sessions/browser-cycle.test.ts
+npx vitest run --project unit tests/unit/browser-sessions tests/unit/property-search
+npx tsc --noEmit
+# Полная контейнерная проверка: build, отдельная БД, миграции, 6 сценариев.
+powershell -File scripts/test-captcha-hitl-docker.ps1
+```
 
-| Метод / путь после `/api/v1/browser-sessions` | Тело / параметры | Результат |
-|---|---|---|
-| POST `/` | `{searchRunId, source}` | Metadata созданной сессии; 409 при существующей активной |
-| GET `/{id}` | — | Metadata, текущий статус и запасные ссылки |
-| GET `/{id}/frame?after=N` | Опциональный неотрицательный integer sequence | До 5 с ожидания; `status`, `continuing`, `frame:{sequence,jpeg,width,height} | null` |
-| POST `/{id}/input` | Discriminated union: `click{x,y}`, `scroll{x,y,deltaY}`, `text{text}`, `key{key}` с полем `type` | `{ok:true}` либо 400/409/429 |
-| POST `/{id}/complete` | — | Завершение проверки/продолжение и терминальная metadata |
-| POST `/{id}/cancel` | — | Безопасное закрытие и терминальная metadata |
+`production-cycle.ts` использует реальные Next API handlers с cookie/Origin, Prisma repository, очередь, production continuation и парсер Циана. Только transport направлен в собственный стенд; loopback не доступен через production ENV/API. Стенд выдаёт синтетический Cian SSR после ввода «человек» через **API input**. Проверяются API JPEG, исходный run/source, snapshots, прогресс, повторный complete и удаление **конкретного собственного профиля**. Это не проверка отсутствия чужих параллельных temp-каталогов.
 
-Все методы требуют штатной CRM-сессии; чужая запись → 404, все POST требуют same-origin. Заголовки и тела browser/cookie/secret не входят в этот контракт.
+Контейнерный runner монтирует только синтетическую фикстуру/скрипт read-only; production src и зависимости берутся из образа. Используется отдельная `crm_test_hitl_docker`, без изменения production/demo DB. Созданные cookie-сессии отзываются в finally. Docker baseline Node 24; локальный host — Node 22.23.4. Новые npm-зависимости и миграции не добавлялись.
 
-Docker уже содержит runtime `playwright-core` и Chromium, `SCRAPER_CHROME_PATH=/usr/bin/chromium`. Модуль использует тот же ENV, дополнительных secrets/переменных не требуется. В `next.config.ts` добавлен только `playwright-core` в `serverExternalPackages`, чтобы Next не менял пути runtime/driver. `npm install` не выполнялся, зависимости/lockfile/Dockerfile не менялись. Sandbox не отключается автоматически: если kernel/container его запрещает, сеанс безопасно не запускается. Требуется обычная сетевая изоляция браузера от host/DB/private networks на уровне deployment, поскольку Playwright routing не является полным сетевым sandbox для фоновых процессов Chromium. Новый Docker build и проверка sandbox внутри production-образа этим модулем **не подтверждены**.
+## Фактические проверки 06.11.2026
 
-## Подключение агентом поиска
+Typecheck и scoped ESLint — PASS; unit **493/493**, integration **26/26** (стандартный 30-секундный testTimeout; повтор с 90 с под нагрузкой также PASS), browser **6/6**, итоговый production Docker **6/6** — PASS. Финальный image и команды сохранены в [машиночитаемом протоколе](captcha-hitl-production.json).
 
-Публичная точка — `configureBrowserSessionSearch(port)` из `application/dependencies.ts`, контракт — `domain/session.ts`. Регистрировать один раз в серверном composition root до обработки запроса создания. `prepare` возвращает `{startUrl, parameters}` из доверенного задания, не из query клиента. `isReady(page, source)` проверяет **положительный маркер выдачи** конкретного адаптера. `resume({actor, runId, source, parameters, page, context, signal})` возвращает `completed | blocked`. Он должен:
-
-1. Повторно проверить актуальность CRM-пользователя, run/need scope, отсутствие отмены и право доступа к источнику.
-2. Использовать переданные page/context, без изменения маршрутизации и без второго browser launch.
-3. Ограничить глубину/время, распарсить и нормализовать данные, повторно проверить фильтры и DTO.
-4. Перед каждым commit проверять signal/состояние запуска, сохранять snapshots атомарно и идемпотентно; уже сохранённые результаты не удалять.
-5. На повторной блокировке вернуть `blocked`; `blocked(runId, source, reason)` обновляет только состояние/безопасное объяснение источника, не стирая выдачу.
-
-Нельзя сериализовать callback/page/context/cookies в SearchRun или InteractiveBrowserSession. Для восстановления исходное задание заново разрешается через серверный порт; браузерная сессия после рестарта не возобновляется.
-
-**Осталось за другой зоной:** зарегистрировать этот порт в приложении поиска, подключить source-specific continuation к скраперу и отобразить `StartBrowserSession` для `needs_user_action` вместо прежнего blocked-only UI. Текущий модуль и API не делают фиктивного продолжения, когда порт не установлен. Модель и миграцию добавил агент данных; их файлы этот агент не изменял. Для проверки реального репозитория готовая миграция `20261106010000_v31_extensions` применена только к `crm_test_c`, без reset/migrate diff/generate.
-
-На финальном просмотре параллельной зоны уже появился `src/modules/property-search/application/browser-continuation.ts` с `attachInteractiveSearchAdapter`, использующий данный порт и application persistence. Его исходники здесь не изменялись; фактическая регистрация конкретного source adapter и отображение кнопки ещё не наблюдались.
+Финальные результаты и ограничения — в [AT-05](../acceptance/v31/AT-05.md) и [AT-06](../acceptance/v31/AT-06.md). Локальные технические логи (без cookies/текста ввода) находятся в игнорируемом `data/captcha-hitl-*.log`. Общий release gate всей CRM относится к AT-17.
 
 ## Условия доступа площадок: проверенные факты и границы
 
@@ -84,51 +70,9 @@ Docker уже содержит runtime `playwright-core` и Chromium, `SCRAPER_C
 
 В §12 ТЗ заказчик добавил пометку: «можем обходим ограничения АПИ через Playwright и его аналоги - это окей и не нарушает соглашение». Она учтена как позиция заказчика и разрешение на разработку/ограниченный технический probe. Она сама по себе не является документом Циана и не доказывает изменение условий его API/сайта. Замена HTTP-клиента браузером не меняет автоматически договорные права. Это инженерное разграничение подтверждённых источников, а не утверждение о юридической допустимости конкретного договора агентства. Лимиты и ограничения не снимаются, CAPTCHA не распознаётся автоматически, подмена fingerprints/прокси-ротация не применяются.
 
-## LIVE: одна попытка Циана
 
-05.11.2026 **16:37:11 UTC / 19:37:11 МСК**, один вызов `BrowserSessionService.create`, один `page.goto` коммерческой выдачи Новосибирска. Исследование юридических страниц не относится к поисковым browser attempts. Повторного перехода/решения/авторизации/сбора объявлений не было.
+## LIVE и прежние визуальные доказательства
 
-Результат: **BLOCKED**, страница «Обнаружен подозрительный трафик», `cian_waf_block`. Решаемая CAPTCHA в этом открытии **не отображалась**. JPEG-трансляция работала. Контекст закрыт и профиль удалён через shutdown; результат поиска не формировался. Первоначальная узкая regex не распознала WAF-текст; метаданные уточнены по визуально просмотренному скриншоту без нового запроса, диагностический классификатор расширен на WAF.
+В этой работе отдельный LIVE smoke площадок не запускался. Сохраняется прежний факт от 05.11.2026: **один ручной LIVE probe Циана — BLOCKED, cian_waf_block**, без решаемой CAPTCHA и без результатов. [Метаданные](captcha-hitl-cian-live.json), [LIVE screenshot](captcha-hitl-cian-live.png). Это не результат текущих DEMO-прогонов и не доказательство доступа к рынку Циана.
 
-- [LIVE screenshot, viewport без DevTools/cookies](captcha-hitl-cian-live.png).
-- [Метаданные одной попытки](captcha-hitl-cian-live.json): только источник, дата, статус, признаки и количество попыток.
-- Воспроизводимый **ручной** probe: `npx tsx tests/fixtures/captcha-stand/live-cian.ts`. Он не входит в test suite, не запускается повторно в этой задаче и не является CAPTCHA solver.
-
-## Испытательный стенд и приёмка
-
-`tests/fixtures/captcha-stand/server.ts` — локальный HTTP-сервер: `/check` с полем/кнопкой «Я не робот», `/verify` и выдача с синтетическим офисом. Собственный адаптер определяет `needs_user_action` по маркеру, затем сотрудник вводит текст через React UI CRM. Stand-cookie HttpOnly живёт исключительно в тестовом браузере. `harness.ts` собирает настоящий `BrowserSessionView`, не его имитацию. Loopback разрешён **только** через constructor dependency injection стенда, без production ENV bypass; разрешён ровно origin стенда. Второй пользователь и новый контекст не наследуют проверку.
-
-```powershell
-npx vitest run --config tests/browser-sessions.vitest.config.mts
-$env:TEST_DATABASE_URL='postgresql://crm:crm_test_password@127.0.0.1:55432/crm_test_c'
-npx vitest run --config tests/browser-sessions.db.vitest.config.mts
-npx tsc --noEmit
-```
-
-DB-конфигурация не вызывает reset/generate/migrate; нужна уже мигрированная выделенная БД. Создаёт и удаляет только собственные синтетические строки. Проверяет восемь конкурентных claim через независимые репозитории и освобождение слота после отмены. Первоначальный прогон до применения готовой миграции выявил отсутствие таблицы/новых столбцов; после применения в test DB проверка прошла. Оставшаяся строка первого неуспешного setup удалена по синтетическому маркеру.
-
-| Приёмка | Фактическая проверка | Статус |
-|---|---|---|
-| SR-06 / AT-05, управляемый источник | Адаптер → session → CDP JPEG → клики/Unicode из настоящего React UI → положительная выдача → same-page/context continuation → валидация → snapshot → закрытие и отсутствие нового temp-профиля | PASS на локальном стенде |
-| AT-05, доступ | Чужой сотрудник/руководитель: 404 на каждом методе application и каждом прямом Next API URL; session/CSRF/UUID/non-cacheable frame | PASS |
-| AT-05, тайм-ауты/отмена | Idle без polling, абсолютный срок при вводе, явная отмена, поздний launch, блокировка чужого домена, частотные лимиты | PASS |
-| AT-06, частично | Прерывание зависшего continuation, независимый watchdog, повторная блокировка, restart/process_lost, ошибка cleanup не становится успехом; DB serialization | PASS для зоны модуля |
-| AT-05, LIVE Циан | Единственная попытка: cian_waf_block, без решаемой CAPTCHA; нет решения/возобновления | BLOCKED источником |
-| AT-05, вся production-цепочка SearchRun | Порт продолжения и кнопка ожидают подключения агентом поиска; новый Docker runtime/sandbox отдельно не проверен | PARTIAL |
-
-Также выполнен фактический UI QA штатной страницы `/browser-sessions/[id]` в Next.js на порту 3403 с `.next-3403` и синтетической demo-БД: login, серверная авторизация, 200 страницы и `/frame`, отображение отмены и ручного пути. [DEMO screenshot](captcha-hitl-crm-demo.png). Тестовые run/session удалены; dev-сервер остановлен; добавленные Next include в `tsconfig.json` удалены. Повторить при необходимости: `DATABASE_URL=.../crm_demo npx tsx tests/fixtures/captcha-stand/crm-visual.ts` после запуска указанного dev-сервера; SEED credentials читаются из окружения и не печатаются.
-
-Полный production-build/регрессия всей CRM, HTTP429/очередь всех семи источников и принятие результатов в основном поиске остаются за соответствующими потоками/координатором. Этот документ не присваивает PASS всей AT-06 или всем источникам по одному стенду.
-
-### Фактические команды проверки этого модуля
-
-- `npx vitest run --config tests/browser-sessions.vitest.config.mts` — **45/45 PASS**, 3 файла; включает 5 реальных Chromium-сценариев, lifecycle/policy, независимое закрытие при отказе БД, long-poll/disconnect и настоящие Next API wrappers с подставленной аутентификацией, без БД/внешних площадок.
-- `TEST_DATABASE_URL=.../crm_test_c npx vitest run --config tests/browser-sessions.db.vitest.config.mts` — **1/1 PASS**, реальная PostgreSQL: конкурентный claim, освобождение слота, защита от воскрешения терминальной записи запоздалым active-write.
-- `npx tsc --noEmit -p tests/unit/browser-sessions/tsconfig.json` — **PASS**; конфигурация включает все новые production/test файлы зоны, наследует baseline проекта и не пишет tsbuildinfo.
-- Целевой ESLint всех файлов зоны и `next.config.ts` с `--max-warnings=0` — **PASS**. `git diff --check` — **PASS**.
-- Общий `npx tsc --noEmit` выполнялся; один промежуточный прогон прошёл. На последнем прогоне после продолжения координатором — **FAIL вне зоны**: `tests/integration/property-search-server-v31.test.ts(39,49)`, несовместимость `NormalizedListing` и `ListingDates` (`publishedAt` optional против nullable). В более ранних параллельных срезах также были ошибки `browser-continuation.ts`, planner/collections tests. Диагностик в зоне browser-sessions нет. Чужие незавершённые правки приложения/API поиска не изменялись; финальная общая проверка остаётся за координатором.
-- Next dev visual QA — **PASS** на синтетике; новая production Docker-сборка не запускалась. Пакеты не устанавливались, Git commit/checkout/stash/reset/switch не выполнялись.
-
-Локальный host runtime проверки: Node **v22.23.4**; версия зафиксирована из фактического `node --version`. Целевой Docker baseline — Node 24 из имеющегося Dockerfile; его новый запуск не подтверждён этими локальными тестами. Повторный LIVE probe Циана после продолжения работы не выполнялся.
-
-Технические первоисточники: [Playwright BrowserType / persistent contexts](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context), [CDP Page / startScreencast](https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-startScreencast), [CDP Input](https://chromedevtools.github.io/devtools-protocol/tot/Input/).
+Предыдущая визуальная проверка штатного Next viewer: [DEMO screenshot](captcha-hitl-crm-demo.png). Текущая React/browser-регрессия использует настоящий `BrowserSessionView` в локальном harness. Пользовательская апробация и живые проверки всех семи источников этим набором не подменяются.

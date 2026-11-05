@@ -13,7 +13,7 @@ export interface InteractiveSession {
 export const isLive = (s: InteractiveSession) => s.status === "pending" || s.status === "active";
 export interface SessionRepository {
   /** Atomically claims (owner, source), including across processes. */
-  claim(session: InteractiveSession): Promise<boolean>;
+  claim(session: InteractiveSession, maximum?: number): Promise<boolean>;
   get(id: string): Promise<InteractiveSession | null>;
   active(ownerUserId: string, source: SessionSource): Promise<InteractiveSession | null>;
   save(session: InteractiveSession): Promise<void>;
@@ -41,6 +41,8 @@ export interface PreparedSearch {
   parameters: unknown;
 }
 export interface SearchContinuationPort {
+  /** Watchdog observes cancellation even when requested by a different process. */
+  isCancelled?(runId: string): Promise<boolean>;
   /** Must authorize run + linked need, require needs_user_action, and verify the source access agreement. */
   prepare(actor: Actor, runId: string, source: SessionSource): Promise<PreparedSearch>;
   /** Positive detection of results by the source adapter, never a generic absence-of-CAPTCHA heuristic. */

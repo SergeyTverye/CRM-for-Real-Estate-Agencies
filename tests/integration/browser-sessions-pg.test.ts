@@ -32,4 +32,6 @@ it("PostgreSQL advisory lock serializes independent repositories and preserves s
   await repositories[1]!.save({ ...winner, status: "active", lastActivityAt: new Date() });
   expect((await repositories[1]!.get(winner.id))?.status).toBe("cancelled");
   expect(await repositories[1]!.claim(make())).toBe(true);
+  // Different source/claim key still shares the durable global Chromium budget.
+  await expect(repositories[2]!.claim({ ...make(), source: "avito" }, 1)).rejects.toMatchObject({ code: "BROWSER_CAPACITY" });
 });

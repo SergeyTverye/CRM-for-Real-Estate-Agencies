@@ -58,6 +58,8 @@ x-app-env: &app-env
   SCRAPER_CHROME_PATH: ${SCRAPER_CHROME_PATH:-/usr/bin/chromium}
   SCRAPER_JOB_TIMEOUT_MS: ${SCRAPER_JOB_TIMEOUT_MS:-180000}
   SCRAPER_MAX_CONCURRENT_JOBS: ${SCRAPER_MAX_CONCURRENT_JOBS:-1}
+  BROWSER_SESSION_ALLOWED_SOURCES: ${BROWSER_SESSION_ALLOWED_SOURCES:-}
+  BROWSER_SESSION_MAX_CONCURRENT: ${BROWSER_SESSION_MAX_CONCURRENT:-1}
   SCRAPER_RESULT_TTL_HOURS: ${SCRAPER_RESULT_TTL_HOURS:-24}
   POSTGRES_HOST: db
   POSTGRES_DB: ${POSTGRES_DB}
@@ -108,6 +110,12 @@ services:
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     restart: unless-stopped
     shm_size: 256mb
+    mem_limit: 2g
+    pids_limit: 256
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=512m,mode=1777
+    security_opt:
+      - seccomp=./ops/chrome/seccomp.json
     environment: *app-env
     depends_on:
       migrate:
@@ -151,6 +159,12 @@ services:
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     restart: unless-stopped
     shm_size: 256mb
+    mem_limit: 2g
+    pids_limit: 256
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=512m,mode=1777
+    security_opt:
+      - seccomp=./ops/chrome/seccomp.json
     command: ["node", "ops/worker/search-start.mjs"]
     environment: *app-env
     depends_on:

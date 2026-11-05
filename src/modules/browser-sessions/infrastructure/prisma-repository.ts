@@ -1,3 +1,4 @@
+import { ConflictError } from "@/shared/errors";
 import { db, transaction } from "@/shared/db/client";
 import type { InteractiveSession, SessionRepository } from "../domain/session";
 
@@ -14,9 +15,12 @@ function delegate(client: unknown): SessionDelegate {
   return value;
 }
 export class PrismaSessionRepository implements SessionRepository {
-  async claim(session: InteractiveSession) {
+  async claim(session: InteractiveSession, maximum = 3) {
     return transaction(async tx => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`browser-session:${session.ownerUserId}:${session.source}`}, 0))`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(310106)`;
+      const count = await tx.interactiveBrowserSession.count({ where: { status: { in: ["pending", "active"] }, expiresAt: { gt: new Date() } } });
+      if (count >= maximum) throw new ConflictError("BROWSER_CAPACITY", "Все интерактивные сеансы заняты. Повторите после закрытия открытых сеансов.");
       const table = delegate(tx);
       if (await table.findFirst({ where: { ownerUserId: session.ownerUserId, source: session.source, status: { in: ["pending", "active"] } } })) return false;
       await table.create({ data: session }); return true;

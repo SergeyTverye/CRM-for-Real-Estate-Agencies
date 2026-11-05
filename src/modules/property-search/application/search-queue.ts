@@ -54,12 +54,14 @@ export async function enqueueSearch(actor: Actor, raw: unknown) {
 }
 export async function cancelSearch(actor: Actor, runId: string) {
   await accessibleRun(actor, runId);
-  await db.searchRun.updateMany({ where: { id: runId, userId: actor.userId, status: { in: ["queued", "running", "needs_user_action"] } }, data: { cancelRequested: true, cancelledAt: new Date() } });
+  await db.searchRun.updateMany({ where: { id: runId, userId: actor.userId, OR: [{ status: { in: ["queued", "running", "needs_user_action"] } }, { sources: { some: { needsUserAction: true } } }] }, data: { cancelRequested: true, cancelledAt: new Date() } });
   await transaction(async tx => {
-    const changed = await tx.searchRun.updateMany({ where: { id: runId, status: { in: ["queued", "needs_user_action"] } }, data: { status: "partial", finishedAt: new Date(), incompleteReason: "Поиск отменён сотрудником; полученные данные сохранены" } });
+    const changed = await tx.searchRun.updateMany({ where: { id: runId, cancelRequested: true, status: { in: ["queued", "needs_user_action", "partial"] } }, data: { status: "partial", finishedAt: new Date(), incompleteReason: "Поиск отменён сотрудником; полученные данные сохранены" } });
     if (changed.count) await tx.searchRunSource.updateMany({ where: { runId, status: { in: ["queued", "needs_user_action"] } }, data: { status: "cancelled", needsUserAction: false } });
     await searchAudit(tx, actor, "cancel_requested", "SearchRun", runId);
   });
+  const { cancelRunBrowserSessions } = await import("@/modules/browser-sessions/application/dependencies");
+  await cancelRunBrowserSessions(runId);
   return accessibleRun(actor, runId);
 }
 /** Resume only interrupted sources; completed observations are immutable and never fetched again. */

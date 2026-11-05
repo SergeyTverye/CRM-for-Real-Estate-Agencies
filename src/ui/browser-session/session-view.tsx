@@ -5,7 +5,8 @@ import { apiCall, ApiCallError } from "@/ui/api-client";
 import type { SessionFrame, SessionInput, SessionStatus } from "@/modules/browser-sessions/domain/session";
 
 const labels: Record<SessionStatus, string> = { pending: "Открываем площадку…", active: "Пройдите проверку на площадке", completed: "Проверка пройдена. Поиск продолжен, сеанс закрыт.", cancelled: "Сеанс отменён", expired: "Время сеанса истекло", failed: "Площадка недоступна. Сеанс безопасно закрыт." };
-export function BrowserSessionView({ id }: { id: string }) {
+export function BrowserSessionView({ id, searchRunId }: { id: string; searchRunId?: string }) {
+  const searchUrl = searchRunId ? `/property-search?runId=${encodeURIComponent(searchRunId)}` : "/property-search";
   const canvas = useRef<HTMLCanvasElement>(null); const sequence = useRef(0);
   const terminal = useRef(false);
   const inputQueue = useRef(Promise.resolve()); const queued = useRef(0);
@@ -79,8 +80,8 @@ export function BrowserSessionView({ id }: { id: string }) {
         else if (e.key.length === 1) { e.preventDefault(); void input({ type: "text", text: e.key }); }
       }} />
     <div className="flex flex-wrap gap-2">{live ? <><button className="btn btn-primary" disabled={busy || continuing || !frameReady} onClick={() => void action("complete")}>{busy ? "Ожидаем…" : "Готово"}</button><button className="btn btn-secondary" disabled={busy} onClick={() => void action("cancel")}>Отменить сеанс</button></> : null}
-      <Link className="btn btn-secondary" href="/property-search">Вернуться к поиску</Link>
-      {!live && status !== "completed" ? <><Link className="btn btn-secondary" href="/import">Ручной импорт</Link><Link className="btn btn-secondary" href="/property-search">Добавить по ссылке</Link></> : null}
+      <Link className="btn btn-secondary" href={searchUrl}>Вернуться к поиску</Link>
+      {!live && status !== "completed" ? <><Link className="btn btn-secondary" href="/import">Ручной импорт</Link><Link className="btn btn-secondary" href={searchUrl}>Добавить по ссылке</Link></> : null}
     </div>
     {live ? <form className="flex flex-wrap gap-2" autoComplete="off" onSubmit={e => { e.preventDefault(); if (text) { input({ type: "text", text }); setText(""); } }}>
       <label className="text-sm">Текст для площадки (после выбора поля на экране)<input aria-label="Текст для площадки" className="input ml-2" type="password" autoComplete="off" maxLength={128} value={text} onChange={e => setText(e.target.value)} disabled={busy || continuing} /></label>

@@ -1,0 +1,99 @@
+{
+  "date": "2026-11-06",
+  "dataClass": "DEMO",
+  "scope": "SR-06 / AT-05 / AT-06 CAPTCHA HITL integration",
+  "dockerImage": "sha256:0dff48ee7d642c4a6b2869f1496c4b5e65a3adcfa6cef622aac0eab0598ded12",
+  "productionSourcesMounted": false,
+  "chromiumSandbox": true,
+  "seccompSource": "https://github.com/microsoft/playwright/blob/v1.64.1/utils/docker/seccomp_profile.json",
+  "seccompSha256": "cc3e61cabda6bbc1e53e54d27ba4d55a9d3be829b6dd1a596f4a7b31b1cc7849",
+  "checks": {
+    "typecheck": {
+      "command": "npx tsc --noEmit --incremental false",
+      "exitCode": 0
+    },
+    "eslint": {
+      "changedTypeScriptFiles": 18,
+      "maxWarnings": 0,
+      "exitCode": 0
+    },
+    "unit": {
+      "passed": 493,
+      "files": 16
+    },
+    "integration": {
+      "passed": 26,
+      "files": 3,
+      "testTimeoutMs": 30000,
+      "database": "crm_test_d",
+      "durationSeconds": 78.88,
+      "earlierRerunTimeoutMs": 90000
+    },
+    "browser": {
+      "passed": 6,
+      "files": 1
+    },
+    "docker": {
+      "command": "scripts/test-captcha-hitl-docker.ps1 -SkipBuild (after docker compose build app)",
+      "database": "crm_test_hitl_docker",
+      "cases": [
+        {
+          "mode": "success",
+          "status": "PASS",
+          "localStandRequests": 4,
+          "profilesRemoved": true,
+          "framesViaApi": true
+        },
+        {
+          "mode": "expired",
+          "status": "PASS",
+          "localStandRequests": 2,
+          "profilesRemoved": true,
+          "framesViaApi": true
+        },
+        {
+          "mode": "cancelled",
+          "status": "PASS",
+          "localStandRequests": 2,
+          "profilesRemoved": true,
+          "framesViaApi": true
+        },
+        {
+          "mode": "blocked",
+          "status": "PASS",
+          "localStandRequests": 5,
+          "profilesRemoved": true,
+          "framesViaApi": true
+        },
+        {
+          "mode": "foreign",
+          "status": "PASS",
+          "localStandRequests": 2,
+          "profilesRemoved": true,
+          "framesViaApi": true
+        },
+        {
+          "mode": "restart",
+          "status": "PASS",
+          "localStandRequests": 2,
+          "profilesRemoved": true,
+          "framesViaApi": true
+        }
+      ],
+      "exitCode": 0
+    },
+    "composeConfig": {
+      "exitCode": 0
+    },
+    "gitDiffCheck": {
+      "exitCode": 0
+    }
+  },
+  "limitations": [
+    "Controlled source with synthetic Cian SSR; not a claim of permission or live market access",
+    "restart mode tests graceful service shutdown; abrupt process_lost and durable queue recovery are covered separately by unit/integration tests",
+    "First default 30-second broad integration run timed out exporting 205 rows while building Docker; a 90-second rerun passed 26/26; after the build completed the default 30-second run also passed 26/26 in 78.88 seconds",
+    "Existing pg driver emits a deprecation warning about concurrent client.query calls; no secret data in evidence",
+    "Shared working tree can change after these commands; full CRM release gate belongs to AT-17"
+  ]
+}

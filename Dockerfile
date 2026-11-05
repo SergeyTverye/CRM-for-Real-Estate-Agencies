@@ -42,7 +42,7 @@ RUN apt-get update \
  && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
  && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
  && apt-get update \
- && apt-get install -y --no-install-recommends postgresql-client-18 chromium=${CHROMIUM_VERSION} chromium-common=${CHROMIUM_VERSION} fonts-liberation \
+ && apt-get install -y --no-install-recommends postgresql-client-18 chromium=${CHROMIUM_VERSION} chromium-common=${CHROMIUM_VERSION} chromium-sandbox=${CHROMIUM_VERSION} fonts-liberation \
  && install -d /opt/google/chrome \
  && ln -s /usr/local/bin/crm-chromium /opt/google/chrome/chrome \
  && apt-get purge -y gnupg && apt-get autoremove -y \

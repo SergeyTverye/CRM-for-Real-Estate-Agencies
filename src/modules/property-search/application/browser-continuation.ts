@@ -10,10 +10,12 @@ import { accessibleRun, persistListing, searchAudit } from "./search-service";
 import { trustedListing } from "./search-queue";
 import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { regroupRunListings } from "./duplicate-ingestion";
+import { parseExternalUrl } from "@/shared/net/ssrf";
+import type { DepthOptions } from "../infrastructure/source-limits";
 /** Adapter owns source terms, safe start URL, positive readiness detection and parsing.
  * collect MUST use the supplied page/context, never launch another browser or solve challenges. */
 export interface InteractiveSearchAdapter {
-  prepare(filters: SearchFilters, source: SessionSource): Promise<PreparedSearch>;
+  prepare(filters: SearchFilters, source: SessionSource, depth?: DepthOptions): Promise<PreparedSearch>;
   isReady(page: Page, source: SessionSource): Promise<boolean>;
   collect(input: { source: SessionSource; parameters: unknown; page: Page; context: BrowserContext; signal: AbortSignal }): Promise<{ listings: NormalizedListing[]; blocked: boolean; depthReached: number; incomplete: boolean }>;
 }
@@ -23,7 +25,12 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
       const run = await accessibleRun(actor, runId);
       const row = await db.searchRunSource.findUnique({ where: { runId_source: { runId, source } } });
       if (run.cancelRequested || !row?.needsUserAction || row.status !== "needs_user_action") throw new ConflictError("SEARCH_NOT_WAITING", "Источник не ожидает проверки сотрудника");
-      return adapter.prepare(parseInput(SearchFilters, run.filters), source);
+      const params = run.depthParams as { depth?: DepthOptions; sourceDepth?: Partial<Record<SessionSource, DepthOptions>> };
+      try { return await adapter.prepare(parseInput(SearchFilters, run.filters), source, params.sourceDepth?.[source] ?? params.depth); }
+      catch (error) {
+        if (error instanceof ConflictError && error.code === "SOURCE_CONTINUATION_NOT_ALLOWED") await port.blocked(runId, source, "access_not_allowed");
+        throw error;
+      }
     },
     isReady: (page, source) => adapter.isReady(page, source),
     async resume(input) {
@@ -31,11 +38,12 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
       const waiting = await db.searchRunSource.findUnique({ where: { runId_source: { runId: run.id, source: input.source } } });
       if (run.cancelRequested || input.signal.aborted || !waiting?.needsUserAction || !["needs_user_action", "partial"].includes(run.status)) return "blocked";
       const result = await adapter.collect(input);
-      if (result.blocked || input.signal.aborted) return "blocked";
+      if (input.signal.aborted) return "blocked";
       const filters = parseInput(SearchFilters, run.filters);
       const listings: SearchResult["listings"] = [];
       for (const raw of result.listings) {
         if (raw.source !== input.source || input.signal.aborted) continue;
+        parseExternalUrl(raw.url);
         const listing = await trustedListing(raw);
         listings.push({ listing, evaluation: evaluateListing(listing, filters, run.startedAt) });
       }
@@ -45,17 +53,26 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
         if (!fence.count || !source.needsUserAction || input.signal.aborted) return "blocked";
         if (!await tx.user.findFirst({ where: { id: input.actor.userId, isActive: true } })) return "blocked";
         if (run.needId) await loadAccessibleNeed(tx, input.actor, run.needId);
-        for (const item of listings) await persistListing(tx, run.id, item.listing, item.evaluation, (run.depthParams as { previousRunId?: string }).previousRunId ?? null);
+        for (const item of listings) {
+          input.signal.throwIfAborted();
+          await persistListing(tx, run.id, item.listing, item.evaluation, (run.depthParams as { previousRunId?: string }).previousRunId ?? null);
+        }
         const count = await tx.searchRunResult.count({ where: { runId: run.id, listing: { source: input.source } } });
-        await tx.searchRunSource.update({ where: { id: source.id }, data: { status: result.incomplete ? "partial" : "completed", needsUserAction: false, resultCount: count, receivedCount: count, acceptedCount: listings.filter(l => l.evaluation.verdict !== "rejected").length, depthReached: result.depthReached, statusReasonRu: "Продолжено после ручной проверки" } });
+        const acceptedCount = await tx.searchRunResult.count({ where: { runId: run.id, listing: { source: input.source }, verdict: { not: "rejected" } } });
+        await tx.searchRunSource.update({ where: { id: source.id }, data: { status: result.blocked ? "blocked" : result.incomplete ? "partial" : "completed", needsUserAction: false, resultCount: count, receivedCount: count, acceptedCount, depthReached: result.depthReached, reason: null, statusReasonRu: result.blocked ? "Повторная блокировка. Полученное сохранено; используйте добавление по ссылке или официальный импорт." : "Продолжено после ручной проверки" } });
         const remaining = await tx.searchRunSource.findMany({ where: { runId: run.id } });
         const status = remaining.some(s => s.needsUserAction) ? "needs_user_action" : remaining.every(s => ["success", "completed", "disabled"].includes(s.status)) ? "completed" : "partial";
-        await tx.searchRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), incompleteReason: status === "completed" ? null : "Выборка неполная: ограничения площадок" } });
+        input.signal.throwIfAborted();
+        await tx.searchRun.update({ where: { id: run.id }, data: { status, progress: { phase: status }, finishedAt: new Date(), incompleteReason: status === "completed" ? null : "Выборка неполная: ограничения площадок" } });
         await searchAudit(tx, input.actor, "continued", "SearchRun", run.id, { source: input.source, count });
-        return "completed" as const;
+        return result.blocked ? "blocked" as const : "completed" as const;
       });
-      if (outcome === "completed") await regroupRunListings(run.id);
+      await regroupRunListings(run.id);
       return outcome;
+    },
+    async isCancelled(runId) {
+      const run = await db.searchRun.findUnique({ where: { id: runId }, select: { cancelRequested: true, user: { select: { isActive: true } } } });
+      return !run || run.cancelRequested || !run.user.isActive;
     },
     async blocked(runId, source, _reason) {
       await transaction(async tx => {

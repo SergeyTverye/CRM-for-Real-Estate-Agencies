@@ -13,7 +13,7 @@ export class BrowserSessionService {
   private closing = new Map<string, Promise<void>>();
   constructor(private readonly repo: SessionRepository, private readonly browsers: BrowserFactory,
     private readonly search: SearchContinuationPort, private readonly audit: SessionAudit,
-    private readonly options: { now?: () => number; idleMs?: number; totalMs?: number; tickMs?: number } = {}) {}
+    private readonly options: { now?: () => number; idleMs?: number; totalMs?: number; tickMs?: number; maxConcurrent?: number } = {}) {}
   private now() { return this.options.now?.() ?? Date.now(); }
   private async owned(actor: Actor, id: string) {
     await this.closing.get(id);
@@ -55,11 +55,12 @@ export class BrowserSessionService {
       const current = await this.repo.get(existing.id);
       if (current && isLive(current)) throw new ConflictError("BROWSER_SESSION_EXISTS", "Для этой площадки уже открыт сеанс.", { sessionUrl: `/browser-sessions/${existing.id}` });
     }
+    if (this.running.size >= (this.options.maxConcurrent ?? 2)) throw new ConflictError("BROWSER_CAPACITY", "Все интерактивные сеансы заняты. Завершите открытый сеанс и повторите.");
     const now = this.now();
     const row: InteractiveSession = { id: randomUUID(), ...input, ownerUserId: actor.userId, status: "pending",
       startUrlHost, createdAt: new Date(now), lastActivityAt: new Date(now),
       expiresAt: new Date(now + (this.options.totalMs ?? 20 * 60_000)), completedAt: null, closeReason: null };
-    if (!await this.repo.claim(row)) throw new ConflictError("BROWSER_SESSION_EXISTS", "Для этой площадки уже открыт сеанс. Завершите или отмените его.");
+    if (!await this.repo.claim(row, this.options.maxConcurrent ?? 2)) throw new ConflictError("BROWSER_SESSION_EXISTS", "Для этой площадки уже открыт сеанс. Завершите или отмените его.");
     const runtime: Runtime = { actor: { ...actor }, prepared, session: row, controller: new AbortController(), busy: false, inputBusy: false, probing: false, hits: [], polls: [] };
     this.running.set(row.id, runtime);
     this.schedule(row.id);
@@ -91,6 +92,7 @@ export class BrowserSessionService {
     const rt = this.running.get(id), row = rt?.session;
     // The security deadline must not depend on availability/latency of PostgreSQL.
     if (!row || !rt || rt.controller.signal.aborted || !isLive(row) || await this.expireIfNeeded(row)) return;
+    if (await this.search.isCancelled?.(row.searchRunId)) { await this.finish(row, "cancelled", "search_cancelled"); return; }
     if (rt.handle && !rt.busy && !rt.inputBusy && !rt.probing) {
       rt.probing = true;
       try {
@@ -118,7 +120,8 @@ export class BrowserSessionService {
   }
   async frame(actor: Actor, id: string, after?: number, signal?: AbortSignal) {
     const row = await this.owned(actor, id); const rt = this.running.get(id);
-    if (!isLive(row) || await this.expireIfNeeded(row) || !rt?.handle) return { ...this.dto(await this.owned(actor, id)), frame: null };
+    if (isLive(row) && !rt) await this.finish(row, "failed", "process_lost");
+    if (!isLive(row) || !rt || await this.expireIfNeeded(row) || !rt.handle) return { ...this.dto(await this.owned(actor, id)), frame: null };
     this.limit(rt.polls, 5);
     if (after !== undefined) {
       if (!Number.isSafeInteger(after) || after < 0) throw new ValidationError("Некорректный номер кадра");
@@ -151,6 +154,7 @@ export class BrowserSessionService {
     const row = await this.owned(actor, id), rt = this.running.get(id);
     if (!isLive(row)) return this.dto(row);
     if (await this.expireIfNeeded(row)) return this.get(actor, id);
+    if (await this.search.isCancelled?.(row.searchRunId)) { await this.finish(row, "cancelled", "search_cancelled"); return this.get(actor, id); }
     if (!rt?.handle) throw new ConflictError("SESSION_NOT_READY", "Сеанс ещё открывается.");
     if (rt.busy || rt.inputBusy) throw new ConflictError("SESSION_BUSY", "Операция уже выполняется.");
     rt.busy = true;
@@ -168,6 +172,9 @@ export class BrowserSessionService {
     return this.get(actor, id);
   }
   async cancel(actor: Actor, id: string) { const row = await this.owned(actor, id); await this.finish(row, "cancelled", "user_cancelled"); return this.get(actor, id); }
+  async cancelRun(runId: string) {
+    await Promise.all([...this.running.values()].filter(rt => rt.session.searchRunId === runId).map(rt => this.finish(rt.session, "cancelled", "search_cancelled")));
+  }
   private async closeById(id: string, status: "failed" | "expired", reason: string) { const row = this.running.get(id)?.session ?? await this.repo.get(id); if (row) await this.finish(row, status, reason); }
   private finish(row: InteractiveSession, status: "completed" | "cancelled" | "expired" | "failed", reason: string): Promise<void> {
     const pending = this.closing.get(row.id); if (pending) return pending;
