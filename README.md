@@ -1154,7 +1154,7 @@ IMPLEMENTATION_REPORT.md
 
 Ветка feature/tz-v2.4.1 от ba7e6fa; документационный срез 05.11.2026. Добавлены контроль перспективных обращений, специальная задача возврата pause_return, поиск объектов и подборки, persistent AI-бюджет, галерея, редакции КП, чек-лист сделки, календарь и уведомления. Это расширение P1, поэтому прежнее отнесение любого AI/сбора к будущему scope в разделах baseline относится только к v1.6.1.
 
-Фактическая готовность: [трассировка](docs/requirements-traceability.md#v241), [13 сценариев приёмки](docs/acceptance/v241), [протокол ВКР](docs/vkr/test-protocol.md). Проверенный SHA `8d30d92`: unit 500/500, integration+authorization 163/163, typecheck/lint (0 warnings)/Next build PASS, Playwright 13/13; подлинные скриншоты — 19 PNG ([набор](docs/vkr/screenshots.md)). Docker build, healthy app/worker/db, readiness 200 и restore-test PASS ([протокол](docs/operations/docker-v241-verification.md)); чистая установка отдельно не подтверждена. Живой SCRAPER и реальный Excel — PARTIAL. Локальная нагрузка трёх пользователей измерена (0 ошибок 5xx/409, p95 ≤259 мс), NFR-14 на согласованном оборудовании не подтверждён.
+Фактическая готовность и ограничения: [трассировка](docs/requirements-traceability.md#v241), [приёмка этапа 2](docs/acceptance/stage2-live-ai-ux.md), [протокол испытаний](docs/vkr/test-protocol.md). Итоговые числа тестов и финальный SHA ведутся в единой сводке координатора. Подлинные DEMO/LIVE снимки — [реестр](docs/vkr/screenshots.md). Чистая установка на `d69a3fb`, production build, миграции, вход, PDF и T08 restore/restart подтверждены [отдельным протоколом](docs/operations/clean-deploy-v241.md); финальный HEAD этим прогоном не проверен. WEB-карточки, реальный Excel и NFR-14 на согласованном оборудовании остаются PARTIAL.
 
 ### Поиск объектов и ИИ
 
@@ -1206,3 +1206,13 @@ npx tsx --env-file=.env scripts/ai-smoke.ts --live --web
 Каждая команда — отдельный вызов без автоматического retry, process-local smoke ledger не заменяет production учёт. Агент документации эти команды не запускал.
 
 Материалы защиты: [архитектура](docs/vkr/architecture.md), [ER](docs/vkr/er-diagram.md), [AS-IS/TO-BE](docs/vkr/as-is-to-be.md), [демонстрация](docs/vkr/demo-guide.md), [испытания](docs/vkr/test-protocol.md), [экономика](docs/vkr/economics.md).
+
+## Этап 2: живой AI и UI/UX
+
+Реализованы печать КП A4 с заполненной обложкой/сравнением, серверный PDF и согласованный DOCX; поиск клиента/потребности по названиям, районы, понятные статусы площадок, диалоги действий и расходов, сравнение результатов; календарные повторения и связи, «Сегодня», уведомления и карточка клиента; читаемые отчёты, эффективные ENV-лимиты/бюджет ИИ и мобильные карточки с нижней панелью. Два P2-помощника готовят черновики заметки после звонка и текста КП, сохраняя данные только после подтверждения сотрудником.
+
+LIVE: путь «запрос → подборка → каталог → КП», частичные отказы, тайм-аут/восстановление, повтор, исправный ноль без web и сохранность после restart проверены. Yandex web технически работает, но конкретных пригодных карточек не дал — **PARTIAL**; Циан CAPTCHA, Авито/Домклик — **BLOCKED**. Основной журнал с финальными parse содержит 5,925000 ₽, отдельный P2 — 0,346900 ₽; это расчёт CRM по usage/тарифам без сверки Cloud billing. Секреты не входят в доказательства.
+
+Независимые находки Iceman/Beam исправлены `9e2b71b` и `f15adc8`. QA зафиксировал unit, PostgreSQL integration/authorization и dev E2E; production build общей копии блокировался EPERM/Deny ACL. Изолированный clean deployment на `d69a3fb` прошёл build/login/PDF/restore/restart; поздний HEAD требует собственной финальной сверки. NFR-14 подтверждён только локально; UAT сотрудников и реальный Excel не закрыты.
+
+Инструкции и доказательства: [пользователь](docs/user-guide.md), [API](docs/api.md), [приёмка этапа 2](docs/acceptance/stage2-live-ai-ux.md), [LIVE](docs/vkr/live-ai-trials.md), [единая сводка тестов](docs/vkr/test-protocol.md), [чистое развёртывание](docs/operations/clean-deploy-v241.md).

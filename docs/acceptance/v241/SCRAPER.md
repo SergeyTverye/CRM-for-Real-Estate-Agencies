@@ -24,4 +24,6 @@
 
 Дополнительное свидетельство: [Docker/worker/restore](../../operations/docker-v241-verification.md).
 
-Общий Playwright E2E: 13/13 PASS; подлинные скриншоты: [19 PNG](../../screenshots/vkr/screenshots.md). См. [протокол ВКР](../../vkr/test-protocol.md).
+Актуальные E2E и подлинные DEMO/LIVE снимки: [приёмка этапа 2](../stage2-live-ai-ux.md), [реестр](../../vkr/screenshots.md). См. [протокол ВКР](../../vkr/test-protocol.md).
+
+Актуализация 05.11.2026: результаты этапа 1 выше сохраняются как история своего SHA. Для текущих ограничений и статусов действует [матрица этапа 2](../stage2-live-ai-ux.md); окончательные числа и SHA — в [единой сводке](../../vkr/test-protocol.md).

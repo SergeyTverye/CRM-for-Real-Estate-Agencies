@@ -45,7 +45,7 @@
 | FR-35 профиль Excel, секции, mapping, dry-run, отчёт | import/domain/*, import-profiles/*.json; UI `(crm)/import` | unit/import-parser.test.ts; integration/import.test.ts | T07 | PARTIAL — профили построены по описанию ТЗ 38 на синтетическом образце; подтверждение mapping на фактическом файле предприятия выполняется на пробном импорте |
 | FR-37, FR-38 server/portable | compose.yaml, scripts/bootstrap-portable.sh, promote/demote, standby guard | authorization/admin-api.test.ts (standby) | T11 | PARTIAL — standby/promote и bootstrap реализованы; полный T11 на Windows-хосте не проверялся |
 | FR-39 коммерческое предложение со snapshot и Document | commercial-offers/application/* | integration/deals-offers-documents.test.ts | T10 | PASS |
-| FR-40–FR-42 AI | — | — | T12 | Вне core MVP (P3, `AI_ENABLED=false`); таблица `ai_runs` создана, адаптер не реализован |
+| FR-40–FR-42 AI | `ai/application`, `ai/infrastructure`, `property-search` | [этап 2](acceptance/stage2-live-ai-ux.md), [LIVE](vkr/live-ai-trials.md) | AI v2.4.1 | PARTIAL: Yandex AI/бюджет/P2 реализованы; WEB без пригодных карточек; исходный T12 не заменяется этой проверкой |
 
 ## Нефункциональные требования
 
@@ -60,7 +60,7 @@
 | NFR-11 журналирование | AuditLog | integration/* | PASS |
 | NFR-12 минимизация ПДн | исключение паспортных полей при импорте, нет даты рождения | unit/import-parser.test.ts; integration/import.test.ts; unit/codebook-migration.test.ts | PASS |
 | NFR-13 расширяемость (телефония, площадки) | LeadRequest/Communication/Advertisement без привязки к поставщику | архитектурный review | PASS |
-| NFR-14 производительность | индексы ТЗ 29.12, серверная пагинация | замер на целевом сервере — до M6 | PARTIAL (замер на сервере предприятия) |
+| NFR-14 производительность | индексы ТЗ 29.12, серверная пагинация | [локальные 3 пользователя, p95 ≤259 мс](operations/perf-v241.md) | PARTIAL: оборудование предприятия не проверено |
 | NFR-15 данные переживают перезапуск | volume + bind mounts | down/up на чистой копии | PASS |
 | NFR-16 структурированные логи | pino, correlation id, redact | просмотр логов | PASS |
 | NFR-17 ежедневный backup, хранение 14 копий | backup.sh (ротация), cron в инструкции | Docker-прогон | PASS |
@@ -69,7 +69,7 @@
 | NFR-21 серверная пагинация (50/200) | shared/validation.ts zPagination | все списки | PASS |
 | NFR-22 только Docker на хосте | Dockerfile, compose.yaml, scripts | чистая копия | PASS |
 | NFR-23/24/26/27 portable, single-writer | standby guard, promote/demote, config bundle без ключей | authorization/admin-api.test.ts | PARTIAL |
-| NFR-28–31 AI | — | — | Вне scope (P3) |
+| NFR-28–31 AI | Серверный Yandex adapter, AiGate, обезличивание, подтверждение | [AI](integrations/yandex-ai.md), [этап 2](acceptance/stage2-live-ai-ux.md) | PARTIAL: расширение v2.4.1 реализовано; границы живой проверки отражены отдельно |
 
 
 ## P1-А v2.4.1 — рабочий контур, 05.11.2026
@@ -77,21 +77,21 @@
 | Требование | Модуль | Проверка | Статус |
 |---|---|---|---|
 | §2 перспективные обращения, причины завершения, запрет закрытия no_match | requests, needs | p1a-workflow | PASS |
-| §2 очереди контактов today/overview | requests/contact-control | p1a-workflow (выборка); браузерная приёмка не выполнялась | PARTIAL |
+| §2 очереди контактов today/overview | requests/contact-control | p1a-workflow; [браузерная приёмка этапа 2](acceptance/calendar-ux-p1.md) | PASS |
 | §10.2 pause_return, атомарное продолжение, перенос/повтор | needs, tasks | p1a-workflow | PASS |
 | §10.2 метрики, одинаковые cohorts детализации, границы времени/источник/сотрудник | reports | p1a-workflow | PASS |
 | §2 постсделочный набор, связи Task | deals | p1a-workflow | PASS |
 | §7 редакции КП и снимки | commercial-offers | p1a-workflow, p1a-access | PASS |
-| §7 DOCX фото/ссылки/реквизиты, печатные HTML | commercial-offers, export | DOCX ZIP проверен; визуальная печать не проверена | PARTIAL |
+| §7 DOCX фото/ссылки/реквизиты, печатные HTML | commercial-offers, export | [экспорт: PDF/DOCX и просмотр страниц](../src/modules/commercial-offers/qa/results.md), `e48ea2a` | PASS |
 | §7 чек-лист, файл сделки, RBAC/OCC | deals/checklist | p1a-workflow, p1a-access | PASS |
 | §7 реестры CSV с фильтрами и RBAC | export/register-export | p1a-workflow, p1a-access | PASS |
 
-Подробности и ограничения: [p1a-working-contour.md](p1a-working-contour.md). Целевой набор — 11/11 PASS; общий typecheck не PASS из-за ошибок параллельного demo seed. Общая готовность релиза здесь не утверждается.
+Подробности и ограничения: [p1a-working-contour.md](p1a-working-contour.md). Первоначальный целевой набор PASS; промежуточная ошибка typecheck demo seed устранена последующими изменениями. Актуальные результаты и ограничения — [единая сводка](vkr/test-protocol.md).
 
 <a id="v241"></a>
 ## Дополнение v2.4.1: разделы 2–11
 
-Срез 05.11.2026, feature/tz-v2.4.1 от ba7e6fa. Новое ТЗ имеет приоритет в явно изменённых требованиях; прежние PASS относятся к baseline и не заменяют приёмку расширения. Пути модулей ниже относительно src/modules, если не указано иначе. PASS — конкретные автотесты/протоколы, PARTIAL — указанная незакрытая часть. Общая готовность P1 пока PARTIAL.
+Срез 05.11.2026, feature/tz-v2.4.1 от ba7e6fa. Новое ТЗ имеет приоритет в явно изменённых требованиях; прежние PASS относятся к baseline и не заменяют приёмку расширения. Пути модулей ниже относительно src/modules, если не указано иначе. PASS — конкретные автотесты/протоколы, PARTIAL — указанная незакрытая часть. Общая готовность внешних интеграций и UAT остаётся PARTIAL; актуальные доказательства этапа 2 приведены ниже.
 
 | Требование | Модуль / файлы | Тесты / свидетельства | Статус |
 |---|---|---|---|
@@ -99,12 +99,12 @@
 | §2 LEAD | `requests/application/request-service.ts; tasks; requests/contact-control` | [тесты и фактический протокол](acceptance/v241/LEAD.md) | PASS |
 | §3, §3.1 SEARCH | `property-search/domain; property-search/application; ai/domain/provider-parse.ts` | [тесты и фактический протокол](acceptance/v241/SEARCH.md) | PARTIAL |
 | §4 SCRAPER | `property-search/infrastructure/scraper-adapter.ts; shared/net/ssrf.ts` | [тесты и фактический протокол](acceptance/v241/SCRAPER.md) | PARTIAL |
-| §4 WEB | `property-search/domain/fallback.ts; application/search-service.ts; ai/domain/gate.ts` | [тесты и фактический протокол](acceptance/v241/WEB.md) | PASS |
+| §4 WEB | `property-search/domain/fallback.ts; application/search-service.ts; ai/domain/gate.ts` | [протокол](acceptance/v241/WEB.md), [LIVE](vkr/live-ai-trials.md) | PARTIAL результата, механизм PASS |
 | §5 AI | `ai/application/settings-service.ts; ai/infrastructure; API settings/ai` | [тесты и фактический протокол](acceptance/v241/AI.md) | PASS |
 | §3.2 LINK | `property-search/application/listing-service.ts; matching/application` | [тесты и фактический протокол](acceptance/v241/LINK.md) | PASS |
 | §6 MEDIA | `properties/application/property-media-service.ts; documents/application/property-media-response.ts` | [тесты и фактический протокол](acceptance/v241/MEDIA.md) | PASS |
-| §7 OFFER-DOC | `commercial-offers/application; deals/application/checklist-service.ts; export/application/register-export.ts` | [тесты и фактический протокол](acceptance/v241/OFFER-DOC.md) | PARTIAL |
-| §8 CAL-NOTIF | `calendar/application; notifications/application; src/worker; compose.yaml` | [тесты и фактический протокол](acceptance/v241/CAL-NOTIF.md) | PARTIAL |
+| §7 OFFER-DOC | `commercial-offers/application; deals/application/checklist-service.ts; export/application/register-export.ts` | [тесты и фактический протокол](acceptance/v241/OFFER-DOC.md), [этап 2](acceptance/stage2-live-ai-ux.md) | PASS проверенных нейтральных выгрузок |
+| §8 CAL-NOTIF | `calendar/application; notifications/application; src/worker; compose.yaml` | [протокол](acceptance/v241/CAL-NOTIF.md), [UX этапа 2](acceptance/calendar-ux-p1.md) | PASS проверенных сценариев |
 | §10.2 REPORT-PAUSE | `reports/application/report-service.ts; needs/domain; tasks/application` | [тесты и фактический протокол](acceptance/v241/REPORT-PAUSE.md) | PASS |
 | §11 IMPORT | `import/domain/workbook-parser.ts; import/application` | [тесты и фактический протокол](acceptance/v241/IMPORT.md) | PARTIAL |
 | §9, §11 VKR | `docs/vkr; docs/acceptance/v241; scripts/demo; tests/e2e` | [тесты и фактический протокол](acceptance/v241/VKR.md) | PARTIAL |
@@ -112,20 +112,41 @@
 | §3.1 признаки: structured → rules → AI, отрицания и цитаты | `property-search/domain/evaluation.ts`, `ai/infrastructure/search-ai.ts` | [domain](../tests/unit/property-search/domain.test.ts), [search-ai](../tests/unit/ai/search-ai.test.ts), [скрапер](integrations/scraper.md) | PASS |
 | §3.2 история цены/новизны, сохранённые поиски и версия формы | `property-search/application/search-service.ts`, `listing-service.ts` | [integration](../tests/integration/property-search.test.ts), [протокол](integrations/property-search-application.md) | PASS |
 | §3.2 факты площадки отдельно от проверки сотрудника | `ExternalListingSnapshot`, `ExternalListingVerification`, `listing-service.ts` | [integration](../tests/integration/property-search.test.ts), [протокол](integrations/property-search-application.md) | PASS |
-| §4 семь источников, лимиты географии/пагинации, отсутствие обхода CAPTCHA | `property-search/infrastructure`, `vendor/real-estate-scrapper-2.1.0.tgz` | [adapter unit](../tests/unit/property-search/adapter.test.ts), [ограничения](integrations/scraper.md); live не подтверждён | PARTIAL |
+| §4 семь источников, лимиты географии/пагинации, отсутствие обхода CAPTCHA | `property-search/infrastructure`, `vendor/real-estate-scrapper-2.1.0.tgz` | [adapter unit](../tests/unit/property-search/adapter.test.ts), [ограничения](integrations/scraper.md); [живые испытания](vkr/live-ai-trials.md): частичный сбор, Циан CAPTCHA/Авито/Домклик blocked | PARTIAL |
 | §4–5 очищенный AI-ввод, sourceMethod, evidence, без слепого доверия описанию | `property-search/domain/evaluation.ts`, `ai/domain`, `ai/infrastructure` | [search-ai unit](../tests/unit/ai/search-ai.test.ts), [network](../tests/unit/property-search/network.test.ts), [AI-протокол](integrations/yandex-ai.md) | PASS |
-| §5 таймзона, отчётные границы, повторы | `shared/time.ts`, `calendar`, `reports`, `notifications` | [time unit](../tests/unit/time.test.ts), [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [calendar integration](../tests/integration/calendar-notifications.test.ts); Playwright E2E 13/13 PASS | PARTIAL |
+| §5 таймзона, отчётные границы, повторы | `shared/time.ts`, `calendar`, `reports`, `notifications` | [time unit](../tests/unit/time.test.ts), [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [calendar integration](../tests/integration/calendar-notifications.test.ts); [календарный UX и E2E](acceptance/calendar-ux-p1.md) | PASS |
 | §6 очередь/повтор файлов, обложка, EXIF, thumbnail и права | `properties/application/property-media-service.ts`, `documents` | [MEDIA](acceptance/v241/MEDIA.md), [restore](operations/docker-v241-verification.md) | PASS |
 | §7 исходные snapshot КП и новая редакция draft, явная отправка | `commercial-offers/application/offer-service.ts` | [p1a-workflow](../tests/integration/p1a-workflow.test.ts), [протокол](p1a-working-contour.md) | PASS |
-| §7 нейтральный HTML/DOCX, реестры CSV и чек-лист | `commercial-offers/application`, `deals/application/checklist-service.ts`, `export/application` | [OFFER-DOC](acceptance/v241/OFFER-DOC.md); визуальная печать/PDF не приняты | PARTIAL |
-| §8 приватность, сроки без фиктивной длительности, отдельные встречи | `calendar/application`, `calendar/domain`, `notifications/application` | [calendar authorization](../tests/authorization/calendar-notifications.test.ts), [unit](../tests/unit/calendar-notifications.test.ts), [протокол](calendar-notifications.md); общий UI включён в E2E 13/13 PASS | PARTIAL |
-| §11 обновление документации и материалы защиты | README, IMPLEMENTATION_REPORT, docs/api, docs/vkr, docs/acceptance/v241 | [протокол испытаний](vkr/test-protocol.md): SHA `8d30d92`, 500 unit, 163 integration/authorization, 13 E2E, 19 скриншотов | PASS |
-| §9 визуальные токены, 360 px, фокус, работа сотрудников | `src/ui`, `(crm)/layout`, новые страницы | Код; E2E 13/13 и 19 скриншотов; пользовательская приёмка отдельно не оформлена | PARTIAL |
+| §7 нейтральный HTML/DOCX, реестры CSV и чек-лист | `commercial-offers/application`, `deals/application/checklist-service.ts`, `export/application` | [OFFER-DOC](acceptance/v241/OFFER-DOC.md); [экспорт/просмотр PDF и DOCX](../src/modules/commercial-offers/qa/results.md), `e48ea2a` | PASS |
+| §8 приватность, сроки без фиктивной длительности, отдельные встречи | `calendar/application`, `calendar/domain`, `notifications/application` | [calendar authorization](../tests/authorization/calendar-notifications.test.ts), [unit](../tests/unit/calendar-notifications.test.ts), [протокол](calendar-notifications.md); [этап 2: повторы/пикеры/приватность](acceptance/calendar-ux-p1.md) | PASS |
+| §11 обновление документации и материалы защиты | README, IMPLEMENTATION_REPORT, docs/api, docs/vkr, docs/acceptance/v241 | [протокол испытаний](vkr/test-protocol.md), [приёмка этапа 2](acceptance/stage2-live-ai-ux.md), реестр DEMO/LIVE | PASS |
+| §9 визуальные токены, 360 px, фокус, работа сотрудников | `src/ui`, `(crm)/layout`, новые страницы | [Мобильные 360/430 px](acceptance/P1-reports-ai-mobile.md), [QA](acceptance/qa-stage2.md); пользовательская приёмка отдельно не оформлена | PARTIAL |
 | §11 Docker, миграция, backup/restore и worker restart | `compose.yaml`, `Dockerfile`, `scripts/restore-test.sh` | [Docker-протокол](operations/docker-v241-verification.md), вход/файл/галерея восстановлены | PASS |
-| §11 чистая установка именно v2.4.1 | bootstrap/deploy | Docker-протокол проверяет обновление существующего стека; отдельного clean-install протокола нет | PARTIAL |
+| §11 чистая установка именно v2.4.1 | bootstrap/deploy | [изолированный clone d69a3fb](operations/clean-deploy-v241.md): build/migrate/seed/login/PDF/restore/restart; поздний HEAD отдельно не проверен | PASS на указанном SHA |
 | §11 NFR-14 | Индексы, пагинация | Локально 3 пользователя/3 мин, 0 ошибок 5xx/409, p95 ≤259 мс; целевое согласованное оборудование не подтверждено ([замер](operations/perf-v241.md)) | PARTIAL |
 | §11 три одновременных пользователя | app/worker/db | Локальный прогон: три одновременных пользователя в течение 3 минут; 0 ошибок 5xx/409 | PASS (локальный замер) |
-| §11 Playwright и скриншоты | `tests/e2e`, `docs/screenshots/vkr` | 13/13 E2E PASS; 19 подлинных PNG, demo-fixtures помечены ([описание](vkr/screenshots.md)) | PASS |
-| §11 повтор T01–T10 на финальном SHA | `docs/acceptance/T01.md`–`T10.md` | Модульные регрессии есть; финальная общая сверка в [протоколе](vkr/test-protocol.md) ещё не заполнена | PARTIAL |
+| §11 Playwright и скриншоты | `tests/e2e`, `docs/screenshots/vkr` | [QA этапа 2](acceptance/qa-stage2.md), подлинные DEMO/LIVE PNG ([реестр](vkr/screenshots.md)); итоговый пересчёт у координатора | PASS |
+| §11 повтор T01–T10 на финальном SHA | `docs/acceptance/T01.md`–`T10.md` | Модульные регрессии есть; результаты отдельных прогонов сохранены, окончательный SHA и общую сводку заполняет координатор в [протоколе](vkr/test-protocol.md) | PARTIAL |
 
-Независимая проверка commit `8d30d92`: unit **500/500**, integration+authorization **163/163**, typecheck/lint (0 warnings)/build PASS, Playwright **13/13**; подробности в [протоколе](vkr/test-protocol.md). Живой SCRAPER — PARTIAL (live-срез [описан отдельно](integrations/scraper-live-smoke.md)); записанные ответы 7 площадок — PASS. Реальный Excel — PARTIAL, образца нет. NFR-14 на согласованном оборудовании не подтверждён. Материалы ВКР — [docs/vkr](vkr).
+Первоначальные проверки на `8d30d92` — исторический этап 1. Актуальная сводка этапа 2 находится в [test-protocol](vkr/test-protocol.md); числа финального прогона заполняет координатор. Реальный Excel и NFR-14 на согласованном оборудовании остаются PARTIAL.
+
+## Этап 2 — живой AI и UI/UX
+
+Срез `29273a9..e48ea2a`, 05.11.2026. Доказательства не заменяются утверждением общей готовности.
+
+| Требование | Реализация / доказательство | Статус |
+|---|---|---|
+| Полный LIVE путь до КП, частичный отказ, повтор, ноль, restart | [LIVE-журнал](vkr/live-ai-trials.md), [JSON](vkr/live-ai-evidence.json) | PASS ограниченных сценариев |
+| Автоматический и ручной web | Реальные tool calls, строгие URL, 0 пригодных карточек; [матрица](acceptance/stage2-live-ai-ux.md) | PARTIAL результативности, механизм PASS |
+| Доступность площадок | Циан CAPTCHA, Авито/Домклик blocked; другие источники сохранили выдачу | BLOCKED перечисленных площадок, общий сбор PARTIAL |
+| Расходы, ENV/эффективные лимиты и бюджет | [AI](integrations/yandex-ai.md), [UX бюджета](acceptance/P1-reports-ai-mobile.md), usage JSON | PASS контроля CRM; Cloud billing не сверялся |
+| КП A4/PDF/DOCX, snapshots и AI-текст | [экспорт](../src/modules/commercial-offers/qa/results.md), `91c6fc4`, `e48ea2a`, [P2 JSON](vkr/p2-live-ai-evidence.json) | PASS проверенных макетов/черновиков |
+| Именные пикеры, районы, состояния, диалоги, сравнение | `18c88d9`, `f15adc8`, picker tests, [экраны](vkr/screenshots.md) | PASS проверенных сценариев, UAT отдельно |
+| Повторения/связи, Сегодня, уведомления, клиент | `3396fe3`, `9e2b71b`, [протокол](acceptance/calendar-ux-p1.md) | PASS |
+| Отчёты, эффективные квоты, mobile 360/430 и диалоги | `de1b6d2`, [протокол](acceptance/P1-reports-ai-mobile.md), [QA](acceptance/qa-stage2.md) | PASS проверенных экранов, UAT отдельно |
+| P2 разбор заметки с подтверждением потребности/Task | `0df8a35`, `9e2b71b`, [JSON](vkr/p2-live-ai-evidence.json), p2-ai-drafts tests | PASS ограниченного сценария |
+| Независимые Iceman/Beam и исправления | `9e2b71b`, `f15adc8`, [приёмка этапа 2](acceptance/stage2-live-ai-ux.md) | PASS исправлений по сохранённым свидетельствам |
+| Тесты/скриншоты/чистая установка | [единая сводка](vkr/test-protocol.md), [clean d69a3fb](operations/clean-deploy-v241.md) | PASS зафиксированных проверок; общий production QA PARTIAL из-за ACL |
+| NFR-14 | [локальный замер](operations/perf-v241.md) | PARTIAL, не целевой сервер |
+
+Полная матрица с расходами, SHA, ограничениями P2 и условиями PASS — [stage2-live-ai-ux](acceptance/stage2-live-ai-ux.md).

@@ -16,10 +16,12 @@
 
 ## Фактический результат и свидетельства
 
-Независимая проверка: unit 500/500 (28 файлов), integration+authorization 163/163 (24 файла; схема создана с нуля и мигрирована), typecheck/lint (0 warnings)/Next build PASS, E2E 13/13. Есть 19 подлинных PNG, снятых после UI-полировки на crm_demo; demo-fixtures площадок помечены. Локальная нагрузка: 3 пользователя/3 минуты, 0 ошибок 5xx/409, p95 ≤259 мс; NFR-14 на согласованном оборудовании не подтверждён. Живые площадки и реальный Excel PARTIAL.
+Историческая независимая проверка этапа 1 на `8d30d92`: unit 500/500 (28 файлов), integration+authorization 163/163 (24 файла; схема создана с нуля и мигрирована), typecheck/lint (0 warnings)/Next build PASS, E2E 13/13. Есть 19 подлинных PNG, снятых после UI-полировки на crm_demo; demo-fixtures площадок помечены. Локальная нагрузка: 3 пользователя/3 минуты, 0 ошибок 5xx/409, p95 ≤259 мс; NFR-14 на согласованном оборудовании не подтверждён. Живые площадки и реальный Excel PARTIAL.
 
 Автотесты: [scripts/demo/demo.test.ts](../../../scripts/demo/demo.test.ts); [tests/e2e/smoke.spec.ts](../../../tests/e2e/smoke.spec.ts).
 
 Протокол: [docs/vkr/demo-data.md](../../../docs/vkr/demo-data.md).
 
-Общий Playwright E2E: 13/13 PASS; подлинные скриншоты: [19 PNG](../../screenshots/vkr/screenshots.md). См. [протокол ВКР](../../vkr/test-protocol.md).
+Актуальные E2E и подлинные DEMO/LIVE снимки: [приёмка этапа 2](../stage2-live-ai-ux.md), [реестр](../../vkr/screenshots.md). См. [протокол ВКР](../../vkr/test-protocol.md).
+
+Актуализация 05.11.2026: результаты этапа 1 выше сохраняются как история своего SHA. Для текущих ограничений и статусов действует [матрица этапа 2](../stage2-live-ai-ux.md); окончательные числа и SHA — в [единой сводке](../../vkr/test-protocol.md).
