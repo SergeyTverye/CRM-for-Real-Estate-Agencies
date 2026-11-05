@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ExcelJS from "exceljs";
-import { db, resetDatabase, seedBase, sessionCookieFor, apiRequest, routeParams, type TestUsers } from "../helpers/fixtures";
+import { db, resetDatabase, seedBase, sessionCookieFor, apiRequest, routeParams, type TestUsers, makeClient, makeNeed, makeProperty } from "../helpers/fixtures";
 import { POST as enqueueApi } from "@/app/api/v1/property-search/runs/route";
 import { GET as resultsApi } from "@/app/api/v1/property-search/runs/[id]/results/route";
 import { POST as exportApi } from "@/app/api/v1/property-search/runs/[id]/export/route";
@@ -230,4 +230,30 @@ describe("v3.1 queue, results, export and authorization", () => {
     expect(await db.searchRun.findUnique({ where: { id: run.id } })).toMatchObject({ status: "partial" });
     expect(await db.externalListingSnapshot.count()).toBe(2);
   });
+});
+
+it("page metadata survives a new read and hides private bookmarks, collections and proposed needs", async () => {
+  const run = await enqueue(); await processSearchQueue({ scraper: adapter([listing("one"), listing("two")]) });
+  const initial = await querySearchResults(users.realtor1, run.id, { pageSize: 1 });
+  const id = String(initial.rows[0]!.listingId);
+  const property = await makeProperty(users.realtor1);
+  await db.externalListing.update({ where: { id }, data: { propertyId: property.id } });
+  const privateCollection = await db.propertyCollection.create({ data: { name: "Hidden", ownerUserId: users.realtor2.userId } });
+  await db.propertyCollectionItem.create({ data: { collectionId: privateCollection.id, externalListingId: id, addedBy: users.realtor2.userId } });
+  await db.searchBookmark.create({ data: { userId: users.realtor2.userId, listingId: id, note: "Hidden" } });
+  const foreignClient = await makeClient(users.realtor2); const foreignNeed = await makeNeed(users.realtor2, foreignClient.id);
+  await db.needPropertyMatch.create({ data: { clientNeedId: foreignNeed.id, propertyId: property.id, status: "proposed", createdBy: users.realtor2.userId } });
+  const hidden = await querySearchResults(users.realtor1, run.id, { pageSize: 1 });
+  expect(hidden.rows[0]).toMatchObject({ propertyId: property.id, bookmark: false, inCollection: false, proposed: false, collectionIds: [], note: null });
+  const ownCollection = await db.propertyCollection.create({ data: { name: "Own", ownerUserId: users.realtor1.userId } });
+  await db.propertyCollectionItem.create({ data: { collectionId: ownCollection.id, externalListingId: id, addedBy: users.realtor1.userId } });
+  await db.searchBookmark.create({ data: { userId: users.realtor1.userId, listingId: id, note: "Visible" } });
+  const ownClient = await makeClient(users.realtor1); const ownNeed = await makeNeed(users.realtor1, ownClient.id);
+  await db.needPropertyMatch.create({ data: { clientNeedId: ownNeed.id, propertyId: property.id, status: "proposed", createdBy: users.realtor1.userId } });
+  const restored = await querySearchResults({ ...users.realtor1 }, run.id, { pageSize: 1 });
+  expect(restored.rows).toHaveLength(1);
+  expect(restored.rows[0]).toMatchObject({ propertyId: property.id, bookmark: true, inCollection: true, proposed: true, collectionIds: [ownCollection.id], note: "Visible" });
+  expect(JSON.stringify(restored.rows)).not.toContain(privateCollection.id);
+  await db.propertyCollection.update({ where: { id: ownCollection.id }, data: { archivedAt: new Date() } });
+  expect((await querySearchResults(users.realtor1, run.id, { pageSize: 1 })).rows[0]!.inCollection).toBe(false);
 });

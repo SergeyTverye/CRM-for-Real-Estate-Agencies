@@ -8,7 +8,7 @@ describe('live findings regressions', () => {
   const client = await defaultScraperFactory({ maxRetries: 0, transport: async () => ({ status: 200, data: '<script src="/captcha.js"></script>' }) });
   try {
    const result = await client.searchSite('cian', {city:'Novosibirsk',category:'commercial',types:['office'],deal:'sale',sources:['cian'],maxPages:1,sourceOptions:{cian:{regionId:4897}}});
-   expect(result.errors[0]).toMatchObject({code:'ACCESS_BLOCKED',error:'CIAN_ACCESS_CHALLENGE'});
+   expect(result.errors[0]).toMatchObject({code:'NEEDS_USER_ACTION',error:'NEEDS_USER_ACTION'});
    expect(result.errors[0]?.status).toBeUndefined();
    expect(result.results).toHaveLength(0);
   } finally { await client.close(); }

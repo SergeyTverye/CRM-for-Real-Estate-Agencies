@@ -12,6 +12,9 @@ export function detectAccessChallenge(url: string, payload: unknown): boolean {
     return n.captcha === true || typeof n.captchaUrl === "string" || ["CAPTCHA_REQUIRED", "NEEDS_USER_ACTION", "captcha"].includes(String(n.code ?? n.status));
   }
   if (typeof payload !== "string") return false;
+  if ((host === "cian.ru" || host.endsWith(".cian.ru")) && payload.length < 20000 &&
+    /<script[^>]+src=["'][^"']*\/captcha\.js(?:[?"'])/iu.test(payload) &&
+    !/legacy-commercial-serp-frontend|OfferCard/u.test(payload)) return true;
   // Inspect challenge UI, not arbitrary mentions of captcha in script bundles.
   return /<(?:title|h1)[^>]*>[^<]*(?:captcha|проверка|подтвердите|доступ ограничен|just a moment|access denied)/iu.test(payload) ||
     /<(?:form|div|iframe)[^>]*(?:action=["'][^"']*captcha|id=["'](?:captcha|challenge-running)|class=["'][^"']*(?:SmartCaptcha|g-recaptcha|h-captcha))/iu.test(payload) ||

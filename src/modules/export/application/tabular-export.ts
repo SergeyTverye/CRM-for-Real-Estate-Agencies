@@ -4,7 +4,7 @@ import { ConflictError } from "@/shared/errors";
 export const TABULAR_EXPORT_LIMIT = 10000;
 export function escapeSpreadsheet(value: unknown): string {
   const text = value instanceof Date ? value.toISOString() : String(value ?? "");
-  return /^[\s\uFEFF]*[=+\-@\t\r]/u.test(text) || /^[\t\r]/u.test(text) ? `'${text}` : text;
+  return /^[\s\p{Cf}\u0000-\u001f]*[=+\-@]/u.test(text) || /^[\t\r]/u.test(text) ? `'${text}` : text;
 }
 export function csvCell(value: unknown): string { return `"${escapeSpreadsheet(value).replaceAll('"', '""')}"`; }
 

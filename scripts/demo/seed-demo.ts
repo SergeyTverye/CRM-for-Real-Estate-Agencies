@@ -6,6 +6,7 @@ import { seedSearchAndCosts } from "./search";
 import { generateNotifications } from "@/modules/notifications/application/notification-generator";
 import { readNotification } from "@/modules/notifications/application/notification-service";
 import { seedDemoIssuers } from "./issuer";
+import { seedV31 } from "./v31";
 
 const districts = ["Центральный", "Железнодорожный", "Заельцовский", "Ленинский", "Октябрьский", "Кировский", "Калининский", "Дзержинский", "Первомайский", "Советский"];
 const types = ["retail", "commercial_premises", "office", "warehouse", "production"];
@@ -130,6 +131,7 @@ async function main() {
   await seedMediaAndOffers(ctx);
   await seedDeals(ctx);
   await seedSearchAndCosts(ctx);
+  await seedV31(ctx);
   const transferred = await db.searchSelection.findFirstOrThrow({ where: { needId: ctx.needs[0]!.id, matchId: { not: null } }, include: { property: true } });
   if (transferred.property) await seedGallery(ctx, [transferred.property], 30);
   await db.notificationPreference.createMany({ data: users.map(u => ({ userId: u.id })), skipDuplicates: true });
@@ -142,4 +144,4 @@ async function main() {
   await assertNeedInvariants(db, ctx.needs.map(n => n.id));
   await printCounts();
 }
-main().catch(() => { console.error("Demo seed failed; check scripts/demo against crm_demo (credentials and payloads suppressed)"); process.exitCode = 1; }).finally(() => db.$disconnect());
+main().catch((error) => { console.error("Demo seed failed", error instanceof Error ? error.message.split("\n").slice(-2).join(" ").replace(/postgres(?:ql)?:\/\/\S+/g, "[REDACTED]") : "unknown"); process.exitCode = 1; }).finally(() => db.$disconnect());

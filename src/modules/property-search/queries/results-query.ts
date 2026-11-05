@@ -7,6 +7,8 @@ import type { Actor } from "@/modules/auth/domain/actor";
 import { accessibleRun } from "../application/search-service";
 import { freshnessSchema, freshnessBounds } from "../domain/freshness";
 import { getGroupsForListings } from "@/modules/listing-duplicates";
+import { clientScope, needScope } from "@/modules/access/domain/scopes";
+import { collectionScope } from "@/modules/collections/application/collection-service";
 
 export const SORTS = ["publication", "first_seen", "source_updated", "price", "price_per_m2", "area", "match", "last_checked", "price_change"] as const;
 export const resultQuerySchema = z.object({
@@ -59,8 +61,27 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
     s.published_at AS "publishedAt",s.date_precision AS "datePrecision",s.date_source AS "dateSource",s.price_per_m2_rub AS "pricePerM2Rub",s.price_per_m2_unit AS "pricePerM2Unit"
     ${base} ${filtered} ORDER BY ${Prisma.raw(resultOrder(q.sort, q.direction))} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`);
   const sources = await tx.searchRunSource.findMany({ where: { runId } });
+  // Only enrich this page. Never expose another employee's private marks or need facts.
+  const accessibleNeed = { AND: [needScope(actor), { client: clientScope(actor) }] };
+  const metadata = await tx.externalListing.findMany({
+    where: { id: { in: rows.map(row => String(row.listingId)) } },
+    select: {
+      id: true, propertyId: true,
+      bookmarks: { where: { userId: actor.userId }, select: { note: true, status: true } },
+      selections: { where: { need: accessibleNeed }, select: { reviewStatus: true, matchId: true } },
+      collectionItems: { where: { collection: { ...collectionScope(actor), archivedAt: null } }, select: { collectionId: true } },
+      property: { select: { matches: { where: { need: accessibleNeed }, select: { id: true }, take: 1 } } },
+    },
+  });
+  const facts = new Map(metadata.map(row => [row.id, {
+    propertyId: row.propertyId,
+    bookmark: row.bookmarks.length > 0, note: row.bookmarks[0]?.note ?? null,
+    collectionIds: row.collectionItems.map(item => item.collectionId),
+    inCollection: row.collectionItems.length > 0 || row.selections.length > 0,
+    proposed: !!row.property?.matches.length || row.selections.some(item => item.matchId !== null),
+  }]));
   const duplicateGroups = await getGroupsForListings(actor, rows.map(row => String(row.listingId)));
-  return { rows, total, page: q.page, pageSize: q.pageSize, revision,
+  return { rows: rows.map(row => Object.assign({}, row, facts.get(String(row.listingId)))), total, page: q.page, pageSize: q.pageSize, revision,
     duplicateGroups, duplicateGroupingError: (run.progress as Record<string, unknown>)?.duplicateGroupingError ?? null,
     counts: { confirmed: 0, needs_review: 0, rejected: 0, ...Object.fromEntries(counts.map(c => [c.verdict, Number(c.count)])) },
     unknownDates: q.unknownDates, unknownDateCount: Number(unknownDateCount[0]?.count ?? 0), sortScope: "saved_selection" as const,

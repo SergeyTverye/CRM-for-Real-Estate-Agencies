@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, it, expect, vi } from "vitest";
 import { db, resetDatabase, seedBase, makeClient, makeNeed, makeProperty, inDays, type TestUsers } from "../helpers/fixtures";
 import { createChat, sendMessage, decideAction, getChat, confirmedWebSearch } from "@/modules/ai-chat/application/chat-service";
-import { executeTool } from "@/modules/ai-chat/application/tools";
+import { executeTool, redactToolData } from "@/modules/ai-chat/application/tools";
 import { FakeResponsesProvider } from "@/modules/ai/infrastructure/fake";
 import { resetConfigCache } from "@/shared/config/env";
 import { seedAiTariffs } from "@/modules/ai/application/seed-ai";
@@ -45,3 +45,12 @@ it("timeline and task text exclude protected client data and tool rows are bound
 it("strict tool schemas reject injected mutation fields without changes", async () => { const c = await makeClient(users.realtor1); const s = await createChat(users.realtor1, {}); await expect(executeTool(users.realtor1, s.id, "prepare_task", { clientId: c.id, title: "Задача", dueAt: inDays(1), execute: true })).rejects.toThrow(); expect(await db.aiPendingAction.count()).toBe(0); expect(await db.task.count()).toBe(0); });
 
 it("confirmed web search uses the same gate, reserve, settlement and chat relation",async()=>{vi.stubEnv("YANDEX_WEB_SEARCH_ENABLED","true");resetConfigCache();await db.aiSetting.updateMany({data:{webSearchManualAllowed:true}});const s=await createChat(users.realtor1,{});const f=new FakeResponsesProvider(()=>({text:"Публичные результаты",webSearchCalls:1}));await confirmedWebSearch(users.realtor1,s.id,{query:"Офисы Новосибирск",confirmed:true},f);expect(f.requests).toHaveLength(1);expect(f.requests[0]?.tools?.[0]?.type).toBe("web_search");expect(await db.aiUsageLog.findFirst()).toMatchObject({callType:"chat_web",status:"success",webSearchCalls:1});expect(await db.aiChatMessage.count({where:{sessionId:s.id,aiUsageLogId:{not:null}}})).toBe(1);});
+
+it("redacts lowercase matching identities and contact persons after 500 clients without loading an arbitrary prefix", async () => {
+    await db.client.createMany({ data: Array.from({ length: 501 }, (_, i) => ({ displayName: `Синтетика ${i}`, clientKind: "person", status: "active", responsibleUserId: users.realtor1.userId, createdBy: users.realtor1.userId })) });
+    const c = await makeClient(users.realtor1, { displayName: "фамилиятест имяредкое" });
+    await db.clientContactPerson.create({ data: { clientId: c.id, fullName: "контакттест редкоеимя" } });
+    const output = await redactToolData(users.realtor1, { title: "Позвонить фамилиятест имяредкое и контакттест редкоеимя", dueAt: "2026-11-05T10:00:00.000Z", id: c.id, area: "80" });
+    expect(JSON.stringify(output)).not.toMatch(/фамилиятест|имяредкое|контакттест|редкоеимя/);
+    expect(output).toMatchObject({ dueAt: "2026-11-05T10:00:00.000Z", id: c.id, area: "80" });
+});

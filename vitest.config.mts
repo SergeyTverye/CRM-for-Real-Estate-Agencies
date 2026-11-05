@@ -36,13 +36,36 @@ export default defineConfig({
     projects: [
       {
         extends: true,
-        test: { name: "unit", include: ["tests/unit/**/*.test.ts"], environment: "node" },
+        test: { name: "unit", include: ["tests/unit/**/*.test.ts", "scripts/vkr/display-regressions.test.ts"], environment: "node" },
+      },
+      {
+        extends: true,
+        test: {
+          name: "browser-cycle",
+          include: ["tests/integration/browser-sessions/browser-cycle.test.ts"],
+          environment: "node",
+          testTimeout: 45_000,
+          hookTimeout: 30_000,
+          fileParallelism: false,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "demo",
+          include: ["scripts/demo/demo.test.ts"],
+          environment: "node",
+          env: { DATABASE_URL: process.env.DEMO_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_demo", FILE_STORAGE_PATH: "./data/demo/files" },
+          testTimeout: 30_000,
+          fileParallelism: false,
+        },
       },
       {
         extends: true,
         test: {
           name: "integration",
           include: ["tests/integration/**/*.test.ts"],
+          exclude: ["tests/integration/browser-sessions/browser-cycle.test.ts"],
           environment: "node",
           globalSetup: ["tests/helpers/global-setup.ts"],
           fileParallelism: false,

@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "prisma generate && tsc --noEmit",
-    "test": "vitest run --project unit",
+    "test": "vitest run --project unit --project browser-cycle",
     "test:integration": "vitest run --project integration --project authorization",
     "test:all": "vitest run",
     "test:e2e": "playwright test",

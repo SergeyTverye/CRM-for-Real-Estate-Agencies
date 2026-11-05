@@ -86,4 +86,4 @@ export function renderText(text: string, context: Context, manifest: Manifest, r
   }
   return walk(parseTemplate(text));
 }
-export function escapeSpreadsheet(value: string): string { return /^[\s\u0000-\u001f]*[=+\-@]/.test(value) ? `'${value}` : value; }
+export function escapeSpreadsheet(value: string): string { return /^[\s\p{Cf}\u0000-\u001f]*[=+\-@]/u.test(value) ? `'${value}` : value; }

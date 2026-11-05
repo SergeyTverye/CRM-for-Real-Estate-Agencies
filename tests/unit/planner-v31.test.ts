@@ -22,8 +22,8 @@ describe("PL-04 recurrence", () => {
     expect(rows.map(r => r.start.slice(0,10))).toEqual(["2026-11-05","2027-02-05","2027-05-05"]);
     expect(occurrences({ start:"2026-11-05T03:00Z",recurrenceRule:"FREQ=YEARLY;UNTIL=20271105T030000Z" },now,new Date("2029-01-01"),zone).map(r => r.start.slice(0,10))).toEqual(["2027-11-05"]);
   });
-  it("skips invalid leap anniversaries and handles series end", () => {
-    expect(occurrences({ start:"2024-02-29T03:00Z",recurrenceRule:"FREQ=YEARLY;COUNT=2" },new Date("2024-01-01"),new Date("2030-01-01"),zone).map(r => r.start.slice(0,10))).toEqual(["2024-02-29","2028-02-29"]);
+  it("clamps leap anniversaries to Feb 28 and handles series end", () => {
+    expect(occurrences({ start:"2024-02-29T03:00Z",recurrenceRule:"FREQ=YEARLY;COUNT=2" },new Date("2024-01-01"),new Date("2030-01-01"),zone).map(r => r.start.slice(0,10))).toEqual(["2024-02-29","2025-02-28"]);
     expect(occurrences({ start:now.toISOString(),recurrenceRule:"FREQ=YEARLY;COUNT=1" },now,new Date("2030-01-01"),zone)).toEqual([]);
   });
   it("roundtrips quarterly and yearly forms", () => {

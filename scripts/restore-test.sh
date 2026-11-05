@@ -103,6 +103,17 @@ while IFS='|' read -r key checksum; do
   fi
 done < "$ROOT_DIR/restore-test/media-checks.txt"
 [ "$MEDIA_OK" = 1 ] && check "gallery_files" "PASS ($MEDIA_COUNT files)" || check "gallery_files" "FAIL"
+if TEMPLATE_RESULT="$(rt exec -T app node node_modules/tsx/dist/cli.mjs scripts/ops-verify-template-files.ts)"; then
+  check "template_files" "PASS ($TEMPLATE_RESULT)"
+else
+  check "template_files" "FAIL"
+fi
+# Browser profiles are created under os.tmpdir(), outside the only backed-up storage mount.
+if find restore-test/data/files -name 'crm-browser-session-*' -print -quit | grep -q .; then
+  check "temporary_profiles_excluded" "FAIL"
+else
+  check "temporary_profiles_excluded" "PASS"
+fi
 rm -f "$JAR"
 check "control_row_counts" "PASS (сверены restore-data.sh)"
 check "duration_sec" "$(( $(date +%s) - START_TS ))"
