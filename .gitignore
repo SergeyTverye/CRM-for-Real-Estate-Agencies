@@ -164,3 +164,11 @@ next-env.d.ts
 /secrets/
 /.deploy-test/
 /.claude/
+
+# v2.4.1 secrets and local sources
+/ключ*.txt
+*key*.txt
+/Real-Estate-Scrapper/
+/docs/vkr/screenshots/tmp/
+
+!/vendor/*.tgz
