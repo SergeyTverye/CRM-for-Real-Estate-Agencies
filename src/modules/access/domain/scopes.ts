@@ -96,6 +96,7 @@ export function advertisementWriteScope(actor: Actor): Prisma.AdvertisementWhere
 /** Every protected link must pass; public links cannot override a denied link. */
 export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
   if (isManager(actor)) return {};
+  const collection: Prisma.PropertyCollectionWhereInput = { archivedAt: null, OR: [{ ownerUserId: actor.userId }, { visibility: "team" }] };
   const need: Prisma.ClientNeedWhereInput = { AND: [needScope(actor), { client: clientScope(actor) }] };
   const showing: Prisma.ShowingWhereInput = { AND: [showingScope(actor), { need: { client: clientScope(actor) } }] };
   const offer: Prisma.CommercialOfferWhereInput = { AND: [offerScope(actor), { need: { client: clientScope(actor) } }] };
@@ -105,6 +106,7 @@ export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
     AND: [
       // Template field restrictions survive generation and apply to every file route/search.
       { OR: [{ templateVersionId: null }, { valuesSnapshot: { path: ["accessRoles"], array_contains: [actor.role] } }] },
+      { collectionLinks: { none: { collection: { NOT: collection } } } },
       { clientLinks: { none: { client: { NOT: clientScope(actor) } } } },
       { needLinks: { none: { need: { NOT: need } } } },
       { showingLinks: { none: { showing: { NOT: showing } } } },
@@ -119,6 +121,7 @@ export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
         ] },
       ] },
       { OR: [
+        { collectionLinks: { some: { collection } } },
         { clientLinks: { some: { client: clientScope(actor) } } },
         { needLinks: { some: { need } } },
         { showingLinks: { some: { showing } } },

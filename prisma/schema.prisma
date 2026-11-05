@@ -868,6 +868,7 @@ model Document {
   advertisementLinks DocumentAdvertisement[]
   agreementLinks     DocumentAgreement[]
   offerLinks         DocumentCommercialOffer[]
+  collectionLinks    DocumentCollection[]
   aiRuns             AiRun[]
 
   @@index([templateVersionId])
@@ -1751,6 +1752,7 @@ model PropertyCollection {
   owner       User                     @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
   items       PropertyCollectionItem[]
   needs       PropertyCollectionNeed[]
+  documentLinks DocumentCollection[]
 
   @@index([ownerUserId, archivedAt, updatedAt])
   @@index([visibility, archivedAt])
@@ -1928,4 +1930,15 @@ model SearchExport {
   @@index([userId, createdAt])
   @@index([documentId])
   @@map("search_exports")
+}
+
+model DocumentCollection {
+  documentId   String             @map("document_id") @db.Uuid
+  collectionId String             @map("collection_id") @db.Uuid
+  document     Document           @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  collection   PropertyCollection @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, collectionId])
+  @@index([collectionId])
+  @@map("document_collections")
 }

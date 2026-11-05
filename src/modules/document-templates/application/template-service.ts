@@ -90,6 +90,7 @@ export async function previewTemplate(actor: Actor, id: string, versionId?: stri
 const generation = z.object({ entityKind: z.enum(KINDS), entityId: zUuid, selectedIds: z.array(zUuid).min(1).max(LIMITS.records).optional(), versionId: zUuid.optional(), requestId: zUuid.optional() }).strict();
 async function linkDocument(tx: Tx, documentId: string, kind: typeof KINDS[number], ids: string[]) {
   for (const id of ids) {
+    if (kind === "collection") await tx.documentCollection.create({ data: { documentId, collectionId: id } });
     if (kind === "client") await tx.documentClient.create({ data: { documentId, clientId: id } });
     if (kind === "need") await tx.documentNeed.create({ data: { documentId, clientNeedId: id } });
     if (kind === "deal") await tx.documentDeal.create({ data: { documentId, dealId: id } });
@@ -135,23 +136,25 @@ export async function generateFromTemplate(actor: Actor, id: string, raw: unknow
 }
 export async function openTemplateDocument(actor: Actor, id: string) {
   parseInput(zUuid, id);
-  const doc = await db.document.findFirst({ where: { id, templateVersionId: { not: null } } });
+  const doc = await db.document.findFirst({ where: { id, templateVersionId: { not: null } }, include: { collectionLinks: true } });
   if (!doc || doc.uploadedBy !== actor.userId && actor.role !== "manager") throw new NotFoundError();
   if (actor.role !== "manager" && !(doc.valuesSnapshot as { accessRoles?: string[] } | null)?.accessRoles?.includes(actor.role)) throw new NotFoundError();
   const source = z.object({ kind: z.enum(KINDS), ids: z.array(zUuid).min(1).max(LIMITS.records) }).parse((doc.valuesSnapshot as { source?: unknown } | null)?.source);
-  for (const entityId of source.ids) await buildContext(db, actor, source.kind, entityId);
+  const ids = source.kind === "collection" ? doc.collectionLinks.map(link => link.collectionId) : source.ids;
+  if (!ids.length) throw new NotFoundError();
+  for (const entityId of ids) await buildContext(db, actor, source.kind, entityId);
   return { ...await getStorage().read(doc.storageKey), mimeType: doc.mimeType, fileName: doc.originalName };
 }
 export async function listGeneratedDocuments(actor: Actor, raw: unknown) {
   const d = parseInput(z.object({ entityKind: z.enum(KINDS), entityId: zUuid }).strict(), raw);
   await buildContext(db, actor, d.entityKind, d.entityId);
   const rows = await db.document.findMany({ where: { templateVersionId: { not: null }, archivedAt: null,
-    AND: [{ valuesSnapshot: { path: ["source", "kind"], equals: d.entityKind } }, { valuesSnapshot: { path: ["source", "ids"], array_contains: [d.entityId] } }, ...(actor.role === "manager" ? [] : [{ uploadedBy: actor.userId }, { valuesSnapshot: { path: ["accessRoles"], array_contains: [actor.role] } }])] },
-    orderBy: [{ createdAt: "desc" }, { id: "asc" }], take: 50, select: { id: true, originalName: true, createdAt: true, valuesSnapshot: true } });
+    AND: [...(d.entityKind === "collection" ? [{ collectionLinks: { some: { collectionId: d.entityId } } }] : [{ valuesSnapshot: { path: ["source", "kind"], equals: d.entityKind } }, { valuesSnapshot: { path: ["source", "ids"], array_contains: [d.entityId] } }]), ...(actor.role === "manager" ? [] : [{ uploadedBy: actor.userId }, { valuesSnapshot: { path: ["accessRoles"], array_contains: [actor.role] } }])] },
+    orderBy: [{ createdAt: "desc" }, { id: "asc" }], take: 50, select: { id: true, originalName: true, createdAt: true, valuesSnapshot: true, collectionLinks: true } });
   const output = [];
   for (const row of rows) {
-    const source = (row.valuesSnapshot as { source: { ids: string[] } }).source;
-    try { for (const id of source.ids) await buildContext(db, actor, d.entityKind, id); }
+    const ids = d.entityKind === "collection" ? row.collectionLinks.map(link => link.collectionId) : (row.valuesSnapshot as { source: { ids: string[] } }).source.ids;
+    try { for (const id of ids) await buildContext(db, actor, d.entityKind, id); }
     catch (e) { if (e instanceof NotFoundError) continue; throw e; }
     output.push({ id: row.id, name: row.originalName, createdAt: row.createdAt.toISOString() });
   }

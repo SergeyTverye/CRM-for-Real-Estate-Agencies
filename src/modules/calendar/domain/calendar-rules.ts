@@ -66,8 +66,11 @@ export function occurrences(event: Interval & { recurrenceRule?: string | null }
     const date = new Date(local);
     if (monthly) {
       date.setUTCMonth(local.getUTCMonth() + index * monthStep, 1);
-      date.setUTCDate(local.getUTCDate());
-      if (date.getUTCDate() !== local.getUTCDate()) continue;
+      // CRM policy (PL-04/AT-12): clamp to the target month's last day.
+      // Always anchor to the original date: Jan 31 -> Feb 28 -> Mar 31;
+      // yearly Feb 29 -> Feb 28 in non-leap years, then Feb 29 again.
+      const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+      date.setUTCDate(Math.min(local.getUTCDate(), lastDay));
     } else date.setUTCDate(local.getUTCDate() + index * (recurrence?.frequency === "WEEKLY" && !recurrence.days ? 7 * recurrence.interval : recurrence?.days ? 1 : recurrence?.interval ?? 1));
     const at = recurrence ? new Date(+new Date(fromDateTimeLocalValue(date.toISOString().slice(0,16), timeZone)) + start.getUTCSeconds()*1000 + start.getUTCMilliseconds()) : start;
     if (+at >= until) break;

@@ -25,8 +25,8 @@ describe("calendar UX recurrence", () => {
     expect(() => recurrenceRule({ ...form, mode: "weekly" }, event.start, zone)).toThrow();
     for (const rule of ["FREQ=WEEKLY;BYDAY=XX", "FREQ=DAILY;COUNT=0", "FREQ=DAILY;COUNT=1001", "FREQ=DAILY;COUNT=1;UNTIL=20261112T235959Z", "FREQ=DAILY;FREQ=WEEKLY", "FREQ=DAILY;COUNT=2=3"]) expect(() => parseRecurrence(rule)).toThrow();
   });
-  it("monthly count excludes nonexistent dates", () => {
-    expect(occurrences({ start: "2026-01-31T03:00Z", end: "2026-01-31T04:00Z", recurrenceRule: "FREQ=MONTHLY;COUNT=2" }, date("2026-01-01"), date("2026-07-01"), zone).map(e => e.start.slice(0,10))).toEqual(["2026-01-31", "2026-03-31"]);
+  it("PL-04/AT-12 monthly count includes clamped occurrences", () => {
+    expect(occurrences({ start: "2026-01-31T03:00Z", end: "2026-01-31T04:00Z", recurrenceRule: "FREQ=MONTHLY;COUNT=2" }, date("2026-01-01"), date("2026-07-01"), zone).map(e => e.start.slice(0,10))).toEqual(["2026-01-31", "2026-02-28"]);
   });
 });
 describe("notification presentation", () => {

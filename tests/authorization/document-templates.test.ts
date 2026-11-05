@@ -9,6 +9,21 @@ let u: TestUsers;
 const meta = { code: "test_template", name: "Синтетический", format: "markdown_docx", manifestYaml: clientYaml, markdownBody: "{{client.displayName}}" };
 beforeEach(async () => { await resetDatabase(); u = await seedBase(); });
 describe("AT-15 authorization", () => {
+  it("collection document access follows the normalized link after ownership changes", async () => {
+    const c = await db.propertyCollection.create({ data: { name: "Синтетическая подборка", ownerUserId: u.realtor1.userId } });
+    const other = await db.propertyCollection.create({ data: { name: "Открытая подборка", ownerUserId: u.realtor1.userId } });
+    const p = await makeProperty(u.realtor1);
+    await db.propertyCollectionItem.create({ data: { collectionId: c.id, propertyId: p.id, addedBy: u.realtor1.userId, status: "in_crm" } });
+    const t = await saveTemplate(u.manager, { ...meta, code: "collection_access", manifestYaml: collectionYaml, markdownBody: "{{collection.name}}" }, null);
+    const generated = await generateFromTemplate(u.realtor1, t.id, { entityKind: "collection", entityId: c.id });
+    const id = generated.id!;
+    expect(await db.document.count({ where: { id, ...documentScope(u.realtor1) } })).toBe(1);
+    expect(await db.document.count({ where: { id, ...documentScope(u.realtor2) } })).toBe(0);
+    await db.document.update({ where: { id }, data: { valuesSnapshot: { accessRoles: ["manager", "realtor"], source: { kind: "collection", ids: [other.id] } } } });
+    await db.propertyCollection.update({ where: { id: c.id }, data: { ownerUserId: u.realtor2.userId } });
+    expect(await db.document.count({ where: { id, ...documentScope(u.realtor1) } })).toBe(0);
+    await expect(openTemplateDocument(u.realtor1, id)).rejects.toMatchObject({ status: 404 });
+  });
   it("риелтор не управляет шаблонами даже прямым API", async () => {
     await expect(saveTemplate(u.realtor1, meta, null)).rejects.toMatchObject({ status: 403 });
     const t = await saveTemplate(u.manager, meta, null);

@@ -1192,6 +1192,21 @@ docker compose up -d worker
 docker compose logs --tail=50 worker
 ```
 
+Очередь поиска v3.1 обслуживает `search-worker` из основного `compose.yaml`,
+с тем же образом, что `app`, после успешных миграций. Отдельный Compose overlay больше не нужен.
+`docker compose -p crm up -d` запускает оба worker; состояние и журнал:
+`docker compose -p crm ps search-worker`, `docker compose -p crm logs --tail=30 search-worker`.
+Healthcheck проверяет дочерний процесс, ошибки проходов — JSON-событие
+`property_search.queue_tick_failed`. На рабочем стеке `SCRAPER_DEMO_FIXTURES=false`.
+При `SCRAPER_ENABLED=false` запуск через API завершается `completed`, источники — `disabled`;
+`POST /api/v1/property-search/runs/{id}/cancel` отменяет ожидающий/активный запуск.
+
+Повторы календаря (PL-04/AT-12): если исходного числа нет в целевом месяце,
+используется последний день этого месяца. Исходное число сохраняется для следующих
+вхождений: 31 января раз в квартал → 30 апреля → 31 июля → 31 октября.
+Ежегодное 29 февраля приходится на 28 февраля в невисокосные годы и снова на
+29 февраля в високосные. `COUNT` включает каждое фактическое вхождение, включая первое.
+
 Demo seed не применяет миграции и не меняет пароли; его ENV и проверка повторного запуска — [demo-data](docs/vkr/demo-data.md). Для интерактивного демо окружение процесса app задаётся отдельно.
 
 AI-smoke — отдельный opt-in скрипт, npm-команды ai-smoke нет. Примеры ниже выполняют платный синтетический запрос и не входят в обычные тесты. Сначала задайте проверенные тарифы `AI_SMOKE_INPUT_RUB_PER_MILLION`, `AI_SMOKE_OUTPUT_RUB_PER_MILLION`, `AI_SMOKE_TARIFF_EFFECTIVE_FROM`, ключ и разрешённый бюджет; для web дополнительно разрешите web ENV. См. [протокол](docs/integrations/yandex-ai.md).

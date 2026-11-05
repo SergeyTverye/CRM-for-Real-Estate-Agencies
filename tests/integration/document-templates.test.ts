@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db, resetDatabase, seedBase, makeClient, makeProperty, type TestUsers } from "../helpers/fixtures";
 import { clientYaml, collectionYaml, docxFixture, xlsxFixture } from "../helpers/template-fixtures";
-import { saveTemplate, generateFromTemplate, changeTemplateStatus, openTemplateDocument, previewTemplate } from "@/modules/document-templates/application/template-service";
+import { saveTemplate, generateFromTemplate, changeTemplateStatus, openTemplateDocument, previewTemplate, listGeneratedDocuments } from "@/modules/document-templates/application/template-service";
 import { getStorage } from "@/shared/storage/storage-adapter";
 import { readPackage } from "@/modules/document-templates/domain/package";
 import ExcelJS from "exceljs";
@@ -10,6 +10,22 @@ let u: TestUsers;
 beforeEach(async () => { await resetDatabase(); u = await seedBase(); });
 const meta = (code: string, format: string, manifestYaml = clientYaml) => ({ code, name: "Тестовый шаблон", format, manifestYaml, markdownBody: "# Клиент\n{{client.displayName}}" });
 describe("AT-15 версии и четыре режима на PostgreSQL", () => {
+  it("DocumentCollection is unique, restricts deletion and drives history independently of snapshot IDs", async () => {
+    const c = await db.propertyCollection.create({ data: { name: "Связанная подборка", ownerUserId: u.realtor1.userId } });
+    const other = await db.propertyCollection.create({ data: { name: "Другая подборка", ownerUserId: u.realtor1.userId } });
+    const p = await makeProperty(u.realtor1);
+    await db.propertyCollectionItem.create({ data: { collectionId: c.id, propertyId: p.id, addedBy: u.realtor1.userId, status: "in_crm" } });
+    const t = await saveTemplate(u.manager, { ...meta("collection_link", "markdown_docx", collectionYaml), markdownBody: "{{collection.name}}" }, null);
+    const generated = await generateFromTemplate(u.realtor1, t.id, { entityKind: "collection", entityId: c.id });
+    const doc = await db.document.findUniqueOrThrow({ where: { id: generated.id! }, include: { collectionLinks: true } });
+    expect(doc.collectionLinks).toEqual([{ documentId: doc.id, collectionId: c.id }]);
+    await expect(db.documentCollection.create({ data: { documentId: doc.id, collectionId: c.id } })).rejects.toMatchObject({ code: "P2002" });
+    await expect(db.propertyCollection.delete({ where: { id: c.id } })).rejects.toMatchObject({ code: "P2003" });
+    await expect(db.document.delete({ where: { id: doc.id } })).rejects.toMatchObject({ code: "P2003" });
+    await db.document.update({ where: { id: doc.id }, data: { valuesSnapshot: { accessRoles: ["manager", "realtor"], source: { kind: "collection", ids: [other.id] } } } });
+    expect(await listGeneratedDocuments(u.realtor1, { entityKind: "collection", entityId: c.id })).toHaveLength(1);
+    expect(await listGeneratedDocuments(u.realtor1, { entityKind: "collection", entityId: other.id })).toHaveLength(0);
+  });
   it("новая версия работает без перезапуска; Document хранит снимок; архив не удаляет прежний файл", async () => {
     const client = await makeClient(u.realtor1, { displayName: "Синтетика до изменения" });
     const t = await saveTemplate(u.manager, meta("client_card", "markdown_docx"), null);

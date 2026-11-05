@@ -1,8 +1,0 @@
-# Merge with compose.yaml. Reuses the application image, environment and PID healthcheck.
-services:
-  search-worker:
-    extends:
-      file: compose.yaml
-      service: worker
-    command: ["node", "ops/worker/search-start.mjs"]
-    networks: [internal, public]

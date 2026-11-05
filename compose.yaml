@@ -146,6 +146,24 @@ services:
       start_period: 20s
     networks: [internal]
 
+  search-worker:
+    <<: *app-image
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    restart: unless-stopped
+    shm_size: 256mb
+    command: ["node", "ops/worker/search-start.mjs"]
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "ops/worker/health.mjs"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks: [internal, public]
+
   # Одноразовый ops-контейнер резервного копирования (ТЗ 36.3, 39.10): pg_dump/pg_restore 18,
   # архивация файлов, manifest/checksums, rclone crypt для off-site targets.
   # Запускается только скриптами: docker compose --profile ops run --rm backup <command>

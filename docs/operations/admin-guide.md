@@ -90,6 +90,35 @@ MAILRU_USER=… MAILRU_APP_PASSWORD=… ./scripts/backup-remote-add.sh mailru-ma
 
 ## 8. Docker v2.4.1: worker, Chrome и галерея
 
+В v3.1 основной `compose.yaml` также запускает `search-worker` из общего образа app.
+Сборка и запуск: `docker compose -p crm build app && docker compose -p crm up -d`.
+Отдельный `compose.property-search.yaml` удалён. Проверка:
+`docker compose -p crm ps search-worker`, `docker compose -p crm logs --tail=30 search-worker`.
+Healthcheck проверяет PID дочернего процесса; ошибки обработки обозначаются безопасным
+JSON-событием `property_search.queue_tick_failed`, без текста исключения и секретов.
+Поисковый worker имеет исходящий доступ к площадкам и `/dev/shm` 256 MB.
+При обслуживании, восстановлении и смене active/standby останавливайте/пересоздавайте
+также `search-worker`; при standby он не обрабатывает очередь.
+
+Проверка без внешних запросов: `SCRAPER_ENABLED=false`, `SCRAPER_DEMO_FIXTURES=false`,
+`AI_ENABLED=false`. После изменения ENV пересоздайте app и search-worker.
+Авторизованный `POST /api/v1/property-search/runs` с filters, sources и idempotencyKey
+возвращает запуск в очереди. Опрос `/runs/{id}/progress` должен показать `completed`
+и `disabled` для источников; зависший `queued` требует проверки worker и его журнала.
+Для отмены используйте `POST /runs/{id}/cancel`; частичные результаты сохраняются.
+Для воспроизводимой проверки отмены ожидающего запуска можно временно остановить
+search-worker, поставить запуск в очередь, отменить и снова запустить worker.
+Не включайте `SCRAPER_DEMO_FIXTURES=true` в рабочем стеке.
+
+Автоматизированный вариант для рабочей копии с Node.js и зависимостями:
+`node ops/worker/search-smoke.mjs` (проект `crm`, локальные SEED-параметры).
+Сценарий требует выключенных scraper/fixtures/AI в ENV и контейнерах, проверяет
+API, отмену после остановки worker, перезапуск, healthcheck, общий image ID и отсутствие
+секретов в журнале. Сессия закрывается; в CRM остаются два синтетических запуска.
+Если SEED-пароль уже изменён, локальный оператор может добавить `--fixture-session`:
+через Docker создаётся сессия на две минуты для активного руководителя без требования
+смены пароля; в конце она отзывается. Пароли и пользователи не изменяются, токен не выводится.
+
 `deploy.sh` и `update.sh` запускают app и worker из единого образа. Сохраняйте имя проекта `crm`;
 не используйте `down -v` на рабочем стеке. При восстановлении оба процесса останавливаются,
 при promote/demote оба пересоздаются с новой ролью.

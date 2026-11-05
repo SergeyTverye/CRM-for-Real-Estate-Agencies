@@ -12,9 +12,9 @@ describe("calendar and notification rules", () => {
     ]);
     expect(free).toEqual([{ start: "2026-11-05T04:00:00.000Z",end:"2026-11-05T10:00:00.000Z" }]);
   });
-  it("uses inclusive UNTIL and skips February for a monthly day 31", () => {
+  it("uses inclusive UNTIL and clamps February for a monthly day 31", () => {
     const dates = occurrences({ start: "2026-01-31T03:00Z",end:"2026-01-31T04:00Z",recurrenceRule:"FREQ=MONTHLY;UNTIL=20260331T030000Z" },at("2026-01-01"),at("2026-05-01"),"Asia/Novosibirsk");
-    expect(dates.map(d => d.start)).toEqual(["2026-01-31T03:00:00.000Z","2026-03-31T03:00:00.000Z"]);
+    expect(dates.map(d => d.start)).toEqual(["2026-01-31T03:00:00.000Z","2026-02-28T03:00:00.000Z","2026-03-31T03:00:00.000Z"]);
   });
   it("preserves local hour across a timezone transition", () => {
     const dates = occurrences({ start:"2026-03-07T14:00Z",end:"2026-03-07T15:00Z",recurrenceRule:"FREQ=DAILY" },at("2026-03-07"),at("2026-03-10"),"America/New_York");
@@ -56,9 +56,9 @@ describe("calendar and internal notification rules", () => {
     expect(occurrences(e,d("05"),d("10"),"Asia/Novosibirsk")).toHaveLength(3);
     expect(occurrences({...e,recurrenceRule:"FREQ=WEEKLY"},d("05"),d("20"),"Asia/Novosibirsk")).toHaveLength(3);
   });
-  it("skips invalid monthly dates", () => {
+  it("clamps invalid monthly dates without losing the original anchor", () => {
     const e = { start: "2026-01-31T03:00:00Z", end:"2026-01-31T04:00:00Z",recurrenceRule:"FREQ=MONTHLY" };
-    expect(occurrences(e,new Date(e.start),new Date("2026-04-01"),"Asia/Novosibirsk").map(o=>o.start.slice(0,10))).toEqual(["2026-01-31","2026-03-31"]);
+    expect(occurrences(e,new Date(e.start),new Date("2026-04-01"),"Asia/Novosibirsk").map(o=>o.start.slice(0,10))).toEqual(["2026-01-31","2026-02-28","2026-03-31"]);
   });
   it("rejects unsupported RRULE and invalid UNTIL", () => {
     expect(()=>parseRecurrence("FREQ=HOURLY")).toThrow();
