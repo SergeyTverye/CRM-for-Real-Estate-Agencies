@@ -31,8 +31,8 @@ export class InMemoryAiLedger implements AiLedgerRepository {
             userHourCalls: user.filter((r) => r.createdAt >= q.hourSince).length,
             userDayCalls: user.filter((r) => r.dayKey === q.dayKey).length,
             jobCalls: job.length,
-            jobWebCalls: job.filter((r) => r.callType === "web_search").reduce((n, r) => n + Math.max(r.estimatedWebCalls, r.webSearchCalls ?? 0), 0),
-            userDayWebJobIds: [...new Set(user.filter((r) => r.dayKey === q.dayKey && r.callType === "web_search").map((r) => r.jobId))],
+            jobWebCalls: job.filter((r) => (r.callType === "web_search" || r.callType === "chat_web")).reduce((n, r) => n + Math.max(r.estimatedWebCalls, r.webSearchCalls ?? 0), 0),
+            userDayWebJobIds: [...new Set(user.filter((r) => r.dayKey === q.dayKey && (r.callType === "web_search" || r.callType === "chat_web")).map((r) => r.jobId))],
             monthCommittedMicros: all.filter((r) => r.monthKey === q.monthKey).reduce((n, r) => n + r.chargedMicros, 0n),
             dayCalls: all.filter((r) => r.dayKey === q.dayKey).length,
           };

@@ -103,6 +103,8 @@ export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
   const agreement: Prisma.AgreementWhereInput = { AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal }] }] };
   return {
     AND: [
+      // Template field restrictions survive generation and apply to every file route/search.
+      { OR: [{ templateVersionId: null }, { valuesSnapshot: { path: ["accessRoles"], array_contains: [actor.role] } }] },
       { clientLinks: { none: { client: { NOT: clientScope(actor) } } } },
       { needLinks: { none: { need: { NOT: need } } } },
       { showingLinks: { none: { showing: { NOT: showing } } } },

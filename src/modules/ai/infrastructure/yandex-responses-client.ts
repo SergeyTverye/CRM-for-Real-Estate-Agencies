@@ -9,7 +9,7 @@ const responseSchema = z.object({
   incomplete_details: z.unknown().optional(),
   usage: z.object({ input_tokens: count, output_tokens: count }).nullish(),
   output: z.array(z.object({
-    type: z.string(), status: z.string().optional(),
+    type: z.string(), status: z.string().optional(), call_id: z.string().max(200).optional(), name: z.string().max(100).optional(), arguments: z.string().max(12000).optional(),
     action: z.object({ sources: z.array(z.object({ url: z.string() })).optional() }).optional(),
     content: z.array(z.object({ type: z.string(), text: z.string().optional(),
       annotations: z.array(z.object({ type: z.string(), url: z.string().optional() })).optional(),
@@ -35,10 +35,10 @@ export class YandexResponsesClient implements ResponsesProvider {
       const response = await this.fetcher(`${this.config.baseUrl}/responses`, {
         method: "POST", redirect: "error", signal: abort.signal,
         headers: { Authorization: `Api-Key ${this.config.apiKey}`, "OpenAI-Project": this.config.folder, "x-folder-id": this.config.folder, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, instructions: request.instructions, input: request.input,
+        body: JSON.stringify({ model, instructions: request.instructions, input: request.inputItems ?? request.input,
           store: false, stream: false, max_output_tokens: request.maxOutputTokens,
           ...(request.responseSchema ? { text: { format: { type: "json_schema", name: "crm_result", schema: request.responseSchema, strict: request.responseSchemaStrict ?? false } } } : {}),
-          ...(request.tools ? { tools: request.tools, max_tool_calls: 1 } : {}),
+          ...(request.functionTools ? { tools: request.functionTools, parallel_tool_calls: false } : request.tools ? { tools: request.tools, max_tool_calls: 1 } : {}),
         }),
       });
       if (!response.ok) throw new AiError(response.status === 429 ? "AI_PROVIDER_RATE_LIMIT" : "AI_PROVIDER_ERROR");
@@ -74,10 +74,14 @@ export class YandexResponsesClient implements ResponsesProvider {
       const contents = data.output.filter((o) => o.type === "message").flatMap((o) => o.content ?? []);
       if (contents.some((c) => c.type === "refusal")) throw new AiError("AI_REFUSED");
       const text = contents.filter((c) => c.type === "output_text").map((c) => c.text ?? "").join("") || data.output_text || "";
-      if (!text) throw new AiError("AI_INVALID_RESPONSE");
+      const functionCalls = data.output.filter(o => o.type === "function_call").map(o => {
+        if (!o.call_id || !o.name || o.arguments === undefined) throw new AiError("AI_INVALID_RESPONSE");
+        return { type: "function_call" as const, call_id: o.call_id, name: o.name, arguments: o.arguments };
+      });
+      if (!text && !functionCalls.length) throw new AiError("AI_INVALID_RESPONSE");
       const urls = [...contents.flatMap((c) => c.annotations?.filter((a) => a.type === "url_citation").map((a) => a.url ?? "") ?? []),
         ...data.output.filter((o) => o.type === "web_search_call").flatMap((o) => o.action?.sources?.map((s) => s.url) ?? [])];
-      return { text, model, mode: "live", usage: data.usage ? { inputTokens: data.usage.input_tokens, outputTokens: data.usage.output_tokens } : undefined,
+      return { text, model, functionCalls, mode: "live", usage: data.usage ? { inputTokens: data.usage.input_tokens, outputTokens: data.usage.output_tokens } : undefined,
         webSearchCalls: data.output.filter((o) => o.type === "web_search_call").length,
         sourceUrls: [...new Set(urls.map(publicSourceUrl).filter((u): u is string => u !== null))],
       };

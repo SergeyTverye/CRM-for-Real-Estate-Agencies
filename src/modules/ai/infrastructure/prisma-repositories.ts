@@ -15,7 +15,7 @@ export async function singleton(tx: DbOrTx) {
   if (rows.length > 1) throw new AiError("AI_SETTINGS_NOT_SINGLETON");
   return rows[0] ?? tx.aiSetting.create({ data: { id: AI_SETTING_ID } });
 }
-function key(requestId: string) {
+export function aiUsageLogId(requestId: string) {
   const h = createHash("sha256").update(`crm-ai:${requestId}`).digest("hex");
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
 }
@@ -44,7 +44,7 @@ export class PrismaAiLedger implements AiLedgerRepository {
   private adapter(tx: Tx): AiLedgerTransaction {
     return {
       find: async (requestId) => {
-        const row = await tx.aiUsageLog.findUnique({ where: { id: key(requestId) } });
+        const row = await tx.aiUsageLog.findUnique({ where: { id: aiUsageLogId(requestId) } });
         const r = row ? decodeReservation(row.result) : null;
         if (row && (!r || r.requestId !== requestId)) throw new AiError("AI_IDEMPOTENCY_CONFLICT");
         return r;
@@ -69,9 +69,9 @@ export class PrismaAiLedger implements AiLedgerRepository {
           if (r.dayKey === q.dayKey) out.dayCalls++;
           if (r.userId === q.userId) {
             if (r.createdAt >= q.hourSince) out.userHourCalls++;
-            if (r.dayKey === q.dayKey) { out.userDayCalls++; if (r.callType === "web_search") jobs.add(r.jobId); }
+            if (r.dayKey === q.dayKey) { out.userDayCalls++; if ((r.callType === "web_search" || r.callType === "chat_web")) jobs.add(r.jobId); }
           }
-          if (r.jobId === q.jobId) { out.jobCalls++; if (r.callType === "web_search") out.jobWebCalls += Math.max(r.estimatedWebCalls, r.webSearchCalls ?? 0); }
+          if (r.jobId === q.jobId) { out.jobCalls++; if ((r.callType === "web_search" || r.callType === "chat_web")) out.jobWebCalls += Math.max(r.estimatedWebCalls, r.webSearchCalls ?? 0); }
         }
         out.userDayWebJobIds = [...jobs]; return out;
       },
@@ -80,25 +80,25 @@ export class PrismaAiLedger implements AiLedgerRepository {
         const usage = await this.adapter(tx).usage({ userId: r.userId, jobId: r.jobId, dayKey: r.dayKey, monthKey: r.monthKey,
           hourSince: new Date(+r.createdAt - 3600000) });
         if (!limits.enabled) throw new AiError("AI_DISABLED");
-        if (r.callType === "web_search" && !limits.webEnabled) throw new AiError("AI_WEB_DISABLED");
+        if ((r.callType === "web_search" || r.callType === "chat_web") && !limits.webEnabled) throw new AiError("AI_WEB_DISABLED");
         if (usage.monthCommittedMicros + r.estimatedMicros > limits.monthlyBudgetMicros) throw new AiError("AI_BUDGET_EXHAUSTED");
         if (usage.userHourCalls >= limits.requestsPerUserHour || usage.userDayCalls >= limits.requestsPerUserDay || usage.jobCalls >= limits.callsPerJob || (usage.dayCalls ?? 0) >= (limits.requestsPerDay ?? Infinity)) throw new AiError("AI_RATE_LIMIT");
-        if (r.callType === "web_search" && (usage.jobWebCalls + r.estimatedWebCalls > limits.webCallsPerJob ||
+        if ((r.callType === "web_search" || r.callType === "chat_web") && (usage.jobWebCalls + r.estimatedWebCalls > limits.webCallsPerJob ||
           (!usage.userDayWebJobIds.includes(r.jobId) && usage.userDayWebJobIds.length >= limits.webJobsPerUserDay))) throw new AiError("AI_WEB_LIMIT");
-        const standalone = r.callType === "call_note" || r.callType === "offer_text";
+        const standalone = r.callType === "call_note" || r.callType === "offer_text" || r.callType === "chat" || r.callType === "chat_web";
         const run = standalone ? null : await tx.searchRun.findFirst({ where: { id: r.jobId, userId: r.userId } });
         const user = await tx.user.findFirst({ where: { id: r.userId, isActive: true } });
         if ((!standalone && !run) || !user) throw new AiError("AI_FORBIDDEN");
-        await tx.aiUsageLog.create({ data: { id: key(r.requestId), userId: r.userId, searchRunId: standalone ? null : r.jobId, callType: r.callType,
+        await tx.aiUsageLog.create({ data: { id: aiUsageLogId(r.requestId), userId: r.userId, searchRunId: standalone ? null : r.jobId, callType: r.callType,
           model: r.model, estimatedCostRub: centsCeil(r.estimatedMicros), status: "running", result: encode(r), createdAt: r.createdAt,
           reservations: { create: { amountRub: centsCeil(r.estimatedMicros), status: "reserved" } } } });
       },
       update: async (r) => {
-        await tx.aiUsageLog.update({ where: { id: key(r.requestId) }, data: { inputTokens: r.usage?.inputTokens ?? 0,
+        await tx.aiUsageLog.update({ where: { id: aiUsageLogId(r.requestId) }, data: { inputTokens: r.usage?.inputTokens ?? 0,
           outputTokens: r.usage?.outputTokens ?? 0, webSearchCalls: r.webSearchCalls ?? 0,
           actualCostRub: r.actualMicros === undefined ? null : centsCeil(r.actualMicros), status: r.outcome ?? "error",
           durationMs: r.durationMs, result: encode(r) } });
-        await tx.aiBudgetReservation.updateMany({ where: { usageLogId: key(r.requestId), status: "reserved" },
+        await tx.aiBudgetReservation.updateMany({ where: { usageLogId: aiUsageLogId(r.requestId), status: "reserved" },
           data: { status: r.chargedMicros === 0n && r.outcome === "error" ? "released" : "settled", amountRub: centsCeil(r.chargedMicros) } });
       },
     };

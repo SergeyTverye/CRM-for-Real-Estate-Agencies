@@ -1,0 +1,43 @@
+{
+  "previous": {
+    "previous": {
+      "startedAt": "2026-11-05T17:51:39.996Z",
+      "mode": "LIVE",
+      "screenshots": [
+        "docs/screenshots/vkr/live-ai/v31-chat-tasks.png"
+      ],
+      "calls": [],
+      "errors": [
+        "AI_RATE_LIMIT"
+      ],
+      "sessionIds": [
+        "c7411b5d-3e99-48fd-9ef8-9873213c20f8"
+      ],
+      "settingsRestored": true,
+      "finishedAt": "2026-11-05T17:52:42.377Z"
+    },
+    "startedAt": "2026-11-05T17:53:45.756Z",
+    "mode": "LIVE",
+    "screenshots": [],
+    "calls": [],
+    "errors": [
+      "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Подтвердить', exact: true }) to be visible\u001b[22m\n"
+    ],
+    "sessionIds": [
+      "692996d3-a429-4b6a-9605-907be84c2f28"
+    ],
+    "settingsRestored": true,
+    "finishedAt": "2026-11-05T17:55:04.593Z"
+  },
+  "startedAt": "2026-11-05T17:55:51.981Z",
+  "mode": "LIVE",
+  "screenshots": [
+    "docs/screenshots/vkr/live-ai/v31-chat-draft.png",
+    "docs/screenshots/vkr/live-ai/v31-chat-tasks.png"
+  ],
+  "calls": [],
+  "errors": [],
+  "confirmed": true,
+  "settingsRestored": true,
+  "finishedAt": "2026-11-05T17:56:53.368Z"
+}

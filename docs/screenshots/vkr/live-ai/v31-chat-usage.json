@@ -1,0 +1,68 @@
+[
+  {
+    "id": "13134c1c-4266-409d-a794-6050d388e1b8",
+    "created_at": "2026-11-05T17:52:28.880Z",
+    "input_tokens": 705,
+    "output_tokens": 13,
+    "status": "success",
+    "model": "aliceai-llm-flash/latest",
+    "charged_micros": "73100",
+    "actual_micros": "73100",
+    "session_id": "c7411b5d-3e99-48fd-9ef8-9873213c20f8"
+  },
+  {
+    "id": "21420c64-49ba-4255-a47e-97f72144262e",
+    "created_at": "2026-11-05T17:52:30.540Z",
+    "input_tokens": 743,
+    "output_tokens": 8,
+    "status": "success",
+    "model": "aliceai-llm-flash/latest",
+    "charged_micros": "75900",
+    "actual_micros": "75900",
+    "session_id": "c7411b5d-3e99-48fd-9ef8-9873213c20f8"
+  },
+  {
+    "id": "24848027-289c-422f-aa12-f2b10c5d0ee2",
+    "created_at": "2026-11-05T17:52:32.404Z",
+    "input_tokens": 724,
+    "output_tokens": 16,
+    "status": "success",
+    "model": "aliceai-llm-flash/latest",
+    "charged_micros": "75600",
+    "actual_micros": "75600",
+    "session_id": "6c13c0e5-44b6-4711-b9db-e1902c4526d5"
+  },
+  {
+    "id": "325f0c59-c7b5-4e1a-ad66-c6293dfffe66",
+    "created_at": "2026-11-05T17:54:51.022Z",
+    "input_tokens": 761,
+    "output_tokens": 73,
+    "status": "success",
+    "model": "aliceai-llm-flash/latest",
+    "charged_micros": "90700",
+    "actual_micros": "90700",
+    "session_id": "692996d3-a429-4b6a-9605-907be84c2f28"
+  },
+  {
+    "id": "8ba7933d-947a-4a8d-ac30-12467850817c",
+    "created_at": "2026-11-05T17:54:53.562Z",
+    "input_tokens": 859,
+    "output_tokens": 9,
+    "status": "success",
+    "model": "aliceai-llm-flash/latest",
+    "charged_micros": "87700",
+    "actual_micros": "87700",
+    "session_id": "692996d3-a429-4b6a-9605-907be84c2f28"
+  },
+  {
+    "id": "0b22d8ae-ff10-490b-a181-0e3a31cc1a5f",
+    "created_at": "2026-11-05T17:56:27.124Z",
+    "input_tokens": 836,
+    "output_tokens": 78,
+    "status": "success",
+    "model": "aliceai-llm-flash/latest",
+    "charged_micros": "99200",
+    "actual_micros": "99200",
+    "session_id": "5eca62f2-b7a1-4bd4-ab79-cd05a0fe4db4"
+  }
+]

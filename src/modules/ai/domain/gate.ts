@@ -71,11 +71,11 @@ export class AiGate {
     const limits = effectiveLimits(this.env, await this.settings.getLimits());
     if (!limits.enabled) throw new AiError("AI_DISABLED");
     if (!user.active || job.ownerUserId !== user.userId) throw new AiError("AI_FORBIDDEN");
-    if (callType === "web_search" && (!limits.webEnabled || (job.automaticWeb && (!limits.autoFallback || !job.fullTechnicalFailure)))) throw new AiError("AI_WEB_DISABLED");
+    if ((callType === "web_search" || callType === "chat_web") && (!limits.webEnabled || (job.automaticWeb && (!limits.autoFallback || !job.fullTechnicalFailure)))) throw new AiError("AI_WEB_DISABLED");
     const now = this.clock();
     if (job.tariff.model !== job.model || !Number.isFinite(job.tariff.effectiveFrom.getTime()) || job.tariff.effectiveFrom > now ||
       (job.tariff.effectiveUntil && (!Number.isFinite(job.tariff.effectiveUntil.getTime()) || job.tariff.effectiveUntil <= now))) throw new AiError("AI_TARIFF_UNAVAILABLE");
-    if (callType === "web_search" ? job.estimatedWebCalls < 1 : job.estimatedWebCalls !== 0) throw new AiError("AI_INVALID_USAGE");
+    if ((callType === "web_search" || callType === "chat_web") ? job.estimatedWebCalls < 1 : job.estimatedWebCalls !== 0) throw new AiError("AI_INVALID_USAGE");
     const estimatedMicros = calculateCost(job.tariff, job.estimatedUsage, job.estimatedWebCalls);
     return this.ledger.atomic(async (tx) => {
       const existing = await tx.find(job.requestId);
@@ -88,7 +88,7 @@ export class AiGate {
       const usage = await tx.usage({ userId: user.userId, jobId: job.id, hourSince: new Date(now.getTime() - 3600000), ...keys });
       if (usage.userHourCalls >= limits.requestsPerUserHour || usage.userDayCalls >= limits.requestsPerUserDay || usage.jobCalls >= limits.callsPerJob) throw new AiError("AI_RATE_LIMIT");
       if ((usage.dayCalls ?? 0) >= (limits.requestsPerDay ?? Number.MAX_SAFE_INTEGER)) throw new AiError("AI_RATE_LIMIT");
-      if (callType === "web_search" && (usage.jobWebCalls + job.estimatedWebCalls > limits.webCallsPerJob || (!usage.userDayWebJobIds.includes(job.id) && usage.userDayWebJobIds.length >= limits.webJobsPerUserDay))) throw new AiError("AI_WEB_LIMIT");
+      if ((callType === "web_search" || callType === "chat_web") && (usage.jobWebCalls + job.estimatedWebCalls > limits.webCallsPerJob || (!usage.userDayWebJobIds.includes(job.id) && usage.userDayWebJobIds.length >= limits.webJobsPerUserDay))) throw new AiError("AI_WEB_LIMIT");
       if (usage.monthCommittedMicros + estimatedMicros > limits.monthlyBudgetMicros) throw new AiError("AI_BUDGET_EXHAUSTED");
       const reservation: AiReservation = {
         requestId: job.requestId, fingerprint: job.fingerprint, userId: user.userId, jobId: job.id, callType,
@@ -117,7 +117,7 @@ export class AiGate {
       const record = await tx.find(requestId);
       if (!record) throw new AiError("AI_RESERVATION_NOT_FOUND");
       if (record.state === "settled") return;
-      const estimated = !result.usage || (record.callType === "web_search" && result.webSearchCalls === undefined);
+      const estimated = !result.usage || ((record.callType === "web_search" || record.callType === "chat_web") && result.webSearchCalls === undefined);
       const webSearchCalls = result.webSearchCalls ?? record.estimatedWebCalls;
       const knownCost = calculateCost(record.tariff, result.usage ?? record.estimatedUsage, webSearchCalls);
       // Unknown usage or timeout retains at least the full reserve, including search context.

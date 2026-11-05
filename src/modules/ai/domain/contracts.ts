@@ -24,16 +24,19 @@ export const webResultSchema = z.object({
   candidates: z.array(z.object({ title: z.string().min(1).max(500), url: z.string().max(2048).nullable() }).strict()).max(50),
 }).strict();
 
-export type CallType = "parse" | "description" | "web_search" | "call_note" | "offer_text";
+export type CallType = "parse" | "description" | "web_search" | "call_note" | "offer_text" | "chat" | "chat_web";
 export interface TokenUsage { inputTokens: number; outputTokens: number }
 export interface WebSearchTool {
   type: "web_search";
   search_context_size: "low" | "medium" | "high";
   filters: { allowed_domains?: string[]; user_location?: { region: string } };
 }
-export interface AiRequest { model: string; instructions: string; input: string; maxOutputTokens: number; tools?: WebSearchTool[]; responseSchema?: Record<string, unknown>; responseSchemaStrict?: boolean }
+export interface FunctionTool { type: "function"; name: string; description: string; parameters: Record<string, unknown>; strict?: boolean }
+export interface FunctionCall { type: "function_call"; call_id: string; name: string; arguments: string }
+export type ResponseInput = { role: "user" | "assistant"; content: string } | FunctionCall | { type: "function_call_output"; call_id: string; output: string };
+export interface AiRequest { model: string; instructions: string; input: string; inputItems?: ResponseInput[]; maxOutputTokens: number; tools?: WebSearchTool[]; functionTools?: FunctionTool[]; responseSchema?: Record<string, unknown>; responseSchemaStrict?: boolean }
 export interface AiResponse {
-  text: string; model: string; usage?: TokenUsage; webSearchCalls: number; sourceUrls: string[];
+  text: string; model: string; functionCalls?: FunctionCall[]; usage?: TokenUsage; webSearchCalls: number; sourceUrls: string[];
   mode: "live" | "test";
 }
 export interface ResponsesProvider { readonly mode: "live" | "test"; respond(request: AiRequest): Promise<AiResponse> }

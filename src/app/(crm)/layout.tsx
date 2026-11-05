@@ -6,6 +6,7 @@ import { getConfig } from "@/shared/config/env";
 import { CrmShell } from "@/ui/shell/sidebar";
 import { NotificationBell } from "@/ui/shell/notification-bell";
 import { CreateMenu, UserMenu } from "@/ui/shell/top-menus";
+import { AiChatPanel } from "@/ui/ai-chat/panel";
 import { GlobalSearch } from "@/ui/shell/global-search";
 import { getShellIndicators } from "@/server/shell-indicators";
 
@@ -28,6 +29,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
             >
               Просрочено: {indicators.overdue}
             </Link>
+            <AiChatPanel />
             <NotificationBell />
             <CreateMenu />
             <UserMenu displayName={actor.displayName} roleLabel={labelOf("userRole", actor.role)} />
