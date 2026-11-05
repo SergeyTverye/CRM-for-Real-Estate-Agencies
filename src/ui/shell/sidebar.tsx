@@ -75,7 +75,7 @@ export function CrmShell({ children, header, isManager, readOnly }: { children: 
         </button>
       </aside>
       <div className="crm-workspace">
-        <header className="crm-header">
+        <header className="crm-header [&>.shell-actions]:max-w-full max-md:[&>.shell-actions]:flex-wrap">
           <button type="button" className="btn icon-button mobile-menu-toggle" aria-label="Открыть навигацию" aria-haspopup="dialog" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><Menu size={20} aria-hidden="true" /></button>
           {header}
         </header>
