@@ -19,6 +19,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
     <CrmShell isManager={actor.role === "manager"} readOnly={cfg.isReadOnlyInstance} header={
       <>
           <GlobalSearch />
+          {cfg.SCRAPER_DEMO_FIXTURES && <span className="badge badge-yellow" title="Синтетические данные и записанные ответы площадок; живой сбор не выполняется">DEMO</span>}
           <div className="shell-actions ml-auto flex items-center gap-2">
             <Link
               href="/tasks?view=overdue"

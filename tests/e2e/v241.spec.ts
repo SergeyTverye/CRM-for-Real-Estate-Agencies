@@ -21,9 +21,10 @@ async function searchManually(page: Page, scenario = "success") {
 }
 
 test("v2.4.1: обращение → поиск → подборка → КП → показ → сделка → повторный контакт", async ({ page }) => {
+  test.setTimeout(300_000);
   await login(page, "realtor1");
   // Диалоги — настоящие подтверждения пользователя, сетевые ответы не подменяются.
-  page.on("dialog", d => d.accept(d.type() === "prompt" ? "Синтетический кандидат E2E" : undefined));
+  page.on("dialog", d => { if (d.type() === "beforeunload") void d.accept(); else throw new Error("Unexpected native dialog"); });
   const name = `ВКР E2E ${Date.now()}`;
   await page.goto("/requests/new");
   await page.getByLabel("Источник", { exact: false }).selectOption({ index: 1 });
@@ -45,33 +46,50 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   expect(lead.needId).toBeTruthy();
   await expect(page.getByText("Обращение зарегистрировано.", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Открыть потребность", exact: true }).click();
-  await expect(page.getByText("Согласовать подбор объектов E2E", { exact: true }).first()).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/needs/${lead.needId}$`), { timeout: 30000 });
+  await expect(page.getByText("Согласовать подбор объектов E2E", { exact: true }).first()).toBeVisible({ timeout: 30000 });
   await page.locator(`a[href="/property-search?needId=${lead.needId}"]`).click();
   await expect(page).toHaveURL(new RegExp(`/property-search\\?needId=${lead.needId}`));
   await expect(page.getByText("ИИ отключён · ручные фильтры доступны")).toBeVisible();
   await searchManually(page);
   await page.getByRole("button", { name: "В подборку клиента", exact: true }).first().click();
+  await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
   await expect(page.getByText("Изменения сохранены", { exact: true })).toBeVisible();
+  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
   await page.getByRole("button", { name: "В каталог CRM", exact: true }).first().click();
+  await page.getByRole("dialog").getByLabel(/Я проверил первоисточник/).check();
+  await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
   await expect(page.getByText("Объект сохранён в каталоге CRM", { exact: true })).toBeVisible();
+  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
   const propertyHref = await page.getByRole("link", { name: "Открыть объект CRM", exact: true }).first().getAttribute("href");
   const propertyId = propertyHref!.split("/").pop()!;
   await page.getByRole("button", { name: "Предложить клиенту", exact: true }).first().click();
+  await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
   await expect(page.getByText("Изменения сохранены", { exact: true })).toBeVisible();
+  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
   const offered = page.waitForResponse(r => /\/listings\/[^/]+\/offer$/.test(r.url()));
   await page.getByRole("button", { name: "В КП", exact: true }).first().click();
+  await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
   const offerResponse = await offered;
   expect(offerResponse.ok(), await offerResponse.text()).toBeTruthy();
   const offer = await offerResponse.json();
   await page.goto(`/offers/${offer.id}`);
   await page.getByRole("link", { name: "Предпросмотр / печать" }).click();
-  await expect(page.locator("body")).toContainText("Демонстрационная");
+  const printed = page.frameLocator('iframe[title="Печатное коммерческое предложение A4"]').locator("body");
+  await expect(printed).toContainText("Демонстрационная");
   await page.emulateMedia({ media: "print" });
-  await expect(page.locator("body")).toContainText("15");
+  await expect(printed).toContainText("15");
   await page.emulateMedia({ media: "screen" });
   await page.goto(`/showings/new?needId=${lead.needId}&propertyId=${propertyId}`);
+  await page.waitForFunction(() => Object.keys(document.querySelector("form") ?? {}).some(key => key.startsWith("__reactProps")));
+  const showingCreated = page.waitForResponse(r => r.url().endsWith("/api/v1/showings") && r.request().method() === "POST");
   await page.getByRole("button", { name: "Назначить показ", exact: true }).click();
-  await expect(page).toHaveURL(/\/showings\/[0-9a-f-]+$/);
+  const showingResponse = await showingCreated;
+  expect(showingResponse.ok(), await showingResponse.text()).toBeTruthy();
+  await expect(page).toHaveURL(/\/showings\/[0-9a-f-]+$/, { timeout: 60000 });
   await page.getByRole("button", { name: "Зафиксировать результат", exact: true }).click();
   await page.getByRole("dialog").getByLabel("Результат", { exact: false }).selectOption("interested");
   await page.getByRole("button", { name: "Сохранить результат", exact: true }).click();
@@ -152,8 +170,8 @@ test("v2.4.1: частичный отказ площадки сохраняет 
   await page.goto("/property-search");
   await expect(page.getByText("Режим тестирования: записанные ответы площадок")).toBeVisible();
   await searchManually(page, "partial");
-  await expect(page.getByText(/Мир Квартир · Заблокирован/)).toBeVisible();
-  await expect(page.getByText(/Циан · Успешно/)).toBeVisible();
+  await expect(page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..").locator("..")).toContainText("Заблокирован");
+  await expect(page.locator("strong").filter({ hasText: /^Циан$/ }).locator("..").locator("..")).toContainText("Успешно");
   await expect(page.getByText("Записанный ответ: HTTP 429").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "В закладки", exact: true }).first()).toBeVisible();
 });

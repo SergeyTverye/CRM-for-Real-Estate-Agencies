@@ -6,12 +6,20 @@ import { CODEBOOK_COLUMNS, checkConstraintSql } from "@/shared/codebook";
 const migrationsDir = path.resolve(__dirname, "../../prisma/migrations");
 const allSql = readdirSync(migrationsDir)
   .filter((d) => !d.endsWith(".toml"))
+  .sort()
   .map((d) => readFileSync(path.join(migrationsDir, d, "migration.sql"), "utf8"))
   .join("\n");
 
 describe("системный codebook и миграции", () => {
   it.each(CODEBOOK_COLUMNS.map((c) => [`${c.table}.${c.column}`, c] as const))("CHECK для %s совпадает с codebook", (_name, entry) => {
-    expect(allSql).toContain(checkConstraintSql(entry));
+    // CHECK IN is a set; use the last definition after incremental codebook migrations.
+    const name = `"${entry.table}_${entry.column}_check"`;
+    const definitions = allSql.split(";").filter(sql => sql.includes(`ADD CONSTRAINT ${name}`));
+    const actual = definitions.at(-1) ?? "";
+    expect(actual).toContain(`"${entry.column}" IN`);
+    const values = (sql: string) => [...sql.matchAll(/'([^']+)'/g)].map(match => match[1]).sort();
+    expect(values(actual)).toEqual(values(checkConstraintSql(entry)));
+    expect(actual.includes(`"${entry.column}" IS NULL`)).toBe(!!entry.nullable);
   });
 
   it("нет ON DELETE CASCADE (значимая история не удаляется каскадно)", () => {

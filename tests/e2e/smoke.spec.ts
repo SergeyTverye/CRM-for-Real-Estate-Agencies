@@ -39,7 +39,7 @@ test.describe("Сквозной сценарий: обращение → кли�
     await page.getByLabel("Имя / наименование").fill(name);
     await page.getByPlaceholder("+7 900 000-00-00").fill(`+7 900 77${String(Date.now()).slice(-5)}`);
     await page.getByRole("button", { name: "Создать клиента" }).click();
-    await expect(page.getByRole("heading", { name })).toBeVisible();
+    await expect(page.getByRole("heading", { name })).toBeVisible({ timeout: 30000 });
     await page.getByRole("link", { name: "+ Потребность" }).first().click();
     await expect(page).toHaveURL(/\/needs\/new/);
   });

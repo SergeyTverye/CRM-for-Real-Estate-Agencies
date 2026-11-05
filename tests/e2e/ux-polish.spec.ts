@@ -49,7 +49,7 @@ test("календарь: рабочие часы и полные названи
 
 test("поиск: разрешённое фото из CRM в карточке результата", async ({ page }) => {
   await login(page, "realtor1");
-  page.on("dialog", d => d.accept(d.type() === "prompt" ? "Новосибирск, улица Демонстрационная, 10" : undefined));
+  page.on("dialog", () => { throw new Error("Search must use an accessible dialog, never window.prompt"); });
   async function search() {
     await page.goto("/property-search");
     await page.getByLabel("Циан", { exact: true }).check();
@@ -59,7 +59,14 @@ test("поиск: разрешённое фото из CRM в карточке �
     await expect(page.getByText("Поиск завершён", { exact: true })).toBeVisible();
   }
   await search();
+  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
   await page.getByRole("button", { name: "В каталог CRM", exact: true }).first().click();
+  const transfer = page.getByRole("dialog", { name: "Перенос в каталог CRM" });
+  await expect(transfer.getByLabel("Проверенный адрес")).toBeVisible();
+  await transfer.getByLabel(/Я проверил первоисточник/).check();
+  await transfer.getByRole("button", { name: "Подтвердить", exact: true }).click();
+  await expect(transfer).not.toBeVisible({ timeout: 60000 });
+  await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();
   const property = page.getByRole("link", { name: "Открыть объект CRM", exact: true }).first();
   await expect(property).toBeVisible();
   await page.goto(`${await property.getAttribute("href")}?tab=photos`);

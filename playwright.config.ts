@@ -5,6 +5,7 @@ import { defineConfig, devices } from "@playwright/test";
  * (global-setup: копия применённой схемы crm_demo → seed с демо-данными; без migrate/generate).
  */
 const PORT = Number(process.env.E2E_PORT ?? 3200);
+const HOST = process.env.E2E_DEV === "true" ? "localhost" : "127.0.0.1";
 const E2E_DB = process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";
 
 export const E2E_PASSWORDS = {
@@ -14,7 +15,7 @@ export const E2E_PASSWORDS = {
 };
 
 const serverEnv = {
-  NODE_ENV: "production",
+  NODE_ENV: process.env.E2E_DEV === "true" ? "development" : "production",
   DATABASE_URL: E2E_DB,
   APP_TIMEZONE: "Asia/Novosibirsk",
   DEPLOYMENT_ID: "6f1c2a3b-4d5e-4f60-8a7b-9c0d1e2f3a4b",
@@ -38,9 +39,12 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   timeout: 120_000,
+  expect: { timeout: 15000 },
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {
-    baseURL: `http://127.0.0.1:${PORT}`,
+    actionTimeout: 20000,
+    navigationTimeout: 60000,
+    baseURL: `http://${HOST}:${PORT}`,
     locale: "ru-RU",
     timezoneId: "Asia/Novosibirsk",
     trace: "retain-on-failure",
@@ -49,7 +53,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } }],
   webServer: {
-    command: `npx next start -p ${PORT}`,
+    command: process.env.E2E_DEV === "true" ? `npx next dev --webpack -p ${PORT}` : `npx next start -p ${PORT}`,
     url: `http://127.0.0.1:${PORT}/api/health/live`,
     timeout: 120_000,
     reuseExistingServer: false,

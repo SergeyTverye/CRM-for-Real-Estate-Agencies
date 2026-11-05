@@ -51,8 +51,8 @@ export function TaskRows({ tasks, showLinks = true, compact = false, withOpen = 
         const open = isOpen(t.status);
         const rule = describeRecurrence(t);
         return (
-          <li key={t.id} className={`flex flex-wrap items-start justify-between gap-2 px-4 ${compact ? "py-2" : "py-2.5"}`}>
-            <div className="min-w-0 flex-1">
+          <li key={t.id} className={`flex flex-col items-start justify-between gap-2 px-4 sm:flex-row sm:flex-wrap ${compact ? "py-2" : "py-2.5"}`}>
+            <div className="w-full min-w-0 sm:w-auto sm:flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Link href={`/tasks/${t.id}`} className="font-medium text-slate-900 hover:underline">
                   {t.title}

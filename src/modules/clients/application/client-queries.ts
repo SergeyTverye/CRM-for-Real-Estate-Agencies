@@ -104,11 +104,13 @@ export async function listClients(actor: Actor, raw: unknown): Promise<Page<Clie
 
 /** Клиенты для выбора в формах (только доступные; короткий список). */
 export async function pickClients(actor: Actor, q: string | undefined, take = 20) {
+  const query = parseInput(z.string().trim().max(120).default(""), q);
+  const limit = parseInput(z.number().int().min(1).max(20), take);
   return db.client.findMany({
-    where: { AND: [clientScope(actor), { status: { not: "archived" } }, q ? clientSearchWhere(q) : {}] },
+    where: { AND: [clientScope(actor), { status: { not: "archived" } }, query ? clientSearchWhere(query) : {}] },
     select: { id: true, displayName: true, contacts: { take: 1, orderBy: { isPrimary: "desc" }, select: { rawValue: true } } },
     orderBy: { updatedAt: "desc" },
-    take,
+    take: limit,
   });
 }
 
