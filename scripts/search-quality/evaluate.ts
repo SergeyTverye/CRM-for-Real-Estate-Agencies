@@ -5,25 +5,15 @@ import { pathToFileURL } from "node:url";
 import { evaluateListing, evaluateFeature } from "../../src/modules/property-search/domain/evaluation";
 import { residentialPurposeContradiction } from "../../src/modules/property-search/domain/purpose";
 import { parseFloor } from "../../src/modules/property-search/domain/floor";
-import { deduplicateListings, listingIdentity, parsePriceUnit } from "../../src/modules/property-search/infrastructure/normalization";
+import { parsePriceUnit } from "../../src/modules/property-search/infrastructure/normalization";
+import { duplicateQualityGrouping } from "../../src/modules/listing-duplicates/domain/quality-adapter";
 import type { NormalizedListing } from "../../src/modules/property-search/domain/types";
 import { loadDataset, fingerprint, baselinePath, reportPath, type Verdict } from "./dataset";
 
 export interface DuplicatePrediction { a: string; b: string; relation: "suspected" | "exact" }
 /** Plug a future domain grouping function into this seam; the gold groups stay unchanged. */
 export type GroupingAdapter = (input: { id: string; listing: NormalizedListing }[]) => { pairs: DuplicatePrediction[]; retained: number };
-export const currentGrouping: GroupingAdapter = input => {
-  const retained = deduplicateListings(input.map(x => x.listing));
-  const pairs: DuplicatePrediction[] = [];
-  for (let i = 0; i < input.length; i++) for (let j = i + 1; j < input.length; j++) {
-    const a = input[i]!, b = input[j]!;
-    const keyA = listingIdentity(a.listing), keyB = listingIdentity(b.listing);
-    const result = retained.find(r => r.url === a.listing.url);
-    if (keyA && keyA === keyB) pairs.push({ a: a.id, b: b.id, relation: "exact" });
-    else if (result?.possibleDuplicateKeys.includes(keyB ?? b.listing.url)) pairs.push({ a: a.id, b: b.id, relation: "suspected" });
-  }
-  return { pairs, retained: retained.length };
-};
+export const currentGrouping: GroupingAdapter = duplicateQualityGrouping;
 const rate = (a: number, b: number) => b ? Number((a / b).toFixed(6)) : null;
 const emptyMetrics = () => ({ cases: 0, expectedRejected: 0, expectedIncluded: 0, falseInclusions: 0, falseConfirmed: 0, falseNeedsReview: 0, falseExclusions: 0, exactVerdictErrors: 0 });
 export function evaluateQuality(grouping: GroupingAdapter = currentGrouping, evaluator = evaluateListing) {
@@ -81,7 +71,9 @@ export function evaluateQuality(grouping: GroupingAdapter = currentGrouping, eva
   return {
     mode: "REPLAY", sourceMode: "LIVE", collectedOn: data.collectedOn, networkCalls: 0, aiCalls: 0,
     fixtureFingerprint: fingerprint(),
-    codeFingerprint: createHash("sha256").update(["domain/evaluation.ts", "domain/purpose.ts", "domain/types.ts", "domain/floor.ts", "infrastructure/normalization.ts"].map(p => readFileSync(resolve("src/modules/property-search", p))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0))).digest("hex"),
+    codeFingerprint: createHash("sha256").update(["domain/evaluation.ts", "domain/purpose.ts", "domain/types.ts", "domain/floor.ts", "infrastructure/normalization.ts"].map(p => readFileSync(resolve("src/modules/property-search", p))).reduce((a, b) => Buffer.concat([a, b]), Buffer.alloc(0)))
+      .update(readFileSync(resolve("src/modules/listing-duplicates/domain/matching.ts")))
+      .update(readFileSync(resolve("src/modules/listing-duplicates/domain/quality-adapter.ts"))).digest("hex"),
     composition: { total: data.listings.length, bySource: composition("source"), byTrueType: composition("trueType"), byRecordKind: composition("recordKind"), populationUniqueUrls: data.populationUniqueUrls },
     totals: { ...totals, falseInclusionRate: rate(totals.falseInclusions, totals.expectedRejected), falseExclusionRate: rate(totals.falseExclusions, totals.expectedIncluded) },
     perQuery, perSource,
