@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { login } from "./helpers";
 
 async function searchManually(page: Page, scenario = "success") {
-  await page.getByLabel("Город", { exact: true }).fill("Москва");
+  await page.getByLabel("Город", { exact: true }).fill("Новосибирск");
   await page.getByLabel(/^Операция/).selectOption("sale");
   await page.getByLabel(/^Этаж/).selectOption("first_floor_only");
   await page.getByLabel("Цена до", { exact: true }).fill("20000000");
@@ -65,7 +65,7 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   const offer = await offerResponse.json();
   await page.goto(`/offers/${offer.id}`);
   await page.getByRole("link", { name: "Предпросмотр / печать" }).click();
-  await expect(page.locator("body")).toContainText("Примерная");
+  await expect(page.locator("body")).toContainText("Демонстрационная");
   await page.emulateMedia({ media: "print" });
   await expect(page.locator("body")).toContainText("15");
   await page.emulateMedia({ media: "screen" });
@@ -102,7 +102,11 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   await page.goto("/today");
   await expect(page.getByText(repeatTitle, { exact: true }).first()).toBeVisible();
   await page.goto("/calendar");
-  await expect(page.locator(".fc-event-title").filter({ hasText: repeatTitle }).first()).toBeVisible();
+  await expect(page.locator(".fc-event").first()).toBeVisible();
+  const repeatEvent = page.locator(".fc-event-title").filter({ hasText: repeatTitle }).first();
+  // Dense slots intentionally collapse; open the real event stack before asserting its content.
+  if (!await repeatEvent.isVisible()) await page.locator(".fc-timegrid-more-link").first().click();
+  await expect(repeatEvent).toBeVisible();
   // Один реальный такт фонового исполнителя, без вставки искусственного Notification.
   execFileSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "tests/e2e/notification-tick.ts"], {
     env: { ...process.env, DATABASE_URL: process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e", APP_TIMEZONE: "Asia/Novosibirsk" }, stdio: "pipe",

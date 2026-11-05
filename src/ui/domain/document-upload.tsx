@@ -1,5 +1,6 @@
 "use client";
 
+import { FilePicker } from "../file-picker";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "../api-client";
@@ -48,9 +49,11 @@ export function DocumentUploadButton({ linkKind, linkId, types, accept, maxMb }:
           <Field label="Тип документа">
             <SelectInput value={type} onChange={setType} options={types} />
           </Field>
-          <Field label="Файл" error={fieldError("file")} hint={`Не более ${maxMb} МБ`}>
-            <input ref={fileRef} type="file" accept={accept} className="block w-full text-sm" />
-          </Field>
+          <div>
+            <p className="label">Файл · не более {maxMb} МБ</p>
+            <FilePicker label="Выбрать документы" inputRef={fileRef} accept={accept} disabled={pending} />
+            {fieldError("file") ? <p className="field-error" role="alert">{fieldError("file")}</p> : null}
+          </div>
           <div className="flex justify-end gap-2">
             <button type="button" className="btn" onClick={() => setOpen(false)}>Отмена</button>
             <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Загрузка…" : "Загрузить"}</button>

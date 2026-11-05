@@ -60,7 +60,7 @@ async function main() {
       if (["active", "paused"].includes(need.status) && !await tx.taskNeed.count({ where: { clientNeedId: need.id, task: { status: { in: ["planned", "in_progress"] }, ...(need.status === "paused" ? { taskType: "pause_return" } : {}) } } })) {
         await tx.task.create({ data: { id: demoId(`next:${i}`), responsibleUserId: owner.userId, createdBy: owner.userId,
           taskType: need.status === "paused" ? "pause_return" : "call_or_contact", title: need.status === "paused" ? "Вернуться к потребности после паузы" : "Связаться по подбору объекта",
-          dueAt: day(origin, need.status === "paused" ? 4 : i % 3 === 0 ? -2 : 0), status: "planned", priority: i % 5 === 0 ? "high" : "normal",
+          dueAt: day(origin, need.status === "paused" ? 4 : i % 3 === 0 ? -2 : 0, 9 + i % 10), status: "planned", priority: i % 5 === 0 ? "high" : "normal",
           needLinks: { create: { clientNeedId: need.id } }, clientLinks: { create: { clientId: client.id } },
         } });
       }
@@ -71,10 +71,13 @@ async function main() {
   }
   for (let i = 0; i < 35; i++) {
     const summary = `Демо обращение ${i + 1}; ответственный агент: ${i % 2 + 1}.`;
-    if (await db.leadRequest.count({ where: { summary, clientId: ctx.clients[i % 25]!.id } })) continue;
+    if (await db.leadRequest.count({ where: { summary, clientId: ctx.clients[i % 25]!.id } })) {
+      await db.leadRequest.updateMany({ where: { summary, clientId: ctx.clients[i % 25]!.id }, data: { occurredAt: day(origin, -i, 9 + i % 10) } });
+      continue;
+    }
     const client = ctx.clients[i % 25]!;
     await db.leadRequest.create({ data: { id: demoId(`request:${i}`), clientId: client.id, responsibleUserId: client.responsibleUserId, createdBy: client.responsibleUserId,
-      occurredAt: day(origin, -i), channelCode: ["phone", "website", "messenger"][i % 3]!, sourceCode: ["cian", "avito", "referral", "website"][i % 4]!,
+      occurredAt: day(origin, -i, 9 + i % 10), channelCode: ["phone", "website", "messenger"][i % 3]!, sourceCode: ["cian", "avito", "referral", "website"][i % 4]!,
       resultCode: ["new_need", "linked_existing_need", "one_off_service", "no_followup"][i % 4]!, statusCode: i % 6 === 0 ? "open" : "processed", summary,
     } });
   }
@@ -87,14 +90,40 @@ async function main() {
     const propertyId = ctx.properties[i]!.id, clientNeedId = ctx.needs[i]!.id;
     if (!await db.showing.count({ where: { propertyId, clientNeedId } })) await db.showing.create({ data: {
       id: demoId(`showing:${i}`), propertyId, clientNeedId, responsibleUserId: ctx.agents[i % 2]!.userId, createdBy: ctx.agents[i % 2]!.userId,
-      scheduledAt: day(origin, i % 2 ? 3 : -3), occurredAt: i % 2 ? null : day(origin, -3), status: i % 2 ? "planned" : "completed", resultCode: i % 2 ? null : "thinking",
+      scheduledAt: day(origin, i % 2 ? 3 : -3, 10 + i), occurredAt: i % 2 ? null : day(origin, -3, 10 + i), status: i % 2 ? "planned" : "completed", resultCode: i % 2 ? null : "thinking",
     } });
   }
   for (let i = 0; i < 3; i++) {
     const title = i === 2 ? "Личное событие (демо)" : "Встреча по коммерческой недвижимости", ownerUserId = ctx.agents[i % 2]!.userId;
     if (!await db.calendarEvent.count({ where: { title, ownerUserId } })) await db.calendarEvent.create({ data: {
-      id: demoId(`event:${i}`), ownerUserId, title, description: "Синтетическое событие для демонстрации календаря", startAt: day(origin, i - 1), endAt: new Date(+day(origin, i - 1) + 3600000), visibility: i === 2 ? "private" : "public", clientId: i === 2 ? null : ctx.clients[i]!.id,
+      id: demoId(`event:${i}`), ownerUserId, title, description: "Синтетическое событие для демонстрации календаря", startAt: day(origin, i - 1, 11 + i * 2), endAt: new Date(+day(origin, i - 1, 11 + i * 2) + 3600000), visibility: i === 2 ? "private" : "public", clientId: i === 2 ? null : ctx.clients[i]!.id,
     } });
+  }
+  // Prospective requests with a genuine future next action, plus measured completion examples.
+  for (const i of [0, 4, 8]) {
+    const client = ctx.clients[i]!, need = ctx.needs[i]!;
+    await db.task.updateMany({ where: { needLinks: { some: { clientNeedId: ctx.needs[i]!.id } }, status: { in: ["planned", "in_progress"] }, taskType: { in: ["call_or_contact", "pause_return"] } }, data: { dueAt: day(origin, 1, 10 + i % 8) } });
+    const data = { clientId: client.id, clientNeedId: need.id, responsibleUserId: client.responsibleUserId, createdBy: client.responsibleUserId,
+      occurredAt: day(origin, -1, 10 + i % 8), channelCode: "phone", sourceCode: "cian", resultCode: "linked_existing_need", statusCode: "open", summary: `${marker} Уточнить подходящие помещения, следующий звонок назначен` };
+    await db.leadRequest.upsert({ where: { id: demoId(`with-action:${i}`) }, update: data, create: { id: demoId(`with-action:${i}`), ...data } });
+  }
+  for (let i = 0; i < 6; i++) {
+    const client = ctx.clients[i]!, dueAt = day(origin, -2, 10 + i);
+    const data = { responsibleUserId: client.responsibleUserId, createdBy: client.responsibleUserId, taskType: "call_or_contact",
+      priority: "normal", title: i % 2 ? "Уточнить решение по предложению" : "Обсудить условия подбора", status: "completed", dueAt,
+      completedAt: new Date(+dueAt + (i % 2 ? 90 : -15) * 60000), description: `${marker} Контроль фактического срока контакта` };
+    await db.task.upsert({ where: { id: demoId(`completed-contact:${i}`) }, update: data, create: { id: demoId(`completed-contact:${i}`), ...data, clientLinks: { create: { clientId: client.id } } } });
+  }
+  // Repair timestamps of the original demo set without creating duplicate business records.
+  for (let i = 0; i < ctx.needs.length; i++) {
+    if ([0, 4, 8].includes(i)) continue;
+    await db.task.updateMany({ where: { needLinks: { some: { clientNeedId: ctx.needs[i]!.id } }, status: { in: ["planned", "in_progress"] }, taskType: { in: ["call_or_contact", "pause_return"] } }, data: { dueAt: day(origin, ctx.needs[i]!.status === "paused" ? 4 : i % 3 === 0 ? -2 : 0, 9 + i % 10) } });
+  }
+  for (let i = 0; i < 8; i++) await db.showing.updateMany({ where: { propertyId: ctx.properties[i]!.id, clientNeedId: ctx.needs[i]!.id }, data: { scheduledAt: day(origin, i % 2 ? 3 : -3, 10 + i), occurredAt: i % 2 ? null : day(origin, -3, 10 + i) } });
+  for (let i = 0; i < 3; i++) await db.calendarEvent.updateMany({ where: { ownerUserId: ctx.agents[i % 2]!.userId, title: i === 2 ? "Личное событие (демо)" : "Встреча по коммерческой недвижимости" }, data: { startAt: day(origin, i - 1, 11 + i * 2), endAt: new Date(+day(origin, i - 1, 11 + i * 2) + 3600000) } });
+  for (const need of ctx.needs) {
+    const links = await db.taskNeed.findMany({ where: { clientNeedId: need.id }, select: { taskId: true } });
+    await db.taskClient.createMany({ data: links.map(link => ({ taskId: link.taskId, clientId: need.clientId })), skipDuplicates: true });
   }
   await seedMediaAndOffers(ctx);
   await seedDeals(ctx);

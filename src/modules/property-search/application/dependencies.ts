@@ -34,5 +34,5 @@ export function scraperFor(settings: Awaited<ReturnType<typeof searchSettings>>,
   const options = { enabled: settings.enabled, enabledSources: settings.sources,
     browserEnabled: settings.config.SCRAPER_BROWSER_ENABLED && !!settings.settings?.browserEnabled,
     jobTimeoutMs: settings.config.SCRAPER_JOB_TIMEOUT_MS, maxConcurrentJobs: settings.config.SCRAPER_MAX_CONCURRENT_JOBS };
-  return settings.config.SCRAPER_DEMO_FIXTURES ? new FixtureScraperAdapter(options, scenario) : new RealEstateScraperAdapter(options);
+  return settings.config.SCRAPER_DEMO_FIXTURES ? new FixtureScraperAdapter(options, scenario, "tests/fixtures/scraper/demo-novosibirsk") : new RealEstateScraperAdapter(options);
 }

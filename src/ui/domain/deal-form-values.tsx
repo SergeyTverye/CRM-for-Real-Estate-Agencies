@@ -1,3 +1,4 @@
+import { displayLabel } from "@/shared/codebook";
 import type { PropertyPick } from "./need-pickers";
 
 /**
@@ -34,7 +35,7 @@ export function moneyText(v: string | null | undefined): string {
 
 export function needTitle(n: NeedPick, labels: NeedLabels): string {
   const who = n.clientVisible ? n.client.displayName : "Клиент (нет доступа)";
-  return `${who}: ${labels.operation[n.operationType] ?? n.operationType} · ${labels.propertyType[n.propertyType] ?? n.propertyType}`;
+  return `${who}: ${labels.operation[n.operationType] ?? displayLabel("need_operation_type", n.operationType)} · ${labels.propertyType[n.propertyType] ?? displayLabel("property_type", n.propertyType)}`;
 }
 
 // ───── Договор ─────

@@ -90,7 +90,7 @@ export function BarTable({ rows, emptyTitle, totalLabel = "Всего", unit = "
         <tr>
           <td className="font-medium text-slate-600">{totalLabel}</td>
           <td className="text-right font-semibold tabular-nums">{total}</td>
-          <td className="text-right text-slate-500">100%</td>
+          <td className="text-right text-slate-500">{pct(total, total)}</td>
           <td />
         </tr>
       </tbody>

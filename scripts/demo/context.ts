@@ -25,7 +25,11 @@ export type DemoContext = {
   needs: Awaited<ReturnType<typeof db.clientNeed.create>>[];
   properties: Awaited<ReturnType<typeof db.property.create>>[];
 };
-export const day = (origin: Date, days: number) => new Date(+origin + days * 86400000);
+// Calendar day in Novosibirsk; deterministic working-hour slot, independent of seed launch time.
+export const day = (origin: Date, days: number, hour = 9 + ((days % 11) + 11) % 11) => {
+  const local = new Date(+origin + 7 * 3600000 + days * 86400000);
+  return new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), hour - 7));
+};
 export async function printCounts() {
   const delegates = {
     clients: db.client, client_contacts: db.clientContact, client_needs: db.clientNeed,

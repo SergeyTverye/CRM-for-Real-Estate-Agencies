@@ -9,7 +9,7 @@ export async function seedSearchAndCosts(ctx: DemoContext) {
   const setting = await db.aiSetting.findFirstOrThrow();
   // Only crm_demo is allowed by context.ts. The provider remains FakeResponsesProvider.
   await db.aiSetting.update({ where: { id: setting.id }, data: { aiEnabled: true, scraperEnabled: true, enabledSources: ["cian", "mirkvartir", "avito"], webSearchManualAllowed: true, webSearchAutoFallback: true } });
-  const filters = SearchFilters.parse({ city: "Москва", operation: "sale", sources: ["cian", "mirkvartir"], purposes: ["retail"], floorMode: "exclude_basement_and_semi_basement" });
+  const filters = SearchFilters.parse({ city: "Новосибирск", operation: "sale", sources: ["cian", "mirkvartir"], purposes: ["retail"], floorMode: "exclude_basement_and_semi_basement" });
   const saved = [];
   for (const name of [`${marker} Торговые помещения — записанные ответы`, `${marker} Веб-резерв — демонстрация отказа`]) {
     saved.push(await db.savedSearch.findFirst({ where: { ownerUserId: actor.userId, name } }) ?? await saveSearch(actor, { name, filters, sources: filters.sources, needId }));
@@ -52,6 +52,17 @@ export async function seedSearchAndCosts(ctx: DemoContext) {
   });
   if (!await db.searchSelection.count({ where: { needId, listingId, matchId: { not: null } } })) await proposeListing(actor, listingId, { needId, comment: `${marker} Факт предложения синтетического объекта` });
 
+  // Upgrade previously seeded synthetic geography in place. Never touches operational DB (context guard).
+  const localize = (value: unknown) => JSON.parse(JSON.stringify(value).replaceAll("Москва", "Новосибирск").replaceAll("Тверской", "Центральный").replaceAll("Примерная", "Демонстрационная")) as Prisma.InputJsonValue;
+  for (const row of saved) await db.savedSearch.update({ where: { id: row!.id }, data: { city: "Новосибирск", filters: localize(row!.filters) } });
+  for (const row of runs) await db.searchRun.update({ where: { id: row.id }, data: { city: "Новосибирск", filters: localize(row.filters) } });
+  const demoListings = await db.externalListing.findMany({ where: { runResults: { some: { runId: { in: runs.map(r => r.id) } } }, sourceListingId: { startsWith: "synthetic-" } }, include: { snapshots: true } });
+  for (const row of demoListings) {
+    const address = row.address?.replaceAll("Москва", "Новосибирск").replaceAll("Тверской", "Центральный").replaceAll("Примерная", "Демонстрационная");
+    await db.externalListing.update({ where: { id: row.id }, data: { city: "Новосибирск", district: row.district?.replaceAll("Тверской", "Центральный"), address } });
+    for (const snap of row.snapshots) await db.externalListingSnapshot.update({ where: { id: snap.id }, data: { normalized: localize(snap.normalized) } });
+    if (row.propertyId) await db.property.updateMany({ where: { id: row.propertyId, description: { contains: marker } }, data: { addressText: address ?? undefined, district: "Центральный" } });
+  }
   // Synthetic measured usage, priced by the ordinary seed's tariffs. No external provider call.
   const model = setting.model;
   const tariffs = await db.aiTariff.findMany({ where: { model, effectiveFrom: { lte: new Date() } }, orderBy: { effectiveFrom: "desc" } });

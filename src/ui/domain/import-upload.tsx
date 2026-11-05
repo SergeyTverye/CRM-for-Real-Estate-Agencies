@@ -1,5 +1,6 @@
 "use client";
 
+import { FilePicker } from "../file-picker";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "../api-client";
@@ -49,21 +50,11 @@ export function ImportUploadForm({ maxMb, blockedReason }: { maxMb: number; bloc
       <FormErrorBanner error={error} />
       {blockedReason ? <div className="alert alert-warning">{blockedReason}</div> : null}
       <div className="flex flex-wrap items-end gap-3">
-        <label className="block min-w-72 flex-1">
-          <span className="label">Файл Excel (.xlsx, не более {maxMb} МБ)</span>
-          <input
-            ref={fileRef}
-            name="file"
-            type="file"
-            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            className={`block w-full rounded-md border bg-white px-2 py-1.5 text-sm ${fieldError("file") ? "border-red-500" : "border-slate-300"}`}
-            disabled={busy || Boolean(blockedReason)}
-            onChange={(e) => {
-              setError(null);
-              setFileName(e.target.files?.[0]?.name ?? null);
-            }}
-          />
-        </label>
+        <div className="min-w-72 flex-1">
+          <p className="label">Файл Excel (.xlsx, не более {maxMb} МБ)</p>
+          <FilePicker label="Выбрать файл Excel" inputRef={fileRef} name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            disabled={busy || Boolean(blockedReason)} onFiles={files => { setError(null); setFileName(files?.[0]?.name ?? null); }} />
+        </div>
         <button type="submit" className="btn btn-primary" disabled={busy || Boolean(blockedReason) || !fileName}>
           {pending ? "Загрузка и проверка…" : navigating ? "Открываем результат…" : "Загрузить файл"}
         </button>

@@ -1,4 +1,5 @@
 "use client";
+import { labelOf } from "@/shared/codebook";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "@/ui/api-client";
@@ -40,7 +41,7 @@ export function AiSettingsForm({ data }: { data: Data }) {
       <legend>Режимы и площадки</legend>
       {(Object.keys(switches) as (keyof typeof switches)[]).map((key) => <label key={key}><input type="checkbox" checked={form[key]} onChange={(e) => change(key, e.target.checked)} /> {switches[key]}{envNote(key)}</label>)}
       <div>{AI_SOURCES.map((source) => <label key={source} style={{ marginRight: 16 }}><input type="checkbox" checked={form.enabledSources.includes(source)}
-        onChange={(e) => change("enabledSources", e.target.checked ? [...form.enabledSources, source] : form.enabledSources.filter((s) => s !== source))} /> {source}</label>)}</div>
+        onChange={(e) => change("enabledSources", e.target.checked ? [...form.enabledSources, source] : form.enabledSources.filter((s) => s !== source))} /> {labelOf("externalSource", source)}</label>)}</div>
       <label>Модель <input required value={form.model} onChange={(e) => change("model", e.target.value)} /></label>
       <label>Модель веб-поиска (пусто — основная) <input value={form.webModel ?? ""} onChange={(e) => change("webModel", e.target.value || null)} /></label>
       <label>Поисковый контекст <select value={form.searchContextSize} onChange={(e) => change("searchContextSize", e.target.value as AiSettingsInput["searchContextSize"])}>

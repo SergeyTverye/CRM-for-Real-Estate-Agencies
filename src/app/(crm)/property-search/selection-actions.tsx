@@ -20,3 +20,15 @@ export function SelectionActions({ listingId, needId, comment, reviewStatus }: {
     }}>Комментарий</button>
   </div><FormErrorBanner error={action.error} /></div>;
 }
+
+export function SelectionCatalogAction({ listingId }: { listingId: string }) {
+  const action = useApiAction();
+  const router = useRouter();
+  return <div className="space-y-2"><span className="block text-xs text-slate-500">Не перенесён</span>
+    <button className="btn btn-secondary" disabled={action.pending} onClick={async () => {
+      if (!window.confirm("Перенести объявление в каталог CRM? Подтвердите идентичность помещения, чтобы избежать дубля.")) return;
+      const result = await action.run(() => apiCall("POST", `/api/v1/property-search/listings/${listingId}/transfer`, { confirmed: true, identityConfirmed: true }));
+      if (result) router.refresh();
+    }}>{action.pending ? "Перенос…" : "В каталог CRM"}</button><FormErrorBanner error={action.error} />
+  </div>;
+}

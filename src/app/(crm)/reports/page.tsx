@@ -9,7 +9,7 @@ import { localDateString } from "@/shared/time";
 import { fmtDateOnly, fmtDateTime, fmtMoney, tz } from "@/server/format";
 import { dictOptions, loadDictionaries, userOptions } from "@/server/options";
 import { Card, EmptyState, FilterBar, FilterField, PageHeader, Select } from "@/ui/components";
-import { BarTable, FunnelRow, KpiTile, ReportSection, StatLine, type Signal } from "@/ui/domain/report-blocks";
+import { pct, BarTable, FunnelRow, KpiTile, ReportSection, StatLine, type Signal } from "@/ui/domain/report-blocks";
 
 export const metadata = { title: "Отчёты руководителя" };
 
@@ -139,9 +139,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       ) : null}
 
       <Card title="Контроль перспективных обращений и контактов" className="mb-4">
-        <StatLine label="Доля перспективных с назначенным действием" value={`${report.contactControl.actionShare}%`} sub={`${report.contactControl.withAction} из ${report.contactControl.prospective}`} href={report.detailLinks.prospectiveWithAction!} />
+        <StatLine label="Доля перспективных с назначенным действием" value={pct(report.contactControl.withAction, report.contactControl.prospective)} sub={`${report.contactControl.withAction} из ${report.contactControl.prospective}`} href={report.detailLinks.prospectiveWithAction!} />
         <Link className="link" href={report.detailLinks.prospective!}>Все открытые перспективные обращения</Link>
-        <StatLine label="Доля контактов в срок" value={`${report.contactControl.onTimeShare}%`} sub={`${report.contactControl.onTime} из ${report.contactControl.completed}`} href={report.detailLinks.contactsOnTime!} />
+        <StatLine label="Доля контактов в срок" value={pct(report.contactControl.onTime, report.contactControl.completed)} sub={`${report.contactControl.onTime} из ${report.contactControl.completed}`} href={report.detailLinks.contactsOnTime!} />
         <Link className="link" href={report.detailLinks.contactsCompleted!}>Все завершённые контакты среза</Link>
       </Card>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
@@ -225,7 +225,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             <StatLine label="Активные потребности" value={needs.active} href={kpi("activeNeeds")?.href} />
             <StatLine
               label="С корректным следующим действием"
-              value={`${needs.nextActionShare}%`}
+              value={needs.active ? `${needs.nextActionShare}%` : "—"}
               href={report.detailLinks.activeWithNextAction}
               sub={`${needs.activeWithNextAction} из ${needs.active}`}
               signal={needs.active > 0 && needs.nextActionShare < 100 ? "warning" : null}
@@ -250,7 +250,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             <div className="px-4 py-2">
               <StatLine label="Открытые задачи" value={tasks.open} href={report.detailLinks.openTasks!} />
               <StatLine label="Просроченные" value={tasks.overdue} href={kpi("overdue")?.href} signal={tasks.overdue > 0 ? "attention" : null} />
-              <StatLine label="Доля просроченных" href={report.detailLinks.overdue} value={`${tasks.overdueShare}%`} sub={`${tasks.overdue} из ${tasks.open}`} />
+              <StatLine label="Доля просроченных" href={report.detailLinks.overdue} value={pct(tasks.overdue, tasks.open)} sub={`${tasks.overdue} из ${tasks.open}`} />
             </div>
           </ReportSection>
           <ReportSection title="Комиссии получены" note="Сумма поступлений со статусом «получена» или «частично получена» с датой поступления в периоде.">

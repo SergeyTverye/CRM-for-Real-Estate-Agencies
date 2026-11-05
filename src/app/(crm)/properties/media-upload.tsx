@@ -1,6 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element -- authenticated media URLs are intentionally served without an image proxy */
+import { FilePicker } from "@/ui/file-picker";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "@/ui/api-client";
@@ -64,8 +65,8 @@ export function MediaUploadQueue({ queue, propertyId, disabled = false }: { queu
     <p className="font-medium">Фотографии и документы</p>
     <p className="text-sm text-slate-600">Фото видны сотрудникам в общем каталоге. Договоры и сканы добавляйте как документы. Загружайте только материалы, которые вы вправе использовать.</p>
     <div className="flex flex-wrap gap-4">
-      <label>Выбрать фотографии<input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={disabled || queue.busy} onChange={(e) => { queue.add(e.target.files, "photo"); e.target.value = ""; }} /></label>
-      <label>Выбрать документы<input type="file" multiple disabled={disabled || queue.busy} onChange={(e) => { queue.add(e.target.files, "document"); e.target.value = ""; }} /></label>
+      <FilePicker label="Выбрать фотографии" multiple accept="image/jpeg,image/png,image/webp" disabled={disabled || queue.busy} selectedCount={queue.items.filter(i => i.kind === "photo").length} onFiles={files => queue.add(files, "photo")} />
+      <FilePicker label="Выбрать документы" multiple disabled={disabled || queue.busy} selectedCount={queue.items.filter(i => i.kind === "document").length} onFiles={files => queue.add(files, "document")} />
     </div>
     <ul className="space-y-2" aria-live="polite">{queue.items.map((item) => <li key={item.id} className="flex flex-wrap items-center gap-3 rounded border p-2">
       {item.preview ? <img src={item.preview} alt={`Предпросмотр ${item.file.name}`} className="h-16 w-24 object-cover" /> : null}

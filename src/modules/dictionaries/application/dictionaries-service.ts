@@ -1,3 +1,4 @@
+import { displayLabel } from "@/shared/codebook";
 import { z } from "zod";
 import { cache } from "react";
 import { db } from "@/shared/db/client";
@@ -27,7 +28,7 @@ export const loadDictionaries = cache(async (): Promise<Dictionaries> => {
 
 export function dictLabel(dicts: Dictionaries, category: DictionaryCategory, code: string | null | undefined): string {
   if (!code) return "—";
-  return dicts[category].find((o) => o.value === code)?.label ?? code;
+  return dicts[category].find((o) => o.value === code)?.label ?? displayLabel(category, code);
 }
 
 /**

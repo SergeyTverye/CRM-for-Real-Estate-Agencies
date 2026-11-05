@@ -86,8 +86,8 @@ export async function seedDeals(ctx: DemoContext) {
         agreementType: rent ? "lease_related" : "sale_related", status: "signed", agreementNumber: `ДЕМО-${i + 1}`, signedAt: day(ctx.origin, -15), validFrom: day(ctx.origin, -15), validUntil: day(ctx.origin, i === 0 ? -1 : i + 3), notes: `${marker} Вымышленный договор, контроль продления`,
       } });
       if (completed) for (const [j, subtype] of ["invoice", "acceptance_act", rent ? "rent_indexation" : "tax_declaration", "followup"].entries()) {
-        await tx.task.upsert({ where: { id: demoId(`postdeal:${i}:${j}`) }, update: {}, create: { id: demoId(`postdeal:${i}:${j}`), responsibleUserId: client.responsibleUserId, createdBy: ctx.manager.userId, taskType: "postdeal", taskSubtypeCode: subtype,
-          title: `${marker} ${["Сверка расчётов и счёт", "Подписание акта", rent ? "Контроль продления аренды" : "Уточнить необходимость декларации", "Повторный контакт"][j]}`, dueAt: day(ctx.origin, j === 3 ? -1 : j + 2), status: "planned", priority: "normal",
+        await tx.task.upsert({ where: { id: demoId(`postdeal:${i}:${j}`) }, update: { dueAt: day(ctx.origin, j === 3 ? -1 : j + 2, 10 + j * 2) }, create: { id: demoId(`postdeal:${i}:${j}`), responsibleUserId: client.responsibleUserId, createdBy: ctx.manager.userId, taskType: "postdeal", taskSubtypeCode: subtype,
+          title: `${marker} ${["Сверка расчётов и счёт", "Подписание акта", rent ? "Контроль продления аренды" : "Уточнить необходимость декларации", "Повторный контакт"][j]}`, dueAt: day(ctx.origin, j === 3 ? -1 : j + 2, 10 + j * 2), status: "planned", priority: "normal",
           dealLinks: { create: { dealId: id } }, clientLinks: { create: { clientId: client.id } }, propertyLinks: { create: { propertyId: property.id } }, agreementLinks: { create: { agreementId } },
         } });
       }

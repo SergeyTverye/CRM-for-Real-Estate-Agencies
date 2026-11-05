@@ -348,3 +348,18 @@ export function checkConstraintSql(entry: (typeof CODEBOOK_COLUMNS)[number]): st
     : `"${entry.column}" IN (${values})`;
   return `ALTER TABLE "${entry.table}" ADD CONSTRAINT "${checkConstraintName(entry.table, entry.column)}" CHECK (${cond});`;
 }
+
+/** Display fallbacks for legacy and external codes; business dictionary labels take precedence. */
+export const DISPLAY_LABELS: Record<string, Record<string, string>> = {
+  need_operation_type: { buy: "Купить", sale: "Продажа", sell: "Продать", rent: "Арендовать", lease_out: "Сдать в аренду" },
+  property_operation_type: { sale: "Продажа", rent: "Аренда" },
+  property_type: { retail: "Торговое помещение", commercial_premises: "Нежилое помещение", office: "Офис", warehouse: "Склад", production: "Производство", psn_universal: "ПСН / универсальное", free_purpose: "Свободное назначение" },
+  criterion_state: { matched: "Совпадает", contradicted: "Не соответствует", unknown: "Нет сведений" },
+  criterion_source: { structured: "Характеристики", rule: "Проверка описания", ai: "Анализ ИИ", manual: "Ручная проверка" },
+  criterion: { city: "Город", operation: "Операция", purpose: "Назначение", priceUnit: "Единица цены", price: "Цена", area: "Площадь", floor: "Этаж", district: "Район", owner: "Собственник" },
+  price_unit: { rub_total: "всего", rub_month: "в месяц", rub_m2: "за м²", rub_m2_month: "за м² в месяц", rub_year: "в год", rub_m2_year: "за м² в год", total: "всего", per_month: "в месяц", per_m2: "за м²", per_m2_month: "за м² в месяц", per_year: "в год", per_m2_year: "за м² в год" },
+  lead_source: { referral: "Рекомендация", website: "Сайт агентства" },
+};
+export function displayLabel(group: string, code: string | null | undefined): string {
+  return code ? DISPLAY_LABELS[group]?.[code] ?? code : "—";
+}

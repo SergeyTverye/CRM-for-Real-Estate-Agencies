@@ -63,6 +63,9 @@ export function CalendarClient({ timeZone, userId, users, labels }: { timeZone: 
     <FullCalendar ref={calendar} plugins={[dayGrid, timeGrid, list, interaction]} locale={ru} timeZone="UTC" initialView="timeGridWeek"
       headerToolbar={{ left: "prev,next today", center: "title", right: "timeGridDay,timeGridWeek,dayGridMonth,listWeek" }}
       height="auto" firstDay={1} now={local(new Date().toISOString())} selectable eventDurationEditable={false} forceEventDuration={false} displayEventEnd={false}
+      slotMinTime="07:00:00" slotMaxTime="22:00:00" scrollTime="08:00:00"
+      eventMaxStack={3} dayMaxEvents={3} moreLinkText={n => `+ещё ${n}`} moreLinkContent={({ num }) => `+ещё ${num}`}
+      eventDidMount={({ el, event }) => { el.title = event.title; }}
       loading={setLoading}
       events={loadEvents}
       select={r => { openNew(utc(r.start)); calendar.current?.getApi().unselect(); }}
