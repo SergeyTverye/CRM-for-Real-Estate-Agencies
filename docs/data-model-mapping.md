@@ -1,5 +1,70 @@
 # Соответствие модели данных: ТЗ → Prisma → PostgreSQL
 
+## Дополнения v2.4.1 (разделы 3–8, 10.2)
+
+Одна миграция `20261105120000_v241_extensions`, полученная через `prisma migrate diff`
+между исходной и дополненной схемами, без shadow-БД. Все новые FK используют RESTRICT.
+
+| Сущность ТЗ | Prisma model | PostgreSQL table |
+|---|---|---|
+| Внешнее объявление / помещение | ExternalListing | external_listings |
+| История получения объявления | ExternalListingSnapshot | external_listing_snapshots |
+| Проверка сотрудником | ExternalListingVerification | external_listing_verifications |
+| Личная закладка | SearchBookmark | search_bookmarks |
+| Кандидат потребности | SearchSelection | search_selections |
+| Сохранённый поиск | SavedSearch | saved_searches |
+| Запуск поиска | SearchRun | search_runs |
+| Состояние источника запуска | SearchRunSource | search_run_sources |
+| Результат и доказательства | SearchRunResult | search_run_results |
+| Единственные настройки AI | AiSetting | ai_settings |
+| Журнал платных вызовов | AiUsageLog | ai_usage_logs |
+| Тариф с датой действия | AiTariff | ai_tariffs |
+| Резерв бюджета | AiBudgetReservation | ai_budget_reservations |
+| Отдельная встреча / занятость | CalendarEvent | calendar_events |
+| Внутреннее уведомление | Notification | notifications |
+| Интервал напоминания сотрудника | NotificationPreference | notification_preferences |
+| Пункт чек-листа сделки | DealChecklistItem | deal_checklist_items |
+| Метаданные галереи | DocumentProperty | document_properties |
+| Миниатюра документа | Document.thumbnailStorageKey | documents.thumbnail_storage_key |
+| Логотип и реквизиты юрлица | LegalEntity.logoDocumentId / requisites | legal_entities.logo_document_id / requisites |
+
+### Ограничения и решения v2.4.1
+
+- `external_market` уже присутствует в Property/codebook; `ExternalListing.propertyId`
+  задаёт необязательную связь многие-к-одному с перенесённым объектом.
+- Идентификаторы площадок/помещений — TEXT, а внутренние PK/FK — UUID.
+  Partial UNIQUE `(source, source_listing_id, source_unit_id) NULLS NOT DISTINCT`
+  действует при известном `source_listing_id`: отсутствующий ID помещения не позволяет
+  создать точный дубль. Без ID объявления записи не объединяются: требуется ручная проверка.
+- Закладки и кандидаты уникальны соответственно по `(user_id, listing_id)` и
+  `(need_id, listing_id)`. Перенос Property и факт предложения Match остаются явными действиями.
+- `SavedSearch.lastSuccessfulRunId` — отдельная необязательная связь с SearchRun;
+  историю запусков хранит `SearchRun.savedSearchId`. Обе связи не каскадные.
+- Сохраняется существующий AiRun для прежних AI-функций; новый AiUsageLog хранит
+  типы parse/description/web_search, токены, расходы и связанные резервы.
+  У AiSetting UUID PK и уникальный индекс на константу: более одной строки невозможно.
+  Для атомарного контроля бюджета сервис должен блокировать эту строку в транзакции,
+  учитывать открытые резервы и создавать резерв до внешнего запроса.
+- Деньги и резервы — numeric(16,2); тариф за отдельный токен — numeric(16,6).
+  Все новые моменты времени — timestamptz(3). Изменяемые формы имеют updatedAt.
+- JSONB разрешён здесь для фильтров, нормализованного публичного снимка,
+  доказательств критериев, изображений с правами использования и очищенного результата AI.
+  Удаление ПДн до записи JSON — обязанность application-адаптеров.
+- Notification.sourceType/sourceId — разрешённая v2.4.1 полиморфная ссылка на
+  исходное событие; FK отсутствует намеренно. Дедупликация — UNIQUE dedupKey.
+  Индексы покрывают получателя/состояние/время и фоновую очередь.
+- У галереи есть kind, sortOrder, isCover, caption и archivedAt для архивации связи.
+  Partial UNIQUE допускает одно активное главное фото на объект. Триггер запрещает
+  обложку из архивного Document и снимает isCover при архивации Document;
+  блокировка строки документа сериализует назначение обложки и архивацию.
+  Существующие связи документов типа photo переводятся в kind=photo SQL UPDATE;
+  миграция не выбирает обложку автоматически.
+- Стабильные значения новых системных полей зарегистрированы в CODEBOOK_COLUMNS
+  и защищены CHECK. Задача возврата получила taskType=pause_return; применение
+  этого типа в сервисах инвариантов выполняет агент соответствующего модуля.
+- Проверки схемы: `tests/integration/v241-schema.test.ts`; соответствие codebook
+  миграциям: существующий `tests/unit/codebook-migration.test.ts`.
+
 Нормативный источник — раздел 29 ТЗ v1.6.1. Исполняемая реализация — [`prisma/schema.prisma`](../prisma/schema.prisma)
 и миграция [`prisma/migrations/*_baseline_schema`](../prisma/migrations), которая создаёт всю baseline-схему с нуля (ТЗ 29.13).
 

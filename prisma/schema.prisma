@@ -18,16 +18,27 @@ datasource db {
 // ───────────────────────────── Идентификация и доступ ─────────────────────────────
 
 model User {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  login              String    @unique
-  displayName        String    @map("display_name")
-  roleCode           String    @map("role_code")
-  passwordHash       String    @map("password_hash")
-  mustChangePassword Boolean   @default(false) @map("must_change_password")
-  passwordChangedAt  DateTime? @map("password_changed_at") @db.Timestamptz(3)
-  isActive           Boolean   @default(true) @map("is_active")
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  searchBookmarks        SearchBookmark[]
+  searchSelections       SearchSelection[]
+  savedSearches          SavedSearch[]
+  searchRuns             SearchRun[]
+  listingVerifications   ExternalListingVerification[]
+  aiSettings             AiSetting[]
+  aiUsageLogs            AiUsageLog[]
+  calendarEvents         CalendarEvent[]
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  checklistItems         DealChecklistItem[]
+  id                     String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  login                  String                        @unique
+  displayName            String                        @map("display_name")
+  roleCode               String                        @map("role_code")
+  passwordHash           String                        @map("password_hash")
+  mustChangePassword     Boolean                       @default(false) @map("must_change_password")
+  passwordChangedAt      DateTime?                     @map("password_changed_at") @db.Timestamptz(3)
+  isActive               Boolean                       @default(true) @map("is_active")
+  createdAt              DateTime                      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime                      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   sessions                  UserSession[]
   grantsReceived            PropertyContactGrant[] @relation("GrantUser")
@@ -102,16 +113,17 @@ model PropertyContactGrant {
 // ───────────────────────────── Клиенты и обращения ─────────────────────────────
 
 model Client {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  displayName       String    @map("display_name")
-  clientKind        String    @map("client_kind")
-  responsibleUserId String    @map("responsible_user_id") @db.Uuid
+  calendarEvents    CalendarEvent[]
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  displayName       String          @map("display_name")
+  clientKind        String          @map("client_kind")
+  responsibleUserId String          @map("responsible_user_id") @db.Uuid
   status            String
   notes             String?
-  archivedAt        DateTime? @map("archived_at") @db.Timestamptz(3)
-  createdBy         String    @map("created_by") @db.Uuid
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  archivedAt        DateTime?       @map("archived_at") @db.Timestamptz(3)
+  createdBy         String          @map("created_by") @db.Uuid
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   responsible    User                    @relation("ClientResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
   creator        User                    @relation("ClientCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
@@ -210,42 +222,46 @@ model LeadRequest {
 }
 
 model ClientNeed {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clientId           String    @map("client_id") @db.Uuid
-  responsibleUserId  String    @map("responsible_user_id") @db.Uuid
-  operationType      String    @map("operation_type")
-  propertyType       String    @map("property_type")
-  propertySubtype    String?   @map("property_subtype")
-  financingType      String?   @map("financing_type")
-  mortgageStatus     String?   @map("mortgage_status")
-  budgetMin          Decimal?  @map("budget_min") @db.Decimal(16, 2)
-  budgetMax          Decimal?  @map("budget_max") @db.Decimal(16, 2)
+  calendarEvents     CalendarEvent[]
+  searchSelections   SearchSelection[]
+  savedSearches      SavedSearch[]
+  searchRuns         SearchRun[]
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientId           String            @map("client_id") @db.Uuid
+  responsibleUserId  String            @map("responsible_user_id") @db.Uuid
+  operationType      String            @map("operation_type")
+  propertyType       String            @map("property_type")
+  propertySubtype    String?           @map("property_subtype")
+  financingType      String?           @map("financing_type")
+  mortgageStatus     String?           @map("mortgage_status")
+  budgetMin          Decimal?          @map("budget_min") @db.Decimal(16, 2)
+  budgetMax          Decimal?          @map("budget_max") @db.Decimal(16, 2)
   district           String?
-  locationText       String?   @map("location_text")
-  areaMin            Decimal?  @map("area_min") @db.Decimal(12, 2)
-  areaMax            Decimal?  @map("area_max") @db.Decimal(12, 2)
-  commercialPurpose  String?   @map("commercial_purpose")
-  floorMin           Int?      @map("floor_min")
-  floorMax           Int?      @map("floor_max")
-  roomsMin           Int?      @map("rooms_min")
-  roomsMax           Int?      @map("rooms_max")
-  landAreaMin        Decimal?  @map("land_area_min") @db.Decimal(12, 2)
-  landAreaMax        Decimal?  @map("land_area_max") @db.Decimal(12, 2)
-  buildingAreaMin    Decimal?  @map("building_area_min") @db.Decimal(12, 2)
-  buildingAreaMax    Decimal?  @map("building_area_max") @db.Decimal(12, 2)
-  powerRequirement   Decimal?  @map("power_requirement") @db.Decimal(10, 2)
-  parkingRequirement Boolean?  @map("parking_requirement")
-  tenantRequirement  Boolean?  @map("tenant_requirement")
+  locationText       String?           @map("location_text")
+  areaMin            Decimal?          @map("area_min") @db.Decimal(12, 2)
+  areaMax            Decimal?          @map("area_max") @db.Decimal(12, 2)
+  commercialPurpose  String?           @map("commercial_purpose")
+  floorMin           Int?              @map("floor_min")
+  floorMax           Int?              @map("floor_max")
+  roomsMin           Int?              @map("rooms_min")
+  roomsMax           Int?              @map("rooms_max")
+  landAreaMin        Decimal?          @map("land_area_min") @db.Decimal(12, 2)
+  landAreaMax        Decimal?          @map("land_area_max") @db.Decimal(12, 2)
+  buildingAreaMin    Decimal?          @map("building_area_min") @db.Decimal(12, 2)
+  buildingAreaMax    Decimal?          @map("building_area_max") @db.Decimal(12, 2)
+  powerRequirement   Decimal?          @map("power_requirement") @db.Decimal(10, 2)
+  parkingRequirement Boolean?          @map("parking_requirement")
+  tenantRequirement  Boolean?          @map("tenant_requirement")
   stage              String
   status             String
-  stopReasonCode     String?   @map("stop_reason_code")
-  stopComment        String?   @map("stop_comment")
+  stopReasonCode     String?           @map("stop_reason_code")
+  stopComment        String?           @map("stop_comment")
   notes              String?
-  openedAt           DateTime  @default(now()) @map("opened_at") @db.Timestamptz(3)
-  closedAt           DateTime? @map("closed_at") @db.Timestamptz(3)
-  createdBy          String    @map("created_by") @db.Uuid
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  openedAt           DateTime          @default(now()) @map("opened_at") @db.Timestamptz(3)
+  closedAt           DateTime?         @map("closed_at") @db.Timestamptz(3)
+  createdBy          String            @map("created_by") @db.Uuid
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   client           Client              @relation(fields: [clientId], references: [id], onDelete: Restrict)
   responsible      User                @relation("NeedResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
@@ -313,34 +329,37 @@ model Communication {
 // ───────────────────────────── Объекты и работа с рынком ─────────────────────────────
 
 model Property {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  responsibleUserId  String?   @map("responsible_user_id") @db.Uuid
-  propertyType       String    @map("property_type")
-  propertySubtype    String?   @map("property_subtype")
-  operationType      String    @map("operation_type")
-  sourceType         String    @map("source_type")
-  sourcePlatformCode String?   @map("source_platform_code")
-  sourceUrl          String?   @map("source_url")
-  addressText        String    @map("address_text")
+  externalListings   ExternalListing[]
+  searchSelections   SearchSelection[]
+  calendarEvents     CalendarEvent[]
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  responsibleUserId  String?           @map("responsible_user_id") @db.Uuid
+  propertyType       String            @map("property_type")
+  propertySubtype    String?           @map("property_subtype")
+  operationType      String            @map("operation_type")
+  sourceType         String            @map("source_type")
+  sourcePlatformCode String?           @map("source_platform_code")
+  sourceUrl          String?           @map("source_url")
+  addressText        String            @map("address_text")
   district           String?
-  area               Decimal?  @db.Decimal(12, 2)
+  area               Decimal?          @db.Decimal(12, 2)
   floor              Int?
-  floorsTotal        Int?      @map("floors_total")
-  roomsCount         Int?      @map("rooms_count")
-  landArea           Decimal?  @map("land_area") @db.Decimal(12, 2)
-  buildingArea       Decimal?  @map("building_area") @db.Decimal(12, 2)
-  price              Decimal?  @db.Decimal(16, 2)
-  commercialPurpose  String?   @map("commercial_purpose")
-  powerKw            Decimal?  @map("power_kw") @db.Decimal(10, 2)
-  parkingAvailable   Boolean?  @map("parking_available")
-  hasTenant          Boolean?  @map("has_tenant")
+  floorsTotal        Int?              @map("floors_total")
+  roomsCount         Int?              @map("rooms_count")
+  landArea           Decimal?          @map("land_area") @db.Decimal(12, 2)
+  buildingArea       Decimal?          @map("building_area") @db.Decimal(12, 2)
+  price              Decimal?          @db.Decimal(16, 2)
+  commercialPurpose  String?           @map("commercial_purpose")
+  powerKw            Decimal?          @map("power_kw") @db.Decimal(10, 2)
+  parkingAvailable   Boolean?          @map("parking_available")
+  hasTenant          Boolean?          @map("has_tenant")
   status             String
   description        String?
-  attributesJsonb    Json?     @map("attributes_jsonb")
-  archivedAt         DateTime? @map("archived_at") @db.Timestamptz(3)
-  createdBy          String    @map("created_by") @db.Uuid
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  attributesJsonb    Json?             @map("attributes_jsonb")
+  archivedAt         DateTime?         @map("archived_at") @db.Timestamptz(3)
+  createdBy          String            @map("created_by") @db.Uuid
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   responsible    User?                  @relation("PropertyResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
   creator        User                   @relation("PropertyCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
@@ -381,17 +400,18 @@ model PropertyOwner {
 }
 
 model NeedPropertyMatch {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clientNeedId        String   @map("client_need_id") @db.Uuid
-  propertyId          String   @map("property_id") @db.Uuid
-  offeredAt           DateTime @default(now()) @map("offered_at") @db.Timestamptz(3)
-  sourceCode          String?  @map("source_code")
+  searchSelections    SearchSelection[]
+  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientNeedId        String            @map("client_need_id") @db.Uuid
+  propertyId          String            @map("property_id") @db.Uuid
+  offeredAt           DateTime          @default(now()) @map("offered_at") @db.Timestamptz(3)
+  sourceCode          String?           @map("source_code")
   status              String
-  rejectionReasonCode String?  @map("rejection_reason_code")
+  rejectionReasonCode String?           @map("rejection_reason_code")
   comment             String?
-  createdBy           String   @map("created_by") @db.Uuid
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdBy           String            @map("created_by") @db.Uuid
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   need     ClientNeed @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
   property Property   @relation(fields: [propertyId], references: [id], onDelete: Restrict)
@@ -633,37 +653,43 @@ model TaskCommercialOffer {
 // ───────────────────────────── Юрлица, сделки и расчёты ─────────────────────────────
 
 model LegalEntity {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  entityType  String   @map("entity_type")
-  displayName String   @map("display_name")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  logoDocumentId String?   @map("logo_document_id") @db.Uuid
+  requisites     String?
+  logoDocument   Document? @relation("LegalEntityLogo", fields: [logoDocumentId], references: [id], onDelete: Restrict)
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entityType     String    @map("entity_type")
+  displayName    String    @map("display_name")
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   deals      Deal[]
   agreements Agreement[]
   offers     CommercialOffer[]
   documents  Document[]
 
+  @@index([logoDocumentId])
   @@map("legal_entities")
 }
 
 model Deal {
-  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  propertyId             String    @map("property_id") @db.Uuid
-  responsibleUserId      String    @map("responsible_user_id") @db.Uuid
-  legalEntityId          String    @map("legal_entity_id") @db.Uuid
+  calendarEvents         CalendarEvent[]
+  checklistItems         DealChecklistItem[]
+  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  propertyId             String              @map("property_id") @db.Uuid
+  responsibleUserId      String              @map("responsible_user_id") @db.Uuid
+  legalEntityId          String              @map("legal_entity_id") @db.Uuid
   status                 String
-  openedAt               DateTime  @default(now()) @map("opened_at") @db.Timestamptz(3)
-  preliminaryAgreementAt DateTime? @map("preliminary_agreement_at") @db.Timestamptz(3)
-  mainAgreementAt        DateTime? @map("main_agreement_at") @db.Timestamptz(3)
-  registrationAt         DateTime? @map("registration_at") @db.Timestamptz(3)
-  closedAt               DateTime? @map("closed_at") @db.Timestamptz(3)
-  dealPrice              Decimal?  @map("deal_price") @db.Decimal(16, 2)
+  openedAt               DateTime            @default(now()) @map("opened_at") @db.Timestamptz(3)
+  preliminaryAgreementAt DateTime?           @map("preliminary_agreement_at") @db.Timestamptz(3)
+  mainAgreementAt        DateTime?           @map("main_agreement_at") @db.Timestamptz(3)
+  registrationAt         DateTime?           @map("registration_at") @db.Timestamptz(3)
+  closedAt               DateTime?           @map("closed_at") @db.Timestamptz(3)
+  dealPrice              Decimal?            @map("deal_price") @db.Decimal(16, 2)
   notes                  String?
-  createdBy              String    @map("created_by") @db.Uuid
-  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdBy              String              @map("created_by") @db.Uuid
+  createdAt              DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   property      Property         @relation(fields: [propertyId], references: [id], onDelete: Restrict)
   responsible   User             @relation("DealResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
@@ -778,18 +804,21 @@ model CommercialOfferItem {
 // ───────────────────────────── Документы и файловые связи ─────────────────────────────
 
 model Document {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  originalName     String    @map("original_name")
-  documentTypeCode String    @map("document_type_code")
-  mimeType         String    @map("mime_type")
-  fileSize         BigInt    @map("file_size")
-  storageProvider  String    @default("local") @map("storage_provider")
-  storageKey       String    @unique @map("storage_key")
-  checksum         String?
-  uploadedBy       String    @map("uploaded_by") @db.Uuid
-  legalEntityId    String?   @map("legal_entity_id") @db.Uuid
-  archivedAt       DateTime? @map("archived_at") @db.Timestamptz(3)
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  thumbnailStorageKey String?             @map("thumbnail_storage_key")
+  logoFor             LegalEntity[]       @relation("LegalEntityLogo")
+  checklistItems      DealChecklistItem[]
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  originalName        String              @map("original_name")
+  documentTypeCode    String              @map("document_type_code")
+  mimeType            String              @map("mime_type")
+  fileSize            BigInt              @map("file_size")
+  storageProvider     String              @default("local") @map("storage_provider")
+  storageKey          String              @unique @map("storage_key")
+  checksum            String?
+  uploadedBy          String              @map("uploaded_by") @db.Uuid
+  legalEntityId       String?             @map("legal_entity_id") @db.Uuid
+  archivedAt          DateTime?           @map("archived_at") @db.Timestamptz(3)
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
 
   uploader           User                      @relation(fields: [uploadedBy], references: [id], onDelete: Restrict)
   legalEntity        LegalEntity?              @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
@@ -831,10 +860,15 @@ model DocumentNeed {
 }
 
 model DocumentProperty {
-  documentId String   @map("document_id") @db.Uuid
-  propertyId String   @map("property_id") @db.Uuid
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  sortOrder  Int       @default(0) @map("sort_order")
+  isCover    Boolean   @default(false) @map("is_cover")
+  caption    String?
+  kind       String    @default("document")
+  archivedAt DateTime? @map("archived_at") @db.Timestamptz(3)
+  documentId String    @map("document_id") @db.Uuid
+  propertyId String    @map("property_id") @db.Uuid
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Restrict)
 
   @@id([documentId, propertyId])
   @@index([propertyId])
@@ -1126,4 +1160,361 @@ model DictionaryItem {
 
   @@unique([category, code])
   @@map("dictionary_items")
+}
+
+// TZ v2.4.1 extensions; system CHECK constraints and partial indexes live in SQL.
+model ExternalListing {
+  id                      String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  source                  String
+  sourceListingId         String?                       @map("source_listing_id")
+  sourceUnitId            String?                       @map("source_unit_id")
+  url                     String
+  sourceMethod            String                        @map("source_method")
+  operation               String
+  priceRub                Decimal?                      @map("price_rub") @db.Decimal(16, 2)
+  priceUnit               String                        @map("price_unit")
+  areaM2                  Decimal?                      @map("area_m2") @db.Decimal(12, 2)
+  floorRaw                String?                       @map("floor_raw")
+  floorNumber             Int?                          @map("floor_number")
+  purposes                String[]                      @default([])
+  address                 String?
+  district                String?
+  city                    String                        @default("Новосибирск")
+  sellerType              String?                       @map("seller_type")
+  ownerConfirmed          Boolean                       @default(false) @map("owner_confirmed")
+  ownerConfirmationMethod String?                       @map("owner_confirmation_method")
+  ownerConfirmedAt        DateTime?                     @map("owner_confirmed_at") @db.Timestamptz(3)
+  ownerConfirmationSource String?                       @map("owner_confirmation_source")
+  description             String?
+  images                  Json                          @default("[]")
+  firstSeenAt             DateTime                      @default(now()) @map("first_seen_at") @db.Timestamptz(3)
+  lastSeenAt              DateTime                      @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  lastPrice               Decimal?                      @map("last_price") @db.Decimal(16, 2)
+  propertyId              String?                       @map("property_id") @db.Uuid
+  updatedAt               DateTime                      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  property                Property?                     @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  snapshots               ExternalListingSnapshot[]
+  verifications           ExternalListingVerification[]
+  bookmarks               SearchBookmark[]
+  selections              SearchSelection[]
+  runResults              SearchRunResult[]
+
+  @@index([propertyId])
+  @@index([city, operation, lastSeenAt])
+  @@map("external_listings")
+}
+
+model ExternalListingSnapshot {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listingId   String          @map("listing_id") @db.Uuid
+  searchRunId String?         @map("search_run_id") @db.Uuid
+  fetchedAt   DateTime        @default(now()) @map("fetched_at") @db.Timestamptz(3)
+  priceRub    Decimal?        @map("price_rub") @db.Decimal(16, 2)
+  normalized  Json
+  listing     ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  searchRun   SearchRun?      @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
+
+  @@index([listingId, fetchedAt])
+  @@index([searchRunId])
+  @@map("external_listing_snapshots")
+}
+
+model ExternalListingVerification {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listingId      String          @map("listing_id") @db.Uuid
+  verifiedBy     String          @map("verified_by") @db.Uuid
+  verifiedAt     DateTime        @default(now()) @map("verified_at") @db.Timestamptz(3)
+  availability   String          @default("unknown")
+  priceConfirmed Boolean?        @map("price_confirmed")
+  ownerConfirmed Boolean?        @map("owner_confirmed")
+  note           String?
+  nextCheckAt    DateTime?       @map("next_check_at") @db.Timestamptz(3)
+  listing        ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  verifier       User            @relation(fields: [verifiedBy], references: [id], onDelete: Restrict)
+
+  @@index([listingId, verifiedAt])
+  @@index([verifiedBy])
+  @@index([nextCheckAt])
+  @@map("external_listing_verifications")
+}
+
+model SearchBookmark {
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String          @map("user_id") @db.Uuid
+  listingId String          @map("listing_id") @db.Uuid
+  note      String?
+  status    String          @default("study")
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  listing   ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, listingId])
+  @@index([listingId])
+  @@map("search_bookmarks")
+}
+
+model SearchSelection {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  needId       String             @map("need_id") @db.Uuid
+  listingId    String             @map("listing_id") @db.Uuid
+  addedBy      String             @map("added_by") @db.Uuid
+  comment      String?
+  reviewStatus String             @default("candidate") @map("review_status")
+  propertyId   String?            @map("property_id") @db.Uuid
+  matchId      String?            @map("match_id") @db.Uuid
+  createdAt    DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  need         ClientNeed         @relation(fields: [needId], references: [id], onDelete: Restrict)
+  listing      ExternalListing    @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  creator      User               @relation(fields: [addedBy], references: [id], onDelete: Restrict)
+  property     Property?          @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  match        NeedPropertyMatch? @relation(fields: [matchId], references: [id], onDelete: Restrict)
+
+  @@unique([needId, listingId])
+  @@index([listingId])
+  @@index([addedBy])
+  @@index([propertyId])
+  @@index([matchId])
+  @@map("search_selections")
+}
+
+model SavedSearch {
+  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerUserId         String      @map("owner_user_id") @db.Uuid
+  name                String
+  city                String      @default("Новосибирск")
+  filters             Json
+  sources             String[]    @default([])
+  needId              String?     @map("need_id") @db.Uuid
+  lastRunAt           DateTime?   @map("last_run_at") @db.Timestamptz(3)
+  lastSuccessfulRunId String?     @map("last_successful_run_id") @db.Uuid
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  owner               User        @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  need                ClientNeed? @relation(fields: [needId], references: [id], onDelete: Restrict)
+  lastSuccessfulRun   SearchRun?  @relation("LastSuccessfulRun", fields: [lastSuccessfulRunId], references: [id], onDelete: Restrict)
+  runs                SearchRun[] @relation("SavedSearchRuns")
+
+  @@index([ownerUserId])
+  @@index([needId])
+  @@index([lastSuccessfulRunId])
+  @@map("saved_searches")
+}
+
+model SearchRun {
+  id             String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  savedSearchId  String?                   @map("saved_search_id") @db.Uuid
+  needId         String?                   @map("need_id") @db.Uuid
+  userId         String                    @map("user_id") @db.Uuid
+  city           String                    @default("Новосибирск")
+  filters        Json
+  status         String                    @default("pending")
+  startedAt      DateTime                  @default(now()) @map("started_at") @db.Timestamptz(3)
+  finishedAt     DateTime?                 @map("finished_at") @db.Timestamptz(3)
+  webSearchUsed  Boolean                   @default(false) @map("web_search_used")
+  fallbackReason String?                   @map("fallback_reason")
+  savedSearch    SavedSearch?              @relation("SavedSearchRuns", fields: [savedSearchId], references: [id], onDelete: Restrict)
+  need           ClientNeed?               @relation(fields: [needId], references: [id], onDelete: Restrict)
+  user           User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  successfulFor  SavedSearch[]             @relation("LastSuccessfulRun")
+  sources        SearchRunSource[]
+  results        SearchRunResult[]
+  snapshots      ExternalListingSnapshot[]
+  aiUsageLogs    AiUsageLog[]
+
+  @@index([savedSearchId, startedAt])
+  @@index([needId])
+  @@index([userId, startedAt])
+  @@map("search_runs")
+}
+
+model SearchRunSource {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runId       String    @map("run_id") @db.Uuid
+  source      String
+  status      String
+  resultCount Int       @default(0) @map("result_count")
+  reason      String?
+  durationMs  Int?      @map("duration_ms")
+  run         SearchRun @relation(fields: [runId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, source])
+  @@map("search_run_sources")
+}
+
+model SearchRunResult {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runId        String          @map("run_id") @db.Uuid
+  listingId    String          @map("listing_id") @db.Uuid
+  verdict      String
+  criteria     Json            @default("[]")
+  score        Decimal         @default(0) @db.Decimal(16, 2)
+  isNew        Boolean         @default(false) @map("is_new")
+  priceChanged Boolean         @default(false) @map("price_changed")
+  run          SearchRun       @relation(fields: [runId], references: [id], onDelete: Restrict)
+  listing      ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, listingId])
+  @@index([listingId])
+  @@index([runId, verdict])
+  @@map("search_run_results")
+}
+
+model AiSetting {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  aiEnabled              Boolean  @default(false) @map("ai_enabled")
+  scraperEnabled         Boolean  @default(false) @map("scraper_enabled")
+  browserEnabled         Boolean  @default(true) @map("browser_enabled")
+  enabledSources         String[] @default([]) @map("enabled_sources")
+  webSearchManualAllowed Boolean  @default(false) @map("web_search_manual_allowed")
+  webSearchAutoFallback  Boolean  @default(false) @map("web_search_auto_fallback")
+  model                  String   @default("aliceai-llm-flash/latest")
+  webModel               String?  @map("web_model")
+  searchContextSize      String   @default("low") @map("search_context_size")
+  perUserDailyLimit      Int      @default(3) @map("per_user_daily_limit")
+  perJobLimit            Int      @default(1) @map("per_job_limit")
+  dailyLimit             Int      @default(10) @map("daily_limit")
+  monthlyBudgetRub       Decimal  @default(1000) @map("monthly_budget_rub") @db.Decimal(16, 2)
+  updatedBy              String?  @map("updated_by") @db.Uuid
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updater                User?    @relation(fields: [updatedBy], references: [id], onDelete: Restrict)
+
+  @@index([updatedBy])
+  @@map("ai_settings")
+}
+
+model AiUsageLog {
+  id               String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  callType         String                @map("call_type")
+  userId           String                @map("user_id") @db.Uuid
+  searchRunId      String?               @map("search_run_id") @db.Uuid
+  model            String
+  inputTokens      Int                   @default(0) @map("input_tokens")
+  outputTokens     Int                   @default(0) @map("output_tokens")
+  webSearchCalls   Int                   @default(0) @map("web_search_calls")
+  estimatedCostRub Decimal               @default(0) @map("estimated_cost_rub") @db.Decimal(16, 2)
+  actualCostRub    Decimal?              @map("actual_cost_rub") @db.Decimal(16, 2)
+  result           Json?
+  status           String                @default("pending")
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  durationMs       Int?                  @map("duration_ms")
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  searchRun        SearchRun?            @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
+  reservations     AiBudgetReservation[]
+
+  @@index([userId, createdAt])
+  @@index([searchRunId])
+  @@index([createdAt, status])
+  @@map("ai_usage_logs")
+}
+
+model AiTariff {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  model         String
+  callType      String   @map("call_type")
+  unit          String
+  priceRub      Decimal  @map("price_rub") @db.Decimal(16, 6)
+  effectiveFrom DateTime @map("effective_from") @db.Timestamptz(3)
+
+  @@unique([model, callType, unit, effectiveFrom])
+  @@map("ai_tariffs")
+}
+
+model AiBudgetReservation {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usageLogId String?     @map("usage_log_id") @db.Uuid
+  amountRub  Decimal     @map("amount_rub") @db.Decimal(16, 2)
+  status     String      @default("reserved")
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  usageLog   AiUsageLog? @relation(fields: [usageLogId], references: [id], onDelete: Restrict)
+
+  @@index([usageLogId])
+  @@index([status, createdAt])
+  @@map("ai_budget_reservations")
+}
+
+model CalendarEvent {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  startAt        DateTime    @map("start_at") @db.Timestamptz(3)
+  endAt          DateTime    @map("end_at") @db.Timestamptz(3)
+  allDay         Boolean     @default(false) @map("all_day")
+  title          String
+  description    String?
+  ownerUserId    String      @map("owner_user_id") @db.Uuid
+  visibility     String      @default("private")
+  recurrenceRule String?     @map("recurrence_rule")
+  clientId       String?     @map("client_id") @db.Uuid
+  needId         String?     @map("need_id") @db.Uuid
+  propertyId     String?     @map("property_id") @db.Uuid
+  dealId         String?     @map("deal_id") @db.Uuid
+  archivedAt     DateTime?   @map("archived_at") @db.Timestamptz(3)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  owner          User        @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  client         Client?     @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  need           ClientNeed? @relation(fields: [needId], references: [id], onDelete: Restrict)
+  property       Property?   @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  deal           Deal?       @relation(fields: [dealId], references: [id], onDelete: Restrict)
+
+  @@index([ownerUserId, startAt])
+  @@index([startAt])
+  @@index([clientId])
+  @@index([needId])
+  @@index([propertyId])
+  @@index([dealId])
+  @@map("calendar_events")
+}
+
+model Notification {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipientUserId String    @map("recipient_user_id") @db.Uuid
+  kind            String
+  sourceType      String    @map("source_type")
+  sourceId        String    @map("source_id") @db.Uuid
+  triggerAt       DateTime  @map("trigger_at") @db.Timestamptz(3)
+  state           String    @default("pending")
+  readAt          DateTime? @map("read_at") @db.Timestamptz(3)
+  snoozedUntil    DateTime? @map("snoozed_until") @db.Timestamptz(3)
+  title           String
+  link            String
+  dedupKey        String    @unique @map("dedup_key")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  recipient       User      @relation(fields: [recipientUserId], references: [id], onDelete: Restrict)
+
+  @@index([recipientUserId, state, triggerAt])
+  @@index([state, triggerAt])
+  @@index([sourceType, sourceId])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  leadMinutes Int      @default(15) @map("lead_minutes")
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("notification_preferences")
+}
+
+model DealChecklistItem {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dealId            String    @map("deal_id") @db.Uuid
+  code              String
+  title             String
+  status            String    @default("none")
+  responsibleUserId String    @map("responsible_user_id") @db.Uuid
+  checkedAt         DateTime? @map("checked_at") @db.Timestamptz(3)
+  documentId        String?   @map("document_id") @db.Uuid
+  sortOrder         Int       @default(0) @map("sort_order")
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deal              Deal      @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  responsible       User      @relation(fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  document          Document? @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  @@unique([dealId, code])
+  @@index([responsibleUserId])
+  @@index([documentId])
+  @@map("deal_checklist_items")
 }

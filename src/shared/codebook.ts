@@ -12,6 +12,28 @@
  */
 
 export const CODEBOOK = {
+  externalSource: { cian: "Циан", mirkvartir: "Мир Квартир", onrealt: "OnRealt", domclick: "Домклик", yandex: "Яндекс", youla: "Юла", avito: "Авито", web_search: "Веб-поиск", manual: "Вручную" },
+  externalSourceMethod: { scraper: "Скрапер", web_search: "Веб-поиск", manual: "Вручную" },
+  externalOperation: { sale: "Продажа", rent: "Аренда" },
+  externalPriceUnit: { total: "Всего", per_month: "В месяц", per_m2: "За м²", per_m2_month: "За м² в месяц", per_year: "В год", per_m2_year: "За м² в год" },
+  listingAvailability: { available: "Доступен", reserved: "Забронирован", withdrawn: "Снят", unknown: "Неизвестно" },
+  searchBookmarkStatus: { study: "Изучить", clarify: "Уточнить", exclude: "Исключить" },
+  selectionReviewStatus: { candidate: "Кандидат", shortlisted: "Отобран", rejected: "Отклонён", proposed: "Предложен" },
+  searchRunStatus: { pending: "Ожидает", running: "Выполняется", success: "Успешно", partial: "Частично", error: "Ошибка", cancelled: "Отменён" },
+  searchSourceStatus: { success: "Успешно", partial: "Частично", blocked: "Заблокирован", timeout: "Тайм-аут", unsupported_filter: "Фильтр не поддерживается", error: "Ошибка", disabled: "Отключён" },
+  searchVerdict: { confirmed: "Подтверждён", needs_review: "Требует проверки", rejected: "Исключён" },
+  aiCallType: { parse: "Разбор запроса", description: "Анализ описания", web_search: "Веб-поиск" },
+  aiUsageStatus: { pending: "Ожидает", running: "Выполняется", success: "Успешно", error: "Ошибка", cancelled: "Отменён" },
+  aiReservationStatus: { reserved: "Зарезервировано", settled: "Учтено", released: "Освобождено" },
+  aiSearchContextSize: { low: "Малый", medium: "Средний", high: "Большой" },
+  aiTariffUnit: { input_token: "Входной токен", output_token: "Выходной токен", input_million_tokens: "Миллион входных токенов", output_million_tokens: "Миллион выходных токенов", web_search_call: "Веб-запрос" },
+  calendarVisibility: { public: "Общее", private: "Личное" },
+  notificationState: { pending: "Ожидает", delivered: "Доставлено", read: "Прочитано", dismissed: "Скрыто" },
+  notificationKind: { task: "Задача", assignment: "Назначение", showing: "Показ", agreement: "Договор", pause_return: "Возврат из паузы", annual_contact: "Ежегодный контакт", postdeal: "Постсделочный контакт", calendar_event: "Встреча" },
+  notificationSourceType: { task: "Задача", showing: "Показ", agreement: "Договор", calendar_event: "Встреча" },
+  propertyMediaKind: { photo: "Фото", document: "Документ" },
+  dealChecklistStatus: { none: "Нет", review: "На проверке", verified: "Проверено", not_required: "Не требуется" },
+
   userRole: { manager: "Руководитель", realtor: "Риелтор" },
 
   clientStatus: { active: "Активный", inactive: "Неактивный", archived: "В архиве" },
@@ -93,6 +115,7 @@ export const CODEBOOK = {
   taskStatus: { planned: "Запланирована", in_progress: "В работе", completed: "Выполнена", cancelled: "Отменена" },
   taskPriority: { low: "Низкий", normal: "Обычный", high: "Высокий" },
   taskType: {
+    pause_return: "Возврат из паузы",
     call_or_contact: "Звонок/контакт",
     showing_or_meeting: "Показ/встреча",
     commercial_offer: "Коммерческое предложение",
@@ -241,6 +264,30 @@ export function isCode<N extends CodebookName>(name: N, value: unknown): value i
  * (scripts/dev/print-check-constraints.ts) и тестом их соответствия миграции.
  */
 export const CODEBOOK_COLUMNS: ReadonlyArray<{ table: string; column: string; book: CodebookName; nullable?: boolean }> = [
+  { table: "external_listings", column: "source", book: "externalSource" },
+  { table: "external_listings", column: "source_method", book: "externalSourceMethod" },
+  { table: "external_listings", column: "operation", book: "externalOperation" },
+  { table: "external_listings", column: "price_unit", book: "externalPriceUnit" },
+  { table: "external_listing_verifications", column: "availability", book: "listingAvailability" },
+  { table: "search_bookmarks", column: "status", book: "searchBookmarkStatus" },
+  { table: "search_selections", column: "review_status", book: "selectionReviewStatus" },
+  { table: "search_runs", column: "status", book: "searchRunStatus" },
+  { table: "search_run_sources", column: "source", book: "externalSource" },
+  { table: "search_run_sources", column: "status", book: "searchSourceStatus" },
+  { table: "search_run_results", column: "verdict", book: "searchVerdict" },
+  { table: "ai_usage_logs", column: "call_type", book: "aiCallType" },
+  { table: "ai_usage_logs", column: "status", book: "aiUsageStatus" },
+  { table: "ai_tariffs", column: "call_type", book: "aiCallType" },
+  { table: "ai_tariffs", column: "unit", book: "aiTariffUnit" },
+  { table: "ai_budget_reservations", column: "status", book: "aiReservationStatus" },
+  { table: "ai_settings", column: "search_context_size", book: "aiSearchContextSize" },
+  { table: "calendar_events", column: "visibility", book: "calendarVisibility" },
+  { table: "notifications", column: "state", book: "notificationState" },
+  { table: "notifications", column: "kind", book: "notificationKind" },
+  { table: "notifications", column: "source_type", book: "notificationSourceType" },
+  { table: "document_properties", column: "kind", book: "propertyMediaKind" },
+  { table: "deal_checklist_items", column: "status", book: "dealChecklistStatus" },
+
   { table: "users", column: "role_code", book: "userRole" },
   { table: "clients", column: "status", book: "clientStatus" },
   { table: "clients", column: "client_kind", book: "clientKind" },
