@@ -1,0 +1,36 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "source": "cian",
+  "startedAt": "2026-11-05T16:31:37.140Z",
+  "finishedAt": "2026-11-05T16:31:38.378Z",
+  "requests": 2,
+  "responses": [
+    {
+      "status": 301,
+      "host": "www.cian.ru",
+      "challenge": false
+    },
+    {
+      "status": 200,
+      "host": "novosibirsk.cian.ru",
+      "challenge": false
+    }
+  ],
+  "status": "PARTIAL",
+  "resultCount": 0,
+  "errors": [
+    {
+      "code": "PARSE_FAILED",
+      "page": 1
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "hasNext": null
+    }
+  ],
+  "normalized": [],
+  "redaction": "Markup structure only; all text/attributes removed. Normalized property projection without seller, contacts, address, description, images. Not a full HTML parser replay."
+}

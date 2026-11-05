@@ -1,14 +1,40 @@
 import RealEstateScraper from "real-estate-scrapper";
-import type { Browser, BrowserContext } from "playwright-core";
+import { chromium, type BrowserContext } from "playwright-core";
 import { safeRequest } from "@/shared/net/ssrf";
 import { SearchFilters, type SearchResult, type Source, type SourceRun } from "../domain/types";
 import { evaluateListing } from "../domain/evaluation";
 import { deduplicateListings, normalizeListing } from "./normalization";
 import { buildScraperQuery, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
 import { scraperHttpRequest } from "./scraper-http";
+import { extendSourceParsers } from "./parser-extension";
+import { resilientTransport, type AdapterFailure } from "./source-response";
+import { resolveSourceDepth, type DepthOptions } from "./source-limits";
+
+export interface AdapterSourceRun extends Omit<SourceRun, "status"> {
+  status: SourceRun["status"] | AdapterFailure;
+  incomplete: boolean; pagesFetched: number; listingsFetched: number;
+  maxPages: number; limit: number; estimatedRequests: number;
+  actionUrl?: string;
+  failureCode?: string;
+}
+export interface AdapterSearchResult extends Omit<SearchResult, "sources" | "listings"> {
+  sources: AdapterSourceRun[];
+  listings: { listing: ReturnType<typeof normalizeListing>; evaluation: SearchResult["listings"][number]["evaluation"] }[];
+}
+function failure(errors: { code?: string; status?: number }[]): AdapterSourceRun["status"] {
+  if (errors.some(e => e.code === "NEEDS_USER_ACTION")) return "needs_user_action";
+  if (errors.some(e => e.code === "RATE_LIMITED" || e.status === 429)) return "rate_limited";
+  if (errors.some(e => e.status === 439)) return "blocked";
+  if (errors.some(e => e.code === "PARSE_FAILED" || e.code === "INVALID_RESPONSE" || e.code === "API_RESPONSE_FAILED")) return "parse_failed";
+  if (errors.some(e => e.code === "ABORTED")) return "cancelled";
+  return classify(errors);
+}
 export { buildScraperQuery } from "./source-filters";
 
-export interface ScraperAdapter { search(input: unknown): Promise<SearchResult>; }
+export interface ScraperAdapter {
+  search(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<SearchResult>;
+  searchDetailed?(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<AdapterSearchResult>;
+}
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
 export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions }) => Promise<ScraperClient>;
 /** A small HTTP-200 challenge is not an empty market or a selector regression. */
@@ -21,8 +47,22 @@ export class ScraperJobLimiter {
   private active = 0;
   private readonly queue: (() => void)[] = [];
   constructor(readonly maximum = 1) { if (!Number.isInteger(maximum) || maximum < 1) throw new Error("INVALID_CONCURRENCY"); }
-  async run<T>(job: () => Promise<T>): Promise<T> {
-    await new Promise<void>(resolve => { if (this.active < this.maximum) { this.active++; resolve(); } else this.queue.push(resolve); });
+  async run<T>(job: () => Promise<T>, context: { signal?: AbortSignal; deadline?: number } = {}): Promise<T> {
+    await new Promise<void>((resolve, reject) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const cleanup = () => { if (timer) clearTimeout(timer); context.signal?.removeEventListener("abort", abort); };
+      const start = () => { cleanup(); resolve(); };
+      const fail = (code: string) => { const index = this.queue.indexOf(start); if (index >= 0) this.queue.splice(index, 1); cleanup(); reject({ code }); };
+      const abort = () => fail("ABORTED");
+      if (context.signal?.aborted) { abort(); return; }
+      if (context.deadline !== undefined && context.deadline <= Date.now()) { fail("TIMEOUT"); return; }
+      if (this.active < this.maximum) { this.active++; start(); }
+      else {
+        this.queue.push(start);
+        context.signal?.addEventListener("abort", abort, { once: true });
+        if (context.deadline !== undefined) timer = setTimeout(() => fail("TIMEOUT"), Math.max(1, context.deadline - Date.now()));
+      }
+    });
     try { return await job(); } finally { const next = this.queue.shift(); if (next) next(); else this.active--; }
   }
 }
@@ -31,42 +71,39 @@ export interface ScraperOptions {
   jobTimeoutMs?: number; maxConcurrentJobs?: number; limiter?: ScraperJobLimiter;
   sourceOptions?: RealEstateScraper.Query["sourceOptions"];
   browser?: RealEstateScraper.BrowserOptions;
+  depth?: DepthOptions; sourceDepth?: Partial<Record<Source, DepthOptions>>;
   factory?: ScraperFactory;
 }
 const transport: RealEstateScraper.Transport = async request => {
   if (!["GET", "POST"].includes(request.method.toUpperCase())) throw new Error("UNSUPPORTED_METHOD");
   const body = request.data === undefined ? undefined : typeof request.data === "string" ? request.data : JSON.stringify(request.data);
-  const response = await scraperHttpRequest(request.url, { method: request.method.toUpperCase() as "GET" | "POST", headers: request.headers, body, signal: request.signal, timeoutMs: request.timeout, maxBytes: 10_000_000 });
+  const response = await scraperHttpRequest(request.url, { method: request.method.toUpperCase() as "GET" | "POST", headers: request.headers, body, signal: request.signal, timeoutMs: request.timeout, maxBytes: 10_000_000 }).catch(error => {
+    if (error instanceof Error && error.message === "NETWORK_TIMEOUT_OR_ABORT") throw Object.assign(new Error("TIMEOUT"), { code: request.signal?.aborted ? "ABORTED" : "TIMEOUT" });
+    throw error;
+  });
   const text = response.data.toString("utf8");
   let data: unknown = text;
   if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch { /* Parser reports invalid payload. */ } }
-  return { data, status: response.status, url: response.url };
+  return { data, status: response.status, url: response.url, headers: Object.fromEntries(Object.entries(response.headers).filter((entry): entry is [string, string] => typeof entry[1] === "string")) };
 };
-/** Detect challenges at the parser boundary without fabricating an HTTP status. */
-function guardCianParser(client: RealEstateScraper): RealEstateScraper {
-  const parser = client.parsers.cian;
-  const parse = parser.parsePage.bind(parser);
-  parser.parsePage = (html, url, query) => {
-    if (isCianAccessChallenge(url, html)) throw Object.assign(new Error("CIAN_ACCESS_CHALLENGE"), { code: "ACCESS_BLOCKED", url });
-    return parse(html, url, query);
-  };
-  return client;
-}
 /** Use the public browser lifecycle API to intercept ALL browser network, including subresources. */
 export const defaultScraperFactory: ScraperFactory = async config => {
-  const { browser, ...httpConfig } = config;
-  if (!browser) return guardCianParser(await RealEstateScraper.create(httpConfig));
+  const { browser, ...provided } = config;
+  const httpConfig = { ...provided, transport: provided.transport ?? transport, maxRetries: 0 };
+  if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig));
   const browserOptions = browser === true ? {} : browser;
-  const launched = await RealEstateScraper.launchBrowserTransport(browserOptions);
+  // Ordinary Playwright launch: no fingerprint changes or anti-detection scripts.
+  const browserInstance = await chromium.launch({ channel: browserOptions.channel, executablePath: browserOptions.executablePath, headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
+  const launched = { browser: browserInstance, close: () => browserInstance.close() };
   try {
-    await (launched.context as BrowserContext).close();
-    const context = await (launched.browser as Browser).newContext({ serviceWorkers: "block", locale: "ru-RU" });
+    const context: BrowserContext = await launched.browser.newContext({ serviceWorkers: "block", locale: "ru-RU" });
+    const browserAbort = new AbortController();
     await context.routeWebSocket("**/*", socket => socket.close());
     await context.route("**/*", async route => {
       const request = route.request();
       try {
         if (!["GET", "POST"].includes(request.method())) { await route.abort(); return; }
-        const response = await safeRequest(request.url(), { method: request.method() as "GET" | "POST", headers: request.headers(), body: request.postData() ?? undefined, timeoutMs: config.timeout, maxBytes: 10_000_000, followRedirects: false });
+        const response = await safeRequest(request.url(), { method: request.method() as "GET" | "POST", headers: request.headers(), body: request.postData() ?? undefined, signal: browserAbort.signal, timeoutMs: config.timeout, maxBytes: 10_000_000, followRedirects: false });
         const headers = Object.fromEntries(Object.entries(response.headers).filter(([key, value]) => value !== undefined && !["content-encoding", "content-length", "transfer-encoding"].includes(key)).map(([key, value]) => [key, Array.isArray(value) ? value.join(", ") : String(value)]));
         await route.fulfill({ status: response.status, headers, body: response.data });
       } catch { await route.abort().catch(() => undefined); }
@@ -74,9 +111,15 @@ export const defaultScraperFactory: ScraperFactory = async config => {
     const sources = browserOptions.sources ?? ["cian", "avito"];
     const sourceConfigs = { ...httpConfig.sourceConfigs };
     const browserTransport = RealEstateScraper.createBrowserTransport({ context, timeout: browserOptions.timeout, settleMs: browserOptions.settleMs, waitForSelector: browserOptions.waitForSelector });
-    const guardedBrowserTransport: RealEstateScraper.Transport = request => request.method.toUpperCase() !== "GET" && !request.browser ? transport(request) : browserTransport(request);
-    for (const source of sources) sourceConfigs[source] = { ...sourceConfigs[source], transport: guardedBrowserTransport };
-    const client = guardCianParser(new RealEstateScraper({ ...httpConfig, sourceConfigs }));
+    const guardedBrowserTransport: RealEstateScraper.Transport = async request => {
+      const abort = () => browserAbort.abort();
+      request.signal?.addEventListener("abort", abort, { once: true });
+      if (request.signal?.aborted) abort();
+      try { return await (request.method.toUpperCase() !== "GET" && !request.browser ? (httpConfig.transport ?? transport)(request) : browserTransport(request)); }
+      finally { request.signal?.removeEventListener("abort", abort); }
+    };
+    for (const source of sources) sourceConfigs[source] = { ...sourceConfigs[source], transport: resilientTransport(guardedBrowserTransport, source, Date.now() + (config.timeout ?? 30000)) };
+    const client = extendSourceParsers(new RealEstateScraper({ ...httpConfig, sourceConfigs }));
     return { searchSite: client.searchSite.bind(client), close: launched.close };
   } catch (error) { await launched.close(); throw error; }
 };
@@ -87,21 +130,31 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
   private readonly limiter: ScraperJobLimiter;
   private readonly timeout: number;
   constructor(private readonly options: ScraperOptions = {}) {
-    const maximum = positiveInt(options.maxConcurrentJobs ?? process.env.SCRAPER_MAX_CONCURRENT_JOBS, 1);
+    const maximum = Math.min(3, positiveInt(options.maxConcurrentJobs ?? process.env.SCRAPER_MAX_CONCURRENT_JOBS, 1));
     this.limiter = options.limiter ?? (options.factory ? new ScraperJobLimiter(maximum) : productionLimiter ??= new ScraperJobLimiter(maximum));
-    this.timeout = positiveInt(options.jobTimeoutMs ?? process.env.SCRAPER_JOB_TIMEOUT_MS, 180_000);
+    this.timeout = Math.min(300_000, positiveInt(options.jobTimeoutMs ?? process.env.SCRAPER_JOB_TIMEOUT_MS, 180_000));
   }
-  async search(input: unknown): Promise<SearchResult> {
+  /** Compatibility bridge until application/model adopts v3.1 statuses. */
+  async search(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<SearchResult> {
+    const result = await this.searchDetailed(input, context);
+    return { ...result, sources: result.sources.map(run => ({ ...run, adapterStatus: run.status,
+      status: (["needs_user_action", "rate_limited"].includes(run.status) ? "blocked" : run.status === "parse_failed" ? "error" : run.status === "cancelled" ? "timeout" : run.status) as SourceRun["status"] })) };
+  }
+  async searchDetailed(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<AdapterSearchResult> {
     const filters = SearchFilters.parse(input);
-    const deadline = Date.now() + this.timeout;
-    const runs = await Promise.all([...new Set(filters.sources)].map(source => this.runSource(source, filters, deadline)));
+    const deadline = Math.min(context?.deadline ?? Infinity, Date.now() + this.timeout);
+    const runs = await Promise.all([...new Set(filters.sources)].map(source => this.runSource(source, filters, deadline, context?.signal)));
     const listings = deduplicateListings(runs.flatMap(r => r.listings));
     return { listings: listings.map(listing => ({ listing, evaluation: evaluateListing(listing, filters) })), sources: runs.map(r => r.run) };
   }
-  private async runSource(source: Source, filters: SearchFilters, deadline: number) {
-    const empty = (status: SourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason } satisfies SourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
+  private async runSource(source: Source, filters: SearchFilters, deadline: number, signal?: AbortSignal) {
+    const depth = resolveSourceDepth(source, { ...this.options.depth, ...this.options.sourceDepth?.[source] }, source === "onrealt" ? filters.purposes.length || 5 : Math.max(1, filters.purposes.length));
+    const metadata = { incomplete: true, pagesFetched: 0, listingsFetched: 0, maxPages: depth.maxPages, limit: depth.limit, estimatedRequests: depth.estimatedRequests };
+    const host = { cian: "www.cian.ru", avito: "www.avito.ru", domclick: "domclick.ru", yandex: "realty.yandex.ru", mirkvartir: "cre.mirkvartir.ru", onrealt: "onrealt.ru", youla: "youla.ru" }[source];
+    const empty = (status: AdapterSourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason, ...metadata, ...(status === "needs_user_action" ? { actionUrl: `https://${host}/` } : {}) } satisfies AdapterSourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
+    if (signal?.aborted) return empty("cancelled", "Поиск отменён");
     if (!(this.options.enabled ?? process.env.SCRAPER_ENABLED === "true") || this.options.enabledSources && !this.options.enabledSources.includes(source)) return empty("disabled", "Источник отключён");
-    const query = buildScraperQuery(filters, source, new AbortController().signal, this.options.sourceOptions);
+    const query = buildScraperQuery(filters, source, new AbortController().signal, this.options.sourceOptions, depth);
     const geography = query.sourceOptions?.[source];
     const missingGeography = source === "domclick" && !geography?.address && !geography?.params?.address ? "address" : source === "avito" && !geography?.locationId ? "locationId" : source === "mirkvartir" && !geography?.locationIds ? "locationIds" : null;
     if (missingGeography && !geography?.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${missingGeography}`);
@@ -110,37 +163,56 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       // request after an earlier source consumed the entire job's budget.
       const remaining = deadline - Date.now();
       if (remaining <= 0) return empty("timeout", "Превышен срок выполнения задания");
-      const controller = new AbortController(); let timer: ReturnType<typeof setTimeout> | undefined;
+      if (signal?.aborted) return empty("cancelled", "Поиск отменён");
+      const controller = new AbortController();
+      const abort = () => controller.abort();
+      signal?.addEventListener("abort", abort, { once: true });
+      let timer: ReturnType<typeof setTimeout> | undefined;
       let client: ScraperClient | undefined;
       const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
       const factory = this.options.factory ?? defaultScraperFactory;
       const work = async () => {
-        client = await factory({ timeout: Math.min(remaining, 30_000), maxRetries: 0, transport,
+        client = await factory({ timeout: Math.min(remaining, 30_000), maxRetries: 0, transport: resilientTransport(transport, source, deadline),
           ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
             ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
             ...this.options.browser, sources: [source] } } : {}) });
         if (controller.signal.aborted) { await client.close(); throw { code: "ABORTED" }; }
-        return client.searchSite(source, buildScraperQuery(filters, source, controller.signal, this.options.sourceOptions));
+        return client.searchSite(source, buildScraperQuery(filters, source, controller.signal, this.options.sourceOptions, depth));
       };
+      let partial: RealEstateScraper.SearchResult | undefined;
       try {
-        const result = await Promise.race([work(), new Promise<never>((_, reject) => { timer = setTimeout(() => { controller.abort(); reject({ code: "TIMEOUT" }); }, remaining); })]);
+        const result = await Promise.race([work().then(result => { partial = result; return result; }), new Promise<RealEstateScraper.SearchResult>((resolve, reject) => {
+          const stop = (code: string) => { controller.abort(); setTimeout(() => partial ? resolve(partial) : reject({ code }), 20); };
+          controller.signal.addEventListener("abort", () => { setTimeout(() => partial ? resolve(partial) : reject({ code: signal?.aborted ? "ABORTED" : "TIMEOUT" }), 20); }, { once: true });
+          timer = setTimeout(() => stop("TIMEOUT"), remaining);
+        })]);
         const listings: ReturnType<typeof normalizeListing>[] = []; let invalid = 0;
         for (const raw of result.results) { try { if (raw.source !== source) throw new Error("SOURCE_MISMATCH"); listings.push(normalizeListing(raw, result.timestamp)); } catch { invalid++; } }
         const successfulPage = result.pages.some(p => p.errors.length === 0);
-        const errors = result.errors;
-        const status: SourceRun["status"] = errors.length ? successfulPage || listings.length ? "partial" : classify(errors) : invalid || result.partial ? "partial" : "success";
-        const limited = result.pages.some(p => p.hasNext === true || p.truncated);
-        return { listings, run: { source, status, resultCount: listings.length,
-          reason: errors.length ? errors.map(scraperErrorReason).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Выборка ограничена бюджетом страниц/результатов" : null } satisfies SourceRun };
+        const errors = result.errors.map(e => e.code === "ABORTED" && !signal?.aborted ? { ...e, code: "TIMEOUT" } : e);
+        const status: AdapterSourceRun["status"] = errors.length ? successfulPage || listings.length ? "partial" : failure(errors) : invalid || result.partial ? "partial" : "success";
+        const branchTails = new Map<string, RealEstateScraper.PageMetadata>();
+        for (const page of result.pages) branchTails.set(JSON.stringify(page.types ?? []), page);
+        const limited = [...branchTails.values()].some(p => p.hasNext === true || p.truncated);
+        return { listings, run: { source, status, resultCount: listings.length, ...metadata,
+          pagesFetched: result.pages.filter(p => !p.errors.length).length, listingsFetched: result.results.length,
+          ...(errors[0] ? { failureCode: errors[0].code } : {}),
+          incomplete: limited || !!errors.length || invalid > 0 || result.pages.some(p => p.hasNext === null),
+          ...(errors.some(e => e.code === "NEEDS_USER_ACTION") ? { actionUrl: `https://${host}/` } : {}),
+          reason: errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null } satisfies AdapterSourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
-        return empty(classify([info]), scraperErrorReason(info));
+        return empty(failure([info]), `${source}: ${scraperErrorReason(info)}`);
       } finally {
+        signal?.removeEventListener("abort", abort);
         if (timer) clearTimeout(timer);
         controller.abort();
         // close() is idempotent; race bounds cleanup even for faulty injected clients.
         if (client) { let cleanupTimer: ReturnType<typeof setTimeout> | undefined; await Promise.race([client.close().catch(() => undefined), new Promise<void>(resolve => { cleanupTimer = setTimeout(resolve, 1000); })]); if (cleanupTimer) clearTimeout(cleanupTimer); }
       }
+    }, { signal, deadline }).catch(error => {
+      const info = error as { code?: string };
+      return empty(failure([info]), `${source}: ${scraperErrorReason(info)}`);
     });
   }
 }

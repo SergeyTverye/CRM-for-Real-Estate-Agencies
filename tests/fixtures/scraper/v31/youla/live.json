@@ -1,0 +1,32 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "source": "youla",
+  "startedAt": "2026-11-05T16:31:58.968Z",
+  "finishedAt": "2026-11-05T16:32:01.744Z",
+  "requests": 2,
+  "responses": [
+    {
+      "status": 200,
+      "host": "youla.ru",
+      "challenge": false
+    },
+    {
+      "status": 200,
+      "host": "api-gw.youla.ru",
+      "challenge": false
+    }
+  ],
+  "status": "PASS",
+  "resultCount": 0,
+  "errors": [],
+  "pages": [
+    {
+      "page": 1,
+      "hasNext": false,
+      "truncated": false
+    }
+  ],
+  "normalized": [],
+  "redaction": "Markup structure only; all text/attributes removed. Normalized property projection without seller, contacts, address, description, images. Not a full HTML parser replay."
+}

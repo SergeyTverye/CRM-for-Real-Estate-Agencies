@@ -1,0 +1,25 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "source": "mirkvartir",
+  "startedAt": "2026-11-05T16:31:39.334Z",
+  "finishedAt": "2026-11-05T16:31:40.232Z",
+  "requests": 1,
+  "responses": [],
+  "status": "PARTIAL",
+  "resultCount": 0,
+  "errors": [
+    {
+      "code": "FETCH_FAILED",
+      "page": 1
+    }
+  ],
+  "pages": [
+    {
+      "page": 1,
+      "hasNext": null
+    }
+  ],
+  "normalized": [],
+  "redaction": "Markup structure only; all text/attributes removed. Normalized property projection without seller, contacts, address, description, images. Not a full HTML parser replay."
+}

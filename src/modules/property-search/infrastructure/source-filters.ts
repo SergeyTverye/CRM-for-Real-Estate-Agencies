@@ -1,5 +1,6 @@
 import type RealEstateScraper from "real-estate-scrapper";
 import type { SearchFilters, Source } from "../domain/types";
+import { resolveSourceDepth, type DepthOptions } from "./source-limits";
 
 const purposeMap = { retail: "retail", psn_universal: "freePurpose", free_purpose: "freePurpose", office: "office", production: "industrial", warehouse: "warehouse" } as const;
 const cities = {
@@ -8,7 +9,7 @@ const cities = {
 } as const;
 
 /** Site IDs are independent namespaces. Trusted server options override defaults. */
-export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"]): RealEstateScraper.Query {
+export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query {
   const city = cities[filters.city.trim().toLocaleLowerCase("ru") as keyof typeof cities];
   const defaults: RealEstateScraper.SourceOptions = city ? {
     citySlug: city.slug,
@@ -21,8 +22,9 @@ export function buildScraperQuery(filters: SearchFilters, source: Source, signal
   const types = filters.purposes.length ? [...new Set(filters.purposes.map(p => purposeMap[p]))]
     : source === "onrealt" ? ["retail", "freePurpose", "office", "industrial", "warehouse"] as const : ["commercial"] as const;
   // Price, floor, ownership and districts remain local to preserve unknown candidates.
+  const { maxPages, limit } = resolveSourceDepth(source, depth);
   return { city: filters.city, category: "commercial", types: [...types], deal: filters.operation,
-    sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages: 2, limit: 100, signal,
+    sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages, limit, signal,
     sourceOptions: { ...sourceOptions, [source]: { ...defaults, ...sourceOptions?.[source] } } };
 }
 

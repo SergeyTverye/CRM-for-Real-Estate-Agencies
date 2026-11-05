@@ -4,6 +4,7 @@ import { parseFloor } from "../domain/floor";
 import type { NormalizedListing, PriceUnit, Purpose } from "../domain/types";
 
 import { listingFields } from "./listing-fields";
+import { extractListingDates, type ListingDates } from "./listing-dates";
 
 const purposeMap: Record<string, Purpose> = { retail: "retail", freePurpose: "free_purpose", office: "office", industrial: "production", warehouse: "warehouse" };
 function safeUrl(value: string): string | null { try { return parseExternalUrl(value).href; } catch { return null; } }
@@ -16,7 +17,7 @@ export function parsePriceUnit(text: string | null | undefined, operation: "sale
   return null;
 }
 /** Package 2.1.0 already expands Cian grouped listings into #part-N/parentId rows. */
-export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new Date().toISOString()): NormalizedListing & { title: string | null } {
+export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new Date().toISOString()): NormalizedListing & ListingDates & { title: string | null } {
   const url = safeUrl(raw.url);
   if (!url) throw new Error("INVALID_LISTING_URL");
   const part = new URL(url).hash.match(/^#part-(\d+)$/u)?.[1] ?? null;
@@ -28,7 +29,12 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
   const basement = raw.description?.match(/(?:^|[.;\n])\s*(?:этаж\s*[:—-]?\s*)?(цоколь\S*|полуподвал\S*|подвал\S*)\s*(?:этаж|помещени\S*)?(?=[\s,.;]|$)/iu);
   if (basement) floor = parseFloor(basement[1]);
   const price = raw.price !== null && Number.isFinite(raw.price) && raw.price >= 0 && raw.price < 1e15 ? raw.price.toFixed(2) : null;
+  const dates = extractListingDates(raw.source, raw, { id: raw.parentId ?? raw.id, url }, fetchedAt);
+  const extended = raw as RealEstateScraper.Listing & Partial<ListingDates>;
+  if ((dates.publishedAt || dates.sourceUpdatedAt) && extended.dateSource?.startsWith(`${raw.source}:`)) dates.dateSource = extended.dateSource;
+  if ((dates.publishedAt || dates.sourceUpdatedAt) && ["day", "exact"].includes(extended.datePrecision ?? "")) dates.datePrecision = extended.datePrecision!;
   return {
+    ...dates,
     source: raw.source, sourceListingId: raw.parentId ?? raw.id ?? null, sourceUnitId: part ?? (raw.parentId ? raw.id ?? null : null), url,
     purpose: purposeMap[raw.propertyType ?? ""] ?? null, operation,
     // Package 2.1.0 generic parsers infer propertyType from title, not a source field.
@@ -44,8 +50,8 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
 export function listingIdentity(listing: NormalizedListing): string | null {
   return listing.sourceListingId && !listing.identityNeedsReview ? JSON.stringify([listing.source, listing.sourceListingId, listing.sourceUnitId]) : null;
 }
-export function deduplicateListings(input: NormalizedListing[]): NormalizedListing[] {
-  const exact = new Set<string>(); const results: NormalizedListing[] = [];
+export function deduplicateListings<T extends NormalizedListing>(input: T[]): T[] {
+  const exact = new Set<string>(); const results: T[] = [];
   for (const listing of input) { const key = listingIdentity(listing); if (key && exact.has(key)) continue; if (key) exact.add(key); results.push({ ...listing, possibleDuplicateKeys: [] }); }
   for (let i = 0; i < results.length; i++) for (let j = i + 1; j < results.length; j++) {
     const a = results[i]!, b = results[j]!;
