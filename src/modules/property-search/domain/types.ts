@@ -37,6 +37,8 @@ export type CriterionState = "matched" | "contradicted" | "unknown";
 export interface CriterionEvaluation { criterion: string; state: CriterionState; source: "structured" | "rule" | "ai"; evidence: string; }
 export interface OwnerVerification { source: string; method: string; checkedAt: string; verifiedBy?: string; }
 export interface NormalizedListing {
+  title?: string | null;
+  purposeSource?: "structured" | "rule";
   source: Source; sourceListingId: string | null; sourceUnitId: string | null; url: string;
   purpose: Purpose | null; operation: "sale" | "rent" | null;
   price: string | null; priceUnit: PriceUnit | null; area: number | null; floor: Floor;

@@ -56,7 +56,9 @@ async function shot(file: string, scenario: string, runId?: string, fullPage = f
       const el = document.createElement("div"); el.id = "capture-provenance"; el.textContent = label;
       Object.assign(el.style, { position: "fixed", bottom: "0", left: "0", right: "0", padding: "8px 16px", zIndex: "2147483647", background: "#172b3e", color: "white", font: "12px Arial", textAlign: "center" });
       document.body.append(el);
-    }, `LIVE-данные, сохранённые при испытании ${sourceTime}, кадр переснят без новых вызовов`);
+    }, process.argv[2] === "purpose-rule-only"
+      ? `Сохранённые LIVE-данные ${sourceTime} · офлайн-переоценка назначения · AI выключен, новых вызовов нет`
+      : `LIVE-данные, сохранённые при испытании ${sourceTime}, кадр переснят без новых вызовов`);
   }
   await page.screenshot({ path: `${output}/${file}.png`, animations: "disabled", fullPage });
   const record = { file: `${file}.png`, scenario, date: new Date().toISOString(), sha, role: "realtor1", url: new URL(page.url()).pathname + new URL(page.url()).search,
@@ -80,6 +82,21 @@ async function focus(locator: Locator) {
 try {
   await mkdir("data/polish-offer", { recursive: true });
   await login();
+  if (process.argv[2] === "purpose-rule-only") {
+    const id = evidence.runs[0].id;
+    await run(id);
+    await page.getByRole("tab", { name: "Исключены", exact: true }).click();
+    await focus(page.getByRole("tablist", { name: "Результаты поиска" }));
+    await shot("live-ai/04-live-results", "Сохранённая LIVE выдача после офлайн-переоценки назначения; исходно жилые объявления были needs_review", id);
+    const evidenceBlock = page.locator("details").filter({ has: page.locator("summary", { hasText: /^Доказательства по критериям/ }) })
+      .filter({ hasText: /Квартира в квартале бизнес-класса|жилой комплекс комфорт-класса/ }).first();
+    await expect(evidenceBlock).toBeAttached();
+    await evidenceBlock.locator("summary").click();
+    await expect(evidenceBlock).toContainText(/Назначение/);
+    await focus(evidenceBlock);
+    await shot("live-ai/05-evidence", "Противоречие назначения: жилое объявление, детерминированное правило и исходный evidence-фрагмент", id);
+    return;
+  }
   if (process.argv[2] === "details-only") {
     const ids = evidence.runs.map((r: { id: string }) => r.id);
     await run(ids[0]);

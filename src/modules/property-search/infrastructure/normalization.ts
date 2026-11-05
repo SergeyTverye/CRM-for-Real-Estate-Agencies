@@ -31,12 +31,14 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
   return {
     source: raw.source, sourceListingId: raw.parentId ?? raw.id ?? null, sourceUnitId: part ?? (raw.parentId ? raw.id ?? null : null), url,
     purpose: purposeMap[raw.propertyType ?? ""] ?? null, operation,
+    // Package 2.1.0 generic parsers infer propertyType from title, not a source field.
+    purposeSource: ["yandex", "onrealt"].includes(raw.source) ? "rule" : "structured",
     price, priceUnit: parsePriceUnit(raw.priceText, operation),
     area: raw.area !== null && Number.isFinite(raw.area) && raw.area >= 0 ? raw.area : null, floor,
     ...listingFields(raw),
     seller: { type: raw.sellerType === "owner" || raw.sellerType === "agent" ? raw.sellerType : "unknown" },
     description: raw.description ?? "", images: raw.images.map(safeUrl).filter((u): u is string => u !== null), fetchedAt,
-    structuredFeatures: {}, possibleDuplicateKeys: [], identityNeedsReview: !(raw.parentId ?? raw.id) || !!raw.parentId && !part && !raw.id,
+    structuredFeatures: raw.category ? { category: raw.category } : {}, possibleDuplicateKeys: [], identityNeedsReview: !(raw.parentId ?? raw.id) || !!raw.parentId && !part && !raw.id,
   };
 }
 export function listingIdentity(listing: NormalizedListing): string | null {

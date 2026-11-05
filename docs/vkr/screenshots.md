@@ -1,5 +1,16 @@
 # Подлинные экраны ВКР
 
+## Офлайн-переоценка назначения, 05.11.2026
+
+Пересняты и визуально просмотрены только [04-live-results.png](../screenshots/vkr/live-ai/04-live-results.png) и [05-evidence.png](../screenshots/vkr/live-ai/05-evidence.png). Кадры 14:13:49 UTC показывают сохранённый run 33f90440-7a66-4d5f-bc8a-dadb0c271906 от 11:53:10 UTC после применения нового правила назначения. Исходно жилые результаты испытания были needs_review; на 04 теперь открыты «Исключены», на 05 раскрыто противоречие назначения с исходным фрагментом про квартиру. Это офлайн-переоценка, не новый LIVE-подбор.
+
+Параметры: crm_demo, localhost:3396, NEXT_DIST_DIR=.next-rule, AI_ENABLED=false, SCRAPER_ENABLED=false, 1440×1000, ru-RU, Asia/Novosibirsk. Скрипт: `polish-screenshots.ts purpose-rule-only`. Новых вызовов AI/web/скрапера нет. Обе версии manifest.json и SHA256SUMS обновлены; SHA коммита в записи означает базу рабочей копии, изменения правила ещё не закоммичены. Исторические ссылки/хеши в исходном live-ai-evidence.json сохранены как свидетельство прежнего испытания; актуальные PNG и их хеши находятся в manifest/SHA256SUMS. Остальные кадры и их время не обновлялись.
+
+| Кадр | Время кадра UTC | SHA-256 |
+|---|---|---|
+| 04-live-results.png | 2026-11-05T14:13:49.266Z | a55574e7396e83f9f4d13291ede56a8788239b63de11748a940e362d09370f80 |
+| 05-evidence.png | 2026-11-05T14:13:49.519Z | 87907271f9e019a0c4e7a7c4fb52a7840aa3e228150d6f17971667cc551dee31 |
+
 В кадре 07 веб-резерв действительно запущен (проверено `webSearchUsed=true`). Текущая проверка первоисточников отклоняет URL синтетического ответа FakeResponsesProvider с причиной `CATALOGUE_NOT_LISTING`: пригодных карточек — 0. Это подлинное состояние интерфейса после проверки, а не доказательство успешного живого AI-подбора. Модули AI/поиска в рамках QA не изменялись.
 
 Сняты Playwright, viewport 1440×900 (мобильный 390×844), часовой пояс Asia/Novosibirsk. Локаль ru-RU. Режим DEMO, dev-сервер webpack на порту 3370, NEXT_DIST_DIR=.next-qa; веб-резерв — отдельный fake-only сервер 3371. Рабочая копия включает незакоммиченные доработки UI v2.4.1. Production build в этом QA-прогоне заблокирован Deny ACL в стандартной .next. В crm_demo — 25 клиентов, 25 потребностей, 40 обращений, 27 задач; три новых перспективных обращения с актуальным действием, шесть завершённых контактов (три в срок и три с опозданием). Рабочие часы 09:00–19:00 Asia/Novosibirsk; фикстуры поиска — Новосибирск, вымышленные улицы. Клиенты и коммерческие данные синтетические. В общей crm_demo сохранены также ссылки и пометки LIVE от параллельных испытаний; в карточке клиента и кадре 08 они видны как существующая история и не являются доказательством живого поиска этого DEMO-прогона. Кадр 08 снимает отдельно блок кандидатов, его статусы и перенос в каталог; тосты закрыты штатными кнопками. SHA256 каждого PNG записан в manifest.json и SHA256SUMS. Статус внешних площадок и веб-резерв демонстрируются записанными ответами и не доказывают доступность живых интеграций. [Воспроизведение и исправленный дефект](../../scripts/vkr/README.md). Каждый PNG открыт и визуально проверен; длинные страницы сняты целиком.
@@ -51,7 +62,7 @@
 | [15-refinement-parsed.png](../screenshots/vkr/live-ai/15-refinement-parsed.png) | LIVE new parse; no web | parse · 2026-11-05T13:34:38.880Z | 2026-11-05T13:34:39.020Z |
 | [16-warehouse-query.png](../screenshots/vkr/live-ai/16-warehouse-query.png) | LIVE new parse; no web | parse · 2026-11-05T13:34:39.047Z | 2026-11-05T13:34:39.123Z |
 | [17-warehouse-parsed.png](../screenshots/vkr/live-ai/17-warehouse-parsed.png) | LIVE new parse; no web | parse · 2026-11-05T13:34:45.415Z | 2026-11-05T13:34:45.588Z |
-| [04-live-results.png](../screenshots/vkr/live-ai/04-live-results.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:36:15.868Z |
+| [04-live-results.png](../screenshots/vkr/live-ai/04-live-results.png) | LIVE saved replay; offline purpose reevaluation; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T14:13:49.266Z |
 | [06-source-statuses.png](../screenshots/vkr/live-ai/06-source-statuses.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:36:21.085Z |
 | [19-rent-results.png](../screenshots/vkr/live-ai/19-rent-results.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 7349f731-c051-4c69-a772-5a6d3936f2f8 · 2026-11-05T12:04:09.444Z | 2026-11-05T13:36:24.172Z |
 | [25-repeat-results.png](../screenshots/vkr/live-ai/25-repeat-results.png) | LIVE saved replay; AI_ENABLED=false; no new calls | b2935476-406d-415c-a960-10958ae655d8 · 2026-11-05T12:08:05.251Z | 2026-11-05T13:36:26.769Z |
@@ -64,7 +75,7 @@
 | [09-selection.png](../screenshots/vkr/live-ai/09-selection.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:36:56.610Z |
 | [10-offer.png](../screenshots/vkr/live-ai/10-offer.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:37:00.108Z |
 | [11-offer-print.png](../screenshots/vkr/live-ai/11-offer-print.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:37:03.148Z |
-| [05-evidence.png](../screenshots/vkr/live-ai/05-evidence.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:44:54.688Z |
+| [05-evidence.png](../screenshots/vkr/live-ai/05-evidence.png) | LIVE saved replay; offline purpose reevaluation; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T14:13:49.519Z |
 | [08-bookmarks.png](../screenshots/vkr/live-ai/08-bookmarks.png) | LIVE saved replay; AI_ENABLED=false; no new calls | 33f90440-7a66-4d5f-bc8a-dadb0c271906 · 2026-11-05T11:53:10.129Z | 2026-11-05T13:44:55.257Z |
 | [36-preserved-after-restart.png](../screenshots/vkr/live-ai/36-preserved-after-restart.png) | LIVE saved replay; AI_ENABLED=false; no new calls | bce2a997-e54a-4ac6-9c8b-564f5e9845ac · 2026-11-05T12:38:05.494Z | 2026-11-05T13:44:58.032Z |
 
@@ -115,8 +126,8 @@ Property.commercialPurpose, а демо-объекты имеют Property.prope
 | [10b-offer-print.png](../screenshots/vkr/10b-offer-print.png) | 2026-11-05T14:01:13.162Z | DEMO | `cf475593fbaf9275f793ba0e8ea51bc83381ed7078911e8f1c1d00751c3c659e` |
 | [10c-offer-pdf-page1.png](../screenshots/vkr/10c-offer-pdf-page1.png) | 2026-11-05T14:01:10.824Z | DEMO | `9b902a92c63173ecd002cb4bcaea38e8331b700187eed0cf1d7da4a19d753cfd` |
 | [10d-offer-pdf-page2.png](../screenshots/vkr/10d-offer-pdf-page2.png) | 2026-11-05T14:01:10.827Z | DEMO | `cd7eeb21fa9bdb497d3e6922c773cb3e39f891ad7f4375cfb5f94bc0564ab5a8` |
-| [live-ai/04-live-results.png](../screenshots/vkr/live-ai/04-live-results.png) | 2026-11-05T14:04:10.981Z | 2026-11-05T11:53:10.129Z | `262313a46ed84733137ab5d95f7c5a3159befecf96b6f65133b70ca1240bb8fc` |
-| [live-ai/05-evidence.png](../screenshots/vkr/live-ai/05-evidence.png) | 2026-11-05T14:04:22.381Z | 2026-11-05T11:53:10.129Z | `a76069b1ddfafc86c87df9613530e2a88e97c9a0de6e35ad7a25d76a239dd20f` |
+| [live-ai/04-live-results.png](../screenshots/vkr/live-ai/04-live-results.png) | 2026-11-05T14:13:49.266Z | 2026-11-05T11:53:10.129Z | `a55574e7396e83f9f4d13291ede56a8788239b63de11748a940e362d09370f80` |
+| [live-ai/05-evidence.png](../screenshots/vkr/live-ai/05-evidence.png) | 2026-11-05T14:13:49.519Z | 2026-11-05T11:53:10.129Z | `87907271f9e019a0c4e7a7c4fb52a7840aa3e228150d6f17971667cc551dee31` |
 | [live-ai/19-rent-results.png](../screenshots/vkr/live-ai/19-rent-results.png) | 2026-11-05T14:04:15.688Z | 2026-11-05T12:04:09.444Z | `d1346e2003e739607f8760b529b84eb87bad41c4c2e774fe2b1055ee10a55176` |
 | [live-ai/25-repeat-results.png](../screenshots/vkr/live-ai/25-repeat-results.png) | 2026-11-05T14:04:18.352Z | 2026-11-05T12:08:05.251Z | `5a608809863930bf009a40edb0dce2c0d1f0ca160f9c040555bdef1a99659f75` |
 | [live-ai/26-comparison.png](../screenshots/vkr/live-ai/26-comparison.png) | 2026-11-05T14:04:21.589Z | 2026-11-05T11:53:10.129Z | `5d6e7d80191be450496bb101fd31eb7f5dddf0a2ac4088e2720d197d33002e6c` |

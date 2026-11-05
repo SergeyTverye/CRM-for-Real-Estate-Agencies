@@ -42,6 +42,21 @@ beforeEach(async () => {
   await db.aiSetting.create({ data: { scraperEnabled: true, enabledSources: ["cian", "avito"] } });
 });
 describe("search application integration", () => {
+  it("persists residential rejection and mixed-purpose review with their evidence", async () => {
+    const residential = { ...listing(), purpose: null, description: "Квартира в квартале бизнес-класса…" };
+    const mixed = { ...listing("10000000", "synthetic-mixed"), purpose: null, description: "ЖК: коммерческие помещения на первом этаже" };
+    const structured = { ...listing("10000000", "synthetic-residential"), purpose: null, description: "Офисы в жилом комплексе", structuredFeatures: { category: "residential" } };
+    const run = await search([residential, mixed, structured]);
+    const saved = await getSearchRun(users.realtor1, run.id);
+    expect(saved.results.find(r => r.listing.sourceListingId === residential.sourceListingId)).toMatchObject({ verdict: "rejected", criteria: expect.arrayContaining([
+      { criterion: "purpose", state: "contradicted", source: "rule", evidence: residential.description },
+    ]) });
+    expect(saved.results.find(r => r.listing.sourceListingId === mixed.sourceListingId)?.verdict).toBe("needs_review");
+    expect(saved.results.find(r => r.listing.sourceListingId === structured.sourceListingId)).toMatchObject({ verdict: "rejected", criteria: expect.arrayContaining([
+      { criterion: "purpose", state: "contradicted", source: "structured", evidence: "category=residential" },
+    ]) });
+    expect(await db.aiUsageLog.count()).toBe(0);
+  });
   it("candidate is independent; repeated transfer/proposal/offer has no duplicates", async () => {
     const need = await needFor(); const run = await search(); const listingId = run.results[0]!.listingId;
     await setSelection(users.realtor1, listingId, { needId: need.id, comment: "Позвонить" });

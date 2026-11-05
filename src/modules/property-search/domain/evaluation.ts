@@ -1,5 +1,6 @@
 import { compareMoney, type CriterionEvaluation, type DescriptionAnalyzer, type ListingEvaluation, type NormalizedListing, type SearchFilters } from "./types";
 import { normalizeGeography, resolveDistrict } from "./geography";
+import { residentialPurposeContradiction } from "./purpose";
 
 const featureRules = [
   { key: "separate_entrance", request: /отдельн\S*\s+вход/iu, fact: /отдельн\S*\s+вход\S*/iu },
@@ -48,7 +49,9 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   const add = (criterion: string, known: boolean, matches: boolean, evidence: string) => criteria.push({ criterion, state: !known ? "unknown" : matches ? "matched" : "contradicted", source: "structured", evidence });
   add("city", !!listing.city, normalizeGeography(listing.city ?? "") === normalizeGeography(filters.city), listing.city ?? "Город неизвестен");
   add("operation", !!listing.operation, listing.operation === filters.operation, listing.operation ?? "Операция неизвестна");
-  if (filters.purposes.length) add("purpose", !!listing.purpose, filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? ""))), listing.purpose ?? "Назначение неизвестно");
+  const residentialPurpose = residentialPurposeContradiction(listing);
+  if (residentialPurpose) criteria.push(residentialPurpose);
+  else if (filters.purposes.length) add("purpose", !!listing.purpose, filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? ""))), listing.purpose ?? "Назначение неизвестно");
   if (filters.operation === "rent" || filters.priceFrom !== undefined || filters.priceTo !== undefined) {
     const unit = filters.operation === "sale" ? "rub_total" : filters.priceUnit;
     add("priceUnit", !!listing.priceUnit, listing.priceUnit === unit, listing.priceUnit ?? "Единица цены неизвестна");

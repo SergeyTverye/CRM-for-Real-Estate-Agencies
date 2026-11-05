@@ -222,3 +222,30 @@ LIVE-проверка новых ответов: «любые районы» о�
 DEMO PDF и DOCX: по четыре страницы, просмотрены все PNG. Изменены только шаблоны; application/offer-document.ts делегирует сборку DOCX вынесенному presentation/offer-docx.ts. src/modules/ai и html-pdf.ts не менялись. tsc --noEmit PASS; целевой ESLint PASS; offer-export integration/authorization 3/3 PASS на crm_test_b. Полный Playwright и build не запускались, npm install и миграций нет.
 
 Повторные PNG удалены: `24-repeat-confirm.png` → `23-repeat-confirm.png`; `31-web-cards.png` → `31-web-corrected.png`; `32-cian-status.png` → `31-web-corrected.png`; `21-manual-web-browser.png` → `31-web-corrected.png`; `07-web-fallback-live.png` → `34-auto-web-cards.png`; `28-fallback-statuses.png` → `34-auto-web-cards.png`; `22-preserved-bookmarks.png` → `08-bookmarks.png`. См. screenshots.md и manifest/SHA256SUMS. Исторические подтверждения платного запуска, исходные бюджеты и чужие p2-кадры не переснимались и не выдаются за новые.
+
+## Офлайн-переоценка после правила назначения
+
+Дополнительно **confirmed → rejected: 20**. В старых снимках Yandex/OnRealt purpose выводился пакетом real-estate-scrapper 2.1.0 через baseParser/inferPropertyType(title), а не читался из структурированного поля площадки. При replay восстановлено происхождение rule; исходные snapshots не изменены. Новая нормализация сохраняет purposeSource и category для будущих запусков.
+
+2026-11-05T14:13:01.268Z: сохранённые снимки 10 живых запусков crm_demo, 591 результатов. Переход **needs_review → rejected: 56**; всего изменений: 76. Исходные вердикты жилых объявлений при испытании были **needs_review**. Это исправление детерминированного правила после испытания, а не новый успешный LIVE-прогон. Исходный live-ai-evidence.json не переписывался.
+
+Структурированная жилая категория или явные признаки жилья без коммерческих сигналов дают purpose=contradicted с фрагментом доказательства (§3.1). Смешанные случаи не отклоняются этим текстовым правилом. Пересчитан только критерий назначения; остальные исторические доказательства, score, новизна, цены и снимки объявлений сохранены. AI, web и скрапер не вызывались; новых расходов нет.
+
+| Run ID | Проверено | needs_review → rejected |
+|---|---:|---:|
+| 7349f731-c051-4c69-a772-5a6d3936f2f8 | 148 | 0 |
+| b2935476-406d-415c-a960-10958ae655d8 | 99 | 13 |
+| a88b0675-7668-4bc0-82e5-d1e62d3e9b1c | 103 | 16 |
+| 33f90440-7a66-4d5f-bc8a-dadb0c271906 | 141 | 14 |
+| 9e28eae7-3507-4937-8126-b2dccb4fe185 | 3 | 0 |
+| 1c0d904b-604e-4c0d-b484-53f0ead97c7e | 0 | 0 |
+| 57520939-7d91-41e3-a180-19c6485071a6 | 0 | 0 |
+| bce2a997-e54a-4ac6-9c8b-564f5e9845ac | 97 | 13 |
+| 81a98519-3f49-4597-9828-20214c751e5b | 0 | 0 |
+| 1a231df9-3099-4a45-85f4-fbc8c37b2e30 | 0 | 0 |
+
+Детали: [offline-purpose-evaluation.json](offline-purpose-evaluation.json). Повтор: DATABASE_URL указывает на локальную crm_demo; `npx tsx scripts/vkr/reevaluate-live.ts` — dry-run, `--apply` — транзакционная запись. Повторный apply без изменений не переписывает первоначальный отчёт.
+
+Проверки: 320/320 unit поиска; 24/24 integration поиска на crm_test_c; npx tsc --noEmit PASS; целевой ESLint --max-warnings=0 PASS. Повторный --apply: 0 изменений. Полный Playwright-набор не запускался.
+
+Кадры 04-live-results.png и 05-evidence.png пересняты и просмотрены на localhost:3396, NEXT_DIST_DIR=.next-rule, AI_ENABLED=false. На 04 открыта вкладка «Исключены», на 05 — «Назначение · Противоречит · Правило» с исходным фрагментом про квартиру. Подпись явно указывает на офлайн-переоценку сохранённых LIVE-данных. Время исходного run — 11:53:10 UTC; время новых кадров — 14:13:49 UTC. Новых вызовов AI, web и скрапера не было.
