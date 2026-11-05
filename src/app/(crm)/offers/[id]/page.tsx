@@ -1,3 +1,4 @@
+import { RevisionButton } from "./revision-button";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
@@ -54,6 +55,8 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
         }
         actions={
           <>
+            <Link className="btn" href={`/offers/${id}/print`}>Предпросмотр / печать</Link>
+            <RevisionButton id={id} updatedAt={updatedAt} />
             {!archived ? (
               <ActionButton url={`/api/v1/offers/${id}/document`} label="Сформировать документ (DOCX)" pendingLabel="Формирование…" className="btn btn-primary" />
             ) : null}
@@ -84,6 +87,7 @@ export default async function OfferCardPage({ params }: { params: Promise<{ id: 
         }
       />
 
+      {o.promptTemplateVersion?.startsWith("revision-of:") ? <p className="mb-4"><Link className="link" href={`/offers/${o.promptTemplateVersion.slice(12)}`}>Предыдущая редакция</Link></p> : null}
       {priceChanged.length ? (
         <div className="alert alert-info mb-4">
           Текущая цена {priceChanged.length === 1 ? "объекта" : "части объектов"} изменилась или отличается от цены в КП — в предложении сохранена цена на момент подготовки.

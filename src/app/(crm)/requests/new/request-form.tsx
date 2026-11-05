@@ -229,7 +229,7 @@ function RequestFormInner({
       resultCode === "new_need"
         ? { resultCode, need: needParamsPayload(need), nextAction: next }
         : resultCode === "linked_existing_need"
-          ? { resultCode, needId: linkedNeedId, nextAction: withNext ? next : undefined }
+          ? { resultCode, needId: linkedNeedId, nextAction: next }
           : resultCode === "one_off_service"
             ? { resultCode, nextAction: withNext ? next : undefined }
             : { resultCode };
@@ -263,7 +263,7 @@ function RequestFormInner({
 
   const resultOptions = (["new_need", "linked_existing_need", "one_off_service", "no_followup", "invalid_or_spam"] as ResultCode[]).map((value) => ({
     value,
-    label: labelOf("leadResult", value),
+    label: `${["new_need", "linked_existing_need"].includes(value) ? "Перспективное — " : ""}${labelOf("leadResult", value)}`,
     disabled: (clientMode === "none" && (value === "new_need" || value === "linked_existing_need")) || (clientMode === "new" && value === "linked_existing_need"),
   }));
 
@@ -348,7 +348,7 @@ function RequestFormInner({
       </Section>
 
       <Section title="Итог разговора">
-        <Field label="Кратко: что хотел клиент, о чём договорились" error={fieldError("summary")}>
+        <Field label="Кратко: что хотел клиент, о чём договорились" required={["no_followup", "invalid_or_spam", "one_off_service"].includes(resultCode)} hint={["no_followup", "invalid_or_spam", "one_off_service"].includes(resultCode) ? "Укажите причину завершения обращения" : undefined} error={fieldError("summary")}>
           <textarea className="input min-h-20" value={summary} onChange={(e) => setSummary(e.target.value)} />
         </Field>
         <div className="space-y-1.5">
@@ -369,13 +369,10 @@ function RequestFormInner({
               {clientNeeds.length ? (
                 <SelectInput value={linkedNeedId} onChange={setLinkedNeedId} options={clientNeeds} placeholder="—" invalid={Boolean(fieldError("outcome.needId"))} />
               ) : (
-                <div className="text-sm text-slate-500">{client ? "У клиента нет открытых потребностей — выберите «Новая потребность»." : "Сначала выберите клиента."}</div>
+                <div className="text-sm text-slate-500">{client ? "У клиента нет открытых потребностей — выберите «Перспективное — новая потребность»." : "Сначала выберите клиента."}</div>
               )}
             </Field>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={withNext} onChange={(e) => setWithNext(e.target.checked)} /> Добавить следующее действие
-            </label>
-            {withNext ? <NextActionFields value={next} onChange={setNext} timeZone={timeZone} taskTypes={NEED_TASK_TYPES} users={isManager ? users : undefined} errors={fieldError} prefix="outcome.nextAction" /> : null}
+            <NextActionFields value={next} onChange={setNext} timeZone={timeZone} taskTypes={NEED_TASK_TYPES} users={isManager ? users : undefined} errors={fieldError} prefix="outcome.nextAction" />
           </div>
         ) : null}
 

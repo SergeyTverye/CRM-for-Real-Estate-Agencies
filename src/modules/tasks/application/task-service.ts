@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { db, transaction, type Tx } from "@/shared/db/client";
+import { db, transaction, Prisma, type Tx } from "@/shared/db/client";
 import { DomainError, ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import {
   parseInput,
@@ -239,6 +239,7 @@ const completeSchema = z.object({
   expectedUpdatedAt: zExpectedUpdatedAt,
   resultComment: zOptText(4000),
   nextTask: nextActionSchema.optional(),
+  needChanges: z.array(z.object({ needId: zUuid, change: z.unknown() })).max(20).default([]),
 });
 
 export interface CompleteTaskResult {
@@ -257,12 +258,13 @@ export async function completeTask(actor: Actor, taskId: string, input: unknown)
   return transaction(async (tx) => {
     const task = await loadOwnTask(tx, actor, taskId);
     if (!isOpenTaskStatus(task.status)) throw new DomainError("TASK_NOT_OPEN", "Задача уже завершена или отменена");
+    const links = await loadTaskLinks(tx, taskId);
+    if (links.needIds.length) await tx.$queryRaw(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`);
     await lockVersion(tx, taskId, data.expectedUpdatedAt);
     await tx.task.update({
       where: { id: taskId },
       data: { status: "completed", completedAt: new Date(), resultComment: data.resultComment },
     });
-    const links = await loadTaskLinks(tx, taskId);
 
     let nextInstanceId: string | null = null;
     const nextDue = nextRecurrenceDue(task.dueAt, task.recurrenceKind as Code<"recurrenceKind">, task.recurrenceInterval, task.recurrenceUntil);
@@ -296,6 +298,7 @@ export async function completeTask(actor: Actor, taskId: string, input: unknown)
       nextTaskId = created.id;
     }
 
+    await applyTaskNeedChanges(tx, actor, links.needIds, data.needChanges);
     await assertNeedInvariants(tx, links.needIds);
     return { completedTaskId: taskId, nextInstanceId, nextTaskId };
   });
@@ -305,6 +308,7 @@ const cancelSchema = z.object({
   expectedUpdatedAt: zExpectedUpdatedAt,
   resultComment: zOptText(4000),
   nextTask: nextActionSchema.optional(),
+  needChanges: z.array(z.object({ needId: zUuid, change: z.unknown() })).max(20).default([]),
 });
 
 export async function cancelTask(actor: Actor, taskId: string, input: unknown): Promise<{ nextTaskId: string | null }> {
@@ -312,14 +316,16 @@ export async function cancelTask(actor: Actor, taskId: string, input: unknown): 
   return transaction(async (tx) => {
     const task = await loadOwnTask(tx, actor, taskId);
     if (!isOpenTaskStatus(task.status)) throw new DomainError("TASK_NOT_OPEN", "Задача уже завершена или отменена");
+    const links = await loadTaskLinks(tx, taskId);
+    if (links.needIds.length) await tx.$queryRaw(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`);
     await lockVersion(tx, taskId, data.expectedUpdatedAt);
     await tx.task.update({ where: { id: taskId }, data: { status: "cancelled", resultComment: data.resultComment } });
-    const links = await loadTaskLinks(tx, taskId);
     let nextTaskId: string | null = null;
     if (data.nextTask) {
       const responsibleUserId = await resolveTaskResponsible(tx, actor, data.nextTask.responsibleUserId, task.responsibleUserId);
       nextTaskId = (await insertTask(tx, actor.userId, { ...data.nextTask, responsibleUserId }, links)).id;
     }
+    await applyTaskNeedChanges(tx, actor, links.needIds, data.needChanges);
     await assertNeedInvariants(tx, links.needIds);
     return { nextTaskId };
   });
@@ -378,4 +384,15 @@ export async function updateTask(actor: Actor, taskId: string, input: unknown): 
 /** Число открытых задач по потребности (для подсказок UI). */
 export async function countOpenTasksForNeed(needId: string): Promise<number> {
   return db.taskNeed.count({ where: { clientNeedId: needId, task: { status: { in: [...OPEN_TASK_STATUSES] } } } });
+}
+
+/** Status changes and closing the last return task are one atomic operation. */
+async function applyTaskNeedChanges(tx: Tx, actor: Actor, linked: string[], changes: { needId: string; change?: unknown }[]) {
+  if (!changes.length) return;
+  const { embeddedNeedChangeSchema, applyNeedStateChange } = await import("@/modules/needs/application/need-service");
+  for (const entry of changes) {
+    if (!linked.includes(entry.needId)) throw new NotFoundError();
+    const change = parseInput(embeddedNeedChangeSchema, entry.change);
+    await applyNeedStateChange(tx, actor, entry.needId, change);
+  }
 }

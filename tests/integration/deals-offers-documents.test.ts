@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import sharp from "sharp";
 import { apiRequest, db, inDays, makeClient, makeNeed, makeProperty, readBody, resetDatabase, routeParams, seedBase, sessionCookieFor, type TestUsers } from "../helpers/fixtures";
 import { createDeal, closeDeal, addCommission, updateCommission } from "@/modules/deals/application/deal-service";
 import { createOffer, changeOfferStatus, getOffer } from "@/modules/commercial-offers/application/offer-service";
@@ -159,7 +160,7 @@ describe("T05: документы недоступной сущности не �
 
   it("фото объекта видно всем, правоустанавливающий документ — только при доступе к контактам собственника", async () => {
     const prop = await makeProperty(u.realtor1);
-    const photo = await storeDocument(u.realtor1.userId, { data: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]), originalName: "фасад.png", mimeType: "image/png", documentTypeCode: "photo", link: { kind: "property", id: prop.id }, legalEntityId: null });
+    const photo = await storeDocument(u.realtor1.userId, { data: await sharp({ create: { width: 8, height: 8, channels: 3, background: "white" } }).png().toBuffer(), originalName: "фасад.png", mimeType: "image/png", documentTypeCode: "photo", link: { kind: "property", id: prop.id }, legalEntityId: null });
     const title = await storeDocument(u.realtor1.userId, { data: Buffer.from("%PDF выписка"), originalName: "выписка.pdf", mimeType: "application/pdf", documentTypeCode: "title_document", link: { kind: "property", id: prop.id }, legalEntityId: null });
     await expect(openDocumentForDownload(u.realtor2, photo.id)).resolves.toBeTruthy();
     await expect(openDocumentForDownload(u.realtor2, title.id)).rejects.toBeInstanceOf(NotFoundError);

@@ -1,4 +1,6 @@
+import { ContactControl } from "../requests/contact-control";
 import Link from "next/link";
+import { TodayAgenda } from "../calendar/today-agenda";
 import { requirePageActor } from "@/server/page-auth";
 import { getTodayView, type ControlItem, type TodayView } from "@/modules/tasks/application/task-queries";
 import { TODAY_GROUP_LABELS, type TodayGroup } from "@/modules/tasks/domain/task-rules";
@@ -94,6 +96,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
       ) : null}
       {filterError ? <div className="alert alert-warning mb-3">Некорректный фильтр сотрудника — показаны ваши действия.</div> : null}
 
+      <ContactControl actor={actor} userId={view.scope === "mine" ? actor.userId : view.scope === "user" ? sp.userId : undefined} />
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <TodayCounter label="Просрочено" value={view.counters.overdue} href={taskHref("overdue")} tone="red" />
         <TodayCounter label="На сегодня" value={view.counters.today} href={taskHref("today")} tone="blue" />
@@ -106,6 +109,8 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
           hint="Активные потребности без открытой задачи и приостановленные без задачи возврата"
         />
       </div>
+
+      <TodayAgenda actor={actor} employee={view.scope === "user" ? sp.userId : actor.userId} />
 
       {hasOverdue ? (
         <Card

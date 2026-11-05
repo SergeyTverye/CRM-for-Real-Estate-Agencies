@@ -167,6 +167,7 @@ const changeStateBase = z.object({
 type StateRuleInput = { status?: string; stopReasonCode?: string | null; stopComment?: string | null; returnTask?: unknown };
 
 function stateRules(d: StateRuleInput, ctx: z.RefinementCtx) {
+  if (d.status === "closed" && d.stopReasonCode === "no_match") ctx.addIssue({ code: "custom", path: ["stopReasonCode"], message: "Отсутствие подходящих объектов не завершает потребность. Оставьте её в работе или назначьте возврат из паузы." });
   if (d.status === "closed" && !d.stopReasonCode) ctx.addIssue({ code: "custom", path: ["stopReasonCode"], message: "Укажите причину остановки" });
   if (d.status === "closed" && d.stopReasonCode === "other" && !d.stopComment)
     ctx.addIssue({ code: "custom", path: ["stopComment"], message: "Для причины «Другое» нужен комментарий" });
@@ -255,7 +256,7 @@ export async function applyNeedStateChange(
   if (continuation) {
     const responsibleUserId = await resolveTaskResponsible(tx, actor, continuation.responsibleUserId, need.responsibleUserId);
     const title = continuation.title;
-    taskId = (await insertTask(tx, actor.userId, { ...continuation, title, responsibleUserId }, { needIds: [needId], clientIds: [need.clientId] })).id;
+    taskId = (await insertTask(tx, actor.userId, { ...continuation, taskType: toStatus === "paused" ? "pause_return" : continuation.taskType, title, responsibleUserId }, { needIds: [needId], clientIds: [need.clientId] })).id;
   }
   if (toStatus === "active" && (need.status === "closed" || need.status === "success")) {
     await reactivateClientIfInactive(tx, need.clientId);

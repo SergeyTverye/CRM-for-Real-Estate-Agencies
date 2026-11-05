@@ -30,9 +30,10 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
         title="Сделки"
         subtitle={isManager ? "Сделки агентства: участники, юрлицо, комиссии и постсделочное сопровождение" : "Ваши сделки и сделки ваших клиентов"}
         actions={
-          <Link href="/deals/new" className="btn btn-primary">
-            + Сделка
-          </Link>
+          <>
+            <a className="btn" href={`/api/v1/export/deals?${new URLSearchParams(Object.entries(query).filter((e): e is [string, string] => typeof e[1] === "string"))}`}>CSV по фильтрам</a>
+            <Link href="/deals/new" className="btn btn-primary">+ Сделка</Link>
+          </>
         }
       />
       <ViewTabs

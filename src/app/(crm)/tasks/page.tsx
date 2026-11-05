@@ -50,9 +50,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
         title="Задачи"
         subtitle={isManager ? "Задачи сотрудников, контрольные и повторяющиеся действия" : "Ваши задачи, звонки и контрольные действия"}
         actions={
-          <Link href="/tasks/new" className="btn btn-primary">
-            + Новая задача
-          </Link>
+          <><a className="btn" href={`/api/v1/export/tasks?${new URLSearchParams(sp)}`}>CSV по фильтрам</a><Link href="/tasks/new" className="btn btn-primary">+ Новая задача</Link></>
         }
       />
       <nav className="mb-3 flex gap-1 border-b border-slate-200" aria-label="Режим списка задач">

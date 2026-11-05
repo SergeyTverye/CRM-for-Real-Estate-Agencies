@@ -1,3 +1,4 @@
+import { ChecklistPanel } from "./checklist-panel";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
@@ -273,6 +274,8 @@ export default async function DealCardPage({ params }: { params: Promise<{ id: s
         )}
       </Card>
 
+      <p className="mb-4"><a className="btn" href={`/api/v1/export/commissions?dealId=${id}`}>Реестр комиссий CSV</a></p>
+      <ChecklistPanel actor={actor} dealId={id} canEdit={canEdit} />
       <div className="space-y-4">
         <TaskList
           title="Постсделочные задачи"

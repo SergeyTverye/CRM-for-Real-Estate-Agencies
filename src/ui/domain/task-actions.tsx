@@ -33,18 +33,28 @@ function CloseTaskForm({
 }) {
   const [comment, setComment] = useState("");
   const [withNext, setWithNext] = useState(false);
+  const [needIds, setNeedIds] = useState<string[]>([]);
+  const [pauseChoice, setPauseChoice] = useState("return");
+  const [stopReason, setStopReason] = useState("other");
   const [required, setRequired] = useState<null | string>(null);
   const [next, setNext] = useState<NextActionValue>(() => defaultNextAction("Следующий шаг"));
   const { pending, error, run, fieldError } = useApiAction();
-  const showNext = withNext || required !== null;
+  const showNext = pauseChoice !== "closed" && (withNext || required !== null);
 
   async function submit() {
     const url = `/api/v1/tasks/${taskId}/${mode === "complete" ? "complete" : "cancel"}`;
     const res = await run(async () => {
       try {
-        return await apiCall("POST", url, { expectedUpdatedAt: updatedAt, resultComment: comment || null, nextTask: showNext ? next : undefined });
+        return await apiCall("POST", url, { expectedUpdatedAt: updatedAt, resultComment: comment || null, nextTask: showNext ? { ...next, taskType: required === "RETURN_TASK_REQUIRED" && pauseChoice === "return" ? "pause_return" : next.taskType } : undefined,
+          needChanges: required === "RETURN_TASK_REQUIRED" && pauseChoice !== "return" ? needIds.map(needId => ({ needId, change: { status: pauseChoice, cancelOpenTasks: false, ...(pauseChoice === "closed" ? { stopReasonCode: stopReason, stopComment: comment } : {}) } })) : undefined });
       } catch (e) {
-        if (e instanceof ApiCallError && NEXT_STEP_CODES.includes(e.body.code)) setRequired(e.body.code);
+        if (e instanceof ApiCallError && NEXT_STEP_CODES.includes(e.body.code)) {
+          setRequired(e.body.code);
+          if (e.body.code === "RETURN_TASK_REQUIRED") {
+            setNeedIds((e.body.details?.needIds as string[] | undefined) ?? []);
+            setNext(s => ({ ...s, taskType: "pause_return", title: "Возврат из паузы" }));
+          }
+        }
         throw e;
       }
     });
@@ -61,6 +71,12 @@ function CloseTaskForm({
       ) : (
         <FormErrorBanner error={error} />
       )}
+      {required === "RETURN_TASK_REQUIRED" ? <Field label="Продолжение работы с потребностью">
+        <SelectInput value={pauseChoice} onChange={v => { setPauseChoice(v); if (v === "active") setNext(s => ({ ...s, taskType: "call_or_contact" })); }} options={[
+          { value: "return", label: "Создать новую задачу возврата" }, { value: "active", label: "Сменить статус: в работе" }, { value: "closed", label: "Сменить статус: закрыта" },
+        ]} />
+        {pauseChoice === "closed" ? <SelectInput value={stopReason} onChange={setStopReason} options={optionsOf("stopReason")} /> : null}
+      </Field> : null}
       <Field label={mode === "complete" ? "Итог (комментарий)" : "Причина отмены"}>
         <textarea className="input min-h-20" value={comment} onChange={(e) => setComment(e.target.value)} />
       </Field>
@@ -73,7 +89,7 @@ function CloseTaskForm({
           value={next}
           onChange={setNext}
           timeZone={timeZone}
-          taskTypes={TASK_TYPES}
+          taskTypes={required === "RETURN_TASK_REQUIRED" && pauseChoice === "return" ? TASK_TYPES.filter(t => t.value === "pause_return") : TASK_TYPES}
           errors={fieldError}
           prefix="nextTask"
           heading={required === "RETURN_TASK_REQUIRED" ? "Задача возврата" : "Следующий шаг"}

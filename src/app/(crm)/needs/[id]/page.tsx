@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NeedSelectionPanel } from "../../property-search/need-selection-panel";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
 import { getNeedCard } from "@/modules/needs/application/need-queries";
@@ -113,6 +114,7 @@ export default async function NeedCardPage({ params, searchParams }: { params: P
           </>
         }
       />
+      <NeedSelectionPanel actor={actor} needId={id} />
 
       {need.client?.status === "archived" && clientVisible && need.client ? <div className="alert alert-warning mb-3">Клиент в архиве.</div> : null}
 

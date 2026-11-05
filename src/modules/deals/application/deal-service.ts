@@ -117,7 +117,7 @@ export async function createDeal(actor: Actor, input: unknown): Promise<{ id: st
           amount: c.amount,
           status: c.status,
           dueAt: c.dueAt,
-          receivedAt: c.receivedAt,
+          receivedAt: c.receivedAt ?? (["received", "partially_received"].includes(c.status) ? new Date() : null),
           payerPartyId: c.payerPartyIndex !== undefined ? (partyIds[c.payerPartyIndex] ?? null) : null,
           comment: c.comment,
         },
@@ -228,7 +228,7 @@ export async function addCommission(actor: Actor, dealId: string, input: unknown
     assertCanEditDeal(actor, deal);
     if (c.payerPartyId && !(await tx.dealParty.count({ where: { id: c.payerPartyId, dealId } }))) throw new ValidationError(undefined, { payerPartyId: ["Плательщик не из этой сделки"] });
     const created = await tx.dealCommission.create({
-      data: { dealId, amount: c.amount, status: c.status, dueAt: c.dueAt, receivedAt: c.receivedAt, payerPartyId: c.payerPartyId ?? null, comment: c.comment },
+      data: { dealId, amount: c.amount, status: c.status, dueAt: c.dueAt, receivedAt: c.receivedAt ?? (["received", "partially_received"].includes(c.status) ? new Date() : null), payerPartyId: c.payerPartyId ?? null, comment: c.comment },
       select: { id: true },
     });
     await writeAudit(tx, { actorUserId: actor.userId, action: "deal.commission_added", entityType: "Deal", entityId: dealId, after: { commissionId: created.id, amount: c.amount, status: c.status, dueAt: c.dueAt } });

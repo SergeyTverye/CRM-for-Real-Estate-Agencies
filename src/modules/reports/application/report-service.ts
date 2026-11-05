@@ -1,222 +1,130 @@
 import { z } from "zod";
 import { db } from "@/shared/db/client";
-import { Prisma } from "@/generated/prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { getConfig } from "@/shared/config/env";
 import { addDays, startOfDayInTz, todayAsDateOnly } from "@/shared/time";
-import { ForbiddenError } from "@/shared/errors";
+import { ForbiddenError, NotFoundError, ValidationError } from "@/shared/errors";
 import { parseInput, zDateOnly, zUuid } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { staleNeedWhere } from "@/modules/needs/application/need-queries";
+import { PROSPECTIVE_RESULTS } from "@/modules/requests/domain/prospective";
+import { listReactivatedClients } from "./reactivation-query";
+export { countReactivatedClients } from "./reactivation-query";
 
-/**
- * UC-11 GetManagerReport (FR-22, FR-28, ТЗ 25.2, 31.5, 37.13, 37.18, 40.6).
- * Показатели вычисляются из первичных событий (обращения, показы, StageHistory, задачи, сделки, КП),
- * вручную редактируемых агрегатов нет. Каждая цифра сопровождается ссылкой drill-down на исходный список.
- */
+export const reportFiltersSchema = z.object({ from: zDateOnly.optional(), to: zDateOnly.optional(), userId: zUuid.optional(), sourceCode: z.string().max(50).optional() });
+export interface Metric { key: string; label: string; value: number; hint?: string; href?: string }
+export interface DetailRow { id: string; label: string; href: string; amount?: string }
+export function percent(n: number, total: number) { return total ? Math.round(n / total * 1000) / 10 : 100; }
 
-export const reportFiltersSchema = z.object({
-  from: zDateOnly.optional(),
-  to: zDateOnly.optional(),
-  userId: zUuid.optional(),
-  sourceCode: z.string().max(50).optional(),
-});
-
-export interface Metric {
-  key: string;
-  label: string;
-  value: number;
-  hint?: string;
-  href?: string;
-}
-
-function qs(params: Record<string, string | undefined>): string {
-  const sp = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== "") as [string, string][]);
-  return sp.toString() ? `?${sp.toString()}` : "";
-}
-
+/** The aggregate and every drill-down use these exact cohorts and timezone boundaries. */
 export async function getManagerReport(actor: Actor, raw: unknown = {}) {
   if (!isManager(actor)) throw new ForbiddenError("Отчёты доступны руководителю");
   const f = parseInput(reportFiltersSchema, raw);
-  const cfg = getConfig();
-  const tz = cfg.APP_TIMEZONE;
-  const today = todayAsDateOnly(new Date(), tz);
-  const fromDate = f.from ?? addDays(today, -29);
-  const toDate = f.to ?? today;
-  // Границы периода в часовом поясе экземпляра: [from 00:00, to+1 00:00).
-  const from = startOfDayInTz(new Date(fromDate.getTime() + 12 * 3_600_000), tz);
-  const to = startOfDayInTz(new Date(toDate.getTime() + 36 * 3_600_000), tz);
+  const cfg = getConfig(), zone = cfg.APP_TIMEZONE;
+  const now = new Date(), today = todayAsDateOnly(now, zone);
+  const fromDate = f.from ?? addDays(today, -29), toDate = f.to ?? today;
+  if (fromDate > toDate) throw new ValidationError("Начало периода позже окончания");
+  const from = startOfDayInTz(new Date(fromDate.getTime() + 12 * 3600000), zone);
+  const to = startOfDayInTz(new Date(toDate.getTime() + 36 * 3600000), zone);
   const period = { gte: from, lt: to };
-  const fromStr = fromDate.toISOString().slice(0, 10);
-  const toStr = toDate.toISOString().slice(0, 10);
-  const user = f.userId;
-
-  const leadWhere: Prisma.LeadRequestWhereInput = { occurredAt: period, ...(user ? { responsibleUserId: user } : {}), ...(f.sourceCode ? { sourceCode: f.sourceCode } : {}) };
-
-  const [newRequests, bySourceRaw, byChannelRaw, unprocessed, requestsWithNeed] = await Promise.all([
-    db.leadRequest.count({ where: leadWhere }),
-    db.leadRequest.groupBy({ by: ["sourceCode"], where: leadWhere, _count: { _all: true }, orderBy: { _count: { sourceCode: "desc" } } }),
-    db.leadRequest.groupBy({ by: ["channelCode"], where: leadWhere, _count: { _all: true }, orderBy: { _count: { channelCode: "desc" } } }),
-    db.leadRequest.count({ where: { ...leadWhere, statusCode: "open" } }),
-    db.leadRequest.findMany({ where: { ...leadWhere, clientNeedId: { not: null } }, select: { clientNeedId: true, occurredAt: true } }),
+  const p = { from: fromDate.toISOString().slice(0, 10), to: toDate.toISOString().slice(0, 10) };
+  const user = f.userId ? { responsibleUserId: f.userId } : {};
+  const sourceNeed: Prisma.ClientNeedWhereInput = f.sourceCode ? { leadRequests: { some: { sourceCode: f.sourceCode, occurredAt: period } } } : {};
+  const sourceClient: Prisma.ClientWhereInput = f.sourceCode ? { leadRequests: { some: { sourceCode: f.sourceCode, occurredAt: period } } } : {};
+  const needWhere: Prisma.ClientNeedWhereInput = { ...user, ...sourceNeed };
+  const taskWhere: Prisma.TaskWhereInput = { ...user, ...(f.sourceCode ? { OR: [{ needLinks: { some: { need: sourceNeed } } }, { clientLinks: { some: { client: sourceClient } } }] } : {}) };
+  const dealWhere: Prisma.DealWhereInput = { ...user, ...(f.sourceCode ? { parties: { some: { client: sourceClient } } } : {}) };
+  const [requests, needs, showings, offers, deals, tasks, commissions, closures, reactivated, stale] = await Promise.all([
+    db.leadRequest.findMany({ where: { occurredAt: period, ...user, ...(f.sourceCode ? { sourceCode: f.sourceCode } : {}) }, select: { id: true, occurredAt: true, clientNeedId: true, statusCode: true, resultCode: true, sourceCode: true, channelCode: true, createdBy: true } }),
+    db.clientNeed.findMany({ where: needWhere, select: { id: true, status: true, taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] } } }, select: { task: { select: { dueAt: true, taskType: true } } } } } }),
+    db.showing.findMany({ where: { scheduledAt: period, ...user, need: sourceNeed }, select: { id: true, clientNeedId: true, scheduledAt: true, status: true, resultCode: true, responsibleUserId: true, occurredAt: true } }),
+    db.commercialOffer.findMany({ where: { sentAt: period, ...user, need: sourceNeed }, select: { id: true, sentAt: true, clientNeedId: true, items: { select: { propertyId: true } } } }),
+    db.deal.findMany({ where: dealWhere, select: { id: true, propertyId: true, status: true, openedAt: true, closedAt: true, responsibleUserId: true, parties: { select: { clientId: true } } } }),
+    db.task.findMany({ where: taskWhere, select: { id: true, title: true, status: true, dueAt: true, completedAt: true, taskType: true, responsibleUserId: true } }),
+    db.dealCommission.findMany({ where: { status: { in: ["received", "partially_received"] }, receivedAt: period, deal: dealWhere }, select: { id: true, dealId: true, amount: true } }),
+    db.needStageHistory.findMany({ where: { occurredAt: period, toStatus: "closed", fromStatus: { not: "closed" }, need: needWhere }, select: { id: true, clientNeedId: true, reasonCode: true } }),
+    listReactivatedClients(from, to, cfg.REACTIVATION_GAP_DAYS, f.userId, f.sourceCode),
+    db.clientNeed.findMany({ where: { AND: [needWhere, staleNeedWhere(new Date(now.getTime() - cfg.NEED_INACTIVITY_DAYS * 86400000))] }, select: { id: true } }),
   ]);
-
-  // Переход «обращение → показ»: потребности из обращений периода, по которым был показ после обращения.
-  let requestToShowing = 0;
-  if (requestsWithNeed.length) {
-    const needIds = [...new Set(requestsWithNeed.map((r) => r.clientNeedId!))];
-    const showings = await db.showing.findMany({ where: { clientNeedId: { in: needIds } }, select: { clientNeedId: true, scheduledAt: true } });
-    const firstReq = new Map<string, Date>();
-    for (const r of requestsWithNeed) {
-      const prev = firstReq.get(r.clientNeedId!);
-      if (!prev || r.occurredAt < prev) firstReq.set(r.clientNeedId!, r.occurredAt);
-    }
-    requestToShowing = [...firstReq.entries()].filter(([needId, at]) => showings.some((s) => s.clientNeedId === needId && s.scheduledAt >= at)).length;
-  }
-
-  const showingWhere: Prisma.ShowingWhereInput = { scheduledAt: period, ...(user ? { responsibleUserId: user } : {}) };
-  const [showingsTotal, showingsByStatus, showingsByResult] = await Promise.all([
-    db.showing.count({ where: showingWhere }),
-    db.showing.groupBy({ by: ["status"], where: showingWhere, _count: { _all: true } }),
-    db.showing.groupBy({ by: ["resultCode"], where: { ...showingWhere, status: "completed" }, _count: { _all: true } }),
-  ]);
-
-  const needUser = user ? { responsibleUserId: user } : {};
-  const activeNeeds = await db.clientNeed.count({ where: { status: "active", ...needUser } });
-  const activeWithNextAction = await db.clientNeed.count({ where: { status: "active", ...needUser, taskLinks: { some: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } } });
-  const staleNeeds = await db.clientNeed.count({ where: { AND: [staleNeedWhere(new Date(Date.now() - cfg.NEED_INACTIVITY_DAYS * 86_400_000)), needUser] } });
-  const needsClosedByReason = await db.needStageHistory.groupBy({
-    by: ["reasonCode"],
-    where: { occurredAt: period, toStatus: "closed", fromStatus: { not: "closed" }, ...(user ? { need: { responsibleUserId: user } } : {}) },
-    _count: { _all: true },
+  const inPeriod = (d: Date | null) => d !== null && d >= from && d < to;
+  const row = (path: string, id: string, label = id): DetailRow => ({ id, label, href: `/${path}/${id}` });
+  const leadRows = (rs: typeof requests) => rs.map(r => row("requests", r.id, `Обращение ${r.occurredAt.toISOString()}`));
+  const needRows = (ids: string[]) => [...new Set(ids)].map(id => row("needs", id, "Потребность"));
+  const taskRows = (ts: typeof tasks) => ts.map(t => row("tasks", t.id, t.title));
+  const offerRows = (os: typeof offers) => os.map(o => row("offers", o.id, "Коммерческое предложение"));
+  const dealRows = (ds: typeof deals) => ds.map(d => row("deals", d.id, "Сделка"));
+  const isOpen = (s: string) => (OPEN_TASK_STATUSES as readonly string[]).includes(s);
+  const openTasks = tasks.filter(t => isOpen(t.status));
+  const overdue = openTasks.filter(t => t.dueAt < now);
+  const active = needs.filter(n => n.status === "active");
+  const activeWithNext = active.filter(n => n.taskLinks.length);
+  const firstRequest = new Map<string, Date>();
+  for (const r of requests) if (r.clientNeedId && (!firstRequest.has(r.clientNeedId) || r.occurredAt < firstRequest.get(r.clientNeedId)!)) firstRequest.set(r.clientNeedId, r.occurredAt);
+  const linkedNeeds = await db.clientNeed.findMany({ where: { id: { in: [...new Set([...firstRequest.keys(), ...offers.map(o => o.clientNeedId)])] } }, select: { id: true, clientId: true, status: true, taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] } } }, select: { task: { select: { dueAt: true } } } } } });
+  const prospective = requests.filter(r => PROSPECTIVE_RESULTS.includes(r.resultCode) && r.statusCode !== "closed" && (!r.clientNeedId || linkedNeeds.some(n => n.id === r.clientNeedId && ["active", "paused"].includes(n.status))));
+  const covered = prospective.filter(r => linkedNeeds.some(n => n.id === r.clientNeedId && n.taskLinks.some(l => l.task.dueAt >= now)));
+  const contacts = tasks.filter(t => ["call_or_contact", "pause_return"].includes(t.taskType) && t.status === "completed" && inPeriod(t.completedAt));
+  const timely = contacts.filter(t => t.completedAt! <= t.dueAt);
+  const cohorts: Record<string, DetailRow[]> = {
+    newRequests: leadRows(requests), unprocessedRequests: leadRows(requests.filter(r => r.statusCode === "open")),
+    activeNeeds: needRows(active.map(n => n.id)), activeWithNextAction: needRows(activeWithNext.map(n => n.id)),
+    withoutNextAction: needRows(active.filter(n => !n.taskLinks.length).map(n => n.id)), staleNeeds: needRows(stale.map(n => n.id)),
+    showings: showings.map(s => row("showings", s.id, "Показ")), overdue: taskRows(overdue), openTasks: taskRows(openTasks),
+    dealsOpened: dealRows(deals.filter(d => inPeriod(d.openedAt))), dealsActive: dealRows(deals.filter(d => !["completed", "cancelled"].includes(d.status))),
+    dealsCompleted: dealRows(deals.filter(d => d.status === "completed" && inPeriod(d.closedAt))),
+    reactivated: reactivated.map(c => row("clients", c.id, c.label)),
+    requestsWithNeed: needRows([...firstRequest.keys()]),
+    requestToShowing: needRows([...firstRequest].filter(([id, at]) => showings.some(s => s.clientNeedId === id && s.scheduledAt >= at)).map(([id]) => id)),
+    offersSent: offerRows(offers),
+    offersToShowing: offerRows(offers.filter(o => showings.some(s => s.clientNeedId === o.clientNeedId && s.scheduledAt >= o.sentAt!))),
+    offersToDeal: offerRows(offers.filter(o => deals.some(d => d.status === "completed" && inPeriod(d.closedAt) && d.closedAt! >= o.sentAt! && o.items.some(i => i.propertyId === d.propertyId) && linkedNeeds.some(n => n.id === o.clientNeedId && d.parties.some(p => p.clientId === n.clientId))))),
+    prospective: leadRows(prospective), prospectiveWithAction: leadRows(covered), prospectiveWithoutAction: leadRows(prospective.filter(r => !covered.some(c => c.id === r.id))),
+    contactsCompleted: taskRows(contacts), contactsOnTime: taskRows(timely),
+    commissions: commissions.map(c => ({ ...row("deals", c.dealId, "Комиссия"), id: c.id, amount: c.amount.toString() })),
+  };
+  const href = (metric: string) => `/reports/detail?${new URLSearchParams({ ...p, ...(f.userId ? { userId: f.userId } : {}), ...(f.sourceCode ? { sourceCode: f.sourceCode } : {}), metric })}`;
+  const group = <T,>(rs: T[], code: (r: T) => string, key: string, convert: (rs: T[]) => DetailRow[]) => [...new Set(rs.map(code))].map(c => {
+    const metric = `${key}:${c}`; const rows = convert(rs.filter(r => code(r) === c)); cohorts[metric] = rows;
+    return { code: c, count: rows.length, href: href(metric) };
   });
-
-  const overdueWhere: Prisma.TaskWhereInput = { status: { in: [...OPEN_TASK_STATUSES] }, dueAt: { lt: new Date() }, ...(user ? { responsibleUserId: user } : {}) };
-  const [overdue, overdueByUserRaw, openTasks] = await Promise.all([
-    db.task.count({ where: overdueWhere }),
-    db.task.groupBy({ by: ["responsibleUserId"], where: overdueWhere, _count: { _all: true } }),
-    db.task.count({ where: { status: { in: [...OPEN_TASK_STATUSES] }, ...(user ? { responsibleUserId: user } : {}) } }),
-  ]);
-
-  const dealUser = user ? { responsibleUserId: user } : {};
-  const [dealsOpened, dealsCompleted, dealsActive, commissionsReceived] = await Promise.all([
-    db.deal.count({ where: { openedAt: period, ...dealUser } }),
-    db.deal.count({ where: { status: "completed", closedAt: period, ...dealUser } }),
-    db.deal.count({ where: { status: { notIn: ["completed", "cancelled"] }, ...dealUser } }),
-    db.dealCommission.aggregate({ where: { status: { in: ["received", "partially_received"] }, receivedAt: period, ...(user ? { deal: { responsibleUserId: user } } : {}) }, _sum: { amount: true } }),
-  ]);
-
-  // Воронка после КП: отправленные в периоде → показ после отправки → сделка по объекту из КП.
-  const offersSent = await db.commercialOffer.findMany({
-    where: { sentAt: period, ...(user ? { responsibleUserId: user } : {}) },
-    select: { id: true, sentAt: true, clientNeedId: true, items: { select: { propertyId: true } } },
-  });
-  let offersToShowing = 0;
-  let offersToDeal = 0;
-  for (const o of offersSent) {
-    const propertyIds = o.items.map((i) => i.propertyId);
-    if (await db.showing.count({ where: { clientNeedId: o.clientNeedId, scheduledAt: { gte: o.sentAt! } } })) offersToShowing++;
-    if (await db.deal.count({ where: { propertyId: { in: propertyIds }, openedAt: { gte: o.sentAt! } } })) offersToDeal++;
-  }
-
-  const reactivated = await countReactivatedClients(from, to, cfg.REACTIVATION_GAP_DAYS, user);
-
-  // Активность сотрудников (по первичным событиям периода).
-  const users = await db.user.findMany({ where: user ? { id: user } : { isActive: true }, select: { id: true, displayName: true, roleCode: true }, orderBy: { displayName: "asc" } });
+  const requestsBySource = group(requests, r => r.sourceCode, "source", leadRows);
+  const requestsByChannel = group(requests, r => r.channelCode, "channel", leadRows);
+  const byStatus = group(showings, s => s.status, "showingStatus", rs => rs.map(s => row("showings", s.id, "Показ")));
+  const byResult = group(showings.filter(s => s.status === "completed"), s => s.resultCode ?? "—", "showingResult", rs => rs.map(s => row("showings", s.id, "Показ")));
+  const closedByReason = group(closures, r => r.reasonCode ?? "—", "closure", rs => needRows(rs.map(r => r.clientNeedId)));
+  const labels: Record<string, string> = { newRequests: "Новые обращения", unprocessedRequests: "Обращения без обработки", activeNeeds: "Активные потребности", staleNeeds: `Без движения ${cfg.NEED_INACTIVITY_DAYS} дн.`, showings: "Показы", overdue: "Просроченные действия", dealsOpened: "Открыто сделок", dealsActive: "Сделки в работе", dealsCompleted: "Завершено сделок", reactivated: `Повторно активированные клиенты (пауза ${cfg.REACTIVATION_GAP_DAYS} дн.)`, prospective: "Открытые перспективные обращения", prospectiveWithAction: "Перспективные с актуальным действием", contactsCompleted: "Завершённые контакты", contactsOnTime: "Контакты в срок", commissions: "Полученные комиссионные записи" };
+  const kpis: Metric[] = Object.entries(labels).map(([key, label]) => ({ key, label, value: cohorts[key]!.length, href: href(key) }));
+  const users = await db.user.findMany({ where: f.userId ? { id: f.userId } : { isActive: true }, select: { id: true, displayName: true, roleCode: true } });
   const activity = [];
   for (const u of users) {
-    const [reqs, comms, shows, tasksDone, deals] = await Promise.all([
-      db.leadRequest.count({ where: { createdBy: u.id, occurredAt: period } }),
-      db.communication.count({ where: { authorUserId: u.id, occurredAt: period } }),
-      db.showing.count({ where: { responsibleUserId: u.id, status: "completed", occurredAt: period } }),
-      db.task.count({ where: { responsibleUserId: u.id, status: "completed", completedAt: period } }),
-      db.deal.count({ where: { responsibleUserId: u.id, openedAt: period } }),
-    ]);
-    activity.push({
-      user: u,
-      requests: reqs,
-      communications: comms,
-      showingsCompleted: shows,
-      tasksCompleted: tasksDone,
-      dealsOpened: deals,
-      overdue: overdueByUserRaw.find((o) => o.responsibleUserId === u.id)?._count._all ?? 0,
-    });
+    const communications = await db.communication.findMany({ where: { authorUserId: u.id, occurredAt: period, client: sourceClient }, select: { id: true, clientId: true } });
+    const activityCohorts = {
+      requests: leadRows(requests.filter(r => r.createdBy === u.id)), communications: communications.map(c => ({ ...row("clients", c.clientId, "Коммуникация"), id: c.id })),
+      showingsCompleted: showings.filter(s => s.responsibleUserId === u.id && s.status === "completed" && inPeriod(s.occurredAt)).map(s => row("showings", s.id, "Показ")),
+      tasksCompleted: taskRows(tasks.filter(t => t.responsibleUserId === u.id && t.status === "completed" && inPeriod(t.completedAt))),
+      dealsOpened: dealRows(deals.filter(d => d.responsibleUserId === u.id && inPeriod(d.openedAt))), overdue: taskRows(overdue.filter(t => t.responsibleUserId === u.id)),
+    };
+    for (const [key, rows] of Object.entries(activityCohorts)) cohorts[`activity:${u.id}:${key}`] = rows;
+    activity.push({ user: u, ...Object.fromEntries(Object.entries(activityCohorts).map(([k, v]) => [k, v.length])) as Record<keyof typeof activityCohorts, number> });
   }
-
-  const p = { from: fromStr, to: toStr };
-  const kpis: Metric[] = [
-    { key: "newRequests", label: "Новые обращения", value: newRequests, href: `/requests${qs({ ...p, sourceCode: f.sourceCode, responsibleUserId: user })}` },
-    { key: "unprocessedRequests", label: "Обращения без обработки", value: unprocessed, href: `/requests${qs({ ...p, unprocessed: "yes", responsibleUserId: user })}` },
-    { key: "activeNeeds", label: "Активные потребности", value: activeNeeds, href: `/needs${qs({ status: "active", responsibleUserId: user })}` },
-    { key: "staleNeeds", label: `Без движения ${cfg.NEED_INACTIVITY_DAYS} дн.`, value: staleNeeds, href: `/needs${qs({ stale: "yes", responsibleUserId: user })}` },
-    { key: "showings", label: "Показы", value: showingsTotal, href: `/showings${qs({ ...p, responsibleUserId: user })}` },
-    { key: "overdue", label: "Просроченные действия", value: overdue, href: `/tasks${qs({ view: "all", status: "open", responsibleUserId: user })}&overdueOnly=yes` },
-    { key: "dealsOpened", label: "Открыто сделок", value: dealsOpened, href: `/deals${qs({ ...p, responsibleUserId: user })}` },
-    { key: "dealsActive", label: "Сделки в работе", value: dealsActive, href: `/deals${qs({ open: "yes", responsibleUserId: user })}` },
-    { key: "dealsCompleted", label: "Завершено сделок", value: dealsCompleted, href: `/deals${qs({ status: "completed", responsibleUserId: user })}` },
-    { key: "reactivated", label: `Повторно активированные клиенты (пауза ${cfg.REACTIVATION_GAP_DAYS} дн.)`, value: reactivated },
-  ];
-
+  const count = (k: string) => cohorts[k]!.length;
+  const commissionSum = commissions.reduce((sum, c) => sum + BigInt(c.amount.toFixed(2).replace(".", "")), 0n);
   return {
-    period: { from: fromStr, to: toStr, timeZone: tz },
-    filters: { userId: user ?? null, sourceCode: f.sourceCode ?? null },
-    kpis,
-    requestsBySource: bySourceRaw.map((r) => ({ code: r.sourceCode, count: r._count._all, href: `/requests${qs({ ...p, sourceCode: r.sourceCode, responsibleUserId: user })}` })),
-    requestsByChannel: byChannelRaw.map((r) => ({ code: r.channelCode, count: r._count._all })),
-    funnel: {
-      requests: newRequests,
-      requestsWithNeed: new Set(requestsWithNeed.map((r) => r.clientNeedId)).size,
-      requestToShowing,
-      offersSent: offersSent.length,
-      offersToShowing,
-      offersToDeal,
-      dealsOpened,
-      dealsCompleted,
-    },
-    showings: {
-      total: showingsTotal,
-      byStatus: showingsByStatus.map((s) => ({ code: s.status, count: s._count._all, href: `/showings${qs({ ...p, status: s.status })}` })),
-      byResult: showingsByResult.map((s) => ({ code: s.resultCode ?? "—", count: s._count._all })),
-    },
-    needs: {
-      active: activeNeeds,
-      activeWithNextAction,
-      nextActionShare: activeNeeds ? Math.round((activeWithNextAction / activeNeeds) * 1000) / 10 : 100,
-      stale: staleNeeds,
-      closedByReason: needsClosedByReason.map((r) => ({ code: r.reasonCode ?? "—", count: r._count._all })),
-    },
-    tasks: { open: openTasks, overdue, overdueShare: openTasks ? Math.round((overdue / openTasks) * 1000) / 10 : 0 },
-    commissionsReceived: commissionsReceived._sum.amount?.toString() ?? "0",
-    activity,
-    generatedAt: new Date(),
+    period: { ...p, timeZone: zone }, filters: { userId: f.userId ?? null, sourceCode: f.sourceCode ?? null }, kpis,
+    requestsBySource, requestsByChannel,
+    funnel: { requests: count("newRequests"), requestsWithNeed: count("requestsWithNeed"), requestToShowing: count("requestToShowing"), offersSent: count("offersSent"), offersToShowing: count("offersToShowing"), offersToDeal: count("offersToDeal"), dealsOpened: count("dealsOpened"), dealsCompleted: count("dealsCompleted") },
+    showings: { total: count("showings"), byStatus, byResult },
+    needs: { active: active.length, activeWithNextAction: activeWithNext.length, nextActionShare: percent(activeWithNext.length, active.length), stale: stale.length, closedByReason },
+    tasks: { open: openTasks.length, overdue: overdue.length, overdueShare: openTasks.length ? percent(overdue.length, openTasks.length) : 0 },
+    contactControl: { prospective: prospective.length, withAction: covered.length, actionShare: percent(covered.length, prospective.length), completed: contacts.length, onTime: timely.length, onTimeShare: percent(timely.length, contacts.length) },
+    commissionsReceived: `${commissionSum / 100n}.${String(commissionSum % 100n).padStart(2, "0")}`,
+    activity, generatedAt: now, detailLinks: Object.fromEntries(Object.keys(cohorts).map(k => [k, href(k)])), cohorts,
   };
 }
-
-/**
- * Повторно активированные клиенты (ТЗ 31.5): Client существовал до события, не имел LeadRequest, Communication,
- * нового/изменённого ClientNeed, NeedPropertyMatch, Showing или завершённой Task в течение REACTIVATION_GAP_DAYS
- * и затем получил новый LeadRequest или новую ClientNeed в периоде.
- */
-export async function countReactivatedClients(from: Date, to: Date, gapDays: number, userId?: string): Promise<number> {
-  const userFilter = userId ? Prisma.sql`AND c.responsible_user_id = ${userId}::uuid` : Prisma.empty;
-  const rows = await db.$queryRaw<{ n: bigint }[]>`
-    WITH events AS (
-      SELECT lr.client_id, lr.occurred_at AS at FROM lead_requests lr WHERE lr.client_id IS NOT NULL AND lr.occurred_at >= ${from} AND lr.occurred_at < ${to}
-      UNION ALL
-      SELECT n.client_id, n.opened_at AS at FROM client_needs n WHERE n.opened_at >= ${from} AND n.opened_at < ${to}
-    ),
-    first_event AS (SELECT client_id, min(at) AS at FROM events GROUP BY client_id)
-    SELECT count(*)::bigint AS n
-    FROM first_event fe
-    JOIN clients c ON c.id = fe.client_id
-    WHERE c.created_at < fe.at - make_interval(days => ${gapDays})
-      ${userFilter}
-      AND NOT EXISTS (SELECT 1 FROM lead_requests x WHERE x.client_id = fe.client_id AND x.occurred_at >= fe.at - make_interval(days => ${gapDays}) AND x.occurred_at < fe.at)
-      AND NOT EXISTS (SELECT 1 FROM communications x WHERE x.client_id = fe.client_id AND x.occurred_at >= fe.at - make_interval(days => ${gapDays}) AND x.occurred_at < fe.at)
-      AND NOT EXISTS (SELECT 1 FROM client_needs x WHERE x.client_id = fe.client_id AND ((x.opened_at >= fe.at - make_interval(days => ${gapDays}) AND x.opened_at < fe.at) OR (x.updated_at >= fe.at - make_interval(days => ${gapDays}) AND x.updated_at < fe.at)))
-      AND NOT EXISTS (SELECT 1 FROM need_property_matches m JOIN client_needs x ON x.id = m.client_need_id WHERE x.client_id = fe.client_id AND m.offered_at >= fe.at - make_interval(days => ${gapDays}) AND m.offered_at < fe.at)
-      AND NOT EXISTS (SELECT 1 FROM showings s JOIN client_needs x ON x.id = s.client_need_id WHERE x.client_id = fe.client_id AND s.scheduled_at >= fe.at - make_interval(days => ${gapDays}) AND s.scheduled_at < fe.at)
-      AND NOT EXISTS (SELECT 1 FROM tasks t JOIN task_clients tc ON tc.task_id = t.id WHERE tc.client_id = fe.client_id AND t.completed_at >= fe.at - make_interval(days => ${gapDays}) AND t.completed_at < fe.at)
-  `;
-  return Number(rows[0]?.n ?? 0);
+export async function getReportDetail(actor: Actor, metric: string, raw: unknown = {}) {
+  const report = await getManagerReport(actor, raw);
+  const rows = report.cohorts[metric];
+  if (!rows) throw new NotFoundError();
+  return { metric, period: report.period, filters: report.filters, rows, total: rows.length };
 }

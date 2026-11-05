@@ -22,12 +22,6 @@ function qs(params: Record<string, string | null | undefined>): string {
   return s ? `?${s}` : "";
 }
 
-/** Добавляет фильтр сотрудника в drill-down, если сервер его не передал. */
-function withUser(href: string, userId: string | null): string {
-  if (!userId || href.includes("responsibleUserId=")) return href;
-  return `${href}${href.includes("?") ? "&" : "?"}responsibleUserId=${encodeURIComponent(userId)}`;
-}
-
 function shiftDate(ymd: string, days: number): string {
   return new Date(new Date(`${ymd}T00:00:00.000Z`).getTime() + days * 86_400_000).toISOString().slice(0, 10);
 }
@@ -140,10 +134,16 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       ) : null}
       {sourceCode ? (
         <div className="alert alert-info mb-3 text-xs">
-          Фильтр по источнику применяется к обращениям (новые обращения, без обработки, распределение по источникам и каналам, воронка обращений). Остальные показатели источник не учитывают.
+          Источник ограничивает обращения периода и связанные с ними записи. Текущие состояния считаются на момент формирования отчёта.
         </div>
       ) : null}
 
+      <Card title="Контроль перспективных обращений и контактов" className="mb-4">
+        <StatLine label="Доля перспективных с назначенным действием" value={`${report.contactControl.actionShare}%`} sub={`${report.contactControl.withAction} из ${report.contactControl.prospective}`} href={report.detailLinks.prospectiveWithAction!} />
+        <Link className="link" href={report.detailLinks.prospective!}>Все открытые перспективные обращения</Link>
+        <StatLine label="Доля контактов в срок" value={`${report.contactControl.onTimeShare}%`} sub={`${report.contactControl.onTime} из ${report.contactControl.completed}`} href={report.detailLinks.contactsOnTime!} />
+        <Link className="link" href={report.detailLinks.contactsCompleted!}>Все завершённые контакты среза</Link>
+      </Card>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         {report.kpis.map((k) => (
           <KpiTile
@@ -171,7 +171,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               key: r.code,
               label: dictLabel(dicts, "lead_channel", r.code),
               count: r.count,
-              href: `/requests${qs({ from, to, channelCode: r.code, sourceCode, responsibleUserId: userId })}`,
+              href: r.href,
             }))}
           />
         </ReportSection>
@@ -183,16 +183,16 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             title="Обращение → потребность → показ"
             steps={[
               { label: "Обращения", value: funnel.requests, href: kpi("newRequests")?.href },
-              { label: "Потребности из обращений", value: funnel.requestsWithNeed, note: "уникальные потребности" },
-              { label: "Был показ после обращения", value: funnel.requestToShowing, note: "по тем же потребностям" },
+              { label: "Потребности из обращений", value: funnel.requestsWithNeed, href: report.detailLinks.requestsWithNeed, note: "уникальные потребности" },
+              { label: "Был показ после обращения", value: funnel.requestToShowing, href: report.detailLinks.requestToShowing, note: "по тем же потребностям" },
             ]}
           />
           <FunnelRow
             title="Коммерческое предложение → показ → сделка"
             steps={[
-              { label: "КП отправлено", value: funnel.offersSent },
-              { label: "Показ после КП", value: funnel.offersToShowing, note: "по потребности из КП" },
-              { label: "Сделка по объекту из КП", value: funnel.offersToDeal },
+              { label: "КП отправлено", value: funnel.offersSent, href: report.detailLinks.offersSent },
+              { label: "Показ после КП", value: funnel.offersToShowing, href: report.detailLinks.offersToShowing, note: "по потребности из КП" },
+              { label: "Сделка по объекту из КП", value: funnel.offersToDeal, href: report.detailLinks.offersToDeal },
             ]}
           />
           <FunnelRow
@@ -211,12 +211,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <div className="px-4 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">По статусу</div>
           <BarTable
             emptyTitle="Показов за период нет"
-            rows={showings.byStatus.map((s) => ({ key: s.code, label: labelOf("showingStatus", s.code), count: s.count, href: withUser(s.href, userId) }))}
+            rows={showings.byStatus.map((s) => ({ key: s.code, label: labelOf("showingStatus", s.code), count: s.count, href: s.href }))}
           />
           <div className="px-4 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Результат проведённых</div>
           <BarTable
             emptyTitle="Проведённых показов нет"
-            rows={showings.byResult.map((s) => ({ key: s.code, label: s.code === "—" ? "Результат не указан" : labelOf("showingResult", s.code), count: s.count }))}
+            rows={showings.byResult.map((s) => ({ key: s.code, label: s.code === "—" ? "Результат не указан" : labelOf("showingResult", s.code), count: s.count, href: s.href }))}
           />
         </ReportSection>
 
@@ -226,13 +226,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             <StatLine
               label="С корректным следующим действием"
               value={`${needs.nextActionShare}%`}
+              href={report.detailLinks.activeWithNextAction}
               sub={`${needs.activeWithNextAction} из ${needs.active}`}
               signal={needs.active > 0 && needs.nextActionShare < 100 ? "warning" : null}
             />
             <StatLine
               label="Без следующего действия"
               value={withoutNextAction}
-              href={`/needs${qs({ status: "active", withoutNextAction: "yes", responsibleUserId: userId })}`}
+              href={report.detailLinks.withoutNextAction!}
               signal={withoutNextAction > 0 ? "attention" : null}
             />
             <StatLine label={kpi("staleNeeds")?.label ?? "Без движения"} value={needs.stale} href={kpi("staleNeeds")?.href} signal={needs.stale > 0 ? "warning" : null} />
@@ -240,23 +241,23 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <div className="px-4 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Закрыты в периоде — по причине</div>
           <BarTable
             emptyTitle="Закрытых потребностей за период нет"
-            rows={needs.closedByReason.map((r) => ({ key: r.code, label: r.code === "—" ? "Причина не указана" : labelOf("stopReason", r.code), count: r.count }))}
+            rows={needs.closedByReason.map((r) => ({ key: r.code, label: r.code === "—" ? "Причина не указана" : labelOf("stopReason", r.code), count: r.count, href: r.href }))}
           />
         </ReportSection>
 
         <div className="space-y-4">
           <ReportSection title="Задачи и следующие действия" note="Состояние на текущий момент, без учёта периода.">
             <div className="px-4 py-2">
-              <StatLine label="Открытые задачи" value={tasks.open} href={`/tasks${qs({ view: "all", status: "open", responsibleUserId: userId })}`} />
+              <StatLine label="Открытые задачи" value={tasks.open} href={report.detailLinks.openTasks!} />
               <StatLine label="Просроченные" value={tasks.overdue} href={kpi("overdue")?.href} signal={tasks.overdue > 0 ? "attention" : null} />
-              <StatLine label="Доля просроченных" value={`${tasks.overdueShare}%`} sub={`${tasks.overdue} из ${tasks.open}`} />
+              <StatLine label="Доля просроченных" href={report.detailLinks.overdue} value={`${tasks.overdueShare}%`} sub={`${tasks.overdue} из ${tasks.open}`} />
             </div>
           </ReportSection>
           <ReportSection title="Комиссии получены" note="Сумма поступлений со статусом «получена» или «частично получена» с датой поступления в периоде.">
             <div className="px-4 py-3">
               <div className="text-2xl font-semibold tabular-nums text-slate-900">{fmtMoney(report.commissionsReceived)}</div>
-              <Link href={kpi("dealsCompleted")?.href ?? "/deals"} className="link text-xs">
-                Завершённые сделки →
+              <Link href={report.detailLinks.commissions!} className="link text-xs">
+                Комиссионные записи →
               </Link>
             </div>
           </ReportSection>
@@ -291,14 +292,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                     </Link>
                     {a.user.roleCode === "manager" ? <span className="ml-1 text-xs text-slate-400">руководитель</span> : null}
                   </td>
-                  <td className="text-right tabular-nums">{a.requests}</td>
-                  <td className="text-right tabular-nums">{a.communications}</td>
-                  <td className="text-right tabular-nums">{a.showingsCompleted}</td>
-                  <td className="text-right tabular-nums">{a.tasksCompleted}</td>
-                  <td className="text-right tabular-nums">{a.dealsOpened}</td>
+                  <td className="text-right tabular-nums">{<Link className="link" href={report.detailLinks[`activity:${a.user.id}:requests`]!}>{a.requests}</Link>}</td>
+                  <td className="text-right tabular-nums">{<Link className="link" href={report.detailLinks[`activity:${a.user.id}:communications`]!}>{a.communications}</Link>}</td>
+                  <td className="text-right tabular-nums">{<Link className="link" href={report.detailLinks[`activity:${a.user.id}:showingsCompleted`]!}>{a.showingsCompleted}</Link>}</td>
+                  <td className="text-right tabular-nums">{<Link className="link" href={report.detailLinks[`activity:${a.user.id}:tasksCompleted`]!}>{a.tasksCompleted}</Link>}</td>
+                  <td className="text-right tabular-nums">{<Link className="link" href={report.detailLinks[`activity:${a.user.id}:dealsOpened`]!}>{a.dealsOpened}</Link>}</td>
                   <td className="text-right tabular-nums">
                     {a.overdue > 0 ? (
-                      <Link href={`/tasks${qs({ view: "all", status: "open", responsibleUserId: a.user.id, overdueOnly: "yes" })}`} className="font-medium text-red-700 hover:underline">
+                      <Link href={report.detailLinks[`activity:${a.user.id}:overdue`]!} className="font-medium text-red-700 hover:underline">
                         {a.overdue} ⚠
                       </Link>
                     ) : (

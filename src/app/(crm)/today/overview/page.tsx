@@ -1,3 +1,4 @@
+import { ContactControl } from "../../requests/contact-control";
 import Link from "next/link";
 import { requirePageActor } from "@/server/page-auth";
 import { getManagerReport } from "@/modules/reports/application/report-service";
@@ -48,6 +49,7 @@ export default async function ManagerOverviewPage() {
           </>
         }
       />
+      <ContactControl actor={actor} />
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {kpis.map((k) => (
           <Link key={k.key} href={k.href ?? "/reports"} className="card block p-3 hover:border-brand-500">

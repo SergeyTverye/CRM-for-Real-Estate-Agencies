@@ -1,3 +1,5 @@
+import { PROSPECTIVE_RESULTS } from "../domain/prospective";
+import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { z } from "zod";
 import { db, transaction, type Tx } from "@/shared/db/client";
 import { ConflictError, DomainError, ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
@@ -35,7 +37,7 @@ const clientChoiceSchema = z.discriminatedUnion("mode", [
 
 const outcomeSchema = z.discriminatedUnion("resultCode", [
   z.object({ resultCode: z.literal("new_need"), need: needParamsSchema, nextAction: nextActionSchema }),
-  z.object({ resultCode: z.literal("linked_existing_need"), needId: zUuid, nextAction: nextActionSchema.optional() }),
+  z.object({ resultCode: z.literal("linked_existing_need"), needId: zUuid, nextAction: nextActionSchema }),
   z.object({ resultCode: z.literal("one_off_service"), nextAction: nextActionSchema.optional() }),
   z.object({ resultCode: z.literal("no_followup") }),
   z.object({ resultCode: z.literal("invalid_or_spam") }),
@@ -88,6 +90,9 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
   if (d.outcome.resultCode === "new_need") {
     await assertDictionaryCode("need_operation_type", d.outcome.need.operationType, "outcome.need.operationType");
     await assertDictionaryCode("property_type", d.outcome.need.propertyType, "outcome.need.propertyType");
+  }
+  if (["no_followup", "invalid_or_spam", "one_off_service"].includes(d.outcome.resultCode) && !d.summary) {
+    throw new ValidationError("Укажите причину завершения обращения в кратком содержании", { summary: ["Укажите причину"] });
   }
   if (d.client.mode === "none" && (d.outcome.resultCode === "new_need" || d.outcome.resultCode === "linked_existing_need")) {
     throw new ValidationError("Для потребности нужен клиент", { client: ["Выберите или создайте клиента"] });
@@ -263,6 +268,7 @@ const resolveSchema = z.object({
   statusCode: zCode("leadStatus").optional(),
   responsibleUserId: zUuid.optional(),
   comment: zOptText(2000),
+  nextAction: nextActionSchema.optional(),
 });
 
 /** Руководитель разрешает обращение: привязывает к клиенту, назначает ответственного, меняет статус. */
@@ -284,6 +290,19 @@ export async function resolveRequest(actor: Actor, requestId: string, input: unk
     }
     if (d.responsibleUserId) data.responsibleUserId = d.responsibleUserId;
     if (d.statusCode) data.statusCode = d.statusCode;
+    const status = d.statusCode ?? lr.statusCode;
+    if (status === "closed" && d.statusCode && !d.comment) throw new ValidationError("Укажите причину завершения обращения", { comment: ["Укажите причину"] });
+    if (PROSPECTIVE_RESULTS.includes(lr.resultCode) && status !== "closed") {
+      if (!lr.clientNeedId) throw new ValidationError("Свяжите перспективное обращение с потребностью и назначьте следующее действие");
+      const need = await tx.clientNeed.findFirst({ where: { id: lr.clientNeedId, ...needScope(actor) } });
+      if (!need) throw new NotFoundError();
+      if (d.nextAction) {
+        const responsibleUserId = await resolveTaskResponsible(tx, actor, d.nextAction.responsibleUserId, need.responsibleUserId);
+        await insertTask(tx, actor.userId, { ...d.nextAction, responsibleUserId }, { needIds: [need.id], clientIds: [need.clientId] });
+      }
+      if (["active", "paused"].includes(need.status) && !await tx.taskNeed.count({ where: { clientNeedId: need.id, task: { status: { in: [...OPEN_TASK_STATUSES] }, dueAt: { gte: new Date() } } } })) throw new ConflictError("NEXT_ACTION_REQUIRED", "Для перспективного обращения назначьте следующее действие с ответственным и сроком");
+      await assertNeedInvariants(tx, [need.id]);
+    }
     // Комментарий решения руководителя хранится только в AuditLog: summary видит зарегистрировавший риелтор.
     await tx.leadRequest.update({ where: { id: requestId }, data });
     if (data.clientId || data.responsibleUserId || d.comment || d.statusCode) {

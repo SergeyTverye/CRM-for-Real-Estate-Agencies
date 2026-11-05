@@ -46,7 +46,7 @@ export async function listNeeds(actor: Actor, raw: unknown) {
   if (f.responsibleUserId && isManager(actor)) and.push({ responsibleUserId: f.responsibleUserId });
   if (f.clientId) and.push({ clientId: f.clientId });
   if (f.q) and.push({ OR: [{ client: { AND: [clientScope(actor), { displayName: { contains: f.q, mode: "insensitive" } }] } }, { district: { contains: f.q, mode: "insensitive" } }, { locationText: { contains: f.q, mode: "insensitive" } }] });
-  if (f.withoutNextAction) and.push({ status: { in: ["active", "paused"] }, taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } });
+  if (f.withoutNextAction) and.push({ OR: [{ status: "active", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } }, { status: "paused", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] }, taskType: "pause_return" } } } }] });
   if (f.stale) and.push(staleNeedWhere(new Date(Date.now() - getConfig().NEED_INACTIVITY_DAYS * 86_400_000)));
   const where: Prisma.ClientNeedWhereInput = { AND: and };
   const [rows, total] = await Promise.all([

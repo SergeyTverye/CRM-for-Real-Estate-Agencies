@@ -80,6 +80,7 @@ export default async function PropertyCardPage({ params, searchParams }: { param
         }
         actions={
           <>
+            <Link className="btn" href={`/properties/${id}/print`}>Печать карточки</Link>
             {!archived ? (
               <Link className="btn btn-primary" href={`/requests/new?propertyId=${id}`}>
                 Зарегистрировать обращение по объекту

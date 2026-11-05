@@ -406,9 +406,11 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}): Prom
 
   const needsWithoutNextAction = await db.clientNeed.count({
     where: {
-      status: { in: ["active", "paused"] },
       ...(scope === "all" ? needScope(actor) : { responsibleUserId: userId }),
-      taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } },
+      AND: [{ OR: [
+        { status: "active", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } },
+        { status: "paused", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] }, taskType: "pause_return" } } } },
+      ] }],
     },
   });
 

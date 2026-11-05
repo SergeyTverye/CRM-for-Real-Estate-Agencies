@@ -1,5 +1,5 @@
 import type { DbOrTx } from "@/shared/db/client";
-import { DomainError } from "@/shared/errors";
+import { ConflictError, DomainError } from "@/shared/errors";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 
 /**
@@ -19,6 +19,7 @@ export async function findNeedInvariantViolations(tx: DbOrTx, needIds: string[])
       status: true,
       stopReasonCode: true,
       closedAt: true,
+      taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] }, taskType: "pause_return" } }, select: { taskId: true } },
       _count: { select: { taskLinks: { where: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } } },
     },
   });
@@ -26,7 +27,7 @@ export async function findNeedInvariantViolations(tx: DbOrTx, needIds: string[])
   for (const n of needs) {
     const open = n._count.taskLinks;
     if (n.status === "active" && open === 0) out.push({ needId: n.id, status: n.status, violation: "NEXT_ACTION_REQUIRED" });
-    if (n.status === "paused" && open === 0) out.push({ needId: n.id, status: n.status, violation: "RETURN_TASK_REQUIRED" });
+    if (n.status === "paused" && n.taskLinks.length === 0) out.push({ needId: n.id, status: n.status, violation: "RETURN_TASK_REQUIRED" });
     if (n.status === "closed" && (!n.stopReasonCode || !n.closedAt)) out.push({ needId: n.id, status: n.status, violation: "STOP_REASON_REQUIRED" });
   }
   return out;
@@ -40,7 +41,8 @@ export async function assertNeedInvariants(tx: DbOrTx, needIds: string[]): Promi
     first.violation === "NEXT_ACTION_REQUIRED"
       ? "Для потребности в работе необходимо назначить следующее действие (задачу со сроком)."
       : first.violation === "RETURN_TASK_REQUIRED"
-        ? "Для потребности на паузе необходима задача возврата с датой."
+        ? "Создайте новую задачу возврата (тип «Возврат из паузы») с ответственным и сроком или смените статус потребности в этой операции."
         : "Для закрытия потребности укажите причину остановки.";
-  throw new DomainError(first.violation, message, { needIds: violations.map((v) => v.needId) });
+  const ErrorType = first.violation === "RETURN_TASK_REQUIRED" ? ConflictError : DomainError;
+  throw new ErrorType(first.violation, message, { needIds: violations.map((v) => v.needId) });
 }

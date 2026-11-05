@@ -143,6 +143,7 @@ export async function updateOffer(actor: Actor, id: string, input: unknown): Pro
       },
     });
     if (d.items) {
+      if (new Set(d.items.map(i => i.propertyId)).size !== d.items.length) throw new ValidationError("Объект указан дважды");
       const existing = await tx.commercialOfferItem.findMany({ where: { commercialOfferId: id } });
       const keep = new Map(existing.map((e) => [e.propertyId, e]));
       const wanted = new Set(d.items.map((i) => i.propertyId));
@@ -276,7 +277,7 @@ export async function getOffer(actor: Actor, id: string) {
       need: { select: { id: true, operationType: true, propertyType: true, client: { select: { id: true, displayName: true, responsibleUserId: true } } } },
       responsible: { select: { id: true, displayName: true } },
       creator: { select: { displayName: true } },
-      legalEntity: { select: { id: true, displayName: true, entityType: true } },
+      legalEntity: { select: { id: true, displayName: true, entityType: true, requisites: true } },
       items: {
         orderBy: { position: "asc" },
         include: { property: { select: { id: true, addressText: true, price: true, area: true, status: true } } },
@@ -291,4 +292,23 @@ export async function getOffer(actor: Actor, id: string) {
     // Расхождение snapshot и текущей цены — для подсказки пользователю, snapshot не меняется.
     priceChanged: o.items.filter((i) => i.priceSnapshot !== null && i.property.price !== null && !i.priceSnapshot.equals(i.property.price)).map((i) => i.id),
   };
+}
+
+/** A new draft keeps the exact historical snapshots; no Property refresh or send side effect. */
+export async function createOfferRevision(actor: Actor, id: string, input: unknown): Promise<{ id: string }> {
+  const d = parseInput(z.object({ expectedUpdatedAt: zExpectedUpdatedAt }), input);
+  return transaction(async tx => {
+    const source = await loadOffer(tx, actor, id);
+    if (source.updatedAt.getTime() !== d.expectedUpdatedAt.getTime()) throw new StaleUpdateError();
+    const items = await tx.commercialOfferItem.findMany({ where: { commercialOfferId: id }, orderBy: { position: "asc" } });
+    const revision = await tx.commercialOffer.create({ data: {
+      clientNeedId: source.clientNeedId, responsibleUserId: source.responsibleUserId, createdBy: actor.userId,
+      legalEntityId: source.legalEntityId, status: "draft", title: source.title, introText: source.introText,
+      expiresAt: source.expiresAt, generationSource: "manual", promptTemplateVersion: `revision-of:${id}`,
+      notes: source.notes,
+      items: { create: items.map(i => ({ propertyId: i.propertyId, position: i.position, priceSnapshot: i.priceSnapshot, addressSnapshot: i.addressSnapshot, areaSnapshot: i.areaSnapshot, termsSnapshot: i.termsSnapshot, comment: i.comment })) },
+    }, select: { id: true } });
+    await writeAudit(tx, { actorUserId: actor.userId, action: "offer.revision_created", entityType: "CommercialOffer", entityId: revision.id, after: { previousOfferId: id } });
+    return revision;
+  });
 }
