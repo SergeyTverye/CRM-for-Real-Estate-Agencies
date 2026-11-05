@@ -61,7 +61,7 @@ describe("calendar and internal notification rules", () => {
     expect(occurrences(e,new Date(e.start),new Date("2026-04-01"),"Asia/Novosibirsk").map(o=>o.start.slice(0,10))).toEqual(["2026-01-31","2026-03-31"]);
   });
   it("rejects unsupported RRULE and invalid UNTIL", () => {
-    expect(()=>parseRecurrence("FREQ=YEARLY")).toThrow();
+    expect(()=>parseRecurrence("FREQ=HOURLY")).toThrow();
     expect(()=>parseRecurrence("FREQ=DAILY;UNTIL=20260231T030000Z")).toThrow();
   });
   it("projects private intervals without content or CRM/source links", () => {

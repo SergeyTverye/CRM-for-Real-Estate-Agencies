@@ -34,6 +34,7 @@ export interface TaskView {
   recurrenceKind: string;
   recurrenceInterval: number;
   recurrenceUntil: Date | null;
+  recurrenceRule?: string | null;
   parentTaskId: string | null;
   completedAt: Date | null;
   resultComment: string | null;
@@ -119,6 +120,7 @@ export function toTaskView(actor: Actor, t: TaskRow, now = getTodayReferenceTime
     recurrenceKind: t.recurrenceKind,
     recurrenceInterval: t.recurrenceInterval,
     recurrenceUntil: t.recurrenceUntil,
+    recurrenceRule: t.recurrenceRule,
     parentTaskId: t.parentTaskId,
     completedAt: t.completedAt,
     resultComment: t.resultComment,

@@ -50,9 +50,11 @@ export async function listNotifications(actor: Actor, input: unknown) {
       const occurrence = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.exec(n.dedupKey)?.[0];
       if (event?.editable) context = { title: event.title, at: occurrence ?? event.startAt.toISOString(), end: new Date(+new Date(occurrence ?? event.startAt) + +event.endAt - +event.startAt).toISOString() };
     }
+    const phase = n.dedupKey.includes(":overdue:") ? "Просрочено" : n.dedupKey.includes(":due:") ? "Срок наступил" : n.kind === "assignment" ? "Назначение" : "До срока";
+    const text = notificationText(n.kind, context, timeZone);
     return { id: n.id, kind: n.kind, sourceType: n.sourceType, sourceId: n.sourceId,
     triggerAt: n.triggerAt, state: n.state, readAt: n.readAt, snoozedUntil: n.snoozedUntil,
-    ...notificationText(n.kind, context, timeZone), link: sourceLink(n.sourceType, n.sourceId) };
+    ...text, title: `${phase} · ${text.title}`, phase, link: sourceLink(n.sourceType, n.sourceId) };
   }));
   return { items, total, page: f.page, pageSize: f.pageSize };
 }

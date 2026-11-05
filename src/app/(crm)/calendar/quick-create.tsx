@@ -20,7 +20,7 @@ export function CalendarQuickCreate({ timeZone, users, labels, onDone }: { timeZ
   function open(next: "task" | "showing") { setType(next); setAt(new Date(Date.now()+3600000).toISOString()); setTitle(""); setNeed(null); setProperty(null); setResponsible(""); setDirty(false); action.setError(null); }
   async function close() { if (!dirty || await requestConfirmation("Закрыть без сохранения?")) setType(null); }
   return <>
-    <button className="btn" onClick={() => open("task")}>+ Задача</button><button className="btn" onClick={() => open("showing")}>+ Показ</button>
+    <button className="btn" onClick={() => open("task")}>+ Звонок / задача</button><button className="btn" onClick={() => open("showing")}>+ Показ</button>
     <Modal open={!!type} onClose={close} title={type === "showing" ? "Назначить показ" : "Быстрая задача"}>
       <form className="space-y-3" onChange={() => setDirty(true)} onSubmit={e => { e.preventDefault(); void action.run(async () => {
         const data = type === "task" ? { title, taskType: "call_or_contact", dueAt: at, ...(responsibleUserId ? { responsibleUserId } : {}), ...(need ? { links: { needIds: [need.id] } } : {}) }

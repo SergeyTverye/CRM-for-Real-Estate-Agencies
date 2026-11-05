@@ -64,6 +64,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
         }
         actions={
           <>
+            <Link href="/calendar" className="btn">Планер: день / неделя / месяц / три месяца</Link>
             <Link href="/requests/new" className="btn btn-primary">
               + Обращение
             </Link>

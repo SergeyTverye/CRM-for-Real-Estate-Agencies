@@ -7,6 +7,8 @@ import { userOptions } from "@/server/options";
 import { loadList } from "@/server/list-page";
 import { Card, EmptyState, FilterBar, FilterField, PageHeader, Pagination, Select } from "@/ui/components";
 import { TaskTable } from "@/ui/domain/task-list";
+import { BulkTasks } from "./bulk-tasks";
+import { tz } from "@/server/format";
 
 export const metadata = { title: "Задачи" };
 
@@ -50,7 +52,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
         title="Задачи"
         subtitle={isManager ? "Задачи сотрудников, контрольные и повторяющиеся действия" : "Ваши задачи, звонки и контрольные действия"}
         actions={
-          <><a className="btn" href={`/api/v1/export/tasks?${new URLSearchParams(sp)}`}>CSV по фильтрам</a><Link href="/tasks/new" className="btn btn-primary">+ Новая задача</Link></>
+          <><Link href="/calendar" className="btn">Планер</Link><BulkTasks timeZone={tz()} /><a className="btn" href={`/api/v1/export/tasks?${new URLSearchParams(sp)}`}>CSV по фильтрам</a><Link href="/tasks/new" className="btn btn-primary">+ Новая задача</Link></>
         }
       />
       <nav className="mb-3 flex gap-1 border-b border-slate-200" aria-label="Режим списка задач">

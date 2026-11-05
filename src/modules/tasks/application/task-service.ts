@@ -25,7 +25,9 @@ import {
 } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { assertNeedInvariants } from "@/modules/needs/domain/need-invariant";
-import { isOpenTaskStatus, nextRecurrenceDue, OPEN_TASK_STATUSES } from "../domain/task-rules";
+import { isOpenTaskStatus, nextTaskDue, OPEN_TASK_STATUSES } from "../domain/task-rules";
+import { parseRecurrence } from "@/modules/calendar/domain/calendar-rules";
+import { getConfig } from "@/shared/config/env";
 
 /**
  * UC-06 CreateOrCompleteTask (FR-09, FR-10, FR-11, FR-26).
@@ -63,9 +65,12 @@ export const taskInputSchema = z
     recurrenceKind: zCode("recurrenceKind").default("none"),
     recurrenceInterval: z.coerce.number().int().min(1).max(365).default(1),
     recurrenceUntil: zOptDateOnly,
+    recurrenceRule: z.string().max(150).nullable().optional(),
+    reminderOffsets: z.array(z.number().int().min(0).max(525600)).max(5).default([]),
     links: taskLinksSchema,
   })
   .superRefine((t, ctx) => {
+    try { parseRecurrence(t.recurrenceRule); } catch { ctx.addIssue({ code: "custom", path: ["recurrenceRule"], message: "Некорректное повторение" }); }
     if (t.taskType === "postdeal" && !t.taskSubtypeCode)
       ctx.addIssue({ code: "custom", path: ["taskSubtypeCode"], message: "Для постсделочной задачи выберите подвид" });
   });
@@ -139,6 +144,8 @@ export interface InsertTaskData {
   recurrenceInterval?: number;
   recurrenceUntil?: Date | null;
   parentTaskId?: string | null;
+  recurrenceRule?: string | null;
+  reminderOffsets?: number[];
 }
 
 /** Низкоуровневая вставка задачи и её связей (вызывающая команда уже проверила права). */
@@ -158,6 +165,8 @@ export async function insertTask(tx: Tx, createdBy: string, data: InsertTaskData
       recurrenceInterval: data.recurrenceInterval ?? 1,
       recurrenceUntil: data.recurrenceUntil ?? null,
       parentTaskId: data.parentTaskId ?? null,
+      recurrenceRule: data.recurrenceRule ?? null,
+      reminderOffsets: data.reminderOffsets ?? [],
     },
     select: { id: true },
   });
@@ -236,6 +245,7 @@ async function lockVersion(tx: Tx, taskId: string, expected: Date) {
 }
 
 const completeSchema = z.object({
+  confirmOpenRequired: z.boolean().default(false),
   expectedUpdatedAt: zExpectedUpdatedAt,
   resultComment: zOptText(4000),
   nextTask: nextActionSchema.optional(),
@@ -254,10 +264,14 @@ export interface CompleteTaskResult {
  * Для повторяемой задачи создаётся следующий экземпляр.
  */
 export async function completeTask(actor: Actor, taskId: string, input: unknown): Promise<CompleteTaskResult> {
+  parseInput(zUuid, taskId);
   const data = parseInput(completeSchema, input);
   return transaction(async (tx) => {
+    await tx.$queryRaw(Prisma.sql`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`);
     const task = await loadOwnTask(tx, actor, taskId);
     if (!isOpenTaskStatus(task.status)) throw new DomainError("TASK_NOT_OPEN", "Задача уже завершена или отменена");
+    const openRequired = await tx.taskChecklistItem.count({ where: { taskId, required: true, status: "open" } });
+    if (openRequired && !data.confirmOpenRequired) throw new DomainError("OPEN_REQUIRED_CHECKLIST", `Открытых обязательных пунктов: ${openRequired}. Подтвердите завершение задачи.`, { count: openRequired });
     const links = await loadTaskLinks(tx, taskId);
     if (links.needIds.length) await tx.$queryRaw(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`);
     await lockVersion(tx, taskId, data.expectedUpdatedAt);
@@ -267,7 +281,8 @@ export async function completeTask(actor: Actor, taskId: string, input: unknown)
     });
 
     let nextInstanceId: string | null = null;
-    const nextDue = nextRecurrenceDue(task.dueAt, task.recurrenceKind as Code<"recurrenceKind">, task.recurrenceInterval, task.recurrenceUntil);
+    const rule = parseRecurrence(task.recurrenceRule);
+    const nextDue = nextTaskDue(task, getConfig().APP_TIMEZONE);
     if (nextDue) {
       const inst = await insertTask(
         tx,
@@ -284,10 +299,14 @@ export async function completeTask(actor: Actor, taskId: string, input: unknown)
           recurrenceInterval: task.recurrenceInterval,
           recurrenceUntil: task.recurrenceUntil,
           parentTaskId: task.parentTaskId ?? task.id,
+          recurrenceRule: rule?.count ? task.recurrenceRule!.replace(/COUNT=\d+/, `COUNT=${rule.count - 1}`) : task.recurrenceRule,
+          reminderOffsets: task.reminderOffsets,
         },
         links,
       );
       nextInstanceId = inst.id;
+      const checklist = await tx.taskChecklistItem.findMany({ where: { taskId }, orderBy: { sortOrder: "asc" } });
+      if (checklist.length) await tx.taskChecklistItem.createMany({ data: checklist.map(i => ({ taskId: inst.id, title: i.title, sortOrder: i.sortOrder, responsibleUserId: i.responsibleUserId, required: i.required, dueAt: i.dueAt ? new Date(+nextDue + +i.dueAt - +task.dueAt) : null })) });
     }
 
     let nextTaskId: string | null = null;
@@ -300,6 +319,7 @@ export async function completeTask(actor: Actor, taskId: string, input: unknown)
 
     await applyTaskNeedChanges(tx, actor, links.needIds, data.needChanges);
     await assertNeedInvariants(tx, links.needIds);
+    if (openRequired) await writeAudit(tx, { actorUserId: actor.userId, action: "task.completed_with_open_checklist", entityType: "Task", entityId: taskId, after: { openRequired } });
     return { completedTaskId: taskId, nextInstanceId, nextTaskId };
   });
 }

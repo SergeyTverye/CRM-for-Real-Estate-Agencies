@@ -1,4 +1,13 @@
 import type { Code } from "@/shared/codebook";
+import { occurrences, parseRecurrence } from "@/modules/calendar/domain/calendar-rules";
+import { localDateString } from "@/shared/time";
+
+export function nextTaskDue(task: { dueAt: Date; recurrenceKind: string; recurrenceInterval: number; recurrenceUntil: Date | null; recurrenceRule?: string | null }, timeZone: string): Date | null {
+  const rule = parseRecurrence(task.recurrenceRule);
+  const occurrence = rule ? occurrences({ start: task.dueAt.toISOString(), recurrenceRule: task.recurrenceRule }, task.dueAt, new Date(+task.dueAt + 366 * 366 * 86400000), timeZone, 1)[0] : null;
+  const next = rule ? occurrence ? new Date(occurrence.start) : null : nextRecurrenceDue(task.dueAt, task.recurrenceKind as Code<"recurrenceKind">, task.recurrenceInterval, task.recurrenceUntil);
+  return next && (!task.recurrenceUntil || localDateString(next,timeZone) <= task.recurrenceUntil.toISOString().slice(0,10)) ? next : null;
+}
 
 export const OPEN_TASK_STATUSES = ["planned", "in_progress"] as const;
 

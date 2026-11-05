@@ -51,6 +51,10 @@ interface Template {
 
 /** Типовые регулярные контрольные действия (ТЗ 25.4). */
 const TEMPLATES: Template[] = [
+  { label: "Проверить декларацию", title: "Проверить декларацию", taskType: "postdeal", taskSubtypeCode: "tax_declaration", recurrenceKind: "yearly", hint: "Ежегодный контроль декларации." },
+  { label: "Индексация аренды", title: "Индексация аренды", taskType: "postdeal", taskSubtypeCode: "rent_indexation", recurrenceKind: "yearly", hint: "Ежегодная проверка условий аренды." },
+  { label: "Контроль договора", title: "Контроль договора", taskType: "contract_check", recurrenceKind: "quarterly", hint: "Контроль каждый квартал." },
+  { label: "Повторный контакт", title: "Повторный контакт", taskType: "call_or_contact", recurrenceKind: "weekly", hint: "Повторный контакт каждую неделю." },
   { label: "Проверка сроков договоров", title: "Ежемесячная проверка сроков договоров", taskType: "contract_check", recurrenceKind: "monthly", hint: "Повторяется каждый месяц от выбранного срока." },
   { label: "Проверка рекламы", title: "Проверить актуальность рекламных объявлений", taskType: "advertising_check", recurrenceKind: "weekly", hint: "Повторяется каждую неделю." },
   { label: "День рождения клиента", title: "Поздравить клиента с днём рождения", taskType: "call_or_contact", recurrenceKind: "yearly", hint: "Укажите срок — дату дня рождения в этом году; задача будет повторяться ежегодно." },
@@ -128,8 +132,9 @@ export function NewTaskForm({
         dueAt,
         priority,
         responsibleUserId: responsibleUserId || undefined,
-        recurrenceKind,
-        recurrenceInterval: recurrenceKind === "none" ? 1 : recurrenceInterval,
+        recurrenceKind: recurrenceKind === "quarterly" ? "monthly" : recurrenceKind === "weekdays" ? "none" : recurrenceKind,
+        recurrenceRule: recurrenceKind === "weekdays" ? "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR" : null,
+        recurrenceInterval: recurrenceKind === "quarterly" ? 3 : recurrenceKind === "none" ? 1 : recurrenceInterval,
         recurrenceUntil: recurrenceKind === "none" ? null : recurrenceUntil || null,
         links: payloadLinks,
       }),
@@ -195,13 +200,13 @@ export function NewTaskForm({
         <legend className="px-1 text-xs font-semibold text-slate-600">Повторение</legend>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <Field label="Повторять" error={fieldError("recurrenceKind")}>
-            <SelectInput value={recurrenceKind} onChange={setRecurrenceKind} options={optionsOf("recurrenceKind")} />
+            <SelectInput value={recurrenceKind} onChange={setRecurrenceKind} options={[...optionsOf("recurrenceKind"), { value: "weekdays", label: "По будням" }, { value: "quarterly", label: "Ежеквартально" }]} />
           </Field>
           {recurrenceKind !== "none" ? (
             <>
-              <Field label={`Интервал, ${UNIT[recurrenceKind] ?? ""}`} error={fieldError("recurrenceInterval")} hint="1 — каждый период, 2 — через один и т.д.">
+              {!["quarterly", "weekdays"].includes(recurrenceKind) ? <Field label={`Интервал, ${UNIT[recurrenceKind] ?? ""}`} error={fieldError("recurrenceInterval")} hint="1 — каждый период, 2 — через один и т.д.">
                 <input className="input" type="number" min={1} max={365} value={recurrenceInterval} onChange={(e) => setRecurrenceInterval(e.target.value)} />
-              </Field>
+              </Field> : null}
               <Field label="Повторять до (включительно)" error={fieldError("recurrenceUntil")} hint="Пусто — без ограничения">
                 <input className="input" type="date" value={recurrenceUntil} onChange={(e) => setRecurrenceUntil(e.target.value)} />
               </Field>

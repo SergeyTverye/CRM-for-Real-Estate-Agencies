@@ -9,6 +9,8 @@ import { fmtDateTime, tz } from "@/server/format";
 import { Badge, Card, Dl, PageHeader, StatusBadge } from "@/ui/components";
 import { TaskCardActions } from "@/ui/domain/task-actions";
 import { describeRecurrence, nextInstanceDue } from "@/ui/domain/task-list";
+import { TaskChecklist } from "./checklist";
+import { listChecklist } from "@/modules/tasks/application/checklist-service";
 
 export const metadata = { title: "Задача" };
 
@@ -26,8 +28,9 @@ export default async function TaskCardPage({ params }: { params: Promise<{ id: s
   const open = task.status === "planned" || task.status === "in_progress";
   const rule = describeRecurrence(task);
   const nextDue = nextInstanceDue(task);
-  const series = task.recurrenceKind !== "none" || task.parentTaskId ? await listRecurrenceSeries(actor, task) : [];
+  const series = task.recurrenceKind !== "none" || task.recurrenceRule || task.parentTaskId ? await listRecurrenceSeries(actor, task) : [];
   const allUsers = await listActiveUsersBrief();
+  const checklist = await listChecklist(actor, id).catch(e => { if (e instanceof NotFoundError) return null; throw e; });
   const creator = allUsers.find((u) => u.id === task.createdBy);
   const isResponsible = task.responsible.id === actor.userId;
   // Передать задачу может руководитель или её ответственный; риелтор — себе или руководителю.
@@ -77,6 +80,7 @@ export default async function TaskCardPage({ params }: { params: Promise<{ id: s
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
+          {checklist ? <Card title="Чек-лист"><TaskChecklist taskId={id} open={open} timeZone={tz()} users={(reassignUsers ?? []).map(u => ({ value: u.value, label: u.label }))} items={checklist.items.map(i => ({ ...i, dueAt: i.dueAt?.toISOString() ?? null, updatedAt: i.updatedAt.toISOString() }))} /></Card> : null}
           <Card title="Сведения">
             <Dl
               items={[

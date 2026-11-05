@@ -20,24 +20,24 @@ describe("calendar / notifications database integration (existing v2.4.1 schema 
     const due = new Date(Date.now()+3600000);
     const t = await createTask(users.realtor1,{ title:"Синтетическая задача",taskType:"call_or_contact",dueAt:due.toISOString() });
     await generateNotifications(); await generateNotifications();
-    expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task" } })).toBe(1);
+    expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task" } })).toBe(3);
     const old = await db.task.findUniqueOrThrow({ where:{ id:t.id } });
     const moved = new Date(+due+86400000);
     await updateTask(users.realtor1,t.id,{ dueAt:moved.toISOString(),expectedUpdatedAt:old.updatedAt.toISOString() });
     await generateNotifications();
     expect((await db.notification.findFirstOrThrow({ where:{ sourceId:t.id,kind:"task",state:"pending" } })).triggerAt.toISOString()).toBe(new Date(+moved-900000).toISOString());
-    expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task",state:"dismissed" } })).toBe(1);
+    expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task",state:"dismissed" } })).toBe(3);
     await db.$disconnect();
     await generateNotifications(new Date(+moved+1000));
     await Promise.all([generateNotifications(new Date(+moved+2000)),generateNotifications(new Date(+moved+2000))]); // competing workers
-    expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task",state:"delivered" } })).toBe(1);
+    expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task",state:"delivered" } })).toBe(2);
     const n = await db.notification.findFirstOrThrow({ where:{ sourceId:t.id,kind:"task",state:"delivered" } });
     await snoozeNotification(users.realtor1,n.id,{ until:new Date(Date.now()+3*86400000).toISOString() });
     expect((await db.task.findUniqueOrThrow({ where:{ id:t.id } })).dueAt).toEqual(moved);
     await generateNotifications(new Date(Date.now()+4*86400000));
     expect((await db.notification.findUniqueOrThrow({ where:{ id:n.id } })).state).toBe("delivered");
     await readNotification(users.realtor1,n.id);
-    expect((await unreadCount(users.realtor1)).count).toBe(1); // assignment remains
+    expect((await unreadCount(users.realtor1)).count).toBe(3); // assignment and two other deadline phases remain
   });
   it("shows one showing, not its helper task, and never exposes foreign task text", async () => {
     const c = await makeClient(users.realtor1), need = await makeNeed(users.realtor1,c.id), p = await makeProperty(users.realtor1);
@@ -68,8 +68,8 @@ describe("calendar/notification integration and authorization",()=>{
     await createTask(users.realtor1,{title:"synthetic",taskType:"call_or_contact",dueAt:due.toISOString()});
     await generateNotifications(); const count=await db.notification.count();
     await db.$disconnect(); await generateNotifications();
-    expect(await db.notification.count()).toBe(count); expect(count).toBe(2);
-    expect((await unreadCount(users.realtor1)).count).toBe(2);
+    expect(await db.notification.count()).toBe(count); expect(count).toBe(4);
+    expect((await unreadCount(users.realtor1)).count).toBe(4);
     expect((await listNotifications(users.realtor2,{})).total).toBe(0);
   });
   it("reschedules pending reminders; snooze never changes task deadline",async()=>{
@@ -82,7 +82,7 @@ describe("calendar/notification integration and authorization",()=>{
     await updateTask(users.realtor1,t.id,{expectedUpdatedAt:task.updatedAt.toISOString(),dueAt:moved.toISOString()});
     await generateNotifications();
     expect((await db.notification.findUniqueOrThrow({where:{id:old.id}})).state).toBe("dismissed");
-    expect(await db.notification.count({where:{sourceId:t.id,kind:"task",state:"pending"}})).toBe(1);
+    expect(await db.notification.count({where:{sourceId:t.id,kind:"task",state:"pending"}})).toBe(3);
     const assignment=await db.notification.findFirstOrThrow({where:{sourceId:t.id,kind:"assignment"}});
     await snoozeNotification(users.realtor1,assignment.id,{until:new Date(Date.now()+60000).toISOString()});
     expect(+(await db.task.findUniqueOrThrow({where:{id:t.id}})).dueAt).toBe(+moved);

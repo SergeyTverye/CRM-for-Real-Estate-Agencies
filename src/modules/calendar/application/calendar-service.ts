@@ -10,16 +10,21 @@ import { createTask, updateTask } from "@/modules/tasks/application/task-service
 import { scheduleShowing, updateShowing } from "@/modules/showings/application/showing-service";
 import { fromDateTimeLocalValue, localDateString, startOfDayInTz } from "@/shared/time";
 import { freeIntervals, occurrences, parseRecurrence, privateProjection, type CalendarItem } from "../domain/calendar-rules";
+import { plannerTone } from "../domain/planner-rules";
 
 const calendarInstant = z.string().regex(/(?:Z|[+-]\d{2}:\d{2})$/, "Укажите ISO-время с часовым поясом").pipe(zDateTime);
-const rangeSchema = z.object({
+export const rangeSchema = z.object({
   from: calendarInstant, to: calendarInstant, employee: zUuid.optional(),
   type: z.enum(["task", "showing", "agreement", "calendar_event"]).optional(),
   status: z.string().max(40).optional(),
+  clientId: zUuid.optional(), priority: zCode("taskPriority").optional(),
+  deadline: z.enum(["overdue", "soon", "controlled", "closed"]).optional(),
 }).refine(d => d.to > d.from && +d.to - +d.from <= 100 * 86400000, "Период: от 1 до 100 дней");
 
-export async function listCalendar(actor: Actor, input: unknown): Promise<CalendarItem[]> {
+export async function listCalendar(actor: Actor, input: unknown, options: { recurringOnly?: boolean; now?: Date; soonHours?: number } = {}): Promise<CalendarItem[]> {
   const f = parseInput(rangeSchema, input);
+  if (f.clientId && !await db.client.count({ where: { id: f.clientId, ...clientScope(actor) } })) throw new NotFoundError();
+  const client = f.clientId;
   const timeZone = getConfig().APP_TIMEZONE;
   const time = { gte: f.from, lt: f.to };
   const employee = f.employee ? { responsibleUserId: f.employee } : {};
@@ -27,8 +32,10 @@ export async function listCalendar(actor: Actor, input: unknown): Promise<Calend
   const items: CalendarItem[] = [];
   if (!f.type || f.type === "task") {
     const tasks = await db.task.findMany({ where: { AND: [taskScope(actor), employee, status,
-      { dueAt: time, NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } } ] },
-      select: { id: true, dueAt: true, status: true, updatedAt: true, responsibleUserId: true } });
+      { dueAt: time, ...(f.priority ? { priority: f.priority } : {}), ...(client ? { OR: [{ clientLinks: { some: { clientId: client } } }, { needLinks: { some: { need: { clientId: client } } } }] } : {}), NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } } ] },
+      take: 1001, orderBy: [{ dueAt: "asc" }, { id: "asc" }],
+      select: { id: true, dueAt: true, priority: true, status: true, updatedAt: true, responsibleUserId: true } });
+    if (tasks.length > 1000) throw new ValidationError("Слишком много задач. Уточните фильтры или выберите один день.");
     const safeTitles = new Map((await db.task.findMany({ where: { id: { in: tasks.map(t => t.id) }, AND: [
       { clientLinks: { none: { client: { NOT: clientScope(actor) } } } },
       { needLinks: { none: { need: { client: { NOT: clientScope(actor) } } } } },
@@ -39,20 +46,22 @@ export async function listCalendar(actor: Actor, input: unknown): Promise<Calend
     ] }, select: { id: true, title: true } })).map(t => [t.id,t.title]));
     items.push(...tasks.map(t => ({ id: `task:${t.id}`, sourceId: t.id, type: "task" as const,
       title: safeTitles.get(t.id) ?? "Задача", start: t.dueAt.toISOString(), status: t.status, ownerUserId: t.responsibleUserId,
-      updatedAt: t.updatedAt.toISOString(), editable: ["planned", "in_progress"].includes(t.status), url: `/tasks/${t.id}` })));
+      priority: t.priority, updatedAt: t.updatedAt.toISOString(), editable: ["planned", "in_progress"].includes(t.status), url: `/tasks/${t.id}` })));
   }
   if (!f.type || f.type === "showing") {
-    const showings = await db.showing.findMany({ where: { AND: [showingScope(actor), employee, status, { scheduledAt: time }] },
+    const showings = await db.showing.findMany({ where: { AND: [showingScope(actor), employee, status, { scheduledAt: time, ...(client ? { need: { clientId: client } } : {}) }] }, take: 1001,
       select: { id: true, scheduledAt: true, status: true, updatedAt: true, responsibleUserId: true } });
+    if (showings.length > 1000) throw new ValidationError("Уточните период показов");
     items.push(...showings.map(s => ({ id: `showing:${s.id}`, sourceId: s.id, type: "showing" as const,
       title: "Показ", start: s.scheduledAt.toISOString(), status: s.status, ownerUserId: s.responsibleUserId,
       updatedAt: s.updatedAt.toISOString(), editable: s.status === "planned", url: `/showings/${s.id}` })));
   }
   if (!f.type || f.type === "agreement") {
     const agreements = await db.agreement.findMany({ where: { AND: [agreementScope(actor), employee, status, { archivedAt: null,
-      OR: [{ validFrom: { gte: new Date(`${localDateString(f.from,timeZone)}T00:00:00Z`), lte: f.to } },
+      ...(client ? { clientId: client } : {}), OR: [{ validFrom: { gte: new Date(`${localDateString(f.from,timeZone)}T00:00:00Z`), lte: f.to } },
         { validUntil: { gte: new Date(`${localDateString(f.from,timeZone)}T00:00:00Z`), lte: f.to } }] }] },
-      select: { id: true, validFrom: true, validUntil: true, status: true, responsibleUserId: true } });
+      take: 1001, select: { id: true, validFrom: true, validUntil: true, status: true, responsibleUserId: true } });
+    if (agreements.length > 1000) throw new ValidationError("Уточните период договоров");
     for (const a of agreements) for (const field of ["validFrom", "validUntil"] as const) {
       if (!a[field]) continue;
       const at = fromDateTimeLocalValue(`${a[field].toISOString().slice(0,10)}T00:00`, timeZone);
@@ -63,9 +72,13 @@ export async function listCalendar(actor: Actor, input: unknown): Promise<Calend
   }
   if (!f.type || f.type === "calendar_event") {
     const events = await db.calendarEvent.findMany({ where: { archivedAt: null, startAt: { lt: f.to },
-      ...(f.employee ? { ownerUserId: f.employee } : {}), OR: [{ endAt: { gt: f.from } }, { recurrenceRule: { not: null } }] } });
+      ...(options.recurringOnly ? { recurrenceRule: { not: null } } : {}),
+      ...(f.employee ? { ownerUserId: f.employee } : {}), OR: [{ endAt: { gt: f.from } }, { recurrenceRule: { not: null } }] }, take: 1001 });
+    if (events.length > 1000) throw new ValidationError("Слишком много встреч. Уточните период или сотрудника.");
     for (const e of events) {
       const canRead = (e.visibility !== "private" || e.ownerUserId === actor.userId) && await linksAccessible(db, actor, e);
+      // Client filtering must not reveal who attends another employee's personal meeting.
+      if (client && (!canRead || (e.clientId !== client && (!e.needId || !await db.clientNeed.count({ where: { id: e.needId, clientId: client } }))))) continue;
       for (const occurrence of occurrences({ start: e.startAt.toISOString(), end: e.endAt.toISOString(), recurrenceRule: e.recurrenceRule }, f.from, f.to, timeZone)) {
         const item: CalendarItem = { id: `calendar_event:${e.id}:${occurrence.start}`, sourceId: e.id,
           type: "calendar_event", title: e.title, description: e.description, ...occurrence, status: "scheduled",
@@ -77,7 +90,10 @@ export async function listCalendar(actor: Actor, input: unknown): Promise<Calend
       }
     }
   }
-  return items.sort((a,b) => a.start.localeCompare(b.start));
+  const soonHours = options.soonHours ?? (await db.plannerSetting.findFirst())?.soonThresholdHours ?? 24;
+  return items.map(item => ({ ...item, tone: plannerTone(item.status, new Date(item.start), item.priority, options.now, soonHours) }))
+    .filter(item => (!f.priority || (item.priority ?? "normal") === f.priority) && (!f.deadline || item.tone === ({ overdue: "red", soon: "yellow", controlled: "green", closed: "gray" } as const)[f.deadline]))
+    .sort((a,b) => a.start.localeCompare(b.start));
 }
 
 type Links = { clientId?: string | null; needId?: string | null; propertyId?: string | null; dealId?: string | null };

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { labelOf, type Code } from "@/shared/codebook";
+import { labelOf } from "@/shared/codebook";
 import type { TaskView } from "@/modules/tasks/application/task-queries";
-import { nextRecurrenceDue } from "@/modules/tasks/domain/task-rules";
+import { nextTaskDue } from "@/modules/tasks/domain/task-rules";
+import { parseRecurrence } from "@/modules/calendar/domain/calendar-rules";
 import { fmtDateOnly, fmtDateTime, tz } from "@/server/format";
 import { Badge, Card, EmptyState, StatusBadge } from "../components";
 import { TaskQuickActions } from "./task-actions";
@@ -11,16 +12,18 @@ const UNIT: Record<string, string> = { daily: "дн.", weekly: "нед.", monthl
 const isOpen = (status: string) => status === "planned" || status === "in_progress";
 
 /** Правило повторения словами: «Ежемесячно», «Каждые 2 нед., до 31.12.2026». */
-export function describeRecurrence(t: Pick<TaskView, "recurrenceKind" | "recurrenceInterval" | "recurrenceUntil">): string | null {
+export function describeRecurrence(t: Pick<TaskView, "recurrenceKind" | "recurrenceInterval" | "recurrenceUntil" | "recurrenceRule">): string | null {
+  const rule = parseRecurrence(t.recurrenceRule);
+  if (rule) return `${rule.days ? "По дням недели" : rule.frequency === "YEARLY" ? "Ежегодно" : rule.frequency === "MONTHLY" ? rule.interval === 3 ? "Ежеквартально" : "Ежемесячно" : rule.frequency === "DAILY" ? "Ежедневно" : "Еженедельно"}${rule.count ? ` · осталось: ${rule.count}` : ""}${rule.until || t.recurrenceUntil ? `, до ${fmtDateOnly(rule.until ?? t.recurrenceUntil!)}` : ""}`;
   if (t.recurrenceKind === "none") return null;
   const base = t.recurrenceInterval > 1 ? `Каждые ${t.recurrenceInterval} ${UNIT[t.recurrenceKind] ?? ""}` : labelOf("recurrenceKind", t.recurrenceKind);
   return t.recurrenceUntil ? `${base}, до ${fmtDateOnly(t.recurrenceUntil)}` : base;
 }
 
 /** Срок следующего экземпляра повторяемой открытой задачи (создаётся при её завершении). */
-export function nextInstanceDue(t: Pick<TaskView, "status" | "dueAt" | "recurrenceKind" | "recurrenceInterval" | "recurrenceUntil">): Date | null {
+export function nextInstanceDue(t: Pick<TaskView, "status" | "dueAt" | "recurrenceKind" | "recurrenceInterval" | "recurrenceUntil" | "recurrenceRule">): Date | null {
   if (!isOpen(t.status)) return null;
-  return nextRecurrenceDue(t.dueAt, t.recurrenceKind as Code<"recurrenceKind">, t.recurrenceInterval, t.recurrenceUntil);
+  return nextTaskDue(t, tz());
 }
 
 function TaskLinks({ links }: { links: TaskView["links"] }) {
@@ -59,7 +62,7 @@ export function TaskRows({ tasks, showLinks = true, compact = false, withOpen = 
                 </Link>
                 <Badge>{labelOf("taskType", t.taskType)}</Badge>
                 {t.taskSubtypeCode ? <Badge tone="blue">{labelOf("postdealSubtype", t.taskSubtypeCode)}</Badge> : null}
-                {t.priority === "high" ? <Badge tone="red">высокий</Badge> : null}
+                {t.priority === "high" || t.priority === "critical" ? <Badge tone="red">{labelOf("taskPriority",t.priority).toLowerCase()}</Badge> : null}
                 {rule ? (
                   <Badge tone="yellow" title="Повторяемая задача">
                     {rule}

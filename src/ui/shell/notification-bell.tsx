@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
+import { NotificationBrowserDelivery } from "@/modules/notifications/presentation/browser-notifications";
 
 /** Счётчик не мешает работе оболочки при недоступном API. */
 export function NotificationBell() {
@@ -35,10 +36,10 @@ export function NotificationBell() {
     };
   }, []);
   return (
-    <Link href="/notifications" className="btn icon-button relative" title="Уведомления"
+    <><NotificationBrowserDelivery /><Link href="/notifications" className="btn icon-button relative" title="Уведомления"
       aria-label={count ? `Уведомления: ${count} непрочитанных` : "Уведомления"}>
       <Bell size={18} aria-hidden="true" />
       {count !== null && count > 0 ? <span className="notification-count" aria-hidden="true">{count > 99 ? "99+" : count}</span> : null}
-    </Link>
+    </Link></>
   );
 }

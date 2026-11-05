@@ -34,6 +34,7 @@ function CloseTaskForm({
   onClose: (done: boolean) => void;
 }) {
   const [comment, setComment] = useState("");
+  const [confirmOpenRequired, setConfirmOpenRequired] = useState(false);
   const [withNext, setWithNext] = useState(false);
   const [needIds, setNeedIds] = useState<string[]>([]);
   const [pauseChoice, setPauseChoice] = useState("return");
@@ -47,7 +48,7 @@ function CloseTaskForm({
     const url = `/api/v1/tasks/${taskId}/${mode === "complete" ? "complete" : "cancel"}`;
     const res = await run(async () => {
       try {
-        return await apiCall("POST", url, { expectedUpdatedAt: updatedAt, resultComment: comment || null, nextTask: showNext ? { ...next, taskType: required === "RETURN_TASK_REQUIRED" && pauseChoice === "return" ? "pause_return" : next.taskType } : undefined,
+        return await apiCall("POST", url, { confirmOpenRequired, expectedUpdatedAt: updatedAt, resultComment: comment || null, nextTask: showNext ? { ...next, taskType: required === "RETURN_TASK_REQUIRED" && pauseChoice === "return" ? "pause_return" : next.taskType } : undefined,
           needChanges: required === "RETURN_TASK_REQUIRED" && pauseChoice !== "return" ? needIds.map(needId => ({ needId, change: { status: pauseChoice, cancelOpenTasks: false, ...(pauseChoice === "closed" ? { stopReasonCode: stopReason, stopComment: comment } : {}) } })) : undefined });
       } catch (e) {
         if (e instanceof ApiCallError && NEXT_STEP_CODES.includes(e.body.code)) {
@@ -66,6 +67,7 @@ function CloseTaskForm({
   const nextRequiredError = error && NEXT_STEP_CODES.includes(error.code) ? error : null;
   return (
     <div className="space-y-3">
+      {error?.code === "OPEN_REQUIRED_CHECKLIST" ? <div className="alert alert-warning" role="alert"><p>{error.message}</p><label><input type="checkbox" checked={confirmOpenRequired} onChange={e => setConfirmOpenRequired(e.target.checked)} /> Завершить с открытыми обязательными пунктами</label><Link className="link ml-2" href={`/tasks/${taskId}`}>Открыть чек-лист</Link></div> : null}
       {nextRequiredError ? (
         <div className="alert alert-warning" role="alert">
           {nextRequiredError.message} Задайте {required === "RETURN_TASK_REQUIRED" ? "задачу возврата" : "следующий шаг"} ниже.

@@ -5,6 +5,7 @@ export type CalendarItem = Interval & {
   id: string; sourceId?: string; type: "task" | "showing" | "agreement" | "calendar_event";
   title: string; description?: string | null; allDay?: boolean; status: string;
   ownerUserId: string; updatedAt?: string; editable: boolean; url?: string; recurrenceRule?: string | null;
+  priority?: string; tone?: "red" | "yellow" | "green" | "gray";
 };
 export function privateProjection(item: CalendarItem): CalendarItem {
   return { id: item.id, type: "calendar_event", title: "Занято", start: item.start, end: item.end,
@@ -31,9 +32,11 @@ export function parseRecurrence(rule: string | null | undefined) {
   const frequency = fields.get("FREQ");
   const days = fields.get("BYDAY")?.split(",");
   const count = fields.has("COUNT") ? Number(fields.get("COUNT")) : null;
+  const interval = fields.has("INTERVAL") ? Number(fields.get("INTERVAL")) : 1;
   if (fields.size !== parts.length || parts.some(p => !/^[A-Z]+=[A-Z0-9,]+$/.test(p)) ||
-    [...fields.keys()].some(k => !["FREQ", "BYDAY", "UNTIL", "COUNT"].includes(k)) ||
-    !["DAILY", "WEEKLY", "MONTHLY"].includes(frequency ?? "") ||
+    [...fields.keys()].some(k => !["FREQ", "BYDAY", "UNTIL", "COUNT", "INTERVAL"].includes(k)) ||
+    !["DAILY", "WEEKLY", "MONTHLY", "YEARLY"].includes(frequency ?? "") ||
+    !Number.isInteger(interval) || interval < 1 || interval > 365 ||
     (days && (frequency !== "WEEKLY" || days.some(d => !WEEK_DAYS.includes(d)) || new Set(days).size !== days.length)) ||
     (count !== null && (!Number.isInteger(count) || count < 1 || count > 1000)) || (count !== null && fields.has("UNTIL")))
     throw new Error("Выберите корректное повторение и окончание серии (от 1 до 1000 повторений)");
@@ -41,34 +44,38 @@ export function parseRecurrence(rule: string | null | undefined) {
   if (s && !/^\d{8}T\d{6}Z$/.test(s)) throw new Error("Некорректная дата окончания серии");
   const until = s ? new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T${s.slice(9,11)}:${s.slice(11,13)}:${s.slice(13,15)}Z`) : null;
   if (until && (!Number.isFinite(+until) || until.toISOString().replace(/[-:]/g, "").replace(".000", "") !== s)) throw new Error("Некорректная дата UNTIL");
-  return { frequency: frequency!, until, days, count };
+  return { frequency: frequency!, until, days, count, interval };
 }
 
 export const WEEK_DAYS: string[] = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
 
-export function occurrences(event: Interval & { recurrenceRule?: string | null }, from: Date, to: Date, timeZone: string) {
+export function occurrences(event: Interval & { recurrenceRule?: string | null }, from: Date, to: Date, timeZone: string, limit = Infinity) {
   const start = new Date(event.start), end = event.end ? new Date(event.end) : start;
   const recurrence = parseRecurrence(event.recurrenceRule);
   const result: { start: string; end: string }[] = [];
   const duration = +end - +start;
   const until = recurrence?.until ? Math.min(+to, +recurrence.until + 1) : +to;
   const local = new Date(`${toDateTimeLocalValue(start, timeZone)}:00Z`);
-  const first = recurrence && !recurrence.count ? Math.max(0, recurrence.frequency === "MONTHLY"
-    ? (from.getUTCFullYear() - local.getUTCFullYear()) * 12 + from.getUTCMonth() - local.getUTCMonth() - 2
-    : Math.floor((+from - +start - duration) / (86400000 * (recurrence.frequency === "WEEKLY" && !recurrence.days ? 7 : 1))) - 2) : 0;
+  const monthStep = recurrence?.frequency === "YEARLY" ? 12 * recurrence.interval : recurrence?.interval ?? 1;
+  const monthly = recurrence?.frequency === "MONTHLY" || recurrence?.frequency === "YEARLY";
+  const first = recurrence && !recurrence.count ? Math.max(0, monthly
+    ? Math.floor(((from.getUTCFullYear() - local.getUTCFullYear()) * 12 + from.getUTCMonth() - local.getUTCMonth()) / monthStep) - 2
+    : Math.floor((+from - +start - duration) / (86400000 * (recurrence.frequency === "WEEKLY" && !recurrence.days ? 7 * recurrence.interval : recurrence.days ? 1 : recurrence.interval))) - 2) : 0;
   let emitted = 0;
   for (let index = first; index < first + 366000; index++) {
     const date = new Date(local);
-    if (recurrence?.frequency === "MONTHLY") {
-      date.setUTCMonth(local.getUTCMonth() + index, 1);
+    if (monthly) {
+      date.setUTCMonth(local.getUTCMonth() + index * monthStep, 1);
       date.setUTCDate(local.getUTCDate());
       if (date.getUTCDate() !== local.getUTCDate()) continue;
-    } else date.setUTCDate(local.getUTCDate() + index * (recurrence?.frequency === "WEEKLY" && !recurrence.days ? 7 : 1));
+    } else date.setUTCDate(local.getUTCDate() + index * (recurrence?.frequency === "WEEKLY" && !recurrence.days ? 7 * recurrence.interval : recurrence?.days ? 1 : recurrence?.interval ?? 1));
     const at = recurrence ? new Date(+new Date(fromDateTimeLocalValue(date.toISOString().slice(0,16), timeZone)) + start.getUTCSeconds()*1000 + start.getUTCMilliseconds()) : start;
     if (+at >= until) break;
     if (recurrence?.days && !recurrence.days.includes(WEEK_DAYS[(date.getUTCDay() + 6) % 7]!)) continue;
+    if (recurrence?.days && Math.floor((+date - +local + ((local.getUTCDay()+6)%7)*86400000) / (7*86400000)) % recurrence.interval !== 0) continue;
     if (recurrence?.count && ++emitted > recurrence.count) break;
     if (+at + duration > +from) result.push({ start: at.toISOString(), end: new Date(+at + duration).toISOString() });
+    if (result.length >= limit) break;
     if (!recurrence) break;
   }
   return result;

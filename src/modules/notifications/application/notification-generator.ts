@@ -18,31 +18,37 @@ export async function generateNotifications(now = new Date()) {
     const users = await tx.user.findMany({ where: { isActive: true }, select: { id: true, notificationPreference: { select: { leadMinutes: true } } } });
     const preferences = new Map(users.map(u => [u.id, u.notificationPreference?.leadMinutes ?? 15]));
     const planned: Planned[] = [];
-    const add = (recipient: string, sourceType: string, sourceId: string, kind: string, due: Date, link: string, assignment = false) => {
+    const add = (recipient: string, sourceType: string, sourceId: string, kind: string, due: Date, link: string, assignment = false, phase?: string, offset = 0) => {
       if (!preferences.has(recipient)) return;
       planned.push({ recipientUserId: recipient, kind, sourceType, sourceId,
-        triggerAt: assignment ? due : reminderAt(due, preferences.get(recipient)!),
-        title: NOTIFICATION_TITLES[kind]!, link, dedupKey: notificationKey(recipient, sourceType, sourceId, kind, due) });
+        triggerAt: phase ? new Date(+due + offset * 60000) : assignment ? due : reminderAt(due, preferences.get(recipient)!),
+        title: NOTIFICATION_TITLES[kind]!, link, dedupKey: notificationKey(recipient, sourceType, sourceId, phase ? `${kind}:${phase}` : kind, due) });
+    };
+    const deadlines = (recipient: string, sourceType: string, id: string, kind: string, due: Date, link: string) => {
+      if ((preferences.get(recipient) ?? 15) > 0) add(recipient, sourceType, id, kind, due, link);
+      add(recipient, sourceType, id, kind, due, link, false, "due");
+      add(recipient, sourceType, id, kind, due, link, false, "overdue", 1);
     };
     const tasks = await tx.task.findMany({ where: { status: { in: ["planned", "in_progress"] },
       NOT: { taskType: "showing_or_meeting", showingLinks: { some: {} } } },
-      select: { id: true, responsibleUserId: true, dueAt: true, createdAt: true, taskType: true, recurrenceKind: true } });
+      select: { id: true, responsibleUserId: true, dueAt: true, createdAt: true, taskType: true, recurrenceKind: true, reminderOffsets: true } });
     for (const t of tasks) {
-      add(t.responsibleUserId, "task", t.id, taskNotificationKind(t), t.dueAt, `/tasks/${t.id}`);
+      deadlines(t.responsibleUserId, "task", t.id, taskNotificationKind(t), t.dueAt, `/tasks/${t.id}`);
+      for (const offset of new Set(t.reminderOffsets)) if (offset > 0 && offset !== preferences.get(t.responsibleUserId)) add(t.responsibleUserId, "task", t.id, taskNotificationKind(t), t.dueAt, `/tasks/${t.id}`, false, `before_${offset}`, -offset);
       add(t.responsibleUserId, "task", t.id, "assignment", t.createdAt, `/tasks/${t.id}`, true);
     }
     const showings = await tx.showing.findMany({ where: { status: "planned" }, select: { id: true, responsibleUserId: true, scheduledAt: true } });
-    for (const s of showings) add(s.responsibleUserId, "showing", s.id, "showing", s.scheduledAt, `/showings/${s.id}`);
+    for (const s of showings) deadlines(s.responsibleUserId, "showing", s.id, "showing", s.scheduledAt, `/showings/${s.id}`);
     const agreements = await tx.agreement.findMany({ where: { archivedAt: null, status: { in: ["active", "signed"] }, validUntil: { not: null } },
       select: { id: true, responsibleUserId: true, validUntil: true } });
-    for (const a of agreements) add(a.responsibleUserId, "agreement", a.id, "agreement",
+    for (const a of agreements) deadlines(a.responsibleUserId, "agreement", a.id, "agreement",
       new Date(fromDateTimeLocalValue(`${a.validUntil!.toISOString().slice(0,10)}T00:00`, getConfig().APP_TIMEZONE)), `/agreements/${a.id}`);
     const events = await tx.calendarEvent.findMany({ where: { archivedAt: null }, select: { id: true, ownerUserId: true, startAt: true, endAt: true, recurrenceRule: true, createdAt: true } });
     for (const e of events) {
       const from = e.createdAt < e.startAt ? e.createdAt : e.startAt;
       const to = new Date(+now + ((preferences.get(e.ownerUserId) ?? 15) * 60000) + 86400000);
       for (const o of occurrences({ start: e.startAt.toISOString(), end: e.endAt.toISOString(), recurrenceRule: e.recurrenceRule }, from, to, getConfig().APP_TIMEZONE))
-        add(e.ownerUserId, "calendar_event", e.id, "calendar_event", new Date(o.start), "/calendar");
+        deadlines(e.ownerUserId, "calendar_event", e.id, "calendar_event", new Date(o.start), "/calendar");
     }
     await reconcilePending(tx, planned);
     const delivery = await tx.notification.updateMany({ where: { state: "pending", triggerAt: { lte: now },

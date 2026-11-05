@@ -27,15 +27,15 @@ describe("notification worker reconciliation (in-memory persistence contract)",(
   beforeEach(()=>{state.rows=[];state.transactions=0;state.lockQueries=0;state.standby=false;state.locked=true;state.open=true;state.owner="u";state.due=new Date("2026-11-05T03:00Z");});
   it("catches up and never duplicates delivered rows across ticks",async()=>{
     const now=new Date("2026-11-06");
-    expect((await generateNotifications(now)).delivered).toBe(2);
+    expect((await generateNotifications(now)).delivered).toBe(4);
     expect((await generateNotifications(now)).delivered).toBe(0);
-    expect(state.rows).toHaveLength(2);
+    expect(state.rows).toHaveLength(4);
   });
   it("dismisses the old pending deadline before delivering rescheduled reminders",async()=>{
     await generateNotifications(new Date("2026-11-04"));
     state.due=new Date("2026-11-07T03:00Z");
     await generateNotifications(new Date("2026-11-06"));
-    expect(state.rows.filter(r=>r.kind==="task"&&r.state==="dismissed")).toHaveLength(1);
+    expect(state.rows.filter(r=>r.kind==="task"&&r.state==="dismissed")).toHaveLength(3);
     const next=state.rows.find(r=>r.kind==="task"&&r.state==="pending")!;
     expect(next.triggerAt.toISOString()).toBe("2026-11-07T02:45:00.000Z");
   });
