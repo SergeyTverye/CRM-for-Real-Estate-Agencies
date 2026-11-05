@@ -11,7 +11,8 @@ RUN apt-get update \
  && apt-get purge -y gnupg && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
 COPY scripts/ /opt/crm-backup/
-RUN chmod +x /opt/crm-backup/*.sh
+RUN sed -i 's/\r$//' /opt/crm-backup/*.sh /opt/crm-backup/*.sql \
+ && chmod +x /opt/crm-backup/*.sh
 ENV PATH="/opt/crm-backup:${PATH}"
 WORKDIR /backups
 ENTRYPOINT []

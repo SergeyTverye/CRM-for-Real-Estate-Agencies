@@ -35,6 +35,30 @@ x-app-env: &app-env
   BACKUP_TARGETS: ${BACKUP_TARGETS:-}
   BACKUP_RETENTION_DAILY: ${BACKUP_RETENTION_DAILY:-14}
   AI_ENABLED: ${AI_ENABLED:-false}
+  YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}
+  YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-b1gsj611qbf7re0rfcde}
+  YANDEX_CLOUD_MODEL: ${YANDEX_CLOUD_MODEL:-aliceai-llm-flash/latest}
+  YANDEX_CLOUD_WEB_MODEL: ${YANDEX_CLOUD_WEB_MODEL:-}
+  YANDEX_CLOUD_BASE_URL: ${YANDEX_CLOUD_BASE_URL:-https://ai.api.cloud.yandex.net/v1}
+  YANDEX_AI_STORE_RESPONSES: "false"
+  YANDEX_AI_MAX_OUTPUT_TOKENS: ${YANDEX_AI_MAX_OUTPUT_TOKENS:-1800}
+  YANDEX_AI_TIMEOUT_MS: ${YANDEX_AI_TIMEOUT_MS:-30000}
+  YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR: ${YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR:-30}
+  YANDEX_AI_MAX_MONTHLY_COST_RUB: ${YANDEX_AI_MAX_MONTHLY_COST_RUB:-1000}
+  YANDEX_WEB_SEARCH_ENABLED: ${YANDEX_WEB_SEARCH_ENABLED:-false}
+  YANDEX_WEB_SEARCH_AUTO_FALLBACK: ${YANDEX_WEB_SEARCH_AUTO_FALLBACK:-false}
+  YANDEX_WEB_SEARCH_CONTEXT_SIZE: ${YANDEX_WEB_SEARCH_CONTEXT_SIZE:-low}
+  YANDEX_WEB_SEARCH_REGION: ${YANDEX_WEB_SEARCH_REGION:-65}
+  YANDEX_WEB_SEARCH_MAX_CALLS_PER_JOB: ${YANDEX_WEB_SEARCH_MAX_CALLS_PER_JOB:-1}
+  YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY: ${YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY:-3}
+  YANDEX_WEB_SEARCH_ALLOWED_DOMAINS: ${YANDEX_WEB_SEARCH_ALLOWED_DOMAINS:-}
+  SCRAPER_ENABLED: ${SCRAPER_ENABLED:-false}
+  SCRAPER_DEMO_FIXTURES: ${SCRAPER_DEMO_FIXTURES:-false}
+  SCRAPER_BROWSER_ENABLED: ${SCRAPER_BROWSER_ENABLED:-true}
+  SCRAPER_CHROME_PATH: ${SCRAPER_CHROME_PATH:-/usr/bin/chromium}
+  SCRAPER_JOB_TIMEOUT_MS: ${SCRAPER_JOB_TIMEOUT_MS:-180000}
+  SCRAPER_MAX_CONCURRENT_JOBS: ${SCRAPER_MAX_CONCURRENT_JOBS:-1}
+  SCRAPER_RESULT_TTL_HOURS: ${SCRAPER_RESULT_TTL_HOURS:-24}
   POSTGRES_HOST: db
   POSTGRES_DB: ${POSTGRES_DB}
   POSTGRES_USER: ${POSTGRES_USER}
@@ -83,6 +107,7 @@ services:
     # Процесс работает от владельца каталогов data/ и backups/ на хосте (bootstrap задаёт APP_UID/APP_GID).
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     restart: unless-stopped
+    shm_size: 256mb
     environment: *app-env
     depends_on:
       migrate:
@@ -94,7 +119,7 @@ services:
       - ./data/import-staging:/data/import-staging
       - ./backups:/backups
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health/ready"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -105,16 +130,20 @@ services:
     <<: *app-image
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     restart: unless-stopped
-    command: ["node_modules/.bin/tsx", "src/worker/notifications-worker.ts"]
+    command: ["node", "ops/worker/start.mjs"]
     environment:
       <<: *app-env
       NOTIFICATIONS_INTERVAL_MS: ${NOTIFICATIONS_INTERVAL_MS:-15000}
     depends_on:
       migrate:
         condition: service_completed_successfully
-    # Worker has no HTTP listener; do not inherit the image's app healthcheck.
+    # Liveness of the supervised process (no HTTP listener). Tick failures remain in JSON logs.
     healthcheck:
-      disable: true
+      test: ["CMD", "node", "ops/worker/health.mjs"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     networks: [internal]
 
   # Одноразовый ops-контейнер резервного копирования (ТЗ 36.3, 39.10): pg_dump/pg_restore 18,

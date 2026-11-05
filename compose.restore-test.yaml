@@ -2,6 +2,9 @@
 # Используется scripts/restore-test.sh с отдельным project name, своими томом БД
 # и каталогами restore-test/, поэтому рабочие данные не затрагиваются.
 services:
+  # Never start the notification generator implicitly in the restored test copy.
+  worker:
+    profiles: ["restore-worker"]
   app:
     volumes:
       - ./restore-test/data/files:/data/files

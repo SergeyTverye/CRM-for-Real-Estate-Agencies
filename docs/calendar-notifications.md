@@ -44,7 +44,7 @@
 - PASS: 22 unit-теста в `calendar-notifications`, `calendar-notification-rules`, `notification-worker`: правила повторений (включая DST), интервалы, приватная проекция, lead times, дедупликация и контракт очереди на in-memory fake. Fake не подтверждает работу PostgreSQL.
 - PASS: целевой ESLint модулей, API, страниц, воркера и новых тестов.
 - PASS: `docker compose config --quiet`; запуск `tsx src/worker/notifications-worker.ts` с `INSTANCE_ROLE=standby` — процесс работает без ошибок старта, без обращения к отсутствующим таблицам.
-- PARTIAL: `npx tsc --noEmit` — в calendar/notifications ошибок нет; общий запуск блокируют параллельно изменяемые AI/property-search файлы.
+- PARTIAL: `npx tsc --noEmit` — в calendar/notifications ошибок нет; общий запуск блокируют параллельно изменяемые файлы других модулей (последний прогон: property-search и commercial-offers).
 - BLOCKED: integration/authorization на `crm_test_f` — `calendar_events` и `notifications` отсутствуют (P2021). Пять тестов запущены, пять завершились ошибкой предусловия. Миграции и Prisma generate не выполнялись по ограничениям задачи.
 - Не подтверждены: реальный PostgreSQL restart/advisory lock, браузерный drag и Docker build/start. Для этого требуется применение подготовленной миграции владельцем общей схемы и работоспособная общая сборка.
 

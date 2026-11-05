@@ -19,7 +19,11 @@ pg_restore --no-owner --no-privileges --single-transaction --exit-on-error -d "$
 log "восстановление файлов"
 mkdir -p "$FILES_DIR"
 find "$FILES_DIR" -mindepth 1 -delete
-zstd -q -dc "$DIR/files.tar.zst" | tar -C "$FILES_DIR" -xf -
+# Bind-mount roots on Docker Desktop do not support restoring Unix owner/mode/mtime.
+zstd -q -dc "$DIR/files.tar.zst" | tar --strip-components=1 --no-same-owner --no-same-permissions --no-overwrite-dir --touch -C "$FILES_DIR" -xf -
+if [ -s "$DIR/files.sha256" ]; then
+  (cd "$FILES_DIR" && sha256sum --quiet -c "$DIR/files.sha256") || die "контрольные суммы восстановленных файлов не совпадают"
+fi
 
 # Восстановленная копия содержит свою запись backup_runs в состоянии running — фиксируем успех.
 psql_q -c "UPDATE backup_runs SET local_status='success', finished_at=COALESCE(finished_at, now()) WHERE backup_id=$(sql_lit "$ID") AND local_status='running'" >/dev/null || true

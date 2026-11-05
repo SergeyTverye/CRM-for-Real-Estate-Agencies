@@ -87,3 +87,67 @@ MAILRU_USER=… MAILRU_APP_PASSWORD=… ./scripts/backup-remote-add.sh mailru-ma
 
 `./scripts/status.sh` — контейнеры и `/api/health`; `./scripts/logs.sh app --follow` — журналы (без паролей и токенов,
 с идентификатором запроса — его показывает пользователю сообщение о внутренней ошибке).
+
+## 8. Docker v2.4.1: worker, Chrome и галерея
+
+`deploy.sh` и `update.sh` запускают app и worker из единого образа. Сохраняйте имя проекта `crm`;
+не используйте `down -v` на рабочем стеке. При восстановлении оба процесса останавливаются,
+при promote/demote оба пересоздаются с новой ролью.
+
+```bash
+docker compose -p crm ps
+docker compose -p crm logs --tail=30 worker
+docker compose -p crm restart worker
+docker compose -p crm exec -T app curl -fsS http://127.0.0.1:3000/api/health/ready
+docker compose -p crm exec -T app node scripts/container-smoke.mjs
+```
+
+Worker запускает `tsx src/worker/notifications-worker.ts` под супервизором. Интервал
+`NOTIFICATIONS_INTERVAL_MS=15000` (1000–60000 ms). Healthcheck проверяет дочерний процесс;
+ошибки проходов видны как `notifications.tick_failed` в JSON-логе. Живой процесс сам по себе
+не доказывает успешность обработки. PostgreSQL advisory lock и уникальный dedup key защищают
+от дублей; standby не генерирует уведомления. Браузер для уведомлений не требуется.
+
+Образ содержит Node 24.22.2, Chromium 156.0.8078.79-1~deb12u1, шрифты, Linux sharp,
+tsx и playwright-core 1.64.1. `CHROMIUM_VERSION` — build ARG для контролируемого обновления.
+`SCRAPER_CHROME_PATH=/usr/bin/chromium` — путь для серверной конфигурации; совместимый
+`channel: chrome` указывает на тот же Chromium. Для `browser:true` настроен
+`PLAYWRIGHT_BROWSERS_PATH=/opt/playwright`. Процесс работает без root, `/dev/shm` — 256 MB.
+Оба режима запуска проходят через wrapper, читающий `SCRAPER_CHROME_PATH` из ENV;
+при переопределении укажите исполняемый файл, существующий внутри контейнера.
+Smoke запускает и закрывает браузер без обращения к площадкам, затем кодирует WebP через sharp.
+Он не проверяет доступность площадок. Используются настройки sandbox библиотеки Playwright;
+полная изоляция браузера от host/private networks требует отдельного egress-контроля на сервере.
+Не включайте privileged для устранения ошибок браузера.
+
+ENV скрапера: `SCRAPER_ENABLED=false`, `SCRAPER_BROWSER_ENABLED=true`,
+`SCRAPER_JOB_TIMEOUT_MS=180000`, `SCRAPER_MAX_CONCURRENT_JOBS=1`, `SCRAPER_RESULT_TTL_HOURS=24`.
+`SCRAPER_DEMO_FIXTURES=true` включает обозначенные синтетические ответы.
+Фотографии и миниатюры хранятся в общем томе `./data/files:/data/files`, включая `thumbnails/`.
+Files-архив покрывает всё дерево StorageAdapter. `files.sha256` содержит суммы каждого файла.
+Manifest считает все пользовательские таблицы, включая search/AI/calendar/notifications,
+из того же snapshot PostgreSQL, что и dump. Snapshot БД и файлов не атомарен:
+при массовом изменении файлов используйте окно обслуживания.
+Restore-test проверяет счётчики, суммы, оригиналы и миниатюры, readiness и вход.
+Без контрольного документа пустая копия не получает T08 PASS.
+Если первоначальный пароль из `.env` уже сменён, передайте действующие
+`RESTORE_TEST_LOGIN`/`RESTORE_TEST_PASSWORD` через окружение. Скрипт не меняет рабочие пароли.
+Для синтетического dev-стека доступны явные helpers `scripts/ops-gallery-fixture.ts`
+(`OPS_SYNTHETIC_FIXTURE=true`) и `scripts/ops-restore-login.ts` (одноразовый логин
+`OPS_RESTORE_TEST_LOGIN=ops_restore_<12 hex>` и случайный пароль ≥24 символов через
+`OPS_RESTORE_TEST_PASSWORD`; после backup удалить helper-командой `--remove`).
+Первый helper оставляет помеченные тестовые объект/фото/задачу; запускайте его только
+на синтетических данных. Пароль тестового логина не выводится и в документы не включается.
+
+## 9. Лимиты AI
+
+AI по умолчанию выключен. Ключ `YANDEX_CLOUD_API_KEY` задаёт владелец в `.env`.
+Все `YANDEX_*` из `.env.example` передаются через compose; `store=false` принудителен.
+Не выводите `docker compose config` без `--quiet` в общие журналы: он раскрывает ENV.
+После изменения ENV пересоздайте app (`docker compose -p crm up -d app`).
+Настройки руководителя на `/settings/ai` ограничиваются ENV: 30 запросов/пользователь/час
+(`YANDEX_AI_MAX_REQUESTS_PER_USER_HOUR`), 1800 выходных токенов, 30000 ms на запрос,
+1000 ₽/месяц (`YANDEX_AI_MAX_MONTHLY_COST_RUB`). 1000 ₽ — предохранитель, не утверждённый бюджет.
+Веб-поиск отдельно выключен (`YANDEX_WEB_SEARCH_ENABLED=false`,
+`YANDEX_WEB_SEARCH_AUTO_FALLBACK=false`); пределы: 1 вызов/задание, 3 задания/пользователь/день,
+контекст low, регион 65. Перед платными вызовами проверьте тарифы и ограничения в UI.

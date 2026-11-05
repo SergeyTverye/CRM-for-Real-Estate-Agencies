@@ -21,7 +21,7 @@ info "Миграции и seed…"
 dc run --rm migrate || fail "Миграция не выполнена — приложение не запускается (см. вывод выше)"
 
 info "Запуск приложения…"
-dc up -d --no-deps app
+dc up -d --no-deps app worker
 wait_healthy app 240 || fail "Приложение не прошло healthcheck (см. ./scripts/logs.sh app)"
 
 info "Готово: $(app_url)"

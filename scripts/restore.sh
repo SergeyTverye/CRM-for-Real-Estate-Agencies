@@ -44,9 +44,9 @@ PROTECT_ID="$(backup_run backup.sh --trigger pre_migration | tail -1)" || fail "
 info "Защитный snapshot: backups/$PROTECT_ID"
 
 info "Остановка приложения…"
-dc stop app >/dev/null 2>&1 || true
+dc stop app worker >/dev/null 2>&1 || true
 backup_run restore-data.sh "$ID" --confirm || fail "восстановление завершилось ошибкой; защитная копия: $PROTECT_ID"
 dc run --rm migrate >/dev/null || fail "проверка миграций после восстановления не пройдена"
-dc up -d --no-deps app
+dc up -d --no-deps app worker
 wait_healthy app 240 || fail "приложение после восстановления не прошло healthcheck"
 info "Восстановление из $ID завершено: $(app_url)"

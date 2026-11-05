@@ -364,6 +364,15 @@ Node.js, npm, Prisma и PostgreSQL на хосте не требуются.
 
 ### Эксплуатационные команды
 
+В v2.4.1 `deploy.sh` / `update.sh` запускают `app` и фоновый `worker` из единого Node 24 образа
+с Chromium и sharp. Диагностика: `docker compose -p crm ps`,
+`docker compose -p crm logs --tail=30 worker`, `docker compose -p crm restart worker`.
+Проверка браузера без обращения к площадкам и Linux sharp:
+`docker compose -p crm exec -T app node scripts/container-smoke.mjs`.
+Readiness: `/api/health/ready`. Backup включает фото и миниатюры:
+`./scripts/backup.sh`, `./scripts/backup-verify.sh <id>`, `./scripts/restore-test.sh <id>`.
+Параметры Chrome, worker и лимиты AI описаны в [инструкции администратора](docs/operations/admin-guide.md).
+
 | Команда | Назначение |
 |---|---|
 | `./scripts/bootstrap.sh` | первичная подготовка узла (существующий `.env` не перезаписывается) |

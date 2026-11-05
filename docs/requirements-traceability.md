@@ -70,3 +70,20 @@
 | NFR-22 только Docker на хосте | Dockerfile, compose.yaml, scripts | чистая копия | PASS |
 | NFR-23/24/26/27 portable, single-writer | standby guard, promote/demote, config bundle без ключей | authorization/admin-api.test.ts | PARTIAL |
 | NFR-28–31 AI | — | — | Вне scope (P3) |
+
+
+## P1-А v2.4.1 — рабочий контур, 05.11.2026
+
+| Требование | Модуль | Проверка | Статус |
+|---|---|---|---|
+| §2 перспективные обращения, причины завершения, запрет закрытия no_match | requests, needs | p1a-workflow | PASS |
+| §2 очереди контактов today/overview | requests/contact-control | p1a-workflow (выборка); браузерная приёмка не выполнялась | PARTIAL |
+| §10.2 pause_return, атомарное продолжение, перенос/повтор | needs, tasks | p1a-workflow | PASS |
+| §10.2 метрики, одинаковые cohorts детализации, границы времени/источник/сотрудник | reports | p1a-workflow | PASS |
+| §2 постсделочный набор, связи Task | deals | p1a-workflow | PASS |
+| §7 редакции КП и снимки | commercial-offers | p1a-workflow, p1a-access | PASS |
+| §7 DOCX фото/ссылки/реквизиты, печатные HTML | commercial-offers, export | DOCX ZIP проверен; визуальная печать не проверена | PARTIAL |
+| §7 чек-лист, файл сделки, RBAC/OCC | deals/checklist | p1a-workflow, p1a-access | PASS |
+| §7 реестры CSV с фильтрами и RBAC | export/register-export | p1a-workflow, p1a-access | PASS |
+
+Подробности и ограничения: [p1a-working-contour.md](p1a-working-contour.md). Целевой набор — 11/11 PASS; общий typecheck не PASS из-за ошибок параллельного demo seed. Общая готовность релиза здесь не утверждается.

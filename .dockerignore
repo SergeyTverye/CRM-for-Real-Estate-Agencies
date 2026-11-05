@@ -23,3 +23,7 @@ AGENTS
 CLAUDE.md
 README.md
 .deploy-test
+
+secrets
+*.tsbuildinfo
+ТЗ*.md

@@ -26,6 +26,6 @@ set_env_role "active"
 dc up -d db >/dev/null
 wait_healthy db 120 || fail "PostgreSQL недоступна"
 record_instance_event "instance.promoted" "$DEP" "$INST" "$who"
-dc up -d --no-deps --force-recreate app
+dc up -d --no-deps --force-recreate app worker
 wait_healthy app 240 || fail "приложение не прошло healthcheck"
 info "Экземпляр $INST переведён в active writer"

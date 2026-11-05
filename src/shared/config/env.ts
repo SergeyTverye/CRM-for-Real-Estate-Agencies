@@ -93,7 +93,9 @@ const schema = z
       return domains.length <= 5 && domains.every((s) => /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}$/i.test(s));
     }, "Допустимо до 5 доменов без схемы и пути"),
     SCRAPER_ENABLED: bool(false),
+    SCRAPER_DEMO_FIXTURES: bool(false),
     SCRAPER_BROWSER_ENABLED: bool(true),
+    SCRAPER_CHROME_PATH: z.string().min(1).optional(),
     SCRAPER_JOB_TIMEOUT_MS: int(180000, 1000, 600000),
     SCRAPER_MAX_CONCURRENT_JOBS: int(1, 1, 10),
     SCRAPER_RESULT_TTL_HOURS: int(24, 1, 720),

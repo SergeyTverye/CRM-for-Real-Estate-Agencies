@@ -24,14 +24,15 @@ MAIN_PROJECT="$(env_value COMPOSE_PROJECT_NAME)"; MAIN_PROJECT="${MAIN_PROJECT:-
 RT_PROJECT="${MAIN_PROJECT}-restoretest"
 RT_PORT="${RESTORE_TEST_PORT:-18080}"
 RT_ENV="$ROOT_DIR/restore-test/.env"
-rm -rf restore-test
+# Never delete the directory of a potentially running previous restore-test stack.
+[ ! -e "$ROOT_DIR/restore-test" ] || fail "restore-test уже существует: остановите прежний тестовый контур и сохраните его результаты"
 mkdir -p restore-test/data/files restore-test/data/import-staging restore-test/backups
 cp -a "backups/$ID" "restore-test/backups/$ID"
 grep -vE '^(COMPOSE_PROJECT_NAME|APP_PORT|APP_BIND|INSTANCE_ID|INSTANCE_ROLE)=' "$ENV_FILE" > "$RT_ENV"
 { echo "COMPOSE_PROJECT_NAME=$RT_PROJECT"; echo "APP_PORT=$RT_PORT"; echo "APP_BIND=127.0.0.1"; echo "INSTANCE_ID=restore-test"; echo "INSTANCE_ROLE=standby"; } >> "$RT_ENV"
 chmod 600 "$RT_ENV"
 
-rt() { docker compose --env-file "$RT_ENV" -f "$ROOT_DIR/compose.yaml" -f "$ROOT_DIR/compose.restore-test.yaml" "$@"; }
+rt() { docker compose -p "$RT_PROJECT" --env-file "$RT_ENV" -f "$ROOT_DIR/compose.yaml" -f "$ROOT_DIR/compose.restore-test.yaml" "$@"; }
 rt_wait() {
   local service="$1" timeout="${2:-120}" waited=0 cid status
   while [ "$waited" -lt "$timeout" ]; do
@@ -62,16 +63,18 @@ rt run --rm -T migrate >/dev/null || fail "migrate после восстанов
 check "migrations_compat" "PASS"
 rt up -d --no-deps app >/dev/null
 URL="http://127.0.0.1:$RT_PORT"
-ok=0; for _ in $(seq 1 120); do if curl -fsS "$URL/api/health" >/dev/null 2>&1; then ok=1; break; fi; sleep 2; done
+ok=0; for _ in $(seq 1 120); do if curl -fsS "$URL/api/health/ready" >/dev/null 2>&1; then ok=1; break; fi; sleep 2; done
 [ "$ok" = 1 ] && check "readiness" "PASS" || { check "readiness" "FAIL"; exit 1; }
 
 LOGIN="${RESTORE_TEST_LOGIN:-$(env_value SEED_MANAGER_LOGIN)}"; LOGIN="${LOGIN:-manager}"
 PASS="${RESTORE_TEST_PASSWORD:-$(env_value SEED_MANAGER_PASSWORD)}"
-JAR="$(mktemp)"
-LOGIN_JSON="$(jq -cn --arg l "$LOGIN" --arg p "$PASS" '{login:$l,password:$p}')"
-HTTP="$(curl -s -o /tmp/crm-rt-login.json -w '%{http_code}' -c "$JAR" -H 'content-type: application/json' -H "origin: $URL" -X POST "$URL/api/v1/auth/login" --data "$LOGIN_JSON" || true)"
-MUST_CHANGE="$(jq -r '.mustChangePassword // empty' /tmp/crm-rt-login.json 2>/dev/null || true)"
-rm -f /tmp/crm-rt-login.json
+JAR="$ROOT_DIR/restore-test/login.cookies"
+LOGIN_RESPONSE="$ROOT_DIR/restore-test/login-response.json"
+LOGIN_JSON="$(printf '%s\n%s\n' "$LOGIN" "$PASS" | rt exec -T app node -e 'let s="";process.stdin.on("data",x=>s+=x).on("end",()=>{const [login,password]=s.trimEnd().split("\n");process.stdout.write(JSON.stringify({login,password}))})')"
+HTTP="$(printf '%s' "$LOGIN_JSON" | curl -s -o "$LOGIN_RESPONSE" -w '%{http_code}' -c "$JAR" -H 'content-type: application/json' -H "origin: $URL" -X POST "$URL/api/v1/auth/login" --data-binary @- || true)"
+unset PASS LOGIN_JSON
+MUST_CHANGE="$(rt exec -T app node -e 'let s="";process.stdin.on("data",x=>s+=x).on("end",()=>{try{process.stdout.write(String(JSON.parse(s).mustChangePassword??""))}catch{}})' < "$LOGIN_RESPONSE")"
+rm -f "$LOGIN_RESPONSE"
 if [ "$HTTP" = 200 ]; then check "login" "PASS ($LOGIN)"; else check "login" "FAIL (HTTP $HTTP; задайте RESTORE_TEST_LOGIN/RESTORE_TEST_PASSWORD)"; fi
 
 # Контрольный файл: первый неархивный документ с checksum.
@@ -85,8 +88,21 @@ if [ -n "$DOC_LINE" ]; then
     [ "$API_SUM" = "$SUM" ] && check "control_file_api" "PASS" || check "control_file_api" "FAIL"
   fi
 else
-  check "control_file_storage" "SKIP (в копии нет документов)"
+  check "control_file_storage" "FAIL (в копии нет контрольного документа)"
 fi
+# Verify every gallery original and thumbnail against its metadata in the restored DB.
+rt --profile ops run --rm -T backup sh -c 'psql -X -qtA -F "|" -v ON_ERROR_STOP=1 -c "SELECT storage_key, checksum FROM documents UNION ALL SELECT thumbnail_storage_key, NULL FROM documents WHERE thumbnail_storage_key IS NOT NULL"' > "$ROOT_DIR/restore-test/media-checks.txt"
+MEDIA_OK=1; MEDIA_COUNT=0
+while IFS='|' read -r key checksum; do
+  [ -n "$key" ] || continue
+  [ -f "restore-test/data/files/$key" ] || { MEDIA_OK=0; continue; }
+  MEDIA_COUNT=$((MEDIA_COUNT + 1))
+  if [ -n "$checksum" ]; then
+    actual="$(sha256sum "restore-test/data/files/$key" | cut -d' ' -f1)"
+    [ "$actual" = "$checksum" ] || MEDIA_OK=0
+  fi
+done < "$ROOT_DIR/restore-test/media-checks.txt"
+[ "$MEDIA_OK" = 1 ] && check "gallery_files" "PASS ($MEDIA_COUNT files)" || check "gallery_files" "FAIL"
 rm -f "$JAR"
 check "control_row_counts" "PASS (сверены restore-data.sh)"
 check "duration_sec" "$(( $(date +%s) - START_TS ))"

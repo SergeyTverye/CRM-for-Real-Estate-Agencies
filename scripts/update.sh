@@ -18,6 +18,6 @@ dc --profile ops build backup
 dc up -d db
 wait_healthy db 120 || fail "PostgreSQL недоступна"
 dc run --rm migrate || fail "Миграция завершилась ошибкой. Новая версия НЕ развернута; восстановить данные можно из backup перед обновлением."
-dc up -d --no-deps app
+dc up -d --no-deps app worker
 wait_healthy app 240 || fail "Новая версия не прошла healthcheck"
 info "Обновление завершено: $(app_url)"
