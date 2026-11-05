@@ -11,6 +11,12 @@ export { buildScraperQuery } from "./source-filters";
 export interface ScraperAdapter { search(input: unknown): Promise<SearchResult>; }
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
 export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions }) => Promise<ScraperClient>;
+/** A small HTTP-200 challenge is not an empty market or a selector regression. */
+export function isCianAccessChallenge(url: string, data: unknown): boolean {
+  const host = new URL(url).hostname;
+  return (host === "cian.ru" || host.endsWith(".cian.ru")) && typeof data === "string" && data.length < 20000 &&
+    /captcha|подтвердите.{0,40}человек|проверка браузера/iu.test(data) && !/legacy-commercial-serp-frontend|OfferCard/u.test(data);
+}
 export class ScraperJobLimiter {
   private active = 0;
   private readonly queue: (() => void)[] = [];
@@ -36,10 +42,20 @@ const transport: RealEstateScraper.Transport = async request => {
   if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch { /* Parser reports invalid payload. */ } }
   return { data, status: response.status, url: response.url };
 };
+/** Detect challenges at the parser boundary without fabricating an HTTP status. */
+function guardCianParser(client: RealEstateScraper): RealEstateScraper {
+  const parser = client.parsers.cian;
+  const parse = parser.parsePage.bind(parser);
+  parser.parsePage = (html, url, query) => {
+    if (isCianAccessChallenge(url, html)) throw Object.assign(new Error("CIAN_ACCESS_CHALLENGE"), { code: "ACCESS_BLOCKED", url });
+    return parse(html, url, query);
+  };
+  return client;
+}
 /** Use the public browser lifecycle API to intercept ALL browser network, including subresources. */
 export const defaultScraperFactory: ScraperFactory = async config => {
   const { browser, ...httpConfig } = config;
-  if (!browser) return RealEstateScraper.create(httpConfig);
+  if (!browser) return guardCianParser(await RealEstateScraper.create(httpConfig));
   const browserOptions = browser === true ? {} : browser;
   const launched = await RealEstateScraper.launchBrowserTransport(browserOptions);
   try {
@@ -60,7 +76,7 @@ export const defaultScraperFactory: ScraperFactory = async config => {
     const browserTransport = RealEstateScraper.createBrowserTransport({ context, timeout: browserOptions.timeout, settleMs: browserOptions.settleMs, waitForSelector: browserOptions.waitForSelector });
     const guardedBrowserTransport: RealEstateScraper.Transport = request => request.method.toUpperCase() !== "GET" && !request.browser ? transport(request) : browserTransport(request);
     for (const source of sources) sourceConfigs[source] = { ...sourceConfigs[source], transport: guardedBrowserTransport };
-    const client = new RealEstateScraper({ ...httpConfig, sourceConfigs });
+    const client = guardCianParser(new RealEstateScraper({ ...httpConfig, sourceConfigs }));
     return { searchSite: client.searchSite.bind(client), close: launched.close };
   } catch (error) { await launched.close(); throw error; }
 };
@@ -100,7 +116,9 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       const factory = this.options.factory ?? defaultScraperFactory;
       const work = async () => {
         client = await factory({ timeout: Math.min(remaining, 30_000), maxRetries: 0, transport,
-          ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome", ...this.options.browser, sources: [source] } } : {}) });
+          ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
+            ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
+            ...this.options.browser, sources: [source] } } : {}) });
         if (controller.signal.aborted) { await client.close(); throw { code: "ABORTED" }; }
         return client.searchSite(source, buildScraperQuery(filters, source, controller.signal, this.options.sourceOptions));
       };

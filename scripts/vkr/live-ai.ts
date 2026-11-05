@@ -1,6 +1,7 @@
 import { chromium, expect, type Page } from "@playwright/test";
 import { config } from "dotenv";
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { db, disconnectDb } from "../../src/shared/db/client";
 import { decodeReservation, microsToRub } from "../../src/modules/ai/infrastructure/prisma-repositories";
@@ -47,7 +48,10 @@ async function shot(page: Page, name: string) {
 }
 async function main() {
   const mode = process.argv[2] ?? "inspect";
+  if (mode.startsWith("second-")) return secondTrial(mode);
   if (mode === "report") {
+    const existing = JSON.parse(await readFile("docs/vkr/live-ai-evidence.json", "utf8"));
+    if (existing.secondPass) throw new Error("Second pass exists: use second-report to preserve historical evidence and prose");
     const trialState = JSON.parse(await readFile(statePath, "utf8")) as State;
     const runs = await db.searchRun.findMany({ where: { startedAt: { gte: new Date(trialState.startedAt) }, needId: trialState.needId }, include: { sources: true, results: { include: { listing: { select: { source: true, address: true, priceRub: true, areaM2: true, url: true } } } } }, orderBy: { startedAt: "asc" } });
     const live = runs.filter(r => r.sources.length && !r.sources.some(s => s.reason?.includes("Записанный")));
@@ -88,7 +92,9 @@ async function main() {
   if (mode === "server") {
     const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", "dev", "--webpack", "-p", "3310"], {
       stdio: "inherit", env: { ...process.env, NEXT_DIST_DIR: ".next-live", NODE_ENV: "development", AI_ENABLED: "true", YANDEX_WEB_SEARCH_ENABLED: "true", YANDEX_WEB_SEARCH_AUTO_FALLBACK: "true",
-        SCRAPER_ENABLED: "true", SCRAPER_DEMO_FIXTURES: "false", SCRAPER_BROWSER_ENABLED: "false", SCRAPER_JOB_TIMEOUT_MS: "60000",
+        SCRAPER_ENABLED: "true", SCRAPER_DEMO_FIXTURES: "false", SCRAPER_BROWSER_ENABLED: process.env.SCRAPER_BROWSER_ENABLED ?? "true", SCRAPER_JOB_TIMEOUT_MS: process.env.SCRAPER_JOB_TIMEOUT_MS ?? "60000",
+        SCRAPER_BROWSER_EXECUTABLE_PATH: "D:/chrome-win64/chrome.exe",
+        YANDEX_WEB_SEARCH_ALLOWED_DOMAINS: "cian.ru,mirkvartir.ru,onrealt.ru,realty.yandex.ru,domclick.ru",
         // crm_demo already contains five synthetic web jobs for realtor1. Keep
         // those records; reserve at most five new LIVE jobs in this session.
         YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY: "10",
@@ -353,5 +359,151 @@ async function apiRun(page: Page, body: unknown) {
   state.events.push({ time: new Date().toISOString(), type: "scraper run", id: data.id, filters: data.filters, sources: data.sources }); await save();
   console.log(`Run ${data.id} sources=${JSON.stringify(data.sources)} results=${data.results.length}`);
   return data;
+}
+type SecondState = { startedAt: string; runs: number; web: number; other: number; runIds: string[]; events: unknown[] };
+async function secondTrial(mode: string) {
+  const path = "data/live-ai-second-state.json";
+  let second: SecondState;
+  try { second = JSON.parse(await readFile(path, "utf8")); }
+  catch { second = { startedAt: new Date().toISOString(), runs: 0, web: 0, other: 0, runIds: [], events: [] }; }
+  const persist = async () => writeFile(path, JSON.stringify(second, null, 2));
+  await persist();
+  const first = JSON.parse(await readFile(statePath, "utf8")) as State;
+  if (mode === "second-report") { await secondReport(second); await disconnectDb(); return; }
+  const browser = await chromium.launch();
+  const manager = await browser.newPage({ baseURL, viewport: { width: 1440, height: 1000 } });
+  const page = await browser.newPage({ baseURL, viewport: { width: 1440, height: 1000 }, locale: "ru-RU" });
+  const capture = async (name: string, runId?: string) => {
+    if (runId) {
+      await page.goto(`${baseURL}/property-search?runId=${runId}`, { waitUntil: "domcontentloaded" });
+      await readySearch(page);
+      await expect(page.getByRole("heading", { name: "Состояние источников", exact: true })).toBeVisible({ timeout: 60000 });
+      await page.getByRole("heading", { name: "Состояние источников", exact: true }).scrollIntoViewIfNeeded();
+    }
+    await page.screenshot({ path: `${output}/${name}.png`, animations: "disabled" });
+  };
+  let original: Settings | undefined;
+  let applied: Settings | undefined;
+  try {
+    for (const [target, role] of [[manager, "MANAGER"], [page, "REALTOR1"]] as const) {
+      await api(target, "POST", "/api/v1/auth/login", { login: process.env[`SEED_${role}_LOGIN`] ?? role.toLowerCase(), password: process.env[`SEED_${role}_PASSWORD`] });
+    }
+    original = await api<Settings>(manager, "GET", "/api/v1/settings/ai");
+    if (mode === "second-restore") {
+      const savedOriginal = JSON.parse(await readFile("data/live-ai-second-settings-original.json", "utf8")) as Settings["setting"];
+      await api(manager, "PUT", "/api/v1/settings/ai", { ...settingInput(savedOriginal), expectedUpdatedAt: original.setting.updatedAt });
+      second.events.push({ type: "settings-restored-after-dev-error", budgetRub: savedOriginal.monthlyBudgetRub }); await persist(); return;
+    }
+    await writeFile("data/live-ai-second-settings-original.json", JSON.stringify(original.setting));
+    const baseline = await db.searchRunResult.count({ where: { runId: first.firstRunId } });
+    if (mode === "second-timeout-shot") { await capture("33-timeout-recovery", second.runIds[0]); return; }
+    if (mode === "second-preserved") {
+      const restored = await api<{ id: string; results: unknown[] }>(page, "GET", `/api/v1/property-search/runs/${first.firstRunId}`);
+      expect(restored.results.length).toBe(baseline);
+      const recovered = await api<{ id: string; results: unknown[] }>(page, "GET", `/api/v1/property-search/runs/${second.runIds[1]}`);
+      expect(recovered.results.length).toBeGreaterThan(0);
+      await capture("36-preserved-after-restart", first.firstRunId);
+      second.events.push({ type: "preserved-after-restart", at: new Date().toISOString(), runId: first.firstRunId, results: baseline, recoveredRunId: recovered.id, recoveredResults: recovered.results.length });
+      await persist(); return;
+    }
+    applied = await api<Settings>(manager, "PUT", "/api/v1/settings/ai", { ...settingInput(original.setting),
+      aiEnabled: true, scraperEnabled: true, browserEnabled: mode === "second-recovery", enabledSources: ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"],
+      webSearchManualAllowed: true, webSearchAutoFallback: mode === "second-fallback", monthlyBudgetRub: "250",
+      model: "aliceai-llm-flash/latest", webModel: null, searchContextSize: "low", perJobLimit: 3,
+      perUserDailyLimit: 100, dailyLimit: 200 });
+    expect(Number(applied.effective.values.monthlyBudgetRub)).toBe(250);
+    if (mode === "second-offer") {
+      if (second.other >= 1) throw new Error("Second offer cap reached");
+      const offerId = first.offerId!;
+      await page.goto(`${baseURL}/offers/${offerId}`, { waitUntil: "domcontentloaded" });
+      const button = page.getByRole("button", { name: "Сгенерировать введение", exact: true });
+      await expect(button).toBeVisible({ timeout: 60000 });
+      await expect.poll(() => button.evaluate(el => Object.keys(el).some(k => k.startsWith("__reactProps")))).toBe(true);
+      second.other++; await persist();
+      const pending = page.waitForResponse(r => r.url().endsWith("/api/v1/ai/offer-text") && r.request().method() === "POST", { timeout: 120000 });
+      await button.click(); const response = await pending; const body = await response.json();
+      second.events.push({ type: "offer_text", at: new Date().toISOString(), http: response.status(), result: body }); await persist();
+      if (response.ok()) await expect(page.getByText(/LIVE.*Yandex AI/)).toBeVisible();
+      await capture("35-offer-text-checked"); expect(response.ok()).toBe(true); return;
+    }
+    const saved = (await api<{ id: string; filters: Record<string, unknown>; sources: string[]; needId: string }[]>(page, "GET", "/api/v1/property-search/saved-searches")).find(r => r.id === first.savedSearchId)!;
+    let filters = saved.filters;
+    if (mode === "second-timeout") filters = { ...filters, sources: ["cian", "onrealt"] };
+    if (mode === "second-fallback") filters = { ...filters, sources: ["domclick", "avito"] };
+    if (mode === "second-empty") filters = { ...filters, sources: ["youla"], priceFrom: undefined, priceTo: "1", areaFrom: 100000, areaTo: undefined };
+    if (!["second-timeout", "second-recovery", "second-fallback", "second-empty"].includes(mode)) throw new Error("Unknown second trial");
+    if (second.runs >= 4) throw new Error("Second run cap reached");
+    if (mode === "second-fallback") { if (second.web >= 2) throw new Error("Second web cap reached"); second.web++; }
+    second.runs++; await persist();
+    const at = Date.now();
+    const result = await api<{ id: string; sources: unknown; webSearchUsed: boolean; results: { listingId: string; isNew: boolean; priceChanged: boolean; verdict: string }[] }>(page, "POST", "/api/v1/property-search/runs", {
+      filters, sources: filters.sources, needId: saved.needId, ...(mode === "second-recovery" ? { savedSearchId: saved.id } : {}), confirmedPaid: true });
+    second.runIds.push(result.id);
+    second.events.push({ type: mode, at: new Date().toISOString(), id: result.id, durationMs: Date.now() - at,
+      sources: result.sources, count: result.results.length, isNew: result.results.filter(r => r.isNew).length, priceChanged: result.results.filter(r => r.priceChanged).length, webSearchUsed: result.webSearchUsed });
+    await persist();
+    console.log(JSON.stringify({ mode, id: result.id, durationMs: Date.now() - at, count: result.results.length, sources: result.sources }));
+    if (mode === "second-recovery") {
+      await capture("32-cian-status", result.id);
+      if (second.web >= 2) throw new Error("Second web cap reached");
+      second.web++; await persist();
+      await api(page, "POST", `/api/v1/property-search/runs/${result.id}/web-search`);
+      second.events.push({ type: "manual-web", at: new Date().toISOString(), id: result.id }); await persist();
+      await capture("31-web-cards", result.id);
+    } else await capture(mode === "second-timeout" ? "33-timeout-recovery" : mode === "second-fallback" ? "34-auto-web-cards" : "37-empty-live", result.id);
+    if (mode === "second-empty") { expect(result.results).toHaveLength(0); expect(result.webSearchUsed).toBe(false); }
+  } finally {
+    try {
+      if (original && applied) {
+        const current = await api<Settings>(manager, "GET", "/api/v1/settings/ai");
+        if (current.setting.updatedAt !== applied.setting.updatedAt) throw new Error("Concurrent settings edit; reconcile data/live-ai-second-settings-original.json");
+        const restored = await api<Settings>(manager, "PUT", "/api/v1/settings/ai", { ...settingInput(original.setting), expectedUpdatedAt: current.setting.updatedAt });
+        second.events.push({ type: "settings-restored", at: new Date().toISOString(), budgetRub: restored.setting.monthlyBudgetRub }); await persist();
+      }
+    } finally { await browser.close(); await disconnectDb(); }
+  }
+}
+async function secondReport(second: SecondState) {
+  const path = "docs/vkr/live-ai-evidence.json";
+  const evidence = JSON.parse(await readFile(path, "utf8"));
+  const runs = await db.searchRun.findMany({ where: { id: { in: second.runIds } }, include: { sources: true,
+    results: { include: { listing: { select: { source: true, url: true, address: true, priceRub: true, areaM2: true } } } } }, orderBy: { startedAt: "asc" } });
+  const snapshots = await db.externalListingSnapshot.findMany({ where: { searchRunId: { in: second.runIds } }, orderBy: { fetchedAt: "desc" } });
+  const offer = second.events.find(e => (e as { type?: string }).type === "offer_text") as { http: number; result: { text: string; usage: { inputTokens: number; outputTokens: number } } } | undefined;
+  const rows = await db.aiUsageLog.findMany({ where: { OR: [
+    { searchRunId: { in: second.runIds } },
+    ...(offer ? [{ callType: "offer_text", createdAt: { gte: new Date(second.startedAt) }, inputTokens: offer.result.usage.inputTokens, outputTokens: offer.result.usage.outputTokens }] : []),
+  ] }, orderBy: { createdAt: "asc" } });
+  if (rows.filter(r => r.callType === "offer_text").length !== 1 || rows.filter(r => r.callType === "web_search").length !== 2) throw new Error("Unexpected second-pass ledger; reconcile before export");
+  const usage = rows.map(r => { const d = decodeReservation(r.result); return { id: r.id, time: r.createdAt, jobId: r.searchRunId,
+    type: r.callType, model: r.model, input: r.inputTokens, output: r.outputTokens, webSearchCalls: r.webSearchCalls,
+    estimatedRub: d ? microsToRub(d.estimatedMicros) : r.estimatedCostRub.toString(), actualCrmRub: d?.actualMicros === undefined ? null : microsToRub(d.actualMicros),
+    chargedRub: d ? microsToRub(d.chargedMicros) : null, status: r.status }; });
+  const records = runs.map(r => ({ id: r.id, time: r.startedAt, filters: r.filters, status: r.status, webSearchUsed: r.webSearchUsed,
+    sources: r.sources.map(s => ({ source: s.source, status: s.status, count: s.resultCount, reason: s.reason })),
+    results: r.results.map(v => {
+      const snap = snapshots.find(s => s.searchRunId === r.id && s.listingId === v.listingId)?.normalized as Record<string, unknown> | undefined;
+      return { verdict: v.verdict, isNew: v.isNew, priceChanged: v.priceChanged, source: v.listing.source, address: snap?.address ?? v.listing.address,
+        priceRub: snap?.price ?? null, areaM2: snap?.area ?? null, url: snap?.url ?? v.listing.url };
+    }) }));
+  const unique = <T extends { id: string }>(values: T[]): T[] => [...new Map(values.map(v => [v.id, v])).values()];
+  evidence.usage = unique([...evidence.usage, ...usage]); evidence.runs = unique([...evidence.runs, ...records]);
+  const screenshotNames = ["31-web-cards", "32-cian-status", "33-timeout-recovery", "34-auto-web-cards", "36-preserved-after-restart", "37-empty-live"];
+  const screenshots = await Promise.all(screenshotNames.map(async name => ({ file: `${output}/${name}.png`, mode: "LIVE", sha256: createHash("sha256").update(await readFile(`${output}/${name}.png`)).digest("hex") })));
+  const current = await db.aiSetting.findFirstOrThrow({ select: { monthlyBudgetRub: true } });
+  evidence.secondPass = { mode: "LIVE", startedAt: second.startedAt, exportedAt: new Date().toISOString(), runs: second.runIds,
+    usageIds: usage.map(u => u.id), counters: { runs: second.runs, web: second.web, other: second.other },
+    events: second.events.filter(e => (e as { type?: string }).type !== "offer_text"),
+    offerText: { http: offer?.http, text: offer?.result.text, postCheckPassed: offer?.http === 200 && rows.some(r => r.callType === "offer_text" && r.status === "success"), previewScreenshotAvailable: false },
+    cianHttpDiagnostic: JSON.parse(await readFile("data/live-ai-cian-http.json", "utf8")),
+    cianBrowserStatusNote: "The recorded run used an intermediate adapter that mapped a small CAPTCHA page to HTTP 403. This is a policy classification, not proof of the original browser HTTP status. Final parser guard emits ACCESS_BLOCKED/CIAN_ACCESS_CHALLENGE without synthesizing an HTTP status; covered by unit regression, no further live run.", screenshots,
+    finalBudgetRub: current.monthlyBudgetRub.toString(), webCardsFound: records.flatMap(r => r.results).filter(r => r.source === "web_search").length };
+  const sum = evidence.usage.reduce((a: { input: number; output: number; web: number; other: number; toolCalls: number; rub: number }, u: { input: number; output: number; type: string; webSearchCalls: number; chargedRub: string }) => ({
+    input: a.input + u.input, output: a.output + u.output, web: a.web + Number(u.type === "web_search"), other: a.other + Number(u.type !== "web_search"), toolCalls: a.toolCalls + u.webSearchCalls, rub: a.rub + Number(u.chargedRub ?? 0),
+  }), { input: 0, output: 0, web: 0, other: 0, toolCalls: 0, rub: 0 });
+  evidence.totals = { ...sum, rub: sum.rub.toFixed(6), runs: evidence.runs.length, calls: evidence.usage.length, cloudBillingAvailable: false };
+  evidence.exportedAt = new Date().toISOString();
+  await writeFile(path, JSON.stringify(evidence, null, 2) + "\n");
+  console.log(JSON.stringify({ totals: evidence.totals, secondUsage: usage, finalBudgetRub: current.monthlyBudgetRub.toString() }));
 }
 main().catch(e => { console.error(e instanceof Error ? e.message : "Live trials failed"); process.exitCode = 1; });

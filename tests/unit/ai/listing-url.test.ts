@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isMarketCatalogue } from "@/modules/ai/domain/listing-url";
+import { isMarketCatalogue, listingUrlRejection } from "@/modules/ai/domain/listing-url";
 describe("web results must identify a listing", () => {
   it.each([
     "https://novosibirsk.domclick.ru/pokupka-commerce",
@@ -14,4 +14,25 @@ describe("web results must identify a listing", () => {
     "https://novosibirsk.domclick.ru/card/sale__commercial__12345",
     "https://example.com/listing/42",
   ])("retains possible listing URLs for further verification: %s", url => expect(isMarketCatalogue(url)).toBe(false));
+});
+
+
+describe("strict card allowlist", () => {
+  it.each([
+    "https://cian.ru/sale/commercial/123456789/",
+    "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/ofis_123456789",
+    "https://realty.yandex.ru/offer/123456789/",
+    "https://novosibirsk.domclick.ru/card/sale__commercial__12345",
+    "https://cre.mirkvartir.ru/361166102/",
+    "https://onrealt.ru/novosibirsk/kypit-ofis/86529013",
+    "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost/ofis-0123456789abcdef01234567",
+  ])("accepts only supported card shape %s", url => expect(listingUrlRejection(url)).toBeNull());
+  it.each([
+    "https://cian.ru/kupit-ofis/", "https://avito.ru/novosibirsk/kommercheskaya_nedvizhimost",
+    "https://realty.yandex.ru/novosibirsk/kupit/", "https://domclick.ru/card/",
+    "https://domclick.ru/card/search", "https://cre.mirkvartir.ru/Novosibirsk/",
+    "https://onrealt.ru/novosibirsk/kypit-ofis", "https://youla.ru/novosibirsk/nedvijimost",
+  ])("explains rejected catalogue %s", url => expect(listingUrlRejection(url)).toBe("CATALOGUE_NOT_LISTING"));
+  it.each(["https://cian.ru.evil.test/sale/commercial/123/", "https://example.com/listing/42", "http://127.0.0.1/"])("rejects unknown/private host %s", url => expect(listingUrlRejection(url)).not.toBeNull());
+  it.each(["bad", "file:///tmp/file", "https://u:p@cian.ru/sale/commercial/123/", "https://cian.ru:444/sale/commercial/123/"])("rejects unsafe URL %s", url => expect(listingUrlRejection(url)).not.toBeNull());
 });

@@ -5,6 +5,7 @@ import type { ResponsesProvider } from "../domain/contracts";
 import { envAiLimits } from "./config";
 import { SearchAi } from "./search-ai";
 import { YandexResponsesClient } from "./yandex-responses-client";
+import { verifyListingPage } from "./verify-listing-page";
 
 /** Only invoke from server application composition. Persistence adapters are mandatory. */
 export function createSearchAi(config: AppConfig, repositories: {
@@ -15,6 +16,6 @@ export function createSearchAi(config: AppConfig, repositories: {
   new AiGate(repositories.ledger, envAiLimits(config), repositories.settings, config.APP_TIMEZONE), repositories.tariffs,
   { model: config.YANDEX_CLOUD_MODEL, webModel: config.YANDEX_CLOUD_WEB_MODEL,
     maxOutputTokens: config.YANDEX_AI_MAX_OUTPUT_TOKENS, contextSize: config.YANDEX_WEB_SEARCH_CONTEXT_SIZE,
-    defaultRegion: config.YANDEX_WEB_SEARCH_REGION,
+    defaultRegion: config.YANDEX_WEB_SEARCH_REGION, ...(!provider ? { verifyPage: verifyListingPage } : {}),
     allowedDomains: config.YANDEX_WEB_SEARCH_ALLOWED_DOMAINS.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean) });
 }

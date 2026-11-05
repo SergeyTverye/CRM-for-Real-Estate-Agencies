@@ -13,10 +13,22 @@ function fixture(reply?: (r: AiRequest) => Partial<AiResponse>, enabled = true) 
     { getLimits: async () => ({}) });
   const ai = new SearchAi(provider, gate, { findEffective: async (model) => ({ id: "synthetic", model, effectiveFrom: new Date("2026-01-01Z"),
     inputMicrosPerMillion: 1000000n, outputMicrosPerMillion: 2000000n, webSearchMicrosPerCall: 500n, webInputTokenAllowance: 10000 }) },
-    { model: "demo-model", webModel: "", maxOutputTokens: 100, contextSize: "low", defaultRegion: "65", allowedDomains: ["example.com"] });
+    { model: "demo-model", webModel: "", maxOutputTokens: 100, contextSize: "low", defaultRegion: "65", allowedDomains: ["cian.ru"] });
   return { ai, provider, ledger };
 }
 describe("SearchAi", () => {
+  it("drops catalogues and foreign hosts with deterministic reasons", async () => {
+    const f = fixture(() => ({ text: JSON.stringify({ candidates: [
+      { title: "Catalogue", url: "https://cian.ru/kupit-ofis/" },
+      { title: "Foreign", url: "https://example.com/sale/commercial/123/" },
+      { title: "Card", url: "https://cian.ru/sale/commercial/123/" },
+    ] }) }));
+    const result = await f.ai.webSearch(context, { operation: "sale" });
+    expect(result.candidates[0]).toMatchObject({ originalUrl: null, rejectionReason: "CATALOGUE_NOT_LISTING" });
+    expect(result.candidates[1]).toMatchObject({ originalUrl: null, rejectionReason: "DOMAIN_NOT_ALLOWED" });
+    expect(result.candidates[2]).toMatchObject({ originalUrl: "https://cian.ru/sale/commercial/123/", verdict: "needs_review", primarySourceVerified: false });
+    expect(f.provider.requests[0]?.instructions).toContain("candidates=[]");
+  });
   it("parses with canonical filters, passes current filters and no tools, explicitly marks demo mode", async () => {
     const { ai, provider } = fixture();
     const filters = searchFiltersSchema.parse({ operation: "sale", areaFrom: 50 });
@@ -87,10 +99,10 @@ describe("SearchAi", () => {
     await expect(f.ai.analyzeDescriptions(context, { listings: [{ id: "a", publicDescription: "да" }], unresolvedCriteria: ["витрина"] })).rejects.toThrow("AI_INVALID_EVIDENCE");
   });
   it.each([["Москва", "213"], ["Новосибирск", "65"]])("web search uses request city %s and keeps candidates unconfirmed", async (city, region) => {
-    const f = fixture(() => ({ text: '{"candidates":[{"title":"Офис","url":"https://example.com/listing"},{"title":"Без источника","url":null}]}',
-      webSearchCalls: 1, sourceUrls: ["https://example.com/listing"] }));
+    const f = fixture(() => ({ text: '{"candidates":[{"title":"Офис","url":"https://novosibirsk.cian.ru/sale/commercial/123456789/"},{"title":"Без источника","url":null}]}',
+      webSearchCalls: 1, sourceUrls: ["https://novosibirsk.cian.ru/sale/commercial/123456789/"] }));
     const result = await f.ai.webSearch(context, { operation: "sale", city });
-    expect(f.provider.requests[0]?.tools).toEqual([{ type: "web_search", search_context_size: "low", filters: { allowed_domains: ["example.com"], user_location: { region } } }]);
+    expect(f.provider.requests[0]?.tools).toEqual([{ type: "web_search", search_context_size: "low", filters: { allowed_domains: ["cian.ru"], user_location: { region } } }]);
     expect(result.candidates[0]).toMatchObject({ sourceMethod: "web_search", sourceCited: true, verdict: "needs_review", primarySourceVerified: false });
     expect(result.candidates[1]).toMatchObject({ originalUrl: null, verdict: "needs_review" });
   });

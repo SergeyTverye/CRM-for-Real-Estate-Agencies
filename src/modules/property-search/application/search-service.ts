@@ -154,8 +154,11 @@ async function performWebSearch(actor: Actor, runId: string, ai: SearchAiPort, a
         await persistListing(tx, runId, listing, evaluation, null, "web_search", "web_search");
         persisted.add(candidate.originalUrl);
       }
+      const rejected = web.candidates.filter(c => c.rejectionReason).map(c => c.rejectionReason);
+      const pageChecks = [...new Set(web.candidates.filter(c => c.originalUrl).map(c => c.pageCheck).filter(Boolean))];
       await tx.searchRunSource.create({ data: { runId, source: "web_search", status: "success", resultCount: persisted.size,
-        reason: persisted.size ? "Веб-резерв: первоисточники требуют проверки" : "Веб-поиск выполнен; проверяемых карточек объявлений не найдено" } });
+        reason: [persisted.size ? "Веб-резерв: первоисточники требуют проверки" : "Веб-поиск выполнен; проверяемых карточек объявлений не найдено",
+          ...(rejected.length ? [`Отклонено: ${rejected.length} (${[...new Set(rejected)].join(", ")})`] : []), ...pageChecks].join("; ") } });
       await tx.searchRun.update({ where: { id: runId }, data: { status: "partial", finishedAt: new Date() } });
       await searchAudit(tx, actor, "web_search", "SearchRun", runId, { automatic });
     });

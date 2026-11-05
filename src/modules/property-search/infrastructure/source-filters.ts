@@ -41,5 +41,6 @@ export function scraperErrorReason(error: TechnicalError): string {
   const field = fields.find(key => new RegExp(`\\b${key}\\b`, "u").test(error.error ?? ""));
   const types = error.types?.filter(t => ["commercial", "office", "retail", "freePurpose", "industrial", "warehouse", "building"].includes(t));
   const smokeReason = ["SMOKE_REQUEST_BUDGET", "SMOKE_REDIRECT_STOPPED"].find(value => error.error === value);
-  return `${code}${error.status ? ` HTTP ${error.status}` : ""}${field ? `; фильтр: ${field}` : ""}${types?.length ? `; назначения: ${types.join(", ")}` : ""}${smokeReason ? `; ${smokeReason}` : ""}`;
+  const challenge = error.error === "CIAN_ACCESS_CHALLENGE" ? "; CIAN_ACCESS_CHALLENGE (CAPTCHA/антибот)" : "";
+  return `${code}${error.status ? ` HTTP ${error.status}` : ""}${field ? `; фильтр: ${field}` : ""}${types?.length ? `; назначения: ${types.join(", ")}` : ""}${smokeReason ? `; ${smokeReason}` : ""}${challenge}`;
 }
