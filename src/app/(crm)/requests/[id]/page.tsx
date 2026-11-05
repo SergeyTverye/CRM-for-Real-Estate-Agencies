@@ -1,3 +1,5 @@
+import { CallNoteButton } from "@/ui/domain/ai-p2-drafts";
+import { p2Available } from "@/modules/ai/application/p2-service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
@@ -5,7 +7,7 @@ import { getRequestCard } from "@/modules/requests/application/request-queries";
 import { NotFoundError } from "@/shared/errors";
 import { labelOf } from "@/shared/codebook";
 import { dictLabel } from "@/modules/dictionaries/application/dictionaries-service";
-import { fmtDateTime } from "@/server/format";
+import { fmtDateTime, tz } from "@/server/format";
 import { loadDictionaries, userOptions } from "@/server/options";
 import { Card, Dl, PageHeader, StatusBadge } from "@/ui/components";
 import { ResolveRequestForm } from "./resolve-form";
@@ -14,6 +16,7 @@ export const metadata = { title: "Обращение" };
 
 export default async function RequestCardPage({ params }: { params: Promise<{ id: string }> }) {
   const actor = await requirePageActor();
+  const aiEnabled = await p2Available(actor);
   const { id } = await params;
   let card;
   try {
@@ -45,6 +48,7 @@ export default async function RequestCardPage({ params }: { params: Promise<{ id
         }
         actions={
           <>
+            <CallNoteButton timeZone={tz()} context={{kind:"request",id}} enabled={aiEnabled && clientVisible} />
             {needVisible && r.need ? (
               <Link className="btn btn-primary" href={`/needs/${r.need.id}`}>
                 Открыть потребность

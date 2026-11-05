@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -202,7 +204,7 @@ function TaskEditForm({
       onSubmit={async (e) => {
         e.preventDefault();
         const reassign = users && v.responsibleUserId !== initial.responsibleUserId;
-        if (reassign && !window.confirm("Передать задачу другому сотруднику? Изменение ответственного фиксируется в журнале.")) return;
+        if (reassign && !await requestConfirmation("Передать задачу другому сотруднику? Изменение ответственного фиксируется в журнале.")) return;
         const res = await run(() =>
           apiCall("PATCH", `/api/v1/tasks/${taskId}`, {
             expectedUpdatedAt: updatedAt,

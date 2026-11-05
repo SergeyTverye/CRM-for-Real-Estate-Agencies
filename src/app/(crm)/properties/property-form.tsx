@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { MediaUploadQueue, useMediaQueue } from "./media-upload";
@@ -146,7 +148,7 @@ export function PropertyForm({
       setError({ code: "VALIDATION_ERROR", message: "Проверьте правильность заполнения полей", fieldErrors: { description: ["Уберите телефон из описания — контакты собственника ведутся во вкладке «Собственники»"] } });
       return;
     }
-    if (mode === "edit" && v.status === "archived" && initial.status !== "archived" && !window.confirm("Перевести объект в архив? Он исчезнет из рабочего каталога и подбора, история сохранится.")) return;
+    if (mode === "edit" && v.status === "archived" && initial.status !== "archived" && !await requestConfirmation("Перевести объект в архив? Он исчезнет из рабочего каталога и подбора, история сохранится.")) return;
     const n = (s: string) => (s.trim() === "" ? null : s.trim());
     const body: Record<string, unknown> = {
       operationType: v.operationType,
@@ -309,7 +311,7 @@ export function PropertyForm({
       <MediaUploadQueue queue={queue} propertyId={savedId ?? id} disabled={pending} />
       <div className="flex gap-2">
         <SubmitButton pending={pending || queue.busy}>{savedId ? "Повторить загрузку и открыть карточку" : mode === "create" ? "Создать объект" : "Сохранить"}</SubmitButton>
-        <button type="button" className="btn" disabled={pending || queue.busy} onClick={() => { if ((!dirty && !queue.hasPending) || window.confirm("Покинуть форму? Несохранённые изменения и очередь файлов будут потеряны.")) router.back(); }}>
+        <button type="button" className="btn" disabled={pending || queue.busy} onClick={async () => { if ((!dirty && !queue.hasPending) || await requestConfirmation("Покинуть форму? Несохранённые изменения и очередь файлов будут потеряны.")) router.back(); }}>
           Отмена
         </button>
       </div>

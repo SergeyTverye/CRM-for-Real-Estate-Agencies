@@ -334,7 +334,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </Card>
       </div>
       <p className="mt-3 text-xs text-slate-400">
-        Отчёт сформирован {fmtDateTime(report.generatedAt)}. Показатели вычисляются из первичных событий CRM; вручную редактируемых итогов нет.
+        Отчёт сформирован {fmtDateTime(report.generatedAt).replace(",", "")}. Показатели вычисляются из первичных событий CRM; вручную редактируемых итогов нет.
       </p>
     </div>
   );

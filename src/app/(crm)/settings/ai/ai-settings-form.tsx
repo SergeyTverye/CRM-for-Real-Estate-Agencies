@@ -1,4 +1,6 @@
 "use client";
+import { DateTimeInput } from "@/ui/client-kit";
+import { toast } from "@/ui/toast";
 import { labelOf } from "@/shared/codebook";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,10 +11,12 @@ import { AI_SOURCES, type AiSettingsInput } from "@/modules/ai/domain/settings";
 import type { getAiSettings } from "@/modules/ai/application/settings-service";
 
 type Data = Awaited<ReturnType<typeof getAiSettings>>;
+const contextLabel = (value: string) => ({ low: "Малый", medium: "Средний", high: "Большой" })[value] ?? value;
 const switches = { aiEnabled: "ИИ", scraperEnabled: "Скрапер", browserEnabled: "Браузерный режим",
   webSearchManualAllowed: "Ручной веб-поиск", webSearchAutoFallback: "Автопереход при полном техническом отказе" } as const;
-const numbers = { perUserDailyLimit: "Вызовов на сотрудника в сутки / веб-заданий", perJobLimit: "Вызовов на задание", dailyLimit: "Вызовов агентства в сутки" } as const;
-export function AiSettingsForm({ data }: { data: Data }) {
+const numbers = { perUserDailyLimit: "AI-вызовов на сотрудника в сутки", perJobLimit: "Вызовов на задание", dailyLimit: "Вызовов агентства в сутки" } as const;
+type Ceilings = { perUserDailyLimit: number; perJobLimit: number; dailyLimit: number; monthlyBudgetRub: string; searchContextSize: string } & Record<keyof typeof switches, boolean>;
+export function AiSettingsForm({ data, ceilings, timeZone }: { data: Data; ceilings: Ceilings; timeZone: string }) {
   const router = useRouter();
   const [form, setForm] = useState<AiSettingsInput>(() => ({
     expectedUpdatedAt: data.setting.updatedAt, aiEnabled: data.setting.aiEnabled, scraperEnabled: data.setting.scraperEnabled,
@@ -21,41 +25,48 @@ export function AiSettingsForm({ data }: { data: Data }) {
     model: data.setting.model, webModel: data.setting.webModel, searchContextSize: data.setting.searchContextSize as AiSettingsInput["searchContextSize"],
     perUserDailyLimit: data.setting.perUserDailyLimit, perJobLimit: data.setting.perJobLimit, dailyLimit: data.setting.dailyLimit, monthlyBudgetRub: data.setting.monthlyBudgetRub,
   }));
+  const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [addTariff, setAddTariff] = useState(false);
   const [tariff, setTariff] = useState({ model: form.model, effectiveFrom: "", inputRubPerMillion: "", outputRubPerMillion: "", webRubPerCall: "0.915" });
   const action = useApiAction();
+  const effectiveModes = { ...data.effective.values,
+    browserEnabled: data.effective.values.scraperEnabled && data.effective.values.browserEnabled,
+    webSearchManualAllowed: data.effective.values.aiEnabled && data.effective.values.webSearchManualAllowed,
+    webSearchAutoFallback: data.effective.values.aiEnabled && data.effective.values.webSearchManualAllowed && data.effective.values.webSearchAutoFallback };
   useUnsavedChangesWarning(dirty);
-  function change<K extends keyof AiSettingsInput>(key: K, value: AiSettingsInput[K]) { setForm((v) => ({ ...v, [key]: value })); setDirty(true); }
+  function change<K extends keyof AiSettingsInput>(key: K, value: AiSettingsInput[K]) { setForm((v) => ({ ...v, [key]: value })); setDirty(true); setSaved(false); }
   const envNote = (key: string) => data.effective.restrictedByEnv.includes(key) ? <span> Ограничено ENV</span> : null;
   return <form onSubmit={async (event) => {
     event.preventDefault();
     const result = await action.run(() => apiCall<Data>("PUT", "/api/v1/settings/ai", { ...form,
-      ...(addTariff ? { tariffs: [{ ...tariff, effectiveFrom: new Date(tariff.effectiveFrom).toISOString() }] } : {}) }));
-    if (result) { setDirty(false); setAddTariff(false); setForm((v) => ({ ...v, expectedUpdatedAt: result.setting.updatedAt })); router.refresh(); }
+      ...(addTariff ? { tariffs: [{ ...tariff, effectiveFrom: tariff.effectiveFrom }] } : {}) }));
+    if (result) { toast("Настройки ИИ сохранены"); setSaved(true); setDirty(false); setAddTariff(false); setForm((v) => ({ ...v, expectedUpdatedAt: result.setting.updatedAt })); router.refresh(); }
   }} className="stack">
     <FormErrorBanner error={action.error} />
+    {saved && <p className="alert alert-success" role="status">Настройки сохранены. Эффективные ограничения обновлены.</p>}
     {action.error?.fieldErrors && <ul role="alert">{Object.entries(action.error.fieldErrors).map(([key, errors]) => <li key={key}>{key}: {errors.join("; ")}</li>)}</ul>}
     {action.error?.code === "STALE_UPDATE" && <button type="button" onClick={() => window.location.reload()}>Обновить данные</button>}
     <fieldset disabled={action.pending} className="stack">
       <legend>Режимы и площадки</legend>
-      {(Object.keys(switches) as (keyof typeof switches)[]).map((key) => <label key={key}><input type="checkbox" checked={form[key]} onChange={(e) => change(key, e.target.checked)} /> {switches[key]}{envNote(key)}</label>)}
+      {(Object.keys(switches) as (keyof typeof switches)[]).map((key) => <label key={key}><input type="checkbox" checked={form[key]} onChange={(e) => change(key, e.target.checked)} /> {switches[key]}{envNote(key)}<small>Действует: {effectiveModes[key] ? "включено" : "выключено"}. ENV: {ceilings[key] ? "разрешено" : "запрещено"}.</small></label>)}
       <div>{AI_SOURCES.map((source) => <label key={source} style={{ marginRight: 16 }}><input type="checkbox" checked={form.enabledSources.includes(source)}
         onChange={(e) => change("enabledSources", e.target.checked ? [...form.enabledSources, source] : form.enabledSources.filter((s) => s !== source))} /> {labelOf("externalSource", source)}</label>)}</div>
       <label>Модель <input required value={form.model} onChange={(e) => change("model", e.target.value)} /></label>
       <label>Модель веб-поиска (пусто — основная) <input value={form.webModel ?? ""} onChange={(e) => change("webModel", e.target.value || null)} /></label>
       <label>Поисковый контекст <select value={form.searchContextSize} onChange={(e) => change("searchContextSize", e.target.value as AiSettingsInput["searchContextSize"])}>
-        <option value="low">Малый</option><option value="medium">Средний</option><option value="high">Большой</option></select>{envNote("searchContextSize")}</label>
-      {(Object.keys(numbers) as (keyof typeof numbers)[]).map((key) => <label key={key}>{numbers[key]} <input type="number" min="0" max="100000" required value={form[key]} onChange={(e) => change(key, Number(e.target.value))} />{envNote(key)}<small> Действует: {data.effective.values[key]}</small></label>)}
-      <label>Общий месячный бюджет, ₽ <input required inputMode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" value={form.monthlyBudgetRub} onChange={(e) => change("monthlyBudgetRub", e.target.value)} />{envNote("monthlyBudgetRub")}<small> Действует: {data.effective.values.monthlyBudgetRub} ₽</small></label>
-      <p>Действует: ИИ {data.effective.values.aiEnabled ? "включён" : "выключен"}; скрапер {data.effective.values.scraperEnabled ? "включён" : "выключен"}; браузер {data.effective.values.browserEnabled ? "включён" : "выключен"}; ручной веб-поиск {data.effective.values.webSearchManualAllowed ? "разрешён" : "запрещён"}; автопереход {data.effective.values.webSearchAutoFallback ? "разрешён" : "запрещён"}.</p>
-      <label><input type="checkbox" checked={addTariff} onChange={(e) => { setAddTariff(e.target.checked); setDirty(true); }} /> Добавить версию тарифа</label>
+        <option value="low">Малый</option><option value="medium">Средний</option><option value="high">Большой</option></select>{envNote("searchContextSize")}<small>Действует: {contextLabel(data.effective.values.searchContextSize)}. ENV-потолок: {contextLabel(ceilings.searchContextSize)}.</small></label>
+      {(Object.keys(numbers) as (keyof typeof numbers)[]).map((key) => <label key={key}>{numbers[key]} <input type="number" min="0" max="100000" required value={form[key]} onChange={(e) => change(key, Number(e.target.value))} />{envNote(key)}<small>Сохранено: {data.setting[key]}. Действует: {data.effective.values[key]}. ENV-потолок: {ceilings[key]}.</small></label>)}
+      <label>Общий месячный бюджет, ₽ <input required inputMode="decimal" pattern="[0-9]+([.][0-9]{1,2})?" value={form.monthlyBudgetRub} onChange={(e) => change("monthlyBudgetRub", e.target.value)} />{envNote("monthlyBudgetRub")}<small>Действует: {data.effective.values.monthlyBudgetRub} ₽. ENV-потолок: {ceilings.monthlyBudgetRub} ₽.</small></label>
+      <p>Веб-поиск и автопереход недоступны при выключенном ИИ. Браузерный режим действует при включённом скрапере. Площадки выше используются только при разрешённом скрапере.</p>
+      <label><input type="checkbox" checked={addTariff} onChange={(e) => { setAddTariff(e.target.checked); setDirty(true); setSaved(false); }} /> Добавить версию тарифа</label>
       {addTariff && <div className="stack">
         <label>Модель тарифа <input required value={tariff.model} onChange={(e) => setTariff({ ...tariff, model: e.target.value })} /></label>
-        <label>Дата начала действия <input required type="datetime-local" value={tariff.effectiveFrom} onChange={(e) => setTariff({ ...tariff, effectiveFrom: e.target.value })} /></label>
+        <label>Дата начала действия <DateTimeInput value={tariff.effectiveFrom} timeZone={timeZone} onChange={value => { setTariff({ ...tariff, effectiveFrom: value }); setDirty(true); }} /></label>
         {([['inputRubPerMillion', '₽ за миллион входных токенов'], ['outputRubPerMillion', '₽ за миллион выходных токенов'], ['webRubPerCall', '₽ за вызов веб-поиска']] as const).map(([key, label]) => <label key={key}>{label} <input required type="number" min="0.000001" step="0.000001" value={tariff[key]} onChange={(e) => setTariff({ ...tariff, [key]: e.target.value })} /></label>)}
       </div>}
-      <button type="submit" className="btn btn-primary">{action.pending ? "Сохранение…" : "Сохранить настройки"}</button>
+      <p>Ноль запрещает новые вызовы. Изменения действуют после сохранения. Значение выше ENV не увеличивает лимит; ENV меняет администратор установки. Суточные ENV-потолки выведены из часового лимита × 8; общий предел на задание — 10 вызовов. Для веб-поиска дополнительно действуют отдельные ENV-лимиты.</p>
+      <div className="ai-save-actions"><button type="submit" className="btn btn-primary">{action.pending ? "Сохранение…" : "Сохранить настройки"}</button></div>
     </fieldset>
   </form>;
 }

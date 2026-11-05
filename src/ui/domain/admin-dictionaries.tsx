@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "../api-client";
@@ -93,7 +95,7 @@ export function DictionaryEditor({ category, categoryLabel, items }: { category:
     const msg = it.isActive
       ? `Деактивировать значение «${it.displayName}»? Оно перестанет предлагаться в формах, но сохранится в существующих записях и истории.`
       : `Снова сделать значение «${it.displayName}» доступным для выбора?`;
-    if (!window.confirm(msg)) return;
+    if (!await requestConfirmation(msg)) return;
     setBusy(true);
     const res = await row.run(() => apiCall("PATCH", `/api/v1/admin/dictionaries/${it.id}`, { isActive: !it.isActive }));
     setBusy(false);

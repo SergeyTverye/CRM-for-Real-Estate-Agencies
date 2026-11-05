@@ -56,7 +56,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
               }
             />
           ) : (
-            <table className="table">
+            <table className="table mobile-card-table" role="table">
               <thead>
                 <tr>
                   <th>Клиент</th>
@@ -70,7 +70,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
               <tbody>
                 {res.data.items.map((c) => (
                   <tr key={c.id}>
-                    <td>
+                    <td data-label="Клиент">
                       <Link href={`/clients/${c.id}`} className="link font-medium">
                         {c.displayName}
                       </Link>
@@ -79,10 +79,10 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                         {c.clientKind === "organization" ? <span className="text-xs text-slate-400">организация</span> : null}
                       </div>
                     </td>
-                    <td>{c.primaryContact ?? "—"}</td>
-                    <td>{c.responsible.displayName}</td>
-                    <td>{c.activeNeeds || "—"}</td>
-                    <td>
+                    <td data-label="Основной контакт">{c.primaryContact ?? "—"}</td>
+                    <td data-label="Ответственный">{c.responsible.displayName}</td>
+                    <td data-label="Потребности">{c.activeNeeds || "—"}</td>
+                    <td data-label="Ближайшее действие">
                       {c.nextAction ? (
                         <>
                           <div>{c.nextAction.title}</div>
@@ -92,7 +92,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                         <span className="text-slate-400">нет</span>
                       )}
                     </td>
-                    <td>{fmtDateTime(c.lastActivityAt)}</td>
+                    <td data-label="Последняя активность">{fmtDateTime(c.lastActivityAt)}</td>
                   </tr>
                 ))}
               </tbody>

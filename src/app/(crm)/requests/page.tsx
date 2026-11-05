@@ -82,7 +82,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
               }
             />
           ) : (
-            <table className="table">
+            <table className="table mobile-card-table" role="table">
               <thead>
                 <tr>
                   <th>Дата и время</th>
@@ -99,7 +99,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                   const next = r.needVisible ? r.nextAction : null;
                   return (
                     <tr key={r.id}>
-                      <td className="whitespace-nowrap">
+                      <td data-label="Дата и время" className="whitespace-nowrap">
                         <Link href={`/requests/${r.id}`} className="link font-medium">
                           {fmtDateTime(r.occurredAt)}
                         </Link>
@@ -107,7 +107,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                           <StatusBadge status={r.statusCode} label={labelOf("leadStatus", r.statusCode)} />
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Контакт / клиент">
                         {r.client ? (
                           r.clientVisible ? (
                             <Link href={`/clients/${r.client.id}`} className="link">
@@ -122,11 +122,11 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                           <span>{r.rawContact ?? <span className="text-slate-400">не указан</span>}</span>
                         )}
                       </td>
-                      <td>
+                      <td data-label="Источник">
                         {dictLabel(dicts, "lead_source", r.sourceCode)}
                         <div className="text-xs text-slate-500">{dictLabel(dicts, "lead_channel", r.channelCode)}</div>
                       </td>
-                      <td>
+                      <td data-label="Объект / объявление">
                         {r.property ? (
                           <Link href={`/properties/${r.property.id}`} className="link">
                             {r.property.addressText}
@@ -135,12 +135,12 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                         {r.advertisement ? <div className="text-xs text-slate-500">Объявление: {dictLabel(dicts, "ad_platform", r.advertisement.platformCode)}</div> : null}
                         {!r.property && !r.advertisement ? <span className="text-slate-400">—</span> : null}
                       </td>
-                      <td>{r.responsible.displayName}</td>
-                      <td className="max-w-80">
+                      <td data-label="Ответственный">{r.responsible.displayName}</td>
+                      <td data-label="Итог" className="max-w-80">
                         <div className="text-xs font-medium text-slate-600">{labelOf("leadResult", r.resultCode)}</div>
                         {r.summary ? <div className="line-clamp-2 text-sm">{r.summary}</div> : null}
                       </td>
-                      <td>
+                      <td data-label="Следующее действие">
                         {next ? (
                           <>
                             <div>{next.title}</div>

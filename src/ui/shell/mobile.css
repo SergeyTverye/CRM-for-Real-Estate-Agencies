@@ -1,0 +1,23 @@
+﻿.mobile-action-bar { display: none; }
+@media (max-width: 767px) {
+  .crm-main { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+  .crm-shell .btn, .crm-dialog .btn, .crm-shell .sidebar-link { min-height: 44px; }
+  .crm-shell .icon-button { min-width: 44px; }
+  .crm-shell .input { min-height: 44px; font-size: 16px; }
+  .crm-shell input[type="checkbox"], .crm-shell input[type="radio"] { width: 20px; height: 20px; flex-shrink: 0; }
+  .mobile-action-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 25; display: flex; gap: 8px; justify-content: space-around; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: white; border-top: 1px solid var(--color-line); }
+  .mobile-action-bar > * { flex: 1; }
+  .crm-shell .toast-viewport { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .crm-main form:not([method="get"]) > div:last-child:has(> button[type="submit"]) { position: sticky; bottom: calc(72px + env(safe-area-inset-bottom)); z-index: 10; padding: 12px 0; background: var(--color-surface); border-top: 1px solid var(--color-line); flex-wrap: wrap; }
+  .crm-main .mobile-card-table { display: block; min-width: 0; }
+  .mobile-card-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .mobile-card-table tbody { display: grid; gap: 12px; }
+  .mobile-card-table tbody tr { display: block; border: 1px solid var(--color-line); border-radius: 8px; overflow: hidden; background: white; }
+  .crm-main .mobile-card-table td { display: block; width: auto; white-space: normal; overflow-wrap: anywhere; padding: 8px 12px; text-align: left; }
+  .mobile-card-table td[data-label]::before { content: attr(data-label); display: block; font-size: 12px; color: var(--color-muted); font-weight: 500; margin-bottom: 4px; }
+  .mobile-card-table td > .flex { flex-wrap: wrap; }
+  .mobile-card-table td:last-child { border-bottom: 0; }
+  .mobile-card-table td .link { display: inline-flex; min-height: 44px; align-items: center; }
+  .crm-main nav[aria-label="Режим списка задач"] { max-width: 100%; overflow-x: auto; }
+  .crm-main nav[aria-label="Режим списка задач"] > a { display: inline-flex; align-items: center; min-height: 44px; flex-shrink: 0; }
+}

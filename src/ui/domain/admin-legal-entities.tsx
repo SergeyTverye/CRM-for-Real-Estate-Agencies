@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "../api-client";
@@ -30,7 +32,7 @@ function RenameForm({ item, onDone, onCancel }: { item: LegalEntityRow; onDone: 
       className="space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
-        if (used && !window.confirm(`Субъект указан в ${used} документах (сделки, договоры, КП). Новое наименование отобразится и в них. Продолжить?`)) return;
+        if (used && !await requestConfirmation(`Субъект указан в ${used} документах (сделки, договоры, КП). Новое наименование отобразится и в них. Продолжить?`)) return;
         const res = await run(() => apiCall("PATCH", `/api/v1/admin/legal-entities/${item.id}`, { displayName }));
         if (res !== undefined) onDone();
       }}
@@ -68,7 +70,7 @@ export function LegalEntitiesPanel({ items }: { items: LegalEntityRow[] }) {
     const msg = it.isActive
       ? `Деактивировать «${it.displayName}»? Его нельзя будет выбрать в новых сделках, договорах и КП; существующие записи сохранятся.`
       : `Снова сделать «${it.displayName}» доступным для выбора?`;
-    if (!window.confirm(msg)) return;
+    if (!await requestConfirmation(msg)) return;
     setBusyId(it.id);
     const res = await row.run(() => apiCall("PATCH", `/api/v1/admin/legal-entities/${it.id}`, { isActive: !it.isActive }));
     setBusyId(null);

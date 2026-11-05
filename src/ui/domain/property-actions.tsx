@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -65,7 +67,7 @@ export function ReassignPropertyButton({ propertyId, users, currentUserId }: { p
           className="space-y-3"
           onSubmit={async (e) => {
             e.preventDefault();
-            if (!window.confirm(userId ? "Назначить нового ответственного? Он получит доступ к контактам собственника." : "Оставить объект без ответственного?")) return;
+            if (!await requestConfirmation(userId ? "Назначить нового ответственного? Он получит доступ к контактам собственника." : "Оставить объект без ответственного?")) return;
             const res = await run(() => apiCall("POST", `/api/v1/properties/${propertyId}/reassign`, { responsibleUserId: userId || null }));
             if (res !== undefined) {
               setOpen(false);

@@ -128,7 +128,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="table">
+              <table className="table mobile-card-table" role="table">
                 <thead>
                   <tr>
                     <th>Адрес</th>
@@ -148,14 +148,14 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
                     const agreement = p.agreements[0];
                     return (
                       <tr key={p.id}>
-                        <td>
+                        <td data-label="Адрес">
                           <Link href={`/properties/${p.id}`} className="link font-medium">
                             {covers[p.id] ? <img src={covers[p.id]} alt="Главное фото" loading="lazy" className="mb-1 h-16 w-24 rounded object-cover" /> : null}
                             {p.addressText}
                           </Link>
                           {p.district ? <div className="text-xs text-slate-500">{p.district}</div> : null}
                         </td>
-                        <td>
+                        <td data-label="Тип">
                           {dictLabel(dicts, "property_operation_type", p.operationType)} · {dictLabel(dicts, "property_type", p.propertyType)}
                           {p.propertySubtype || p.roomsCount !== null ? (
                             <div className="text-xs text-slate-500">
@@ -164,19 +164,19 @@ export default async function PropertiesPage({ searchParams }: { searchParams: P
                             </div>
                           ) : null}
                         </td>
-                        <td>
+                        <td data-label="Происхождение">
                           {p.sourceType === "external_market" ? <Badge tone="yellow">внешний рынок</Badge> : <Badge tone="blue">агентство</Badge>}
                           {p.sourceType === "external_market" && p.sourcePlatformCode ? (
                             <div className="mt-0.5 text-xs text-slate-500">{dictLabel(dicts, "ad_platform", p.sourcePlatformCode)}</div>
                           ) : null}
                         </td>
-                        <td className="whitespace-nowrap text-right">{p.area ? fmtNum(p.area, "м²") : "—"}</td>
-                        <td className="whitespace-nowrap text-right">{fmtMoney(p.price)}</td>
-                        <td>{p.responsible?.displayName ?? <span className="text-slate-400">не назначен</span>}</td>
-                        <td>
+                        <td data-label="Площадь" className="whitespace-nowrap text-right">{p.area ? fmtNum(p.area, "м²") : "—"}</td>
+                        <td data-label="Цена" className="whitespace-nowrap text-right">{fmtMoney(p.price)}</td>
+                        <td data-label="Ответственный">{p.responsible?.displayName ?? <span className="text-slate-400">не назначен</span>}</td>
+                        <td data-label="Статус">
                           <StatusBadge status={p.status} label={labelOf("propertyStatus", p.status)} />
                         </td>
-                        <td>
+                        <td data-label="Реклама / договор">
                           <div className="flex flex-wrap gap-1">
                             {ad ? (
                               <Badge tone={adExpiring ? "yellow" : "green"} title="Активное объявление">

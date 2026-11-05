@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "./api-client";
@@ -43,7 +45,7 @@ export function ActionButton({
         className={className ?? "btn btn-sm"}
         disabled={pending}
         onClick={async () => {
-          if (confirm && !window.confirm(confirm)) return;
+          if (confirm && !await requestConfirmation(confirm)) return;
           const res = await run(() => apiCall(method, url, body ?? (method === "DELETE" ? undefined : {})));
           if (res !== undefined) {
             onDone?.(res);
@@ -154,7 +156,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
     if (!open && d.open) d.close();
   }, [open]);
   return (
-    <dialog ref={ref} aria-labelledby={titleId} onClose={onClose} className={`crm-dialog ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
+    <dialog ref={ref} aria-labelledby={titleId} onClose={onClose} onCancel={e => { e.preventDefault(); onClose(); }} className={`crm-dialog ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
       <div className="card-header">
         <h2 id={titleId} className="card-title">{title}</h2>
         <button type="button" className="btn btn-sm btn-link" onClick={onClose} aria-label="Закрыть">

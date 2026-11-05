@@ -1,5 +1,7 @@
 "use client";
 
+import { requestConfirmation } from "@/ui/confirm-dialog";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiCall } from "../api-client";
@@ -78,7 +80,7 @@ function CreateUserForm({ onCreated, onCancel }: { onCreated: (i: IssuedPassword
       className="space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
-        if (roleCode === "manager" && !window.confirm("Создать учётную запись с ролью «Руководитель»? Она получит полный доступ, включая администрирование.")) return;
+        if (roleCode === "manager" && !await requestConfirmation("Создать учётную запись с ролью «Руководитель»? Она получит полный доступ, включая администрирование.")) return;
         const res = await run(() => apiCall<{ user: { login: string; displayName: string }; temporaryPassword: string }>("POST", "/api/v1/admin/users", { login, displayName, roleCode }));
         if (res) onCreated({ login: res.user.login, displayName: res.user.displayName, password: res.temporaryPassword, reason: "created" });
       }}
@@ -121,7 +123,7 @@ function EditUserForm({ user, isSelf, onDone, onCancel }: { user: AdminUserRow; 
             roleCode === "manager"
               ? `Повысить ${user.displayName} до руководителя? Он получит полный доступ ко всем данным и администрированию.`
               : `Понизить ${user.displayName} до риелтора? ${isSelf ? "Вы потеряете доступ к администрированию." : "Он потеряет доступ к данным других сотрудников."}`;
-          if (!window.confirm(msg)) return;
+          if (!await requestConfirmation(msg)) return;
         }
         const res = await run(() =>
           apiCall("PATCH", `/api/v1/admin/users/${user.id}`, {
@@ -168,7 +170,7 @@ export function AdminUsersPanel({ users, currentUserId, timeZone }: { users: Adm
     const msg = u.isActive
       ? `Деактивировать учётную запись ${u.displayName}? Все её сеансы будут завершены, вход станет невозможен. История и записи сохранятся.${isSelf ? " Это ваша учётная запись — вы будете отключены." : ""}`
       : `Восстановить учётную запись ${u.displayName}? Сотрудник снова сможет входить в систему.`;
-    if (!window.confirm(msg)) return;
+    if (!await requestConfirmation(msg)) return;
     setBusyId(u.id);
     const res = await run(() => apiCall("PATCH", `/api/v1/admin/users/${u.id}`, { isActive: !u.isActive }));
     setBusyId(null);
@@ -176,7 +178,7 @@ export function AdminUsersPanel({ users, currentUserId, timeZone }: { users: Adm
   }
 
   async function resetPassword(u: AdminUserRow) {
-    if (!window.confirm(`Сбросить пароль ${u.displayName}? Текущие сеансы будут завершены, сотрудник войдёт по временному паролю и сменит его.`)) return;
+    if (!await requestConfirmation(`Сбросить пароль ${u.displayName}? Текущие сеансы будут завершены, сотрудник войдёт по временному паролю и сменит его.`)) return;
     setBusyId(u.id);
     const res = await run(() => apiCall<{ temporaryPassword: string }>("POST", `/api/v1/admin/users/${u.id}/reset-password`, {}));
     setBusyId(null);

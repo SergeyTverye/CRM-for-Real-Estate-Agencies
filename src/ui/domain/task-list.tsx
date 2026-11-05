@@ -135,7 +135,7 @@ export function TaskList({
 export function TaskTable({ tasks }: { tasks: TaskView[] }) {
   const zone = tz();
   return (
-    <table className="table">
+    <table className="table mobile-card-table" role="table">
       <thead>
         <tr>
           <th>Задача и связи</th>
@@ -155,7 +155,7 @@ export function TaskTable({ tasks }: { tasks: TaskView[] }) {
           const nextDue = nextInstanceDue(t);
           return (
             <tr key={t.id}>
-              <td className="min-w-64">
+              <td data-label="Задача и связи" className="min-w-64">
                 <Link href={`/tasks/${t.id}`} className="link font-medium">
                   {t.title}
                 </Link>
@@ -166,25 +166,25 @@ export function TaskTable({ tasks }: { tasks: TaskView[] }) {
                 ) : null}
                 {t.resultComment ? <div className="mt-0.5 text-xs text-slate-600">Итог: {t.resultComment}</div> : null}
               </td>
-              <td>
+              <td data-label="Тип">
                 {labelOf("taskType", t.taskType)}
                 {t.taskSubtypeCode ? <div className="text-xs text-slate-500">{labelOf("postdealSubtype", t.taskSubtypeCode)}</div> : null}
               </td>
-              <td className={`whitespace-nowrap ${t.overdue ? "font-medium text-red-600" : ""}`}>
+              <td data-label="Срок" className={`whitespace-nowrap ${t.overdue ? "font-medium text-red-600" : ""}`}>
                 {fmtDateTime(t.dueAt)}
                 {t.overdue ? <div className="text-xs">просрочено</div> : null}
                 {t.completedAt ? <div className="text-xs text-slate-500">завершена {fmtDateTime(t.completedAt)}</div> : null}
               </td>
-              <td>{t.responsible.displayName}</td>
-              <td>{t.priority === "high" ? <Badge tone="red">Высокий</Badge> : labelOf("taskPriority", t.priority)}</td>
-              <td>
+              <td data-label="Ответственный">{t.responsible.displayName}</td>
+              <td data-label="Приоритет">{t.priority === "high" ? <Badge tone="red">Высокий</Badge> : labelOf("taskPriority", t.priority)}</td>
+              <td data-label="Статус">
                 <StatusBadge status={t.status} label={labelOf("taskStatus", t.status)} />
               </td>
-              <td className="text-xs">
+              <td data-label="Повтор" className="text-xs">
                 {rule ?? <span className="text-slate-400">—</span>}
                 {nextDue ? <div className="text-slate-500">след.: {fmtDateTime(nextDue)}</div> : null}
               </td>
-              <td>{open ? <TaskQuickActions taskId={t.id} updatedAt={t.updatedAt.toISOString()} dueAt={t.dueAt.toISOString()} timeZone={zone} /> : null}</td>
+              <td data-label="Действия">{open ? <TaskQuickActions taskId={t.id} updatedAt={t.updatedAt.toISOString()} dueAt={t.dueAt.toISOString()} timeZone={zone} /> : null}</td>
             </tr>
           );
         })}

@@ -6,6 +6,7 @@ import { useState, useSyncExternalStore } from "react";
 import { Building2, PanelLeftClose, PanelLeftOpen, Menu, X, Sun, Inbox, Users, ListChecks, House, Search, CalendarDays, Bell, MapPin, CheckSquare, FileText, Handshake, Megaphone, ChartNoAxesCombined, Archive, Upload, Settings, Shield, Sparkles } from "lucide-react";
 import { NAV_ITEMS } from "./nav-config";
 import { Modal } from "../client-kit";
+import { MobileActions } from "./mobile-actions";
 import { ToastViewport } from "../toast";
 
 const icons = {
@@ -85,6 +86,7 @@ export function CrmShell({ children, header, isManager, readOnly }: { children: 
         {readOnly ? <p className="alert alert-warning">Standby: только чтение</p> : null}
         <button type="button" className="btn mt-3 w-full" onClick={() => setMobileOpen(false)}><X size={16} aria-hidden="true" /> Закрыть меню</button>
       </Modal>
+      <MobileActions readOnly={readOnly} />
       <ToastViewport />
     </div>
   );
