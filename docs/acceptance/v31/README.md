@@ -20,7 +20,7 @@
 | [AT-14](AT-14.md) | Таймлайн | PASS | UI/API/RBAC зоны; полный PG authorization PASS |
 | [AT-15](AT-15.md) | Шаблоны | PASS с учётом AT-17 | В карточке PARTIAL было ожиданием финального SHA; четыре режима визуально PASS, теперь production/restore финального SHA PASS |
 | [AT-16](AT-16.md) | AI-чат | PASS fake и повторного LIVE ISO | Production UI/PG права PASS; замечания refresh/санитизации остаются в карточке |
-| [AT-17](AT-17.md) | Release gate | **PASS c812d18** | 1363 unit, 326 PG, 24 production E2E + 1 opt-in skip; Docker, чистый deploy, restart, два T08 PASS |
+| [AT-17](AT-17.md) | Release gate | **PASS c812d18 + повтор на 9adc8ff** | 1364 unit, 328 PG, 24 production E2E + 1 opt-in skip, Docker healthy на 9adc8ff; чистый deploy, restart и два T08 PASS на c812d18 |
 | [AT-18](AT-18.md) | Апробация | ОЖИДАЕТ УЧАСТИЯ ПОЛЬЗОВАТЕЛЕЙ | Руководитель и два риелтора должны заполнить реальные протоколы; автоматический dry-run этого не заменяет |
 
 Подробные критерии, предусловия, шаги, ожидаемые результаты и доказательства — в файлах `AT-01.md` … `AT-18.md`.
