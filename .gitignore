@@ -174,3 +174,11 @@ next-env.d.ts
 !/vendor/*.tgz
 
 /.next-*/
+
+# Confidential enterprise materials: never commit real customer workbooks
+РЕКЛАМНЫЕ ОБЪЕКТЫ_РАБОТА.xlsx
+**/РЕКЛАМНЫЕ ОБЪЕКТЫ_РАБОТА.xlsx
+~$РЕКЛАМНЫЕ ОБЪЕКТЫ_РАБОТА.xlsx
+**/~$РЕКЛАМНЫЕ ОБЪЕКТЫ_РАБОТА.xlsx
+/private-data/
+/data/private-imports/
