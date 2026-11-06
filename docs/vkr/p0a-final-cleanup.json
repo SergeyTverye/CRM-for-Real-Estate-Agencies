@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-06T01:57:31.977Z",
+  "temporaryUsers": 3,
+  "activeTemporaryUsers": 0,
+  "activeTemporarySessions": 0,
+  "monthlyBudgetRub": "1000",
+  "perJobLimit": 1,
+  "settingsMatchInitial": true,
+  "database": "crm_demo",
+  "paidTrials": [
+    "p0a-final-ai.json",
+    "p0a-final-parse.json"
+  ],
+  "sourceHttpAttempts": 6
+}

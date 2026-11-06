@@ -1,5 +1,33 @@
 # Семь адаптеров: аудит SR-03/04/05, поток A, v3.1
 
+> Актуальное ограниченное испытание 06.11.2026 — раздел «Финальные LIVE-доработки P0-A» ниже. Ранние таблицы сохраняют историческое состояние; MIR transport и detail-даты исправлены.
+
+## Финальные LIVE-доработки P0-A
+
+06.11.2026, 01:30 UTC. Ровно **6 физических HTTPS GET**, включая redirects в общем счётчике; без повторов по ошибке, браузера, CAPTCHA, авторизации на площадках и web_search. Это **не** семь новых поисковых запусков. Два detail OnRealt, два detail MIR, один detail Яндекс и один MIR SERP200. [Журнал](../../tests/fixtures/scraper/p0a-final/ledger.json), [измерение](../vkr/p0a-final-dates.json), [семь индексов](../../tests/fixtures/scraper/p0a-final/), [AT-04](../acceptance/v31/AT-04.md).
+
+| Источник | LIVE статус / доказательство | REPLAY покрытия | Работающий запасной путь |
+|---|---|---|---|
+| Циан | **BLOCKED**, последний ранее сохранённый HTTP403, новых запросов нет | JSON статуса + предыдущий structure-only HTML; последний body отсутствует | Ручные поля после ввода ссылки / CSV/XLSX/XML; REPLAY manual+CSV PASS |
+| Авито | **BLOCKED**, ранее HTTP439 | JSON статуса + старый structure-only HTML; полноценный последний body не заявляется | Те же пути, REPLAY PASS; кабинет/разрешённый экспорт сотрудника |
+| Домклик | **BLOCKED**, ранее HTTP401 | JSON статуса + старый structure-only HTML; полноценный последний body не заявляется | Те же пути, REPLAY PASS; разрешённый экспорт сотрудника |
+| Мир Квартир | **PASS ограниченного HTTP**, два detail и SERP200 | Date-only canonical-bound detail, очищенный SERP, 25 ID/дат в измерении; full parser replay PARTIAL | По реальной ссылке ручная форма + CSV preview/commit через LIVE API PASS |
+| OnRealt | **PASS двух detail200**, предыдущие SERP доказательства сохранены | Date-only фрагменты + предыдущая нормализованная проекция, full parser replay PARTIAL | По реальной ссылке ручная форма + CSV preview/commit LIVE API PASS |
+| Яндекс | **PASS одного detail200** | Только offerId+creationDate/updateDate собственного INITIAL_STATE.card, прежний нормализованный JSON; full parser replay PARTIAL | По реальной ссылке ручная форма + CSV preview/commit LIVE API PASS |
+| Юла | **PASS прежнего корректного нуля**, нового GET нет | Ранее сохранённые structure-only HTML и JSON результата; full parser replay PARTIAL | REPLAY manual+CSV PASS; LIVE реальной карточки нет, PARTIAL |
+
+REPLAY-индексы `<source>-response.json` содержат время/источник доказательства, transportStatus, outcome, ссылку на старый снимок и явный `bodyCoverage`. **Они не подменяют отсутствующие тела ответов**. Тест `p0a-final.test.ts` проверяет статусы трёх blocked из метаданных (transport без повторов), нормализованные проекции, date-only фрагменты и manual/feed для каждой площадки. Очищенные старые блокирующие страницы без текста не доказывают CAPTCHA UI/содержание последнего ответа. Поэтому общий AT-04 **PARTIAL**, а три внешние площадки **BLOCKED**. При лимите 6 получить свежие bodies семи площадок плюс четыре detail-карточки невозможно; новые попытки сверх лимита не выполнялись.
+
+MIR detail сообщает в секции с заголовком «Информация об объявлении»: `Размещено: 9 сентября 2026 г.` и отдельно `Обновлено: 9 сентября 2026 г.`. Соседние recommendation `time[datetime]` не являются датой этой карточки. Parser требует canonical URL; публикация имеет точность day, начало суток Asia/Novosibirsk. OnRealt собственная `.add-time`: `добавлено 18 августа в 8:55`, canonical/ID привязка. Мета/JSON-LD publication на этих MIR/OnRealt не обнаружены; утверждение относится только к двум карточкам каждого сайта.
+
+`date-enrichment.ts`: N=3 detail GET на source/client-job, 15 с общий deadline дообогащения, ограниченный 1000-entry process-local кеш **только дат** по source+listingId. TTL 1 ч для известной публикации, 5 мин для unknown. Ошибка/блок/тайм-аут прекращают detail этого источника без retry и сохраняют SERP. AbortSignal, общий jobDeadlineAt и SSRF transport сохранены. estimatedRequests для MIR теперь учитывает +3; по пяти ветвям это не +3 на каждую ветвь. Опции `extendSourceParsers(...,{maxCards,deadline,cache})` позволяют ограничить N/дедлайн и изолировать тесты без схемы/нового ENV.
+
+Progress: `dateDetails={requested,cacheHits,enriched,failed,limit}` сохраняется worker в JSON `SearchRun.progress.dateDetails[source]`, возвращается `sources[].dateDetails`; русское описание счётчиков доступно как statusReasonRu. Обновляется по завершении источника и сохраняется после terminal state; **поминутный/покарточный streaming не реализован**. БД и миграции не менялись.
+
+Измерение MIR на тех же 25 LIVE SERP строках: unknown publication **25/25→24/25**; из двух открытых detail только одна входит в текущую страницу. На самих двух MIR detail **2/2→0/2**, OnRealt **0/2→0/2** при одинаковом extractor payload. Прежние OnRealt **22/25** не сравниваются с другим рынком/моментом как улучшение; новый полный SERP OnRealt не запрашивался. Unknown никогда не подменяется fetchedAt/обновлением.
+
+Ручной fallback LIVE API: `from-url` с явными manual полями, затем подготовленный сотрудником CSV `preview→commit`, по одному реальному URL OnRealt/MIR/Яндекс. [HTTP/DB evidence](../vkr/p0a-final-ai.json), operations kind=fallback, у каждого importedCount=1, preview errors=[]/1 строка. Это не официальный feed площадки и не дополнительный fetch сайта. Для заблокированных источников и Юлы этот общий путь подтверждён REPLAY-тестом, отдельный LIVE импорт с реальной карточкой не заявляется.
+
 Проверено 05.11.2026 по установленному `real-estate-scrapper` 2.1.0 (`index.js`, `index.d.ts`, все `parsers/*`, `lib/{query,sourceParser,sources,browserTransport,youla}.js`) и адаптеру CRM. Этот документ уточняет прежние `scraper.md` и `scraper-live-smoke.md`. Схема, миграции, application, API и UI здесь не изменены. Новые зависимости не устанавливались.
 
 ## Реальные возможности

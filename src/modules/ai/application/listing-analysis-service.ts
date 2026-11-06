@@ -125,7 +125,10 @@ export async function previewAnalysisQuery(actor: Actor, raw: unknown, injected?
   await available();
   const parsed = await withListingAi(actor,(ai,c)=>ai.parseSearchQuery(c,{query:input.text,currentFilters:input.currentFilters}),injected,input.currentFilters);
   if (!parsed.filters || parsed.clarificationQuestion) return {...parsed,diff:[],confirmationRequired:false,pendingActionId:null};
-  const filters = SearchFilters.parse(preserveSearchConditions(input.currentFilters,parsed.filters,input.text));
+  // LIVE: spelled-out square metres must open the same preservation category
+  // as "м²"; otherwise a correctly parsed area silently disappears here.
+  const preservationText = input.text.replace(/квадратн\p{L}*\s+метр\p{L}*/giu, "площадь");
+  const filters = SearchFilters.parse(preserveSearchConditions(input.currentFilters,parsed.filters,preservationText));
   const diff = filterDiff(input.currentFilters,filters);
   const draft = await pendingDraft(actor,"listing_analysis_filters",{before:input.currentFilters,filters});
   return {...parsed,filters,diff,confirmationRequired:true,pendingActionId:draft.id};

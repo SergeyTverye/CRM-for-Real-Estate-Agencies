@@ -1,0 +1,154 @@
+{
+  "attempts": [
+    {
+      "source": "onrealt",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976",
+      "at": "2026-11-06T01:30:03.759Z"
+    },
+    {
+      "source": "onrealt",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528761",
+      "at": "2026-11-06T01:30:04.999Z"
+    },
+    {
+      "source": "mirkvartir",
+      "url": "https://cre.mirkvartir.ru/369638218/",
+      "at": "2026-11-06T01:30:06.056Z"
+    },
+    {
+      "source": "mirkvartir",
+      "url": "https://cre.mirkvartir.ru/369638217/",
+      "at": "2026-11-06T01:30:08.012Z"
+    },
+    {
+      "source": "yandex",
+      "url": "https://realty.yandex.ru/offer/3961425542481186113/",
+      "at": "2026-11-06T01:30:09.601Z"
+    },
+    {
+      "source": "mirkvartir",
+      "url": "https://cre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F+%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/%D0%9E%D1%84%D0%B8%D1%81%D1%8B/",
+      "at": "2026-11-06T01:32:38.871Z"
+    }
+  ],
+  "responses": [
+    {
+      "source": "onrealt",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976",
+      "sourceListingId": "86528976",
+      "status": 200,
+      "fetchedAt": "2026-11-06T01:30:03.758Z",
+      "file": "tests/fixtures/scraper/p0a-final/onrealt-1.html",
+      "rawSha256": "867a7a789d9430d68ddb21717717c48189fbf7f79a4284a55824be44955d3e26",
+      "dates": {
+        "publishedAt": "2026-08-18T01:55:00.000Z",
+        "sourceUpdatedAt": null,
+        "dateSource": "onrealt:html_label:publication",
+        "datePrecision": "exact"
+      },
+      "structuredDateKeys": [],
+      "datesAfter": {
+        "publishedAt": "2026-08-18T01:55:00.000Z",
+        "sourceUpdatedAt": null,
+        "dateSource": "onrealt:html_label:publication",
+        "datePrecision": "exact"
+      }
+    },
+    {
+      "source": "onrealt",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528761",
+      "sourceListingId": "86528761",
+      "status": 200,
+      "fetchedAt": "2026-11-06T01:30:04.999Z",
+      "file": "tests/fixtures/scraper/p0a-final/onrealt-2.html",
+      "rawSha256": "45da30097293d0acec33d8e7b66af4b71ce8bf189f58136047cd21d69db3ddcc",
+      "dates": {
+        "publishedAt": "2026-08-17T07:26:00.000Z",
+        "sourceUpdatedAt": null,
+        "dateSource": "onrealt:html_label:publication",
+        "datePrecision": "exact"
+      },
+      "structuredDateKeys": [],
+      "datesAfter": {
+        "publishedAt": "2026-08-17T07:26:00.000Z",
+        "sourceUpdatedAt": null,
+        "dateSource": "onrealt:html_label:publication",
+        "datePrecision": "exact"
+      }
+    },
+    {
+      "source": "mirkvartir",
+      "url": "https://cre.mirkvartir.ru/369638218/",
+      "sourceListingId": "369638218",
+      "status": 200,
+      "fetchedAt": "2026-11-06T01:30:06.056Z",
+      "file": "tests/fixtures/scraper/p0a-final/mirkvartir-1.html",
+      "rawSha256": "33d889e299b287db511372906441d320afc81e502558be223bde400f7a88087e",
+      "dates": {
+        "publishedAt": null,
+        "sourceUpdatedAt": null,
+        "dateSource": "unknown",
+        "datePrecision": "unknown"
+      },
+      "structuredDateKeys": [],
+      "datesAfter": {
+        "publishedAt": "2026-09-08T17:00:00.000Z",
+        "sourceUpdatedAt": "2026-09-08T17:00:00.000Z",
+        "dateSource": "mirkvartir:html_label:publication",
+        "datePrecision": "day"
+      }
+    },
+    {
+      "source": "mirkvartir",
+      "url": "https://cre.mirkvartir.ru/369638217/",
+      "sourceListingId": "369638217",
+      "status": 200,
+      "fetchedAt": "2026-11-06T01:30:08.012Z",
+      "file": "tests/fixtures/scraper/p0a-final/mirkvartir-2.html",
+      "rawSha256": "c999a384df5589d4765d259d6864db56580ff75475e731ed4428e19490e517cc",
+      "dates": {
+        "publishedAt": null,
+        "sourceUpdatedAt": null,
+        "dateSource": "unknown",
+        "datePrecision": "unknown"
+      },
+      "structuredDateKeys": [],
+      "datesAfter": {
+        "publishedAt": "2026-09-08T17:00:00.000Z",
+        "sourceUpdatedAt": "2026-09-08T17:00:00.000Z",
+        "dateSource": "mirkvartir:html_label:publication",
+        "datePrecision": "day"
+      }
+    },
+    {
+      "source": "yandex",
+      "url": "https://realty.yandex.ru/offer/3961425542481186113/",
+      "sourceListingId": "3961425542481186113",
+      "status": 200,
+      "fetchedAt": "2026-11-06T01:30:09.601Z",
+      "file": "tests/fixtures/scraper/p0a-final/yandex-1.html",
+      "rawSha256": "bb508f88aaeee8e49f3b1091610be2ec758d39647042a0b606162a66e7fd72f9",
+      "dates": {
+        "publishedAt": "2024-07-22T06:45:01.000Z",
+        "sourceUpdatedAt": "2026-11-06T06:36:00.000Z",
+        "dateSource": "yandex:structured:publication",
+        "datePrecision": "exact"
+      },
+      "structuredDateKeys": [
+        "creationDate"
+      ],
+      "datesAfter": {
+        "publishedAt": "2024-07-22T06:45:01.000Z",
+        "sourceUpdatedAt": "2026-11-06T06:36:00.000Z",
+        "dateSource": "yandex:structured:publication",
+        "datePrecision": "exact"
+      }
+    },
+    {
+      "source": "mirkvartir",
+      "kind": "serp",
+      "status": 200,
+      "rawSha256": "0a98d97d2f850c84ce0f6c752f1876eae33ad4ba9f845c6bd1e06727a3269ec6"
+    }
+  ]
+}

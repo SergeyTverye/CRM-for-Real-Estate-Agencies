@@ -29,6 +29,14 @@ function adapter(listings = [listing()], statuses: SearchResult["sources"] = [{ 
 const enqueue = (key = "synthetic-one", sources = ["cian"]) => enqueueSearch(users.realtor1, { filters, sources, idempotencyKey: key });
 beforeEach(async () => { await resetDatabase(); users = await seedBase(); process.env.AI_ENABLED = "false"; resetConfigCache(); });
 describe("v3.1 queue, results, export and authorization", () => {
+  it("persists date-enrichment counters in source progress after local worker completion", async () => {
+    const run = await enqueue("date-detail-counters", ["mirkvartir"]);
+    const counters = { requested: 3, cacheHits: 2, enriched: 2, failed: 0, limit: 3 };
+    const scraper = { search: vi.fn(), searchDetailed: vi.fn(async (): Promise<AdapterSearchResult> => ({ listings: [], sources: [{ source: "mirkvartir", status: "success", resultCount: 0, reason: "Даты карточек: запросов 3/3", dateDetails: counters, incomplete: false, pagesFetched: 1, listingsFetched: 0, maxPages: 1, limit: 25, estimatedRequests: 4 }] })) };
+    await processSearchQueue({ scraper });
+    expect((await searchProgress(users.realtor1, run.id)).sources[0]?.dateDetails).toEqual(counters);
+    await expect(searchProgress(users.realtor2, run.id)).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
   it("concurrent repeated click creates one job and rejects changed inputs", async () => {
     const runs = await Promise.all([enqueue(), enqueue()]); expect(runs[0]!.id).toBe(runs[1]!.id);
     expect(await db.searchRun.count()).toBe(1);

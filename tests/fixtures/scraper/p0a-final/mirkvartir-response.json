@@ -1,0 +1,14 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "source": "mirkvartir",
+  "capturedAt": "2026-11-06T01:32:38.871Z",
+  "transportStatus": 200,
+  "outcome": "PASS",
+  "bodyFile": "tests/fixtures/scraper/p0a-final/mirkvartir-serp.html",
+  "bodyCoverage": "date/identity-only projection",
+  "previousReplay": "tests/fixtures/scraper/v31/mirkvartir/live.json",
+  "normalized": [],
+  "reason": "Bounded public HTTPS capture",
+  "caveat": "Not a full source-body replay. Missing text/attributes cannot be reconstructed from status metadata. No new LIVE request was made by this indexer."
+}

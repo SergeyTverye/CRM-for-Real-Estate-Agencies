@@ -6,9 +6,10 @@ import { evaluateListing } from "../domain/evaluation";
 import { deduplicateListings, normalizeListing } from "./normalization";
 import { buildScraperQuery, resolveSourceGeography, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
 import { scraperHttpRequest } from "./scraper-http";
-import { extendSourceParsers } from "./parser-extension";
+import { extendSourceParsers, dateEnrichmentProgress } from "./parser-extension";
 import { resilientTransport, type AdapterFailure } from "./source-response";
 import { resolveSourceDepth, type DepthOptions } from "./source-limits";
+import type { DateDetailProgress } from "./date-enrichment";
 
 export interface AdapterSourceRun extends Omit<SourceRun, "status"> {
   status: SourceRun["status"] | AdapterFailure;
@@ -16,6 +17,7 @@ export interface AdapterSourceRun extends Omit<SourceRun, "status"> {
   maxPages: number; limit: number; estimatedRequests: number;
   actionUrl?: string;
   failureCode?: string;
+  dateDetails?: DateDetailProgress;
 }
 export interface AdapterSearchResult extends Omit<SearchResult, "sources" | "listings"> {
   sources: AdapterSourceRun[];
@@ -92,7 +94,7 @@ export const defaultScraperFactory: ScraperFactory = async config => {
   const deadline = jobDeadlineAt ?? Date.now() + (config.timeout ?? 30000);
   let requestDeadline = deadline;
   const httpConfig = { ...provided, transport: provided.transport ?? transport, maxRetries: 0 };
-  if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig));
+  if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig), { deadline });
   const browserOptions = browser === true ? {} : browser;
   // Ordinary Playwright launch: no fingerprint changes or anti-detection scripts.
   const browserInstance = await chromium.launch({ channel: browserOptions.channel, executablePath: browserOptions.executablePath, headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
@@ -199,12 +201,15 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         const branchTails = new Map<string, RealEstateScraper.PageMetadata>();
         for (const page of result.pages) branchTails.set(JSON.stringify(page.types ?? []), page);
         const limited = [...branchTails.values()].some(p => p.hasNext === true || p.truncated);
+        const dateDetails = client && dateEnrichmentProgress(client, source);
+        const detailReason = dateDetails ? `Даты карточек: запросов ${dateDetails.requested}/${dateDetails.limit}, кеш ${dateDetails.cacheHits}, найдено ${dateDetails.enriched}, ошибок ${dateDetails.failed}` : null;
         return { listings, run: { source, status, resultCount: listings.length, ...metadata,
+          ...(dateDetails ? { dateDetails: { ...dateDetails } } : {}),
           pagesFetched: result.pages.filter(p => !p.errors.length).length, listingsFetched: result.results.length,
           ...(errors[0] ? { failureCode: errors[0].code } : {}),
           incomplete: limited || !!errors.length || invalid > 0 || result.pages.some(p => p.hasNext === null),
           ...(errors.some(e => e.code === "NEEDS_USER_ACTION") ? { actionUrl: `https://${host}/` } : {}),
-          reason: errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null } satisfies AdapterSourceRun };
+          reason: [errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
         return empty(failure([info]), `${source}: ${scraperErrorReason(info)}`);

@@ -1,11 +1,19 @@
 import type RealEstateScraper from "real-estate-scrapper";
 import { extractListingDates } from "./listing-dates";
 import { detectAccessChallenge } from "./source-response";
+import { DateEnrichment, type DateDetailOptions, type DateDetailProgress } from "./date-enrichment";
+import type { Source } from "../domain/types";
+
+const detailProgress = new WeakMap<RealEstateScraper, Partial<Record<Source, DateDetailProgress>>>();
+export function dateEnrichmentProgress(client: object, source: Source) { return detailProgress.get(client as RealEstateScraper)?.[source]; }
 
 /** Extend the installed parsers in our adapter, without patching node_modules. */
-export function extendSourceParsers(client: RealEstateScraper): RealEstateScraper {
-  let dateDetailRequests = 0;
-  for (const parser of Object.values(client.parsers)) {
+export function extendSourceParsers(client: RealEstateScraper, options: DateDetailOptions = {}): RealEstateScraper {
+  const progress: Partial<Record<Source, DateDetailProgress>> = {};
+  detailProgress.set(client, progress);
+  for (const [source, parser] of Object.entries(client.parsers)) {
+    const details = new DateEnrichment(options);
+    if (["onrealt", "mirkvartir"].includes(source)) progress[source as Source] = details.progress;
     const fetch = parser.fetch.bind(parser), searchPage = parser.searchPage.bind(parser), parse = parser.parsePage.bind(parser);
     let documents: { payload: unknown; fetchedAt: string }[] = [];
     parser.fetch = async (url, options) => {
@@ -36,18 +44,12 @@ export function extendSourceParsers(client: RealEstateScraper): RealEstateScrape
         }
         return { ...raw, ...fields };
       });
-      // OnRealt exposes "добавлено" on the detail page, absent from its SERP.
-      // At most three extra public GETs per job, no retries and no bypass.
-      for (let index = 0; index < page.results.length && dateDetailRequests < 3; index++) {
+      // At most N detail GETs per source/job, shared deadline, date-only TTL cache.
+      for (let index = 0; index < page.results.length; index++) {
         const raw = page.results[index]!;
-        if (raw.source !== "onrealt" || (raw as typeof raw & { publishedAt?: string | null }).publishedAt || query?.signal?.aborted) continue;
-        dateDetailRequests++;
-        try {
-          const detail = await parser.fetch(raw.url, { signal: query?.signal });
-          const payload = detail && typeof detail === "object" && "data" in detail ? detail.data : detail;
-          const dates = extractListingDates(raw.source, payload, { id: raw.id, url: raw.url }, new Date().toISOString());
-          if (dates.publishedAt || dates.sourceUpdatedAt) page.results[index] = { ...raw, ...dates };
-        } catch { break; /* Preserve SERP results; do not repeat a failed detail request. */ }
+        if ((raw as typeof raw & { publishedAt?: string | null }).publishedAt) continue;
+        const dates = await details.read(raw.source, { id: raw.id, url: raw.url }, signal => fetch(raw.url, { signal }), query?.signal);
+        if (dates?.publishedAt || dates?.sourceUpdatedAt) page.results[index] = { ...raw, ...dates };
       }
       documents = [];
       return page;

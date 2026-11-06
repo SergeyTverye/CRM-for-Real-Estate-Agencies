@@ -15,6 +15,7 @@ import { SORTS } from "../queries/results-query";
 import { resolveSourceDepth } from "../infrastructure/source-limits";
 import { getConfig } from "@/shared/config/env";
 import { regroupRunListings } from "./duplicate-ingestion";
+import type { DateDetailProgress } from "../infrastructure/date-enrichment";
 const depthSchema = z.object({ maxPages: z.number().int().min(1).max(10).default(2), limit: z.number().int().min(1).max(500).default(100) }).strict();
 export async function stopSearchWorker() { await disconnectDb(); }
 export const queueInput = z.object({ filters: SearchFilters, sources: z.array(z.enum(SOURCES)).min(1).max(7), idempotencyKey: z.string().trim().min(8).max(120), needId: zUuid.optional(), savedSearchId: zUuid.optional(),
@@ -76,7 +77,7 @@ export async function recoverSearchQueue(now = new Date()) {
     return stale.length;
   });
 }
-type SourceDetails = Omit<SourceRun, "status"> & { status: string; adapterStatus?: string; failureCode?: string; pagesFetched?: number; listingsFetched?: number; incomplete?: boolean; retryAfterAt?: string; actionUrl?: string };
+type SourceDetails = Omit<SourceRun, "status"> & { status: string; adapterStatus?: string; failureCode?: string; pagesFetched?: number; listingsFetched?: number; incomplete?: boolean; retryAfterAt?: string; actionUrl?: string; dateDetails?: DateDetailProgress };
 export async function trustedListing(listing: NormalizedListing) {
   const copy = { ...listing, seller: { ...listing.seller } };
   delete copy.seller.ownerVerification;
@@ -102,6 +103,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
   });
   if (!run) return false;
   const controller = new AbortController(), stop = () => controller.abort();
+  const dateDetails: Partial<Record<typeof SOURCES[number], DateDetailProgress>> = {};
   options.signal?.addEventListener("abort", stop, { once: true });
   if (options.signal?.aborted) stop();
   const deadline = run.deadlineAt?.getTime() ?? Date.now() + 180000;
@@ -166,10 +168,11 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
         items.push({ listing, evaluation });
       }
       const detail = result.sources.find(s => s.source === source) as SourceDetails | undefined;
+      if (detail?.dateDetails) dateDetails[source] = detail.dateDetails;
       const adapterStatus = detail?.adapterStatus ?? detail?.status ?? "error";
       const status = detail?.actionUrl || detail?.failureCode === "NEEDS_USER_ACTION" ? "needs_user_action" : adapterStatus === "rate_limited" ? "blocked" : adapterStatus === "parse_failed" ? "error" : adapterStatus === "cancelled" ? "cancelled" : adapterStatus;
       await transaction(async tx => {
-        const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { heartbeatAt: new Date(), progress: { phase: "fetching", source } } });
+        const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { heartbeatAt: new Date(), progress: jsonValue({ phase: "fetching", source, dateDetails }) } });
         if (!fence.count) return;
         for (const item of items) await persistListing(tx, run.id, item.listing, item.evaluation, params.previousRunId ?? null);
         await tx.searchRunSource.update({ where: { runId_source: { runId: run.id, source } }, data: { status, resultCount: items.length, receivedCount: detail?.listingsFetched ?? items.length, acceptedCount: items.filter(i => i.evaluation.verdict !== "rejected").length, depthReached: detail?.pagesFetched ?? 0,
@@ -188,13 +191,13 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
       const status = needsAction && !stopped ? "needs_user_action" : partial ? "partial" : "completed";
       await tx.searchRunSource.updateMany({ where: { runId: run.id, status: { in: ["queued", "running"] } }, data: { status: "cancelled", statusReasonRu: "Отмена или общий срок выполнения" } });
       if (stopped) await tx.searchRunSource.updateMany({ where: { runId: run.id, needsUserAction: true }, data: { status: "cancelled", needsUserAction: false } });
-      await tx.searchRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), lockedBy: null, progress: { phase: status }, ...(stopped ? { incompleteReason: "Поиск остановлен; частичные результаты сохранены" } : {}) } });
+      await tx.searchRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), lockedBy: null, progress: jsonValue({ phase: status, dateDetails }), ...(stopped ? { incompleteReason: "Поиск остановлен; частичные результаты сохранены" } : {}) } });
       if (run.savedSearchId && (status === "completed" || await tx.searchRunResult.count({ where: { runId: run.id } }) > 0)) await tx.savedSearch.update({ where: { id: run.savedSearchId }, data: { lastSuccessfulRunId: run.id, lastRunAt: run.startedAt } });
       await searchAudit(tx, actor, "finished", "SearchRun", run.id, { status });
     });
   } catch {
     await transaction(async tx => {
-      const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { status: "partial", finishedAt: new Date(), lockedBy: null, progress: { phase: "partial" }, incompleteReason: "Ошибка выполнения; сохранённые результаты доступны" } });
+      const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { status: "partial", finishedAt: new Date(), lockedBy: null, progress: jsonValue({ phase: "partial", dateDetails }), incompleteReason: "Ошибка выполнения; сохранённые результаты доступны" } });
       if (fence.count) await tx.searchRunSource.updateMany({ where: { runId: run.id, status: { in: ["running", "queued"] } }, data: { status: "error", statusReasonRu: "Выполнение прервано; сохранённые данные доступны" } });
     });
   } finally {

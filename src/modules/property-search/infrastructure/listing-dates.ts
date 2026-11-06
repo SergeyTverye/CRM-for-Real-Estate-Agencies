@@ -106,6 +106,18 @@ export function extractListingDates(source: Source, payload: unknown, identity: 
     const label = $(".add-time").first().text().trim();
     if (/^добавлено\s/iu.test(label)) assign({ datePublished: label.replace(/^добавлено\s+/iu, "") }, "html_label");
   }
+  if (source === "mirkvartir" && ownDetail) {
+    // The detail's information block distinguishes placement from refresh.
+    // Recommendation <time> elements and generic page dates are not evidence.
+    $("h4,h3,h2").filter((_, el) => $(el).text().trim() === "Информация об объявлении").each((_, heading) => {
+      $(heading).parent().find("p").each((_, el) => {
+        const label = $(el).text().replace(/\s+/gu, " ").trim();
+        const pub = label.match(/^Размещено:\s*(.+?)(?=\s*Обновлено:|$)/iu)?.[1];
+        const upd = label.match(/Обновлено:\s*(.+)$/iu)?.[1];
+        assign({ datePublished: pub, dateModified: upd }, "html_label");
+      });
+    });
+  }
   $("a[href]").each((_, el) => {
     let matches = false;
     try { matches = new URL($(el).attr("href")!, identity.url).pathname === new URL(identity.url).pathname; } catch { return; }

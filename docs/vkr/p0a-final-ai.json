@@ -1,0 +1,568 @@
+{
+  "mode": "LIVE",
+  "startedAt": "2026-11-06T01:36:47.313Z",
+  "setupFailure": {
+    "mode": "LIVE",
+    "startedAt": "2026-11-06T01:36:19.986Z",
+    "setupFailure": {
+      "mode": "LIVE",
+      "startedAt": "2026-11-06T01:35:57.081Z",
+      "setupFailure": {
+        "mode": "LIVE",
+        "startedAt": "2026-11-06T01:34:25.623Z",
+        "database": "crm_demo",
+        "port": 3432,
+        "distDir": ".next-3432",
+        "maxAiCalls": 8,
+        "webSearchCalls": 0,
+        "settingsBefore": {
+          "perJobLimit": 1,
+          "monthlyBudgetRub": "1000"
+        },
+        "operations": [],
+        "failure": "response.ok is not a function",
+        "sessionRevoked": true,
+        "usage": [],
+        "actualRub": "0.000000",
+        "finishedAt": "2026-11-06T01:34:29.897Z"
+      },
+      "database": "crm_demo",
+      "port": 3432,
+      "distDir": ".next-3432",
+      "maxAiCalls": 8,
+      "webSearchCalls": 0,
+      "settingsBefore": {
+        "perJobLimit": 1,
+        "monthlyBudgetRub": "1000"
+      },
+      "operations": [],
+      "failure": "/api/v1/settings/ai: HTTP 403 {\"error\":{\"code\":\"PASSWORD_CHANGE_REQUIRED\",\"message\":\"Необходимо сменить временный пароль\",\"correlationId\":\"c4fed110-c26b-4b7b-a799-459fc3eb0a1b\"}}",
+      "sessionRevoked": true,
+      "usage": [],
+      "actualRub": "0.000000",
+      "finishedAt": "2026-11-06T01:35:57.172Z"
+    },
+    "database": "crm_demo",
+    "port": 3432,
+    "distDir": ".next-3432",
+    "maxAiCalls": 8,
+    "webSearchCalls": 0,
+    "settingsBefore": {
+      "perJobLimit": 1,
+      "monthlyBudgetRub": "1000"
+    },
+    "operations": [],
+    "settingsTemporary": {
+      "perJobLimit": 6,
+      "monthlyBudgetRub": "100"
+    },
+    "failure": "/api/v1/property-search/analysis/batch: HTTP 422 {\"error\":{\"code\":\"AI_RATE_LIMIT\",\"message\":\"Не удалось подготовить черновик: проверьте лимиты ИИ или уточните исходные данные.\",\"correlationId\":\"675f39b5-91e7-4c87-84d8-a02a4c591be6\"}}",
+    "settingsRestored": {
+      "perJobLimit": 1,
+      "monthlyBudgetRub": "1000",
+      "matches": true
+    },
+    "sessionRevoked": true,
+    "usage": [],
+    "actualRub": "0.000000",
+    "finishedAt": "2026-11-06T01:36:21.725Z"
+  },
+  "database": "crm_demo",
+  "port": 3432,
+  "distDir": ".next-3432",
+  "maxAiCalls": 8,
+  "webSearchCalls": 0,
+  "settingsBefore": {
+    "perJobLimit": 1,
+    "monthlyBudgetRub": "1000"
+  },
+  "operations": [
+    {
+      "kind": "batch",
+      "listingCount": 4,
+      "urls": [
+        "https://onrealt.ru/novosibirsk/kypit-ofis/86528976",
+        "https://onrealt.ru/novosibirsk/kypit-ofis/86528761",
+        "https://onrealt.ru/novosibirsk/kypit-ofis/86529373",
+        "https://onrealt.ru/novosibirsk/kypit-ofis/86529226"
+      ],
+      "result": {
+        "items": [
+          {
+            "listingId": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+            "source": "onrealt",
+            "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976",
+            "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+            "ruleChecks": [
+              {
+                "criterion": "city",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "Новосибирск"
+              },
+              {
+                "criterion": "operation",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "sale"
+              },
+              {
+                "criterion": "purpose",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "office"
+              },
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "state": "unknown",
+                "source": "rule",
+                "evidence": "Нет подтверждающих сведений"
+              }
+            ],
+            "cacheHit": false,
+            "evidence": [
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "result": "unknown",
+                "quote": null,
+                "source": "ai",
+                "reason": "В описании нет точного подтверждения; уточните у продавца."
+              }
+            ],
+            "unresolved": [
+              "удобная планировка для учебного центра"
+            ]
+          },
+          {
+            "listingId": "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+            "source": "onrealt",
+            "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528761",
+            "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+            "ruleChecks": [
+              {
+                "criterion": "city",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "Новосибирск"
+              },
+              {
+                "criterion": "operation",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "sale"
+              },
+              {
+                "criterion": "purpose",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "office"
+              },
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "state": "unknown",
+                "source": "rule",
+                "evidence": "Нет подтверждающих сведений"
+              }
+            ],
+            "cacheHit": false,
+            "evidence": [
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "result": "unknown",
+                "quote": null,
+                "source": "ai",
+                "reason": "В описании нет точного подтверждения; уточните у продавца."
+              }
+            ],
+            "unresolved": [
+              "удобная планировка для учебного центра"
+            ]
+          },
+          {
+            "listingId": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+            "source": "onrealt",
+            "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529373",
+            "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+            "ruleChecks": [
+              {
+                "criterion": "city",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "Новосибирск"
+              },
+              {
+                "criterion": "operation",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "sale"
+              },
+              {
+                "criterion": "purpose",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "office"
+              },
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "state": "unknown",
+                "source": "rule",
+                "evidence": "Нет подтверждающих сведений"
+              }
+            ],
+            "cacheHit": false,
+            "evidence": [
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "result": "unknown",
+                "quote": null,
+                "source": "ai",
+                "reason": "В описании нет точного подтверждения; уточните у продавца."
+              }
+            ],
+            "unresolved": [
+              "удобная планировка для учебного центра"
+            ]
+          },
+          {
+            "listingId": "102bf0b3-5177-43e2-bfaf-dcbc9a70f930",
+            "source": "onrealt",
+            "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529226",
+            "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+            "ruleChecks": [
+              {
+                "criterion": "city",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "Новосибирск"
+              },
+              {
+                "criterion": "operation",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "sale"
+              },
+              {
+                "criterion": "purpose",
+                "state": "matched",
+                "source": "structured",
+                "evidence": "office"
+              },
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "state": "unknown",
+                "source": "rule",
+                "evidence": "Нет подтверждающих сведений"
+              }
+            ],
+            "cacheHit": false,
+            "evidence": [
+              {
+                "criterion": "удобная планировка для учебного центра",
+                "result": "unknown",
+                "quote": null,
+                "source": "ai",
+                "reason": "В описании нет точного подтверждения; уточните у продавца."
+              }
+            ],
+            "unresolved": [
+              "удобная планировка для учебного центра"
+            ]
+          }
+        ],
+        "limit": 6,
+        "model": "aliceai-llm-flash/latest",
+        "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения."
+      }
+    },
+    {
+      "kind": "repeat",
+      "cacheHits": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "countBefore": 1,
+      "countAfter": 1,
+      "noPaidRepeat": true
+    },
+    {
+      "kind": "compare-three",
+      "result": {
+        "text": "Объект по адресу Красный проспект, 101/1 имеет площадь 46.81 кв. м, стоимость — 21 500 000 рублей. Объект предназначен для офисных целей, находится в Новосибирске и выставлен на продажу.  \nОбъект по адресу улица Дуси Ковальчук, 252/1 имеет площадь 220 кв. м, стоимость — 21 000 000 рублей. Объект предназначен для офисных целей, находится в Новосибирске и выставлен на продажу.  \nОбъект по адресу улица Пархоменко, 29 имеет площадь 75.1 кв. м, стоимость — 6 000 000 рублей. Объект предназначен для офисных целей, находится в Новосибирске и выставлен на продажу.\n\nСведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+        "mode": "live",
+        "testingMode": false,
+        "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+        "usage": {
+          "inputTokens": 375,
+          "outputTokens": 172
+        },
+        "webSearchCalls": 0,
+        "warning": "Сведения объявления не заменяют проверку сотрудником. Собственник и актуальная доступность не подтверждены ИИ. Неизвестные факты требуют уточнения.",
+        "tradeoffs": [
+          {
+            "listingId": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+            "points": [
+              {
+                "comparedListingId": "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+                "area": "Меньше площади, чем у другого выбранного варианта.",
+                "price": "Цена выше: оцените дополнительную нагрузку на бюджет."
+              },
+              {
+                "comparedListingId": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+                "area": "Меньше площади, чем у другого выбранного варианта.",
+                "price": "Цена выше: оцените дополнительную нагрузку на бюджет."
+              }
+            ]
+          },
+          {
+            "listingId": "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+            "points": [
+              {
+                "comparedListingId": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+                "area": "Больше площади, чем у другого выбранного варианта.",
+                "price": "Цена ниже: остаётся больше бюджета на остальные расходы."
+              },
+              {
+                "comparedListingId": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+                "area": "Больше площади, чем у другого выбранного варианта.",
+                "price": "Цена выше: оцените дополнительную нагрузку на бюджет."
+              }
+            ]
+          },
+          {
+            "listingId": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+            "points": [
+              {
+                "comparedListingId": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+                "area": "Больше площади, чем у другого выбранного варианта.",
+                "price": "Цена ниже: остаётся больше бюджета на остальные расходы."
+              },
+              {
+                "comparedListingId": "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+                "area": "Меньше площади, чем у другого выбранного варианта.",
+                "price": "Цена ниже: остаётся больше бюджета на остальные расходы."
+              }
+            ]
+          }
+        ],
+        "questions": [
+          {
+            "listingId": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+            "questions": [
+              "Уточните: удобная планировка для учебного центра",
+              "Кто собственник? Как подтверждены полномочия?",
+              "Доступно ли помещение сейчас?"
+            ]
+          },
+          {
+            "listingId": "09e89c65-a4aa-42aa-985d-b20b3c72671d",
+            "questions": [
+              "Уточните: удобная планировка для учебного центра",
+              "Кто собственник? Как подтверждены полномочия?",
+              "Доступно ли помещение сейчас?"
+            ]
+          },
+          {
+            "listingId": "0ca5ee57-3581-49f3-9d84-745193fc96fd",
+            "questions": [
+              "Уточните: удобная планировка для учебного центра",
+              "Кто собственник? Как подтверждены полномочия?",
+              "Доступно ли помещение сейчас?"
+            ]
+          }
+        ],
+        "draftOnly": true
+      }
+    },
+    {
+      "kind": "tasks",
+      "proposal": {
+        "tasks": [
+          {
+            "listingId": "0741a1c2-8e46-42a8-9053-91ff2ea691b5",
+            "title": "Уточнить характеристики объявления",
+            "description": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976\nПроверить: удобная планировка для учебного центра",
+            "needId": null,
+            "propertyId": null,
+            "expectedUpdatedAt": "2026-11-05T23:34:33.395Z"
+          }
+        ],
+        "pendingActionId": "b04d25bd-46a1-4447-8975-d665593ad9b4",
+        "confirmationRequired": true
+      },
+      "taskCountBefore": 124,
+      "taskCountPreview": 124,
+      "confirmed": {
+        "tasks": [
+          {
+            "id": "265549ca-46d0-4a33-9292-84a4d24b5104"
+          }
+        ],
+        "alreadyConfirmed": false
+      },
+      "again": {
+        "tasks": [
+          {
+            "id": "265549ca-46d0-4a33-9292-84a4d24b5104"
+          }
+        ],
+        "alreadyConfirmed": true
+      },
+      "created": [
+        {
+          "id": "265549ca-46d0-4a33-9292-84a4d24b5104",
+          "title": "Уточнить характеристики объявления",
+          "status": "planned",
+          "dueAt": "2026-11-07T01:36:56.496Z",
+          "createdBy": "d3d5dd08-25c8-4244-9ea3-e3b59203cedc"
+        }
+      ]
+    },
+    {
+      "kind": "russian-query",
+      "result": {
+        "filters": {
+          "city": "Новосибирск",
+          "operation": "sale",
+          "purposes": [
+            "office"
+          ],
+          "floorMode": "any",
+          "districts": [],
+          "seller": "all",
+          "requiredFeatures": [
+            "удобная планировка для учебного центра"
+          ],
+          "preferredFeatures": [],
+          "sources": [
+            "onrealt"
+          ]
+        },
+        "clarificationQuestion": null,
+        "mode": "live",
+        "testingMode": false,
+        "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+        "usage": {
+          "inputTokens": 467,
+          "outputTokens": 105
+        },
+        "webSearchCalls": 0,
+        "diff": [],
+        "confirmationRequired": true,
+        "pendingActionId": "9ed6d8c2-25a3-4221-9312-ba1c1500ebc5"
+      }
+    },
+    {
+      "kind": "residential-rule",
+      "mode": "DEMO negative control, not a LIVE scraped residential card",
+      "verdict": "rejected"
+    },
+    {
+      "kind": "fallback",
+      "source": "onrealt",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528976",
+      "manual": {
+        "status": "success",
+        "runId": "19eb5612-4166-4d09-8d55-a9ec1250c048",
+        "importedCount": 1
+      },
+      "feedPreview": {
+        "rowsRead": 1,
+        "errors": [],
+        "count": 1
+      },
+      "feedCommit": {
+        "importedCount": 1,
+        "committed": true
+      },
+      "mode": "LIVE CRM API, manually prepared CSV from real URL; not an official site export"
+    },
+    {
+      "kind": "fallback",
+      "source": "mirkvartir",
+      "url": "https://cre.mirkvartir.ru/369638218/",
+      "manual": {
+        "status": "success",
+        "runId": "36f5300d-c495-4b77-9ff8-5bfc598fe32d",
+        "importedCount": 1
+      },
+      "feedPreview": {
+        "rowsRead": 1,
+        "errors": [],
+        "count": 1
+      },
+      "feedCommit": {
+        "importedCount": 1,
+        "committed": true
+      },
+      "mode": "LIVE CRM API, manually prepared CSV from real URL; not an official site export"
+    },
+    {
+      "kind": "fallback",
+      "source": "yandex",
+      "url": "https://realty.yandex.ru/offer/3936755696708953483/",
+      "manual": {
+        "status": "success",
+        "runId": "c3440f71-2451-4869-bc0b-7fe9319fdb45",
+        "importedCount": 1
+      },
+      "feedPreview": {
+        "rowsRead": 1,
+        "errors": [],
+        "count": 1
+      },
+      "feedCommit": {
+        "importedCount": 1,
+        "committed": true
+      },
+      "mode": "LIVE CRM API, manually prepared CSV from real URL; not an official site export"
+    }
+  ],
+  "settingsTemporary": {
+    "perJobLimit": 6,
+    "monthlyBudgetRub": "100",
+    "dailyLimit": 100,
+    "perUserDailyLimit": 8
+  },
+  "settingsRestored": {
+    "perJobLimit": 1,
+    "monthlyBudgetRub": "1000",
+    "matches": true
+  },
+  "sessionRevoked": true,
+  "usage": [
+    {
+      "id": "8e368c70-aeca-4ca1-a321-8db2e6231813",
+      "callType": "description",
+      "status": "success",
+      "model": "aliceai-llm-flash/latest",
+      "inputTokens": 835,
+      "outputTokens": 312,
+      "webSearchCalls": 0,
+      "actualRub": "0.145900"
+    },
+    {
+      "id": "290e64b6-fcb1-47fc-a9f6-23193bb1b26c",
+      "callType": "offer_text",
+      "status": "success",
+      "model": "aliceai-llm-flash/latest",
+      "inputTokens": 375,
+      "outputTokens": 172,
+      "webSearchCalls": 0,
+      "actualRub": "0.071900"
+    },
+    {
+      "id": "f82a98a7-40e5-41a8-a7dc-ea02a9d46593",
+      "callType": "parse",
+      "status": "success",
+      "model": "aliceai-llm-flash/latest",
+      "inputTokens": 467,
+      "outputTokens": 105,
+      "webSearchCalls": 0,
+      "actualRub": "0.067700"
+    }
+  ],
+  "actualRub": "0.285500",
+  "finishedAt": "2026-11-06T01:37:08.707Z"
+}

@@ -1,0 +1,62 @@
+{
+  "mode": "LIVE",
+  "startedAt": "2026-11-06T01:49:37.506Z",
+  "maxAdditionalCalls": 1,
+  "result": {
+    "filters": {
+      "city": "Новосибирск",
+      "operation": "sale",
+      "purposes": [
+        "office"
+      ],
+      "floorMode": "any",
+      "areaFrom": 50,
+      "areaTo": 100,
+      "districts": [],
+      "seller": "all",
+      "requiredFeatures": [
+        "удобная планировка для учебного центра"
+      ],
+      "preferredFeatures": [],
+      "sources": [
+        "onrealt"
+      ]
+    },
+    "clarificationQuestion": null,
+    "mode": "live",
+    "testingMode": false,
+    "model": "gpt://b1gsj611qbf7re0rfcde/aliceai-llm-flash/latest",
+    "usage": {
+      "inputTokens": 467,
+      "outputTokens": 105
+    },
+    "webSearchCalls": 0,
+    "diff": [
+      {
+        "field": "areaFrom",
+        "before": null,
+        "after": 50
+      },
+      {
+        "field": "areaTo",
+        "before": null,
+        "after": 100
+      }
+    ],
+    "confirmationRequired": true,
+    "pendingActionId": "f994176a-30f8-4078-8f60-2ecf0af4574a"
+  },
+  "areaVerified": true,
+  "settingsRestored": true,
+  "sessionRevoked": true,
+  "usage": [
+    {
+      "callType": "parse",
+      "inputTokens": 467,
+      "outputTokens": 105,
+      "webSearchCalls": 0,
+      "status": "success",
+      "actualRub": "0.067700"
+    }
+  ]
+}

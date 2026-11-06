@@ -1,0 +1,14 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "source": "avito",
+  "capturedAt": "2026-11-05T22:45:58.739Z",
+  "transportStatus": 439,
+  "outcome": "BLOCKED",
+  "bodyFile": null,
+  "bodyCoverage": "Latest body not retained; only prior markup structure and transport/application metadata available",
+  "previousReplay": "tests/fixtures/scraper/v31/avito/live.json",
+  "normalized": [],
+  "reason": "avito: ACCESS_BLOCKED HTTP 439",
+  "caveat": "Not a full source-body replay. Missing text/attributes cannot be reconstructed from status metadata. No new LIVE request was made by this indexer."
+}

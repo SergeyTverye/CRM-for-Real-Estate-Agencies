@@ -86,7 +86,7 @@ describe("SR-04 source budgets", () => {
     vi.stubEnv(`SCRAPER_${source.toUpperCase()}_MAX_PAGES`, "1");
     vi.stubEnv(`SCRAPER_${source.toUpperCase()}_MAX_LISTINGS`, "12");
     expect(resolveSourceDepth(source, { maxPages: 999, limit: 999 })).toMatchObject({ maxPages: 1, limit: 12 });
-    expect(resolveSourceDepth(source, {}, 5).estimatedRequests).toBe(5 * SOURCE_LIMITS[source].requestsPerPage + SOURCE_LIMITS[source].setupRequests + (source === "onrealt" ? 3 : 0));
+    expect(resolveSourceDepth(source, {}, 5).estimatedRequests).toBe(5 * SOURCE_LIMITS[source].requestsPerPage + SOURCE_LIMITS[source].setupRequests + (["onrealt", "mirkvartir"].includes(source) ? 3 : 0));
   });
   it("cancels a queued source without waiting for another hanging job", async () => {
     const limiter = new ScraperJobLimiter(1), controller = new AbortController();

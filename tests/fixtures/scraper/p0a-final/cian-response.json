@@ -1,0 +1,14 @@
+{
+  "mode": "REPLAY",
+  "capturedFrom": "LIVE",
+  "source": "cian",
+  "capturedAt": "2026-11-05T22:45:58.739Z",
+  "transportStatus": 403,
+  "outcome": "BLOCKED",
+  "bodyFile": null,
+  "bodyCoverage": "Latest body not retained; only prior markup structure and transport/application metadata available",
+  "previousReplay": "tests/fixtures/scraper/v31/cian/live.json",
+  "normalized": [],
+  "reason": "cian: ACCESS_BLOCKED HTTP 403",
+  "caveat": "Not a full source-body replay. Missing text/attributes cannot be reconstructed from status metadata. No new LIVE request was made by this indexer."
+}

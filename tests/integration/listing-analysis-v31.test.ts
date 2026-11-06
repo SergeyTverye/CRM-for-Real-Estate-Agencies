@@ -130,6 +130,14 @@ it("query preview preserves conditions, returns diff, and needs owner confirmati
   await expect(confirmAnalysisQuery(users.realtor1,{...input,currentFilters:{...before,areaFrom:100}})).rejects.toMatchObject({code:"STALE_UPDATE"});
   expect((await confirmAnalysisQuery(users.realtor1,input)).filters.requiredFeatures).toEqual(["отдельный вход"]);expect(f.provider.requests).toHaveLength(1);
 });
+it("LIVE regression: spelled-out square metres retains parsed range and unrelated requirements",async()=>{
+  const before=SearchFilters.parse({operation:"sale",priceTo:"9000000",requiredFeatures:["удобная планировка"]});
+  const f=fake(JSON.stringify({filters:{operation:"sale",areaFrom:50,areaTo:100},clarificationQuestion:null}));
+  const result=await previewAnalysisQuery(users.realtor1,{text:"Ищу офис для покупки в Новосибирске, от 50 до 100 квадратных метров. Остальные условия оставить.",currentFilters:before},f.ai);
+  expect(result.filters).toMatchObject({areaFrom:50,areaTo:100,priceTo:"9000000",requiredFeatures:["удобная планировка"]});
+  expect(result.diff.map(d=>d.field)).toEqual(["areaFrom","areaTo"]);
+  expect(result.confirmationRequired).toBe(true);
+});
 it("comparison requires 2–4 candidates; unsupported numbers are rejected and valid draft has questions + disclaimer",async()=>{
   const a=await listing(),b=await listing(),input={listingIds:[a.id,b.id],filters};
   const f=fake('{"text":"Площадь 999999 м²"}');
