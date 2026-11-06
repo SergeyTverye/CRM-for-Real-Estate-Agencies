@@ -1,0 +1,171 @@
+# Изолированный production-like контур приёмки v3.2.1 (только synthetic данные).
+# Запускается ТОЛЬКО скриптом scripts/acceptance/server-production.mjs с явным --env-file
+# из data/qa-v32-prod/<контур>/qa.env и собственным project name (crm-v32-qa / crm-v32-qa-restore).
+# Образ приложения не собирается: используется готовый crm-app:v32-acceptance.
+name: ${COMPOSE_PROJECT_NAME:?}
+
+x-app-env: &app-env
+  NODE_ENV: production
+  DATABASE_URL: postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@db:5432/${POSTGRES_DB:?}
+  APP_TIMEZONE: Asia/Novosibirsk
+  DEPLOYMENT_MODE: server
+  DEPLOYMENT_ID: ${DEPLOYMENT_ID:?}
+  INSTANCE_ID: ${INSTANCE_ID:?}
+  INSTANCE_ROLE: ${INSTANCE_ROLE:-active}
+  SESSION_TTL_HOURS: "12"
+  COOKIE_SECURE: "false"
+  FILE_STORAGE_PATH: /data/files
+  IMPORT_STAGING_PATH: /data/import-staging
+  BACKUP_PATH: /backups
+  MAX_UPLOAD_MB: "50"
+  LOG_LEVEL: info
+  AI_ENABLED: "false"
+  SCRAPER_ENABLED: "false"
+  POSTGRES_HOST: db
+  POSTGRES_DB: ${POSTGRES_DB}
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+x-app: &app
+  image: ${APP_IMAGE:?}
+  pull_policy: never
+  user: "1000:1000"
+
+services:
+  db:
+    image: postgres:18.6-bookworm
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: [internal]
+
+  migrate:
+    <<: *app
+    restart: "no"
+    command: ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node_modules/.bin/prisma db seed"]
+    environment:
+      <<: *app-env
+      SEED_MANAGER_LOGIN: ${SEED_MANAGER_LOGIN:?}
+      SEED_REALTOR1_LOGIN: ${SEED_REALTOR1_LOGIN:?}
+      SEED_REALTOR2_LOGIN: ${SEED_REALTOR2_LOGIN:?}
+      SEED_MANAGER_PASSWORD: ${SEED_MANAGER_PASSWORD:?}
+      SEED_REALTOR1_PASSWORD: ${SEED_REALTOR1_PASSWORD:?}
+      SEED_REALTOR2_PASSWORD: ${SEED_REALTOR2_PASSWORD:?}
+      SEED_MUST_CHANGE_PASSWORD: "false"
+      SEED_DEMO_DATA: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+  app:
+    <<: *app
+    restart: unless-stopped
+    shm_size: 256mb
+    mem_limit: 2g
+    pids_limit: 256
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=512m,mode=1777
+    security_opt:
+      - seccomp=${REPO_ROOT:?}/ops/chrome/seccomp.json
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${APP_PORT:?}:3000"
+    volumes:
+      - ${QA_DATA:?}/files:/data/files
+      - ${QA_DATA:?}/import-staging:/data/import-staging
+      - ${QA_DATA:?}/backups:/backups
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks: [internal, public]
+
+  worker:
+    <<: *app
+    restart: unless-stopped
+    command: ["node", "ops/worker/start.mjs"]
+    environment:
+      <<: *app-env
+      NOTIFICATIONS_INTERVAL_MS: "15000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "ops/worker/health.mjs"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks: [internal]
+
+  search-worker:
+    <<: *app
+    restart: unless-stopped
+    shm_size: 256mb
+    mem_limit: 2g
+    pids_limit: 256
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=512m,mode=1777
+    security_opt:
+      - seccomp=${REPO_ROOT:?}/ops/chrome/seccomp.json
+    command: ["node", "ops/worker/search-start.mjs"]
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "ops/worker/health.mjs"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks: [internal, public]
+
+  # Публичные ops/backup/scripts/*.sh запускаются из того же образа приложения
+  # (в нём есть pg client 18, zstd, tar, jq, flock) — отдельный backup-образ не нужен.
+  backup:
+    <<: *app
+    profiles: ["ops"]
+    restart: "no"
+    working_dir: /backups
+    environment:
+      PGHOST: db
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID}
+      BACKUP_DIR: /backups
+      FILES_DIR: /data/files
+      BACKUP_RETENTION_DAILY: "14"
+    volumes:
+      - ${QA_DATA:?}/files:/data/files
+      - ${QA_DATA:?}/backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+volumes:
+  postgres_data:
+
+networks:
+  internal:
+    internal: true
+  public:

@@ -61,14 +61,21 @@ async function main() {
     applicationPassword: readSecretAlias(secrets, ["MAILRU_WEBDAV_APP_PASSWORD", "MAILRU_APP_PASSWORD"]),
   };
   if (isModule) {
-    const { runModuleTransferRestore } = await import("../../tests/cloud-live/module-transfer");
-    const evidence = await runModuleTransferRestore({ yandex, mailru });
-    console.log(JSON.stringify([safeResult("MODULE_TRANSFER_RESTORE", "COMPLETED", {
-      providers: evidence.providers, bytes: evidence.bytes, restoredInstances: evidence.restoredInstances,
-      s3Parts: evidence.s3Parts, mailruChunks: evidence.mailruChunks,
-      failureModes: evidence.failureModes, anonymousDenied: evidence.anonymousDenied,
-      hashesMatch: evidence.hashesMatch ? 1 : 0,
-    })]));
+    const { runModuleTransferRestore, moduleFailureDiagnostic } = await import("./cloud-module");
+    try {
+      const evidence = await runModuleTransferRestore({ yandex, mailru });
+      console.log(JSON.stringify([safeResult("MODULE_TRANSFER_RESTORE", "COMPLETED", {
+        providers: evidence.providers, bytes: evidence.bytes, restoredInstances: evidence.restoredInstances,
+        s3Parts: evidence.s3Parts, mailruChunks: evidence.mailruChunks,
+        failureModes: evidence.failureModes, anonymousDenied: evidence.anonymousDenied,
+        hashesMatch: evidence.hashesMatch ? 1 : 0,
+      })]));
+    } catch (error) {
+      const diagnostic = moduleFailureDiagnostic(error);
+      if (!diagnostic) throw error;
+      console.error(JSON.stringify([diagnostic]));
+      process.exitCode = 1;
+    }
     return;
   }
   const baseUrl = validateDisposableBaseUrl(process.env.CRM_CLOUD_LIVE_BASE_URL!).toString();
