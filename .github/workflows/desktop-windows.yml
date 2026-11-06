@@ -66,6 +66,11 @@ jobs:
       - name: Rust toolchain
         run: rustup toolchain install 1.90.0 --profile minimal
       - run: rustup override set 1.90.0
+      - name: Windows launcher regression
+        shell: pwsh
+        run: |
+          ./scripts/desktop/test-native-node-path.ps1 -Node (Resolve-Path src-tauri/resources/app/node/node.exe).Path
+          cargo test --manifest-path src-tauri/Cargo.toml --release --locked
       - name: Build NSIS offline installer
         run: npm run desktop:tauri
       - name: SHA-256, SBOM, runtime versions

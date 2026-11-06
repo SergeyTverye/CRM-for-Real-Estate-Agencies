@@ -51,12 +51,21 @@ function Api([string]$path,[string]$method='GET',$body=$null) {
 function StartDesktop {
   Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList '--shutdown' -WindowStyle Hidden -Wait | Out-Null
   WaitFor { $script:app.HasExited -and -not (Test-Path -LiteralPath $runtime) } 210
-  $script:app=Start-Process -FilePath "$install\RealEstateCRM.exe" -WindowStyle Hidden -PassThru
+  $nativeLog=Join-Path $data 'logs\native-startup.log'
+  if (Test-Path -LiteralPath $nativeLog) { Remove-Item -LiteralPath $nativeLog -Force }
+  $script:app=Start-Process -FilePath "$install\RealEstateCRM.exe" -PassThru
   WaitFor {
     if ($script:app.HasExited) { throw 'DESKTOP_EXIT_BEFORE_WEBVIEW' }
-    @(Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.ParentProcessId -eq $script:app.Id }).Count -gt 0
+    $script:app.Refresh()
+    # Require the actual native window, not merely a Chromium child process.
+    # Chromium helpers need not all be direct children of the Tauri process.
+    $created=(Test-Path -LiteralPath $nativeLog) -and (@(Get-Content -LiteralPath $nativeLog) -contains 'WINDOW_CREATED')
+    $created -and $script:app.MainWindowHandle -ne [IntPtr]::Zero
   }
-  Check (-not $script:app.HasExited) 'real-tauri-webview-running'
+  Check (-not $script:app.HasExited) 'real-tauri-window-running'
+  $info=Get-Content -Raw -LiteralPath $runtime | ConvertFrom-Json
+  Check ($info.url -match '^http://127\.0\.0\.1:[0-9]+$') 'desktop-loopback-only'
+  Check ((Invoke-WebRequest "$($info.url)/api/health/ready" -TimeoutSec 3).StatusCode -eq 200) 'desktop-readiness-200'
   Check (Test-Path -LiteralPath (Join-Path $data 'data\webview')) 'owned-webview-profile'
   $before=(Get-Content -Raw -LiteralPath $runtime | ConvertFrom-Json).pid
   $second=Start-Process -FilePath "$install\RealEstateCRM.exe" -WindowStyle Hidden -PassThru
@@ -133,6 +142,11 @@ try {
   @{os=$os.Caption; build=$os.BuildNumber; memoryBytes=([long]$os.TotalVisibleMemorySize*1024); processor=$env:PROCESSOR_ARCHITECTURE} | ConvertTo-Json | Set-Content -LiteralPath "$evidence\runner.json"
   Add-Content -LiteralPath "$evidence\steps.log" -Value 'PASS installer-lifecycle-complete'
 } catch {
+  $nativeLog=Join-Path $data 'logs\native-startup.log'
+  if (Test-Path -LiteralPath $nativeLog) {
+    Get-Content -LiteralPath $nativeLog | Where-Object { $_ -match '^(SERVER_READY|WINDOW_BUILD_STARTED|WINDOW_CREATED|WINDOW_BUILD_FAILED|WINDOW_DISPATCH_FAILED)$' } |
+      Set-Content -LiteralPath "$evidence\native-startup-codes.log"
+  }
   Add-Content -LiteralPath "$evidence\steps.log" -Value ('FAILED '+$_.FullyQualifiedErrorId.Split(',')[0])
   throw 'INSTALLER_LIFECYCLE_FAILED_SEE_SAFE_CODES'
 } finally { $password=$null }

@@ -55,8 +55,10 @@ fn main() {
             // profile as SQLite; never leave a second identifier-based profile.
             let webview_data = supervisor::data_root()?.join("data/webview");
             let result = supervisor::Supervisor::start(&resources, move |url| {
+                supervisor::startup_event("SERVER_READY");
                 let callback_handle = handle.clone();
-                let _ = handle.run_on_main_thread(move || {
+                if handle.run_on_main_thread(move || {
+                    supervisor::startup_event("WINDOW_BUILD_STARTED");
                     let allowed = url.clone();
                     let start_url = format!("{}/setup",url);
                     let builder = WebviewWindowBuilder::new(&callback_handle,"main",WebviewUrl::External(start_url.parse().expect("loopback URL")))
@@ -66,6 +68,7 @@ fn main() {
                         .devtools(false);
                     match builder.build() {
                         Ok(window) => {
+                            supervisor::startup_event("WINDOW_CREATED");
                             let app = callback_handle.clone();
                             window.on_window_event(move |event| {
                                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -78,9 +81,16 @@ fn main() {
                                 }
                             });
                         },
-                        Err(_) => callback_handle.dialog().message("Не удалось открыть окно CRM. Проверьте WebView2 и журнал в LOCALAPPDATA\\RealEstateCRM\\logs.").show(|_| {}),
+                        Err(_) => {
+                            supervisor::startup_event("WINDOW_BUILD_FAILED");
+                            let app = callback_handle.clone();
+                            callback_handle.dialog().message("Не удалось открыть окно CRM. Проверьте WebView2 и журнал в LOCALAPPDATA\\RealEstateCRM\\logs.").show(move |_| app.exit(1));
+                        },
                     }
-                });
+                }).is_err() {
+                    supervisor::startup_event("WINDOW_DISPATCH_FAILED");
+                    handle.exit(1);
+                }
             }, move |message| {
                 let app = fail.clone();
                 fail.dialog().message(message).title("CRM: ошибка запуска").show(move |_| app.exit(1));

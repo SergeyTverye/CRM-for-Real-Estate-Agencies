@@ -2,6 +2,36 @@ use std::{fs::{self, OpenOptions}, io::{self, BufRead, BufReader, Write}, path::
 use std::os::windows::process::CommandExt;
 pub struct Supervisor { child: Child, input: ChildStdin }
 pub type Shared = Arc<Mutex<Option<Supervisor>>>;
+// Tauri's resource_dir may be a canonical Windows verbatim path. Node 24
+// cannot resolve its JS entrypoint (or cwd) with that prefix: EISDIR lstat C:.
+// Do not canonicalize this result again before passing it to Node.
+fn node_resource_path(path: &Path) -> io::Result<PathBuf> {
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+    let units: Vec<u16> = path.as_os_str().encode_wide().collect();
+    let prefix: Vec<u16> = r"\\?\".encode_utf16().collect();
+    if !units.starts_with(&prefix) { return Ok(path.to_path_buf()); }
+    let tail = &units[prefix.len()..];
+    let unc: Vec<u16> = r"UNC\".encode_utf16().collect();
+    let normal = if tail.starts_with(&unc) {
+        let mut result: Vec<u16> = r"\\".encode_utf16().collect();
+        result.extend_from_slice(&tail[unc.len()..]);
+        result
+    } else if tail.len() >= 3 && (tail[0] as u8).is_ascii_alphabetic()
+        && tail[0] <= 127 && tail[1] == b':' as u16 && tail[2] == b'\\' as u16 {
+        tail.to_vec()
+    } else {
+        return Err(io::Error::other("UNSUPPORTED_NODE_RESOURCE_PATH"));
+    };
+    Ok(PathBuf::from(std::ffi::OsString::from_wide(&normal)))
+}
+// Only fixed stage codes, never URLs, arbitrary errors or user data.
+pub fn startup_event(code: &'static str) {
+    if let Ok(root) = data_root() {
+        if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(root.join("logs/native-startup.log")) {
+            let _ = writeln!(file, "{}", code);
+        }
+    }
+}
 pub fn data_root() -> io::Result<PathBuf> {
     Ok(PathBuf::from(std::env::var_os("LOCALAPPDATA").ok_or_else(|| io::Error::other("LOCALAPPDATA_MISSING"))?).join("RealEstateCRM"))
 }
@@ -26,13 +56,14 @@ pub fn protect_data(root: &Path) -> io::Result<()> {
 }
 impl Supervisor {
     pub fn start(resources: &Path, on_ready: impl FnOnce(String) + Send + 'static, on_failure: impl FnOnce(String) + Send + 'static, on_notice: impl Fn(&str) + Send + 'static) -> io::Result<Self> {
+        let resources = node_resource_path(resources)?;
         let root = data_root()?;
         protect_data(&root)?;
         fs::create_dir_all(root.join("logs"))?;
         let log_path = root.join("logs/supervisor.log");
         let log = OpenOptions::new().create(true).append(true).open(&log_path)?;
         let mut child = Command::new(resources.join("node/node.exe"))
-            .arg(resources.join("supervisor.mjs")).current_dir(resources)
+            .arg(resources.join("supervisor.mjs")).current_dir(&resources)
             .env_remove("NODE_OPTIONS").env_remove("NODE_PATH").env_remove("PSModulePath")
             .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::from(log))
             .creation_flags(0x08000000).spawn()?;
@@ -75,3 +106,20 @@ impl Supervisor {
 }
 impl Drop for Supervisor { fn drop(&mut self) { self.stop(); } }
 pub fn stop(shared: &Shared) { if let Ok(mut guard) = shared.lock() { if let Some(mut process) = guard.take() { process.stop(); } } }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn node_paths_remove_only_supported_verbatim_prefixes() {
+        for (input, expected) in [
+            (r"\\?\C:\Program Files\CRM\app", r"C:\Program Files\CRM\app"),
+            (r"\\?\UNC\server\share\CRM\app", r"\\server\share\CRM\app"),
+            (r"C:\CRM\app", r"C:\CRM\app"),
+            (r"\\?\D:\CRM\недвижимость", r"D:\CRM\недвижимость"),
+        ] {
+            assert_eq!(node_resource_path(Path::new(input)).unwrap(), PathBuf::from(expected));
+        }
+        assert!(node_resource_path(Path::new(r"\\?\GLOBALROOT\Device\app")).is_err());
+    }
+}

@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { assertRuntimeEntries, runtimeEntries, runtimeBuildOptions } from './runtime-entries.mjs';
+import { safeCopyTrace, assertRuntimeResources } from './resource-policy.mjs';
 const require = createRequire(import.meta.url);
 const root = process.cwd();
 const app = path.join(root,'src-tauri/resources/app');
@@ -20,18 +21,6 @@ function run(exe,args,options={}) {
   if (r.error || r.status !== 0) throw Error('BUILD_STEP_FAILED:' + path.basename(exe));
 }
 function npm(args,cwd=root) { run(process.env.ComSpec ?? 'C:\\Windows\\System32\\cmd.exe',['/d','/s','/c','npm ' + args.join(' ')],{cwd}); }
-const forbidden = name => /^(?:\.env(?:\..*)?|\.git|private-data)$/i.test(name) || /\.(?:db|sqlite|crmbackup|dump)(?:-(?:wal|shm))?$/i.test(name);
-async function copySafe(from,to) {
-  await cp(from,to,{recursive:true,dereference:true,filter:src => !forbidden(path.basename(src)) && !['data','backups'].includes(path.relative(from,src).split(path.sep)[0]) && !src.includes(path.sep+'private-imports'+path.sep)});
-}
-async function rejectPrivateFiles(dir) {
-  for (const item of await readdir(dir,{withFileTypes:true})) {
-    if (forbidden(item.name)) throw Error('PRIVATE_RESOURCE_REJECTED');
-    const file = path.join(dir,item.name);
-    if ((await lstat(file)).isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
-    if (item.isDirectory()) await rejectPrivateFiles(file);
-  }
-}
 if (process.platform !== 'win32' || process.arch !== 'x64' || process.versions.node !== versions.node) throw Error('USE_PINNED_WINDOWS_NODE_' + versions.node);
 if (existsSync(app)) throw Error('RESOURCE_DIRECTORY_ALREADY_EXISTS_USE_CLEAN_CI_CHECKOUT');
 assertRuntimeEntries({ tracked: process.env.CI === 'true' });
@@ -39,13 +28,13 @@ await mkdir(app,{recursive:true});
 run(process.execPath,['scripts/desktop/create-icon.mjs']);
 Object.assign(process.env,{CRM_BUILD_TARGET:'desktop',CRM_DEPLOYMENT_MODE:'desktop',NEXT_DIST_DIR:dist,NEXT_TELEMETRY_DISABLED:'1'});
 npm(['run','build']);
-await copySafe(path.join(root,dist,'standalone'),app);
-await copySafe(path.join(root,dist,'static'),path.join(app,dist,'static'));
-if (existsSync('public')) await copySafe('public',path.join(app,'public'));
-await copySafe('import-profiles',path.join(app,'import-profiles'));
-await copySafe('prisma/sqlite',path.join(app,'prisma/sqlite'));
-await copySafe('src/generated/prisma-sqlite',path.join(app,'generated/sqlite'));
-await cp('prisma/sqlite.config.ts',path.join(app,'prisma/sqlite.config.ts'));
+await safeCopyTrace(path.join(root,dist,'standalone'),app,{dist});
+await safeCopyTrace(path.join(root,dist,'static'),path.join(app,dist,'static'),{prefix:dist+'/static',dist});
+if (existsSync('public')) await safeCopyTrace('public',path.join(app,'public'),{prefix:'public',dist});
+await safeCopyTrace('import-profiles',path.join(app,'import-profiles'),{prefix:'import-profiles',dist});
+await safeCopyTrace('prisma/sqlite',path.join(app,'prisma/sqlite'),{prefix:'prisma/sqlite',dist});
+// Runtime DB lifecycle reads SQL migrations; the generated client is bundled
+// below. Neither source TypeScript nor the build-time Prisma config is needed.
 // Production install only; no workspace, env or dev packages are copied.
 // Explicit vendor tarball is an existing public dependency, never a root glob.
 await cp('package.json',path.join(app,'package.json'));
@@ -106,6 +95,6 @@ for (const name of ['next','better-sqlite3','@node-rs/argon2','@prisma/client'])
 }
 await writeFile(path.join(app,'sbom.cdx.json'),JSON.stringify(inventory,null,2));
 await writeFile(path.join(app,'RUNTIMES.md'),`Node.js ${versions.node} x64 (node/LICENSE); Chromium (chromium/*/LICENSE*); WebView2 Evergreen Offline Installer (Microsoft); Tauri 2 (MIT/Apache-2.0); app-local MSVC CRT (Microsoft Visual Studio Distributable Code, node/MSVC-RUNTIME.json).\nProduction npm dependency/license inventory: sbom.cdx.json, generated from the exact npm ci lockfile with dev dependencies omitted. Optional platform variants listed by the lock may not all be installed on Windows. Next, SQLite, Argon2 and Prisma versions are checked against the installed bundle. No host Node/npm required.\n`);
-await rejectPrivateFiles(app);
+await assertRuntimeResources(app,dist);
 run(process.execPath,['scripts/security/confidential-guard.mjs','--artifacts','--artifact','src-tauri/resources/app']);
 console.log('DESKTOP_BUNDLE_READY');
