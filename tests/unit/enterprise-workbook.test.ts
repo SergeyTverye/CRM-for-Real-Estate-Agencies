@@ -31,6 +31,7 @@ describe('enterprise workbook v2 synthetic', () => {
     it('hidden skip/archive, unresolved acknowledgement, section context', async () => {
         const wb = await loadEnterprise(await fixture()), p = buildProfile(wb);
         for (const s of p.sheets) {
+            if (s.target === null) s.target = 'ignore';
             s.hiddenRows = 'archive';
             s.defaults.priceUnit = 'rub_month';
             for (const k of Object.keys(s.columns))

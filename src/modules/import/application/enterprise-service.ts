@@ -151,8 +151,10 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
         if (!lock.count)
             throw new ConflictError('IMPORT_RUNNING', 'Импорт уже выполняется');
         const rows = await duplicates(tx, parsed.rows);
+        const eligible = (r: EnterpriseRow) => !['invalid', 'unrecognized', 'skipped_policy'].includes(r.validationStatus)
+            && !r.warningCodes.some(c => ['already_imported', 'probable_duplicate'].includes(c));
         let imported = 0, skipped = 0;
-        for (const r of rows) {
+        for (const r of rows.filter(eligible)) {
             if (r.record.commercialPurpose && !await tx.dictionaryItem.count({ where: { category: 'commercial_purpose', code: String(r.record.commercialPurpose), isActive: true } }))
                 throw new ValidationError('INVALID_PURPOSE_CODE');
             if (r.record.responsibleUserId && !await tx.user.count({ where: { id: String(r.record.responsibleUserId), isActive: true } }))
@@ -165,7 +167,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                 type: string;
                 id: string;
             } | null = null;
-            if (!['invalid', 'unrecognized', 'skipped_policy'].includes(r.validationStatus) && !r.warningCodes.some(c => ['already_imported', 'probable_duplicate'].includes(c))) {
+            if (eligible(r)) {
                 const result = await commitRow(tx, r, { coordinatesAsPhone: true, createTasksFromFixNotes: false, responsibleUserId: String(r.record.responsibleUserId ?? actor.userId), jobId: id, sourceFilename: 'enterprise-workbook.xlsx', actorId: actor.userId });
                 if (!('skipped' in result)) {
                     target = result;
@@ -176,9 +178,10 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                         const cc = r.record.contacts as {
                             type: string;
                             normalized: string;
+                            raw: string;
                         }[];
                         for (const c of cc.slice(1))
-                            await tx.clientContact.create({ data: { clientId: result.id, contactType: c.type, rawValue: c.normalized, normalizedValue: c.normalized } });
+                            await tx.clientContact.create({ data: { clientId: result.id, contactType: c.type, rawValue: c.raw, normalizedValue: c.normalized } });
                     }
                 }
             }
@@ -200,7 +203,7 @@ export async function exportEnterprise(actor: Actor, id: string) {
     const wb = await source(job);
     const parsed = parseEnterprise(wb, profile);
     const receipts = await db.importRowResult.findMany({ where: { importJobId: id, commitResult: 'imported' } });
-    const headers = new Set(parsed.blocks.map(b => `${b.sheet}:${b.row}`));
+    const headers = new Set(parsed.blocks.flatMap(b => Array.from({ length: b.endRow - b.row + 1 }, (_, i) => `${b.sheet}:${b.row + i}`)));
     const sections = new Set(parsed.sectionMarkers.map(r => `${r.sheet}:${r.row}`));
     const report: Record<string, number> = { UNSUPPORTED_COLUMN: parsed.unresolved.length + profile.sheets.reduce((n, s) => n + Object.values(s.columns).filter(v => v === 'ignore').length, 0), HYPERLINK_CLEARED: 0, UNSUPPORTED_FIELD: 0, HYPERLINK_PRESERVED: 0, FORMULA_CLEARED: 0,NUMBER_AS_TEXT:0, IMAGE_PRESERVED: wb.worksheets.reduce((n, s) => n + s.getImages().length, 0) };
     // Clear every non-header/non-section cell, including ignored sheets and rejected rows. Never export stale source data.
@@ -227,7 +230,7 @@ export async function exportEnterprise(actor: Actor, id: string) {
         else if (receipt.targetEntityType === 'Client') {
             const c = await db.client.findUnique({ where: { id: receipt.targetEntityId }, include: { contacts: true, leadRequests: { orderBy: { createdAt: 'asc' }, take: 1 } } });
             if (c)
-                values = { name: c.displayName, phone: c.contacts.filter(c => c.contactType === 'phone').map(c => c.normalizedValue).join('; '), email: c.contacts.filter(c => c.contactType === 'email').map(c => c.normalizedValue).join('; '), receivedDate: c.leadRequests[0]?.occurredAt, request: c.leadRequests[0]?.summary, comment: c.notes };
+                values = { name: c.displayName, phone: c.contacts.filter(c => c.contactType === 'phone').map(c => c.rawValue || c.normalizedValue).join('; '), email: c.contacts.filter(c => c.contactType === 'email').map(c => c.rawValue || c.normalizedValue).join('; '), receivedDate: c.leadRequests[0]?.occurredAt, request: c.leadRequests[0]?.summary, comment: c.notes };
         }
         else if (receipt.targetEntityType === 'HistoricalDealArchive') {
             const a = await db.historicalDealArchive.findUnique({ where: { id: receipt.targetEntityId } });

@@ -16,6 +16,7 @@ it('trusted CLI: full synthetic cycle, numeric-only output, no source strings, c
     const workbook = await loadEnterprise(await readFile(fixture));
     const profile = buildProfile(workbook);
     for (const sheet of profile.sheets) {
+      if (sheet.target === null) sheet.target = 'ignore';
       sheet.defaults.priceUnit = 'rub_month';
       for (const header of Object.keys(sheet.columns)) if (sheet.columns[header] === null) sheet.columns[header] = 'ignore';
     }
@@ -23,11 +24,18 @@ it('trusted CLI: full synthetic cycle, numeric-only output, no source strings, c
     await writeFile(profilePath, JSON.stringify(profile));
     const invocation = run(process.execPath, ['--import', 'tsx', 'scripts/private-import/verify-workbook.ts', fixture, '--profile', profilePath, '--backend', backend], { timeout: 120000, maxBuffer: 1024 * 1024 });
     const pid = invocation.child.pid;
-    const result = await invocation;
-    expect(result.stderr).toBe('');
+    // A failing child still produces its privacy-safe numeric report. Do not expose
+    // execFile's command line, raw stderr, paths or an exception object to the reporter.
+    const result = await invocation.then(
+      value => ({ stdout: value.stdout, stderr: value.stderr, exitCode: 0 }),
+      (error: { stdout?: string; stderr?: string; code?: number }) => ({ stdout: error.stdout ?? '', stderr: error.stderr ?? '', exitCode: typeof error.code === 'number' ? error.code : 1 }),
+    );
+    expect(result.stderr === '').toBe(true);
     expect(result.stdout.trim().split('\n')).toHaveLength(1);
     const report = JSON.parse(result.stdout);
+    expect(Object.fromEntries(Object.entries(report.preservation).filter(([, count]) => (count as { mismatched: number }).mismatched > 0))).toEqual({});
     expect(report.errors).toEqual({});
+    expect(result.exitCode).toBe(0);
     expect(report.sheets).toHaveLength(6);
     expect(report.sheets.reduce((n: number, s: { imported: number }) => n + s.imported, 0)).toBe(62);
     for (const check of ['dry_run_no_business_writes', 'injected_failure', 'rollback_business', 'rollback_receipts', 'rollback_job', 'retry_imported', 'repeat_zero_new', 'export_repeat_zero_new', 'export_preservation', 'rbac_foreign_closed_client', 'source_unchanged', 'cleanup']) expect(report.checks[check], check).toBe(1);

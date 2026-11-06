@@ -20,8 +20,11 @@ export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workboo
     check('widths', sheet.columns.map(c => c.width), next?.columns.map(c => c.width));
     check('filters', sheet.autoFilter, next?.autoFilter);
     check('freeze', sheet.views, next?.views);
-    check('merges', sheet.model.merges, next?.model.merges);
-    const structural = new Set([...original.blocks, ...original.sectionMarkers].filter(b => b.sheet === i + 1).map(b => b.row));
+    check('merges', [...sheet.model.merges].sort(), next ? [...next.model.merges].sort() : undefined);
+    const structural = new Set([
+      ...original.blocks.filter(b => b.sheet === i + 1).flatMap(b => Array.from({ length: b.endRow - b.row + 1 }, (_, j) => b.row + j)),
+      ...original.sectionMarkers.filter(b => b.sheet === i + 1).map(b => b.row),
+    ]);
     sheet.eachRow((row, rn) => row.eachCell({ includeEmpty: true }, (cell, cn) => {
       check('number_formats', cell.numFmt ?? 'General', next?.getCell(rn, cn).numFmt ?? 'General');
       if (structural.has(rn)) check('headers_sections', cell.value, next?.getCell(rn, cn).value);
