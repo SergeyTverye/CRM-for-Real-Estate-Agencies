@@ -36,6 +36,12 @@ jobs:
         run: |
           npm run prisma:generate
           npm run desktop:generate
+      - name: Verify tracked runtime entrypoints and esbuild bundles
+        run: node scripts/desktop/check-runtime-entries.mjs
+      - name: Bundled runtime load and synthetic SQLite initialization
+        run: node scripts/desktop/check-worker-bundles.mjs
+      - name: Supervisor backup restart and in-flight shutdown
+        run: node scripts/desktop/test-supervisor.mjs
       - name: Unit regression
         run: npx vitest run --project unit
       - name: Chromium for PDF and interactive-session tests

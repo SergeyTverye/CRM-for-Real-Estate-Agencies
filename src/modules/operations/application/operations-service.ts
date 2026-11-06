@@ -174,11 +174,11 @@ function scriptEnv(): NodeJS.ProcessEnv {
 }
 
 /** Ручной локальный backup (асинхронно): статус виден в backup_runs, повторный запуск блокируется. */
-export async function startManualBackup(actor: Actor): Promise<{ started: true }> {
+export async function startManualBackup(actor: Actor, trigger: "manual" | "scheduled" = "manual"): Promise<{ started: true }> {
   requireManager(actor);
   const running = await db.backupRun.count({ where: { localStatus: "running", startedAt: { gt: new Date(Date.now() - 30 * 60_000) } } });
   if (running) throw new ConflictError("BACKUP_RUNNING", "Резервное копирование уже выполняется");
-  const child = spawn("bash", [path.join(SCRIPTS_DIR, "backup.sh"), "--trigger", "manual", "--initiated-by", actor.userId], {
+  const child = spawn("bash", [path.join(SCRIPTS_DIR, "backup.sh"), "--trigger", trigger, "--initiated-by", actor.userId], {
     env: scriptEnv(),
     detached: true,
     stdio: ["ignore", "pipe", "pipe"],

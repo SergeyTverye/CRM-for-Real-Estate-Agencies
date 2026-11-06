@@ -5,6 +5,7 @@ import { cp, mkdir, readFile, writeFile, readdir, lstat, rm } from 'node:fs/prom
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { assertRuntimeEntries, runtimeEntries, runtimeBuildOptions } from './runtime-entries.mjs';
 const require = createRequire(import.meta.url);
 const root = process.cwd();
 const app = path.join(root,'src-tauri/resources/app');
@@ -33,6 +34,7 @@ async function rejectPrivateFiles(dir) {
 }
 if (process.platform !== 'win32' || process.arch !== 'x64' || process.versions.node !== versions.node) throw Error('USE_PINNED_WINDOWS_NODE_' + versions.node);
 if (existsSync(app)) throw Error('RESOURCE_DIRECTORY_ALREADY_EXISTS_USE_CLEAN_CI_CHECKOUT');
+assertRuntimeEntries({ tracked: process.env.CI === 'true' });
 await mkdir(app,{recursive:true});
 run(process.execPath,['scripts/desktop/create-icon.mjs']);
 Object.assign(process.env,{CRM_BUILD_TARGET:'desktop',CRM_DEPLOYMENT_MODE:'desktop',NEXT_DIST_DIR:dist,NEXT_TELEMETRY_DISABLED:'1'});
@@ -53,18 +55,8 @@ await cp('vendor/real-estate-scrapper-2.1.0.tgz',path.join(app,'vendor/real-esta
 npm(['ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],app);
 npm(['rebuild','better-sqlite3'],app);
 await rm(path.join(app,'vendor'),{recursive:true,force:true});
-const common = {bundle:true,platform:'node',format:'cjs',target:'node24',packages:'external',tsconfig:'tsconfig.json',logLevel:'warning',define:{'import.meta.url':'__crmModuleUrl'},banner:{js:"const __crmModuleUrl = require('node:url').pathToFileURL(__filename).href;"}};
-const entries = {
-  'workers/notifications.cjs':'src/worker/notifications-worker.ts',
-  'workers/search.cjs':'src/worker/property-search-worker.ts',
-  'workers/backup.cjs':existsSync('src/worker/desktop-backup-worker.ts')?'src/worker/desktop-backup-worker.ts':'scripts/desktop/runtime/backup-worker.ts',
-  'init-db.cjs':existsSync('scripts/desktop/init-db.ts')?'scripts/desktop/init-db.ts':'scripts/desktop/runtime/init-fallback.ts',
-  'upgrade.cjs':'scripts/desktop/runtime/upgrade.ts',
-  'backup-command.cjs':'scripts/desktop/runtime/backup-command.ts',
-  'backup-now.cjs':'scripts/desktop/runtime/backup-now.ts',
-  'generated/sqlite/client.cjs':'src/generated/prisma-sqlite/client.ts',
-};
-for (const [out,input] of Object.entries(entries)) await build({...common,entryPoints:[input],outfile:path.join(app,out)});
+const entries = runtimeEntries;
+for (const [out,input] of Object.entries(entries)) await build({...runtimeBuildOptions,entryPoints:[input],outfile:path.join(app,out)});
 for (const file of ['supervisor.mjs','graceful.cjs']) await cp(path.join('scripts/desktop/runtime',file),path.join(app,file));
 // Download only the official, fixed-version Node zip and verify both release manifest and pinned digest.
 const zipName = 'node-v' + versions.node + '-win-x64.zip';

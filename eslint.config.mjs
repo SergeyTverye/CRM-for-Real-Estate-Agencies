@@ -7,6 +7,10 @@ const config = [
   {
     ignores: [
       "src/generated/**",
+      "src-tauri/target/**",
+      "src-tauri/resources/app/**",
+      "desktop-build/**",
+      "desktop-artifacts/**",
       ".next/**",
       ".next-*/**",
       "node_modules/**",

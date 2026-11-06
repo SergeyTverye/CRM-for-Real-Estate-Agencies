@@ -41,21 +41,24 @@ class PlainReader {
 }
 export function validateManifest(input: unknown, limits: ArchiveLimits = DEFAULT_LIMITS): BackupManifest {
   const m = manifestSchema.parse(input); const { manifestSha256, ...unsigned } = m;
+  const databaseFile = m.components.includes("postgres") ? "database.dump" : "database.sqlite";
+  if (m.components.includes("postgres") && (m.components.includes("sqlite") || m.formatVersion !== 2 || m.verification.snapshot !== "pg-restore-list")) throw new BackupError("DATABASE_FORMAT_MISMATCH");
+  if (!m.components.includes("postgres") && (m.formatVersion !== 1 || m.verification.snapshot !== "integrity-and-foreign-keys")) throw new BackupError("DATABASE_FORMAT_MISMATCH");
   if (sha256(canonical(unsigned)) !== manifestSha256) throw new BackupError("MANIFEST_CHECKSUM");
   if (m.files.length > limits.files) throw new BackupError("FILE_COUNT_LIMIT");
   let total = 0; const seen = new Set<string>();
   for (const file of m.files) {
     safeRelative(file.path);
-    if (file.path !== "database.sqlite" && file.path !== "settings.json" && !/^(documents|photos|templates)\//.test(file.path)) throw new BackupError("UNKNOWN_COMPONENT");
+    if (file.path !== databaseFile && file.path !== "settings.json" && !/^(documents|photos|templates)\//.test(file.path)) throw new BackupError("UNKNOWN_COMPONENT");
     const normalized = file.path.normalize("NFC").toLowerCase();
     if (seen.has(normalized)) throw new BackupError("DUPLICATE_PATH"); seen.add(normalized);
     if (file.size > limits.fileBytes) throw new BackupError("FILE_SIZE_LIMIT");
     total += file.size; if (!Number.isSafeInteger(total) || total > limits.totalBytes) throw new BackupError("TOTAL_SIZE_LIMIT");
   }
-  if (!seen.has("database.sqlite") || !seen.has("settings.json")) throw new BackupError("MISSING_COMPONENT");
+  if (!seen.has(databaseFile) || !seen.has("settings.json")) throw new BackupError("MISSING_COMPONENT");
   const settings = m.files.find(f => f.path === "settings.json")!;
   if (settings.size > 65536) throw new BackupError("SETTINGS_SIZE_LIMIT");
-  const expected = new Set(["sqlite", "settings", ...m.files.filter(f => f.path.includes("/")).map(f => f.path.split("/")[0]!)]);
+  const expected = new Set([m.components.includes("postgres") ? "postgres" : "sqlite", "settings", ...m.files.filter(f => f.path.includes("/")).map(f => f.path.split("/")[0]!)]);
   if (new Set(m.components).size !== m.components.length || [...expected].some(c => !m.components.includes(c as BackupManifest["components"][number]))) throw new BackupError("COMPONENT_MISMATCH");
   for (const item of seen) { const parts = item.split("/"); for (let i = 1; i < parts.length; i++) if (seen.has(parts.slice(0, i).join("/"))) throw new BackupError("PATH_COLLISION"); }
   return m;
@@ -93,7 +96,7 @@ export async function extractArchive(input: {
     }
     await reader.finish(); // Authenticate final sentinel: prevents truncation at a chunk boundary.
     safeSettingsSchema.parse(JSON.parse(await readFile(path.join(stage, "settings.json"), "utf8")));
-    await input.validator.validate(path.join(stage, "database.sqlite"));
+    await input.validator.validate(path.join(stage, manifest.components.includes("postgres") ? "database.dump" : "database.sqlite"));
     return { manifest, stage, dispose: () => rm(stage, { recursive: true, force: true }) };
   } catch (e) { await rm(stage, { recursive: true, force: true }); throw e; }
   finally { key?.fill(0); await h.close(); }
@@ -131,6 +134,7 @@ async function writeEncrypted(file: string, stage: string, manifest: BackupManif
   } finally { await h.close(); }
 }
 export interface CreateArchiveInput {
+  databaseKind?: "sqlite" | "postgres";
   outputDir: string; stagingRoot: string; source: SnapshotSource; barrier: SnapshotBarrier; validator: SnapshotValidator;
   metadata: BackupMetadata | (() => Promise<BackupMetadata>); passphrase: string; recoveryKey: string; recoveryKeySaved: true;
   settings: SafeSettings; storage: Partial<Record<"documents" | "photos" | "templates", string>>; limits?: ArchiveLimits;
@@ -139,6 +143,7 @@ export interface CreateArchiveInput {
 export async function createArchive(input: CreateArchiveInput): Promise<{ manifest: BackupManifest; archive: ArchiveRef; path: string }> {
   if (input.recoveryKeySaved !== true) throw new BackupError("RECOVERY_CONFIRMATION_REQUIRED");
   const limits = input.limits ?? DEFAULT_LIMITS; const settings = safeSettingsSchema.parse(input.settings);
+  const databaseKind = input.databaseKind ?? "sqlite"; const databaseFile = databaseKind === "postgres" ? "database.dump" : "database.sqlite";
   await protectedDir(input.stagingRoot); await protectedDir(input.outputDir);
   const stage = await mkdtemp(path.join(input.stagingRoot, "build-")); const backupId = randomUUID();
   const target = path.join(input.outputDir, backupId + ".crmbackup"); const pending = target + ".pending";
@@ -149,9 +154,9 @@ export async function createArchive(input: CreateArchiveInput): Promise<{ manife
     let metadata: BackupMetadata | undefined;
     await input.barrier.run(async () => {
       metadata = typeof input.metadata === "function" ? await input.metadata() : input.metadata;
-      await input.source.createConsistentSnapshot(path.join(stage, "database.sqlite"));
-      await regularFile(path.join(stage, "database.sqlite"));
-      files.push({ path: "database.sqlite", ...await hashFile(path.join(stage, "database.sqlite")) });
+      await input.source.createConsistentSnapshot(path.join(stage, databaseFile));
+      await regularFile(path.join(stage, databaseFile));
+      files.push({ path: databaseFile, ...await hashFile(path.join(stage, databaseFile)) });
       for (const component of ["documents", "photos", "templates"] as const) {
         const source = input.storage[component]; if (source) { await assertNoSymlinks(source); await copyTree(source, path.join(stage, component), component, files, limits); }
       }
@@ -159,9 +164,9 @@ export async function createArchive(input: CreateArchiveInput): Promise<{ manife
       files.push({ path: "settings.json", ...await hashFile(path.join(stage, "settings.json")) });
     });
     if (!metadata) throw new BackupError("SNAPSHOT_METADATA_REQUIRED");
-    await input.validator.validate(path.join(stage, "database.sqlite"));
+    await input.validator.validate(path.join(stage, databaseFile));
     const now = new Date().toISOString();
-    const unsigned = { ...metadata, backupId, formatVersion: 1 as const, createdAtUtc: now, components: ["sqlite", "settings", ...Object.keys(input.storage)] as BackupManifest["components"], files, encryption: header.encryption, kind: "full" as const, verification: { files: "sha256" as const, snapshot: "integrity-and-foreign-keys" as const, verifiedAtUtc: now } };
+    const unsigned = { ...metadata, backupId, formatVersion: databaseKind === "postgres" ? 2 as const : 1 as const, createdAtUtc: now, components: [databaseKind, "settings", ...Object.keys(input.storage)] as BackupManifest["components"], files, encryption: header.encryption, kind: "full" as const, verification: { files: "sha256" as const, snapshot: databaseKind === "postgres" ? "pg-restore-list" as const : "integrity-and-foreign-keys" as const, verifiedAtUtc: now } };
     const manifest = validateManifest({ ...unsigned, manifestSha256: sha256(canonical(unsigned)) }, limits);
     if (Buffer.byteLength(canonical(manifest)) > limits.manifestBytes) throw new BackupError("MANIFEST_SIZE_LIMIT");
     const budget = input.localBudget ?? { maxArchives: 50, maxBytes: 20 * 1024 ** 3 };

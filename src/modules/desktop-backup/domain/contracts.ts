@@ -13,12 +13,12 @@ export const encryptionSchema = z.object({
   params: z.object({ N: z.literal(32768), r: z.literal(8), p: z.literal(1), salt: z.string().regex(/^[a-f0-9]{32}$/) }).strict(),
 }).strict();
 export const manifestSchema = identitySchema.extend({
-  backupId: z.uuid(), formatVersion: z.literal(1), crmVersion: z.string().min(1).max(80),
+  backupId: z.uuid(), formatVersion: z.union([z.literal(1), z.literal(2)]), crmVersion: z.string().min(1).max(80),
   schemaVersion: z.number().int().nonnegative(), createdAtUtc: z.iso.datetime(),
-  components: z.array(z.enum(["sqlite", "documents", "photos", "templates", "settings"])),
+  components: z.array(z.enum(["sqlite", "postgres", "documents", "photos", "templates", "settings"])),
   files: z.array(z.object({ path: z.string().min(1).max(1024), size: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict()).min(2).max(100000),
   encryption: encryptionSchema, kind: z.literal("full"),
-  verification: z.object({ files: z.literal("sha256"), snapshot: z.literal("integrity-and-foreign-keys"), verifiedAtUtc: z.iso.datetime() }).strict(),
+  verification: z.object({ files: z.literal("sha256"), snapshot: z.union([z.literal("integrity-and-foreign-keys"), z.literal("pg-restore-list")]), verifiedAtUtc: z.iso.datetime() }).strict(),
   manifestSha256: z.string().regex(/^[a-f0-9]{64}$/),
 }).strict();
 export type BackupManifest = z.infer<typeof manifestSchema>;

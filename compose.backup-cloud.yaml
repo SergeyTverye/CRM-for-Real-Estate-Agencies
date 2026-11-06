@@ -1,0 +1,37 @@
+# Opt-in overlay: docker compose -f compose.yaml -f compose.backup-cloud.yaml up -d --build
+# BACKUP_SETTINGS_MASTER_KEY is an administrator-provisioned 32-byte base64 secret.
+services:
+  app:
+    environment:
+      BACKUP_SETTINGS_DIR: /data/backup-settings
+      BACKUP_SETTINGS_MASTER_KEY: ${BACKUP_SETTINGS_MASTER_KEY:-}
+    volumes:
+      - ./data/backup-settings:/data/backup-settings
+  backup-cloud-worker:
+    image: crm-app:${APP_IMAGE_TAG:-local}
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
+    restart: unless-stopped
+    command: ["node", "node_modules/tsx/dist/cli.mjs", "src/worker/backup-cloud-worker.ts"]
+    environment:
+      NODE_ENV: production
+      CRM_DEPLOYMENT_MODE: server
+      DATABASE_URL: postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@db:5432/${POSTGRES_DB:?}
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID:?}
+      INSTANCE_ID: ${INSTANCE_ID:?}
+      INSTANCE_ROLE: ${INSTANCE_ROLE:-active}
+      APP_TIMEZONE: ${APP_TIMEZONE:?}
+      APP_VERSION: ${APP_VERSION:-dev}
+      FILE_STORAGE_PATH: /data/files
+      IMPORT_STAGING_PATH: /data/import-staging
+      BACKUP_PATH: /backups
+      BACKUP_SETTINGS_DIR: /data/backup-settings
+      BACKUP_SETTINGS_MASTER_KEY: ${BACKUP_SETTINGS_MASTER_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - ./data/files:/data/files
+      - ./backups:/backups
+      - ./data/backup-settings:/data/backup-settings
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks: [internal, public]

@@ -51,6 +51,9 @@ fn main() {
             let fail = app.handle().clone();
             let notice = app.handle().clone();
             let resources = app.path().resource_dir()?.join("app");
+            // Keep cookies/WebView cache inside the same protected, purgeable
+            // profile as SQLite; never leave a second identifier-based profile.
+            let webview_data = supervisor::data_root()?.join("data/webview");
             let result = supervisor::Supervisor::start(&resources, move |url| {
                 let callback_handle = handle.clone();
                 let _ = handle.run_on_main_thread(move || {
@@ -58,6 +61,7 @@ fn main() {
                     let start_url = format!("{}/setup",url);
                     let builder = WebviewWindowBuilder::new(&callback_handle,"main",WebviewUrl::External(start_url.parse().expect("loopback URL")))
                         .title("CRM — Магазин недвижимости").inner_size(1360.0,900.0).min_inner_size(1000.0,650.0)
+                        .data_directory(webview_data)
                         .on_navigation(move |target| target.origin().ascii_serialization() == allowed)
                         .devtools(false);
                     match builder.build() {
@@ -81,6 +85,21 @@ fn main() {
                 let app = fail.clone();
                 fail.dialog().message(message).title("CRM: ошибка запуска").show(move |_| app.exit(1));
             }, move |code| {
+                if let Some((kind,id)) = code.split_once(':') {
+                    if (kind == "NATIVE_FOLDER" || kind == "NATIVE_EXPORT") && id.len() == 36 && id.bytes().all(|c| c.is_ascii_hexdigit() || c == b'-') {
+                        if let Ok(root) = supervisor::data_root() {
+                            let result = root.join("data/backup-settings/native-dialogs").join(format!("{}.path",id));
+                            let callback = move |selected: Option<tauri_plugin_dialog::FilePath>| {
+                                let text = selected.and_then(|p| p.into_path().ok()).map(|p| p.to_string_lossy().into_owned()).unwrap_or_default();
+                                // Native replies only to a manager-authorized mailbox request; no WebView IPC.
+                                if let Ok(mut file) = std::fs::OpenOptions::new().write(true).create_new(true).open(result) { use std::io::Write; let _ = file.write_all(text.as_bytes()); }
+                            };
+                            if kind == "NATIVE_FOLDER" { notice.dialog().file().pick_folder(callback); }
+                            else { notice.dialog().file().set_file_name("CRM-backup.crmbackup").add_filter("CRM backup", &["crmbackup"]).save_file(callback); }
+                        }
+                        return;
+                    }
+                }
                 let message = if code == "BACKUP_COMPLETE" { "Локальная защитная копия создана и проверена. Для переноса на другой ПК используйте переносимую резервную копию с ключом восстановления." } else { "Защитная копия не создана. Проверьте свободное место и журнал в LOCALAPPDATA\\RealEstateCRM\\logs." };
                 notice.dialog().message(message).title("Резервная копия CRM").show(|_| {});
             });

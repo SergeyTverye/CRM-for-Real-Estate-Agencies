@@ -1,0 +1,1 @@
+{ "extends": "../../tsconfig.json", "include": ["../../src/**/*.ts", "../../src/**/*.tsx", "../../.next-backup-ui-server/types/**/*.ts", "../../.next-backup-ui-server/dev/types/**/*.ts"], "exclude": ["../../node_modules"] }

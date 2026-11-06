@@ -10,7 +10,11 @@ const rowSchema = z.object({
   status: z.enum(["queued", "uploading", "uploaded", "verified", "failed"]),
   attempts: z.number().int().nonnegative(), nextAttemptAt: z.number(), errorCode: z.string().optional(),
 }).strict();
-const journalSchema = z.object({ version: z.literal(1), rows: z.array(rowSchema).max(100000) }).strict();
+export const journalSchema = z.object({ version: z.literal(1), rows: z.array(rowSchema).max(100000) }).strict();
+export interface ReplicationJournal {
+  read(): Promise<{ revision: number; rows: ReplicationRow[] }>;
+  save(revision: number, rows: ReplicationRow[]): Promise<number>;
+}
 export type ReplicationRow = z.infer<typeof rowSchema>;
 export interface QueueOptions { maxPendingArchives: number; maxPendingBytes: number; maxAttempts: number; baseBackoffMs: number; maxBackoffMs: number }
 const defaults: QueueOptions = { maxPendingArchives: 50, maxPendingBytes: 20 * 1024 ** 3, maxAttempts: 5, baseBackoffMs: 2000, maxBackoffMs: 300000 };
@@ -18,14 +22,21 @@ const defaults: QueueOptions = { maxPendingArchives: 50, maxPendingBytes: 20 * 1
 export class ReplicationQueue {
   private rows: ReplicationRow[] = []; private loaded = false; private tail: Promise<unknown> = Promise.resolve();
   private readonly options: QueueOptions;
-  constructor(private readonly dataDir: string, private readonly destinations: BackupDestination[], options: Partial<QueueOptions> = {}) {
+  private revision = 0;
+  constructor(private readonly dataDir: string, private readonly destinations: BackupDestination[], options: Partial<QueueOptions> = {}, private readonly journal?: ReplicationJournal) {
     this.options = { ...defaults, ...options };
     if (new Set(destinations.map(d => d.id)).size !== destinations.length || Object.values(this.options).some(n => !Number.isFinite(n) || n <= 0)) throw new BackupError("QUEUE_CONFIGURATION");
   }
   private serial<T>(work: () => Promise<T>): Promise<T> { const result = this.tail.then(work, work); this.tail = result.catch(() => {}); return result; }
   private get file() { return path.join(this.dataDir, "backup-replication-v1.json"); }
   private async load() {
-    if (this.loaded) return; await protectedDir(this.dataDir);
+    if (this.loaded) return;
+    if (this.journal) {
+      const state = await this.journal.read(); this.rows = state.rows; this.revision = state.revision;
+      for (const row of this.rows) if (row.status === "uploading" || row.status === "uploaded") { row.status = "queued"; row.nextAttemptAt = 0; row.attempts = Math.max(0, row.attempts - 1); }
+      this.loaded = true; return;
+    }
+    await protectedDir(this.dataDir);
     try {
       if ((await stat(this.file)).size > 32 * 1024 ** 2) throw new BackupError("QUEUE_JOURNAL_LIMIT");
       await regularFile(this.file); this.rows = journalSchema.parse(JSON.parse(await readFile(this.file, "utf8"))).rows;
@@ -33,12 +44,15 @@ export class ReplicationQueue {
     } catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
     this.loaded = true;
   }
-  private save() { return atomicJson(this.file, { version: 1, rows: this.rows }); }
+  private async save() {
+    if (this.journal) { this.revision = await this.journal.save(this.revision, this.rows); return; }
+    await atomicJson(this.file, { version: 1, rows: this.rows });
+  }
   async enqueue(archive: ArchiveRef, sourcePath: string, destinationIds = this.destinations.map(d => d.id)) {
     return this.serial(async () => {
       await this.load(); archiveRefSchema.parse(archive); await assertArchive(sourcePath, archive);
       const pending = new Map(this.rows.filter(r => r.status !== "verified").map(r => [r.archive.backupId, r.archive.size]));
-      pending.set(archive.backupId, archive.size);
+      if (destinationIds.some(id => !this.rows.some(r => r.archive.backupId === archive.backupId && r.destinationId === id && r.status === "verified"))) pending.set(archive.backupId, archive.size);
       if (pending.size > this.options.maxPendingArchives || [...pending.values()].reduce((n, size) => n + size, 0) > this.options.maxPendingBytes) throw new BackupError("QUEUE_CAPACITY");
       if (this.rows.some(r => r.archive.backupId === archive.backupId && r.archive.sha256 !== archive.sha256)) throw new BackupError("IMMUTABLE_CONFLICT");
       if (destinationIds.some(id => !this.destinations.some(d => d.id === id))) throw new BackupError("DESTINATION_UNKNOWN");

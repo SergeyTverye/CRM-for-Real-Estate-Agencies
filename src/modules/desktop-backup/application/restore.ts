@@ -38,6 +38,7 @@ export async function restoreArchive(input: {
   await protectedDir(input.store.root);
   const checked = await extractArchive({ ...input, stagingRoot: path.join(input.store.root, "staging") });
   try {
+    if (checked.manifest.components.includes("postgres")) throw new BackupError("SQLITE_RESTORE_REQUIRED");
     const prepared = await input.hooks.prepareStage(checked.stage, checked.manifest);
     const schemaVersion = prepared?.schemaVersion ?? checked.manifest.schemaVersion;
     if (!Number.isSafeInteger(schemaVersion) || schemaVersion < checked.manifest.schemaVersion || schemaVersion > input.schemaVersion) throw new BackupError("STAGED_SCHEMA_INVALID");

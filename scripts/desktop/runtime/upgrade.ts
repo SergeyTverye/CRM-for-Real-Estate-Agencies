@@ -9,7 +9,9 @@ import { SqliteSnapshotValidator } from "../../../src/modules/desktop-backup/inf
 import { WindowsDpapiProtector } from "../../../src/modules/desktop-backup/infrastructure/credential-store";
 import { newRecoveryKey } from "../../../src/modules/desktop-backup/infrastructure/encryption";
 const root = () => process.env.DESKTOP_DATA_DIR!;
-const database = () => path.join(root(),"crm.db");
+// Server-mode tooling may supply a PostgreSQL URL. Only an explicit SQLite
+// path can override the desktop default (including a restored generation).
+const database = () => process.env.DATABASE_URL?.startsWith("file:") ? process.env.DATABASE_URL.slice(5) : path.join(root(),"crm.db");
 const marker = () => path.join(root(),"desktop-version.json");
 const journal = () => path.join(root(),"pending-upgrade.json");
 const validator = new SqliteSnapshotValidator();

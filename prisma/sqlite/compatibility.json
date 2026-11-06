@@ -1,5 +1,5 @@
 {
-  "sourceSha256": "ec0ee41e5223a7ada22b4e895066234d3d1ba7cd9f6852b311c2b6bb5638962e",
+  "sourceSha256": "8c726d524446c2575d7f1b005f55c7de69698976bda24dafcfd0ce56bdb63309",
   "models": {
     "User": {
       "table": "users",
@@ -1428,6 +1428,17 @@
       "relations": {
         "job": "ImportJob"
       }
+    },
+    "BackupQueueJournal": {
+      "table": "backup_queue_journals",
+      "columns": {
+        "id": "id",
+        "revision": "revision",
+        "payload": "payload"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {}
     },
     "BackupRun": {
       "table": "backup_runs",

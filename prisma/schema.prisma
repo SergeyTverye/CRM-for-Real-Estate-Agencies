@@ -1061,6 +1061,15 @@ model ImportRowResult {
 
 // ───────────────────────────── Эксплуатация ─────────────────────────────
 
+// Durable portable-backup queue/scheduler. No credentials belong in payload.
+model BackupQueueJournal {
+  id       String @id
+  revision Int    @default(0)
+  payload  Json
+
+  @@map("backup_queue_journals")
+}
+
 model BackupRun {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   backupId          String    @unique @map("backup_id")

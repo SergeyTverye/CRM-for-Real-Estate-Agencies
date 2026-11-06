@@ -41,6 +41,10 @@
   ],
   "exclude": [
     "node_modules",
+    "src-tauri/target",
+    "src-tauri/resources/app",
+    "desktop-build",
+    "desktop-artifacts",
     "data",
     "backups",
     "restore-test",

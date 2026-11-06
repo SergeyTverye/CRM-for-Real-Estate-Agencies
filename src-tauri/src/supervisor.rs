@@ -33,7 +33,7 @@ impl Supervisor {
         let log = OpenOptions::new().create(true).append(true).open(&log_path)?;
         let mut child = Command::new(resources.join("node/node.exe"))
             .arg(resources.join("supervisor.mjs")).current_dir(resources)
-            .env_remove("NODE_OPTIONS").env_remove("NODE_PATH")
+            .env_remove("NODE_OPTIONS").env_remove("NODE_PATH").env_remove("PSModulePath")
             .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::from(log))
             .creation_flags(0x08000000).spawn()?;
         let input = child.stdin.take().ok_or_else(|| io::Error::other("STDIN_UNAVAILABLE"))?;
@@ -44,7 +44,7 @@ impl Supervisor {
             let mut reached_ready = false;
             for line in BufReader::new(stdout).lines().map_while(Result::ok) {
                 if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&log_path) { let _ = writeln!(file,"{}",line); }
-                if line == "BACKUP_COMPLETE" || line == "BACKUP_FAILED" { on_notice(&line); }
+                if line == "BACKUP_COMPLETE" || line == "BACKUP_FAILED" || line.starts_with("NATIVE_FOLDER:") || line.starts_with("NATIVE_EXPORT:") { on_notice(&line); }
                 if let Some(url) = line.strip_prefix("READY ") {
                     if let Ok(parsed) = url.parse::<tauri::Url>() {
                         if parsed.scheme() == "http" && parsed.host_str() == Some("127.0.0.1") && parsed.port().is_some() {
@@ -64,7 +64,7 @@ impl Supervisor {
     pub fn backup(&mut self) { let _ = self.input.write_all(b"BACKUP\n"); }
     pub fn stop(&mut self) {
         let _ = self.input.write_all(b"STOP\n");
-        let deadline = Instant::now() + Duration::from_secs(18);
+        let deadline = Instant::now() + Duration::from_secs(180);
         while Instant::now() < deadline {
             if matches!(self.child.try_wait(), Ok(Some(_))) { return; }
             thread::sleep(Duration::from_millis(100));

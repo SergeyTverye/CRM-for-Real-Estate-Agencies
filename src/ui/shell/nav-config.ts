@@ -27,6 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/operations", label: "Эксплуатация", managerOnly: true },
   { href: "/admin", label: "Администрирование", managerOnly: true },
   { href: "/templates", label: "Шаблоны документов", managerOnly: true },
+  { href: "/settings/backups", label: "Резервные копии", managerOnly: true },
   { href: "/settings/ai", label: "Настройки ИИ", managerOnly: true },
 ];
 

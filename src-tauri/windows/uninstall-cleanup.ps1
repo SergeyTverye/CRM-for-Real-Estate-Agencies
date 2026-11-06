@@ -23,7 +23,7 @@ function OwnedProcesses {
   @($all | Where-Object { $owned.ContainsKey([int]$_.ProcessId) })
 }
 if ($Phase -eq 'Stop') {
-  $deadline = (Get-Date).AddSeconds(18)
+  $deadline = (Get-Date).AddSeconds(185)
   while ((Get-Date) -lt $deadline -and @(OwnedProcesses).Count -gt 0) { Start-Sleep -Milliseconds 250 }
   $remaining = @(OwnedProcesses)
   foreach ($process in ($remaining | Sort-Object CreationDate -Descending)) {

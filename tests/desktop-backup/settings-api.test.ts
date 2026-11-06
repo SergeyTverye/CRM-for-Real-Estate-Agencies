@@ -17,7 +17,7 @@ function req(method: string, role?: string, body?: unknown, origin = "http://127
 }
 for (const mode of ["server", "desktop"]) it("HTTP role/CSRF/OCC and write-only credentials in " + mode + " mode (synthetic session adapter)", async () => {
   vi.resetModules(); const root = await mkdtemp(path.join(os.tmpdir(), "crm-settings-api-")); roots.push(root);
-  vi.stubEnv("CRM_DEPLOYMENT_MODE", mode); vi.stubEnv("BACKUP_SETTINGS_DIR", root);
+  vi.stubEnv("CRM_DEPLOYMENT_MODE", mode); vi.stubEnv("CRM_DESKTOP_PORT", "3503"); vi.stubEnv("BACKUP_SETTINGS_DIR", root);
   vi.stubEnv("BACKUP_SETTINGS_MASTER_KEY", randomBytes(32).toString("base64"));
   vi.stubEnv("DATABASE_URL", "postgresql://synthetic:synthetic@127.0.0.1:1/crm_test_unused"); vi.stubEnv("LOG_LEVEL", "silent"); vi.stubEnv("NODE_ENV", "test");
   const { GET, PUT } = await import("../../src/app/api/v1/settings/backups/route");

@@ -20,9 +20,21 @@ function Install {
   Check (Test-Path -LiteralPath "$install\RealEstateCRM.exe") 'installed-exe'
 }
 function StartSmoke {
+  # A crash can leave the previous ready marker. Never accept its port/PID.
+  if (Test-Path -LiteralPath $runtime) { Remove-Item -LiteralPath $runtime -Force }
   $script:app=Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList @('--smoke','--smoke-seconds=180') -WindowStyle Hidden -PassThru
-  WaitFor { (Test-Path -LiteralPath $runtime) -and -not $script:app.HasExited }
-  $script:base=(Get-Content -Raw -LiteralPath $runtime | ConvertFrom-Json).url
+  WaitFor {
+    if ($script:app.HasExited) { throw 'SMOKE_EXIT_BEFORE_READY' }
+    try {
+      $info=Get-Content -Raw -LiteralPath $runtime -ErrorAction Stop | ConvertFrom-Json
+      if ($info.url -notmatch '^http://127\.0\.0\.1:[0-9]+$') { return $false }
+      $owner=Get-CimInstance Win32_Process -Filter "ProcessId=$($info.pid)"
+      if (-not $owner -or $owner.ParentProcessId -ne $script:app.Id -or $owner.ExecutablePath -ne "$install\app\node\node.exe") { return $false }
+      if ((Invoke-WebRequest "$($info.url)/api/health/ready" -TimeoutSec 3).StatusCode -ne 200) { return $false }
+      $script:base=$info.url
+      return $true
+    } catch { return $false }
+  }
   Check ($script:base -match '^http://127\.0\.0\.1:[0-9]+$') 'loopback-only'
   Check ((Invoke-WebRequest "$script:base/api/health/ready").StatusCode -eq 200) 'readiness-200'
   Check (-not $script:app.HasExited) 'smoke-process-running'
@@ -32,9 +44,25 @@ function StartSmoke {
   Add-Content -LiteralPath "$evidence\steps.log" -Value "METRIC smokeWorkingSetBytes=$memory"
 }
 function Api([string]$path,[string]$method='GET',$body=$null) {
-  $options=@{Uri="$script:base$path";Method=$method;Headers=@{Origin=$script:base};WebSession=$script:session}
+  $options=@{Uri="$script:base$path";Method=$method;Headers=@{Origin=$script:base};WebSession=$script:session;TimeoutSec=30}
   if ($body) { $options.ContentType='application/json'; $options.Body=($body | ConvertTo-Json -Depth 10 -Compress) }
   Invoke-RestMethod @options
+}
+function StartDesktop {
+  Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList '--shutdown' -WindowStyle Hidden -Wait | Out-Null
+  WaitFor { $script:app.HasExited -and -not (Test-Path -LiteralPath $runtime) } 210
+  $script:app=Start-Process -FilePath "$install\RealEstateCRM.exe" -WindowStyle Hidden -PassThru
+  WaitFor {
+    if ($script:app.HasExited) { throw 'DESKTOP_EXIT_BEFORE_WEBVIEW' }
+    @(Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.ParentProcessId -eq $script:app.Id }).Count -gt 0
+  }
+  Check (-not $script:app.HasExited) 'real-tauri-webview-running'
+  Check (Test-Path -LiteralPath (Join-Path $data 'data\webview')) 'owned-webview-profile'
+  $before=(Get-Content -Raw -LiteralPath $runtime | ConvertFrom-Json).pid
+  $second=Start-Process -FilePath "$install\RealEstateCRM.exe" -WindowStyle Hidden -PassThru
+  WaitFor { $second.HasExited } 30
+  Check ($second.ExitCode -eq 0 -and -not $script:app.HasExited) 'second-launch-focuses-existing-instance'
+  Check ((Get-Content -Raw -LiteralPath $runtime | ConvertFrom-Json).pid -eq $before) 'second-launch-keeps-supervisor'
 }
 function Registration {
   $entries=@(Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*' | Where-Object DisplayName -eq 'RealEstateCRM')
@@ -48,7 +76,7 @@ function Registration {
 function Uninstall([bool]$purge) {
   $arguments=@('/S')
   if ($purge) { $arguments += @('/PURGE-DATA','/CONFIRM-PURGE') }
-  $p=Start-Process -FilePath "$install\uninstall.exe" -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
+  $p=Start-Process -FilePath $script:uninstall -ArgumentList $arguments -WindowStyle Hidden -Wait -PassThru
   Check ($p.ExitCode -eq 0) 'silent-uninstall'
   WaitFor { -not (Test-Path -LiteralPath "$install\RealEstateCRM.exe") } 30
   WaitFor { @(Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*' | Where-Object DisplayName -eq 'RealEstateCRM').Count -eq 0 } 30
@@ -61,6 +89,9 @@ function Uninstall([bool]$purge) {
   foreach ($leaf in @('data','files','backups')) { Check ((Test-Path -LiteralPath (Join-Path $data $leaf)) -eq (-not $purge)) "retention-$leaf-purge-$purge" }
 }
 try {
+  # This destructive lifecycle harness is only for a disposable, empty profile.
+  Check (-not (Test-Path -LiteralPath $data)) 'empty-synthetic-data-profile-required'
+  Check (-not (Test-Path -LiteralPath $install)) 'empty-install-directory-required'
   Install; StartSmoke; Registration
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
   $password=[Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(24))+'z7'
@@ -77,17 +108,19 @@ try {
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
   Api '/api/v1/auth/login' 'POST' @{login='director';password=$password} | Out-Null
   $restored=Api "/api/v1/clients/$id"
-  Check ([bool]$restored) 'client-retained-after-reinstall'
+  Check ($restored.id -eq $id -and $restored.displayName -eq 'CI synthetic client') 'client-retained-after-reinstall'
   Check ((Api '/api/v1/desktop/setup').available -eq $false) 'setup-closed-after-reinstall'
   # Check upgrade over an existing install, including protective backup.
   Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList '--shutdown' -WindowStyle Hidden -Wait | Out-Null
-  WaitFor { -not (Test-Path -LiteralPath $runtime) } 30
+  WaitFor { $script:app.HasExited -and -not (Test-Path -LiteralPath $runtime) } 210
   Set-Content -LiteralPath (Join-Path $data 'data\desktop-version.json') -Value '{"version":"3.2.0-synthetic"}'
   Install; StartSmoke
   Check (@(Get-ChildItem -LiteralPath (Join-Path $data 'backups') -Filter '*.crmbackup').Count -gt 0) 'pre-upgrade-encrypted-snapshot'
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
   Api '/api/v1/auth/login' 'POST' @{login='director';password=$password} | Out-Null
   Check ([bool](Api "/api/v1/clients/$id")) 'client-retained-after-overinstall'
+  # --smoke bypasses WebView. Exercise the actual Tauri window and singleton too.
+  StartDesktop
   # Only allowlisted, secret-free codes leave the runner; server/HTTP bodies never exported.
   if (Test-Path -LiteralPath (Join-Path $data 'logs\supervisor.log')) {
     Get-Content -LiteralPath (Join-Path $data 'logs\supervisor.log') |
