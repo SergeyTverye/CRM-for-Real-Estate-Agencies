@@ -10,9 +10,14 @@ $crt=Get-ChildItem -LiteralPath (Join-Path $version.FullName 'x64') -Directory -
 if (-not $crt) { throw 'MSVC_CRT_NOT_FOUND' }
 New-Item -ItemType Directory -Path $Destination -Force | Out-Null
 $manifest=@()
+# Windows PowerShell started from pwsh may not load Microsoft.PowerShell.Utility (no Get-FileHash): use .NET directly.
+function Get-Sha256Hex([string]$Path) {
+  $sha=[System.Security.Cryptography.SHA256]::Create(); $stream=[System.IO.File]::OpenRead($Path)
+  try { return ([System.BitConverter]::ToString($sha.ComputeHash($stream)) -replace '-','').ToLowerInvariant() } finally { $stream.Dispose(); $sha.Dispose() }
+}
 foreach($file in Get-ChildItem -LiteralPath $crt.FullName -File -Filter '*.dll') {
   Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $Destination $file.Name)
-  $manifest+=@{name=$file.Name;fileVersion=$file.VersionInfo.FileVersion;sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+  $manifest+=@{name=$file.Name;fileVersion=$file.VersionInfo.FileVersion;sha256=(Get-Sha256Hex $file.FullName)}
 }
 if ($manifest.Count -eq 0) { throw 'MSVC_CRT_EMPTY' }
 $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $Destination 'MSVC-RUNTIME.json') -Encoding utf8

@@ -11,7 +11,11 @@ const app = path.join(root,'src-tauri/resources/app');
 const versions = JSON.parse(await readFile('scripts/desktop/desktop-versions.json','utf8'));
 const dist = '.next-desktop';
 function run(exe,args,options={}) {
-  const r = spawnSync(exe,args,{cwd:root,env:process.env,stdio:'inherit',windowsHide:true,...options});
+  // Windows PowerShell 5.1 inherits PowerShell 7 module paths from a pwsh runner and then fails to load its own
+  // Microsoft.PowerShell.Utility/Archive modules (Get-FileHash, Expand-Archive). Give it a clean module path.
+  const env = { ...process.env };
+  if (/^powershell(\.exe)?$/i.test(path.basename(exe))) delete env.PSModulePath;
+  const r = spawnSync(exe,args,{cwd:root,env,stdio:'inherit',windowsHide:true,...options});
   if (r.error || r.status !== 0) throw Error('BUILD_STEP_FAILED:' + path.basename(exe));
 }
 function npm(args,cwd=root) { run(process.env.ComSpec ?? 'C:\\Windows\\System32\\cmd.exe',['/d','/s','/c','npm ' + args.join(' ')],{cwd}); }
@@ -56,6 +60,7 @@ const entries = {
   'workers/backup.cjs':existsSync('src/worker/desktop-backup-worker.ts')?'src/worker/desktop-backup-worker.ts':'scripts/desktop/runtime/backup-worker.ts',
   'init-db.cjs':existsSync('scripts/desktop/init-db.ts')?'scripts/desktop/init-db.ts':'scripts/desktop/runtime/init-fallback.ts',
   'upgrade.cjs':'scripts/desktop/runtime/upgrade.ts',
+  'backup-command.cjs':'scripts/desktop/runtime/backup-command.ts',
   'backup-now.cjs':'scripts/desktop/runtime/backup-now.ts',
   'generated/sqlite/client.cjs':'src/generated/prisma-sqlite/client.ts',
 };
