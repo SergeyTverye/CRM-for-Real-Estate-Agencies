@@ -1,11 +1,12 @@
 // TRUSTED LOCAL TOOL. Never invoke on enterprise data from an agent or CI.
 import ExcelJS from 'exceljs';
 import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile, lstat, rename, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, lstat, rename, readFile, realpath } from 'node:fs/promises';
 import { resolve, join, relative, sep } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { cellForms, sha256, textForms } from './fingerprint-core.mjs';
 
+let failureCode = 'ARGS';
 try {
   const args = process.argv.slice(2);
   let input;
@@ -16,6 +17,7 @@ try {
     else throw new Error('ARGS');
   }
   if (!input || process.env.CI) throw new Error('LOCAL_ONLY');
+  failureCode = 'INPUT';
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(input);
   const hashes = new Set();
@@ -35,15 +37,19 @@ try {
   workbook.eachSheet((sheet) => sheet.eachRow((row) => row.eachCell((cell) => add(cell.value))));
   const total = hashes.size;
   if (publicDirectory) {
+    failureCode = 'PUBLIC_GIT';
+    // Windows TEMP may use an 8.3 alias while Git returns the long directory name.
+    publicDirectory = await realpath(publicDirectory);
     const git = (...arguments_) => execFileSync('git', ['-C', publicDirectory, ...arguments_], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
-    const root = git('rev-parse', '--show-toplevel').trim();
-    const names = git('ls-files', '-z', '--', '*.md', '*.ts', '*.tsx', '*.json', '*.mjs', '*.yaml').split('\0').filter(Boolean);
+    const root = await realpath(resolve(git('rev-parse', '--show-toplevel').trim()));
+    const names = git('ls-files', '--full-name', '-z', '--', '*.md', '*.ts', '*.tsx', '*.json', '*.mjs', '*.yaml').split('\0').filter(Boolean);
+    failureCode = 'PUBLIC_READ';
     for (const name of names) {
       // Even accidentally tracked private files must never become a public dictionary.
       const normalized = name.replaceAll('\\', '/').normalize('NFKC').toLowerCase();
       if (/(?:^|\/)(?:private-data|crm-secrets|private-imports|\.git|\.aws)(?:\/|$)/u.test(normalized)) continue;
       if (!/\.(?:md|ts|tsx|json|mjs|yaml)$/u.test(normalized)) continue;
-      const absolute = resolve(publicDirectory, name);
+      const absolute = resolve(root, name);
       const inside = relative(root, absolute);
       if (inside.startsWith('..') || !inside) throw new Error('PUBLIC_SCOPE');
       let current = root;
@@ -57,13 +63,17 @@ try {
       for (const form of textForms(await readFile(absolute, 'utf8'))) hashes.delete(sha256(form));
     }
   }
+  failureCode = 'OUTPUT';
   await mkdir('private-data', { recursive: true, mode: 0o700 });
   if ((await lstat('private-data')).isSymbolicLink()) throw new Error('OUTPUT_PATH');
   const temporary = 'private-data/.fingerprints-' + randomUUID() + '.tmp';
   await writeFile(temporary, JSON.stringify([...hashes].sort()) + '\n', { mode: 0o600, flag: 'wx' });
   await rename(temporary, 'private-data/fingerprints.json');
   console.log(total + ' / ' + (total - hashes.size) + ' / ' + hashes.size);
-} catch {
+} catch (error) {
   // No library exceptions, paths or cell values in output.
+  const safeCodes = new Set(['ARGS', 'LOCAL_ONLY', 'PUBLIC_SCOPE', 'PUBLIC_SYMLINK', 'PUBLIC_FILE', 'OUTPUT_PATH']);
+  const code = error instanceof Error && safeCodes.has(error.message) ? error.message : failureCode;
+  console.error('CG_GENERATE_' + code);
   process.exitCode = 1;
 }

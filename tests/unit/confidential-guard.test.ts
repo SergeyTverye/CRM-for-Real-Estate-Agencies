@@ -15,7 +15,10 @@ const secret = "Синтетический объект Альфа 92387";
 function repo() {
   const root = mkdtempSync(path.join(os.tmpdir(), "crm-confidential-guard-"));
   roots.push(root);
-  execFileSync("git", ["init", "--quiet", root], { stdio: "pipe" });
+  execFileSync("git", ["-c", "core.autocrlf=false", "init", "--quiet", root], { stdio: "pipe" });
+  for (const [key, value] of Object.entries({ "user.name": "Synthetic CI", "user.email": "synthetic@example.invalid", "core.autocrlf": "false" })) {
+    execFileSync("git", ["-C", root, "config", "--local", key, value], { stdio: "pipe" });
+  }
   return root;
 }
 function put(root: string, name: string, value: string | Buffer | Uint8Array) {
@@ -196,7 +199,8 @@ describe("confidential guard (synthetic only)", () => {
     const root = repo();
     const result = spawnSync(process.execPath, [producer, fixture], { cwd: root, env: { ...process.env, CI: "true" }, encoding: "utf8" });
     expect(result.status).toBe(1);
-    expect(result.stdout + result.stderr).toBe("");
+    expect(result.stdout).toBe("");
+    expect(result.stderr.trim()).toBe("CG_GENERATE_LOCAL_ONLY");
   });
 
   async function generate(root: string, values: Array<string | number>, ...args: string[]) {
@@ -209,7 +213,7 @@ describe("confidential guard (synthetic only)", () => {
     delete env.CI;
     const result = spawnSync(process.execPath, [producer, filename, ...args], { cwd: root, env, encoding: "utf8", timeout: 30_000 });
     expect(result.error).toBeUndefined();
-    expect(result.status).toBe(0);
+    expect(result.status, result.stderr).toBe(0);
     expect(result.stderr).toBe("");
     expect(result.stdout).toMatch(/^\d+ \/ \d+ \/ \d+\s*$/u);
     return result.stdout.trim();
@@ -284,6 +288,48 @@ describe("confidential guard (synthetic only)", () => {
     stage(root, "leak.txt");
     expect(run(root, "--staged").output).toContain('CG_FINGERPRINT "leak.txt"');
   }, 20_000);
+
+  it("excludes tracked public files relative to a nested directory with spaces", async () => {
+    const root = repo();
+    put(root, "nested folder/public.ts", 'const phone = "8 999 000 12 34";');
+    stage(root, "nested folder/public.ts");
+    expect(await generate(root, ["+7 (999) 000-12-34"], "--exclude-public", path.join(root, "nested folder"))).toBe("1 / 1 / 0");
+  }, 20_000);
+
+  it("reports only a safe code when the public directory is not a Git repository", async () => {
+    const root = repo();
+    const workbook = new ExcelJS.Workbook();
+    workbook.addWorksheet("Synthetic").getCell("A1").value = secret;
+    const filename = path.join(root, "synthetic-source.xlsx");
+    writeFileSync(filename, Buffer.from(await workbook.xlsx.writeBuffer()));
+    const outside = mkdtempSync(path.join(os.tmpdir(), "crm-confidential-guard-"));
+    roots.push(outside);
+    const env = { ...process.env };
+    delete env.CI;
+    const result = spawnSync(process.execPath, [producer, filename, "--exclude-public", outside], { cwd: root, env, encoding: "utf8", timeout: 30_000 });
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr.trim()).toBe("CG_GENERATE_PUBLIC_GIT");
+  });
+
+  it("keeps LF text and binary bytes under autocrlf and renormalization", () => {
+    const root = repo();
+    put(root, ".gitattributes", readFileSync(path.resolve(".gitattributes")));
+    const binary = Buffer.from([0x50, 0x4b, 0, 13, 10, 10, 255]);
+    put(root, "tests/fixtures/synthetic/sample.xlsx", binary);
+    put(root, "tests/fixtures/synthetic/sample.json", '{"synthetic":true}\r\n');
+    const git = (...args: string[]) => execFileSync("git", ["-C", root, "-c", "core.autocrlf=true", ...args], { stdio: "pipe" });
+    git("add", ".");
+    git("add", "--renormalize", ".");
+    expect(git("show", ":tests/fixtures/synthetic/sample.xlsx")).toEqual(binary);
+    expect(git("show", ":tests/fixtures/synthetic/sample.json").toString()).toBe('{"synthetic":true}\n');
+    rmSync(path.join(root, "tests/fixtures/synthetic/sample.json"));
+    rmSync(path.join(root, "tests/fixtures/synthetic/sample.xlsx"));
+    git("checkout-index", "--force", "--all");
+    expect(readFileSync(path.join(root, "tests/fixtures/synthetic/sample.xlsx"))).toEqual(binary);
+    expect(readFileSync(path.join(root, "tests/fixtures/synthetic/sample.json"), "utf8")).toBe('{"synthetic":true}\n');
+  });
 
   it("producer → xlsx scanner matches a whole rich-text cell", async () => {
     const root = repo();

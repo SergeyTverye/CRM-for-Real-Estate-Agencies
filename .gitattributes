@@ -1,0 +1,23 @@
+# Keep source and textual fixtures identical on Windows and Unix checkouts.
+* text=auto
+*.json text=auto eol=lf
+*.ts text=auto eol=lf
+*.tsx text=auto eol=lf
+*.mjs text=auto eol=lf
+*.mts text=auto eol=lf
+*.md text=auto eol=lf
+*.yaml text=auto eol=lf
+*.yml text=auto eol=lf
+*.sql text=auto eol=lf
+tests/fixtures/** text=auto eol=lf
+
+# Binary overrides must follow the fixture rule. Never normalize these bytes.
+*.xlsx binary
+*.png binary
+*.docx binary
+*.pdf binary
+*.crmbackup binary
+*.zip binary
+*.db binary
+*.sqlite binary
+*.tgz binary
