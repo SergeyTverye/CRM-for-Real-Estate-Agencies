@@ -209,7 +209,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
           ...(errors[0] ? { failureCode: errors[0].code } : {}),
           incomplete: limited || !!errors.length || invalid > 0 || result.pages.some(p => p.hasNext === null),
           ...(errors.some(e => e.code === "NEEDS_USER_ACTION") ? { actionUrl: `https://${host}/` } : {}),
-          reason: [errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
+          reason: [source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
         return empty(failure([info]), `${source}: ${scraperErrorReason(info)}`);

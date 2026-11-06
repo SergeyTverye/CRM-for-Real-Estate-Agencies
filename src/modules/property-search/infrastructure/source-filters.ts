@@ -22,8 +22,10 @@ export function resolveSourceGeography(filters: SearchFilters, source: Source, s
 }
 export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query {
   // OnRealt has no all-commercial route; searchSite splits these OR branches.
-  const types = filters.purposes.length ? [...new Set(filters.purposes.map(p => purposeMap[p]))]
-    : source === "onrealt" ? ["retail", "freePurpose", "office", "industrial", "warehouse"] as const : ["commercial"] as const;
+  // OnRealt's retail routes return 404. Its public navigation exposes PSN for
+  // both operations; retain the requested retail purpose in the local evaluator.
+  const types = filters.purposes.length ? [...new Set(filters.purposes.map(p => source === "onrealt" && p === "retail" ? "freePurpose" : purposeMap[p]))]
+    : source === "onrealt" ? ["freePurpose", "office", "industrial", "warehouse"] as const : ["commercial"] as const;
   // Price, floor, ownership and districts remain local to preserve unknown candidates.
   const { maxPages, limit } = resolveSourceDepth(source, depth);
   return { city: filters.city, category: "commercial", types: [...types], deal: filters.operation,

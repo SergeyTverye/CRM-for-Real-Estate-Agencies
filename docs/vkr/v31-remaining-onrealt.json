@@ -1,0 +1,68 @@
+{
+  "mode": "LIVE",
+  "database": "crm_demo",
+  "aiCalls": 0,
+  "discoveryRequests": 4,
+  "requests": [
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya?page=1",
+      "at": "2026-11-06T05:00:16.995Z",
+      "status": 200
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86534248",
+      "at": "2026-11-06T05:00:19.805Z",
+      "status": 200
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86535138",
+      "at": "2026-11-06T05:00:20.406Z",
+      "status": 200
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86633104",
+      "at": "2026-11-06T05:00:21.001Z",
+      "status": 200
+    }
+  ],
+  "runId": "563518fd-3650-489e-9287-525fa4757a13",
+  "source": {
+    "requestedCount": 20,
+    "receivedCount": 20,
+    "acceptedCount": 0,
+    "depthReached": 1,
+    "retryAfterAt": null,
+    "statusReasonRu": "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 3, ошибок 0",
+    "needsUserAction": false,
+    "id": "a3bde14e-78b8-44d6-b63b-02295e4c8bac",
+    "runId": "563518fd-3650-489e-9287-525fa4757a13",
+    "source": "onrealt",
+    "status": "success",
+    "resultCount": 20,
+    "reason": "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 3, ошибок 0",
+    "durationMs": 5065
+  },
+  "count": 20,
+  "verdicts": {
+    "confirmed": 0,
+    "needs_review": 0,
+    "rejected": 20
+  },
+  "sampleUrls": [
+    "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86534252",
+    "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86535021",
+    "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86633113",
+    "https://onrealt.ru/novosibirsk/arenda-pomeshcheniya-svobodnogo-naznacheniya/86534297"
+  ],
+  "status": "completed",
+  "afterFixReplay": {
+    "mode": "REPLAY",
+    "networkRequests": 0,
+    "snapshots": 20,
+    "verdicts": {
+      "confirmed": 0,
+      "needs_review": 20,
+      "rejected": 0
+    }
+  }
+}

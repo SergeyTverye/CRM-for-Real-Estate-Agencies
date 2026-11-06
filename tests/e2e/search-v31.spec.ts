@@ -2,6 +2,7 @@ import { test, expect, type Page, type APIRequestContext } from "@playwright/tes
 import ExcelJS from "exceljs";
 import { readFileSync } from "node:fs";
 import { parse } from "dotenv";
+import pg from "pg";
 import { login } from "./helpers";
 
 const filters={city:"Новосибирск",operation:"sale",priceUnit:"rub_total",purposes:["office"],floorMode:"any",districts:[],seller:"all",requiredFeatures:[],preferredFeatures:[],sources:["cian"]};
@@ -92,21 +93,52 @@ test.describe("Поиск v3.1: реальные API и браузер без п
   });
 
   test("AT-06: идемпотентный запуск и остановка очереди",async({page},testInfo)=>{
-    test.setTimeout(120_000);await authenticate(page);const idempotencyKey=`ui-cancel-${Date.now()}`;
-    const body={filters,sources:["cian"],idempotencyKey,deadlineMs:600000};
-    const first=await page.request.post("/api/v1/property-search/runs",{headers:{origin:new URL(page.url()).origin},data:body});expect(first.ok()).toBeTruthy();const run=await first.json();
-    const second=await page.request.post("/api/v1/property-search/runs",{headers:{origin:new URL(page.url()).origin},data:body});expect((await second.json()).id).toBe(run.id);
-    await page.goto(`/property-search?runId=${run.id}`);
-    const stop=page.getByRole("button",{name:"Остановить",exact:true});
-    // A fast DEMO worker may complete before navigation: API cancellation is still verified.
-    await page.getByRole("heading",{name:"Состояние источников",exact:true}).waitFor();
-    const before=await(await page.request.get(`/api/v1/property-search/runs/${run.id}/progress`)).json();
-    if(!["queued","running","needs_user_action"].includes(before.status)){
-      testInfo.annotations.push({type:"cancel_race",description:"DEMO-worker завершил работу до открытия UI; реальная отмена покрыта серверными integration-тестами"});
-      const after=await page.request.post(`/api/v1/property-search/runs/${run.id}/cancel`,{headers:{origin:new URL(page.url()).origin}});expect(after.ok()).toBeTruthy();expect((await after.json()).status).toBe(before.status);return;
+    test.setTimeout(120_000);
+    await authenticate(page);
+    const databaseUrl=process.env.E2E_DATABASE_URL??"postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";
+    if(new URL(databaseUrl).pathname!=="/crm_e2e")throw new Error("Queue cancellation fixture requires crm_e2e");
+    const queueLock=new pg.Client({connectionString:databaseUrl});
+    const diagnostics:unknown[]=[];
+    const record=(event:string,data:unknown)=>{diagnostics.push({event,at:new Date().toISOString(),data});};
+    const summarize=(p:{status?:string;cancelRequested?:boolean;sources?:{source:string;status:string}[]})=>({status:p.status,cancelRequested:p.cancelRequested,sources:p.sources?.map(s=>({source:s.source,status:s.status}))});
+    await queueLock.connect();
+    try{
+      // Reserve the real worker's durable claim slot until cancellation. An instant
+      // fixture must not complete between observing an active UI and POST /cancel.
+      // This lock changes no records and is released on every exit/connection close.
+      await queueLock.query("SELECT pg_advisory_lock(310105)");
+      const body={filters,sources:["cian"],idempotencyKey:`ui-cancel-${Date.now()}`,deadlineMs:600000};
+      const origin=new URL(page.url()).origin;
+      const first=await page.request.post("/api/v1/property-search/runs",{headers:{origin},data:body});
+      expect(first.ok()).toBeTruthy();const run=await first.json();
+      const second=await page.request.post("/api/v1/property-search/runs",{headers:{origin},data:body});
+      expect(second.ok()).toBeTruthy();expect((await second.json()).id).toBe(run.id);
+      const cancelPath=`/api/v1/property-search/runs/${run.id}/cancel`;
+      page.on("request",request=>{if(new URL(request.url()).pathname===cancelPath)record("cancel_request",{method:request.method()});});
+      const readProgress=async()=>{
+        const response=await page.request.get(`/api/v1/property-search/runs/${run.id}/progress`);
+        const data=await response.json();record("progress",{httpStatus:response.status(),...summarize(data)});
+        expect(response.ok()).toBeTruthy();return data;
+      };
+      await page.goto(`/property-search?runId=${run.id}`);
+      expect(await readProgress()).toMatchObject({status:"queued",cancelRequested:false});
+      const [response]=await Promise.all([
+        page.waitForResponse(response=>response.request().method()==="POST"&&new URL(response.url()).pathname===cancelPath),
+        page.getByRole("button",{name:"Остановить",exact:true}).click(),
+      ]);
+      const data=await response.json();
+      record("cancel_response",{httpStatus:response.status(),...summarize(data),errorCode:data.error?.code});
+      expect(response.ok()).toBeTruthy();
+      expect(data).toMatchObject({status:"partial",cancelRequested:true});
+      await expect.poll(async()=>summarize(await readProgress())).toEqual({status:"partial",cancelRequested:true,sources:[{source:"cian",status:"cancelled"}]});
+      await queueLock.query("SELECT pg_advisory_unlock(310105)");
+      expect(await readProgress()).toMatchObject({status:"partial",cancelRequested:true});
+      await expect(page.getByText("Отмена запрошена. Полученные данные сохраняются.",{exact:true})).toBeVisible();
+    }finally{
+      await queueLock.end();
+      console.log("AT-06 diagnostics",JSON.stringify(diagnostics));
+      await testInfo.attach("cancel-diagnostics",{body:JSON.stringify(diagnostics,null,2),contentType:"application/json"});
     }
-    await expect(stop).toBeVisible();await stop.click();
-    await expect.poll(async()=>{const response=await page.request.get(`/api/v1/property-search/runs/${run.id}/progress`);return(await response.json()).cancelRequested;}).toBeTruthy();
   });
   test("AT-01: расширенные фильтры из формы и защита повторного нажатия",async({page})=>{
     await authenticate(page);await page.goto("/property-search");

@@ -1,6 +1,6 @@
 import { it, expect, vi } from "vitest";
 import { runChatLoop } from "@/modules/ai-chat/domain/loop";
-import { safeText, MAX_STEPS, instructions } from "@/modules/ai-chat/domain/policy";
+import { safeText, referenceText, displayText, MAX_STEPS, instructions } from "@/modules/ai-chat/domain/policy";
 import { FakeResponsesProvider, InMemoryAiLedger } from "@/modules/ai/infrastructure/fake";
 import { AiGate } from "@/modules/ai/domain/gate";
 import { YandexResponsesClient } from "@/modules/ai/infrastructure/yandex-responses-client";
@@ -41,3 +41,12 @@ it("Yandex serializes Responses function input/output and accepts a tool-only re
     expect(r.text).toBe("");
 });
 it("sanitization preserves explicit ISO dates and CRM IDs", () => { const date = "2026-11-06T04:00:00Z"; const id = "9639e152-ba32-40da-809a-4435f5728e1d"; expect(safeText(`срок ${date}; запись [[${id}]]`)).toContain(date); expect(safeText(id)).toBe(id); });
+it("keeps authorized labels server-side and restores them only from record references", () => {
+    const links = [{ id: "9639e152-ba32-40da-809a-4435f5728e1d", label: "ООО «Надежда»", href: "/clients/9639e152-ba32-40da-809a-4435f5728e1d" }];
+    const model = safeText(referenceText("проверить ООО «Надежда»; улица Кирова, 25; Иван Петров", links));
+    expect(model).not.toMatch(/Надежда|Иван|Петров/);
+    expect(model).toContain(`[[${links[0]!.id}]]`);
+    expect(model).toContain("улица Кирова, 25");
+    expect(displayText(model, links)).toContain("ООО «Надежда»");
+    expect(displayText(model, [])).not.toContain("Надежда");
+});

@@ -8,7 +8,7 @@ import { getClientTimelinePage } from "@/modules/clients/application/timeline-se
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
 import { redactContacts } from "@/modules/ai/domain/contracts";
 import { NotFoundError } from "@/shared/errors";
-import { MAX_ROWS, safeText, taskProposal, offerProposal, type ChatContext, type RecordLink } from "../domain/policy";
+import { MAX_ROWS, safeText, referenceText, taskProposal, offerProposal, type ChatContext, type RecordLink } from "../domain/policy";
 export const collectionScope = (actor: Actor) => ({ archivedAt: null, OR: [{ ownerUserId: actor.userId }, { visibility: "team" }] });
 export async function checkContext(actor: Actor, c: ChatContext, tx: DbOrTx = db) {
     if (c.kind === "client")
@@ -92,13 +92,13 @@ export async function executeTool(actor: Actor, sessionId: string, name: string,
     }
     else
         return { data: { error: "TOOL_NOT_ALLOWED" }, links };
-    return { data: await redactToolData(actor, data), links };
+    return { data: await redactToolData(actor, data, links), links };
 }
 
 /** Match candidate identities in PostgreSQL against output tokens, without a client-count cap.
  * Links stay server-side for the authorized UI; only data is sent to the model.
  */
-export async function redactToolData(actor: Actor, data: unknown) {
+export async function redactToolData(actor: Actor, data: unknown, links: RecordLink[] = []) {
     const texts: string[] = [];
     function collect(value: unknown) {
         if (typeof value === "string") texts.push(value.slice(0, 4000));
@@ -121,7 +121,7 @@ export async function redactToolData(actor: Actor, data: unknown) {
     }
     const identities = [...names];
     function redact(value: unknown): unknown {
-        if (typeof value === "string") return safeText(value, identities);
+        if (typeof value === "string") return safeText(referenceText(value, links), identities);
         if (Array.isArray(value)) return value.map(redact);
         if (value instanceof Date) return value;
         if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, v]) => [key, redact(v)]));

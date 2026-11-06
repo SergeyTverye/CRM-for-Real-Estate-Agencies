@@ -71,7 +71,12 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   if (residentialPurpose) criteria.push(residentialPurpose);
   else if (filters.purposes.length) {
     const matches = filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? "")));
-    add("purpose", !!listing.purpose && !hasAmbiguousLegacyPurpose(listing), matches, listing.purpose ?? "Назначение неизвестно");
+    // The OnRealt fallback category PSN contains possible retail uses. Its
+    // inferred broad category is neither proof nor a contradiction of retail.
+    const retailFallback = !matches && listing.source === "onrealt" && listing.purposeSource === "rule"
+      && listing.purpose === "free_purpose" && filters.purposes.includes("retail");
+    if (retailFallback) criteria.push(unknown("purpose", "Категория ПСН OnRealt; торговое назначение требует проверки"));
+    else add("purpose", !!listing.purpose && !hasAmbiguousLegacyPurpose(listing), matches, listing.purpose ?? "Назначение неизвестно");
   }
   if (filters.operation === "rent" || filters.priceFrom !== undefined || filters.priceTo !== undefined) {
     const unit = filters.operation === "sale" ? "rub_total" : filters.priceUnit;

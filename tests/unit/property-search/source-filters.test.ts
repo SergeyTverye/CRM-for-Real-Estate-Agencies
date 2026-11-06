@@ -2,6 +2,8 @@ import { expect, it } from "vitest";
 import RealEstateScraper from "real-estate-scrapper";
 import { PURPOSES, SOURCES, SearchFilters } from "@/modules/property-search/domain/types";
 import { buildScraperQuery, classifyScraperErrors, scraperErrorReason } from "@/modules/property-search/infrastructure/source-filters";
+import { normalizeListing } from "@/modules/property-search/infrastructure/normalization";
+import { evaluateListing } from "@/modules/property-search/domain/evaluation";
 
 const scraper = new RealEstateScraper({ transport: async () => { throw new Error("NETWORK_FORBIDDEN"); } });
 const signal = new AbortController().signal;
@@ -32,7 +34,10 @@ for (const city of ["Новосибирск", "Москва"]) for (const source
     if (source === "avito") expect(url.searchParams.get("params[536]")).toBe(operation === "sale" ? "5545" : "5546");
     if (source === "mirkvartir") expect(url.hostname).toBe(`${operation === "sale" ? "cre" : "arendacre"}.mirkvartir.ru`);
     if (source === "yandex") expect(url.pathname).toContain(operation === "sale" ? "/kupit/" : "/snyat/");
-    if (source === "onrealt") expect(url.pathname).toContain(operation === "sale" ? "/kypit-" : "/arenda-");
+    if (source === "onrealt") {
+      const route = { office: ["ofis", "ofisa"], warehouse: ["sklad", "sklada"], production: ["proizvodstvo", "proizvodstva"], retail: ["pomeshchenie-svobodnogo-naznacheniya", "pomeshcheniya-svobodnogo-naznacheniya"], psn_universal: ["pomeshchenie-svobodnogo-naznacheniya", "pomeshcheniya-svobodnogo-naznacheniya"], free_purpose: ["pomeshchenie-svobodnogo-naznacheniya", "pomeshcheniya-svobodnogo-naznacheniya"] }[purpose];
+      expect(url.pathname).toBe(`/${nsk ? "novosibirsk" : "moskva"}/${operation === "sale" ? "kypit-" + route[0] : "arenda-" + route[1]}`);
+    }
     if (source === "youla") expect(url.searchParams.get("attributes[tip_sdelki][0]")).toBe(operation === "sale" ? "10807" : "10806");
   });
 }
@@ -41,7 +46,7 @@ it.each(SOURCES)("%s supports any use and OR uses without network", async source
     const plan = await scraper.buildSearchLinks(buildScraperQuery(SearchFilters.parse({ operation: "sale", purposes }), source, signal));
     expect(plan.searches.length).toBeGreaterThan(0);
     expect(plan.errors).toHaveLength(source === "mirkvartir" && purposes.length ? 1 : 0);
-    if (source === "onrealt") expect(plan.searches).toHaveLength(5);
+    if (source === "onrealt") expect(plan.searches).toHaveLength(4);
   }
 });
 it("preserves trusted overrides and leaves uncertain criteria local", () => {
@@ -54,4 +59,14 @@ it("sanitizes reasons and correctly classifies parser failure", () => {
   expect(scraperErrorReason({ code: "UNSUPPORTED_FILTER", error: "city requires secret@example.test locationId" })).toBe("UNSUPPORTED_FILTER; фильтр: city");
   expect(scraperErrorReason({ code: "bad secret", error: "seller phone" })).toBe("SCRAPER_ERROR");
   expect(classifyScraperErrors([{ code: "PARSE_FAILED" }])).toBe("error");
+});
+it.each(["sale", "rent"] as const)("OnRealt %s retail fallback keeps PSN uncertain, real contradictions rejected and OR semantics", operation => {
+  const listing = normalizeListing({ source: "onrealt", id: "test-1", url: `https://onrealt.ru/novosibirsk/${operation === "sale" ? "kypit-pomeshchenie" : "arenda-pomeshcheniya"}-svobodnogo-naznacheniya/12345678`,
+    city: "Новосибирск", category: "commercial", propertyType: "freePurpose", deal: operation, title: "Помещение свободного назначения", address: "улица Кирова, 25", price: 100000, priceText: operation === "rent" ? "100000 руб/месяц" : "100000 руб", area: 100, floor: 1, images: [], description: "Нежилое помещение", rooms: null, phone: null, district: null, timestamp: "2026-11-06T05:00:00Z" });
+  const filters = SearchFilters.parse({ operation, purposes: ["retail"], priceUnit: operation === "sale" ? "rub_total" : "rub_month" });
+  expect(evaluateListing(listing, filters)).toMatchObject({ verdict: "needs_review", criteria: expect.arrayContaining([expect.objectContaining({ criterion: "purpose", state: "unknown" })]) });
+  expect(evaluateListing({ ...listing, purpose: "office" }, filters).verdict).toBe("rejected");
+  expect(evaluateListing({ ...listing, purposeSource: "structured" }, filters).verdict).toBe("rejected");
+  expect(evaluateListing({ ...listing, description: "Юридически квартира" }, filters).verdict).toBe("rejected");
+  expect(evaluateListing(listing, { ...filters, purposes: ["retail", "free_purpose"] }).verdict).toBe("confirmed");
 });

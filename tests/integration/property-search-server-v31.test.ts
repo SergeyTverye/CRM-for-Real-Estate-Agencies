@@ -74,6 +74,29 @@ describe("v3.1 queue, results, export and authorization", () => {
     expect(await db.searchRun.findUnique({ where: { id: run.id } })).toMatchObject({ status: "partial", cancelRequested: true });
     expect(await db.searchRunResult.count({ where: { runId: run.id } })).toBe(1);
   });
+  it("queued cancellation through the API is durable and prevents a later worker claim", async () => {
+    const run = await enqueue("cancel-before-claim");
+    const cookie = await sessionCookieFor(users.realtor1);
+    const response = await cancelApi(apiRequest("POST", `/api/v1/property-search/runs/${run.id}/cancel`, { cookie }), routeParams({ id: run.id }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ status: "partial", cancelRequested: true });
+    const scraper = adapter();
+    expect(await processSearchQueue({ scraper })).toBe(false);
+    expect(scraper.search).not.toHaveBeenCalled();
+    expect(await searchProgress(users.realtor1, run.id)).toMatchObject({ status: "partial", cancelRequested: true, sources: [{ status: "cancelled" }] });
+  });
+  it("cancellation arriving after completion is a no-op and preserves successful observations", async () => {
+    const run = await enqueue("complete-before-cancel");
+    await processSearchQueue({ scraper: adapter() });
+    const before = await searchProgress(users.realtor1, run.id);
+    expect(before).toMatchObject({ status: "completed", cancelRequested: false });
+    const cookie = await sessionCookieFor(users.realtor1);
+    const response = await cancelApi(apiRequest("POST", `/api/v1/property-search/runs/${run.id}/cancel`, { cookie }), routeParams({ id: run.id }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ status: "completed", cancelRequested: false });
+    expect(await searchProgress(users.realtor1, run.id)).toMatchObject({ status: "completed", cancelRequested: false, sources: [{ status: "success" }] });
+    expect(await db.searchRunResult.count({ where: { runId: run.id } })).toBe(1);
+  });
   it("restart requeues an unexpired lease and skips sources already committed", async () => {
     const run = await enqueue(); await processSearchQueue({ scraper: adapter() });
     await db.searchRun.update({ where: { id: run.id }, data: { status: "running", lockedBy: "dead", heartbeatAt: new Date(0) } });

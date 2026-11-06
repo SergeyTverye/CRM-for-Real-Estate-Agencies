@@ -11,7 +11,7 @@ import { extractListingDates } from '@/modules/property-search/infrastructure/li
 import { tabularExport } from '@/modules/export/application/tabular-export';
 
 describe('P0-A live defect regressions', () => {
-  const routes = {office:['arenda-ofisa','kypit-ofis'],retail:['arenda-torgovyh-ploshchadej','kypit-torgovuyu-ploshchad'],psn_universal:['arenda-pomeshcheniya-svobodnogo-naznacheniya','kypit-pomeshchenie-svobodnogo-naznacheniya'],free_purpose:['arenda-pomeshcheniya-svobodnogo-naznacheniya','kypit-pomeshchenie-svobodnogo-naznacheniya'],warehouse:['arenda-sklada','kypit-sklad'],production:['arenda-proizvodstva','kypit-proizvodstvo']} as const;
+  const routes = {office:['arenda-ofisa','kypit-ofis'],retail:['arenda-pomeshcheniya-svobodnogo-naznacheniya','kypit-pomeshchenie-svobodnogo-naznacheniya'],psn_universal:['arenda-pomeshcheniya-svobodnogo-naznacheniya','kypit-pomeshchenie-svobodnogo-naznacheniya'],free_purpose:['arenda-pomeshcheniya-svobodnogo-naznacheniya','kypit-pomeshchenie-svobodnogo-naznacheniya'],warehouse:['arenda-sklada','kypit-sklad'],production:['arenda-proizvodstva','kypit-proizvodstvo']} as const;
   for(const [purpose, paths] of Object.entries(routes)) for(const [index, operation] of (['rent','sale'] as const).entries()) it(`${purpose} × ${operation} uses canonical OnRealt path and preserves filters`,async()=>{
     const client=await RealEstateScraper.create({maxRetries:0});
     try {

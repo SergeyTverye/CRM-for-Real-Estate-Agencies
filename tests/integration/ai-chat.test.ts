@@ -1,13 +1,15 @@
 import { beforeEach, afterEach, it, expect, vi } from "vitest";
-import { db, resetDatabase, seedBase, makeClient, makeNeed, makeProperty, inDays, type TestUsers } from "../helpers/fixtures";
+import { db, resetDatabase, seedBase, makeClient, makeNeed, makeProperty, inDays, apiRequest, sessionCookieFor, routeParams, type TestUsers } from "../helpers/fixtures";
 import { createChat, sendMessage, decideAction, getChat, confirmedWebSearch } from "@/modules/ai-chat/application/chat-service";
 import { executeTool, redactToolData } from "@/modules/ai-chat/application/tools";
 import { FakeResponsesProvider } from "@/modules/ai/infrastructure/fake";
 import { resetConfigCache } from "@/shared/config/env";
 import { seedAiTariffs } from "@/modules/ai/application/seed-ai";
+import * as composition from "@/modules/ai-chat/infrastructure/composition";
+import { POST } from "@/app/api/v1/ai-chat/sessions/[id]/messages/route";
 let users: TestUsers;
 beforeEach(async () => { vi.stubEnv("AI_ENABLED", "true"); resetConfigCache(); await resetDatabase(); users = await seedBase(); await db.aiSetting.create({ data: { aiEnabled: true, perJobLimit: 4 } }); await seedAiTariffs(db); });
-afterEach(() => { vi.unstubAllEnvs(); resetConfigCache(); });
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); resetConfigCache(); });
 it("tools only return authorized clients; ledger links every provider call to the chat", async () => {
     const own = await makeClient(users.realtor1, { displayName: "Иван Петров" });
     const other = await makeClient(users.realtor2, { displayName: "Чужой Клиент" });
@@ -53,4 +55,38 @@ it("redacts lowercase matching identities and contact persons after 500 clients 
     const output = await redactToolData(users.realtor1, { title: "Позвонить фамилиятест имяредкое и контакттест редкоеимя", dueAt: "2026-11-05T10:00:00.000Z", id: c.id, area: "80" });
     expect(JSON.stringify(output)).not.toMatch(/фамилиятест|имяредкое|контакттест|редкоеимя/);
     expect(output).toMatchObject({ dueAt: "2026-11-05T10:00:00.000Z", id: c.id, area: "80" });
+});
+
+it("first API response contains the reply, named links and draft without a refresh; no cache", async () => {
+    const client = await makeClient(users.realtor1, { displayName: "ООО «Надежда»", clientKind: "organization" });
+    const session = await createChat(users.realtor1, { context: { kind: "client", id: client.id } });
+    const fake = new FakeResponsesProvider(r => r.inputItems?.length === 2
+        ? { functionCalls: [{ type: "function_call", call_id: "draft", name: "prepare_task", arguments: JSON.stringify({ clientId: client.id, title: `Уточнить [[${client.id}]]`, dueAt: inDays(1) }) }] }
+        : { text: `Черновик для [[${client.id}]] готов` });
+    const runtime = composition.chatRuntime;
+    vi.spyOn(composition, "chatRuntime").mockImplementation((actor, id) => runtime(actor, id, fake));
+    const cookie = await sessionCookieFor(users.realtor1);
+    const response = await POST(apiRequest("POST", `/api/v1/ai-chat/sessions/${session.id}/messages`, { cookie, body: { text: "Подготовь задачу для ООО «Надежда»" } }), routeParams({ id: session.id }));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    const result = await response.json();
+    expect(result.title).toContain("ООО «Надежда»");
+    expect(result.title).not.toContain(client.id);
+    expect(result.messages.at(-1)).toMatchObject({ content: `Черновик для [[${client.id}]] готов`, toolArgs: [{ label: "ООО «Надежда»" }] });
+    expect(result.actions[0].payload.title).toBe("Уточнить ООО «Надежда»");
+    expect(JSON.stringify(fake.requests)).not.toContain("Надежда");
+    expect(await db.task.count()).toBe(0);
+    await decideAction(users.realtor1, session.id, result.actions[0].id, { decision: "confirm", confirmed: true });
+    expect((await db.task.findFirstOrThrow()).title).toBe("Уточнить ООО «Надежда»");
+});
+
+it("returns an authorized persisted draft immediately when the next call is stopped by the gate", async () => {
+    const client = await makeClient(users.realtor1);
+    const session = await createChat(users.realtor1, { context: { kind: "client", id: client.id } });
+    await db.aiSetting.updateMany({ data: { perJobLimit: 1 } });
+    const fake = new FakeResponsesProvider(() => ({ functionCalls: [{ type: "function_call", call_id: "draft", name: "prepare_task", arguments: JSON.stringify({ clientId: client.id, title: "Уточнить условия", dueAt: inDays(1) }) }] }));
+    const result = await sendMessage(users.realtor1, session.id, { text: "подготовь задачу" }, fake);
+    expect(result).toMatchObject({ warning: expect.stringContaining("AI_RATE_LIMIT"), actions: [{ status: "proposed", payload: { title: "Уточнить условия" } }] });
+    expect(fake.requests).toHaveLength(1);
+    expect(await db.task.count()).toBe(0);
 });

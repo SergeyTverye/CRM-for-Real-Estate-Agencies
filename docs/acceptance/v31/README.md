@@ -4,7 +4,7 @@
 
 | ID | Проверка | Актуальный статус | Граница доказательства / что осталось |
 |---|---|---|---|
-| [AT-01](AT-01.md) | Расширенные условия | PASS локального LIVE + REPLAY | Два LIVE: торговля MIR/Яндекс, ИЛИ/И и unknown; OnRealt retail404, полный охват всех источников не обещается |
+| [AT-01](AT-01.md) | Расширенные условия | PASS локального LIVE + REPLAY | OnRealt: вместо retail404 — подтверждённый маршрут ПСН, LIVE 20 карточек; REPLAY финального фильтра 20 review. ИЛИ/И и неизвестное проверены, полнота рынка не заявляется |
 | [AT-02](AT-02.md) | Свежесть | Реализация и тесты PASS; LIVE PARTIAL | Циан/Авито/Домклик BLOCKED; даты части источников unknown. Запасной путь: firstSeen CRM, отдельный блок unknown, ручной ввод/CSV; обновление не подменяет публикацию |
 | [AT-03](AT-03.md) | Сортировки/большие выдачи | PASS production / SYNTHETIC | 10000 строк, 18 sort/direction ×20 страниц, counts, экспорт2.74/2.81с; 3000 задач; локальное оборудование |
 | [AT-04](AT-04.md) | Семь адаптеров | Реализация и тесты PASS; LIVE PARTIAL/BLOCKED | Циан/Авито/Домклик BLOCKED, полного последнего HTML/JSON replay всех семи нет. Действует ручная форма/CSV preview→commit; MIR/OnRealt/Яндекс fallback LIVE API PASS, Юла REPLAY PASS |
@@ -19,7 +19,7 @@
 | [AT-13](AT-13.md) | Звонки | PASS | Первичные записи/статистика и production сохранение звонка без Client |
 | [AT-14](AT-14.md) | Таймлайн | PASS | UI/API/RBAC зоны; полный PG authorization PASS |
 | [AT-15](AT-15.md) | Шаблоны | PASS с учётом AT-17 | В карточке PARTIAL было ожиданием финального SHA; четыре режима визуально PASS, теперь production/restore финального SHA PASS |
-| [AT-16](AT-16.md) | AI-чат | PASS fake и повторного LIVE ISO | Production UI/PG права PASS; замечания refresh/санитизации остаются в карточке |
+| [AT-16](AT-16.md) | AI-чат | PASS fake/UI исправлений и прежнего LIVE ISO | Первый ответ/черновик без refresh, восстановление после 422, серверные подписи links; crm_demo:3450, 2 browser PASS. Новых платных вызовов 0 |
 | [AT-17](AT-17.md) | Release gate | **PASS c812d18 + повтор на 9adc8ff** | 1364 unit, 328 PG, 24 production E2E + 1 opt-in skip, Docker healthy на 9adc8ff; чистый deploy, restart и два T08 PASS на c812d18 |
 | [AT-18](AT-18.md) | Апробация | ОЖИДАЕТ УЧАСТИЯ ПОЛЬЗОВАТЕЛЕЙ | Руководитель и два риелтора должны заполнить реальные протоколы; автоматический dry-run этого не заменяет |
 
@@ -47,3 +47,7 @@
 [Нагрузка](../../operations/perf-v31.md), [два LIVE поиска](../../vkr/at0136-live-v31.json). AT-01 PASS проверенной области MIR/Яндекс, AT-03 PASS на 10000 синтетических строк в production. AT-06 сохраняет PASS отказа/восстановления и оговорку «LIVE изменение цены не наблюдалось»; положительный REPLAY на копии реального snapshot PASS. Unit506/506, PG23/23, production build PASS. Новый полный release gate и пользовательская апробация этим не заявляются. Коммитов, миграций и npm install нет.
 
 Финальные проверки зоны: `npx tsc --noEmit`, scoped ESLint `--max-warnings=0`, build, `git diff --check` PASS. Свои серверы3441/3442 остановлены; tsconfig без diff. Нагрузочная БД сохранена.
+
+## Доработка замечаний AT-01/16 · 06.11.2026, база HEAD d480c32
+
+[AI-чат](../../ai-chat.md#исправление-первого-ответа-и-подписей-06112026) и [OnRealt](../../vkr/live-search-v31.md#доработка-at-0116-на-базе-d480c32): fake/API/RBAC + поиск **554/554**, Chromium на crm_demo:3450 **2/2**. LIVE — один worker run, 20 объявлений ПСН, 4×HTTP200; финальная проверка назначения — отдельный REPLAY тех же снимков, 20 needs_review. Первичные LIVE verdict не переписаны. Новых Yandex AI/web вызовов **0**, бюджет не менялся. AT-18 по-прежнему ожидает пользователей; новый полный production gate не заявляется.

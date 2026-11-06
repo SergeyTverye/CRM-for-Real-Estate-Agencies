@@ -3,12 +3,12 @@ import { db, transaction, type Tx } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { parseInput } from "@/shared/validation";
 import { DomainError, NotFoundError } from "@/shared/errors";
-import { clientScope, taskScope, needScope, offerScope, dealScope, showingScope, documentScope } from "@/modules/access/domain/scopes";
+import { clientScope, taskScope, needScope, offerScope, dealScope, showingScope, documentScope, propertyReadScope } from "@/modules/access/domain/scopes";
 import { AiError, type ResponsesProvider, type ResponseInput } from "@/modules/ai/domain/contracts";
 import { createTask } from "@/modules/tasks/application/task-service";
 import { createOffer } from "@/modules/commercial-offers/application/offer-service";
 import { writeAudit } from "@/modules/audit/application/audit";
-import { contextSchema, safeText, taskProposal, offerProposal, instructions } from "../domain/policy";
+import { contextSchema, safeText, referenceText, displayText, taskProposal, offerProposal, instructions, type RecordLink, type ChatContext } from "../domain/policy";
 import { runChatLoop } from "../domain/loop";
 import { chatRuntime } from "../infrastructure/composition";
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
@@ -17,6 +17,19 @@ const sessionContext = (s: {
     contextType: string;
     contextId: string | null;
 }) => contextSchema.parse({ kind: s.contextType, ...(s.contextId ? { id: s.contextId } : {}) });
+async function contextLinks(actor: Actor, context: ChatContext, tx: Tx | typeof db = db): Promise<RecordLink[]> {
+    await checkContext(actor, context, tx);
+    if (context.kind === "client" || context.kind === "need") {
+        const clientId = context.kind === "client" ? context.id : (await tx.clientNeed.findUniqueOrThrow({ where: { id: context.id }, select: { clientId: true } })).clientId;
+        const client = await tx.client.findFirstOrThrow({ where: { id: clientId, ...clientScope(actor) }, select: { id: true, displayName: true } });
+        return [{ id: client.id, label: client.displayName, href: `/clients/${client.id}` }];
+    }
+    if (context.kind === "collection") {
+        const collection = await tx.propertyCollection.findFirstOrThrow({ where: { id: context.id, ...collectionScope(actor) }, select: { id: true, name: true } });
+        return [{ id: collection.id, label: collection.name, href: `/collections/${collection.id}` }];
+    }
+    return [];
+}
 export async function loadSession(actor: Actor, id: string, tx: Tx | typeof db = db) {
     const s = await tx.aiChatSession.findFirst({ where: { id, ownerUserId: actor.userId, archivedAt: null } });
     if (!s)
@@ -35,7 +48,7 @@ export async function listChats(actor: Actor) {
     for (const s of rows) {
         try {
             await checkContext(actor, sessionContext(s));
-            visible.push(s);
+            visible.push({ ...s, title: displayText(s.title, await contextLinks(actor, sessionContext(s))) });
         }
         catch { /* Access may have changed since creation. */ }
     }
@@ -51,8 +64,13 @@ async function checkSavedLinks(actor: Actor, value: unknown) {
         };
         const targetId = link.href.match(/\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? link.id;
         let allowed = true;
-        if (link.href.startsWith("/clients/"))
-            allowed = !!await db.client.findFirst({ where: { id: targetId, ...clientScope(actor) }, select: { id: true } });
+        if (link.href.startsWith("/clients/")) {
+            const client = await db.client.findFirst({ where: { id: targetId, ...clientScope(actor) }, select: { displayName: true } });
+            allowed = !!client;
+            if (client) (raw as { label: string }).label = client.displayName;
+        }
+        if (link.href.startsWith("/properties/"))
+            allowed = !!await db.property.findFirst({ where: { id: targetId, ...propertyReadScope(actor) }, select: { id: true } });
         if (link.href.startsWith("/needs/"))
             allowed = !!await db.clientNeed.findFirst({ where: { id: targetId, AND: [needScope(actor), { client: clientScope(actor) }] }, select: { id: true } });
         if (link.href.startsWith("/tasks/"))
@@ -81,7 +99,21 @@ export async function getChat(actor: Actor, id: string) {
         await checkSavedLinks(actor, m.toolArgs);
     for (const a of actions)
         await validateProposal(actor, a.actionType, a.payload);
-    return { ...s, messages: messages.reverse(), actions };
+    const links = await contextLinks(actor, sessionContext(s));
+    for (const a of actions) {
+        const payload = a.actionType === "task" ? taskProposal.parse(a.payload) : offerProposal.parse(a.payload);
+        links.push(...await contextLinks(actor, "clientId" in payload ? { kind: "client", id: payload.clientId } : { kind: "need", id: payload.clientNeedId }));
+    }
+    const availableLinks = [...links, ...messages.flatMap(m => Array.isArray(m.toolArgs) ? m.toolArgs as RecordLink[] : [])];
+    const visibleMessages = messages.reverse().map(m => {
+        const refs = [...availableLinks.filter(l => m.content.includes(`[[${l.id}]]`)), ...(Array.isArray(m.toolArgs) ? m.toolArgs as RecordLink[] : [])];
+        return { ...m, toolArgs: [...new Map(refs.map(l => [l.id, l])).values()] };
+    });
+    const visibleActions = actions.map(a => {
+        const payload = a.payload as { title: string; description?: string };
+        return { ...a, payload: { ...payload, title: displayText(payload.title, availableLinks), ...(payload.description ? { description: displayText(payload.description, availableLinks) } : {}) } };
+    });
+    return { ...s, title: displayText(s.title, availableLinks), messages: visibleMessages, actions: visibleActions };
 }
 const busy = new Set<string>();
 export async function sendMessage(actor: Actor, id: string, raw: unknown, injected?: ResponsesProvider) {
@@ -91,22 +123,29 @@ export async function sendMessage(actor: Actor, id: string, raw: unknown, inject
     if (busy.has(id))
         throw new DomainError("AI_CHAT_BUSY", "Дождитесь ответа помощника.");
     busy.add(id);
+    const turnStartedAt = new Date();
     try {
         const history = await db.aiChatMessage.findMany({ where: { sessionId: id, role: { in: ["user", "assistant"] } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 6 });
         const identities = await db.client.findMany({ where: clientScope(actor), select: { displayName: true, contactPersons: { select: { fullName: true } } }, take: 500 });
         const names = identities.flatMap(c => [c.displayName, ...c.contactPersons.map(p => p.fullName)]);
-        const text = safeText(p.text, names);
+        const references = await contextLinks(actor, sessionContext(s));
+        const text = safeText(referenceText(p.text, references), names);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "user", content: text } });
         const input: ResponseInput[] = [{ role: "user", content: JSON.stringify({ context: await modelContext(actor, sessionContext(s)), now: new Date().toISOString(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }) }, { role: "user", content: text }];
         const runtime = await chatRuntime(actor, id, injected);
         const result = await runChatLoop(input, r => runtime.call(r), (name, args) => executeTool(actor, id, name, args), runtime.model);
         // Recheck before persistence/display: ownership of the CRM context may have changed.
         await loadSession(actor, id);
-        await db.aiChatMessage.create({ data: { sessionId: id, role: "assistant", content: result.text, toolArgs: JSON.parse(JSON.stringify(result.links)) } });
-        await db.aiChatSession.update({ where: { id }, data: { title: s.title === "Новый диалог" ? text.slice(0, 70) : s.title, updatedAt: new Date() } });
-        return getChat(actor, id);
+        await db.aiChatMessage.create({ data: { sessionId: id, role: "assistant", content: result.text, toolArgs: JSON.parse(JSON.stringify([...references, ...result.links])) } });
+        await db.aiChatSession.update({ where: { id }, data: { title: s.title === "Новый диалог" ? displayText(text, references).slice(0, 70) : s.title, updatedAt: new Date() } });
+        return await getChat(actor, id);
     }
     catch (e) {
+        if (e instanceof AiError && await db.aiPendingAction.count({ where: { sessionId: id, createdAt: { gte: turnStartedAt } } })) {
+            // A tool can persist a draft before the next model call hits a gate.
+            // Return the authorized snapshot now, without retrying the paid call.
+            return { ...await getChat(actor, id), warning: `Ответ помощника прерван (${e.code}). Сохранённый черновик доступен для проверки.` };
+        }
         if (e instanceof AiError)
             throw new DomainError(e.code, `Помощник не выполнил запрос: ${e.code}. Проверьте лимиты ИИ или сократите запрос.`);
         throw e;
@@ -135,7 +174,8 @@ export async function decideAction(actor: Actor, sessionId: string, actionId: st
             await validateProposal(actor, a.actionType, a.payload, tx);
             if (a.actionType === "task") {
                 const d = taskProposal.parse(a.payload);
-                record = await createTask(actor, { title: d.title, description: d.description, taskType: "call_or_contact", dueAt: d.dueAt, links: { clientIds: [d.clientId] } }, tx);
+                const links = await contextLinks(actor, { kind: "client", id: d.clientId }, tx);
+                record = await createTask(actor, { title: displayText(d.title, links), description: d.description ? displayText(d.description, links) : undefined, taskType: "call_or_contact", dueAt: d.dueAt, links: { clientIds: [d.clientId] } }, tx);
             }
             else if (a.actionType === "offer") {
                 const d = offerProposal.parse(a.payload);

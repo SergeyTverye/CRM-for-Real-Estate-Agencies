@@ -11,10 +11,25 @@ export type RecordLink = {
     label: string;
     href: string;
 };
+/** Labels never leave the server: the model receives stable references instead. */
+export function referenceText(text: string, links: RecordLink[]) {
+    for (const link of [...links].sort((a, b) => b.label.length - a.label.length)) {
+        if (link.label.trim().length < 2) continue;
+        text = text.replace(new RegExp(link.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "giu"), `[[${link.id}]]`);
+    }
+    return text;
+}
+export function displayText(text: string, links: RecordLink[]) {
+    return text.replace(/\[\[([0-9a-f-]{36})\]\]/gi, (_match, id: string) => links.find(l => l.id === id)?.label ?? "запись")
+        .replace(/\[PERSON\]/g, "данные скрыты");
+}
 export function safeText(text: string, names: string[] = []) {
     const facts: string[] = [];
     // Dates and CRM identifiers are facts, not phone numbers or personal names.
-    const protectedText = text.replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})\b|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, v => { facts.push(v); return `\uE200${String.fromCodePoint(0xE300 + facts.length - 1)}\uE201`; });
+    const protect = (v: string) => { facts.push(v); return `\uE200${String.fromCodePoint(0xE300 + facts.length - 1)}\uE201`; };
+    const protectedText = text.replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})\b|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, protect)
+        // A small vocabulary of CRM commands, not arbitrary capitalized words.
+        .replace(/(?<!\p{L})(?:подготовь|подготовить|уточнить|уточни|проверить|проверь|задача|задачи|условия|предложение|черновик|новосибирская область)(?!\p{L})/giu, protect);
     return sanitizeFreeNote(protectedText.replace(/(?:authorization|bearer|api[_ -]?key|password|пароль|token|токен|cookie)\s*[:= ]+[^\s;]+/giu, "[REDACTED]"), names)
         .replace(/\uE200([\s\S])\uE201/gu, (token, index: string) => facts[index.codePointAt(0)! - 0xE300] ?? token).slice(0, 4000);
 }

@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { apiCall } from "@/ui/api-client";
+import { apiCall, ApiCallError } from "@/ui/api-client";
 import { useUnsavedChangesWarning } from "@/ui/hooks";
 import type { ChatContext, RecordLink } from "@/modules/ai-chat/domain/policy";
 type Session = {
@@ -26,6 +26,7 @@ type Action = {
     };
 };
 type Chat = Session & {
+    warning?: string;
     messages: {
         id: string;
         role: string;
@@ -43,7 +44,7 @@ function Message({ text, links }: {
     const parts = text.split(/(\[\[[0-9a-f-]{36}\]\])/gi).map((part, i) => { const id = part.match(/^\[\[([0-9a-f-]{36})\]\]$/i)?.[1]; const l = links.find(l => l.id === id); if (l) {
         referenced.add(l.id);
         return <Link className="text-blue-700 underline" href={l.href} key={i}>{l.label}</Link>;
-    } return <span key={i}>{part.replace(/\[\[[0-9a-f-]{36}\]\]/gi, "[запись]").replace(/[0-9a-f]{8}-[0-9a-f-]{27}/gi, "[запись]")}</span>; });
+    } return <span key={i}>{part.replace(/\[PERSON\]/g, "данные скрыты").replace(/\[\[[0-9a-f-]{36}\]\]/gi, "[запись]").replace(/[0-9a-f]{8}-[0-9a-f-]{27}/gi, "[запись]")}</span>; });
     return <><p className="whitespace-pre-wrap">{parts}</p><div className="mt-2 flex flex-wrap gap-2">{links.filter(l => !referenced.has(l.id)).slice(0, 10).map(l => <Link className="text-blue-700 underline" key={l.id} href={l.href}>{l.label}</Link>)}</div></>;
 }
 export function AiChatPanel() {
@@ -54,17 +55,19 @@ export function AiChatPanel() {
     const [chat, setChat] = useState<Chat | null>(null);
     const [text, setText] = useState("");
     const [pending, setPending] = useState(false);
+    const working = useRef(false);
     const [error, setError] = useState("");
     const [feedback, setFeedback] = useState("");
     const [webPreview, setWebPreview] = useState(false);
     useUnsavedChangesWarning(!!text);
-    async function run(work: () => Promise<void>) { setPending(true); setError(""); setFeedback(""); try {
+    async function run(work: () => Promise<void>) { if (working.current) return; working.current = true; setPending(true); setError(""); setFeedback(""); try {
         await work();
     }
     catch (e) {
         setError(e instanceof Error ? e.message : "Личные диалоги");
     }
     finally {
+        working.current = false;
         setPending(false);
     } }
     async function refreshSessions() { setSessions((await apiCall<{
@@ -75,7 +78,17 @@ export function AiChatPanel() {
         const s = await apiCall<Session>("POST", "/api/v1/ai-chat/sessions", { context: pageContext(path) });
         active = { ...s, messages: [], actions: [] };
         setChat(active);
-    } const result = await apiCall<Chat>("POST", `/api/v1/ai-chat/sessions/${active.id}/messages`, { text }); setChat(result); setText(""); await refreshSessions(); }
+    } try {
+        const result = await apiCall<Chat>("POST", `/api/v1/ai-chat/sessions/${active.id}/messages`, { text });
+        setChat(result); setText(""); setFeedback(result.warning ?? "");
+    } catch (error) {
+        // A draft or reply may already be durable after a gate/network failure.
+        // Read only: never repeat the paid POST automatically.
+        try { setChat(await apiCall<Chat>("GET", `/api/v1/ai-chat/sessions/${active.id}`)); }
+        catch (refreshError) { if (refreshError instanceof ApiCallError && [403, 404].includes(refreshError.status)) setChat(null); }
+        throw error;
+    }
+    await refreshSessions(); }
     async function decide(a: Action, decision: "confirm" | "reject") { if (!chat)
         return; await apiCall("POST", `/api/v1/ai-chat/sessions/${chat.id}/actions/${a.id}`, { decision, confirmed: true }); setChat(await apiCall<Chat>("GET", `/api/v1/ai-chat/sessions/${chat.id}`)); setFeedback(decision === "confirm" ? "Действие подтверждено и выполнено" : "Черновик отклонён. CRM не изменена."); router.refresh(); }
     return <Dialog.Root open={open} onOpenChange={value => { setOpen(value); if (value)
