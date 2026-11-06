@@ -25,11 +25,14 @@ export function resultOrder(sort: typeof SORTS[number], direction: "asc" | "desc
   const unit = sort === "price" ? "s.normalized->>'priceUnit' ASC NULLS LAST," : sort === "price_per_m2" ? "s.price_per_m2_unit ASC NULLS LAST," : "";
   return `${unit} ${fields[sort]} ${direction.toUpperCase()} NULLS LAST, ${sort === "match" ? `r.score ${direction.toUpperCase()} NULLS LAST,` : ""} r.id ASC`;
 }
-export async function querySearchResults(actor: Actor, runId: string, raw: unknown = {}, exportIds?: string[]) {
+export async function querySearchResults(actor: Actor, runId: string, raw: unknown = {}, exportIds?: string[], exportBatch = false) {
   await accessibleRun(actor, runId);
   return db.$transaction(async tx => {
   const run = await tx.searchRun.findUniqueOrThrow({ where: { id: runId } });
-  const q = parseInput(resultQuerySchema, { ...(run.sortParams as Record<string, unknown>), ...(raw as Record<string, unknown>) });
+  // Internal export batches avoid recomputing the full selection digest per 200 rows.
+  // HTTP callers always retain the public 200-row limit; this flag is never parsed from input.
+  const schema = exportBatch ? resultQuerySchema.extend({ pageSize: z.coerce.number().int().min(1).max(2000).default(2000) }) : resultQuerySchema;
+  const q = parseInput(schema, { ...(run.sortParams as Record<string, unknown>), ...(raw as Record<string, unknown>) });
   const base = Prisma.sql`FROM search_run_results r JOIN external_listings l ON l.id=r.listing_id
     LEFT JOIN LATERAL (SELECT * FROM external_listing_snapshots s0 WHERE s0.search_run_id=r.run_id AND s0.listing_id=r.listing_id ORDER BY s0.fetched_at DESC,s0.id ASC LIMIT 1) s ON true`;
   const conditions = [Prisma.sql`r.run_id=${runId}::uuid`];
@@ -63,7 +66,7 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
   const sources = await tx.searchRunSource.findMany({ where: { runId } });
   // Only enrich this page. Never expose another employee's private marks or need facts.
   const accessibleNeed = { AND: [needScope(actor), { client: clientScope(actor) }] };
-  const metadata = await tx.externalListing.findMany({
+  const metadata = exportBatch ? [] : await tx.externalListing.findMany({
     where: { id: { in: rows.map(row => String(row.listingId)) } },
     select: {
       id: true, propertyId: true,
@@ -80,7 +83,8 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
     inCollection: row.collectionItems.length > 0 || row.selections.length > 0,
     proposed: !!row.property?.matches.length || row.selections.some(item => item.matchId !== null),
   }]));
-  const duplicateGroups = await getGroupsForListings(actor, rows.map(row => String(row.listingId)));
+  // Export fetches private notes and duplicate links once after collecting its selection.
+  const duplicateGroups = exportBatch ? [] : await getGroupsForListings(actor, rows.map(row => String(row.listingId)));
   return { rows: rows.map(row => Object.assign({}, row, facts.get(String(row.listingId)))), total, page: q.page, pageSize: q.pageSize, revision,
     duplicateGroups, duplicateGroupingError: (run.progress as Record<string, unknown>)?.duplicateGroupingError ?? null,
     counts: { confirmed: 0, needs_review: 0, rejected: 0, ...Object.fromEntries(counts.map(c => [c.verdict, Number(c.count)])) },

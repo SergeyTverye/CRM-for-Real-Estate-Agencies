@@ -19,12 +19,12 @@ export async function exportSearch(actor: Actor, runId: string, raw: unknown) {
   // The table's page/revision belongs to its own page size; export starts a fresh stable selection.
   const { revision: _revision, ...selection } = input.query ?? {};
   void _revision;
-  const query = { ...selection, page: 1, pageSize: 200 };
-  const first = await querySearchResults(actor, runId, query, ids);
+  const query = { ...selection, page: 1, pageSize: 2000 };
+  const first = await querySearchResults(actor, runId, query, ids, true);
   if (first.total > 10000) throw new ConflictError("EXPORT_LIMIT", "Не более 10000 строк. Уточните фильтры.");
   const rows = [...first.rows];
   for (let page = 2; rows.length < first.total; page++) {
-    const next = await querySearchResults(actor, runId, { ...query, page, revision: first.revision }, ids);
+    const next = await querySearchResults(actor, runId, { ...query, page, revision: first.revision }, ids, true);
     if (!next.rows.length) throw new ConflictError("SEARCH_RESULTS_CHANGED", "Выдача изменилась. Повторите экспорт.");
     rows.push(...next.rows);
   }

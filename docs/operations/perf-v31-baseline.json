@@ -1,0 +1,265 @@
+{
+  "mode": "SYNTHETIC / production HTTP",
+  "startedAt": "2026-11-06T02:27:00.485Z",
+  "base": "http://127.0.0.1:3441",
+  "hardware": {
+    "cpu": "Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz",
+    "logicalCpus": 12,
+    "memoryGiB": 32,
+    "os": "win32 10.0.26200",
+    "node": "v22.23.4"
+  },
+  "runId": "71a4afa4-bbb0-448d-a43f-0f89a2a5cdb9",
+  "listings": 10000,
+  "sorts": {
+    "publication.asc": {
+      "n": 20,
+      "p50": 155.42,
+      "p95": 184,
+      "max": 248.54,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "466200cb1d348f52b8738b5b1bd6b1ebb07612c8afdf9fecc7e83a95939f08ef"
+    },
+    "publication.desc": {
+      "n": 20,
+      "p50": 152.36,
+      "p95": 166.23,
+      "max": 179.58,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "9fa454b4683cadac15f618bded4e4bfa7d3a6af85e085a46fb08a9408e799e88"
+    },
+    "first_seen.asc": {
+      "n": 20,
+      "p50": 125.71,
+      "p95": 159.68,
+      "max": 172.23,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "f2af4569e9c87049a0ac0315654f6762e792a98c3b17110fa32591f278f9775e"
+    },
+    "first_seen.desc": {
+      "n": 20,
+      "p50": 171.75,
+      "p95": 226.08,
+      "max": 237.91,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "6b3acfe2613250e6ba1df86c66cd616188815c6e21a019129e4c6349cd75fa60"
+    },
+    "source_updated.asc": {
+      "n": 20,
+      "p50": 164.48,
+      "p95": 221.68,
+      "max": 248.45,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "1d4bb481d86bfaaa4e94d93649481458d715ce658d1df162cbe42346c07bf5ac"
+    },
+    "source_updated.desc": {
+      "n": 20,
+      "p50": 173.92,
+      "p95": 204.58,
+      "max": 205.36,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "9d195deebc0fd98fb9c128de40df9ff60a24599ca294e6d40ab70e8e2a80039c"
+    },
+    "price.asc": {
+      "n": 20,
+      "p50": 184.81,
+      "p95": 202.61,
+      "max": 205.72,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "342a23536c97ed22e7879c00b8d002d53ee84b378d40aaaf4cca2f1fe30b9705"
+    },
+    "price.desc": {
+      "n": 20,
+      "p50": 179,
+      "p95": 219.68,
+      "max": 223.42,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "1eefe059b0b985e279779a4924e3b2779ca36edd8160cf411538368bcc0aa8cb"
+    },
+    "price_per_m2.asc": {
+      "n": 20,
+      "p50": 171.45,
+      "p95": 206.43,
+      "max": 256.9,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "9f319a1195aedb037021b4ca9edbf5a7d08b723ee56e38c1b35385d73fa0d5aa"
+    },
+    "price_per_m2.desc": {
+      "n": 20,
+      "p50": 166.96,
+      "p95": 215.98,
+      "max": 266.97,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "9cf84ff2320ad5c3b378fe85bf3d1664a9a51d09d98f3f836a38eec83e94c858"
+    },
+    "area.asc": {
+      "n": 20,
+      "p50": 176.3,
+      "p95": 205.39,
+      "max": 207.17,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "10689ffc471d4cf107daa09137b7076fbfe8c8f9e202a6b14eaab2777891c09b"
+    },
+    "area.desc": {
+      "n": 20,
+      "p50": 170.91,
+      "p95": 224.42,
+      "max": 247.14,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "3dbce9d0f47236ae10bca6bd198dcab71dd04b055bcfde399ca39a35d3fd8489"
+    },
+    "match.asc": {
+      "n": 20,
+      "p50": 151.19,
+      "p95": 166.86,
+      "max": 170.98,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "7dadd08a33816d625df9aef0a48a0bd4919d268cda3c4bdb2c578a0a2b943697"
+    },
+    "match.desc": {
+      "n": 20,
+      "p50": 153.29,
+      "p95": 169.21,
+      "max": 170.55,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "49f32320ce62b062627f4d49f931c5c17390048923354a224bd3ff3c9e21b830"
+    },
+    "last_checked.asc": {
+      "n": 20,
+      "p50": 118.08,
+      "p95": 121.02,
+      "max": 129.91,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "aa559cadcc60215b6b2546181f97767c4a624e8ddc54f2ded81b7aabafc00ccb"
+    },
+    "last_checked.desc": {
+      "n": 20,
+      "p50": 144.68,
+      "p95": 157.1,
+      "max": 159.24,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "69f919dbec5bdbe55af37ff22fe4fe4ae736d269ac7591999feadafc48477ce8"
+    },
+    "price_change.asc": {
+      "n": 20,
+      "p50": 147.73,
+      "p95": 163.34,
+      "max": 165.64,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "00b260ca8c3e58f941f3c16fbbe92b4b21861f053e223df4c3a02b1b70167d52"
+    },
+    "price_change.desc": {
+      "n": 20,
+      "p50": 145.69,
+      "p95": 163.22,
+      "max": 164.02,
+      "pages": 20,
+      "unique": 1000,
+      "oracleOrder": true,
+      "counts": true,
+      "incomplete": true,
+      "idsSha256": "6bfb9fd34ea98a508c3ef63b1f5235e8be0d355ebf7851285703f045c908d9cc"
+    }
+  },
+  "counts": {
+    "confirmed": 3334,
+    "needs_review": 3333,
+    "rejected": 3333
+  },
+  "planner": {
+    "n": 20,
+    "p50": 12.81,
+    "p95": 14.53,
+    "max": 19.26,
+    "tasks": 3000,
+    "primaryRowsReturned": 0
+  },
+  "exports": [
+    {
+      "format": "csv",
+      "ms": 9492,
+      "rows": 10000,
+      "unique": 10000,
+      "bytes": 1283943,
+      "sha256": "4d9ec5fa8481e87ee1b7e2dcc5032531d346e1a96a062d1c13f3d70fdc213b64"
+    },
+    {
+      "format": "xlsx",
+      "ms": 9510,
+      "rows": 10000,
+      "unique": 10000,
+      "bytes": 383214,
+      "sha256": "efdc55f861ffe02b329b013663ef2a3aace70bfa8c07a255819d10dbc9567344"
+    }
+  ],
+  "finishedAt": "2026-11-06T02:28:22.709Z",
+  "status": "PASS correctness; timings assessed separately"
+}

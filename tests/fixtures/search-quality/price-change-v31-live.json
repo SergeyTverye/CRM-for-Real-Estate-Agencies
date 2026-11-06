@@ -1,0 +1,53 @@
+{
+  "mode": "REPLAY",
+  "provenance": {
+    "sourceMode": "LIVE",
+    "snapshotId": "8d599ca4-975b-465e-afd0-41042cb60acc",
+    "runId": "9337c4ab-2022-483a-9af1-0468a6b012b6",
+    "sourceUrl": "https://cre.mirkvartir.ru/360636685/",
+    "sha256": "2f47d7111449ef3b82d5355fd96fb36dc3d8d31fec0cbd34813f991236258727",
+    "note": "Public numeric fields copied; description/seller/images removed. Changed price is synthetic."
+  },
+  "listing": {
+    "url": "https://cre.mirkvartir.ru/360636685/",
+    "area": 90,
+    "city": "Новосибирск",
+    "floor": {
+      "raw": "1",
+      "kind": "above_ground",
+      "number": 1
+    },
+    "price": "5000000.00",
+    "title": "Торговое помещение, 90 м², 1/1 этаж",
+    "images": [],
+    "seller": {
+      "type": "unknown"
+    },
+    "source": "mirkvartir",
+    "address": "Новосибирск, Красный пр-кт, 228",
+    "purpose": "retail",
+    "district": null,
+    "fetchedAt": "2026-11-06T02:27:40.478Z",
+    "operation": "sale",
+    "priceUnit": "rub_total",
+    "dateSource": "mirkvartir:html_label:publication",
+    "pricePerM2": {
+      "unit": "per_m2",
+      "amount": "55555.56",
+      "calculated": true
+    },
+    "description": "",
+    "firstSeenAt": "2026-11-06T02:27:40.478Z",
+    "publishedAt": "2026-02-11T17:00:00.000Z",
+    "sourceMethod": "scraper",
+    "sourceUnitId": null,
+    "datePrecision": "day",
+    "lastCheckedAt": null,
+    "purposeSource": "structured",
+    "sourceListingId": "360636685",
+    "sourceUpdatedAt": "2026-04-21T17:00:00.000Z",
+    "structuredFeatures": {},
+    "identityNeedsReview": false,
+    "possibleDuplicateKeys": []
+  }
+}
