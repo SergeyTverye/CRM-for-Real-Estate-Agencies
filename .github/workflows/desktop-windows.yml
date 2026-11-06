@@ -38,6 +38,8 @@ jobs:
           npm run desktop:generate
       - name: Unit regression
         run: npx vitest run --project unit
+      - name: Chromium for PDF and interactive-session tests
+        run: npx playwright install chromium
       - name: SQLite integration regression
         run: npx vitest run --project integration-sqlite
       - name: Desktop bundle and artifact guard

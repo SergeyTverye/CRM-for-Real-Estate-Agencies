@@ -232,7 +232,7 @@ export async function exportEnterprise(actor: Actor, id: string) {
         else if (receipt.targetEntityType === 'HistoricalDealArchive') {
             const a = await db.historicalDealArchive.findUnique({ where: { id: receipt.targetEntityId } });
             if (a)
-                values = { ...a, addressText: a.objectText, area: a.area?.toString(), price: a.price?.toString(), commissionAmount: a.commissionAmount?.toString() };
+                values = { ...a, addressText: a.objectText, receivedDate: a.dealDate, name: a.participantName, phone: a.contactPhone, email: a.contactEmail, area: a.area?.toString(), price: a.price?.toString(), commissionAmount: a.commissionAmount?.toString() };
         }
         const config = profile.sheets.find(s => s.index === row.sheetIndex || (s.namePattern && new RegExp(s.namePattern, 'iu').test(wb.worksheets[row.sheetIndex - 1]!.name)));
         if (values.status)
