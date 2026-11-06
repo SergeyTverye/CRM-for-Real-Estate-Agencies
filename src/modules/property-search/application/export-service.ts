@@ -1,4 +1,5 @@
-import { tabularExport, type ExportColumnType } from "@/modules/export/application/tabular-export";
+import { businessLabel, exportDisplayLabel, exportDateLabel, exportCriterion } from "@/modules/export/application/business-labels";
+import { tabularExport, formatExportDate, type ExportColumnType } from "@/modules/export/application/tabular-export";
 export { escapeSpreadsheet, csvCell } from "@/modules/export/application/tabular-export";
 import { z } from "zod";
 import { db } from "@/shared/db/client";
@@ -38,9 +39,9 @@ export async function exportSearch(actor: Actor, runId: string, raw: unknown) {
     const snap = (row.snapshot ?? {}) as Record<string, unknown>;
     const criteria = (Array.isArray(row.criteria) ? row.criteria : []) as { criterion: string; state: string }[];
     const verification = verifications.find(v => v.listingId === row.listingId);
-    const record: Record<Column, unknown> = { source: row.source, url: snap.url ?? row.url, publishedAt: row.publishedAt ?? "Дата неизвестна", datePrecision: row.datePrecision ?? "unknown", dateSource: row.dateSource ?? "unknown", firstSeenAt: row.firstSeenAt, lastCheckedAt: row.lastCheckedAt,
-      purpose: snap.purpose, address: snap.address, district: snap.district, area: snap.area, floor: (snap.floor as { raw?: string } | undefined)?.raw, price: snap.price, priceUnit: snap.priceUnit, pricePerM2Rub: row.pricePerM2Rub, pricePerM2Unit: row.pricePerM2Unit, verdict: row.verdict,
-      unknown: criteria.filter(c => c.state === "unknown").map(c => c.criterion).join("; "), owner: verification?.ownerConfirmed === true ? `Проверка сотрудника ${verification.verifiedAt.toISOString()}` : "Не подтверждён",
+    const record: Record<Column, unknown> = { source: exportDisplayLabel("external_source", row.source), url: snap.url ?? row.url, publishedAt: row.publishedAt ?? "Дата неизвестна", datePrecision: exportDateLabel("listingDatePrecision", row.datePrecision), dateSource: exportDateLabel("listingDateSource", row.dateSource), firstSeenAt: row.firstSeenAt, lastCheckedAt: row.lastCheckedAt,
+      purpose: exportDisplayLabel("property_type", snap.purpose), address: snap.address, district: snap.district, area: snap.area, floor: (snap.floor as { raw?: string } | undefined)?.raw, price: snap.price, priceUnit: exportDisplayLabel("price_unit", snap.priceUnit), pricePerM2Rub: row.pricePerM2Rub, pricePerM2Unit: businessLabel("pricePerM2Unit", row.pricePerM2Unit), verdict: businessLabel("searchVerdict", row.verdict),
+      unknown: criteria.filter(c => c.state === "unknown").map(c => exportCriterion(c.criterion)).join("; "), owner: verification?.ownerConfirmed === true ? `Проверка сотрудника ${formatExportDate(verification.verifiedAt)}` : "Не подтверждён",
       note: bookmarks.find(b => b.listingId === row.listingId)?.note, links: duplicates.find(d => d.members.some(m => m.listingId === row.listingId && !m.releasedAt))?.members.filter(m => !m.releasedAt).map(m => m.listing.url).join("\n") ?? row.url,
       photos: Array.isArray(snap.images) && snap.images.length ? snap.url : "" };
     return input.columns.map(c => record[c]);

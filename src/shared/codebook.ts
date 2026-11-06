@@ -29,7 +29,7 @@ export const CODEBOOK = {
   aiPendingActionStatus: { proposed: "Предложено", confirmed: "Подтверждено", rejected: "Отклонено", expired: "Истекло" },
   searchExportFormat: { xlsx: "XLSX", csv: "CSV" },
   searchExportScope: { all_filtered: "Весь отфильтрованный набор", selected: "Выбранные строки" },
-  externalSource: { cian: "Циан", mirkvartir: "Мир Квартир", onrealt: "OnRealt", domclick: "Домклик", yandex: "Яндекс", youla: "Юла", avito: "Авито", web_search: "Веб-поиск", manual: "Вручную" },
+  externalSource: { cian: "Циан", mirkvartir: "Мир Квартир", onrealt: "OnRealt", domclick: "Домклик", yandex: "Яндекс Недвижимость", youla: "Юла", avito: "Авито", web_search: "Веб-поиск", manual: "Ручное добавление" },
   externalSourceMethod: { scraper: "Скрапер", web_search: "Веб-поиск", manual: "Вручную" },
   externalOperation: { sale: "Продажа", rent: "Аренда" },
   externalPriceUnit: { total: "Всего", per_month: "В месяц", per_m2: "За м²", per_m2_month: "За м² в месяц", per_year: "В год", per_m2_year: "За м² в год" },
@@ -38,7 +38,7 @@ export const CODEBOOK = {
   selectionReviewStatus: { candidate: "Кандидат", shortlisted: "Отобран", rejected: "Отклонён", proposed: "Предложен" },
   searchRunStatus: { queued: "В очереди", needs_user_action: "Требуется действие", completed: "Завершён", failed: "Ошибка выполнения", pending: "Ожидает", running: "Выполняется", success: "Успешно", partial: "Частично", error: "Ошибка", cancelled: "Отменён" },
   searchSourceStatus: { queued: "В очереди", running: "Выполняется", needs_user_action: "Требуется действие", completed: "Завершён", failed: "Ошибка выполнения", cancelled: "Отменён", success: "Успешно", partial: "Частично", blocked: "Заблокирован", timeout: "Тайм-аут", unsupported_filter: "Фильтр не поддерживается", error: "Ошибка", disabled: "Отключён" },
-  searchVerdict: { confirmed: "Подтверждён", needs_review: "Требует проверки", rejected: "Исключён" },
+  searchVerdict: { confirmed: "Совпадает", needs_review: "Требует проверки", rejected: "Исключено" },
   aiCallType: { chat: "AI-чат", chat_web: "Веб-поиск из чата", call_note: "Разбор заметки", offer_text: "Текст КП", parse: "Разбор запроса", description: "Анализ описания", web_search: "Веб-поиск" },
   aiUsageStatus: { pending: "Ожидает", running: "Выполняется", success: "Успешно", error: "Ошибка", cancelled: "Отменён" },
   aiReservationStatus: { reserved: "Зарезервировано", settled: "Учтено", released: "Освобождено" },
@@ -395,9 +395,22 @@ export const DISPLAY_LABELS: Record<string, Record<string, string>> = {
   criterion_state: { matched: "Совпадает", contradicted: "Не соответствует", unknown: "Нет сведений" },
   criterion_source: { structured: "Характеристики", rule: "Проверка описания", ai: "Анализ ИИ", manual: "Ручная проверка" },
   criterion: { city: "Город", operation: "Операция", purpose: "Назначение", priceUnit: "Единица цены", price: "Цена", area: "Площадь", floor: "Этаж", district: "Район", owner: "Собственник" },
-  price_unit: { rub_total: "всего", rub_month: "в месяц", rub_m2: "за м²", rub_m2_month: "за м² в месяц", rub_year: "в год", rub_m2_year: "за м² в год", total: "всего", per_month: "в месяц", per_m2: "за м²", per_m2_month: "за м² в месяц", per_year: "в год", per_m2_year: "за м² в год" },
+  price_unit: { rub_total: "за объект", rub_month: "в месяц", rub_m2: "за м²", rub_m2_month: "за м² в месяц", rub_year: "в год", rub_m2_year: "за м² в год", total: "за объект", per_month: "в месяц", per_m2: "за м²", per_m2_month: "за м² в месяц", per_year: "в год", per_m2_year: "за м² в год" },
+  external_source: { ...CODEBOOK.externalSource, import: "Импорт выгрузки", feed: "Импорт выгрузки", CRM: "CRM" },
   lead_source: { referral: "Рекомендация", website: "Сайт агентства" },
 };
 export function displayLabel(group: string, code: string | null | undefined): string {
   return code ? DISPLAY_LABELS[group]?.[code] ?? code : "—";
+}
+
+export const EVIDENCE_LABELS: Record<string, string> = {
+  matched: "Совпадает", contradicted: "Противоречит", unknown: "Нет данных",
+  structured: "Структурированные поля", rule: "Правило", ai: "ИИ",
+  separate_entrance: "Отдельный вход", shop_window: "Витрина", showcase: "Витрина", first_line: "Первая линия",
+  wet_point: "Мокрая точка", gates: "Ворота", power_kw: "Мощность, кВт", ceiling_m: "Высота потолков, м",
+  owner_confirmed: "Собственник", price_unit: "Единица цены",
+};
+export function evidenceLabel(group: string, code: string): string {
+  const power = code.match(/^power_from_(\d+)_kW$/iu);
+  return power ? `Мощность от ${power[1]} кВт` : EVIDENCE_LABELS[code] ?? displayLabel(group, code);
 }

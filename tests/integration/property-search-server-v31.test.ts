@@ -105,6 +105,17 @@ describe("v3.1 queue, results, export and authorization", () => {
     const xlsx = await exportSearch(users.realtor1, run.id, { format: "xlsx", ids: [page.rows[0]!.listingId], columns: ["address", "url"] });
     const book = new ExcelJS.Workbook(); await book.xlsx.load(Buffer.from(xlsx.bytes) as never);
     expect(book.worksheets[0]!.rowCount).toBe(2); expect(book.worksheets[0]!.getCell("A2").type).toBe(ExcelJS.ValueType.String);
+    const businessCsv = Buffer.from((await exportSearch(users.realtor1, run.id, {})).bytes).toString();
+    for (const label of ["Циан", "Офис", "за объект", "Совпадает", "День"]) {
+      expect(businessCsv).toContain(label);
+    }
+    expect(businessCsv).not.toMatch(/"(?:cian|office|rub_total|per_m2|confirmed|day|site_published|unknown)"/u);
+    const typed = new ExcelJS.Workbook(); await typed.xlsx.load(Buffer.from((await exportSearch(users.realtor1, run.id, { format: "xlsx", columns: ["source", "publishedAt", "area", "price", "url", "priceUnit", "purpose", "dateSource"] })).bytes) as never);
+    const sheet = typed.worksheets[0]!;
+    expect(sheet.getCell("A2").text).toBe("Циан"); expect(sheet.getCell("B2").value).toBeInstanceOf(Date);
+    expect(sheet.getCell("C2").value).toBe(100); expect(sheet.getCell("D2").value).toBe(10000);
+    expect(sheet.getCell("E2").hyperlink).toBeTruthy(); expect(sheet.getCell("F2").text).toBe("за объект");
+    expect(sheet.getCell("G2").text).toBe("Офис"); expect(sheet.getCell("H2").text).toBe("Публикация площадки");
     expect(await db.searchExport.findUnique({ where: { id: xlsx.exportId } })).toMatchObject({ scope: "selected", rowCount: 1, columns: ["address", "url"] });
     await expect(exportSearch(users.realtor2, run.id, {})).rejects.toMatchObject({ status: 404 });
     await expect(cancelSearch(users.realtor2, run.id)).rejects.toMatchObject({ status: 404 });

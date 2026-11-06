@@ -512,16 +512,18 @@
   },
   {
     "file": "search-export-xlsx.png",
-    "mode": "REPLAY · native XLSX exported from session LIVE",
-    "description": "Contact sheet: native LibreOffice PDF pages 1,2,4,5 of 8; whitespace trimmed, proportional resize; no content edits or HTML projection",
-    "renderer": "LibreOffice 25.8.4.2 → PDF → pdftoppm → Sharp contact sheet",
-    "date": "2026-11-05T23:49:23.056Z",
-    "sourceChecksum": "867fe6a27defe409d0930dafecb9f159e6d1edeb65e6c259face669136a53ac0",
-    "pdfChecksum": "7756a9f1038798e578e6a38afc140234157544a21b1cbb1479d51ddb4af1c13c",
-    "sha256": "58dcbd0be2310589e24c15948bc5dd1b779b76ee4c632965fbfdacce72dc0d28",
-    "sha": "8689bb27fec6f5d1d88472f61daa68f399ac9ae4",
-    "workingTree": "uncommitted P0-A changes; SHA is base HEAD",
+    "mode": "REPLAY · сохранённые LIVE-результаты crm_demo; без новых вызовов площадок и ИИ",
+    "description": "Штатный XLSX: русские бизнес-метки, даты, цены и площади. Контактный лист страниц LibreOffice PDF 1,2,4,5 из 8; только обрезка белых полей и пропорциональный размер.",
+    "renderer": "LibreOffice → PDF → pdftoppm → Sharp contact sheet",
+    "date": "2026-11-06T00:02:55.365Z",
+    "sourceChecksum": "d8190bfc8a2dcb04c6e8a8c56d9fb6b234e3509e8edb79886d8068780405ef21",
+    "pdfChecksum": "d9b1421e4cf1cbcde1a562058d05fe911025da471544ffd2f0546cee24854de8",
+    "sha256": "196c75872d5cffcc6c736b7130442bb6bfaf41b0e98b80a48d2ddc922c614746",
+    "sha": "69d47754eaad5dc178c3dde9da87207e58218933",
+    "workingTree": "uncommitted business export changes; SHA is base HEAD",
     "role": "MANAGER",
-    "evidence": "docs/vkr/p0a-closure-evidence.json"
+    "evidence": "docs/vkr/business-export-refresh.json",
+    "visualReview": "PASS · просмотрены все 8 страниц и итоговый кадр; метки, числа, даты и ссылки читаемы",
+    "reviewedAt": "2026-11-06T00:02:55.419Z"
   }
 ]

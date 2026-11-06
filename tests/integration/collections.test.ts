@@ -9,7 +9,7 @@ describe("AT-10 именованная подборка", () => {
   it("без клиента → смешанный состав → порядок → потребность → экспорт → КП со снимком, без лишних Property/Match", async () => {
     const { realtor1: actor } = await seedBase();
     const p = await makeProperty(actor, { addressText: "=1+1", price: "100000" });
-    const listing = await db.externalListing.create({ data: { source: "cian", sourceMethod: "scraper", priceUnit: "total", sourceListingId: "collection-test", url: "https://www.cian.ru/sale/commercial/123/", operation: "sale", address: "Внешний объект", purposes: ["office"] } });
+    const listing = await db.externalListing.create({ data: { source: "cian", sourceMethod: "scraper", priceUnit: "total", sourceListingId: "collection-test", url: "https://www.cian.ru/sale/commercial/123/", operation: "sale", address: "Внешний объект", areaM2: "42.50", priceRub: "1250000.50", publishedAt: new Date("2026-11-05T10:00:00Z"), datePrecision: "exact", dateSource: "site_published", pricePerM2Rub: "29411.78", pricePerM2Unit: "per_m2", purposes: ["office"] } });
     const collection = await createCollection(actor, { name: "Офисы без клиента", visibility: "team" });
     expect(await addItems(actor, collection.id, [{ externalListingId: listing.id }, { propertyId: p.id }])).toEqual({ added: 2 });
     expect(await addItems(actor, collection.id, [{ externalListingId: listing.id }])).toEqual({ added: 0 });
@@ -22,6 +22,14 @@ describe("AT-10 именованная подборка", () => {
     await linkNeed(actor, card.id, { expectedUpdatedAt: card.updatedAt.toISOString(), needId: need.id });
     const csv = await exportCollection(actor, card.id, { format: "csv" }); expect(new TextDecoder().decode(csv.bytes)).toContain("'=1+1");
     const xlsx = await exportCollection(actor, card.id, { format: "xlsx" }); const book = new ExcelJS.Workbook(); await book.xlsx.load(xlsx.bytes.buffer as ArrayBuffer); expect(book.worksheets[0]!.rowCount).toBe(3);
+    const text = new TextDecoder().decode(csv.bytes);
+    expect(text).toContain("Циан"); expect(text).toContain("Офис"); expect(text).toContain("1 250 000,50 ₽");
+    expect(text).toContain("05.11.2026 17:00"); expect(text).not.toMatch(/"(?:cian|office|total|per_m2|exact|site_published|unknown)"/u);
+    const externalRow = book.worksheets[0]!.getRows(2, 2)!.find(row => row.getCell(3).text === "Циан")!;
+    expect(externalRow.getCell(4).hyperlink).toBe(listing.url); expect(externalRow.getCell(5).value).toBe(42.5);
+    expect(externalRow.getCell(6).value).toBe(1250000.5); expect(externalRow.getCell(8).value).toBeInstanceOf(Date);
+    expect(externalRow.getCell(9).text).toBe("Точный момент"); expect(externalRow.getCell(12).text).toBe("Неизвестно");
+    expect(externalRow.getCell(19).value).toBe(29411.78); expect(externalRow.getCell(21).text).toBe("Публикация площадки");
     await expect(collectionToOffer(actor, card.id, { needId: need.id, itemIds: reversed })).rejects.toMatchObject({ code: "PROPERTY_REQUIRED" });
     const crmItem = card.items.find(i => i.propertyId)!;
     const offer = await collectionToOffer(actor, card.id, { needId: need.id, itemIds: [crmItem.id] });
