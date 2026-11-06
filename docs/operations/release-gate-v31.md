@@ -140,3 +140,9 @@ git clone --branch feature/tz-v3.1 --no-hardlinks D:/CRM-for-Real-Estate-Agencie
 
 После gate на `c812d18` изменены только экспорт поиска и запрос результатов (ускорение полного экспорта, коммит `9adc8ff`). На `9adc8ff` повторены: `tsc` и полный ESLint — PASS; unit **1364/1364**; PostgreSQL integration/authorization **328/328**; production `next build` — PASS; production Playwright **24 passed / 1 штатный opt-in skip**; Docker `app` пересобран, app/worker/search-worker/db healthy, `/api/health/ready` = 200. Чистое развёртывание и backup/restore подтверждены на `c812d18`; изменения `9adc8ff` не затрагивают миграции, Docker-конфигурацию и резервное копирование.
 
+
+
+## Дополнение: SHA dfe2616 (06.11.2026)
+
+Исправления AI-чата (первый ответ и черновик без обновления страницы, названия записей из серверных ссылок с RBAC), маршрут торговли OnRealt через ПСН с серверной проверкой назначения, детерминированный E2E отмены AT-06. Проверено: tsc и полный ESLint — PASS; unit **1367/1367**; PostgreSQL integration/authorization **330/330**; production build — PASS; production Playwright — три полных прогона подряд **25 passed / 1 штатный skip / 0 failed**; Docker `app` пересобран, четыре сервиса healthy, `/api/health/ready` = 200. Миграции, Docker-конфигурация и резервное копирование не менялись с `c812d18` (чистое развёртывание и два T08 PASS).
+
