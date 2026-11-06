@@ -1,6 +1,7 @@
+import { lockSql } from "@/shared/db/dialect";
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { db, transaction, type Tx } from "@/shared/db/client";
@@ -48,7 +49,7 @@ export async function saveTemplate(actor: Actor, raw: unknown, file: File | null
       const id = templateId ?? randomUUID();
       let version = 1;
       if (templateId) {
-        await tx.$executeRaw`SELECT id FROM document_templates WHERE id = ${id}::uuid FOR UPDATE`;
+        await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM document_templates WHERE id = ${id}::uuid FOR UPDATE`));
         const current = await tx.documentTemplate.findUnique({ where: { id } });
         if (!current) throw new NotFoundError();
         if (current.updatedAt.toISOString() !== expectedUpdatedAt) throw new StaleUpdateError();
@@ -108,11 +109,11 @@ export async function generateFromTemplate(actor: Actor, id: string, raw: unknow
   if (!ids.includes(d.entityId)) fail("Основная запись должна входить в выбранные");
   let storedKey: string | undefined;
   try { return await transaction(async tx => {
-    await tx.$executeRaw`SELECT id FROM document_templates WHERE id = ${id}::uuid FOR SHARE`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM document_templates WHERE id = ${id}::uuid FOR SHARE`));
     const contexts = [];
     for (const entityId of ids) contexts.push(projectContext(await buildContext(tx, actor, d.entityKind, entityId), m, actor.role));
     if (d.requestId && !preview) {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${d.requestId}, 0))::text`;
+      await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${d.requestId}, 0))::text`));
       const prior = await tx.document.findUnique({ where: { id: d.requestId } });
       if (prior) {
         const source = (prior.valuesSnapshot as { source?: unknown } | null)?.source;

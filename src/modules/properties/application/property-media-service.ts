@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { Readable } from "node:stream";
 import { db, transaction, type Tx } from "@/shared/db/client";
@@ -24,7 +26,7 @@ const changeSchema = z.object({
 
 async function lockProperty(tx: Tx, actor: Actor, propertyId: string) {
   assertRecordId(propertyId);
-  await tx.$queryRaw`SELECT id FROM properties WHERE id = ${propertyId}::uuid FOR UPDATE`;
+  await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM properties WHERE id = ${propertyId}::uuid FOR UPDATE`));
   return loadEditableProperty(tx, actor, propertyId);
 }
 

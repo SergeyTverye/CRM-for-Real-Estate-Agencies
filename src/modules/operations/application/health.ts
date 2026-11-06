@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { scalarSql } from "@/shared/db/dialect";
 import { access, mkdir, writeFile, unlink } from "node:fs/promises";
 import { constants } from "node:fs";
 import path from "node:path";
@@ -33,8 +35,8 @@ export async function readiness(): Promise<HealthReport> {
   const cfg = getConfig();
   const checks: HealthReport["checks"] = {};
   try {
-    await db.$queryRaw`SELECT 1`;
-    const migrations = await db.$queryRaw<{ count: bigint }[]>`SELECT count(*)::bigint AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL`;
+    await db.$queryRaw(scalarSql(Prisma.sql`SELECT 1`));
+    const migrations = await db.$queryRaw<{ count: bigint }[]>(scalarSql(Prisma.sql`SELECT count(*)::bigint AS count FROM _prisma_migrations WHERE finished_at IS NOT NULL`));
     checks.database = { ok: true, detail: `migrations=${migrations[0]?.count ?? 0}` };
   } catch {
     checks.database = { ok: false, detail: "unavailable" };

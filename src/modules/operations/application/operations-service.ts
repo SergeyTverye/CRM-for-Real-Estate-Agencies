@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { scalarSql } from "@/shared/db/dialect";
 import { spawn } from "node:child_process";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
@@ -108,7 +110,7 @@ export async function getOperationsStatus(actor: Actor) {
     }),
     listLocalBackups(),
     listRestoreReports(),
-    db.$queryRaw<{ migration_name: string; finished_at: Date }[]>`SELECT migration_name, finished_at FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name DESC LIMIT 5`,
+    db.$queryRaw<{ migration_name: string; finished_at: Date }[]>(scalarSql(Prisma.sql`SELECT migration_name, finished_at FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name DESC LIMIT 5`)),
   ]);
   const lastLocal = runs.find((r) => r.localStatus === "success") ?? null;
   return {

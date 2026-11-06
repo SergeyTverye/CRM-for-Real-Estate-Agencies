@@ -7,6 +7,9 @@ import { getConfig } from "../config/env";
  * Data access layer: доступ к БД есть только у application/infrastructure кода модулей.
  */
 function createClient(): PrismaClient {
+  if (getConfig().CRM_DEPLOYMENT_MODE === "desktop") {
+    return lazyDesktopClient(getConfig().DATABASE_URL);
+  }
   const adapter = new PrismaPg({ connectionString: getConfig().DATABASE_URL, max: 10 });
   return new PrismaClient({ adapter });
 }
@@ -43,3 +46,25 @@ export async function disconnectDb(): Promise<void> {
 }
 
 export { Prisma };
+
+// Async module boundary keeps native SQLite code out of server startup.
+function lazyDesktopClient(url: string): PrismaClient {
+  let pending: Promise<PrismaClient> | undefined;
+  const load = () => pending ??= import("./sqlite-client").then(m => m.createSqliteClient(url));
+  return new Proxy({} as PrismaClient, {
+    get(_target, prop) {
+      if (typeof prop !== "string") return undefined;
+      if (prop.startsWith("$")) return async (...args: unknown[]) => {
+        const client = await load();
+        const fn = Reflect.get(client, prop) as (...values: unknown[]) => unknown;
+        return fn.apply(client, args);
+      };
+      return new Proxy({}, { get(_model, operation) {
+        return async (...args: unknown[]) => {
+          const delegate = Reflect.get(await load(), prop);
+          return Reflect.get(delegate, operation).apply(delegate, args);
+        };
+      } });
+    },
+  });
+}

@@ -7,11 +7,12 @@
     "node": ">=24"
   },
   "scripts": {
+    "security:guard": "node scripts/security/confidential-guard.mjs",
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && npm run desktop:generate && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "typecheck": "prisma generate && tsc --noEmit",
+    "typecheck": "prisma generate && npm run desktop:generate && tsc --noEmit",
     "test": "vitest run --project unit --project browser-cycle",
     "test:integration": "vitest run --project integration --project authorization",
     "test:all": "vitest run",
@@ -23,9 +24,17 @@
     "db:migrate:dev": "prisma migrate dev",
     "import:sample": "tsx scripts/dev/generate-import-sample.ts",
     "dev:webpack": "next dev --webpack",
-    "test:e2e:full": "npm run build && playwright test"
+    "test:e2e:full": "npm run build && playwright test",
+    "desktop:schema": "tsx scripts/desktop/gen-sqlite-schema.ts",
+    "desktop:generate": "npm run desktop:schema && prisma generate --config prisma/sqlite.config.ts",
+    "desktop:migration:baseline": "tsx scripts/desktop/gen-sqlite-migration.ts",
+    "desktop:migrate": "tsx scripts/desktop/migrate-sqlite.ts",
+    "test:integration:sqlite": "vitest run --project integration-sqlite",
+    "desktop:audit": "tsx scripts/desktop/sqlite-audit.ts",
+    "desktop:smoke:migrate": "tsx scripts/desktop/smoke-migrate.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1163.0",
     "@fullcalendar/core": "6.1.22",
     "@fullcalendar/daygrid": "6.1.22",
     "@fullcalendar/interaction": "6.1.22",
@@ -33,9 +42,11 @@
     "@fullcalendar/react": "6.1.22",
     "@fullcalendar/timegrid": "6.1.22",
     "@node-rs/argon2": "2.2.2",
+    "@prisma/adapter-better-sqlite3": "7.10.1",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@xmldom/xmldom": "0.9.12",
+    "better-sqlite3": "12.6.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "docx": "9.15.1",
@@ -61,6 +72,7 @@
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.4",
+    "@types/better-sqlite3": "7.6.13",
     "@types/node": "24.19.2",
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
@@ -69,6 +81,10 @@
     "eslint-config-next": "16.4.4",
     "tailwindcss": "4.3.4",
     "typescript": "5.9.3",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "webdav-server": "2.6.3"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.6.2": true
   }
 }

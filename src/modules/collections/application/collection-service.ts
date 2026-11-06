@@ -1,6 +1,7 @@
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, type DbOrTx } from "@/shared/db/client";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { type Actor, isManager } from "@/modules/auth/domain/actor";
 import { clientScope, needScope } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
@@ -20,7 +21,7 @@ async function load(tx: DbOrTx, actor: Actor, id: string, write = false) {
   return row;
 }
 async function touch(tx: DbOrTx, actor: Actor, id: string, expected?: Date) {
-  await tx.$executeRaw`SELECT id FROM property_collections WHERE id = ${id}::uuid FOR UPDATE`;
+  await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM property_collections WHERE id = ${id}::uuid FOR UPDATE`));
   const row = await load(tx, actor, id, true);
   if (expected && row.updatedAt.getTime() !== expected.getTime()) throw new StaleUpdateError();
   await tx.propertyCollection.update({ where: { id }, data: { updatedAt: new Date(Math.max(Date.now(), row.updatedAt.getTime() + 1)) } });

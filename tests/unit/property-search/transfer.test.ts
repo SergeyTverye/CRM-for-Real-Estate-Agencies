@@ -25,8 +25,10 @@ describe("catalog provenance reuse", () => {
   });
   it("reuses the Property from another listing with identical source/listing/unit keys", async () => {
     expect(await transferToCatalog(actor, state.listing.id, { confirmed: true })).toEqual({ id: "existing-property", created: false });
-    expect(state.tx.$executeRaw.mock.calls[0]![0].join("?")).toContain("FOR UPDATE");
-    expect(state.tx.$executeRaw.mock.calls[1]![0].join("?")).toContain("pg_advisory_xact_lock");
+    expect(state.tx.$executeRaw.mock.calls[0]![0].strings.join("?")).toContain("FOR UPDATE");
+    expect(state.tx.$executeRaw.mock.calls[1]![0].strings.join("?")).toContain("pg_advisory_xact_lock");
+    expect(state.tx.$executeRaw.mock.calls[0]![0].values).toEqual([state.listing.id]);
+    expect(state.tx.$executeRaw.mock.calls[1]![0].values).toEqual([JSON.stringify(["cian", "source-id", "unit-1"])]);
     expect(state.tx.externalListing.findFirst).toHaveBeenCalledWith({ where: {
       source: "cian", sourceListingId: "source-id", sourceUnitId: "unit-1", propertyId: { not: null },
     }, select: { propertyId: true } });

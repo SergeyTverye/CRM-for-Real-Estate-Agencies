@@ -1,3 +1,4 @@
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, Prisma } from "@/shared/db/client";
 import { parseInput, zUuid } from "@/shared/validation";
@@ -82,7 +83,7 @@ export async function analyzeListingBatch(actor: Actor, raw: unknown, injected?:
   // Cross-process serialization avoids two simultaneous paid analyses of the same data.
   return db.$transaction(async tx => {
     const keys = prepared.filter(p=>p.criteria.length).map(p=>analysisCacheKey(p.listing.description,p.criteria,config.model));
-    for (const key of [...new Set(keys)].sort()) await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`;
+    for (const key of [...new Set(keys)].sort()) await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`));
     const results: {listingId:string;source:string;url:string;warning:string;ruleChecks:ReturnType<typeof evaluateListing>["criteria"];cacheHit:boolean;evidence:unknown;unresolved:string[]}[] = [];
     const pending = [];
     for (const p of prepared) {
@@ -160,7 +161,7 @@ export async function suggestAnalysisTasks(actor: Actor, raw: unknown) {
 export async function confirmAnalysisTasks(actor: Actor, raw: unknown) {
   const input = parseInput(z.object({pendingActionId:zUuid,confirmed:z.literal(true),dueAt:z.iso.datetime()}).strict(),raw);
   return transaction(async tx=>{
-    await tx.$executeRaw`SELECT id FROM ai_pending_actions WHERE id=${input.pendingActionId}::uuid FOR UPDATE`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM ai_pending_actions WHERE id=${input.pendingActionId}::uuid FOR UPDATE`));
     const action = await tx.aiPendingAction.findFirst({where:{id:input.pendingActionId,actionType:"listing_analysis_tasks",session:{ownerUserId:actor.userId},expiresAt:{gt:new Date()}}});
     if (!action) throw new NotFoundError();
     const payload = action.payload as unknown as {tasks:{listingId:string;title:string;description:string;needId:string|null;propertyId:string|null;expectedUpdatedAt:string}[];created?:{id:string}[]};

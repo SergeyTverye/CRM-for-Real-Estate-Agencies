@@ -1,7 +1,8 @@
+import { reactivationSql } from "@/shared/db/dialect";
 import { db, Prisma } from "@/shared/db/client";
 export async function listReactivatedClients(from: Date, to: Date, gapDays: number, userId?: string, sourceCode?: string): Promise<{ id: string; label: string }[]> {
   const userFilter = userId ? Prisma.sql`AND c.responsible_user_id = ${userId}::uuid` : Prisma.empty;
-  const rows = await db.$queryRaw<{ id: string; label: string }[]>`
+  const rows = await db.$queryRaw<{ id: string; label: string }[]>(reactivationSql(Prisma.sql`
     WITH events AS (
       SELECT lr.client_id, lr.occurred_at AS at FROM lead_requests lr WHERE lr.client_id IS NOT NULL AND lr.occurred_at >= ${from} AND lr.occurred_at < ${to}
       UNION ALL
@@ -20,7 +21,7 @@ export async function listReactivatedClients(from: Date, to: Date, gapDays: numb
       AND NOT EXISTS (SELECT 1 FROM need_property_matches m JOIN client_needs x ON x.id = m.client_need_id WHERE x.client_id = fe.client_id AND m.offered_at >= fe.at - make_interval(days => ${gapDays}) AND m.offered_at < fe.at)
       AND NOT EXISTS (SELECT 1 FROM showings s JOIN client_needs x ON x.id = s.client_need_id WHERE x.client_id = fe.client_id AND s.scheduled_at >= fe.at - make_interval(days => ${gapDays}) AND s.scheduled_at < fe.at)
       AND NOT EXISTS (SELECT 1 FROM tasks t JOIN task_clients tc ON tc.task_id = t.id WHERE tc.client_id = fe.client_id AND t.completed_at >= fe.at - make_interval(days => ${gapDays}) AND t.completed_at < fe.at)
-  `;
+  `));
   return rows;
 }
 

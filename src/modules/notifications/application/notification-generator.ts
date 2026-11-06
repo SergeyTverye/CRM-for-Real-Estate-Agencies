@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { lockSql } from "@/shared/db/dialect";
 import { type Tx, transaction, disconnectDb } from "@/shared/db/client";
 import { getConfig } from "@/shared/config/env";
 import { fromDateTimeLocalValue } from "@/shared/time";
@@ -13,7 +15,7 @@ export const stopNotificationWorker = disconnectDb;
 export async function generateNotifications(now = new Date()) {
   if (getConfig().isReadOnlyInstance) return { active: false, locked: false, delivered: 0 };
   return transaction(async tx => {
-    const [lock] = await tx.$queryRaw<{ locked: boolean }[]>`SELECT pg_try_advisory_xact_lock(241008, 1) AS locked`;
+    const [lock] = await tx.$queryRaw<{ locked: boolean }[]>(lockSql(Prisma.sql`SELECT pg_try_advisory_xact_lock(241008, 1) AS locked`));
     if (!lock?.locked) return { active: true, locked: false, delivered: 0 };
     const users = await tx.user.findMany({ where: { isActive: true }, select: { id: true, notificationPreference: { select: { leadMinutes: true } } } });
     const preferences = new Map(users.map(u => [u.id, u.notificationPreference?.leadMinutes ?? 15]));

@@ -1,3 +1,4 @@
+import { scalarSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, Prisma } from "@/shared/db/client";
 import { parseInput, zDateOnly, zUuid, zCode } from "@/shared/validation";
@@ -49,19 +50,19 @@ interface Counts { calls: number; clients: number; needs: number; showings: numb
 export async function getCallSourceReport(actor: Actor, raw: unknown = {}) {
   const f = parseInput(callReportFiltersSchema, raw);
   const cte = cohort(actor, f);
-  const [totals, sources] = await db.$transaction([
-    db.$queryRaw<Counts[]>(Prisma.sql`${cte} SELECT ${counts} FROM calls`),
-    db.$queryRaw<(Counts & { sourceCode: string })[]>(Prisma.sql`${cte} SELECT source_code AS "sourceCode", ${counts} FROM calls GROUP BY source_code ORDER BY source_code`),
-  ]);
+  const [totals, sources] = await db.$transaction(async tx => Promise.all([
+    tx.$queryRaw<Counts[]>(scalarSql(Prisma.sql`${cte} SELECT ${counts} FROM calls`)),
+    tx.$queryRaw<(Counts & { sourceCode: string })[]>(scalarSql(Prisma.sql`${cte} SELECT source_code AS "sourceCode", ${counts} FROM calls GROUP BY source_code ORDER BY source_code`)),
+  ]));
   const total = totals[0]!;
   return { total, sources, conversions: Object.fromEntries((["needs", "showings", "deals"] as const).map(key => [key, { numerator: total[key], denominator: total.calls, percent: total.calls ? Math.round(total[key] / total.calls * 1000) / 10 : null }])) };
 }
 export async function getCallSourceDetails(actor: Actor, raw: unknown = {}) {
   const f = parseInput(callReportFiltersSchema, raw);
   const condition = f.metric === "clients" ? Prisma.sql`visible_client` : f.metric === "needs" ? Prisma.sql`has_need` : f.metric === "showings" ? Prisma.sql`has_showing` : f.metric === "deals" ? Prisma.sql`has_deal` : Prisma.sql`true`;
-  const rows = await db.$queryRaw<{ id: string; at: Date; summary: string | null; sourceCode: string; outcomeCode: string | null; resultCode: string; responsible: string }[]>(Prisma.sql`${cohort(actor, f)}
+  const rows = await db.$queryRaw<{ id: string; at: Date; summary: string | null; sourceCode: string; outcomeCode: string | null; resultCode: string; responsible: string }[]>(scalarSql(Prisma.sql`${cohort(actor, f)}
     SELECT c.id, event_at AS at, summary, source_code AS "sourceCode", outcome_code AS "outcomeCode", result_code AS "resultCode", u.display_name AS responsible
     FROM calls c JOIN users u ON u.id = c.responsible_user_id WHERE ${condition}
-    ORDER BY event_at DESC, c.id DESC LIMIT ${f.pageSize + 1} OFFSET ${(f.page - 1) * f.pageSize}`);
+    ORDER BY event_at DESC, c.id DESC LIMIT ${f.pageSize + 1} OFFSET ${(f.page - 1) * f.pageSize}`));
   return { items: rows.slice(0, f.pageSize), hasNext: rows.length > f.pageSize, page: f.page };
 }

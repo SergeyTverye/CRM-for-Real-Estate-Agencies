@@ -1,3 +1,4 @@
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, Prisma, type Tx } from "@/shared/db/client";
 import { taskScope } from "@/modules/access/domain/scopes";
@@ -10,7 +11,7 @@ import { writeAudit } from "@/modules/audit/application/audit";
 
 async function lockTask(tx: Tx, actor: Actor, taskId: string) {
   // Serialize checklist edits with completion, including a concurrent new required item.
-  await tx.$queryRaw(Prisma.sql`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`);
+  await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`));
   const task = await tx.task.findFirst({ where: { id: taskId, AND: [taskScope(actor), safeTaskTextScope(actor)] } });
   if (!task) throw new NotFoundError();
   if (!["planned", "in_progress"].includes(task.status)) throw new DomainError("TASK_NOT_OPEN", "Чек-лист завершённой задачи недоступен для изменения");

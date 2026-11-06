@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { lockSql } from "@/shared/db/dialect";
 import type { SearchContinuationPort, PreparedSearch, SessionSource } from "@/modules/browser-sessions/domain/session";
 import { configureBrowserSessionSearch } from "@/modules/browser-sessions/application/dependencies";
 import type { BrowserContext, Page } from "playwright-core";
@@ -76,7 +78,7 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
     },
     async blocked(runId, source, _reason) {
       await transaction(async tx => {
-        await tx.$executeRaw`SELECT id FROM search_runs WHERE id=${runId}::uuid FOR UPDATE`;
+        await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM search_runs WHERE id=${runId}::uuid FOR UPDATE`));
         await tx.searchRunSource.updateMany({ where: { runId, source, needsUserAction: true }, data: { status: "blocked", needsUserAction: false, statusReasonRu: "Повторная блокировка или продолжение недоступно. Используйте ручное добавление или официальный импорт." } });
         if (!await tx.searchRunSource.count({ where: { runId, needsUserAction: true } })) await tx.searchRun.updateMany({ where: { id: runId, status: "needs_user_action" }, data: { status: "partial", progress: { phase: "partial" }, incompleteReason: "Выборка неполная: источник недоступен после ручной проверки", finishedAt: new Date() } });
       });

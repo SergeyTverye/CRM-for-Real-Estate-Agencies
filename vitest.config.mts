@@ -14,6 +14,7 @@ const tmp = path.join(os.tmpdir(), `crm-test-${process.pid}`);
 
 const env = {
   NODE_ENV: "test",
+  CRM_DEPLOYMENT_MODE: "server",
   DATABASE_URL: TEST_DB,
   APP_TIMEZONE: "Asia/Novosibirsk",
   FILE_STORAGE_PATH: path.join(tmp, "files"),
@@ -34,6 +35,7 @@ export default defineConfig({
     fileParallelism: false,
     maxWorkers: 1,
     projects: [
+      { extends: true, test: { name: "integration-sqlite", include: ["tests/sqlite/**/*.test.ts"], setupFiles: ["tests/sqlite/setup.ts"], environment: "node", testTimeout: 30000, hookTimeout: 60000, env: { CRM_DEPLOYMENT_MODE: "desktop" } } },
       {
         extends: true,
         test: { name: "unit", include: ["tests/unit/**/*.test.ts", "scripts/vkr/display-regressions.test.ts"], environment: "node" },

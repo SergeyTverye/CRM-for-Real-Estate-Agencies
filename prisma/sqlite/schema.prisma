@@ -1,0 +1,1945 @@
+// GENERATED: npm run desktop:schema; edit only prisma/schema.prisma.
+// Prisma schema — исполняемая реализация раздела 29 ТЗ v1.6.1.
+// Имена таблиц/колонок — snake_case, PK — UUID, моменты времени — timestamptz(3)
+// (миллисекундная точность совпадает с JS Date и нужна для optimistic concurrency
+// по updated_at), денежные поля — numeric(16,2).
+// CHECK-ограничения и partial unique indexes, которые Prisma DSL не выражает,
+// добавлены SQL-фрагментами в миграции (см. docs/data-model-mapping.md).
+// Ни одна связь не использует ON DELETE CASCADE: значимая история не удаляется.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../../src/generated/prisma-sqlite"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ───────────────────────────── Идентификация и доступ ─────────────────────────────
+
+model User {
+  browserSessions          InteractiveBrowserSession[]
+  duplicateDecisions       ListingDuplicateDecision[]
+  taskChecklistResponsible TaskChecklistItem[]         @relation("TaskChecklistResponsible")
+  taskChecklistCompleted   TaskChecklistItem[]         @relation("TaskChecklistCompleted")
+  plannerSettings          PlannerSetting[]
+  bulkTaskBatches          BulkTaskBatch[]
+  propertyCollections      PropertyCollection[]
+  collectionItemsAdded     PropertyCollectionItem[]
+  collectionNeedsLinked    PropertyCollectionNeed[]
+  templateVersions         DocumentTemplateVersion[]
+  aiChatSessions           AiChatSession[]
+  aiActionDecisions        AiPendingAction[]
+  searchExports            SearchExport[]
+
+  searchBookmarks        SearchBookmark[]
+  searchSelections       SearchSelection[]
+  savedSearches          SavedSearch[]
+  searchRuns             SearchRun[]
+  listingVerifications   ExternalListingVerification[]
+  aiSettings             AiSetting[]
+  aiUsageLogs            AiUsageLog[]
+  calendarEvents         CalendarEvent[]
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  checklistItems         DealChecklistItem[]
+  id                     String                        @id @default(uuid())
+  login                  String                        @unique
+  displayName            String                        @map("display_name")
+  roleCode               String                        @map("role_code")
+  passwordHash           String                        @map("password_hash")
+  mustChangePassword     Boolean                       @default(false) @map("must_change_password")
+  passwordChangedAt      DateTime?                     @map("password_changed_at")
+  isActive               Boolean                       @default(true) @map("is_active")
+  createdAt              DateTime                      @default(now()) @map("created_at")
+  updatedAt              DateTime                      @updatedAt @map("updated_at")
+
+  sessions                  UserSession[]
+  grantsReceived            PropertyContactGrant[] @relation("GrantUser")
+  grantsIssued              PropertyContactGrant[] @relation("GrantIssuer")
+  clientsResponsible        Client[]               @relation("ClientResponsible")
+  clientsCreated            Client[]               @relation("ClientCreatedBy")
+  leadRequestsResponsible   LeadRequest[]          @relation("LeadResponsible")
+  leadRequestsCreated       LeadRequest[]          @relation("LeadCreatedBy")
+  needsResponsible          ClientNeed[]           @relation("NeedResponsible")
+  needsCreated              ClientNeed[]           @relation("NeedCreatedBy")
+  stageChanges              NeedStageHistory[]
+  propertiesResponsible     Property[]             @relation("PropertyResponsible")
+  propertiesCreated         Property[]             @relation("PropertyCreatedBy")
+  matchesCreated            NeedPropertyMatch[]
+  showingsResponsible       Showing[]              @relation("ShowingResponsible")
+  showingsCreated           Showing[]              @relation("ShowingCreatedBy")
+  advertisementsResponsible Advertisement[]
+  agreementsResponsible     Agreement[]
+  communications            Communication[]
+  tasksResponsible          Task[]                 @relation("TaskResponsible")
+  tasksCreated              Task[]                 @relation("TaskCreatedBy")
+  dealsResponsible          Deal[]                 @relation("DealResponsible")
+  dealsCreated              Deal[]                 @relation("DealCreatedBy")
+  offersResponsible         CommercialOffer[]      @relation("OfferResponsible")
+  offersCreated             CommercialOffer[]      @relation("OfferCreatedBy")
+  documentsUploaded         Document[]
+  importJobs                ImportJob[]
+  backupRuns                BackupRun[]
+  auditEntries              AuditLog[]
+  aiRuns                    AiRun[]
+
+  @@map("users")
+}
+
+model UserSession {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  tokenHash  String    @unique @map("token_hash")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at")
+  expiresAt  DateTime  @map("expires_at")
+  revokedAt  DateTime? @map("revoked_at")
+  userAgent  String?   @map("user_agent")
+  ipAddress  String?   @map("ip_address")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, expiresAt])
+  @@map("user_sessions")
+}
+
+model PropertyContactGrant {
+  id         String    @id @default(uuid())
+  propertyId String    @map("property_id")
+  userId     String    @map("user_id")
+  grantedBy  String    @map("granted_by")
+  grantedAt  DateTime  @default(now()) @map("granted_at")
+  revokedAt  DateTime? @map("revoked_at")
+  comment    String?
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  user     User     @relation("GrantUser", fields: [userId], references: [id], onDelete: Restrict)
+  issuer   User     @relation("GrantIssuer", fields: [grantedBy], references: [id], onDelete: Restrict)
+
+  // partial UNIQUE(property_id, user_id) WHERE revoked_at IS NULL — в SQL миграции
+  @@index([propertyId])
+  @@index([userId])
+  @@index([grantedBy])
+  @@map("property_contact_grants")
+}
+
+// ───────────────────────────── Клиенты и обращения ─────────────────────────────
+
+model Client {
+  calendarEvents    CalendarEvent[]
+  id                String          @id @default(uuid())
+  displayName       String          @map("display_name")
+  clientKind        String          @map("client_kind")
+  responsibleUserId String          @map("responsible_user_id")
+  status            String
+  notes             String?
+  archivedAt        DateTime?       @map("archived_at")
+  createdBy         String          @map("created_by")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  responsible    User                    @relation("ClientResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator        User                    @relation("ClientCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  contactPersons ClientContactPerson[]
+  contacts       ClientContact[]
+  needs          ClientNeed[]
+  leadRequests   LeadRequest[]
+  communications Communication[]
+  ownerships     PropertyOwner[]
+  agreements     Agreement[]
+  dealParties    DealParty[]
+  archiveRecords HistoricalDealArchive[]
+  taskLinks      TaskClient[]
+  documentLinks  DocumentClient[]
+
+  @@index([responsibleUserId])
+  @@index([createdBy])
+  @@index([status])
+  @@index([displayName])
+  @@map("clients")
+}
+
+model ClientContactPerson {
+  id        String   @id @default(uuid())
+  clientId  String   @map("client_id")
+  fullName  String   @map("full_name")
+  position  String?
+  isPrimary Boolean  @default(false) @map("is_primary")
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  client   Client          @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  contacts ClientContact[]
+
+  @@index([clientId])
+  @@map("client_contact_persons")
+}
+
+model ClientContact {
+  id              String   @id @default(uuid())
+  clientId        String   @map("client_id")
+  contactType     String   @map("contact_type")
+  rawValue        String   @map("raw_value")
+  normalizedValue String?  @map("normalized_value")
+  contactPersonId String?  @map("contact_person_id")
+  isPrimary       Boolean  @default(false) @map("is_primary")
+  comment         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  client        Client               @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  contactPerson ClientContactPerson? @relation(fields: [contactPersonId], references: [id], onDelete: Restrict)
+
+  // partial UNIQUE(client_id, contact_type, normalized_value) WHERE normalized_value IS NOT NULL — в SQL
+  @@index([clientId])
+  @@index([normalizedValue])
+  @@index([contactPersonId])
+  @@map("client_contacts")
+}
+
+model LeadRequest {
+  callAt            DateTime?        @map("call_at")
+  externalListingId String?          @map("external_listing_id")
+  outcomeCode       String?          @map("outcome_code")
+  externalListing   ExternalListing? @relation(fields: [externalListingId], references: [id], onDelete: Restrict)
+
+  id                String   @id @default(uuid())
+  clientId          String?  @map("client_id")
+  clientNeedId      String?  @map("client_need_id")
+  propertyId        String?  @map("property_id")
+  advertisementId   String?  @map("advertisement_id")
+  responsibleUserId String   @map("responsible_user_id")
+  occurredAt        DateTime @map("occurred_at")
+  channelCode       String   @map("channel_code")
+  sourceCode        String   @map("source_code")
+  resultCode        String   @map("result_code")
+  statusCode        String   @map("status_code")
+  summary           String?
+  rawContact        String?  @map("raw_contact")
+  createdBy         String   @map("created_by")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  client         Client?         @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  need           ClientNeed?     @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+  property       Property?       @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  advertisement  Advertisement?  @relation(fields: [advertisementId], references: [id], onDelete: Restrict)
+  responsible    User            @relation("LeadResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator        User            @relation("LeadCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  communications Communication[]
+
+  @@index([externalListingId])
+  @@index([callAt, responsibleUserId])
+  @@index([outcomeCode, occurredAt])
+  @@index([responsibleUserId, occurredAt])
+  @@index([sourceCode, occurredAt])
+  @@index([statusCode])
+  @@index([clientId])
+  @@index([clientNeedId])
+  @@index([propertyId])
+  @@index([advertisementId])
+  @@index([createdBy])
+  @@map("lead_requests")
+}
+
+model ClientNeed {
+  collectionLinks PropertyCollectionNeed[]
+
+  calendarEvents     CalendarEvent[]
+  searchSelections   SearchSelection[]
+  savedSearches      SavedSearch[]
+  searchRuns         SearchRun[]
+  id                 String            @id @default(uuid())
+  clientId           String            @map("client_id")
+  responsibleUserId  String            @map("responsible_user_id")
+  operationType      String            @map("operation_type")
+  propertyType       String            @map("property_type")
+  propertySubtype    String?           @map("property_subtype")
+  financingType      String?           @map("financing_type")
+  mortgageStatus     String?           @map("mortgage_status")
+  budgetMin          BigInt?          @map("budget_min")
+  budgetMax          BigInt?          @map("budget_max")
+  district           String?
+  locationText       String?           @map("location_text")
+  areaMin            BigInt?          @map("area_min")
+  areaMax            BigInt?          @map("area_max")
+  commercialPurpose  String?           @map("commercial_purpose")
+  floorMin           Int?              @map("floor_min")
+  floorMax           Int?              @map("floor_max")
+  roomsMin           Int?              @map("rooms_min")
+  roomsMax           Int?              @map("rooms_max")
+  landAreaMin        BigInt?          @map("land_area_min")
+  landAreaMax        BigInt?          @map("land_area_max")
+  buildingAreaMin    BigInt?          @map("building_area_min")
+  buildingAreaMax    BigInt?          @map("building_area_max")
+  powerRequirement   BigInt?          @map("power_requirement")
+  parkingRequirement Boolean?          @map("parking_requirement")
+  tenantRequirement  Boolean?          @map("tenant_requirement")
+  stage              String
+  status             String
+  stopReasonCode     String?           @map("stop_reason_code")
+  stopComment        String?           @map("stop_comment")
+  notes              String?
+  openedAt           DateTime          @default(now()) @map("opened_at")
+  closedAt           DateTime?         @map("closed_at")
+  createdBy          String            @map("created_by")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  client           Client              @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  responsible      User                @relation("NeedResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator          User                @relation("NeedCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  leadRequests     LeadRequest[]
+  stageHistory     NeedStageHistory[]
+  matches          NeedPropertyMatch[]
+  showings         Showing[]
+  communications   Communication[]
+  commercialOffers CommercialOffer[]
+  taskLinks        TaskNeed[]
+  documentLinks    DocumentNeed[]
+
+  @@index([clientId])
+  @@index([responsibleUserId, status])
+  @@index([createdBy])
+  @@map("client_needs")
+}
+
+model NeedStageHistory {
+  id           String   @id @default(uuid())
+  clientNeedId String   @map("client_need_id")
+  fromStage    String?  @map("from_stage")
+  toStage      String   @map("to_stage")
+  fromStatus   String?  @map("from_status")
+  toStatus     String?  @map("to_status")
+  reasonCode   String?  @map("reason_code")
+  comment      String?
+  changedBy    String   @map("changed_by")
+  occurredAt   DateTime @default(now()) @map("occurred_at")
+
+  need    ClientNeed @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+  changer User       @relation(fields: [changedBy], references: [id], onDelete: Restrict)
+
+  @@index([clientNeedId, occurredAt])
+  @@index([changedBy])
+  @@map("need_stage_history")
+}
+
+model Communication {
+  id                String   @id @default(uuid())
+  clientId          String   @map("client_id")
+  clientNeedId      String?  @map("client_need_id")
+  leadRequestId     String?  @map("lead_request_id")
+  authorUserId      String   @map("author_user_id")
+  communicationType String   @map("communication_type")
+  channelCode       String?  @map("channel_code")
+  occurredAt        DateTime @map("occurred_at")
+  resultCode        String?  @map("result_code")
+  comment           String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  need        ClientNeed?  @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+  leadRequest LeadRequest? @relation(fields: [leadRequestId], references: [id], onDelete: Restrict)
+  author      User         @relation(fields: [authorUserId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, occurredAt])
+  @@index([clientNeedId])
+  @@index([leadRequestId])
+  @@index([authorUserId])
+  @@map("communications")
+}
+
+// ───────────────────────────── Объекты и работа с рынком ─────────────────────────────
+
+model Property {
+  collectionItems PropertyCollectionItem[]
+
+  externalListings   ExternalListing[]
+  searchSelections   SearchSelection[]
+  calendarEvents     CalendarEvent[]
+  id                 String            @id @default(uuid())
+  responsibleUserId  String?           @map("responsible_user_id")
+  propertyType       String            @map("property_type")
+  propertySubtype    String?           @map("property_subtype")
+  operationType      String            @map("operation_type")
+  sourceType         String            @map("source_type")
+  sourcePlatformCode String?           @map("source_platform_code")
+  sourceUrl          String?           @map("source_url")
+  addressText        String            @map("address_text")
+  district           String?
+  area               BigInt?
+  floor              Int?
+  floorsTotal        Int?              @map("floors_total")
+  roomsCount         Int?              @map("rooms_count")
+  landArea           BigInt?          @map("land_area")
+  buildingArea       BigInt?          @map("building_area")
+  price              BigInt?
+  commercialPurpose  String?           @map("commercial_purpose")
+  powerKw            BigInt?          @map("power_kw")
+  parkingAvailable   Boolean?          @map("parking_available")
+  hasTenant          Boolean?          @map("has_tenant")
+  status             String
+  description        String?
+  attributesJsonb    Json?             @map("attributes_jsonb")
+  archivedAt         DateTime?         @map("archived_at")
+  createdBy          String            @map("created_by")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  responsible    User?                  @relation("PropertyResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator        User                   @relation("PropertyCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  owners         PropertyOwner[]
+  contactGrants  PropertyContactGrant[]
+  matches        NeedPropertyMatch[]
+  showings       Showing[]
+  advertisements Advertisement[]
+  agreements     Agreement[]
+  leadRequests   LeadRequest[]
+  deals          Deal[]
+  offerItems     CommercialOfferItem[]
+  taskLinks      TaskProperty[]
+  documentLinks  DocumentProperty[]
+
+  @@index([status, district, propertyType, operationType])
+  @@index([responsibleUserId])
+  @@index([createdBy])
+  @@index([addressText])
+  @@map("properties")
+}
+
+model PropertyOwner {
+  id             String   @id @default(uuid())
+  propertyId     String   @map("property_id")
+  clientId       String   @map("client_id")
+  ownerRole      String?  @map("owner_role")
+  ownershipShare BigInt? @map("ownership_share")
+  comment        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@unique([propertyId, clientId])
+  @@index([clientId])
+  @@map("property_owners")
+}
+
+model NeedPropertyMatch {
+  searchSelections    SearchSelection[]
+  id                  String            @id @default(uuid())
+  clientNeedId        String            @map("client_need_id")
+  propertyId          String            @map("property_id")
+  offeredAt           DateTime          @default(now()) @map("offered_at")
+  sourceCode          String?           @map("source_code")
+  status              String
+  rejectionReasonCode String?           @map("rejection_reason_code")
+  comment             String?
+  createdBy           String            @map("created_by")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  need     ClientNeed @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+  property Property   @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  creator  User       @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([clientNeedId, offeredAt])
+  @@index([propertyId])
+  @@index([createdBy])
+  @@map("need_property_matches")
+}
+
+model Showing {
+  id                String    @id @default(uuid())
+  clientNeedId      String    @map("client_need_id")
+  propertyId        String    @map("property_id")
+  responsibleUserId String    @map("responsible_user_id")
+  scheduledAt       DateTime  @map("scheduled_at")
+  occurredAt        DateTime? @map("occurred_at")
+  status            String
+  resultCode        String?   @map("result_code")
+  comment           String?
+  participantsText  String?   @map("participants_text")
+  createdBy         String    @map("created_by")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  need          ClientNeed        @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+  property      Property          @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  responsible   User              @relation("ShowingResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator       User              @relation("ShowingCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  taskLinks     TaskShowing[]
+  documentLinks DocumentShowing[]
+
+  @@index([clientNeedId])
+  @@index([propertyId])
+  @@index([responsibleUserId, scheduledAt])
+  @@index([createdBy])
+  @@map("showings")
+}
+
+model Advertisement {
+  id                String    @id @default(uuid())
+  propertyId        String    @map("property_id")
+  responsibleUserId String?   @map("responsible_user_id")
+  platformCode      String    @map("platform_code")
+  url               String?
+  adText            String?   @map("ad_text")
+  status            String
+  publishedAt       DateTime? @map("published_at")
+  lastCheckedAt     DateTime? @map("last_checked_at")
+  expiresAt         DateTime? @map("expires_at")
+  comment           String?
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  property      Property                @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  responsible   User?                   @relation(fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  leadRequests  LeadRequest[]
+  taskLinks     TaskAdvertisement[]
+  documentLinks DocumentAdvertisement[]
+
+  @@index([status, expiresAt])
+  @@index([responsibleUserId])
+  @@index([propertyId])
+  @@map("advertisements")
+}
+
+model Agreement {
+  id                String    @id @default(uuid())
+  clientId          String?   @map("client_id")
+  propertyId        String?   @map("property_id")
+  dealId            String?   @map("deal_id")
+  responsibleUserId String    @map("responsible_user_id")
+  legalEntityId     String?   @map("legal_entity_id")
+  agreementType     String    @map("agreement_type")
+  status            String
+  agreementNumber   String?   @map("agreement_number")
+  isExclusive       Boolean?  @map("is_exclusive")
+  signedAt          DateTime? @map("signed_at")
+  validFrom         DateTime? @map("valid_from")
+  validUntil        DateTime? @map("valid_until")
+  commissionType    String?   @map("commission_type")
+  commissionValue   BigInt?  @map("commission_value")
+  commissionNotes   String?   @map("commission_notes")
+  absenceReasonCode String?   @map("absence_reason_code")
+  actionRequired    String?   @map("action_required")
+  notes             String?
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  archivedAt        DateTime? @map("archived_at")
+
+  client        Client?             @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  property      Property?           @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  deal          Deal?               @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  responsible   User                @relation(fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  legalEntity   LegalEntity?        @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  taskLinks     TaskAgreement[]
+  documentLinks DocumentAgreement[]
+
+  @@index([clientId])
+  @@index([propertyId])
+  @@index([dealId])
+  @@index([responsibleUserId])
+  @@index([legalEntityId])
+  @@index([status, validUntil])
+  @@map("agreements")
+}
+
+// ───────────────────────────── Задачи и связи задач ─────────────────────────────
+
+model Task {
+  checklistItems  TaskChecklistItem[]
+  recurrenceRule  String?             @map("recurrence_rule")
+  reminderOffsets Json               @default("[]") @map("reminder_offsets")
+  bulkBatchId     String?             @map("bulk_batch_id")
+  bulkBatch       BulkTaskBatch?      @relation(fields: [bulkBatchId], references: [id], onDelete: Restrict)
+
+  id                 String    @id @default(uuid())
+  responsibleUserId  String    @map("responsible_user_id")
+  createdBy          String    @map("created_by")
+  taskType           String    @map("task_type")
+  taskSubtypeCode    String?   @map("task_subtype_code")
+  title              String
+  description        String?
+  dueAt              DateTime  @map("due_at")
+  status             String
+  priority           String
+  recurrenceKind     String    @default("none") @map("recurrence_kind")
+  recurrenceInterval Int       @default(1) @map("recurrence_interval")
+  recurrenceUntil    DateTime? @map("recurrence_until")
+  parentTaskId       String?   @map("parent_task_id")
+  completedAt        DateTime? @map("completed_at")
+  resultComment      String?   @map("result_comment")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  responsible        User                  @relation("TaskResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator            User                  @relation("TaskCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  parent             Task?                 @relation("TaskRecurrence", fields: [parentTaskId], references: [id], onDelete: Restrict)
+  instances          Task[]                @relation("TaskRecurrence")
+  clientLinks        TaskClient[]
+  needLinks          TaskNeed[]
+  propertyLinks      TaskProperty[]
+  showingLinks       TaskShowing[]
+  dealLinks          TaskDeal[]
+  advertisementLinks TaskAdvertisement[]
+  agreementLinks     TaskAgreement[]
+  offerLinks         TaskCommercialOffer[]
+
+  @@index([bulkBatchId])
+  @@index([responsibleUserId, status, dueAt])
+  @@index([createdBy])
+  @@index([parentTaskId])
+  @@index([status, dueAt])
+  @@map("tasks")
+}
+
+model TaskClient {
+  taskId   String @map("task_id")
+  clientId String @map("client_id")
+  task     Task   @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, clientId])
+  @@index([clientId])
+  @@map("task_clients")
+}
+
+model TaskNeed {
+  taskId       String     @map("task_id")
+  clientNeedId String     @map("client_need_id")
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  need         ClientNeed @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, clientNeedId])
+  @@index([clientNeedId])
+  @@map("task_needs")
+}
+
+model TaskProperty {
+  taskId     String   @map("task_id")
+  propertyId String   @map("property_id")
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, propertyId])
+  @@index([propertyId])
+  @@map("task_properties")
+}
+
+model TaskShowing {
+  taskId    String  @map("task_id")
+  showingId String  @map("showing_id")
+  task      Task    @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  showing   Showing @relation(fields: [showingId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, showingId])
+  @@index([showingId])
+  @@map("task_showings")
+}
+
+model TaskDeal {
+  taskId String @map("task_id")
+  dealId String @map("deal_id")
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  deal   Deal   @relation(fields: [dealId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, dealId])
+  @@index([dealId])
+  @@map("task_deals")
+}
+
+model TaskAdvertisement {
+  taskId          String        @map("task_id")
+  advertisementId String        @map("advertisement_id")
+  task            Task          @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  advertisement   Advertisement @relation(fields: [advertisementId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, advertisementId])
+  @@index([advertisementId])
+  @@map("task_advertisements")
+}
+
+model TaskAgreement {
+  taskId      String    @map("task_id")
+  agreementId String    @map("agreement_id")
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  agreement   Agreement @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, agreementId])
+  @@index([agreementId])
+  @@map("task_agreements")
+}
+
+model TaskCommercialOffer {
+  taskId            String          @map("task_id")
+  commercialOfferId String          @map("commercial_offer_id")
+  task              Task            @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  offer             CommercialOffer @relation(fields: [commercialOfferId], references: [id], onDelete: Restrict)
+
+  @@id([taskId, commercialOfferId])
+  @@index([commercialOfferId])
+  @@map("task_commercial_offers")
+}
+
+// ───────────────────────────── Юрлица, сделки и расчёты ─────────────────────────────
+
+model LegalEntity {
+  logoDocumentId String?   @map("logo_document_id")
+  requisites     String?
+  logoDocument   Document? @relation("LegalEntityLogo", fields: [logoDocumentId], references: [id], onDelete: Restrict)
+  id             String    @id @default(uuid())
+  entityType     String    @map("entity_type")
+  displayName    String    @map("display_name")
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  deals      Deal[]
+  agreements Agreement[]
+  offers     CommercialOffer[]
+  documents  Document[]
+
+  @@index([logoDocumentId])
+  @@map("legal_entities")
+}
+
+model Deal {
+  calendarEvents         CalendarEvent[]
+  checklistItems         DealChecklistItem[]
+  id                     String              @id @default(uuid())
+  propertyId             String              @map("property_id")
+  responsibleUserId      String              @map("responsible_user_id")
+  legalEntityId          String              @map("legal_entity_id")
+  status                 String
+  openedAt               DateTime            @default(now()) @map("opened_at")
+  preliminaryAgreementAt DateTime?           @map("preliminary_agreement_at")
+  mainAgreementAt        DateTime?           @map("main_agreement_at")
+  registrationAt         DateTime?           @map("registration_at")
+  closedAt               DateTime?           @map("closed_at")
+  dealPrice              BigInt?            @map("deal_price")
+  notes                  String?
+  createdBy              String              @map("created_by")
+  createdAt              DateTime            @default(now()) @map("created_at")
+  updatedAt              DateTime            @updatedAt @map("updated_at")
+
+  property      Property         @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  responsible   User             @relation("DealResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator       User             @relation("DealCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  legalEntity   LegalEntity      @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  parties       DealParty[]
+  commissions   DealCommission[]
+  agreements    Agreement[]
+  taskLinks     TaskDeal[]
+  documentLinks DocumentDeal[]
+
+  @@index([propertyId])
+  @@index([responsibleUserId, status])
+  @@index([legalEntityId])
+  @@index([createdBy])
+  @@map("deals")
+}
+
+model DealParty {
+  id                String   @id @default(uuid())
+  dealId            String   @map("deal_id")
+  clientId          String?  @map("client_id")
+  externalPartyName String?  @map("external_party_name")
+  partyRole         String   @map("party_role")
+  comment           String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  deal        Deal             @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  client      Client?          @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  commissions DealCommission[]
+
+  @@index([dealId])
+  @@index([clientId])
+  @@map("deal_parties")
+}
+
+model DealCommission {
+  id           String    @id @default(uuid())
+  dealId       String    @map("deal_id")
+  payerPartyId String?   @map("payer_party_id")
+  amount       BigInt
+  status       String
+  dueAt        DateTime? @map("due_at")
+  receivedAt   DateTime? @map("received_at")
+  comment      String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  deal  Deal       @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  payer DealParty? @relation(fields: [payerPartyId], references: [id], onDelete: Restrict)
+
+  @@index([dealId])
+  @@index([payerPartyId])
+  @@map("deal_commissions")
+}
+
+// ───────────────────────────── Коммерческие предложения ─────────────────────────────
+
+model CommercialOffer {
+  id                    String    @id @default(uuid())
+  clientNeedId          String    @map("client_need_id")
+  responsibleUserId     String    @map("responsible_user_id")
+  createdBy             String    @map("created_by")
+  legalEntityId         String?   @map("legal_entity_id")
+  status                String
+  title                 String?
+  introText             String?   @map("intro_text")
+  notes                 String?
+  generationSource      String    @default("manual") @map("generation_source")
+  promptTemplateVersion String?   @map("prompt_template_version")
+  sentAt                DateTime? @map("sent_at")
+  expiresAt             DateTime? @map("expires_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  need          ClientNeed                @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+  responsible   User                      @relation("OfferResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  creator       User                      @relation("OfferCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  legalEntity   LegalEntity?              @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  items         CommercialOfferItem[]
+  taskLinks     TaskCommercialOffer[]
+  documentLinks DocumentCommercialOffer[]
+
+  @@index([clientNeedId, status, sentAt])
+  @@index([responsibleUserId])
+  @@index([createdBy])
+  @@index([legalEntityId])
+  @@map("commercial_offers")
+}
+
+model CommercialOfferItem {
+  id                String   @id @default(uuid())
+  commercialOfferId String   @map("commercial_offer_id")
+  propertyId        String   @map("property_id")
+  position          Int
+  priceSnapshot     BigInt? @map("price_snapshot")
+  addressSnapshot   String?  @map("address_snapshot")
+  areaSnapshot      BigInt? @map("area_snapshot")
+  termsSnapshot     String?  @map("terms_snapshot")
+  comment           String?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  offer    CommercialOffer @relation(fields: [commercialOfferId], references: [id], onDelete: Restrict)
+  property Property        @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+
+  @@unique([commercialOfferId, propertyId])
+  @@index([commercialOfferId, position])
+  @@index([propertyId])
+  @@map("commercial_offer_items")
+}
+
+// ───────────────────────────── Документы и файловые связи ─────────────────────────────
+
+model Document {
+  templateVersionId String?                  @map("template_version_id")
+  valuesSnapshot    Json?                    @map("values_snapshot")
+  templateVersion   DocumentTemplateVersion? @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+  searchExports     SearchExport[]
+
+  thumbnailStorageKey String?             @map("thumbnail_storage_key")
+  logoFor             LegalEntity[]       @relation("LegalEntityLogo")
+  checklistItems      DealChecklistItem[]
+  id                  String              @id @default(uuid())
+  originalName        String              @map("original_name")
+  documentTypeCode    String              @map("document_type_code")
+  mimeType            String              @map("mime_type")
+  fileSize            BigInt              @map("file_size")
+  storageProvider     String              @default("local") @map("storage_provider")
+  storageKey          String              @unique @map("storage_key")
+  checksum            String?
+  uploadedBy          String              @map("uploaded_by")
+  legalEntityId       String?             @map("legal_entity_id")
+  archivedAt          DateTime?           @map("archived_at")
+  createdAt           DateTime            @default(now()) @map("created_at")
+
+  uploader           User                      @relation(fields: [uploadedBy], references: [id], onDelete: Restrict)
+  legalEntity        LegalEntity?              @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  clientLinks        DocumentClient[]
+  needLinks          DocumentNeed[]
+  propertyLinks      DocumentProperty[]
+  showingLinks       DocumentShowing[]
+  dealLinks          DocumentDeal[]
+  advertisementLinks DocumentAdvertisement[]
+  agreementLinks     DocumentAgreement[]
+  offerLinks         DocumentCommercialOffer[]
+  collectionLinks    DocumentCollection[]
+  aiRuns             AiRun[]
+
+  @@index([templateVersionId])
+  @@index([uploadedBy])
+  @@index([legalEntityId])
+  @@map("documents")
+}
+
+model DocumentClient {
+  documentId String   @map("document_id")
+  clientId   String   @map("client_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, clientId])
+  @@index([clientId])
+  @@map("document_clients")
+}
+
+model DocumentNeed {
+  documentId   String     @map("document_id")
+  clientNeedId String     @map("client_need_id")
+  document     Document   @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  need         ClientNeed @relation(fields: [clientNeedId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, clientNeedId])
+  @@index([clientNeedId])
+  @@map("document_needs")
+}
+
+model DocumentProperty {
+  sortOrder  Int       @default(0) @map("sort_order")
+  isCover    Boolean   @default(false) @map("is_cover")
+  caption    String?
+  kind       String    @default("document")
+  archivedAt DateTime? @map("archived_at")
+  documentId String    @map("document_id")
+  propertyId String    @map("property_id")
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  property   Property  @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, propertyId])
+  @@index([propertyId])
+  @@map("document_properties")
+}
+
+model DocumentShowing {
+  documentId String   @map("document_id")
+  showingId  String   @map("showing_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  showing    Showing  @relation(fields: [showingId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, showingId])
+  @@index([showingId])
+  @@map("document_showings")
+}
+
+model DocumentDeal {
+  documentId String   @map("document_id")
+  dealId     String   @map("deal_id")
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  deal       Deal     @relation(fields: [dealId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, dealId])
+  @@index([dealId])
+  @@map("document_deals")
+}
+
+model DocumentAdvertisement {
+  documentId      String        @map("document_id")
+  advertisementId String        @map("advertisement_id")
+  document        Document      @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  advertisement   Advertisement @relation(fields: [advertisementId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, advertisementId])
+  @@index([advertisementId])
+  @@map("document_advertisements")
+}
+
+model DocumentAgreement {
+  documentId  String    @map("document_id")
+  agreementId String    @map("agreement_id")
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  agreement   Agreement @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, agreementId])
+  @@index([agreementId])
+  @@map("document_agreements")
+}
+
+model DocumentCommercialOffer {
+  documentId        String          @map("document_id")
+  commercialOfferId String          @map("commercial_offer_id")
+  document          Document        @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  offer             CommercialOffer @relation(fields: [commercialOfferId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, commercialOfferId])
+  @@index([commercialOfferId])
+  @@map("document_commercial_offers")
+}
+
+// ───────────────────────────── Миграция и legacy ─────────────────────────────
+
+model HistoricalDealArchive {
+  id               String    @id @default(uuid())
+  sourceFile       String    @map("source_file")
+  sourceRowId      String?   @map("source_row_id")
+  sourceRowKey     String    @unique @map("source_row_key")
+  dealDate         DateTime? @map("deal_date")
+  dealDateText     String?   @map("deal_date_text")
+  participantName  String?   @map("participant_name")
+  contactPhone     String?   @map("contact_phone")
+  contactEmail     String?   @map("contact_email")
+  propertyType     String?   @map("property_type")
+  objectText       String?   @map("object_text")
+  partyRole        String?   @map("party_role")
+  area             BigInt?
+  price            BigInt?
+  conditions       String?
+  realtorText      String?   @map("realtor_text")
+  contractRef      String?   @map("contract_ref")
+  commissionAmount BigInt?  @map("commission_amount")
+  additionalInfo   String?   @map("additional_info")
+  clientId         String?   @map("client_id")
+  importJobId      String?   @map("import_job_id")
+  importedAt       DateTime  @default(now()) @map("imported_at")
+
+  client    Client?    @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  importJob ImportJob? @relation(fields: [importJobId], references: [id], onDelete: Restrict)
+
+  @@index([clientId])
+  @@index([importJobId])
+  @@index([dealDate])
+  @@map("historical_deal_archive")
+}
+
+model ImportJob {
+  id                 String    @id @default(uuid())
+  sourceFilename     String    @map("source_filename")
+  sourceSha256       String    @map("source_sha256")
+  sourceFormat       String    @map("source_format")
+  profileCode        String    @map("profile_code")
+  status             String
+  startedBy          String    @map("started_by")
+  startedAt          DateTime  @default(now()) @map("started_at")
+  finishedAt         DateTime? @map("finished_at")
+  rowsRead           Int       @default(0) @map("rows_read")
+  rowsImported       Int       @default(0) @map("rows_imported")
+  rowsSkipped        Int       @default(0) @map("rows_skipped")
+  rowsError          Int       @default(0) @map("rows_error")
+  probableDuplicates Int       @default(0) @map("probable_duplicates")
+  mappingVersion     String    @map("mapping_version")
+  reportStorageKey   String?   @map("report_storage_key")
+  sourceStorageKey   String?   @map("source_storage_key")
+  summaryJsonb       Json?     @map("summary_jsonb")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  starter        User                    @relation(fields: [startedBy], references: [id], onDelete: Restrict)
+  rows           ImportRowResult[]
+  archiveRecords HistoricalDealArchive[]
+
+  @@index([startedBy])
+  @@index([sourceSha256])
+  @@map("import_jobs")
+}
+
+model ImportRowResult {
+  id               String   @id @default(uuid())
+  importJobId      String   @map("import_job_id")
+  sheetName        String?  @map("sheet_name")
+  sourceSection    String?  @map("source_section")
+  sourceRowNumber  Int?     @map("source_row_number")
+  sourceRecordKey  String?  @map("source_record_key")
+  targetEntityType String?  @map("target_entity_type")
+  targetEntityId   String?  @map("target_entity_id")
+  validationStatus String   @map("validation_status")
+  commitResult     String?  @map("commit_result")
+  errorCodes       Json @default("[]") @map("error_codes")
+  warningCodes     Json @default("[]") @map("warning_codes")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  job ImportJob @relation(fields: [importJobId], references: [id], onDelete: Restrict)
+
+  @@index([importJobId, validationStatus])
+  @@index([importJobId, commitResult])
+  @@index([sourceRecordKey])
+  @@map("import_row_results")
+}
+
+// ───────────────────────────── Эксплуатация ─────────────────────────────
+
+model BackupRun {
+  id                String    @id @default(uuid())
+  backupId          String    @unique @map("backup_id")
+  deploymentId      String    @map("deployment_id")
+  startedAt         DateTime  @map("started_at")
+  finishedAt        DateTime? @map("finished_at")
+  initiatedByUserId String?   @map("initiated_by_user_id")
+  triggerType       String    @map("trigger_type")
+  localStatus       String    @map("local_status")
+  databaseDumpSize  BigInt?   @map("database_dump_size")
+  filesArchiveSize  BigInt?   @map("files_archive_size")
+  manifestSha256    String?   @map("manifest_sha256")
+  appVersion        String?   @map("app_version")
+  schemaVersion     String?   @map("schema_version")
+  errorSummary      String?   @map("error_summary")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  initiator  User?             @relation(fields: [initiatedByUserId], references: [id], onDelete: Restrict)
+  targetRuns BackupTargetRun[]
+
+  @@index([deploymentId, startedAt])
+  @@index([initiatedByUserId])
+  @@map("backup_runs")
+}
+
+model BackupRemote {
+  id              String    @id @default(uuid())
+  remoteCode      String    @unique @map("remote_code")
+  displayName     String    @map("display_name")
+  providerType    String    @map("provider_type")
+  transportType   String    @map("transport_type")
+  isEnabled       Boolean   @default(true) @map("is_enabled")
+  isMandatory     Boolean   @default(false) @map("is_mandatory")
+  configRef       String    @map("config_ref")
+  remotePrefix    String?   @map("remote_prefix")
+  retentionDaily  Int?      @map("retention_daily")
+  retentionWeekly Int?      @map("retention_weekly")
+  lastProbeAt     DateTime? @map("last_probe_at")
+  probeStatus     String?   @map("probe_status")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  targetRuns BackupTargetRun[]
+
+  @@map("backup_remotes")
+}
+
+model BackupTargetRun {
+  id              String    @id @default(uuid())
+  backupRunId     String    @map("backup_run_id")
+  backupRemoteId  String    @map("backup_remote_id")
+  uploadStatus    String    @map("upload_status")
+  verifyStatus    String    @map("verify_status")
+  attemptCount    Int       @default(0) @map("attempt_count")
+  startedAt       DateTime? @map("started_at")
+  finishedAt      DateTime? @map("finished_at")
+  verifiedAt      DateTime? @map("verified_at")
+  bytesUploaded   BigInt?   @map("bytes_uploaded")
+  remoteBackupRef String?   @map("remote_backup_ref")
+  errorCode       String?   @map("error_code")
+  errorSummary    String?   @map("error_summary")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  backupRun    BackupRun    @relation(fields: [backupRunId], references: [id], onDelete: Restrict)
+  backupRemote BackupRemote @relation(fields: [backupRemoteId], references: [id], onDelete: Restrict)
+
+  @@unique([backupRunId, backupRemoteId])
+  @@index([backupRemoteId, verifyStatus, finishedAt])
+  @@map("backup_target_runs")
+}
+
+// ───────────────────────────── Технический аудит и справочники ─────────────────────────────
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorUserId   String?  @map("actor_user_id")
+  action        String
+  entityType    String   @map("entity_type")
+  entityId      String   @map("entity_id")
+  occurredAt    DateTime @default(now()) @map("occurred_at")
+  beforeJsonb   Json?    @map("before_jsonb")
+  afterJsonb    Json?    @map("after_jsonb")
+  correlationId String?  @map("correlation_id")
+
+  // Аудит должен переживать исходную запись: FK только на actor (User не удаляется физически).
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId, occurredAt])
+  @@index([actorUserId])
+  @@index([occurredAt])
+  @@map("audit_log")
+}
+
+model AiRun {
+  id                    String    @id @default(uuid())
+  providerCode          String    @map("provider_code")
+  featureCode           String    @map("feature_code")
+  modelCode             String?   @map("model_code")
+  requestedByUserId     String    @map("requested_by_user_id")
+  targetEntityType      String?   @map("target_entity_type")
+  targetEntityId        String?   @map("target_entity_id")
+  promptTemplateVersion String    @map("prompt_template_version")
+  status                String
+  startedAt             DateTime? @map("started_at")
+  finishedAt            DateTime? @map("finished_at")
+  inputUnits            BigInt?   @map("input_units")
+  outputUnits           BigInt?   @map("output_units")
+  estimatedCost         BigInt?  @map("estimated_cost")
+  outputDocumentId      String?   @map("output_document_id")
+  errorCode             String?   @map("error_code")
+  errorSummary          String?   @map("error_summary")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  requestedBy    User      @relation(fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  outputDocument Document? @relation(fields: [outputDocumentId], references: [id], onDelete: Restrict)
+
+  @@index([requestedByUserId, createdAt])
+  @@index([featureCode, status, createdAt])
+  @@index([outputDocumentId])
+  @@map("ai_runs")
+}
+
+// Бизнес-справочники (раздел 40.9): каналы, источники, типы объектов/операций,
+// рекламные площадки. Стабильный code + русское display_name + признак активности.
+// Системный codebook (статусы, от которых зависят инварианты) здесь НЕ хранится —
+// он зафиксирован в коде (src/shared/codebook.ts) и CHECK-ограничениях.
+model DictionaryItem {
+  id          String   @id @default(uuid())
+  category    String
+  code        String
+  displayName String   @map("display_name")
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(100) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([category, code])
+  @@map("dictionary_items")
+}
+
+// TZ v2.4.1 extensions; system CHECK constraints and partial indexes live in SQL.
+model ExternalListing {
+  publishedAt       DateTime? @map("published_at")
+  sourceUpdatedAt   DateTime? @map("source_updated_at")
+  dateSource        String    @default("unknown") @map("date_source")
+  datePrecision     String    @default("unknown") @map("date_precision")
+  sourceCategoryRaw String?   @map("source_category_raw")
+  purposeEvidence   Json?     @map("purpose_evidence")
+  pricePerM2Rub     BigInt?  @map("price_per_m2_rub")
+  pricePerM2Unit    String?   @map("price_per_m2_unit")
+
+  fetchedAt        DateTime?                @map("fetched_at")
+  lastCheckedAt    DateTime?                @map("last_checked_at")
+  duplicateMembers ListingDuplicateMember[]
+  collectionItems  PropertyCollectionItem[]
+  leadRequests     LeadRequest[]
+  analysisCaches   AiAnalysisCache[]
+
+  id                      String                        @id @default(uuid())
+  source                  String
+  sourceListingId         String?                       @map("source_listing_id")
+  sourceUnitId            String?                       @map("source_unit_id")
+  url                     String
+  sourceMethod            String                        @map("source_method")
+  operation               String
+  priceRub                BigInt?                      @map("price_rub")
+  priceUnit               String                        @map("price_unit")
+  areaM2                  BigInt?                      @map("area_m2")
+  floorRaw                String?                       @map("floor_raw")
+  floorNumber             Int?                          @map("floor_number")
+  purposes                Json                      @default("[]")
+  address                 String?
+  district                String?
+  city                    String                        @default("Новосибирск")
+  sellerType              String?                       @map("seller_type")
+  ownerConfirmed          Boolean                       @default(false) @map("owner_confirmed")
+  ownerConfirmationMethod String?                       @map("owner_confirmation_method")
+  ownerConfirmedAt        DateTime?                     @map("owner_confirmed_at")
+  ownerConfirmationSource String?                       @map("owner_confirmation_source")
+  description             String?
+  images                  Json                          @default("[]")
+  firstSeenAt             DateTime                      @default(now()) @map("first_seen_at")
+  lastSeenAt              DateTime                      @default(now()) @map("last_seen_at")
+  lastPrice               BigInt?                      @map("last_price")
+  propertyId              String?                       @map("property_id")
+  updatedAt               DateTime                      @updatedAt @map("updated_at")
+  property                Property?                     @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  snapshots               ExternalListingSnapshot[]
+  verifications           ExternalListingVerification[]
+  bookmarks               SearchBookmark[]
+  selections              SearchSelection[]
+  runResults              SearchRunResult[]
+
+  @@index([publishedAt, id])
+  @@index([sourceUpdatedAt, id])
+  @@index([firstSeenAt, id])
+  @@index([priceRub, id])
+  @@index([pricePerM2Unit, pricePerM2Rub, id])
+  @@index([areaM2, id])
+  @@index([lastCheckedAt, id])
+  @@index([propertyId])
+  @@index([city, operation, lastSeenAt])
+  @@map("external_listings")
+}
+
+model ExternalListingSnapshot {
+  publishedAt       DateTime? @map("published_at")
+  sourceUpdatedAt   DateTime? @map("source_updated_at")
+  dateSource        String    @default("unknown") @map("date_source")
+  datePrecision     String    @default("unknown") @map("date_precision")
+  sourceCategoryRaw String?   @map("source_category_raw")
+  purposeEvidence   Json?     @map("purpose_evidence")
+  pricePerM2Rub     BigInt?  @map("price_per_m2_rub")
+  pricePerM2Unit    String?   @map("price_per_m2_unit")
+
+  firstSeenAt   DateTime? @map("first_seen_at")
+  lastSeenAt    DateTime? @map("last_seen_at")
+  areaM2        BigInt?  @map("area_m2")
+  lastCheckedAt DateTime? @map("last_checked_at")
+
+  id          String          @id @default(uuid())
+  listingId   String          @map("listing_id")
+  searchRunId String?         @map("search_run_id")
+  fetchedAt   DateTime        @default(now()) @map("fetched_at")
+  priceRub    BigInt?        @map("price_rub")
+  normalized  Json
+  listing     ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  searchRun   SearchRun?      @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
+
+  @@index([publishedAt, id])
+  @@index([sourceUpdatedAt, id])
+  @@index([firstSeenAt, id])
+  @@index([priceRub, id])
+  @@index([pricePerM2Unit, pricePerM2Rub, id])
+  @@index([areaM2, id])
+  @@index([lastCheckedAt, id])
+  @@index([listingId, fetchedAt])
+  @@index([searchRunId])
+  @@map("external_listing_snapshots")
+}
+
+model ExternalListingVerification {
+  id             String          @id @default(uuid())
+  listingId      String          @map("listing_id")
+  verifiedBy     String          @map("verified_by")
+  verifiedAt     DateTime        @default(now()) @map("verified_at")
+  availability   String          @default("unknown")
+  priceConfirmed Boolean?        @map("price_confirmed")
+  ownerConfirmed Boolean?        @map("owner_confirmed")
+  note           String?
+  nextCheckAt    DateTime?       @map("next_check_at")
+  listing        ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  verifier       User            @relation(fields: [verifiedBy], references: [id], onDelete: Restrict)
+
+  @@index([listingId, verifiedAt])
+  @@index([verifiedBy])
+  @@index([nextCheckAt])
+  @@map("external_listing_verifications")
+}
+
+model SearchBookmark {
+  id        String          @id @default(uuid())
+  userId    String          @map("user_id")
+  listingId String          @map("listing_id")
+  note      String?
+  status    String          @default("study")
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  listing   ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, listingId])
+  @@index([listingId])
+  @@map("search_bookmarks")
+}
+
+model SearchSelection {
+  id           String             @id @default(uuid())
+  needId       String             @map("need_id")
+  listingId    String             @map("listing_id")
+  addedBy      String             @map("added_by")
+  comment      String?
+  reviewStatus String             @default("candidate") @map("review_status")
+  propertyId   String?            @map("property_id")
+  matchId      String?            @map("match_id")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  need         ClientNeed         @relation(fields: [needId], references: [id], onDelete: Restrict)
+  listing      ExternalListing    @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  creator      User               @relation(fields: [addedBy], references: [id], onDelete: Restrict)
+  property     Property?          @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  match        NeedPropertyMatch? @relation(fields: [matchId], references: [id], onDelete: Restrict)
+
+  @@unique([needId, listingId])
+  @@index([listingId])
+  @@index([addedBy])
+  @@index([propertyId])
+  @@index([matchId])
+  @@map("search_selections")
+}
+
+model SavedSearch {
+  id                  String      @id @default(uuid())
+  ownerUserId         String      @map("owner_user_id")
+  name                String
+  city                String      @default("Новосибирск")
+  filters             Json
+  sources             Json    @default("[]")
+  needId              String?     @map("need_id")
+  lastRunAt           DateTime?   @map("last_run_at")
+  lastSuccessfulRunId String?     @map("last_successful_run_id")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+  owner               User        @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  need                ClientNeed? @relation(fields: [needId], references: [id], onDelete: Restrict)
+  lastSuccessfulRun   SearchRun?  @relation("LastSuccessfulRun", fields: [lastSuccessfulRunId], references: [id], onDelete: Restrict)
+  runs                SearchRun[] @relation("SavedSearchRuns")
+
+  @@index([ownerUserId])
+  @@index([needId])
+  @@index([lastSuccessfulRunId])
+  @@map("saved_searches")
+}
+
+model SearchRun {
+  depthParams      Json                        @default("{}") @map("depth_params")
+  sortParams       Json                        @default("{}") @map("sort_params")
+  deadlineAt       DateTime?                   @map("deadline_at")
+  cancelledAt      DateTime?                   @map("cancelled_at")
+  cancelRequested  Boolean                     @default(false) @map("cancel_requested")
+  progress         Json                        @default("{}")
+  incompleteReason String?                     @map("incomplete_reason")
+  idempotencyKey   String?                     @unique @map("idempotency_key")
+  lockedBy         String?                     @map("locked_by")
+  heartbeatAt      DateTime?                   @map("heartbeat_at")
+  browserSessions  InteractiveBrowserSession[]
+
+  id             String                    @id @default(uuid())
+  savedSearchId  String?                   @map("saved_search_id")
+  needId         String?                   @map("need_id")
+  userId         String                    @map("user_id")
+  city           String                    @default("Новосибирск")
+  filters        Json
+  status         String                    @default("pending")
+  startedAt      DateTime                  @default(now()) @map("started_at")
+  finishedAt     DateTime?                 @map("finished_at")
+  webSearchUsed  Boolean                   @default(false) @map("web_search_used")
+  fallbackReason String?                   @map("fallback_reason")
+  savedSearch    SavedSearch?              @relation("SavedSearchRuns", fields: [savedSearchId], references: [id], onDelete: Restrict)
+  need           ClientNeed?               @relation(fields: [needId], references: [id], onDelete: Restrict)
+  user           User                      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  successfulFor  SavedSearch[]             @relation("LastSuccessfulRun")
+  sources        SearchRunSource[]
+  results        SearchRunResult[]
+  snapshots      ExternalListingSnapshot[]
+  aiUsageLogs    AiUsageLog[]
+
+  @@index([status, heartbeatAt, startedAt])
+  @@index([deadlineAt])
+  @@index([savedSearchId, startedAt])
+  @@index([needId])
+  @@index([userId, startedAt])
+  @@map("search_runs")
+}
+
+model SearchRunSource {
+  requestedCount  Int       @default(0) @map("requested_count")
+  receivedCount   Int       @default(0) @map("received_count")
+  acceptedCount   Int       @default(0) @map("accepted_count")
+  depthReached    Int       @default(0) @map("depth_reached")
+  retryAfterAt    DateTime? @map("retry_after_at")
+  statusReasonRu  String?   @map("status_reason_ru")
+  needsUserAction Boolean   @default(false) @map("needs_user_action")
+
+  id          String    @id @default(uuid())
+  runId       String    @map("run_id")
+  source      String
+  status      String
+  resultCount Int       @default(0) @map("result_count")
+  reason      String?
+  durationMs  Int?      @map("duration_ms")
+  run         SearchRun @relation(fields: [runId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, source])
+  @@index([status, retryAfterAt])
+  @@map("search_run_sources")
+}
+
+model SearchRunResult {
+  id           String          @id @default(uuid())
+  runId        String          @map("run_id")
+  listingId    String          @map("listing_id")
+  verdict      String
+  criteria     Json            @default("[]")
+  score        BigInt         @default(0)
+  isNew        Boolean         @default(false) @map("is_new")
+  priceChanged Boolean         @default(false) @map("price_changed")
+  run          SearchRun       @relation(fields: [runId], references: [id], onDelete: Restrict)
+  listing      ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, listingId])
+  @@index([listingId])
+  @@index([runId, verdict])
+  @@map("search_run_results")
+}
+
+model AiSetting {
+  id                     String   @id @default(uuid())
+  aiEnabled              Boolean  @default(false) @map("ai_enabled")
+  scraperEnabled         Boolean  @default(false) @map("scraper_enabled")
+  browserEnabled         Boolean  @default(true) @map("browser_enabled")
+  enabledSources         Json @default("[]") @map("enabled_sources")
+  webSearchManualAllowed Boolean  @default(false) @map("web_search_manual_allowed")
+  webSearchAutoFallback  Boolean  @default(false) @map("web_search_auto_fallback")
+  model                  String   @default("aliceai-llm-flash/latest")
+  webModel               String?  @map("web_model")
+  searchContextSize      String   @default("low") @map("search_context_size")
+  perUserDailyLimit      Int      @default(3) @map("per_user_daily_limit")
+  perJobLimit            Int      @default(1) @map("per_job_limit")
+  dailyLimit             Int      @default(10) @map("daily_limit")
+  monthlyBudgetRub       BigInt  @default(100000) @map("monthly_budget_rub")
+  updatedBy              String?  @map("updated_by")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+  updater                User?    @relation(fields: [updatedBy], references: [id], onDelete: Restrict)
+
+  @@index([updatedBy])
+  @@map("ai_settings")
+}
+
+model AiUsageLog {
+  chatMessages   AiChatMessage[]
+  analysisCaches AiAnalysisCache[]
+
+  id               String                @id @default(uuid())
+  callType         String                @map("call_type")
+  userId           String                @map("user_id")
+  searchRunId      String?               @map("search_run_id")
+  model            String
+  inputTokens      Int                   @default(0) @map("input_tokens")
+  outputTokens     Int                   @default(0) @map("output_tokens")
+  webSearchCalls   Int                   @default(0) @map("web_search_calls")
+  estimatedCostRub BigInt               @default(0) @map("estimated_cost_rub")
+  actualCostRub    BigInt?              @map("actual_cost_rub")
+  result           Json?
+  status           String                @default("pending")
+  createdAt        DateTime              @default(now()) @map("created_at")
+  durationMs       Int?                  @map("duration_ms")
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  searchRun        SearchRun?            @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
+  reservations     AiBudgetReservation[]
+
+  @@index([userId, createdAt])
+  @@index([searchRunId])
+  @@index([createdAt, status])
+  @@map("ai_usage_logs")
+}
+
+model AiTariff {
+  id            String   @id @default(uuid())
+  model         String
+  callType      String   @map("call_type")
+  unit          String
+  priceRub      BigInt  @map("price_rub")
+  effectiveFrom DateTime @map("effective_from")
+
+  @@unique([model, callType, unit, effectiveFrom])
+  @@map("ai_tariffs")
+}
+
+model AiBudgetReservation {
+  id         String      @id @default(uuid())
+  usageLogId String?     @map("usage_log_id")
+  amountRub  BigInt     @map("amount_rub")
+  status     String      @default("reserved")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  usageLog   AiUsageLog? @relation(fields: [usageLogId], references: [id], onDelete: Restrict)
+
+  @@index([usageLogId])
+  @@index([status, createdAt])
+  @@map("ai_budget_reservations")
+}
+
+model CalendarEvent {
+  id             String      @id @default(uuid())
+  startAt        DateTime    @map("start_at")
+  endAt          DateTime    @map("end_at")
+  allDay         Boolean     @default(false) @map("all_day")
+  title          String
+  description    String?
+  ownerUserId    String      @map("owner_user_id")
+  visibility     String      @default("private")
+  recurrenceRule String?     @map("recurrence_rule")
+  clientId       String?     @map("client_id")
+  needId         String?     @map("need_id")
+  propertyId     String?     @map("property_id")
+  dealId         String?     @map("deal_id")
+  archivedAt     DateTime?   @map("archived_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  owner          User        @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  client         Client?     @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  need           ClientNeed? @relation(fields: [needId], references: [id], onDelete: Restrict)
+  property       Property?   @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  deal           Deal?       @relation(fields: [dealId], references: [id], onDelete: Restrict)
+
+  @@index([ownerUserId, startAt])
+  @@index([startAt])
+  @@index([clientId])
+  @@index([needId])
+  @@index([propertyId])
+  @@index([dealId])
+  @@map("calendar_events")
+}
+
+model Notification {
+  id              String    @id @default(uuid())
+  recipientUserId String    @map("recipient_user_id")
+  kind            String
+  sourceType      String    @map("source_type")
+  sourceId        String    @map("source_id")
+  triggerAt       DateTime  @map("trigger_at")
+  state           String    @default("pending")
+  readAt          DateTime? @map("read_at")
+  snoozedUntil    DateTime? @map("snoozed_until")
+  title           String
+  link            String
+  dedupKey        String    @unique @map("dedup_key")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  recipient       User      @relation(fields: [recipientUserId], references: [id], onDelete: Restrict)
+
+  @@index([recipientUserId, state, triggerAt])
+  @@index([state, triggerAt])
+  @@index([sourceType, sourceId])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  leadMinutes Int      @default(15) @map("lead_minutes")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("notification_preferences")
+}
+
+model DealChecklistItem {
+  id                String    @id @default(uuid())
+  dealId            String    @map("deal_id")
+  code              String
+  title             String
+  status            String    @default("none")
+  responsibleUserId String    @map("responsible_user_id")
+  checkedAt         DateTime? @map("checked_at")
+  documentId        String?   @map("document_id")
+  sortOrder         Int       @default(0) @map("sort_order")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  deal              Deal      @relation(fields: [dealId], references: [id], onDelete: Restrict)
+  responsible       User      @relation(fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  document          Document? @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  @@unique([dealId, code])
+  @@index([responsibleUserId])
+  @@index([documentId])
+  @@map("deal_checklist_items")
+}
+
+// TZ v3.1 additive extensions. Additional invariants are enforced in SQL.
+
+model InteractiveBrowserSession {
+  id             String    @id @default(uuid())
+  searchRunId    String    @map("search_run_id")
+  source         String
+  ownerUserId    String    @map("owner_user_id")
+  status         String    @default("pending")
+  startUrlHost   String    @map("start_url_host")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  expiresAt      DateTime  @map("expires_at")
+  completedAt    DateTime? @map("completed_at")
+  lastActivityAt DateTime  @default(now()) @map("last_activity_at")
+  closeReason    String?   @map("close_reason")
+  searchRun      SearchRun @relation(fields: [searchRunId], references: [id], onDelete: Restrict)
+  owner          User      @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+
+  @@index([searchRunId, source])
+  @@index([ownerUserId, status, expiresAt])
+  @@index([status, expiresAt])
+  @@map("interactive_browser_sessions")
+}
+
+model ListingDuplicateGroup {
+  id        String                     @id @default(uuid())
+  status    String                     @default("probable")
+  evidence  Json                       @default("{}")
+  createdAt DateTime                   @default(now()) @map("created_at")
+  updatedAt DateTime                   @updatedAt @map("updated_at")
+  members   ListingDuplicateMember[]
+  decisions ListingDuplicateDecision[]
+
+  @@index([status, createdAt])
+  @@map("listing_duplicate_groups")
+}
+
+model ListingDuplicateMember {
+  id         String                @id @default(uuid())
+  groupId    String                @map("group_id")
+  listingId  String                @map("listing_id")
+  releasedAt DateTime?             @map("released_at")
+  group      ListingDuplicateGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  listing    ExternalListing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@unique([groupId, listingId])
+  @@index([listingId])
+  @@map("listing_duplicate_members")
+}
+
+model ListingDuplicateDecision {
+  id        String                @id @default(uuid())
+  groupId   String                @map("group_id")
+  decision  String
+  decidedBy String                @map("decided_by")
+  decidedAt DateTime              @default(now()) @map("decided_at")
+  comment   String?
+  group     ListingDuplicateGroup @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  decider   User                  @relation(fields: [decidedBy], references: [id], onDelete: Restrict)
+
+  @@index([groupId, decidedAt])
+  @@index([decidedBy])
+  @@map("listing_duplicate_decisions")
+}
+
+model TaskChecklistItem {
+  id                String    @id @default(uuid())
+  taskId            String    @map("task_id")
+  title             String
+  sortOrder         Int       @default(0) @map("sort_order")
+  responsibleUserId String?   @map("responsible_user_id")
+  dueAt             DateTime? @map("due_at")
+  required          Boolean   @default(false)
+  status            String    @default("open")
+  result            String?
+  completedAt       DateTime? @map("completed_at")
+  completedBy       String?   @map("completed_by")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  task              Task      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  responsible       User?     @relation("TaskChecklistResponsible", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+  completer         User?     @relation("TaskChecklistCompleted", fields: [completedBy], references: [id], onDelete: Restrict)
+
+  @@index([taskId, sortOrder])
+  @@index([responsibleUserId, status, dueAt])
+  @@index([completedBy])
+  @@map("task_checklist_items")
+}
+
+model PlannerSetting {
+  id                 String   @id @default(uuid())
+  soonThresholdHours Int      @default(24) @map("soon_threshold_hours")
+  updatedBy          String?  @map("updated_by")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  updater            User?    @relation(fields: [updatedBy], references: [id], onDelete: Restrict)
+
+  @@index([updatedBy])
+  @@map("planner_settings")
+}
+
+model BulkTaskBatch {
+  id             String   @id @default(uuid())
+  idempotencyKey String   @unique @map("idempotency_key")
+  createdBy      String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  count          Int
+  template       Json
+  creator        User     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  tasks          Task[]
+
+  @@index([createdBy, createdAt])
+  @@map("bulk_task_batches")
+}
+
+model PropertyCollection {
+  id          String                   @id @default(uuid())
+  name        String
+  ownerUserId String                   @map("owner_user_id")
+  visibility  String                   @default("private")
+  archivedAt  DateTime?                @map("archived_at")
+  createdAt   DateTime                 @default(now()) @map("created_at")
+  updatedAt   DateTime                 @updatedAt @map("updated_at")
+  owner       User                     @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  items       PropertyCollectionItem[]
+  needs       PropertyCollectionNeed[]
+  documentLinks DocumentCollection[]
+
+  @@index([ownerUserId, archivedAt, updatedAt])
+  @@index([visibility, archivedAt])
+  @@map("property_collections")
+}
+
+model PropertyCollectionItem {
+  id                String             @id @default(uuid())
+  collectionId      String             @map("collection_id")
+  sortOrder         Int                @default(0) @map("sort_order")
+  externalListingId String?            @map("external_listing_id")
+  propertyId        String?            @map("property_id")
+  status            String             @default("in_collection")
+  comment           String?
+  exclusionReason   String?            @map("exclusion_reason")
+  addedBy           String             @map("added_by")
+  addedAt           DateTime           @default(now()) @map("added_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  collection        PropertyCollection @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+  externalListing   ExternalListing?   @relation(fields: [externalListingId], references: [id], onDelete: Restrict)
+  property          Property?          @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  creator           User               @relation(fields: [addedBy], references: [id], onDelete: Restrict)
+
+  @@unique([collectionId, externalListingId])
+  @@unique([collectionId, propertyId])
+  @@index([collectionId, sortOrder])
+  @@index([externalListingId])
+  @@index([propertyId])
+  @@index([addedBy])
+  @@map("property_collection_items")
+}
+
+model PropertyCollectionNeed {
+  id           String             @id @default(uuid())
+  collectionId String             @map("collection_id")
+  needId       String             @map("need_id")
+  linkedBy     String             @map("linked_by")
+  linkedAt     DateTime           @default(now()) @map("linked_at")
+  collection   PropertyCollection @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+  need         ClientNeed         @relation(fields: [needId], references: [id], onDelete: Restrict)
+  linker       User               @relation(fields: [linkedBy], references: [id], onDelete: Restrict)
+
+  @@unique([collectionId, needId])
+  @@index([needId, linkedAt])
+  @@index([linkedBy])
+  @@map("property_collection_needs")
+}
+
+model DocumentTemplate {
+  id               String                    @id @default(uuid())
+  code             String                    @unique
+  name             String
+  format           String
+  description      String?
+  status           String                    @default("active")
+  allowedSources   Json                  @map("allowed_sources") @default("[]")
+  currentVersionId String?                   @unique @map("current_version_id")
+  createdAt        DateTime                  @default(now()) @map("created_at")
+  updatedAt        DateTime                  @updatedAt @map("updated_at")
+  currentVersion   DocumentTemplateVersion?  @relation("TemplateCurrentVersion", fields: [currentVersionId], references: [id], onDelete: Restrict)
+  versions         DocumentTemplateVersion[] @relation("TemplateVersions")
+
+  @@index([status, name])
+  @@map("document_templates")
+}
+
+model DocumentTemplateVersion {
+  id                String            @id @default(uuid())
+  templateId        String            @map("template_id")
+  version           Int
+  manifestYaml      String            @map("manifest_yaml")
+  storageKey        String?           @map("storage_key")
+  markdownBody      String?           @map("markdown_body")
+  checksum          String
+  createdBy         String            @map("created_by")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  compatibilityNote String?           @map("compatibility_note")
+  template          DocumentTemplate  @relation("TemplateVersions", fields: [templateId], references: [id], onDelete: Restrict)
+  currentFor        DocumentTemplate? @relation("TemplateCurrentVersion")
+  creator           User              @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  documents         Document[]
+
+  @@unique([templateId, version])
+  @@index([createdBy])
+  @@map("document_template_versions")
+}
+
+model AiChatSession {
+  id             String            @id @default(uuid())
+  ownerUserId    String            @map("owner_user_id")
+  title          String
+  contextType    String            @default("none") @map("context_type")
+  contextId      String?           @map("context_id")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+  archivedAt     DateTime?         @map("archived_at")
+  owner          User              @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  messages       AiChatMessage[]
+  pendingActions AiPendingAction[]
+
+  @@index([ownerUserId, archivedAt, updatedAt])
+  @@index([contextType, contextId])
+  @@map("ai_chat_sessions")
+}
+
+model AiChatMessage {
+  id                String           @id @default(uuid())
+  sessionId         String           @map("session_id")
+  role              String
+  content           String
+  toolName          String?          @map("tool_name")
+  toolArgs          Json?            @map("tool_args")
+  toolResultSummary String?          @map("tool_result_summary")
+  aiUsageLogId      String?          @map("ai_usage_log_id")
+  pendingActionId   String?          @map("pending_action_id")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  session           AiChatSession    @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  aiUsageLog        AiUsageLog?      @relation(fields: [aiUsageLogId], references: [id], onDelete: Restrict)
+  pendingAction     AiPendingAction? @relation(fields: [pendingActionId], references: [id], onDelete: Restrict)
+
+  @@index([sessionId, createdAt, id])
+  @@index([aiUsageLogId])
+  @@index([pendingActionId])
+  @@map("ai_chat_messages")
+}
+
+model AiPendingAction {
+  id         String          @id @default(uuid())
+  sessionId  String          @map("session_id")
+  actionType String          @map("action_type")
+  payload    Json
+  status     String          @default("proposed")
+  decidedBy  String?         @map("decided_by")
+  decidedAt  DateTime?       @map("decided_at")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  expiresAt  DateTime?       @map("expires_at")
+  session    AiChatSession   @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  decider    User?           @relation(fields: [decidedBy], references: [id], onDelete: Restrict)
+  messages   AiChatMessage[]
+
+  @@index([sessionId, status])
+  @@index([decidedBy])
+  @@index([status, expiresAt])
+  @@map("ai_pending_actions")
+}
+
+model AiAnalysisCache {
+  id           String          @id @default(uuid())
+  cacheKey     String          @unique @map("cache_key")
+  listingId    String          @map("listing_id")
+  result       Json
+  aiUsageLogId String?         @map("ai_usage_log_id")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  listing      ExternalListing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  aiUsageLog   AiUsageLog?     @relation(fields: [aiUsageLogId], references: [id], onDelete: Restrict)
+
+  @@index([listingId])
+  @@index([aiUsageLogId])
+  @@map("ai_analysis_caches")
+}
+
+model SearchExport {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  format     String
+  scope      String
+  params     Json
+  columns    Json @default("[]")
+  rowCount   Int       @map("row_count")
+  documentId String?   @map("document_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  @@index([userId, createdAt])
+  @@index([documentId])
+  @@map("search_exports")
+}
+
+model DocumentCollection {
+  documentId   String             @map("document_id")
+  collectionId String             @map("collection_id")
+  document     Document           @relation(fields: [documentId], references: [id], onDelete: Restrict)
+  collection   PropertyCollection @relation(fields: [collectionId], references: [id], onDelete: Restrict)
+
+  @@id([documentId, collectionId])
+  @@index([collectionId])
+  @@map("document_collections")
+}

@@ -1,3 +1,4 @@
+import { lockSql } from "@/shared/db/dialect";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { db, transaction, Prisma, type Tx } from "@/shared/db/client";
@@ -50,7 +51,7 @@ export async function persistListing(tx: Tx, runId: string, listing: NormalizedL
     identityNeedsReview: listing.identityNeedsReview || !listing.sourceListingId };
   // The SQL partial unique index treats NULL unit as a single (non-grouped) unit.
   // Advisory lock also serializes upserts when the Prisma schema cannot express that index.
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([source, listing.sourceListingId, listing.sourceUnitId])}, 0))`;
+  await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([source, listing.sourceListingId, listing.sourceUnitId])}, 0))`));
   const existing = listing.sourceListingId ? await tx.externalListing.findFirst({ where: { source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId } }) : null;
   const perM2 = pricePerM2(listing.price, listing.priceUnit, listing.area);
   const date = (value?: string | null) => value && Number.isFinite(Date.parse(value)) ? new Date(value) : null;

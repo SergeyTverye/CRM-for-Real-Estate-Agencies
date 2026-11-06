@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { lockSql } from "@/shared/db/dialect";
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
 import { db, transaction, disconnectDb } from "@/shared/db/client";
@@ -40,7 +42,7 @@ export async function enqueueSearch(actor: Actor, raw: unknown) {
   const requestHash = createHash("sha256").update(canonical({ ...input, filters, needId })).digest("hex");
   const sourceDepth = Object.fromEntries(filters.sources.map(source => [source, resolveSourceDepth(source, input.sourceDepth?.[source] ?? input.depth, filters.purposes.length || (source === "onrealt" ? 5 : 1))]));
   return transaction(async tx => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key},0))`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${key},0))`));
     const existing = await tx.searchRun.findUnique({ where: { idempotencyKey: key } });
     if (existing) {
       if ((existing.depthParams as { requestHash?: string }).requestHash !== requestHash) throw new ConflictError("IDEMPOTENCY_CONFLICT", "Ключ запуска уже использован для других условий");
@@ -69,7 +71,7 @@ export async function cancelSearch(actor: Actor, runId: string) {
 export async function recoverSearchQueue(now = new Date()) {
   return transaction(async tx => {
     const threshold = new Date(+now - 60000);
-    const stale = await tx.$queryRaw<{ id: string; resumable: boolean }[]>`SELECT id,(NOT cancel_requested AND deadline_at>${now}) AS resumable FROM search_runs WHERE status='running' AND COALESCE(heartbeat_at,started_at)<${threshold} FOR UPDATE SKIP LOCKED`;
+    const stale = await tx.$queryRaw<{ id: string; resumable: boolean }[]>(lockSql(Prisma.sql`SELECT id,(NOT cancel_requested AND deadline_at>${now}) AS resumable FROM search_runs WHERE status='running' AND COALESCE(heartbeat_at,started_at)<${threshold} FOR UPDATE SKIP LOCKED`));
     for (const row of stale) {
       await tx.searchRun.update({ where: { id: row.id }, data: { status: row.resumable ? "queued" : "partial", finishedAt: row.resumable ? null : now, lockedBy: null, heartbeatAt: null, ...(!row.resumable ? { incompleteReason: "Выполнение прервано перезапуском; полученные результаты сохранены" } : {}) } });
       await tx.searchRunSource.updateMany({ where: { runId: row.id, status: { in: ["queued", "running"] } }, data: { status: row.resumable ? "queued" : "cancelled", statusReasonRu: "Выполнение прервано перезапуском" } });
@@ -93,7 +95,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
   await recoverSearchQueue();
   const workerId = `${options.workerId ?? "search"}:${randomUUID()}`;
   const run = await transaction(async tx => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(310105)`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(310105)`));
     // One durable slot across all processes; bounded per-source adapter concurrency stays separate.
     if (await tx.searchRun.count({ where: { status: "running", lockedBy: { not: null } } })) return null;
     const candidate = await tx.searchRun.findFirst({ where: { status: "queued" }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] });

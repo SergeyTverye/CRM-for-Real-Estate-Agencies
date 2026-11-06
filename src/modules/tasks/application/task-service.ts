@@ -1,3 +1,4 @@
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, Prisma, type Tx } from "@/shared/db/client";
 import { DomainError, ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
@@ -268,13 +269,13 @@ export async function completeTask(actor: Actor, taskId: string, input: unknown)
   parseInput(zUuid, taskId);
   const data = parseInput(completeSchema, input);
   return transaction(async (tx) => {
-    await tx.$queryRaw(Prisma.sql`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`);
+    await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`));
     const task = await loadOwnTask(tx, actor, taskId);
     if (!isOpenTaskStatus(task.status)) throw new DomainError("TASK_NOT_OPEN", "Задача уже завершена или отменена");
     const openRequired = await tx.taskChecklistItem.count({ where: { taskId, required: true, status: "open" } });
     if (openRequired && !data.confirmOpenRequired) throw new DomainError("OPEN_REQUIRED_CHECKLIST", `Открытых обязательных пунктов: ${openRequired}. Подтвердите завершение задачи.`, { count: openRequired });
     const links = await loadTaskLinks(tx, taskId);
-    if (links.needIds.length) await tx.$queryRaw(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`);
+    if (links.needIds.length) await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`));
     await lockVersion(tx, taskId, data.expectedUpdatedAt);
     await tx.task.update({
       where: { id: taskId },
@@ -338,7 +339,7 @@ export async function cancelTask(actor: Actor, taskId: string, input: unknown): 
     const task = await loadOwnTask(tx, actor, taskId);
     if (!isOpenTaskStatus(task.status)) throw new DomainError("TASK_NOT_OPEN", "Задача уже завершена или отменена");
     const links = await loadTaskLinks(tx, taskId);
-    if (links.needIds.length) await tx.$queryRaw(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`);
+    if (links.needIds.length) await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM client_needs WHERE id IN (${Prisma.join(links.needIds)}) ORDER BY id FOR UPDATE`));
     await lockVersion(tx, taskId, data.expectedUpdatedAt);
     await tx.task.update({ where: { id: taskId }, data: { status: "cancelled", resultComment: data.resultComment } });
     let nextTaskId: string | null = null;

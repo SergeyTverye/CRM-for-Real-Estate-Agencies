@@ -149,7 +149,7 @@ describe("confidential guard (synthetic only)", () => {
     const result = spawnSync(process.execPath, [producer, "tests/fixtures/synthetic/confidential-like.xlsx"], { cwd: root, env, encoding: "utf8" });
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
-    expect(result.stdout).toMatch(/^\d+\s*$/u);
+    expect(result.stdout).toMatch(/^\d+ \/ 0 \/ \d+\s*$/u);
     const output = readFileSync(path.join(root, "private-data/fingerprints.json"), "utf8");
     expect(output).not.toContain(secret);
     const hashes = JSON.parse(output) as string[];
@@ -197,5 +197,108 @@ describe("confidential guard (synthetic only)", () => {
     const result = spawnSync(process.execPath, [producer, fixture], { cwd: root, env: { ...process.env, CI: "true" }, encoding: "utf8" });
     expect(result.status).toBe(1);
     expect(result.stdout + result.stderr).toBe("");
+  });
+
+  async function generate(root: string, values: Array<string | number>, ...args: string[]) {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Synthetic only");
+    values.forEach((value, index) => { sheet.getCell(index + 1, 1).value = value; });
+    const filename = path.join(root, "synthetic-source.xlsx");
+    writeFileSync(filename, Buffer.from(await workbook.xlsx.writeBuffer()));
+    const env = { ...process.env };
+    delete env.CI;
+    const result = spawnSync(process.execPath, [producer, filename, ...args], { cwd: root, env, encoding: "utf8", timeout: 30_000 });
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.stdout).toMatch(/^\d+ \/ \d+ \/ \d+\s*$/u);
+    return result.stdout.trim();
+  }
+
+  it("generates only distinguishing whole values, not common words or short numbers", async () => {
+    const root = repo();
+    expect(await generate(root, ["недвижимость", "объект", "продажа", 123456, "дом", "улица"])).toBe("0 / 0 / 0");
+    put(root, "ordinary.md", "Недвижимость: продажа. Объект — дом, улица.");
+    stage(root, "ordinary.md");
+    expect(run(root, "--staged").status).toBe(0);
+  });
+
+  it.each([
+    ["phrase", secret, "Отчёт содержит: " + secret.toUpperCase().replaceAll(" ", "\u00a0 ") + "."],
+    ["phone", "+7 (999) 000-12-34", "Контакт: 8 999 000 12 34"],
+    ["email", "synthetic.person@example.invalid", "Почта: SYNTHETIC.PERSON@EXAMPLE.INVALID"],
+    ["number", 54321987, "Сумма: 54321987"],
+    ["address", "ул. Тестовая, д. 17", "Адрес: ул. Тестовая, д. 17"],
+    ["json", secret, JSON.stringify({ nested: { value: secret } }).replaceAll("С", "\\u0421")],
+    ["csv", secret, 'type,value\r\nsynthetic,"' + secret + '"'],
+    ["tsv", secret, "type\tvalue\nsynthetic\t" + secret],
+  ])("producer → staged scanner detects %s without disclosing values", async (_kind, value, text) => {
+    const root = repo();
+    await generate(root, [value]);
+    put(root, "leak.txt", text);
+    stage(root, "leak.txt");
+    const result = run(root, "--staged");
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('CG_FINGERPRINT "leak.txt"');
+    expect(result.output).not.toContain('CG_ERROR "."');
+    expect(result.output.split(/\r?\n/u).filter(Boolean).every((line) => /^CG_[A-Z_]+ ".*"$/u.test(line))).toBe(true);
+  });
+
+  it("does not match separate common words from a confidential phrase", async () => {
+    const root = repo();
+    await generate(root, ["Просторный объект для продажи", "Коммерческая недвижимость у вокзала"]);
+    put(root, "ordinary.md", "Объект готов. Для покупателя доступна недвижимость.\nПродажи у станции: просторный офис. Коммерческая площадь рядом с вокзалом.");
+    stage(root, "ordinary.md");
+    expect(run(root, "--staged").status).toBe(0);
+  });
+
+  it("does not match old fingerprints of isolated ordinary words", () => {
+    const root = repo();
+    fingerprints(root, ["недвижимость", "продажа", "объект"]);
+    put(root, "ordinary.md", "Недвижимость и продажа: объект готов к просмотру.");
+    stage(root, "ordinary.md");
+    expect(run(root, "--staged").status).toBe(0);
+  });
+
+  it("public phone exclusion applies across formatting and Russian prefixes", async () => {
+    const root = repo();
+    put(root, "public.ts", 'const phone = "8 999 000 12 34";');
+    stage(root, "public.ts");
+    expect(await generate(root, ["+7 (999) 000-12-34"], "--exclude-public", root)).toBe("1 / 1 / 0");
+  }, 20_000);
+
+  it("excludes public tracked phrases and n-grams, never untracked or private files", async () => {
+    const root = repo();
+    const publicPhrase = "Общедоступная синтетическая фраза";
+    const untrackedPhrase = "Закрытая синтетическая строка";
+    put(root, "docs/public.md", "Описание: " + publicPhrase + ", доступна всем.");
+    stage(root, "docs/public.md");
+    put(root, "untracked.md", untrackedPhrase);
+    put(root, "private-data/do-not-read.json", secret);
+    stage(root, "private-data/do-not-read.json");
+    expect(await generate(root, [publicPhrase, untrackedPhrase, secret], "--exclude-public", root)).toBe("3 / 1 / 2");
+    // Remove only the synthetic test index entry; the guard must still block private paths normally.
+    execFileSync("git", ["-C", root, "rm", "--cached", "--", "private-data/do-not-read.json"], { stdio: "pipe" });
+    expect(run(root, "--staged").status).toBe(0);
+    put(root, "leak.txt", untrackedPhrase);
+    stage(root, "leak.txt");
+    expect(run(root, "--staged").output).toContain('CG_FINGERPRINT "leak.txt"');
+  }, 20_000);
+
+  it("producer → xlsx scanner matches a whole rich-text cell", async () => {
+    const root = repo();
+    await generate(root, [secret]);
+    const workbook = new ExcelJS.Workbook();
+    workbook.addWorksheet("Synthetic").getCell("A1").value = { richText: [{ text: "Синтетический объект " }, { text: "Альфа 92387" }] };
+    put(root, "renamed.xlsx", Buffer.from(await workbook.xlsx.writeBuffer()));
+    stage(root, "renamed.xlsx");
+    expect(run(root, "--staged").output).toContain('CG_FINGERPRINT "renamed.xlsx"');
+  });
+
+  it("rejects invalid CLI arguments with a specific code and no dot error", () => {
+    const result = run(repo(), "--unknown");
+    expect(result.status).toBe(1);
+    expect(result.output).toContain("CG_ARGS");
+    expect(result.output).not.toContain("CG_ERROR");
   });
 });

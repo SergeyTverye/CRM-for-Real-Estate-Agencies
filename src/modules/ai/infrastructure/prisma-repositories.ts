@@ -1,3 +1,4 @@
+import { lockSql } from "@/shared/db/dialect";
 import { createHash } from "node:crypto";
 import { db, Prisma, type Tx, type DbOrTx } from "@/shared/db/client";
 import { AiError } from "../domain/contracts";
@@ -9,7 +10,7 @@ import type { AiLedgerRepository, AiLedgerTransaction, AiReservation, AiSettings
 
 export const AI_SETTING_ID = "00000000-0000-4000-8000-000000000005";
 /** All writers, including settings/seed, share this transaction-scoped database lock. */
-export async function lockAi(tx: Tx) { await tx.$queryRaw`SELECT pg_advisory_xact_lock(241005::bigint)::text`; }
+export async function lockAi(tx: Tx) { await tx.$queryRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(241005::bigint)::text`)); }
 export async function singleton(tx: DbOrTx) {
   const rows = await tx.aiSetting.findMany({ take: 2 });
   if (rows.length > 1) throw new AiError("AI_SETTINGS_NOT_SINGLETON");

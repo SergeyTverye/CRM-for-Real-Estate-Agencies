@@ -1,6 +1,7 @@
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, type Tx } from "@/shared/db/client";
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
@@ -34,7 +35,7 @@ function candidate(row: CandidateRow): DuplicateCandidate {
     priceUnit: normalized.priceUnit === null ? null : row.operation === "rent" && row.priceUnit === "total" ? null : dbPriceUnits[row.priceUnit] ?? null, features };
 }
 /** Shared transaction lock serializes regroup and human decisions across workers/processes. */
-async function lock(tx: Tx) { await tx.$queryRaw`SELECT pg_advisory_xact_lock(310007::bigint)::text`; }
+async function lock(tx: Tx) { await tx.$queryRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(310007::bigint)::text`)); }
 const pairKey = (a: string, b: string) => [a, b].sort().join(":");
 
 /** Internal ingestion hook, no actor needed. Does not mutate ExternalListing or create Property.

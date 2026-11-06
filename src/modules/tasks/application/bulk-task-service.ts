@@ -1,3 +1,4 @@
+import { lockSql } from "@/shared/db/dialect";
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { db, transaction, Prisma } from "@/shared/db/client";
@@ -21,7 +22,7 @@ export async function bulkCreateTasks(actor: Actor, input: unknown) {
   if (!data.confirmed) return { preview: true as const, previewToken: token, clients, count: clients.length };
   if (data.previewToken !== token) throw new DomainError("BULK_PREVIEW_REQUIRED", "Сначала проверьте предпросмотр текущих параметров");
   return transaction(async tx => {
-    await tx.$executeRaw(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${data.idempotencyKey}, 0))`);
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${data.idempotencyKey}, 0))`));
     const previous = await tx.bulkTaskBatch.findUnique({ where: { idempotencyKey: data.idempotencyKey } });
     if (previous) {
       if (previous.createdBy !== actor.userId || canonical(previous.template) !== canonical(template)) throw new DomainError("IDEMPOTENCY_CONFLICT", "Ключ уже использован для другой операции");

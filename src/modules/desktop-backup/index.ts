@@ -1,0 +1,15 @@
+// Desktop-only entry point. Server PostgreSQL code must not import this module.
+export * from "./domain/contracts";
+export * from "./domain/handoff";
+export * from "./domain/retention";
+export * from "./application/replication-queue";
+export * from "./application/restore";
+export * from "./application/handoff";
+export * from "./infrastructure/archive";
+export { newRecoveryKey, decodeRecoveryKey } from "./infrastructure/encryption";
+export { LocalDir, RemovableDrive } from "./infrastructure/local-destination";
+export { YandexS3, type S3Options } from "./infrastructure/yandex-s3";
+export { MailruWebDav, type WebDavOptions } from "./infrastructure/mailru-webdav";
+export { SqliteSnapshotValidator } from "./infrastructure/sqlite-validator";
+export * from "./domain/settings";
+export { BackupSettingsService } from "./application/settings-service";

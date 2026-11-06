@@ -58,3 +58,9 @@
 - Решения: EXE собирается в GitHub Actions (локально нет Rust/MSVC); чистые VM недоступны (решение пользователя) — проверка на этом ПК и на чистых раннерах GitHub Actions, VM-проверки DT-01/02 BLOCKED.
 - Облака: пользователь заполнит D:\crm-secrets\clouds.env.
 - Волна 1: аудит+прототип SQLite, защита конфиденциальных данных, формат backup и облачные адаптеры, профилировщик Excel.
+
+## 2026-11-06 — SQLite backend, этап 1
+- Добавлены воспроизводимая SQLite-схема (84 модели), отдельный Prisma client/migrate, ADR 0010 и полный аудит PG-конструкций; PG schema/migrations не менялись.
+- Явный CRM_DEPLOYMENT_MODE, scaled INTEGER вместо неточного native Decimal, Unicode LIKE/equality, очередь + BEGIN IMMEDIATE, PRAGMA и dialect SQL; неперенесённая выдача поиска fail closed.
+- Синтетический core-путь, RBAC/StorageAdapter/планер 1500 задач, конкурентный AI-бюджет и stock Decimal probe проходят; clean/repeat Prisma Migrate PASS. PG integration/authorization финально 332/332, npm test 1418/1418, SQLite 11/11 (10 core + 1 параллельный settings); tsc/ESLint/production build PASS. Протокол — docs/desktop/sqlite-core-prototype.md.
+- DT-05/17 остаются PARTIAL, DT-06 transfer — следующий этап. Tauri и коммерческие материалы не исследовались; коммиты выполняет координатор.

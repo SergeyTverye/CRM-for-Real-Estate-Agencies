@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-cert
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate \
+ && npm run desktop:generate \
  && ls node_modules/@prisma/engines/ | grep -q 'schema-engine-.*openssl-3' \
  && npx next build \
  && rm -rf .next/cache \

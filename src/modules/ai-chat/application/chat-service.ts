@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, type Tx } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
@@ -159,7 +161,7 @@ export async function decideAction(actor: Actor, sessionId: string, actionId: st
     return transaction(async (tx) => {
         await loadSession(actor, sessionId, tx);
         // Row lock + CRM command + decision share one transaction: retry cannot duplicate a task/offer.
-        await tx.$queryRaw `SELECT id FROM ai_pending_actions WHERE id=${actionId}::uuid FOR UPDATE`;
+        await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM ai_pending_actions WHERE id=${actionId}::uuid FOR UPDATE`));
         const a = await tx.aiPendingAction.findFirst({ where: { id: actionId, sessionId } });
         if (!a)
             throw new NotFoundError();

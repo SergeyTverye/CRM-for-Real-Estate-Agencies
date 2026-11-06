@@ -30,9 +30,10 @@ try {
   const args = process.argv.slice(2);
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--root' && args[i + 1]) root = path.resolve(args[++i]);
+    else if (args[i] === '--staged') { /* Default mode; explicit flag supported by hooks. */ }
     else if (args[i] === '--artifacts') artifacts = true;
     else if (args[i] === '--artifact' && args[i + 1]) targets.push(args[++i]);
-    else throw new Error('ARGS');
+    else { fail('CG_ARGS', 'scripts/security/confidential-guard.mjs'); process.exitCode = 1; throw new Error('ARGS'); }
   }
   const git = (...args) => execFileSync('git', ['-C', root, ...args], { maxBuffer: MAX_FILE, stdio: ['ignore', 'pipe', 'pipe'] });
   root = git('rev-parse', '--show-toplevel').toString('utf8').trim();
@@ -88,6 +89,7 @@ try {
           return true;
         } });
         for (const [entry, content] of Object.entries(entries)) {
+          if (entry.endsWith('/')) continue;
           // Archive member names might contain confidential values; report only outer path.
           scan(content, 'member' + path.extname(entry), depth + 1, outer);
         }
@@ -102,9 +104,13 @@ try {
       try {
         if (/<!DOCTYPE/iu.test(text)) throw new Error('XML_DTD');
         const document = new DOMParser({ onError: () => { throw new Error('XML'); } }).parseFromString(text, 'text/xml');
-        hit ||= matchesText(document.documentElement.textContent ?? '', hashes);
-        for (const tag of ['si', 'is', 'v', 't']) {
+        // A shared-string item (including rich-text runs) is one cell, not the
+        // concatenated text of every cell in the workbook or each partial run.
+        for (const tag of ['si', 'is', 'v']) {
           for (const node of Array.from(document.getElementsByTagName(tag))) hit ||= matchesText(node.textContent ?? '', hashes);
+        }
+        if (!document.getElementsByTagName('si').length && !document.getElementsByTagName('is').length) {
+          for (const node of Array.from(document.getElementsByTagName('t'))) hit ||= matchesText(node.textContent ?? '', hashes);
         }
       } catch { fail('CG_XML_INVALID', outer); }
     }
@@ -149,6 +155,6 @@ try {
   report(failed ? 'CG_FAIL' : 'CG_PASS');
   if (failed) process.exitCode = 1;
 } catch {
-  report('CG_ERROR');
+  if (!failed) report('CG_ERROR', 'scripts/security/confidential-guard.mjs');
   process.exitCode = 1;
 }

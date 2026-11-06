@@ -41,6 +41,7 @@ const DEV_DEPLOYMENT_ID = "00000000-0000-4000-8000-000000000001";
 const schema = z
   .object({
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+    CRM_DEPLOYMENT_MODE: z.enum(["server", "desktop"]).default("server"),
     DATABASE_URL: z.string().min(1, "DATABASE_URL обязателен"),
     APP_PORT: int(3000, 1, 65535),
     APP_VERSION: z.string().default("dev"),
@@ -108,7 +109,7 @@ const schema = z
       if (!env.DEPLOYMENT_ID) ctx.addIssue({ code: "custom", path: ["DEPLOYMENT_ID"], message: "обязателен в production" });
       if (!env.INSTANCE_ID) ctx.addIssue({ code: "custom", path: ["INSTANCE_ID"], message: "обязателен в production" });
       if (!env.APP_TIMEZONE) ctx.addIssue({ code: "custom", path: ["APP_TIMEZONE"], message: "обязателен в production" });
-      if (isWeakDbPassword(env.DATABASE_URL)) {
+      if (env.CRM_DEPLOYMENT_MODE === "server" && isWeakDbPassword(env.DATABASE_URL)) {
         ctx.addIssue({
           code: "custom",
           path: ["DATABASE_URL"],

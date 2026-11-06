@@ -1,0 +1,2554 @@
+{
+  "sourceSha256": "ec0ee41e5223a7ada22b4e895066234d3d1ba7cd9f6852b311c2b6bb5638962e",
+  "models": {
+    "User": {
+      "table": "users",
+      "columns": {
+        "browserSessions": "browserSessions",
+        "duplicateDecisions": "duplicateDecisions",
+        "taskChecklistResponsible": "taskChecklistResponsible",
+        "taskChecklistCompleted": "taskChecklistCompleted",
+        "plannerSettings": "plannerSettings",
+        "bulkTaskBatches": "bulkTaskBatches",
+        "propertyCollections": "propertyCollections",
+        "collectionItemsAdded": "collectionItemsAdded",
+        "collectionNeedsLinked": "collectionNeedsLinked",
+        "templateVersions": "templateVersions",
+        "aiChatSessions": "aiChatSessions",
+        "aiActionDecisions": "aiActionDecisions",
+        "searchExports": "searchExports",
+        "searchBookmarks": "searchBookmarks",
+        "searchSelections": "searchSelections",
+        "savedSearches": "savedSearches",
+        "searchRuns": "searchRuns",
+        "listingVerifications": "listingVerifications",
+        "aiSettings": "aiSettings",
+        "aiUsageLogs": "aiUsageLogs",
+        "calendarEvents": "calendarEvents",
+        "notifications": "notifications",
+        "notificationPreference": "notificationPreference",
+        "checklistItems": "checklistItems",
+        "id": "id",
+        "login": "login",
+        "displayName": "display_name",
+        "roleCode": "role_code",
+        "passwordHash": "password_hash",
+        "mustChangePassword": "must_change_password",
+        "passwordChangedAt": "password_changed_at",
+        "isActive": "is_active",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "sessions": "sessions",
+        "grantsReceived": "grantsReceived",
+        "grantsIssued": "grantsIssued",
+        "clientsResponsible": "clientsResponsible",
+        "clientsCreated": "clientsCreated",
+        "leadRequestsResponsible": "leadRequestsResponsible",
+        "leadRequestsCreated": "leadRequestsCreated",
+        "needsResponsible": "needsResponsible",
+        "needsCreated": "needsCreated",
+        "stageChanges": "stageChanges",
+        "propertiesResponsible": "propertiesResponsible",
+        "propertiesCreated": "propertiesCreated",
+        "matchesCreated": "matchesCreated",
+        "showingsResponsible": "showingsResponsible",
+        "showingsCreated": "showingsCreated",
+        "advertisementsResponsible": "advertisementsResponsible",
+        "agreementsResponsible": "agreementsResponsible",
+        "communications": "communications",
+        "tasksResponsible": "tasksResponsible",
+        "tasksCreated": "tasksCreated",
+        "dealsResponsible": "dealsResponsible",
+        "dealsCreated": "dealsCreated",
+        "offersResponsible": "offersResponsible",
+        "offersCreated": "offersCreated",
+        "documentsUploaded": "documentsUploaded",
+        "importJobs": "importJobs",
+        "backupRuns": "backupRuns",
+        "auditEntries": "auditEntries",
+        "aiRuns": "aiRuns"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "browserSessions": "InteractiveBrowserSession",
+        "duplicateDecisions": "ListingDuplicateDecision",
+        "taskChecklistResponsible": "TaskChecklistItem",
+        "taskChecklistCompleted": "TaskChecklistItem",
+        "plannerSettings": "PlannerSetting",
+        "bulkTaskBatches": "BulkTaskBatch",
+        "propertyCollections": "PropertyCollection",
+        "collectionItemsAdded": "PropertyCollectionItem",
+        "collectionNeedsLinked": "PropertyCollectionNeed",
+        "templateVersions": "DocumentTemplateVersion",
+        "aiChatSessions": "AiChatSession",
+        "aiActionDecisions": "AiPendingAction",
+        "searchExports": "SearchExport",
+        "searchBookmarks": "SearchBookmark",
+        "searchSelections": "SearchSelection",
+        "savedSearches": "SavedSearch",
+        "searchRuns": "SearchRun",
+        "listingVerifications": "ExternalListingVerification",
+        "aiSettings": "AiSetting",
+        "aiUsageLogs": "AiUsageLog",
+        "calendarEvents": "CalendarEvent",
+        "notifications": "Notification",
+        "notificationPreference": "NotificationPreference",
+        "checklistItems": "DealChecklistItem",
+        "sessions": "UserSession",
+        "grantsReceived": "PropertyContactGrant",
+        "grantsIssued": "PropertyContactGrant",
+        "clientsResponsible": "Client",
+        "clientsCreated": "Client",
+        "leadRequestsResponsible": "LeadRequest",
+        "leadRequestsCreated": "LeadRequest",
+        "needsResponsible": "ClientNeed",
+        "needsCreated": "ClientNeed",
+        "stageChanges": "NeedStageHistory",
+        "propertiesResponsible": "Property",
+        "propertiesCreated": "Property",
+        "matchesCreated": "NeedPropertyMatch",
+        "showingsResponsible": "Showing",
+        "showingsCreated": "Showing",
+        "advertisementsResponsible": "Advertisement",
+        "agreementsResponsible": "Agreement",
+        "communications": "Communication",
+        "tasksResponsible": "Task",
+        "tasksCreated": "Task",
+        "dealsResponsible": "Deal",
+        "dealsCreated": "Deal",
+        "offersResponsible": "CommercialOffer",
+        "offersCreated": "CommercialOffer",
+        "documentsUploaded": "Document",
+        "importJobs": "ImportJob",
+        "backupRuns": "BackupRun",
+        "auditEntries": "AuditLog",
+        "aiRuns": "AiRun"
+      }
+    },
+    "UserSession": {
+      "table": "user_sessions",
+      "columns": {
+        "id": "id",
+        "userId": "user_id",
+        "tokenHash": "token_hash",
+        "createdAt": "created_at",
+        "lastSeenAt": "last_seen_at",
+        "expiresAt": "expires_at",
+        "revokedAt": "revoked_at",
+        "userAgent": "user_agent",
+        "ipAddress": "ip_address",
+        "user": "user"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "user": "User"
+      }
+    },
+    "PropertyContactGrant": {
+      "table": "property_contact_grants",
+      "columns": {
+        "id": "id",
+        "propertyId": "property_id",
+        "userId": "user_id",
+        "grantedBy": "granted_by",
+        "grantedAt": "granted_at",
+        "revokedAt": "revoked_at",
+        "comment": "comment",
+        "property": "property",
+        "user": "user",
+        "issuer": "issuer"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "property": "Property",
+        "user": "User",
+        "issuer": "User"
+      }
+    },
+    "Client": {
+      "table": "clients",
+      "columns": {
+        "calendarEvents": "calendarEvents",
+        "id": "id",
+        "displayName": "display_name",
+        "clientKind": "client_kind",
+        "responsibleUserId": "responsible_user_id",
+        "status": "status",
+        "notes": "notes",
+        "archivedAt": "archived_at",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "responsible": "responsible",
+        "creator": "creator",
+        "contactPersons": "contactPersons",
+        "contacts": "contacts",
+        "needs": "needs",
+        "leadRequests": "leadRequests",
+        "communications": "communications",
+        "ownerships": "ownerships",
+        "agreements": "agreements",
+        "dealParties": "dealParties",
+        "archiveRecords": "archiveRecords",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "calendarEvents": "CalendarEvent",
+        "responsible": "User",
+        "creator": "User",
+        "contactPersons": "ClientContactPerson",
+        "contacts": "ClientContact",
+        "needs": "ClientNeed",
+        "leadRequests": "LeadRequest",
+        "communications": "Communication",
+        "ownerships": "PropertyOwner",
+        "agreements": "Agreement",
+        "dealParties": "DealParty",
+        "archiveRecords": "HistoricalDealArchive",
+        "taskLinks": "TaskClient",
+        "documentLinks": "DocumentClient"
+      }
+    },
+    "ClientContactPerson": {
+      "table": "client_contact_persons",
+      "columns": {
+        "id": "id",
+        "clientId": "client_id",
+        "fullName": "full_name",
+        "position": "position",
+        "isPrimary": "is_primary",
+        "notes": "notes",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "client": "client",
+        "contacts": "contacts"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "client": "Client",
+        "contacts": "ClientContact"
+      }
+    },
+    "ClientContact": {
+      "table": "client_contacts",
+      "columns": {
+        "id": "id",
+        "clientId": "client_id",
+        "contactType": "contact_type",
+        "rawValue": "raw_value",
+        "normalizedValue": "normalized_value",
+        "contactPersonId": "contact_person_id",
+        "isPrimary": "is_primary",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "client": "client",
+        "contactPerson": "contactPerson"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "client": "Client",
+        "contactPerson": "ClientContactPerson"
+      }
+    },
+    "LeadRequest": {
+      "table": "lead_requests",
+      "columns": {
+        "callAt": "call_at",
+        "externalListingId": "external_listing_id",
+        "outcomeCode": "outcome_code",
+        "externalListing": "externalListing",
+        "id": "id",
+        "clientId": "client_id",
+        "clientNeedId": "client_need_id",
+        "propertyId": "property_id",
+        "advertisementId": "advertisement_id",
+        "responsibleUserId": "responsible_user_id",
+        "occurredAt": "occurred_at",
+        "channelCode": "channel_code",
+        "sourceCode": "source_code",
+        "resultCode": "result_code",
+        "statusCode": "status_code",
+        "summary": "summary",
+        "rawContact": "raw_contact",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "client": "client",
+        "need": "need",
+        "property": "property",
+        "advertisement": "advertisement",
+        "responsible": "responsible",
+        "creator": "creator",
+        "communications": "communications"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "externalListing": "ExternalListing",
+        "client": "Client",
+        "need": "ClientNeed",
+        "property": "Property",
+        "advertisement": "Advertisement",
+        "responsible": "User",
+        "creator": "User",
+        "communications": "Communication"
+      }
+    },
+    "ClientNeed": {
+      "table": "client_needs",
+      "columns": {
+        "collectionLinks": "collectionLinks",
+        "calendarEvents": "calendarEvents",
+        "searchSelections": "searchSelections",
+        "savedSearches": "savedSearches",
+        "searchRuns": "searchRuns",
+        "id": "id",
+        "clientId": "client_id",
+        "responsibleUserId": "responsible_user_id",
+        "operationType": "operation_type",
+        "propertyType": "property_type",
+        "propertySubtype": "property_subtype",
+        "financingType": "financing_type",
+        "mortgageStatus": "mortgage_status",
+        "budgetMin": "budget_min",
+        "budgetMax": "budget_max",
+        "district": "district",
+        "locationText": "location_text",
+        "areaMin": "area_min",
+        "areaMax": "area_max",
+        "commercialPurpose": "commercial_purpose",
+        "floorMin": "floor_min",
+        "floorMax": "floor_max",
+        "roomsMin": "rooms_min",
+        "roomsMax": "rooms_max",
+        "landAreaMin": "land_area_min",
+        "landAreaMax": "land_area_max",
+        "buildingAreaMin": "building_area_min",
+        "buildingAreaMax": "building_area_max",
+        "powerRequirement": "power_requirement",
+        "parkingRequirement": "parking_requirement",
+        "tenantRequirement": "tenant_requirement",
+        "stage": "stage",
+        "status": "status",
+        "stopReasonCode": "stop_reason_code",
+        "stopComment": "stop_comment",
+        "notes": "notes",
+        "openedAt": "opened_at",
+        "closedAt": "closed_at",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "client": "client",
+        "responsible": "responsible",
+        "creator": "creator",
+        "leadRequests": "leadRequests",
+        "stageHistory": "stageHistory",
+        "matches": "matches",
+        "showings": "showings",
+        "communications": "communications",
+        "commercialOffers": "commercialOffers",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {
+        "budgetMin": {
+          "precision": 16,
+          "scale": 2,
+          "column": "budget_min"
+        },
+        "budgetMax": {
+          "precision": 16,
+          "scale": 2,
+          "column": "budget_max"
+        },
+        "areaMin": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area_min"
+        },
+        "areaMax": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area_max"
+        },
+        "landAreaMin": {
+          "precision": 12,
+          "scale": 2,
+          "column": "land_area_min"
+        },
+        "landAreaMax": {
+          "precision": 12,
+          "scale": 2,
+          "column": "land_area_max"
+        },
+        "buildingAreaMin": {
+          "precision": 12,
+          "scale": 2,
+          "column": "building_area_min"
+        },
+        "buildingAreaMax": {
+          "precision": 12,
+          "scale": 2,
+          "column": "building_area_max"
+        },
+        "powerRequirement": {
+          "precision": 10,
+          "scale": 2,
+          "column": "power_requirement"
+        }
+      },
+      "relations": {
+        "collectionLinks": "PropertyCollectionNeed",
+        "calendarEvents": "CalendarEvent",
+        "searchSelections": "SearchSelection",
+        "savedSearches": "SavedSearch",
+        "searchRuns": "SearchRun",
+        "client": "Client",
+        "responsible": "User",
+        "creator": "User",
+        "leadRequests": "LeadRequest",
+        "stageHistory": "NeedStageHistory",
+        "matches": "NeedPropertyMatch",
+        "showings": "Showing",
+        "communications": "Communication",
+        "commercialOffers": "CommercialOffer",
+        "taskLinks": "TaskNeed",
+        "documentLinks": "DocumentNeed"
+      }
+    },
+    "NeedStageHistory": {
+      "table": "need_stage_history",
+      "columns": {
+        "id": "id",
+        "clientNeedId": "client_need_id",
+        "fromStage": "from_stage",
+        "toStage": "to_stage",
+        "fromStatus": "from_status",
+        "toStatus": "to_status",
+        "reasonCode": "reason_code",
+        "comment": "comment",
+        "changedBy": "changed_by",
+        "occurredAt": "occurred_at",
+        "need": "need",
+        "changer": "changer"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "need": "ClientNeed",
+        "changer": "User"
+      }
+    },
+    "Communication": {
+      "table": "communications",
+      "columns": {
+        "id": "id",
+        "clientId": "client_id",
+        "clientNeedId": "client_need_id",
+        "leadRequestId": "lead_request_id",
+        "authorUserId": "author_user_id",
+        "communicationType": "communication_type",
+        "channelCode": "channel_code",
+        "occurredAt": "occurred_at",
+        "resultCode": "result_code",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "client": "client",
+        "need": "need",
+        "leadRequest": "leadRequest",
+        "author": "author"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "client": "Client",
+        "need": "ClientNeed",
+        "leadRequest": "LeadRequest",
+        "author": "User"
+      }
+    },
+    "Property": {
+      "table": "properties",
+      "columns": {
+        "collectionItems": "collectionItems",
+        "externalListings": "externalListings",
+        "searchSelections": "searchSelections",
+        "calendarEvents": "calendarEvents",
+        "id": "id",
+        "responsibleUserId": "responsible_user_id",
+        "propertyType": "property_type",
+        "propertySubtype": "property_subtype",
+        "operationType": "operation_type",
+        "sourceType": "source_type",
+        "sourcePlatformCode": "source_platform_code",
+        "sourceUrl": "source_url",
+        "addressText": "address_text",
+        "district": "district",
+        "area": "area",
+        "floor": "floor",
+        "floorsTotal": "floors_total",
+        "roomsCount": "rooms_count",
+        "landArea": "land_area",
+        "buildingArea": "building_area",
+        "price": "price",
+        "commercialPurpose": "commercial_purpose",
+        "powerKw": "power_kw",
+        "parkingAvailable": "parking_available",
+        "hasTenant": "has_tenant",
+        "status": "status",
+        "description": "description",
+        "attributesJsonb": "attributes_jsonb",
+        "archivedAt": "archived_at",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "responsible": "responsible",
+        "creator": "creator",
+        "owners": "owners",
+        "contactGrants": "contactGrants",
+        "matches": "matches",
+        "showings": "showings",
+        "advertisements": "advertisements",
+        "agreements": "agreements",
+        "leadRequests": "leadRequests",
+        "deals": "deals",
+        "offerItems": "offerItems",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {
+        "area": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area"
+        },
+        "landArea": {
+          "precision": 12,
+          "scale": 2,
+          "column": "land_area"
+        },
+        "buildingArea": {
+          "precision": 12,
+          "scale": 2,
+          "column": "building_area"
+        },
+        "price": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price"
+        },
+        "powerKw": {
+          "precision": 10,
+          "scale": 2,
+          "column": "power_kw"
+        }
+      },
+      "relations": {
+        "collectionItems": "PropertyCollectionItem",
+        "externalListings": "ExternalListing",
+        "searchSelections": "SearchSelection",
+        "calendarEvents": "CalendarEvent",
+        "responsible": "User",
+        "creator": "User",
+        "owners": "PropertyOwner",
+        "contactGrants": "PropertyContactGrant",
+        "matches": "NeedPropertyMatch",
+        "showings": "Showing",
+        "advertisements": "Advertisement",
+        "agreements": "Agreement",
+        "leadRequests": "LeadRequest",
+        "deals": "Deal",
+        "offerItems": "CommercialOfferItem",
+        "taskLinks": "TaskProperty",
+        "documentLinks": "DocumentProperty"
+      }
+    },
+    "PropertyOwner": {
+      "table": "property_owners",
+      "columns": {
+        "id": "id",
+        "propertyId": "property_id",
+        "clientId": "client_id",
+        "ownerRole": "owner_role",
+        "ownershipShare": "ownership_share",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "property": "property",
+        "client": "client"
+      },
+      "lists": {},
+      "decimals": {
+        "ownershipShare": {
+          "precision": 7,
+          "scale": 4,
+          "column": "ownership_share"
+        }
+      },
+      "relations": {
+        "property": "Property",
+        "client": "Client"
+      }
+    },
+    "NeedPropertyMatch": {
+      "table": "need_property_matches",
+      "columns": {
+        "searchSelections": "searchSelections",
+        "id": "id",
+        "clientNeedId": "client_need_id",
+        "propertyId": "property_id",
+        "offeredAt": "offered_at",
+        "sourceCode": "source_code",
+        "status": "status",
+        "rejectionReasonCode": "rejection_reason_code",
+        "comment": "comment",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "need": "need",
+        "property": "property",
+        "creator": "creator"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "searchSelections": "SearchSelection",
+        "need": "ClientNeed",
+        "property": "Property",
+        "creator": "User"
+      }
+    },
+    "Showing": {
+      "table": "showings",
+      "columns": {
+        "id": "id",
+        "clientNeedId": "client_need_id",
+        "propertyId": "property_id",
+        "responsibleUserId": "responsible_user_id",
+        "scheduledAt": "scheduled_at",
+        "occurredAt": "occurred_at",
+        "status": "status",
+        "resultCode": "result_code",
+        "comment": "comment",
+        "participantsText": "participants_text",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "need": "need",
+        "property": "property",
+        "responsible": "responsible",
+        "creator": "creator",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "need": "ClientNeed",
+        "property": "Property",
+        "responsible": "User",
+        "creator": "User",
+        "taskLinks": "TaskShowing",
+        "documentLinks": "DocumentShowing"
+      }
+    },
+    "Advertisement": {
+      "table": "advertisements",
+      "columns": {
+        "id": "id",
+        "propertyId": "property_id",
+        "responsibleUserId": "responsible_user_id",
+        "platformCode": "platform_code",
+        "url": "url",
+        "adText": "ad_text",
+        "status": "status",
+        "publishedAt": "published_at",
+        "lastCheckedAt": "last_checked_at",
+        "expiresAt": "expires_at",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "property": "property",
+        "responsible": "responsible",
+        "leadRequests": "leadRequests",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "property": "Property",
+        "responsible": "User",
+        "leadRequests": "LeadRequest",
+        "taskLinks": "TaskAdvertisement",
+        "documentLinks": "DocumentAdvertisement"
+      }
+    },
+    "Agreement": {
+      "table": "agreements",
+      "columns": {
+        "id": "id",
+        "clientId": "client_id",
+        "propertyId": "property_id",
+        "dealId": "deal_id",
+        "responsibleUserId": "responsible_user_id",
+        "legalEntityId": "legal_entity_id",
+        "agreementType": "agreement_type",
+        "status": "status",
+        "agreementNumber": "agreement_number",
+        "isExclusive": "is_exclusive",
+        "signedAt": "signed_at",
+        "validFrom": "valid_from",
+        "validUntil": "valid_until",
+        "commissionType": "commission_type",
+        "commissionValue": "commission_value",
+        "commissionNotes": "commission_notes",
+        "absenceReasonCode": "absence_reason_code",
+        "actionRequired": "action_required",
+        "notes": "notes",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "archivedAt": "archived_at",
+        "client": "client",
+        "property": "property",
+        "deal": "deal",
+        "responsible": "responsible",
+        "legalEntity": "legalEntity",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {
+        "commissionValue": {
+          "precision": 16,
+          "scale": 2,
+          "column": "commission_value"
+        }
+      },
+      "relations": {
+        "client": "Client",
+        "property": "Property",
+        "deal": "Deal",
+        "responsible": "User",
+        "legalEntity": "LegalEntity",
+        "taskLinks": "TaskAgreement",
+        "documentLinks": "DocumentAgreement"
+      }
+    },
+    "Task": {
+      "table": "tasks",
+      "columns": {
+        "checklistItems": "checklistItems",
+        "recurrenceRule": "recurrence_rule",
+        "reminderOffsets": "reminder_offsets",
+        "bulkBatchId": "bulk_batch_id",
+        "bulkBatch": "bulkBatch",
+        "id": "id",
+        "responsibleUserId": "responsible_user_id",
+        "createdBy": "created_by",
+        "taskType": "task_type",
+        "taskSubtypeCode": "task_subtype_code",
+        "title": "title",
+        "description": "description",
+        "dueAt": "due_at",
+        "status": "status",
+        "priority": "priority",
+        "recurrenceKind": "recurrence_kind",
+        "recurrenceInterval": "recurrence_interval",
+        "recurrenceUntil": "recurrence_until",
+        "parentTaskId": "parent_task_id",
+        "completedAt": "completed_at",
+        "resultComment": "result_comment",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "responsible": "responsible",
+        "creator": "creator",
+        "parent": "parent",
+        "instances": "instances",
+        "clientLinks": "clientLinks",
+        "needLinks": "needLinks",
+        "propertyLinks": "propertyLinks",
+        "showingLinks": "showingLinks",
+        "dealLinks": "dealLinks",
+        "advertisementLinks": "advertisementLinks",
+        "agreementLinks": "agreementLinks",
+        "offerLinks": "offerLinks"
+      },
+      "lists": {
+        "reminderOffsets": {
+          "type": "Int",
+          "column": "reminder_offsets"
+        }
+      },
+      "decimals": {},
+      "relations": {
+        "checklistItems": "TaskChecklistItem",
+        "bulkBatch": "BulkTaskBatch",
+        "responsible": "User",
+        "creator": "User",
+        "parent": "Task",
+        "instances": "Task",
+        "clientLinks": "TaskClient",
+        "needLinks": "TaskNeed",
+        "propertyLinks": "TaskProperty",
+        "showingLinks": "TaskShowing",
+        "dealLinks": "TaskDeal",
+        "advertisementLinks": "TaskAdvertisement",
+        "agreementLinks": "TaskAgreement",
+        "offerLinks": "TaskCommercialOffer"
+      }
+    },
+    "TaskClient": {
+      "table": "task_clients",
+      "columns": {
+        "taskId": "task_id",
+        "clientId": "client_id",
+        "task": "task",
+        "client": "client"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "client": "Client"
+      }
+    },
+    "TaskNeed": {
+      "table": "task_needs",
+      "columns": {
+        "taskId": "task_id",
+        "clientNeedId": "client_need_id",
+        "task": "task",
+        "need": "need"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "need": "ClientNeed"
+      }
+    },
+    "TaskProperty": {
+      "table": "task_properties",
+      "columns": {
+        "taskId": "task_id",
+        "propertyId": "property_id",
+        "task": "task",
+        "property": "property"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "property": "Property"
+      }
+    },
+    "TaskShowing": {
+      "table": "task_showings",
+      "columns": {
+        "taskId": "task_id",
+        "showingId": "showing_id",
+        "task": "task",
+        "showing": "showing"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "showing": "Showing"
+      }
+    },
+    "TaskDeal": {
+      "table": "task_deals",
+      "columns": {
+        "taskId": "task_id",
+        "dealId": "deal_id",
+        "task": "task",
+        "deal": "deal"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "deal": "Deal"
+      }
+    },
+    "TaskAdvertisement": {
+      "table": "task_advertisements",
+      "columns": {
+        "taskId": "task_id",
+        "advertisementId": "advertisement_id",
+        "task": "task",
+        "advertisement": "advertisement"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "advertisement": "Advertisement"
+      }
+    },
+    "TaskAgreement": {
+      "table": "task_agreements",
+      "columns": {
+        "taskId": "task_id",
+        "agreementId": "agreement_id",
+        "task": "task",
+        "agreement": "agreement"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "agreement": "Agreement"
+      }
+    },
+    "TaskCommercialOffer": {
+      "table": "task_commercial_offers",
+      "columns": {
+        "taskId": "task_id",
+        "commercialOfferId": "commercial_offer_id",
+        "task": "task",
+        "offer": "offer"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "offer": "CommercialOffer"
+      }
+    },
+    "LegalEntity": {
+      "table": "legal_entities",
+      "columns": {
+        "logoDocumentId": "logo_document_id",
+        "requisites": "requisites",
+        "logoDocument": "logoDocument",
+        "id": "id",
+        "entityType": "entity_type",
+        "displayName": "display_name",
+        "isActive": "is_active",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "deals": "deals",
+        "agreements": "agreements",
+        "offers": "offers",
+        "documents": "documents"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "logoDocument": "Document",
+        "deals": "Deal",
+        "agreements": "Agreement",
+        "offers": "CommercialOffer",
+        "documents": "Document"
+      }
+    },
+    "Deal": {
+      "table": "deals",
+      "columns": {
+        "calendarEvents": "calendarEvents",
+        "checklistItems": "checklistItems",
+        "id": "id",
+        "propertyId": "property_id",
+        "responsibleUserId": "responsible_user_id",
+        "legalEntityId": "legal_entity_id",
+        "status": "status",
+        "openedAt": "opened_at",
+        "preliminaryAgreementAt": "preliminary_agreement_at",
+        "mainAgreementAt": "main_agreement_at",
+        "registrationAt": "registration_at",
+        "closedAt": "closed_at",
+        "dealPrice": "deal_price",
+        "notes": "notes",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "property": "property",
+        "responsible": "responsible",
+        "creator": "creator",
+        "legalEntity": "legalEntity",
+        "parties": "parties",
+        "commissions": "commissions",
+        "agreements": "agreements",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {
+        "dealPrice": {
+          "precision": 16,
+          "scale": 2,
+          "column": "deal_price"
+        }
+      },
+      "relations": {
+        "calendarEvents": "CalendarEvent",
+        "checklistItems": "DealChecklistItem",
+        "property": "Property",
+        "responsible": "User",
+        "creator": "User",
+        "legalEntity": "LegalEntity",
+        "parties": "DealParty",
+        "commissions": "DealCommission",
+        "agreements": "Agreement",
+        "taskLinks": "TaskDeal",
+        "documentLinks": "DocumentDeal"
+      }
+    },
+    "DealParty": {
+      "table": "deal_parties",
+      "columns": {
+        "id": "id",
+        "dealId": "deal_id",
+        "clientId": "client_id",
+        "externalPartyName": "external_party_name",
+        "partyRole": "party_role",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "deal": "deal",
+        "client": "client",
+        "commissions": "commissions"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "deal": "Deal",
+        "client": "Client",
+        "commissions": "DealCommission"
+      }
+    },
+    "DealCommission": {
+      "table": "deal_commissions",
+      "columns": {
+        "id": "id",
+        "dealId": "deal_id",
+        "payerPartyId": "payer_party_id",
+        "amount": "amount",
+        "status": "status",
+        "dueAt": "due_at",
+        "receivedAt": "received_at",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "deal": "deal",
+        "payer": "payer"
+      },
+      "lists": {},
+      "decimals": {
+        "amount": {
+          "precision": 16,
+          "scale": 2,
+          "column": "amount"
+        }
+      },
+      "relations": {
+        "deal": "Deal",
+        "payer": "DealParty"
+      }
+    },
+    "CommercialOffer": {
+      "table": "commercial_offers",
+      "columns": {
+        "id": "id",
+        "clientNeedId": "client_need_id",
+        "responsibleUserId": "responsible_user_id",
+        "createdBy": "created_by",
+        "legalEntityId": "legal_entity_id",
+        "status": "status",
+        "title": "title",
+        "introText": "intro_text",
+        "notes": "notes",
+        "generationSource": "generation_source",
+        "promptTemplateVersion": "prompt_template_version",
+        "sentAt": "sent_at",
+        "expiresAt": "expires_at",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "need": "need",
+        "responsible": "responsible",
+        "creator": "creator",
+        "legalEntity": "legalEntity",
+        "items": "items",
+        "taskLinks": "taskLinks",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "need": "ClientNeed",
+        "responsible": "User",
+        "creator": "User",
+        "legalEntity": "LegalEntity",
+        "items": "CommercialOfferItem",
+        "taskLinks": "TaskCommercialOffer",
+        "documentLinks": "DocumentCommercialOffer"
+      }
+    },
+    "CommercialOfferItem": {
+      "table": "commercial_offer_items",
+      "columns": {
+        "id": "id",
+        "commercialOfferId": "commercial_offer_id",
+        "propertyId": "property_id",
+        "position": "position",
+        "priceSnapshot": "price_snapshot",
+        "addressSnapshot": "address_snapshot",
+        "areaSnapshot": "area_snapshot",
+        "termsSnapshot": "terms_snapshot",
+        "comment": "comment",
+        "createdAt": "created_at",
+        "offer": "offer",
+        "property": "property"
+      },
+      "lists": {},
+      "decimals": {
+        "priceSnapshot": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price_snapshot"
+        },
+        "areaSnapshot": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area_snapshot"
+        }
+      },
+      "relations": {
+        "offer": "CommercialOffer",
+        "property": "Property"
+      }
+    },
+    "Document": {
+      "table": "documents",
+      "columns": {
+        "templateVersionId": "template_version_id",
+        "valuesSnapshot": "values_snapshot",
+        "templateVersion": "templateVersion",
+        "searchExports": "searchExports",
+        "thumbnailStorageKey": "thumbnail_storage_key",
+        "logoFor": "logoFor",
+        "checklistItems": "checklistItems",
+        "id": "id",
+        "originalName": "original_name",
+        "documentTypeCode": "document_type_code",
+        "mimeType": "mime_type",
+        "fileSize": "file_size",
+        "storageProvider": "storage_provider",
+        "storageKey": "storage_key",
+        "checksum": "checksum",
+        "uploadedBy": "uploaded_by",
+        "legalEntityId": "legal_entity_id",
+        "archivedAt": "archived_at",
+        "createdAt": "created_at",
+        "uploader": "uploader",
+        "legalEntity": "legalEntity",
+        "clientLinks": "clientLinks",
+        "needLinks": "needLinks",
+        "propertyLinks": "propertyLinks",
+        "showingLinks": "showingLinks",
+        "dealLinks": "dealLinks",
+        "advertisementLinks": "advertisementLinks",
+        "agreementLinks": "agreementLinks",
+        "offerLinks": "offerLinks",
+        "collectionLinks": "collectionLinks",
+        "aiRuns": "aiRuns"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "templateVersion": "DocumentTemplateVersion",
+        "searchExports": "SearchExport",
+        "logoFor": "LegalEntity",
+        "checklistItems": "DealChecklistItem",
+        "uploader": "User",
+        "legalEntity": "LegalEntity",
+        "clientLinks": "DocumentClient",
+        "needLinks": "DocumentNeed",
+        "propertyLinks": "DocumentProperty",
+        "showingLinks": "DocumentShowing",
+        "dealLinks": "DocumentDeal",
+        "advertisementLinks": "DocumentAdvertisement",
+        "agreementLinks": "DocumentAgreement",
+        "offerLinks": "DocumentCommercialOffer",
+        "collectionLinks": "DocumentCollection",
+        "aiRuns": "AiRun"
+      }
+    },
+    "DocumentClient": {
+      "table": "document_clients",
+      "columns": {
+        "documentId": "document_id",
+        "clientId": "client_id",
+        "document": "document",
+        "client": "client"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "client": "Client"
+      }
+    },
+    "DocumentNeed": {
+      "table": "document_needs",
+      "columns": {
+        "documentId": "document_id",
+        "clientNeedId": "client_need_id",
+        "document": "document",
+        "need": "need"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "need": "ClientNeed"
+      }
+    },
+    "DocumentProperty": {
+      "table": "document_properties",
+      "columns": {
+        "sortOrder": "sort_order",
+        "isCover": "is_cover",
+        "caption": "caption",
+        "kind": "kind",
+        "archivedAt": "archived_at",
+        "documentId": "document_id",
+        "propertyId": "property_id",
+        "document": "document",
+        "property": "property"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "property": "Property"
+      }
+    },
+    "DocumentShowing": {
+      "table": "document_showings",
+      "columns": {
+        "documentId": "document_id",
+        "showingId": "showing_id",
+        "document": "document",
+        "showing": "showing"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "showing": "Showing"
+      }
+    },
+    "DocumentDeal": {
+      "table": "document_deals",
+      "columns": {
+        "documentId": "document_id",
+        "dealId": "deal_id",
+        "document": "document",
+        "deal": "deal"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "deal": "Deal"
+      }
+    },
+    "DocumentAdvertisement": {
+      "table": "document_advertisements",
+      "columns": {
+        "documentId": "document_id",
+        "advertisementId": "advertisement_id",
+        "document": "document",
+        "advertisement": "advertisement"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "advertisement": "Advertisement"
+      }
+    },
+    "DocumentAgreement": {
+      "table": "document_agreements",
+      "columns": {
+        "documentId": "document_id",
+        "agreementId": "agreement_id",
+        "document": "document",
+        "agreement": "agreement"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "agreement": "Agreement"
+      }
+    },
+    "DocumentCommercialOffer": {
+      "table": "document_commercial_offers",
+      "columns": {
+        "documentId": "document_id",
+        "commercialOfferId": "commercial_offer_id",
+        "document": "document",
+        "offer": "offer"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "offer": "CommercialOffer"
+      }
+    },
+    "HistoricalDealArchive": {
+      "table": "historical_deal_archive",
+      "columns": {
+        "id": "id",
+        "sourceFile": "source_file",
+        "sourceRowId": "source_row_id",
+        "sourceRowKey": "source_row_key",
+        "dealDate": "deal_date",
+        "dealDateText": "deal_date_text",
+        "participantName": "participant_name",
+        "contactPhone": "contact_phone",
+        "contactEmail": "contact_email",
+        "propertyType": "property_type",
+        "objectText": "object_text",
+        "partyRole": "party_role",
+        "area": "area",
+        "price": "price",
+        "conditions": "conditions",
+        "realtorText": "realtor_text",
+        "contractRef": "contract_ref",
+        "commissionAmount": "commission_amount",
+        "additionalInfo": "additional_info",
+        "clientId": "client_id",
+        "importJobId": "import_job_id",
+        "importedAt": "imported_at",
+        "client": "client",
+        "importJob": "importJob"
+      },
+      "lists": {},
+      "decimals": {
+        "area": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area"
+        },
+        "price": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price"
+        },
+        "commissionAmount": {
+          "precision": 16,
+          "scale": 2,
+          "column": "commission_amount"
+        }
+      },
+      "relations": {
+        "client": "Client",
+        "importJob": "ImportJob"
+      }
+    },
+    "ImportJob": {
+      "table": "import_jobs",
+      "columns": {
+        "id": "id",
+        "sourceFilename": "source_filename",
+        "sourceSha256": "source_sha256",
+        "sourceFormat": "source_format",
+        "profileCode": "profile_code",
+        "status": "status",
+        "startedBy": "started_by",
+        "startedAt": "started_at",
+        "finishedAt": "finished_at",
+        "rowsRead": "rows_read",
+        "rowsImported": "rows_imported",
+        "rowsSkipped": "rows_skipped",
+        "rowsError": "rows_error",
+        "probableDuplicates": "probable_duplicates",
+        "mappingVersion": "mapping_version",
+        "reportStorageKey": "report_storage_key",
+        "sourceStorageKey": "source_storage_key",
+        "summaryJsonb": "summary_jsonb",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "starter": "starter",
+        "rows": "rows",
+        "archiveRecords": "archiveRecords"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "starter": "User",
+        "rows": "ImportRowResult",
+        "archiveRecords": "HistoricalDealArchive"
+      }
+    },
+    "ImportRowResult": {
+      "table": "import_row_results",
+      "columns": {
+        "id": "id",
+        "importJobId": "import_job_id",
+        "sheetName": "sheet_name",
+        "sourceSection": "source_section",
+        "sourceRowNumber": "source_row_number",
+        "sourceRecordKey": "source_record_key",
+        "targetEntityType": "target_entity_type",
+        "targetEntityId": "target_entity_id",
+        "validationStatus": "validation_status",
+        "commitResult": "commit_result",
+        "errorCodes": "error_codes",
+        "warningCodes": "warning_codes",
+        "createdAt": "created_at",
+        "job": "job"
+      },
+      "lists": {
+        "errorCodes": {
+          "type": "String",
+          "column": "error_codes"
+        },
+        "warningCodes": {
+          "type": "String",
+          "column": "warning_codes"
+        }
+      },
+      "decimals": {},
+      "relations": {
+        "job": "ImportJob"
+      }
+    },
+    "BackupRun": {
+      "table": "backup_runs",
+      "columns": {
+        "id": "id",
+        "backupId": "backup_id",
+        "deploymentId": "deployment_id",
+        "startedAt": "started_at",
+        "finishedAt": "finished_at",
+        "initiatedByUserId": "initiated_by_user_id",
+        "triggerType": "trigger_type",
+        "localStatus": "local_status",
+        "databaseDumpSize": "database_dump_size",
+        "filesArchiveSize": "files_archive_size",
+        "manifestSha256": "manifest_sha256",
+        "appVersion": "app_version",
+        "schemaVersion": "schema_version",
+        "errorSummary": "error_summary",
+        "createdAt": "created_at",
+        "initiator": "initiator",
+        "targetRuns": "targetRuns"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "initiator": "User",
+        "targetRuns": "BackupTargetRun"
+      }
+    },
+    "BackupRemote": {
+      "table": "backup_remotes",
+      "columns": {
+        "id": "id",
+        "remoteCode": "remote_code",
+        "displayName": "display_name",
+        "providerType": "provider_type",
+        "transportType": "transport_type",
+        "isEnabled": "is_enabled",
+        "isMandatory": "is_mandatory",
+        "configRef": "config_ref",
+        "remotePrefix": "remote_prefix",
+        "retentionDaily": "retention_daily",
+        "retentionWeekly": "retention_weekly",
+        "lastProbeAt": "last_probe_at",
+        "probeStatus": "probe_status",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "targetRuns": "targetRuns"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "targetRuns": "BackupTargetRun"
+      }
+    },
+    "BackupTargetRun": {
+      "table": "backup_target_runs",
+      "columns": {
+        "id": "id",
+        "backupRunId": "backup_run_id",
+        "backupRemoteId": "backup_remote_id",
+        "uploadStatus": "upload_status",
+        "verifyStatus": "verify_status",
+        "attemptCount": "attempt_count",
+        "startedAt": "started_at",
+        "finishedAt": "finished_at",
+        "verifiedAt": "verified_at",
+        "bytesUploaded": "bytes_uploaded",
+        "remoteBackupRef": "remote_backup_ref",
+        "errorCode": "error_code",
+        "errorSummary": "error_summary",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "backupRun": "backupRun",
+        "backupRemote": "backupRemote"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "backupRun": "BackupRun",
+        "backupRemote": "BackupRemote"
+      }
+    },
+    "AuditLog": {
+      "table": "audit_log",
+      "columns": {
+        "id": "id",
+        "actorUserId": "actor_user_id",
+        "action": "action",
+        "entityType": "entity_type",
+        "entityId": "entity_id",
+        "occurredAt": "occurred_at",
+        "beforeJsonb": "before_jsonb",
+        "afterJsonb": "after_jsonb",
+        "correlationId": "correlation_id",
+        "actor": "actor"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "actor": "User"
+      }
+    },
+    "AiRun": {
+      "table": "ai_runs",
+      "columns": {
+        "id": "id",
+        "providerCode": "provider_code",
+        "featureCode": "feature_code",
+        "modelCode": "model_code",
+        "requestedByUserId": "requested_by_user_id",
+        "targetEntityType": "target_entity_type",
+        "targetEntityId": "target_entity_id",
+        "promptTemplateVersion": "prompt_template_version",
+        "status": "status",
+        "startedAt": "started_at",
+        "finishedAt": "finished_at",
+        "inputUnits": "input_units",
+        "outputUnits": "output_units",
+        "estimatedCost": "estimated_cost",
+        "outputDocumentId": "output_document_id",
+        "errorCode": "error_code",
+        "errorSummary": "error_summary",
+        "createdAt": "created_at",
+        "requestedBy": "requestedBy",
+        "outputDocument": "outputDocument"
+      },
+      "lists": {},
+      "decimals": {
+        "estimatedCost": {
+          "precision": 16,
+          "scale": 4,
+          "column": "estimated_cost"
+        }
+      },
+      "relations": {
+        "requestedBy": "User",
+        "outputDocument": "Document"
+      }
+    },
+    "DictionaryItem": {
+      "table": "dictionary_items",
+      "columns": {
+        "id": "id",
+        "category": "category",
+        "code": "code",
+        "displayName": "display_name",
+        "isActive": "is_active",
+        "sortOrder": "sort_order",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {}
+    },
+    "ExternalListing": {
+      "table": "external_listings",
+      "columns": {
+        "publishedAt": "published_at",
+        "sourceUpdatedAt": "source_updated_at",
+        "dateSource": "date_source",
+        "datePrecision": "date_precision",
+        "sourceCategoryRaw": "source_category_raw",
+        "purposeEvidence": "purpose_evidence",
+        "pricePerM2Rub": "price_per_m2_rub",
+        "pricePerM2Unit": "price_per_m2_unit",
+        "fetchedAt": "fetched_at",
+        "lastCheckedAt": "last_checked_at",
+        "duplicateMembers": "duplicateMembers",
+        "collectionItems": "collectionItems",
+        "leadRequests": "leadRequests",
+        "analysisCaches": "analysisCaches",
+        "id": "id",
+        "source": "source",
+        "sourceListingId": "source_listing_id",
+        "sourceUnitId": "source_unit_id",
+        "url": "url",
+        "sourceMethod": "source_method",
+        "operation": "operation",
+        "priceRub": "price_rub",
+        "priceUnit": "price_unit",
+        "areaM2": "area_m2",
+        "floorRaw": "floor_raw",
+        "floorNumber": "floor_number",
+        "purposes": "purposes",
+        "address": "address",
+        "district": "district",
+        "city": "city",
+        "sellerType": "seller_type",
+        "ownerConfirmed": "owner_confirmed",
+        "ownerConfirmationMethod": "owner_confirmation_method",
+        "ownerConfirmedAt": "owner_confirmed_at",
+        "ownerConfirmationSource": "owner_confirmation_source",
+        "description": "description",
+        "images": "images",
+        "firstSeenAt": "first_seen_at",
+        "lastSeenAt": "last_seen_at",
+        "lastPrice": "last_price",
+        "propertyId": "property_id",
+        "updatedAt": "updated_at",
+        "property": "property",
+        "snapshots": "snapshots",
+        "verifications": "verifications",
+        "bookmarks": "bookmarks",
+        "selections": "selections",
+        "runResults": "runResults"
+      },
+      "lists": {
+        "purposes": {
+          "type": "String",
+          "column": "purposes"
+        }
+      },
+      "decimals": {
+        "pricePerM2Rub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price_per_m2_rub"
+        },
+        "priceRub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price_rub"
+        },
+        "areaM2": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area_m2"
+        },
+        "lastPrice": {
+          "precision": 16,
+          "scale": 2,
+          "column": "last_price"
+        }
+      },
+      "relations": {
+        "duplicateMembers": "ListingDuplicateMember",
+        "collectionItems": "PropertyCollectionItem",
+        "leadRequests": "LeadRequest",
+        "analysisCaches": "AiAnalysisCache",
+        "property": "Property",
+        "snapshots": "ExternalListingSnapshot",
+        "verifications": "ExternalListingVerification",
+        "bookmarks": "SearchBookmark",
+        "selections": "SearchSelection",
+        "runResults": "SearchRunResult"
+      }
+    },
+    "ExternalListingSnapshot": {
+      "table": "external_listing_snapshots",
+      "columns": {
+        "publishedAt": "published_at",
+        "sourceUpdatedAt": "source_updated_at",
+        "dateSource": "date_source",
+        "datePrecision": "date_precision",
+        "sourceCategoryRaw": "source_category_raw",
+        "purposeEvidence": "purpose_evidence",
+        "pricePerM2Rub": "price_per_m2_rub",
+        "pricePerM2Unit": "price_per_m2_unit",
+        "firstSeenAt": "first_seen_at",
+        "lastSeenAt": "last_seen_at",
+        "areaM2": "area_m2",
+        "lastCheckedAt": "last_checked_at",
+        "id": "id",
+        "listingId": "listing_id",
+        "searchRunId": "search_run_id",
+        "fetchedAt": "fetched_at",
+        "priceRub": "price_rub",
+        "normalized": "normalized",
+        "listing": "listing",
+        "searchRun": "searchRun"
+      },
+      "lists": {},
+      "decimals": {
+        "pricePerM2Rub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price_per_m2_rub"
+        },
+        "areaM2": {
+          "precision": 12,
+          "scale": 2,
+          "column": "area_m2"
+        },
+        "priceRub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "price_rub"
+        }
+      },
+      "relations": {
+        "listing": "ExternalListing",
+        "searchRun": "SearchRun"
+      }
+    },
+    "ExternalListingVerification": {
+      "table": "external_listing_verifications",
+      "columns": {
+        "id": "id",
+        "listingId": "listing_id",
+        "verifiedBy": "verified_by",
+        "verifiedAt": "verified_at",
+        "availability": "availability",
+        "priceConfirmed": "price_confirmed",
+        "ownerConfirmed": "owner_confirmed",
+        "note": "note",
+        "nextCheckAt": "next_check_at",
+        "listing": "listing",
+        "verifier": "verifier"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "listing": "ExternalListing",
+        "verifier": "User"
+      }
+    },
+    "SearchBookmark": {
+      "table": "search_bookmarks",
+      "columns": {
+        "id": "id",
+        "userId": "user_id",
+        "listingId": "listing_id",
+        "note": "note",
+        "status": "status",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "user": "user",
+        "listing": "listing"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "user": "User",
+        "listing": "ExternalListing"
+      }
+    },
+    "SearchSelection": {
+      "table": "search_selections",
+      "columns": {
+        "id": "id",
+        "needId": "need_id",
+        "listingId": "listing_id",
+        "addedBy": "added_by",
+        "comment": "comment",
+        "reviewStatus": "review_status",
+        "propertyId": "property_id",
+        "matchId": "match_id",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "need": "need",
+        "listing": "listing",
+        "creator": "creator",
+        "property": "property",
+        "match": "match"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "need": "ClientNeed",
+        "listing": "ExternalListing",
+        "creator": "User",
+        "property": "Property",
+        "match": "NeedPropertyMatch"
+      }
+    },
+    "SavedSearch": {
+      "table": "saved_searches",
+      "columns": {
+        "id": "id",
+        "ownerUserId": "owner_user_id",
+        "name": "name",
+        "city": "city",
+        "filters": "filters",
+        "sources": "sources",
+        "needId": "need_id",
+        "lastRunAt": "last_run_at",
+        "lastSuccessfulRunId": "last_successful_run_id",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "owner": "owner",
+        "need": "need",
+        "lastSuccessfulRun": "lastSuccessfulRun",
+        "runs": "runs"
+      },
+      "lists": {
+        "sources": {
+          "type": "String",
+          "column": "sources"
+        }
+      },
+      "decimals": {},
+      "relations": {
+        "owner": "User",
+        "need": "ClientNeed",
+        "lastSuccessfulRun": "SearchRun",
+        "runs": "SearchRun"
+      }
+    },
+    "SearchRun": {
+      "table": "search_runs",
+      "columns": {
+        "depthParams": "depth_params",
+        "sortParams": "sort_params",
+        "deadlineAt": "deadline_at",
+        "cancelledAt": "cancelled_at",
+        "cancelRequested": "cancel_requested",
+        "progress": "progress",
+        "incompleteReason": "incomplete_reason",
+        "idempotencyKey": "idempotency_key",
+        "lockedBy": "locked_by",
+        "heartbeatAt": "heartbeat_at",
+        "browserSessions": "browserSessions",
+        "id": "id",
+        "savedSearchId": "saved_search_id",
+        "needId": "need_id",
+        "userId": "user_id",
+        "city": "city",
+        "filters": "filters",
+        "status": "status",
+        "startedAt": "started_at",
+        "finishedAt": "finished_at",
+        "webSearchUsed": "web_search_used",
+        "fallbackReason": "fallback_reason",
+        "savedSearch": "savedSearch",
+        "need": "need",
+        "user": "user",
+        "successfulFor": "successfulFor",
+        "sources": "sources",
+        "results": "results",
+        "snapshots": "snapshots",
+        "aiUsageLogs": "aiUsageLogs"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "browserSessions": "InteractiveBrowserSession",
+        "savedSearch": "SavedSearch",
+        "need": "ClientNeed",
+        "user": "User",
+        "successfulFor": "SavedSearch",
+        "sources": "SearchRunSource",
+        "results": "SearchRunResult",
+        "snapshots": "ExternalListingSnapshot",
+        "aiUsageLogs": "AiUsageLog"
+      }
+    },
+    "SearchRunSource": {
+      "table": "search_run_sources",
+      "columns": {
+        "requestedCount": "requested_count",
+        "receivedCount": "received_count",
+        "acceptedCount": "accepted_count",
+        "depthReached": "depth_reached",
+        "retryAfterAt": "retry_after_at",
+        "statusReasonRu": "status_reason_ru",
+        "needsUserAction": "needs_user_action",
+        "id": "id",
+        "runId": "run_id",
+        "source": "source",
+        "status": "status",
+        "resultCount": "result_count",
+        "reason": "reason",
+        "durationMs": "duration_ms",
+        "run": "run"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "run": "SearchRun"
+      }
+    },
+    "SearchRunResult": {
+      "table": "search_run_results",
+      "columns": {
+        "id": "id",
+        "runId": "run_id",
+        "listingId": "listing_id",
+        "verdict": "verdict",
+        "criteria": "criteria",
+        "score": "score",
+        "isNew": "is_new",
+        "priceChanged": "price_changed",
+        "run": "run",
+        "listing": "listing"
+      },
+      "lists": {},
+      "decimals": {
+        "score": {
+          "precision": 16,
+          "scale": 2,
+          "column": "score"
+        }
+      },
+      "relations": {
+        "run": "SearchRun",
+        "listing": "ExternalListing"
+      }
+    },
+    "AiSetting": {
+      "table": "ai_settings",
+      "columns": {
+        "id": "id",
+        "aiEnabled": "ai_enabled",
+        "scraperEnabled": "scraper_enabled",
+        "browserEnabled": "browser_enabled",
+        "enabledSources": "enabled_sources",
+        "webSearchManualAllowed": "web_search_manual_allowed",
+        "webSearchAutoFallback": "web_search_auto_fallback",
+        "model": "model",
+        "webModel": "web_model",
+        "searchContextSize": "search_context_size",
+        "perUserDailyLimit": "per_user_daily_limit",
+        "perJobLimit": "per_job_limit",
+        "dailyLimit": "daily_limit",
+        "monthlyBudgetRub": "monthly_budget_rub",
+        "updatedBy": "updated_by",
+        "updatedAt": "updated_at",
+        "updater": "updater"
+      },
+      "lists": {
+        "enabledSources": {
+          "type": "String",
+          "column": "enabled_sources"
+        }
+      },
+      "decimals": {
+        "monthlyBudgetRub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "monthly_budget_rub"
+        }
+      },
+      "relations": {
+        "updater": "User"
+      }
+    },
+    "AiUsageLog": {
+      "table": "ai_usage_logs",
+      "columns": {
+        "chatMessages": "chatMessages",
+        "analysisCaches": "analysisCaches",
+        "id": "id",
+        "callType": "call_type",
+        "userId": "user_id",
+        "searchRunId": "search_run_id",
+        "model": "model",
+        "inputTokens": "input_tokens",
+        "outputTokens": "output_tokens",
+        "webSearchCalls": "web_search_calls",
+        "estimatedCostRub": "estimated_cost_rub",
+        "actualCostRub": "actual_cost_rub",
+        "result": "result",
+        "status": "status",
+        "createdAt": "created_at",
+        "durationMs": "duration_ms",
+        "user": "user",
+        "searchRun": "searchRun",
+        "reservations": "reservations"
+      },
+      "lists": {},
+      "decimals": {
+        "estimatedCostRub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "estimated_cost_rub"
+        },
+        "actualCostRub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "actual_cost_rub"
+        }
+      },
+      "relations": {
+        "chatMessages": "AiChatMessage",
+        "analysisCaches": "AiAnalysisCache",
+        "user": "User",
+        "searchRun": "SearchRun",
+        "reservations": "AiBudgetReservation"
+      }
+    },
+    "AiTariff": {
+      "table": "ai_tariffs",
+      "columns": {
+        "id": "id",
+        "model": "model",
+        "callType": "call_type",
+        "unit": "unit",
+        "priceRub": "price_rub",
+        "effectiveFrom": "effective_from"
+      },
+      "lists": {},
+      "decimals": {
+        "priceRub": {
+          "precision": 16,
+          "scale": 6,
+          "column": "price_rub"
+        }
+      },
+      "relations": {}
+    },
+    "AiBudgetReservation": {
+      "table": "ai_budget_reservations",
+      "columns": {
+        "id": "id",
+        "usageLogId": "usage_log_id",
+        "amountRub": "amount_rub",
+        "status": "status",
+        "createdAt": "created_at",
+        "usageLog": "usageLog"
+      },
+      "lists": {},
+      "decimals": {
+        "amountRub": {
+          "precision": 16,
+          "scale": 2,
+          "column": "amount_rub"
+        }
+      },
+      "relations": {
+        "usageLog": "AiUsageLog"
+      }
+    },
+    "CalendarEvent": {
+      "table": "calendar_events",
+      "columns": {
+        "id": "id",
+        "startAt": "start_at",
+        "endAt": "end_at",
+        "allDay": "all_day",
+        "title": "title",
+        "description": "description",
+        "ownerUserId": "owner_user_id",
+        "visibility": "visibility",
+        "recurrenceRule": "recurrence_rule",
+        "clientId": "client_id",
+        "needId": "need_id",
+        "propertyId": "property_id",
+        "dealId": "deal_id",
+        "archivedAt": "archived_at",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "owner": "owner",
+        "client": "client",
+        "need": "need",
+        "property": "property",
+        "deal": "deal"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "owner": "User",
+        "client": "Client",
+        "need": "ClientNeed",
+        "property": "Property",
+        "deal": "Deal"
+      }
+    },
+    "Notification": {
+      "table": "notifications",
+      "columns": {
+        "id": "id",
+        "recipientUserId": "recipient_user_id",
+        "kind": "kind",
+        "sourceType": "source_type",
+        "sourceId": "source_id",
+        "triggerAt": "trigger_at",
+        "state": "state",
+        "readAt": "read_at",
+        "snoozedUntil": "snoozed_until",
+        "title": "title",
+        "link": "link",
+        "dedupKey": "dedup_key",
+        "createdAt": "created_at",
+        "recipient": "recipient"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "recipient": "User"
+      }
+    },
+    "NotificationPreference": {
+      "table": "notification_preferences",
+      "columns": {
+        "id": "id",
+        "userId": "user_id",
+        "leadMinutes": "lead_minutes",
+        "updatedAt": "updated_at",
+        "user": "user"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "user": "User"
+      }
+    },
+    "DealChecklistItem": {
+      "table": "deal_checklist_items",
+      "columns": {
+        "id": "id",
+        "dealId": "deal_id",
+        "code": "code",
+        "title": "title",
+        "status": "status",
+        "responsibleUserId": "responsible_user_id",
+        "checkedAt": "checked_at",
+        "documentId": "document_id",
+        "sortOrder": "sort_order",
+        "updatedAt": "updated_at",
+        "deal": "deal",
+        "responsible": "responsible",
+        "document": "document"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "deal": "Deal",
+        "responsible": "User",
+        "document": "Document"
+      }
+    },
+    "InteractiveBrowserSession": {
+      "table": "interactive_browser_sessions",
+      "columns": {
+        "id": "id",
+        "searchRunId": "search_run_id",
+        "source": "source",
+        "ownerUserId": "owner_user_id",
+        "status": "status",
+        "startUrlHost": "start_url_host",
+        "createdAt": "created_at",
+        "expiresAt": "expires_at",
+        "completedAt": "completed_at",
+        "lastActivityAt": "last_activity_at",
+        "closeReason": "close_reason",
+        "searchRun": "searchRun",
+        "owner": "owner"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "searchRun": "SearchRun",
+        "owner": "User"
+      }
+    },
+    "ListingDuplicateGroup": {
+      "table": "listing_duplicate_groups",
+      "columns": {
+        "id": "id",
+        "status": "status",
+        "evidence": "evidence",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "members": "members",
+        "decisions": "decisions"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "members": "ListingDuplicateMember",
+        "decisions": "ListingDuplicateDecision"
+      }
+    },
+    "ListingDuplicateMember": {
+      "table": "listing_duplicate_members",
+      "columns": {
+        "id": "id",
+        "groupId": "group_id",
+        "listingId": "listing_id",
+        "releasedAt": "released_at",
+        "group": "group",
+        "listing": "listing"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "group": "ListingDuplicateGroup",
+        "listing": "ExternalListing"
+      }
+    },
+    "ListingDuplicateDecision": {
+      "table": "listing_duplicate_decisions",
+      "columns": {
+        "id": "id",
+        "groupId": "group_id",
+        "decision": "decision",
+        "decidedBy": "decided_by",
+        "decidedAt": "decided_at",
+        "comment": "comment",
+        "group": "group",
+        "decider": "decider"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "group": "ListingDuplicateGroup",
+        "decider": "User"
+      }
+    },
+    "TaskChecklistItem": {
+      "table": "task_checklist_items",
+      "columns": {
+        "id": "id",
+        "taskId": "task_id",
+        "title": "title",
+        "sortOrder": "sort_order",
+        "responsibleUserId": "responsible_user_id",
+        "dueAt": "due_at",
+        "required": "required",
+        "status": "status",
+        "result": "result",
+        "completedAt": "completed_at",
+        "completedBy": "completed_by",
+        "updatedAt": "updated_at",
+        "task": "task",
+        "responsible": "responsible",
+        "completer": "completer"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "task": "Task",
+        "responsible": "User",
+        "completer": "User"
+      }
+    },
+    "PlannerSetting": {
+      "table": "planner_settings",
+      "columns": {
+        "id": "id",
+        "soonThresholdHours": "soon_threshold_hours",
+        "updatedBy": "updated_by",
+        "updatedAt": "updated_at",
+        "updater": "updater"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "updater": "User"
+      }
+    },
+    "BulkTaskBatch": {
+      "table": "bulk_task_batches",
+      "columns": {
+        "id": "id",
+        "idempotencyKey": "idempotency_key",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "count": "count",
+        "template": "template",
+        "creator": "creator",
+        "tasks": "tasks"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "creator": "User",
+        "tasks": "Task"
+      }
+    },
+    "PropertyCollection": {
+      "table": "property_collections",
+      "columns": {
+        "id": "id",
+        "name": "name",
+        "ownerUserId": "owner_user_id",
+        "visibility": "visibility",
+        "archivedAt": "archived_at",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "owner": "owner",
+        "items": "items",
+        "needs": "needs",
+        "documentLinks": "documentLinks"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "owner": "User",
+        "items": "PropertyCollectionItem",
+        "needs": "PropertyCollectionNeed",
+        "documentLinks": "DocumentCollection"
+      }
+    },
+    "PropertyCollectionItem": {
+      "table": "property_collection_items",
+      "columns": {
+        "id": "id",
+        "collectionId": "collection_id",
+        "sortOrder": "sort_order",
+        "externalListingId": "external_listing_id",
+        "propertyId": "property_id",
+        "status": "status",
+        "comment": "comment",
+        "exclusionReason": "exclusion_reason",
+        "addedBy": "added_by",
+        "addedAt": "added_at",
+        "updatedAt": "updated_at",
+        "collection": "collection",
+        "externalListing": "externalListing",
+        "property": "property",
+        "creator": "creator"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "collection": "PropertyCollection",
+        "externalListing": "ExternalListing",
+        "property": "Property",
+        "creator": "User"
+      }
+    },
+    "PropertyCollectionNeed": {
+      "table": "property_collection_needs",
+      "columns": {
+        "id": "id",
+        "collectionId": "collection_id",
+        "needId": "need_id",
+        "linkedBy": "linked_by",
+        "linkedAt": "linked_at",
+        "collection": "collection",
+        "need": "need",
+        "linker": "linker"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "collection": "PropertyCollection",
+        "need": "ClientNeed",
+        "linker": "User"
+      }
+    },
+    "DocumentTemplate": {
+      "table": "document_templates",
+      "columns": {
+        "id": "id",
+        "code": "code",
+        "name": "name",
+        "format": "format",
+        "description": "description",
+        "status": "status",
+        "allowedSources": "allowed_sources",
+        "currentVersionId": "current_version_id",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "currentVersion": "currentVersion",
+        "versions": "versions"
+      },
+      "lists": {
+        "allowedSources": {
+          "type": "String",
+          "column": "allowed_sources"
+        }
+      },
+      "decimals": {},
+      "relations": {
+        "currentVersion": "DocumentTemplateVersion",
+        "versions": "DocumentTemplateVersion"
+      }
+    },
+    "DocumentTemplateVersion": {
+      "table": "document_template_versions",
+      "columns": {
+        "id": "id",
+        "templateId": "template_id",
+        "version": "version",
+        "manifestYaml": "manifest_yaml",
+        "storageKey": "storage_key",
+        "markdownBody": "markdown_body",
+        "checksum": "checksum",
+        "createdBy": "created_by",
+        "createdAt": "created_at",
+        "compatibilityNote": "compatibility_note",
+        "template": "template",
+        "currentFor": "currentFor",
+        "creator": "creator",
+        "documents": "documents"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "template": "DocumentTemplate",
+        "currentFor": "DocumentTemplate",
+        "creator": "User",
+        "documents": "Document"
+      }
+    },
+    "AiChatSession": {
+      "table": "ai_chat_sessions",
+      "columns": {
+        "id": "id",
+        "ownerUserId": "owner_user_id",
+        "title": "title",
+        "contextType": "context_type",
+        "contextId": "context_id",
+        "createdAt": "created_at",
+        "updatedAt": "updated_at",
+        "archivedAt": "archived_at",
+        "owner": "owner",
+        "messages": "messages",
+        "pendingActions": "pendingActions"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "owner": "User",
+        "messages": "AiChatMessage",
+        "pendingActions": "AiPendingAction"
+      }
+    },
+    "AiChatMessage": {
+      "table": "ai_chat_messages",
+      "columns": {
+        "id": "id",
+        "sessionId": "session_id",
+        "role": "role",
+        "content": "content",
+        "toolName": "tool_name",
+        "toolArgs": "tool_args",
+        "toolResultSummary": "tool_result_summary",
+        "aiUsageLogId": "ai_usage_log_id",
+        "pendingActionId": "pending_action_id",
+        "createdAt": "created_at",
+        "session": "session",
+        "aiUsageLog": "aiUsageLog",
+        "pendingAction": "pendingAction"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "session": "AiChatSession",
+        "aiUsageLog": "AiUsageLog",
+        "pendingAction": "AiPendingAction"
+      }
+    },
+    "AiPendingAction": {
+      "table": "ai_pending_actions",
+      "columns": {
+        "id": "id",
+        "sessionId": "session_id",
+        "actionType": "action_type",
+        "payload": "payload",
+        "status": "status",
+        "decidedBy": "decided_by",
+        "decidedAt": "decided_at",
+        "createdAt": "created_at",
+        "expiresAt": "expires_at",
+        "session": "session",
+        "decider": "decider",
+        "messages": "messages"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "session": "AiChatSession",
+        "decider": "User",
+        "messages": "AiChatMessage"
+      }
+    },
+    "AiAnalysisCache": {
+      "table": "ai_analysis_caches",
+      "columns": {
+        "id": "id",
+        "cacheKey": "cache_key",
+        "listingId": "listing_id",
+        "result": "result",
+        "aiUsageLogId": "ai_usage_log_id",
+        "createdAt": "created_at",
+        "listing": "listing",
+        "aiUsageLog": "aiUsageLog"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "listing": "ExternalListing",
+        "aiUsageLog": "AiUsageLog"
+      }
+    },
+    "SearchExport": {
+      "table": "search_exports",
+      "columns": {
+        "id": "id",
+        "userId": "user_id",
+        "format": "format",
+        "scope": "scope",
+        "params": "params",
+        "columns": "columns",
+        "rowCount": "row_count",
+        "documentId": "document_id",
+        "createdAt": "created_at",
+        "user": "user",
+        "document": "document"
+      },
+      "lists": {
+        "columns": {
+          "type": "String",
+          "column": "columns"
+        }
+      },
+      "decimals": {},
+      "relations": {
+        "user": "User",
+        "document": "Document"
+      }
+    },
+    "DocumentCollection": {
+      "table": "document_collections",
+      "columns": {
+        "documentId": "document_id",
+        "collectionId": "collection_id",
+        "document": "document",
+        "collection": "collection"
+      },
+      "lists": {},
+      "decimals": {},
+      "relations": {
+        "document": "Document",
+        "collection": "PropertyCollection"
+      }
+    }
+  }
+}

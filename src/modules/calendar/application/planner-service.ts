@@ -1,3 +1,4 @@
+import { lockSql, plannerSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, Prisma, transaction } from "@/shared/db/client";
 import { type Actor, isManager } from "@/modules/auth/domain/actor";
@@ -18,7 +19,7 @@ export async function setPlannerSetting(actor: Actor, input: unknown) {
   if (!isManager(actor)) throw new ForbiddenError();
   const data = parseInput(z.object({ soonThresholdHours: z.number().int().min(1).max(8760), expectedUpdatedAt: zExpectedUpdatedAt.nullable() }), input);
   return transaction(async tx => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(3105, 2)`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(3105, 2)`));
     const previous = await tx.plannerSetting.findFirst();
     if ((previous?.updatedAt.toISOString() ?? null) !== (data.expectedUpdatedAt?.toISOString() ?? null)) throw new StaleUpdateError();
     const row = previous ? await tx.plannerSetting.update({ where: { id: previous.id }, data: { soonThresholdHours: data.soonThresholdHours, updatedBy: actor.userId } })
@@ -61,7 +62,7 @@ export async function aggregatePlanner(actor: Actor, input: unknown, now = new D
     WHERE e.archived_at IS NULL AND e.recurrence_rule IS NULL AND ${employee("e.owner_user_id")} AND e.start_at<${f.to} AND e.end_at>${f.from}
     AND ${f.clientId ? Prisma.sql`(${safeEvent}) AND (e.client_id=${f.clientId}::uuid OR EXISTS(SELECT 1 FROM client_needs n WHERE n.id=e.need_id AND n.client_id=${f.clientId}::uuid))` : yes}`);
   const toneFilter = f.deadline ? ({ overdue: "red", soon: "yellow", controlled: "green", closed: "gray" } as const)[f.deadline] : null;
-  const rows = await db.$queryRaw<DayAggregate[]>(Prisma.sql`WITH sources AS (${Prisma.join(branches," UNION ALL ")}), colored AS (
+  const rows = await db.$queryRaw<DayAggregate[]>(plannerSql(Prisma.sql`WITH sources AS (${Prisma.join(branches," UNION ALL ")}), colored AS (
     SELECT to_char(at AT TIME ZONE ${timeZone},'YYYY-MM-DD') AS day, CASE
       WHEN status IN ('completed','cancelled','no_show','archived','expired','terminated') THEN 'gray'
       WHEN at<${now} OR priority='critical' THEN 'red'
@@ -69,7 +70,7 @@ export async function aggregatePlanner(actor: Actor, input: unknown, now = new D
     FROM sources WHERE ${f.status ? Prisma.sql`status=${f.status}` : yes} AND ${f.priority ? Prisma.sql`priority=${f.priority}` : yes})
     SELECT day, count(*)::int AS total, count(*) FILTER(WHERE tone='red')::int AS red, count(*) FILTER(WHERE tone='yellow')::int AS yellow,
       count(*) FILTER(WHERE tone='green')::int AS green, count(*) FILTER(WHERE tone='gray')::int AS gray FROM colored
-    WHERE ${toneFilter ? Prisma.sql`tone=${toneFilter}` : yes} GROUP BY day ORDER BY day`);
+    WHERE ${toneFilter ? Prisma.sql`tone=${toneFilter}` : yes} GROUP BY day ORDER BY day`));
   if (!f.type || f.type === "calendar_event") {
     const recurring = await listCalendar(actor, { ...input as object, type: "calendar_event" }, { recurringOnly: true, now, soonHours: soonThresholdHours });
     for (const item of recurring) {

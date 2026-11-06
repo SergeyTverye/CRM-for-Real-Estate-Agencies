@@ -1,3 +1,5 @@
+import { Prisma } from "@/generated/prisma/client";
+import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, type DbOrTx } from "@/shared/db/client";
 import { ConflictError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
@@ -70,7 +72,7 @@ export async function transferToCatalog(actor: Actor, listingId: string, input: 
   const data = parseInput(transferSchema, input);
   await listingById(listingId);
   return transaction(async tx => {
-    await tx.$executeRaw`SELECT id FROM external_listings WHERE id = ${listingId}::uuid FOR UPDATE`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM external_listings WHERE id = ${listingId}::uuid FOR UPDATE`));
     const listing = await tx.externalListing.findUniqueOrThrow({ where: { id: listingId } });
     if (listing.propertyId) return { id: listing.propertyId, created: false };
     const snapshot = await tx.externalListingSnapshot.findFirst({ where: { listingId }, orderBy: { fetchedAt: "desc" } });
@@ -86,7 +88,7 @@ export async function transferToCatalog(actor: Actor, listingId: string, input: 
     await guardExternalUrl(listing.url);
     // Serialize the provenance as well as this row: separate rows may describe one object.
     if (listing.sourceListingId) {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([listing.source, listing.sourceListingId, listing.sourceUnitId])}, 0))`;
+      await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([listing.source, listing.sourceListingId, listing.sourceUnitId])}, 0))`));
       const linked = await tx.externalListing.findFirst({ where: { source: listing.source, sourceListingId: listing.sourceListingId,
         sourceUnitId: listing.sourceUnitId, propertyId: { not: null } }, select: { propertyId: true } });
       if (linked?.propertyId) {
@@ -124,7 +126,7 @@ export async function proposeListing(actor: Actor, listingId: string, input: unk
   const data = parseInput(needAction, input);
   await loadAccessibleNeed(db, actor, data.needId);
   return transaction(async tx => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`search-propose:${data.needId}`}, 0))`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`search-propose:${data.needId}`}, 0))`));
     const { propertyId } = await actionContext(actor, listingId, input, tx);
     // Matching service owns stage transitions; this boundary adds idempotence for candidates.
     const existing = await tx.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } });
@@ -142,7 +144,7 @@ export async function listingToOffer(actor: Actor, listingId: string, input: unk
   const data = parseInput(needAction, input);
   await loadAccessibleNeed(db, actor, data.needId);
   return transaction(async tx => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`search-offer:${data.needId}`}, 0))`;
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`search-offer:${data.needId}`}, 0))`));
     return listingToOfferLocked(actor, listingId, input);
   });
 }
