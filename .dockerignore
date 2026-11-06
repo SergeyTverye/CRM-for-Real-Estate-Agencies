@@ -42,3 +42,4 @@ secrets
 src-tauri/target/
 desktop-build/
 desktop-artifacts/
+releases/
