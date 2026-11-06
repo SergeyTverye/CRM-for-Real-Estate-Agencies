@@ -4,6 +4,7 @@ import { writeFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import { hashFile } from "@/modules/desktop-backup/infrastructure/fs";
 import { cleanupNativeImports, importNativeArchive, nativeArchiveUsage, nativeIncomingRoot, withNativeArchiveBudget } from "@/modules/desktop-backup/application/native-dialog";
 import { backupControlCommand } from "@/modules/desktop-backup/application/backup-control";
@@ -20,7 +21,7 @@ vi.mock("@/modules/desktop-backup/infrastructure/destinations-runtime", () => ({
 let temp: string, output: string;
 const actor = "synthetic-manager";
 beforeEach(async () => {
-  temp = await mkdtemp("D:/TEMP/UserTEMP/opencode/native-budget-");
+  temp = await mkdtemp(path.join(os.tmpdir(), "native-budget-"));
   output = path.join(temp, "archives"); await mkdir(output);
   vi.stubEnv("BACKUP_SETTINGS_DIR", path.join(temp, "runtime"));
   fake.maxBytes = 100; fake.backupId = randomUUID(); fake.dispose.mockReset(); fake.extract.mockReset();

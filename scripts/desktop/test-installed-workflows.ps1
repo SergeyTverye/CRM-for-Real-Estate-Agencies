@@ -194,7 +194,7 @@ try {
     $start.Environment['APPDATA']=Join-Path $script:runRoot 'roaming'
     $start.Environment['TEMP']=Join-Path $script:runRoot 'temp'
     $start.Environment['TMP']=$start.Environment['TEMP']
-    $start.Environment['PATH']=Join-Path $env:SystemRoot 'System32'
+    $start.Environment['PATH']=(Join-Path $env:SystemRoot 'System32')+';'+(Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0')
     $script:app=[Diagnostics.Process]::Start($start)
     WaitFor { (Test-Path -LiteralPath $script:runtime) -and (Ready) } 150
     Check ($script:base -match '^http://127\.0\.0\.1:') 'owned-loopback-ready'
