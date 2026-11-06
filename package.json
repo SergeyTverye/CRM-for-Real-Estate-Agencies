@@ -31,7 +31,13 @@
     "desktop:migrate": "tsx scripts/desktop/migrate-sqlite.ts",
     "test:integration:sqlite": "vitest run --project integration-sqlite",
     "desktop:audit": "tsx scripts/desktop/sqlite-audit.ts",
-    "desktop:smoke:migrate": "tsx scripts/desktop/smoke-migrate.ts"
+    "desktop:smoke:migrate": "tsx scripts/desktop/smoke-migrate.ts",
+    "desktop:bundle": "node scripts/desktop/build-desktop-bundle.mjs",
+    "desktop:tauri": "tauri build --bundles nsis",
+    "desktop:init": "tsx scripts/desktop/init-db.ts --initialize",
+    "desktop:transfer": "tsx scripts/desktop/migrate-pg-to-sqlite.ts",
+    "desktop:upgrade-db": "tsx scripts/desktop/upgrade-db.ts",
+    "test:desktop:transfer": "vitest run --project desktop-transfer"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1163.0",
@@ -72,11 +78,13 @@
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.4",
+    "@tauri-apps/cli": "2.12.4",
     "@types/better-sqlite3": "7.6.13",
     "@types/node": "24.19.2",
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "esbuild": "0.28.2",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.4",
     "tailwindcss": "4.3.4",

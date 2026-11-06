@@ -72,3 +72,7 @@ PG schema и migrations, tsconfig и каталог .next не изменены.
 
 DT-05 PARTIAL (core subset доказан); DT-06 TODO; DT-17 PARTIAL. Полная CRM на SQLite и готовность installer не объявляются.
 
+
+## Продолжение
+
+Перечень «Остаток этапа 2» выше фиксирует историческое состояние этапа 1. Текущая реализация, двойная регрессия, transfer и init/upgrade описаны в [sqlite-stage2.md](sqlite-stage2.md); актуальные результаты следует брать оттуда.

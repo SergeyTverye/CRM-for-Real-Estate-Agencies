@@ -12,6 +12,15 @@ export const db = getDb();
 
 /** Очищает все таблицы тестовой БД (кроме истории миграций). */
 export async function resetDatabase(): Promise<void> {
+  if (process.env.CRM_DEPLOYMENT_MODE === "desktop") {
+    const tables = await db.$queryRawUnsafe<{ name: string }[]>("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> '_prisma_migrations'");
+    await db.$transaction(async tx => {
+      await tx.$executeRawUnsafe("PRAGMA defer_foreign_keys=ON");
+      for (const { name } of tables) await tx.$executeRawUnsafe(`DELETE FROM "${name.replaceAll('"', '""')}"`);
+    });
+    getLoginRateLimiter().reset();
+    return;
+  }
   const rows = await db.$queryRaw<{ tablename: string }[]>`
     SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
   if (rows.length) {
@@ -60,11 +69,11 @@ export async function sessionCookieFor(actor: Actor): Promise<string> {
   return `${SESSION_COOKIE}=${token}`;
 }
 
-export const ORIGIN = "http://crm.test";
+export const ORIGIN = process.env.CRM_DEPLOYMENT_MODE === "desktop" ? "http://127.0.0.1:3511" : "http://crm.test";
 
 /** Запрос к route handler так, как его отправил бы браузер с того же origin. */
 export function apiRequest(method: string, pathAndQuery: string, opts: { cookie?: string; body?: unknown; origin?: string | null } = {}): NextRequest {
-  const headers: Record<string, string> = { host: "crm.test" };
+  const headers: Record<string, string> = { host: new URL(ORIGIN).host };
   if (opts.cookie) headers.cookie = opts.cookie;
   if (opts.origin !== null && method !== "GET") headers.origin = opts.origin ?? ORIGIN;
   if (opts.body !== undefined) headers["content-type"] = "application/json";

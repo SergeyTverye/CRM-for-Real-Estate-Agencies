@@ -1,0 +1,41 @@
+import { execFileSync } from "node:child_process";
+import { afterAll, expect, it } from "vitest";
+import { mkdtemp, readFile, readdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import Database from "better-sqlite3";
+import { initializeDesktopDatabase } from "../../scripts/desktop/init-db";
+import { applySqliteMigrations, upgradeSqlite } from "../../scripts/desktop/database-lifecycle";
+import { getDb, disconnectDb } from "@/shared/db/client";
+import { POST } from "@/app/api/v1/auth/login/route";
+import { NextRequest } from "next/server";
+afterAll(disconnectDb);
+const account={login:"localchief",displayName:"Синтетический руководитель",password:"Synthetic-Setup-93!"};
+it("first launch has no predefined account, creates chosen manager, uses random secrets, and runs offline API",async()=>{
+  const directory=await mkdtemp(path.join(tmpdir(),"crm-init-empty-"));
+  const result=await initializeDesktopDatabase({directory,mode:"empty",account});
+  expect(result.created).toBe(true);
+  const db=getDb();expect(await db.user.count()).toBe(1);expect(await db.client.count()).toBe(0);
+  const req=new NextRequest("http://127.0.0.1:3511/api/v1/auth/login",{method:"POST",headers:{host:"127.0.0.1:3511",origin:"http://127.0.0.1:3511","content-type":"application/json"},body:JSON.stringify({login:account.login,password:account.password})});
+  const response=await POST(req,{params:Promise.resolve({})});expect(response.status).toBe(200);expect(response.headers.get("set-cookie")).toContain("HttpOnly");
+  await disconnectDb();
+  const secrets=JSON.parse(await readFile(path.join(directory,"local-secrets.json"),"utf8"));
+  const snapshot=await upgradeSqlite(result.file);expect(snapshot.snapshot).toContain("before-update");
+  applySqliteMigrations(result.file);
+  const native=new Database(result.file,{readonly:true});
+  expect(native.pragma("integrity_check",{simple:true})).toBe("ok");expect(native.prepare("SELECT count(*) AS n FROM users").get()).toEqual({n:1});native.close();
+  const second=await mkdtemp(path.join(tmpdir(),"crm-init-demo-"));
+  const demo=await initializeDesktopDatabase({directory:second,mode:"demo",account});
+  const other=JSON.parse(await readFile(path.join(second,"local-secrets.json"),"utf8"));expect(secrets.localSecret===other.localSecret).toBe(false);
+  const probe=new Database(demo.file,{readonly:true});expect(probe.prepare("SELECT count(*) AS n FROM clients").get()).toEqual({n:5});expect(probe.pragma("foreign_key_check")).toEqual([]);probe.close();
+});
+
+it("offline migration history is accepted by Prisma deploy and a failed update retains its protective snapshot",async()=>{
+  const directory=await mkdtemp(path.join(tmpdir(),"crm-upgrade-check-")),file=path.join(directory,"crm.db");
+  applySqliteMigrations(file);
+  execFileSync(process.execPath,[path.resolve("node_modules/prisma/build/index.js"),"migrate","deploy","--config","prisma/sqlite.config.ts"],{env:{...process.env,SQLITE_DATABASE_URL:"file:"+file.replaceAll("\\","/")},stdio:"pipe"});
+  const native=new Database(file);native.prepare("UPDATE _prisma_migrations SET checksum=?").run("0".repeat(64));native.close();
+  await expect(upgradeSqlite(file)).rejects.toThrow("SQLITE_MIGRATION_HISTORY_MISMATCH");
+  const snapshots=(await readdir(directory)).filter(name=>name.includes("before-update"));expect(snapshots).toHaveLength(1);
+  const snapshot=new Database(path.join(directory,snapshots[0]!),{readonly:true});expect(snapshot.pragma("integrity_check",{simple:true})).toBe("ok");snapshot.close();
+});

@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+import { db } from "@/shared/db/client";
+import { completeDesktopSetup, desktopSetupStatus } from "@/modules/desktop-setup/application/setup-service";
+import { login } from "@/modules/auth/application/auth-service";
+describe("desktop first-run wizard", () => {
+  it("creates one manager transactionally, with synthetic data and no predefined password; closes setup", async () => {
+    expect((await desktopSetupStatus()).available).toBe(true);
+    const input = {login:"director",displayName:"Synthetic director",password:"Synthetic!483921",mode:"demo",dataDirectory:"default",localDiskConfirmed:true};
+    await expect(completeDesktopSetup({...input,password:"short"})).rejects.toThrow();
+    await expect(completeDesktopSetup({...input,localDiskConfirmed:false})).rejects.toThrow();
+    expect(await db.user.count()).toBe(0);
+    const attempts = await Promise.allSettled([completeDesktopSetup(input),completeDesktopSetup(input)]);
+    if (!attempts.some(a=>a.status==="fulfilled")) throw (attempts[0] as PromiseRejectedResult).reason;
+    expect(attempts.filter(a=>a.status==="fulfilled")).toHaveLength(1);
+    expect(await db.user.count()).toBe(1);
+    expect(await db.client.count()).toBe(3);
+    expect(await db.clientNeed.count()).toBe(3);
+    expect(await db.task.count()).toBe(3);
+    expect(await db.property.count()).toBe(3);
+    const manager = await db.user.findUniqueOrThrow({where:{login:"director"}});
+    expect(manager.passwordHash).not.toContain(input.password);
+    expect(manager.passwordHash).toMatch(/^\$argon2id\$/);
+    expect(manager.roleCode).toBe("manager");
+    expect(manager.mustChangePassword).toBe(false);
+    expect((await desktopSetupStatus()).available).toBe(false);
+    await expect(completeDesktopSetup(input)).rejects.toMatchObject({code:"SETUP_COMPLETE"});
+    expect(await db.dictionaryItem.count()).toBeGreaterThan(5);
+    const result=await login(input.login,input.password,{ip:"127.0.0.1",userAgent:"synthetic"},{delay:false});
+    expect(result.token).toBeTruthy();
+  });
+});

@@ -64,3 +64,10 @@
 - Явный CRM_DEPLOYMENT_MODE, scaled INTEGER вместо неточного native Decimal, Unicode LIKE/equality, очередь + BEGIN IMMEDIATE, PRAGMA и dialect SQL; неперенесённая выдача поиска fail closed.
 - Синтетический core-путь, RBAC/StorageAdapter/планер 1500 задач, конкурентный AI-бюджет и stock Decimal probe проходят; clean/repeat Prisma Migrate PASS. PG integration/authorization финально 332/332, npm test 1418/1418, SQLite 11/11 (10 core + 1 параллельный settings); tsc/ESLint/production build PASS. Протокол — docs/desktop/sqlite-core-prototype.md.
 - DT-05/17 остаются PARTIAL, DT-06 transfer — следующий этап. Tauri и коммерческие материалы не исследовались; коммиты выполняет координатор.
+
+## 2026-11-06 — SQLite backend, этап 2
+
+- Перенесены search result SQL/revision/sorts/export, JSON/list/skipDuplicates/batch/точная Decimal арифметика; сохранены PG-контракты и независимые paid AI caches. Все существующие integration/authorization запускаются в integration-sqlite с отдельными временными файлами и SQLite migration global setup.
+- PG→SQLite всех 84 моделей, read-only snapshot, исходные IDs/FK, финансовые суммы, storage/checksum, шаблоны/AI/search; rollback нового target и preflight. Первый запуск empty/demo/собственный пароль/случайные секреты, offline Prisma-compatible migration history и защитный upgrade snapshot.
+- Gate: SQLite 360/360 (62 файла), PG crm_test_a 342/342 (57), npm test 1438/1438 (69), transfer 2/2, реальный Next HTTP readiness/login/clients/file/page/Origin PASS; tsc и targeted ESLint PASS. Протокол: docs/desktop/sqlite-stage2.md.
+- PG schema/migrations и секреты не изменялись; коммерческая книга/производные не открывались; dependency install/git commit не выполнялись. Next 3511 остановлен, auto-includes убраны. Packaged Node24/Windows installer/restore отдельного исполнителя не подтверждаются backend-прогоном.

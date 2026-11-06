@@ -23,6 +23,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(process.env.CRM_BUILD_TARGET === "desktop" ? {
+    output: "standalone" as const,
+    outputFileTracingExcludes: { "/*": ["./.env*", "./private-data/**/*", "./data/**/*", "./backups/**/*"] },
+  } : {}),
   devIndicators: false,
   // Отдельный каталог сборки позволяет запускать несколько dev-серверов параллельно (QA/скриншоты).
   distDir: process.env.NEXT_DIST_DIR || ".next",

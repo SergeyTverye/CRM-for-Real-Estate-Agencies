@@ -51,20 +51,49 @@ export { Prisma };
 function lazyDesktopClient(url: string): PrismaClient {
   let pending: Promise<PrismaClient> | undefined;
   const load = () => pending ??= import("./sqlite-client").then(m => m.createSqliteClient(url));
-  return new Proxy({} as PrismaClient, {
-    get(_target, prop) {
+  const cache: Record<string, unknown> = {};
+  return new Proxy(cache, {
+    get(target, prop) {
       if (typeof prop !== "string") return undefined;
-      if (prop.startsWith("$")) return async (...args: unknown[]) => {
+      if (Object.hasOwn(target, prop)) return target[prop];
+      if (prop.startsWith("$")) return target[prop] = async (...args: unknown[]) => {
+        if (prop === "$transaction" && Array.isArray(args[0])) {
+          const work = args[0] as {__sqliteDeferred?: () => Promise<unknown>}[];
+          if (work.some(item => typeof item?.__sqliteDeferred !== "function")) throw new Error("SQLITE_BATCH_REQUIRES_DEFERRED_QUERIES");
+          return (await load()).$transaction(async () => {
+            const results: unknown[]=[];
+            for (const item of work) results.push(await item.__sqliteDeferred!());
+            return results;
+          }, args[1] as object);
+        }
         const client = await load();
         const fn = Reflect.get(client, prop) as (...values: unknown[]) => unknown;
         return fn.apply(client, args);
       };
-      return new Proxy({}, { get(_model, operation) {
-        return async (...args: unknown[]) => {
-          const delegate = Reflect.get(await load(), prop);
-          return Reflect.get(delegate, operation).apply(delegate, args);
+      const methods: Record<string, unknown> = {};
+      return target[prop] = new Proxy(methods, { get(model, operation) {
+        if (typeof operation !== "string") return undefined;
+        if (Object.hasOwn(model, operation)) return model[operation];
+        return model[operation] = (...args: unknown[]) => {
+          const run = async () => { const delegate = Reflect.get(await load(), prop); return Reflect.get(delegate, operation).apply(delegate, args); };
+          let pending:Promise<unknown>|undefined;
+          const promise=()=>pending??=run();
+          return {__sqliteDeferred:run,then:(...handlers: Parameters<Promise<unknown>["then"]>)=>promise().then(...handlers),catch:(...handlers:Parameters<Promise<unknown>["catch"]>)=>promise().catch(...handlers),finally:(...handlers:Parameters<Promise<unknown>["finally"]>)=>promise().finally(...handlers),[Symbol.toStringTag]:"PrismaPromise"};
         };
+      }, getOwnPropertyDescriptor(model, operation) {
+        return Reflect.getOwnPropertyDescriptor(model, operation) ?? {configurable:true, enumerable:true, writable:true, value:undefined};
       } });
+    }, getOwnPropertyDescriptor(target, prop) {
+      return Reflect.getOwnPropertyDescriptor(target, prop) ?? {configurable:true, enumerable:true, writable:true, value:undefined};
     },
-  });
+  }) as unknown as PrismaClient;
+}
+
+/** Lock scope for work that deliberately commits paid results independently. */
+export async function independentCommitScope<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+  if (getConfig().CRM_DEPLOYMENT_MODE === "desktop") {
+    const { serializeSqliteWork } = await import("./sqlite-client");
+    return serializeSqliteWork(getConfig().DATABASE_URL, () => fn(getDb()));
+  }
+  return getDb().$transaction(fn, {timeout:180000,maxWait:10000});
 }

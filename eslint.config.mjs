@@ -18,6 +18,7 @@ const config = [
       "next-env.d.ts",
       ".deploy-test/**",
       "Real-Estate-Scrapper/**",
+      "private-data/**",
     ],
   },
   {

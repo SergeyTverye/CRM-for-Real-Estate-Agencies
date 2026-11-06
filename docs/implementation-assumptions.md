@@ -100,3 +100,11 @@
 | V241-13 | Экономика: известные live-токены отдельно от прогноза; NFR-14 и три пользователя не измерены | Не использовать synthetic demo usage как измеренную стоимость; [методика](vkr/economics.md) |
 
 Решения о редакциях КП, KPI и no_match выше в разделе P1-А сохраняются. P2/P3 в эту документационную приёмку не включены.
+
+## Desktop SQLite, этап 2 (v3.2.1 §4)
+
+- История SQLite-миграций должна работать офлайн без Prisma CLI/schema engine в host PATH. Используется исполнитель зафиксированных migration.sql с SHA-256 и совместимой `_prisma_migrations`; совместимость с Prisma migrate deploy проверяется integration-тестом.
+- PG→SQLite читает согласованный READ ONLY REPEATABLE READ snapshot; для согласованности файлов оператор останавливает writers до переноса. Входные PG/storage не меняются. Target и его storage обязаны быть новыми. Полный FK check сильнее выборочной проверки связей; отдельно проверяются сценарные ID/API/финансы/документы.
+- AI-анализ сохраняет оплаченную группу независимо от следующей группы. В SQLite lock scope — внутрипроцессная очередь файла; budget read/check/reserve остаётся BEGIN IMMEDIATE transaction. Server сохраняет advisory transaction scope и независимые коммиты.
+- Runtime init --initialize не создаёт пользователя: пароль задаётся в мастере. Отдельный --setup-stdin предназначен для локальной автоматизации без пароля в argv/stdout. `local-secrets.json` защищает ACL supervisor; секреты не заменяют login/CSRF/Origin.
+- Из-за Windows subprocess-тестов в unit-проекте установлен testTimeout=15 секунд (ранее 5); проверки confidentiality не менялись. Функциональные integration/authorization assertions и таймауты сохранены.

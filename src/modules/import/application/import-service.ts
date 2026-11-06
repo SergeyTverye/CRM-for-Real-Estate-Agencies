@@ -327,7 +327,7 @@ async function createPropertyFromRow(tx: Tx, rec: Record<string, unknown>, o: Co
 }
 
 /** Создание сущностей по одной строке (в собственной транзакции). Возвращает целевую сущность. */
-async function commitRow(tx: Tx, row: ParsedRow, o: CommitOptions): Promise<{ type: string; id: string } | { skipped: string }> {
+export async function commitRow(tx: Tx, row: ParsedRow, o: CommitOptions): Promise<{ type: string; id: string } | { skipped: string }> {
   const rec = row.record;
   switch (row.target) {
     case "historical_deal_archive": {

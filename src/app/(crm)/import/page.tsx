@@ -1,3 +1,4 @@
+import { EnterpriseImportWizard } from "./enterprise-wizard";
 import Link from "next/link";
 import { requirePageActor } from "@/server/page-auth";
 import { listImportJobs } from "@/modules/import/application/import-service";
@@ -27,6 +28,7 @@ export default async function ImportJobsPage() {
         actions={<AutoRefresh active={Boolean(running)} />}
       />
 
+      <EnterpriseImportWizard />
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card title="Загрузить файл" className="lg:col-span-2">
           <ImportUploadForm maxMb={cfg.MAX_UPLOAD_MB} blockedReason={running ? "Сейчас выполняется другой импорт — дождитесь его завершения." : null} />

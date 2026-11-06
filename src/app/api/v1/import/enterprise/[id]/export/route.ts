@@ -1,0 +1,3 @@
+import { api } from '@/server/api-handler';
+import { exportEnterprise } from '@/modules/import/application/enterprise-service';
+export const GET = api<{ id: string }>({ access: 'manager' }, async ({ actor, params }) => { const { buffer, report } = await exportEnterprise(actor, params.id!); return new Response(new Uint8Array(buffer), { headers: { 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition': 'attachment; filename="enterprise-export.xlsx"', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'X-Import-Compatibility': JSON.stringify(report) } }); });

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getConfig } from "@/shared/config/env";
+import { desktopLoopbackAllowed } from "@/shared/auth/desktop-loopback";
 import { correlationIdFrom, runWithContext, setContextActor } from "@/shared/context";
 import { logger } from "@/shared/logging/logger";
 import {
@@ -125,6 +126,8 @@ export function api<P>(options: ApiOptions, handler: (ctx: AuthedApiContext<P>) 
     return runWithContext({ correlationId }, async () => {
       let status = 500;
       try {
+        if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Источник запроса не разрешён");
+        if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Источник запроса не разрешён");
         const method = req.method.toUpperCase();
         if (MUTATING.has(method)) {
           assertSameOrigin(req);

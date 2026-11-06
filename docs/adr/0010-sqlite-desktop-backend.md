@@ -67,3 +67,11 @@ DT-05 подтверждён на перечисленном core subset, вес
 - SQLite WAL: https://www.sqlite.org/wal.html
 - SQLite isolation / BEGIN IMMEDIATE: https://www.sqlite.org/isolation.html
 
+
+## Дополнение этапа 2
+
+Выдача поиска использует отдельный SQLite dialect: indexed correlated snapshot, JSON1, deterministic ordered digest. Пагинация/ревизии/экспорт сохраняют прежний API. Decimal — scaled INTEGER, среднее/арифметические операции вычисляются точно, не через REAL. JSON/list фильтры разрешаются внутри исходного AND/OR/relation tree, внешние RBAC predicates не снимаются.
+
+`independentCommitScope` отделяет координацию paid AI batch от транзакций изменения данных; ошибка поздней группы не удаляет уже оплаченный cache. `BEGIN IMMEDIATE` остаётся для budget и обычных изменений.
+
+Для clean bootstrap/upgrade/transfer используется offline migration runner с Prisma-совместимой checksum history, foreign_key_check и integrity_check; обновление предваряется SQLite backup API. Подробный протокол: [этап 2](../desktop/sqlite-stage2.md).

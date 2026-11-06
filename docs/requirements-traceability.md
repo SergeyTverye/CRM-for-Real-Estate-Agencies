@@ -150,3 +150,14 @@
 | NFR-14 | [локальный замер](operations/perf-v241.md) | PARTIAL, не целевой сервер |
 
 Полная матрица с расходами, SHA, ограничениями P2 и условиями PASS — [stage2-live-ai-ux](acceptance/stage2-live-ai-ux.md).
+
+## v3.2.1 SQLite backend, этап 2 — 06.11.2026
+
+| Требование | Модуль / исполняемое доказательство | Статус |
+|---|---|---|
+| DT-05 / §4.1 все повседневные модули SQLite | shared/db facade/dialect, search results/export, AI independentCommitScope; integration-sqlite 360/360 | PASS backend |
+| DT-06 / §4.2 PG → SQLite | scripts/desktop/migrate-pg-to-sqlite.ts; desktop-transfer 2/2; реальный HTTP login/list/file/page | PASS синтетического переноса |
+| §4.2 пустая база/демо, собственный руководитель, случайные секреты, update snapshot | scripts/desktop/init-db.ts, database-lifecycle.ts, sqlite/lifecycle | PASS |
+| DT-17 двойная backend regression | PG 342/342, SQLite общий набор 342/342 +18 desktop, npm test 1438/1438 | PASS backend; installer/OS отдельный gate |
+
+Отчёт расхождений, файлы, ограничения и команды: [SQLite этап 2](desktop/sqlite-stage2.md).

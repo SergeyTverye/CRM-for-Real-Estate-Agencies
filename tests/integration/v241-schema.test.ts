@@ -15,13 +15,14 @@ const listingData = {
 
 describe("v2.4.1 schema and migrations on PostgreSQL", () => {
   it("all current codebook constraints exist in the database with exactly the current codes", async () => {
-    const constraints = await db.$queryRaw<{ name: string; definition: string }[]>`
+    const sqlite = process.env.CRM_DEPLOYMENT_MODE === "desktop";
+    const constraints = sqlite ? (await db.$queryRawUnsafe<{sql:string}[]>("SELECT sql FROM sqlite_master WHERE type='table'")).flatMap(row => Array.from(row.sql.matchAll(/CONSTRAINT "([^"]+)" CHECK \(([^\n]+)\)/g), match => ({name:match[1]!,definition:match[2]!}))) : await db.$queryRaw<{ name: string; definition: string }[]>`
       SELECT conname AS name, pg_get_constraintdef(oid) AS definition
       FROM pg_constraint WHERE contype = 'c' AND connamespace = 'public'::regnamespace`;
     for (const entry of CODEBOOK_COLUMNS) {
       const actual = constraints.find((c) => c.name === checkConstraintName(entry.table, entry.column));
       expect(actual, `${entry.table}.${entry.column}`).toBeDefined();
-      const codes = Array.from(actual!.definition.matchAll(/'([^']*)'::text/g), (m) => m[1]);
+      const codes = Array.from(actual!.definition.matchAll(sqlite ? /'([^']*)'/g : /'([^']*)'::text/g), (m) => m[1]);
       expect(codes.sort()).toEqual([...codesOf(entry.book)].sort());
     }
   });

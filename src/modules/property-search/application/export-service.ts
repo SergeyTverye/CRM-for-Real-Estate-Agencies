@@ -30,11 +30,14 @@ export async function exportSearch(actor: Actor, runId: string, raw: unknown) {
   }
   if (ids && rows.length !== ids.length) throw new NotFoundError();
   const listingIds = rows.map(r => String(r.listingId));
-  const [bookmarks, verifications, duplicates] = await Promise.all([
-    db.searchBookmark.findMany({ where: { userId: actor.userId, listingId: { in: listingIds } } }),
-    db.externalListingVerification.findMany({ where: { listingId: { in: listingIds } }, orderBy: [{ verifiedAt: "desc" }, { id: "asc" }] }),
+  // Bound parameters on both backends, including SQLite's Prisma query limit.
+  const batches = Array.from({length:Math.ceil(listingIds.length/500)},(_,i)=>listingIds.slice(i*500,(i+1)*500));
+  const [bookmarkBatches, verificationBatches, duplicates] = await Promise.all([
+    Promise.all(batches.map(ids => db.searchBookmark.findMany({ where: { userId: actor.userId, listingId: { in: ids } } }))),
+    Promise.all(batches.map(ids => db.externalListingVerification.findMany({ where: { listingId: { in: ids } }, orderBy: [{ verifiedAt: "desc" }, { id: "asc" }] }))),
     groupsForExport(actor, listingIds),
   ]);
+  const bookmarks=bookmarkBatches.flat(), verifications=verificationBatches.flat();
   const values = rows.map(row => {
     const snap = (row.snapshot ?? {}) as Record<string, unknown>;
     const criteria = (Array.isArray(row.criteria) ? row.criteria : []) as { criterion: string; state: string }[];

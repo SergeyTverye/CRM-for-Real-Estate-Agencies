@@ -30,8 +30,8 @@ export function profilesDir(): string {
 
 export function loadProfiles(dir = profilesDir()): ImportProfile[] {
   if (cache && dir === profilesDir()) return cache;
-  const files = readdirSync(dir).filter((f) => f.endsWith(".json")).sort();
-  const profiles = files.map((f) => profileSchema.parse(JSON.parse(readFileSync(path.join(dir, f), "utf8"))));
+  const files = readdirSync(dir).filter((f) => f.endsWith(".json") && !f.endsWith(".schema.json")).sort();
+  const profiles = files.map((f) => JSON.parse(readFileSync(path.join(dir, f), "utf8"))).filter((p) => p.version !== 2).map((p) => profileSchema.parse(p));
   if (dir === profilesDir()) cache = profiles;
   return profiles;
 }

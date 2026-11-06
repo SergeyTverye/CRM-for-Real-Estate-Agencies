@@ -48,8 +48,9 @@ describe("DT-05 SQLite real application core",()=>{
   });
   it("client → incoming call → need/task → planner → local collection → offer → private StorageAdapter document → audit",async()=>{
     const client=await makeClient(users.realtor1,{displayName:"СИНТЕТИЧЕСКИЙ клиент Ёж"});
+    const callAt=new Date().toISOString();
     const request=await registerRequest(users.realtor1,{
-      occurredAt:new Date().toISOString(),callAt:new Date().toISOString(),channelCode:"phone",sourceCode:"other",
+      occurredAt:callAt,callAt,channelCode:"phone",sourceCode:"other",
       client:{mode:"existing",clientId:client.id},
       outcome:{resultCode:"new_need",need:{operationType:"rent",propertyType:"commercial",budgetMax:"99999999999999.99"},nextAction:{title:"Позвонить",dueAt:"2026-11-06T17:30:00Z",taskType:"call_or_contact"}},
     });

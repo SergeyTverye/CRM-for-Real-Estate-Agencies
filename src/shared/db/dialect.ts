@@ -23,9 +23,14 @@ export function plannerSql(pg: Prisma.Sql): Prisma.Sql {
     .replace("to_char(at AT TIME ZONE ", "crm_local_day(at, ")
     .replace(",'YYYY-MM-DD')", ")")));
 }
-export function requirePostgresSql(pg: Prisma.Sql): Prisma.Sql {
-  if (isSqlite()) throw new Error("SQLITE_MODULE_NOT_PORTED: search result SQL");
-  return pg;
+/** Search SQL has an explicit equivalent; correlated latest-snapshot join uses its index. */
+export function searchSql(pg: Prisma.Sql): Prisma.Sql {
+  if (!isSqlite()) return pg;
+  return rebuild(pg, pg.strings.map(s => s
+    .replace("LEFT JOIN LATERAL (SELECT * FROM external_listing_snapshots s0 WHERE s0.search_run_id=r.run_id AND s0.listing_id=r.listing_id ORDER BY s0.fetched_at DESC,s0.id ASC LIMIT 1) s ON true",
+      "LEFT JOIN external_listing_snapshots s ON s.id=(SELECT s0.id FROM external_listing_snapshots s0 WHERE s0.search_run_id=r.run_id AND s0.listing_id=r.listing_id ORDER BY s0.fetched_at DESC,s0.id ASC LIMIT 1)")
+    .replace(/::uuid\b/g, "")
+    .replaceAll("s.normalized->>'priceUnit'", "json_extract(s.normalized,'$.priceUnit')")));
 }
 export function scalarSql(pg: Prisma.Sql): Prisma.Sql {
   if (!isSqlite()) return pg;
@@ -48,6 +53,7 @@ export function normalizeSqliteRawResult(value: unknown): unknown {
   return value.map(row => {
     if (!row || typeof row !== "object") return row;
     return Object.fromEntries(Object.entries(row).map(([key,v]) => {
+      if ((key === "at" || key === "finished_at") && (typeof v === "bigint" || typeof v === "number")) return [key, new Date(Number(v))];
       if (numberColumns.has(key) && typeof v === "bigint") {
         const n=Number(v);
         if (!Number.isSafeInteger(n)) throw new Error("SQLITE_RAW_COUNT_RANGE");

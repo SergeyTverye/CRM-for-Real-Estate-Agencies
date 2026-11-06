@@ -6,16 +6,14 @@ import type { InteractiveSession } from "@/modules/browser-sessions/domain/sessi
 
 const ownerId = randomUUID(), runId = randomUUID();
 beforeAll(async () => {
-  const ready = await db.$queryRaw<{ ready: boolean }[]>`SELECT to_regclass('public.interactive_browser_sessions') IS NOT NULL AS ready`;
-  if (!ready[0]?.ready) throw new Error("Apply the model agent's v3.1 migration to the dedicated test database before this test.");
+  expect(await db.interactiveBrowserSession.count()).toBeGreaterThanOrEqual(0);
   // Only this test's synthetic rows; no truncate/migrate/generate.
   await db.user.create({ data: { id: ownerId, login: `hitl-${ownerId}`, displayName: "Синтетический HITL-тест", roleCode: "realtor", passwordHash: "disabled-synthetic-account", isActive: false } });
   await db.searchRun.create({ data: { id: runId, userId: ownerId, filters: {}, status: "pending" } });
 });
 afterAll(async () => {
   try {
-    const ready = await db.$queryRaw<{ ready: boolean }[]>`SELECT to_regclass('public.interactive_browser_sessions') IS NOT NULL AS ready`;
-    if (ready[0]?.ready) await db.$executeRaw`DELETE FROM interactive_browser_sessions WHERE owner_user_id = ${ownerId}::uuid`;
+    await db.interactiveBrowserSession.deleteMany({where:{ownerUserId:ownerId}});
     await db.searchRun.deleteMany({ where: { id: runId } }); await db.user.deleteMany({ where: { id: ownerId } });
   } finally { await disconnectDb(); }
 });

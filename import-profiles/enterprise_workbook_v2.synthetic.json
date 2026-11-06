@@ -1,0 +1,211 @@
+{
+  "version": 2,
+  "code": "enterprise_workbook_v2",
+  "sheets": [
+    {
+      "index": 1,
+      "target": "property",
+      "headerRow": "auto",
+      "columns": {
+        "метка": "stateMark",
+        "№": "sourceRowId",
+        "адрес": "addressText",
+        "площадь": "area",
+        "цена": "price",
+        "описание": "description",
+        "этаж": "floor",
+        "контакт собственника": "ownerPhone",
+        "неизвестная колонка": null
+      },
+      "hiddenRows": "skip",
+      "statusMap": {},
+      "purposeMap": {},
+      "sourceMap": {},
+      "responsibleMap": {},
+      "defaults": {
+        "propertyType": "commercial",
+        "priceUnit": "rub_month"
+      },
+      "sections": [
+        {
+          "pattern": "аренд|сда",
+          "operationType": "rent"
+        },
+        {
+          "pattern": "прод|куп",
+          "operationType": "sale"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "target": "property",
+      "headerRow": "auto",
+      "columns": {
+        "метка": "stateMark",
+        "№": "sourceRowId",
+        "адрес": "addressText",
+        "площадь": "area",
+        "цена": "price",
+        "описание": "description",
+        "этаж": "floor",
+        "контакт собственника": "ownerPhone",
+        "неизвестная колонка": null
+      },
+      "hiddenRows": "skip",
+      "statusMap": {},
+      "purposeMap": {},
+      "sourceMap": {},
+      "responsibleMap": {},
+      "defaults": {
+        "propertyType": "commercial",
+        "priceUnit": "rub_month"
+      },
+      "sections": [
+        {
+          "pattern": "аренд|сда",
+          "operationType": "rent"
+        },
+        {
+          "pattern": "прод|куп",
+          "operationType": "sale"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "target": "property",
+      "headerRow": "auto",
+      "columns": {
+        "метка": "stateMark",
+        "№": "sourceRowId",
+        "адрес": "addressText",
+        "площадь": "area",
+        "цена": "price",
+        "описание": "description",
+        "этаж": "floor",
+        "контакт собственника": "ownerPhone",
+        "неизвестная колонка": null
+      },
+      "hiddenRows": "skip",
+      "statusMap": {},
+      "purposeMap": {},
+      "sourceMap": {},
+      "responsibleMap": {},
+      "defaults": {
+        "propertyType": "commercial",
+        "priceUnit": "rub_month"
+      },
+      "sections": [
+        {
+          "pattern": "аренд|сда",
+          "operationType": "rent"
+        },
+        {
+          "pattern": "прод|куп",
+          "operationType": "sale"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "target": "client_request_need",
+      "headerRow": "auto",
+      "columns": {
+        "№": "sourceRowId",
+        "клиент": "name",
+        "телефон": "phone",
+        "дата": "receivedDate",
+        "e-mail": "email",
+        "запрос": "request",
+        "источник": "source",
+        "статус": "stateMark",
+        "комментарий": "comment",
+        "ответственный": "responsible",
+        "операция": "operationText",
+        "район": "district",
+        "назначение": "propertyTypeText",
+        "неизвестная колонка": null
+      },
+      "hiddenRows": "skip",
+      "statusMap": {},
+      "purposeMap": {},
+      "sourceMap": {},
+      "responsibleMap": {},
+      "defaults": {
+        "propertyType": "commercial",
+        "priceUnit": "rub_month"
+      },
+      "sections": [
+        {
+          "pattern": "аренд|сда",
+          "operationType": "rent"
+        },
+        {
+          "pattern": "прод|куп",
+          "operationType": "sale"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "target": "historical_deal_archive",
+      "headerRow": "auto",
+      "columns": {
+        "статус": "stateMark",
+        "№": "sourceRowId",
+        "адрес": "addressText",
+        "площадь": "area",
+        "цена": "price",
+        "источник": "source",
+        "договор": "contractRef",
+        "комиссия": "commissionAmount",
+        "комментарий": "comment"
+      },
+      "hiddenRows": "skip",
+      "statusMap": {},
+      "purposeMap": {},
+      "sourceMap": {},
+      "responsibleMap": {},
+      "defaults": {
+        "propertyType": "commercial",
+        "priceUnit": "rub_month"
+      },
+      "sections": [
+        {
+          "pattern": "аренд|сда",
+          "operationType": "rent"
+        },
+        {
+          "pattern": "прод|куп",
+          "operationType": "sale"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "target": "ignore",
+      "headerRow": "auto",
+      "columns": {},
+      "hiddenRows": "skip",
+      "statusMap": {},
+      "purposeMap": {},
+      "sourceMap": {},
+      "responsibleMap": {},
+      "defaults": {
+        "propertyType": "commercial",
+        "priceUnit": "rub_month"
+      },
+      "sections": [
+        {
+          "pattern": "аренд|сда",
+          "operationType": "rent"
+        },
+        {
+          "pattern": "прод|куп",
+          "operationType": "sale"
+        }
+      ]
+    }
+  ]
+}

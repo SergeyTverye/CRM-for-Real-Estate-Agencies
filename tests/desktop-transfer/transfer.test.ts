@@ -1,0 +1,79 @@
+import { expect, it, afterAll } from "vitest";
+import path from "node:path";
+import { mkdtemp, mkdir, writeFile, readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { createHash } from "node:crypto";
+import Database from "better-sqlite3";
+import { NextRequest } from "next/server";
+import { migratePgToSqlite, TransferError } from "../../scripts/desktop/migrate-pg-to-sqlite";
+import { db, resetDatabase, seedBase, makeClient, makeNeed, makeProperty, TEST_PASSWORD } from "../helpers/fixtures";
+import { clientYaml } from "../helpers/template-fixtures";
+import { saveTemplate, generateFromTemplate } from "@/modules/document-templates/application/template-service";
+import { createDeal } from "@/modules/deals/application/deal-service";
+import { getDb, disconnectDb } from "@/shared/db/client";
+import { resetConfigCache } from "@/shared/config/env";
+import { resetStorage } from "@/shared/storage/storage-adapter";
+import { seedAiTariffs } from "@/modules/ai/application/seed-ai";
+import { POST as loginApi } from "@/app/api/v1/auth/login/route";
+import { GET as clientsApi } from "@/app/api/v1/clients/route";
+import { openDocumentForDownload } from "@/modules/documents/application/document-service";
+import { TEST_DATABASE_URL } from "../helpers/test-env";
+afterAll(disconnectDb);
+it("DT-06 read-only PG snapshot → all SQLite entities, IDs, money, cyclic versions, files and authorized API",async()=>{
+  await resetDatabase(); const users=await seedBase();
+  const client=await makeClient(users.realtor1), need=await makeNeed(users.realtor1,client.id), property=await makeProperty(users.realtor1,{price:"99999999999999.99"});
+  const deal=await createDeal(users.realtor1,{propertyId:property.id,legalEntityId:users.llcId,dealPrice:"120000.25",parties:[{clientId:client.id,partyRole:"tenant"}],commissions:[{payerPartyIndex:0,amount:"0.10",status:"planned"}]});
+  // Source file storage is isolated by Vitest. All content generated here is synthetic.
+  const template=await saveTemplate(users.manager,{code:"transfer_synthetic",name:"Синтетический шаблон",format:"markdown_docx",manifestYaml:clientYaml,markdownBody:"# {{client.displayName}}"},null);
+  const document=await generateFromTemplate(users.realtor1,template.id,{entityKind:"client",entityId:client.id});
+  await seedAiTariffs(db);
+  const usage=await db.aiUsageLog.create({data:{callType:"chat",userId:users.realtor1.userId,model:"synthetic",estimatedCostRub:"0.10",actualCostRub:"0.10",status:"success"}});
+  const chat=await db.aiChatSession.create({data:{ownerUserId:users.realtor1.userId,title:"Синтетика"}});
+  await db.aiChatMessage.create({data:{sessionId:chat.id,role:"assistant",content:"Синтетический ответ",aiUsageLogId:usage.id}});
+  const run=await db.searchRun.create({data:{userId:users.realtor1.userId,status:"completed",filters:{sources:["cian"]}}});
+  const listing=await db.externalListing.create({data:{source:"cian",sourceListingId:"synthetic-transfer",url:"https://example.test/transfer",sourceMethod:"manual",operation:"rent",priceUnit:"per_month",purposes:["office"],priceRub:"150.25"}});
+  await db.externalListingSnapshot.create({data:{listingId:listing.id,searchRunId:run.id,normalized:{address:"Синтетический адрес",priceUnit:"per_month"},priceRub:"150.25"}});
+  await db.searchRunResult.create({data:{runId:run.id,listingId:listing.id,verdict:"confirmed",criteria:[],score:"1.25"}});
+  const directory=await mkdtemp(path.join(tmpdir(),"crm-transfer-"));
+  const sourceStorage=path.resolve(process.env.FILE_STORAGE_PATH!);
+  const opts={sourceUrl:TEST_DATABASE_URL,targetFile:path.join(directory,"converted.db"),sourceStorage,targetStorage:path.join(directory,"files")};
+  const sourceCounts=await db.client.count();
+  const report=await migratePgToSqlite(opts);
+  expect(report.status).toBe("complete");expect(Object.keys(report.entities)).toHaveLength(84);expect(Object.values(report.entities).every(v=>v.source===v.target)).toBe(true);
+  expect(report.financial["Property.price"]).toEqual({source:"99999999999999.99",target:"99999999999999.99"});expect(report.files).toBeGreaterThan(0);
+  expect(await db.client.count()).toBe(sourceCounts);
+  const native=new Database(opts.targetFile,{readonly:true});expect(native.pragma("foreign_key_check")).toEqual([]);expect(native.prepare("SELECT id FROM client_needs WHERE client_id=?").get(client.id)).toEqual({id:need.id});expect(native.prepare("SELECT id FROM deals WHERE id=?").get(deal.id)).toEqual({id:deal.id});native.close();
+  // Checksum failure rolls back the NEW target; source rows and bytes remain unchanged.
+  const badKey="documents/synthetic-bad-file", bytes=Buffer.from("synthetic checksum failure");
+  await mkdir(path.join(sourceStorage,"documents"),{recursive:true});await writeFile(path.join(sourceStorage,badKey),bytes);
+  const bad=await db.document.create({data:{originalName:"synthetic.txt",documentTypeCode:"other",mimeType:"text/plain",fileSize:bytes.length,storageKey:badKey,checksum:"0".repeat(64),uploadedBy:users.manager.userId}});
+  const broken={...opts,targetFile:path.join(directory,"failed.db"),targetStorage:path.join(directory,"failed-files")};
+  await expect(migratePgToSqlite(broken)).rejects.toBeInstanceOf(TransferError);
+  expect(existsSync(broken.targetFile)).toBe(false);expect(existsSync(broken.targetStorage)).toBe(false);
+  expect(createHash("sha256").update(await readFile(path.join(sourceStorage,badKey))).digest("hex")).toBe(createHash("sha256").update(bytes).digest("hex"));expect(await db.document.count({where:{id:bad.id}})).toBe(1);
+  await expect(migratePgToSqlite(opts)).rejects.toThrow("TRANSFER_TARGET_MUST_BE_NEW");
+  await disconnectDb();
+  Object.assign(process.env,{CRM_DEPLOYMENT_MODE:"desktop",CRM_DESKTOP_PORT:"3511",DATABASE_URL:"file:"+opts.targetFile,FILE_STORAGE_PATH:opts.targetStorage});resetConfigCache();resetStorage();
+  const origin="http://127.0.0.1:3511";
+  const response=await loginApi(new NextRequest(origin+"/api/v1/auth/login",{method:"POST",headers:{host:"127.0.0.1:3511",origin,"content-type":"application/json"},body:JSON.stringify({login:users.realtor1.login,password:TEST_PASSWORD})}),{params:Promise.resolve({})});
+  expect(response.status).toBe(200);const cookie=response.headers.get("set-cookie")!.split(';')[0]!;
+  const clients=await clientsApi(new NextRequest(origin+"/api/v1/clients",{headers:{host:"127.0.0.1:3511",cookie}}),{params:Promise.resolve({})});expect(clients.status).toBe(200);expect(await clients.text()).toContain(client.id);
+  const downloaded=await openDocumentForDownload(users.realtor1,document.id!);let size=0;for await(const chunk of downloaded.stream)size+=chunk.length;expect(size).toBeGreaterThan(100);
+  expect((await getDb().aiChatMessage.findFirstOrThrow()).aiUsageLogId).toBe(usage.id);
+  await writeFile("data/sqlite-stage2-http-fixture.json",JSON.stringify({targetFile:opts.targetFile,targetStorage:opts.targetStorage,clientId:client.id,documentId:document.id,login:users.realtor1.login}));
+  await disconnectDb();process.env.CRM_DEPLOYMENT_MODE="server";process.env.DATABASE_URL=TEST_DATABASE_URL;process.env.FILE_STORAGE_PATH=sourceStorage;resetConfigCache();resetStorage();
+},120000);
+
+it("preflight reports unmapped source schema and leaves new target absent",async()=>{
+  const directory=await mkdtemp(path.join(tmpdir(),"crm-transfer-preflight-"));
+  const sourceStorage=path.join(directory,"source-files");await mkdir(sourceStorage);
+  const opts={sourceUrl:TEST_DATABASE_URL,targetFile:path.join(directory,"refused.db"),sourceStorage,targetStorage:path.join(directory,"refused-files")};
+  await db.$executeRawUnsafe("CREATE TABLE synthetic_transfer_unmapped (id TEXT)");
+  try {
+    const error=await migratePgToSqlite(opts).then(()=>null,error=>error);
+    expect(error).toBeInstanceOf(TransferError);
+    expect(error.report.incompatibilities).toContainEqual({entity:"synthetic_transfer_unmapped",code:"UNMAPPED_TABLE"});
+    expect(existsSync(opts.targetFile)).toBe(false);expect(existsSync(opts.targetStorage)).toBe(false);
+  } finally {await db.$executeRawUnsafe("DROP TABLE synthetic_transfer_unmapped");}
+});

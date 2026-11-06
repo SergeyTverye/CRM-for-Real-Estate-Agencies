@@ -35,10 +35,11 @@ export default defineConfig({
     fileParallelism: false,
     maxWorkers: 1,
     projects: [
-      { extends: true, test: { name: "integration-sqlite", include: ["tests/sqlite/**/*.test.ts"], setupFiles: ["tests/sqlite/setup.ts"], environment: "node", testTimeout: 30000, hookTimeout: 60000, env: { CRM_DEPLOYMENT_MODE: "desktop" } } },
+      { extends:true, test:{name:"desktop-transfer",include:["tests/desktop-transfer/**/*.test.ts"],globalSetup:["tests/helpers/global-setup.ts"],environment:"node",testTimeout:120000,hookTimeout:60000} },
+      { extends: true, test: { name: "integration-sqlite", include: ["tests/sqlite/**/*.test.ts", "tests/integration/**/*.test.ts", "tests/authorization/**/*.test.ts"], exclude: ["tests/integration/browser-sessions/browser-cycle.test.ts"], globalSetup: ["tests/sqlite/global-setup.ts"], setupFiles: ["tests/sqlite/setup.ts"], environment: "node", testTimeout: 30000, hookTimeout: 60000, env: { CRM_DEPLOYMENT_MODE: "desktop", SQLITE_TEST_TEMPLATE: path.join(tmp, "sqlite-template.db") } } },
       {
         extends: true,
-        test: { name: "unit", include: ["tests/unit/**/*.test.ts", "scripts/vkr/display-regressions.test.ts"], environment: "node" },
+        test: { name: "unit", testTimeout: 15000, include: ["tests/unit/**/*.test.ts", "scripts/vkr/display-regressions.test.ts"], environment: "node" },
       },
       {
         extends: true,

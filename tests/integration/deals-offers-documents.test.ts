@@ -1,3 +1,4 @@
+import { ORIGIN } from "../helpers/fixtures";
 import { beforeEach, describe, expect, it } from "vitest";
 import sharp from "sharp";
 import { apiRequest, db, inDays, makeClient, makeNeed, makeProperty, readBody, resetDatabase, routeParams, seedBase, sessionCookieFor, type TestUsers } from "../helpers/fixtures";
@@ -177,7 +178,7 @@ describe("T05: документы недоступной сущности не �
       fd.set("documentTypeCode", "other");
       fd.set("linkKind", "client");
       fd.set("linkId", clientId);
-      const req = new NextRequest("http://crm.test/api/v1/documents", { method: "POST", body: fd, headers: { cookie, origin: "http://crm.test", host: "crm.test" } });
+      const req = new NextRequest(`${ORIGIN}/api/v1/documents`, { method: "POST", body: fd, headers: { cookie, origin: ORIGIN, host: new URL(ORIGIN).host } });
       return uploadRoute(req, routeParams({}));
     }
     expect((await upload("ok.pdf", Buffer.from("%PDF-1.4 ok"))).status).toBe(201);
@@ -192,7 +193,7 @@ describe("T05: документы недоступной сущности не �
     fd.set("documentTypeCode", "other");
     fd.set("linkKind", "client");
     fd.set("linkId", clientId);
-    const foreign = await uploadRoute(new NextRequest("http://crm.test/api/v1/documents", { method: "POST", body: fd, headers: { cookie: await sessionCookieFor(u.realtor2), origin: "http://crm.test", host: "crm.test" } }), routeParams({}));
+    const foreign = await uploadRoute(new NextRequest(`${ORIGIN}/api/v1/documents`, { method: "POST", body: fd, headers: { cookie: await sessionCookieFor(u.realtor2), origin: ORIGIN, host: new URL(ORIGIN).host } }), routeParams({}));
     expect(foreign.status).toBe(404);
     expect(await db.document.count()).toBe(1);
   });

@@ -1,3 +1,5 @@
+import { EnterpriseImportWizard, type EnterpriseReport } from "../enterprise-wizard";
+import { enterpriseJobExists, inspectEnterprise } from "@/modules/import/application/enterprise-service";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requirePageActor } from "@/server/page-auth";
@@ -260,6 +262,11 @@ function SectionMapping({ s, profile }: { s: Section; profile?: { version: strin
 
 export default async function ImportJobPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const actor = await requirePageActor({ manager: true });
+  const enterpriseId = (await params).id;
+  if (UUID_RE.test(enterpriseId) && await enterpriseJobExists(actor, enterpriseId)) {
+    const report = await inspectEnterprise(actor, enterpriseId);
+    return <><PageHeader title="Рабочая книга Excel" /><EnterpriseImportWizard initialReport={report as EnterpriseReport} /></>;
+  }
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
   const sp = searchParamsToObject(await searchParams);

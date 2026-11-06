@@ -1,3 +1,4 @@
+import { independentCommitScope } from "@/shared/db/client";
 import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
 import { db, transaction, Prisma } from "@/shared/db/client";
@@ -81,7 +82,7 @@ export async function analyzeListingBatch(actor: Actor, raw: unknown, injected?:
   if (rows.length > limit) throw new DomainError("AI_ANALYSIS_LIMIT", `Для анализа выберите не более ${limit} объявлений (лимит руководителя).`);
   const prepared = rows.map(row=>prepare(row,input.filters));
   // Cross-process serialization avoids two simultaneous paid analyses of the same data.
-  return db.$transaction(async tx => {
+  return independentCommitScope(async tx => {
     const keys = prepared.filter(p=>p.criteria.length).map(p=>analysisCacheKey(p.listing.description,p.criteria,config.model));
     for (const key of [...new Set(keys)].sort()) await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`));
     const results: {listingId:string;source:string;url:string;warning:string;ruleChecks:ReturnType<typeof evaluateListing>["criteria"];cacheHit:boolean;evidence:unknown;unresolved:string[]}[] = [];
@@ -114,7 +115,7 @@ export async function analyzeListingBatch(actor: Actor, raw: unknown, injected?:
       }
     }
     return {items:input.listingIds.map(id=>results.find(r=>r.listingId===id)!),limit,model:config.model,warning:ANALYSIS_WARNING};
-  },{timeout:180000,maxWait:10000});
+  });
 }
 
 async function pendingDraft(actor: Actor, actionType: string, payload: unknown) {

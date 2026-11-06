@@ -44,9 +44,9 @@ export async function productionCycle(mode: "success" | "expired" | "cancelled" 
   const actor: Actor = { userId: user.id, role: "realtor", login: user.login, displayName: user.displayName, mustChangePassword: false, sessionId: "synthetic" };
   const auth = await createSession(db, actor.userId, { ip: "127.0.0.1", userAgent: "hitl-test" });
   const cookie = `${SESSION_COOKIE}=${auth.token}`;
-  const origin = "http://crm.test";
+  const origin = process.env.CRM_DEPLOYMENT_MODE === "desktop" ? "http://127.0.0.1:3511" : "http://crm.test";
   function request(method: string, url: string, body?: unknown, credential = cookie) {
-    return new NextRequest(`${origin}${url}`, { method, headers: { host: "crm.test", origin, cookie: credential, ...(body !== undefined ? { "content-type": "application/json" } : {}) }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
+    return new NextRequest(`${origin}${url}`, { method, headers: { host: new URL(origin).host, origin, cookie: credential, ...(body !== undefined ? { "content-type": "application/json" } : {}) }, ...(body !== undefined ? { body: JSON.stringify(body) } : {}) });
   }
   const filters = SearchFilters.parse({ city: "Новосибирск", operation: "sale", purposes: ["office"], sources: ["cian"] });
   const adapter = new ProductionInteractiveSearchAdapter(() => ["cian"]);

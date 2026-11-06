@@ -1,0 +1,34 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { mkdtemp, mkdir, writeFile, readFile, readdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
+import Database from "better-sqlite3";
+import { WindowsDpapiProtector } from "../../src/modules/desktop-backup/infrastructure/credential-store";
+import { prepareDesktopUpgrade } from "../../scripts/desktop/runtime/upgrade";
+describe("desktop migration safety snapshot", () => {
+  afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+  it("restores original SQLite and version after a failing migrator, retaining encrypted backup and files", async () => {
+    const root = await mkdtemp(path.join(tmpdir(),"crm-upgrade-synthetic-"));
+    for(const dir of ["data","files","backups"]) await mkdir(path.join(root,dir));
+    const data=path.join(root,"data"), file=path.join(data,"crm.db");
+    const db=new Database(file); db.exec("CREATE TABLE control(id TEXT PRIMARY KEY); INSERT INTO control VALUES ('synthetic')"); db.close();
+    await writeFile(path.join(root,"files","control.txt"),"SYNTHETIC");
+    await writeFile(path.join(data,"desktop-version.json"),JSON.stringify({version:"3.2.0"}));
+    await writeFile(path.join(data,"identity.json"),JSON.stringify({deploymentId:randomUUID(),instanceId:randomUUID(),deviceId:randomUUID()}));
+    // DPAPI is platform-specific. Only its envelope is replaced; archive encryption,
+    // native SQLite backup, verification, failing process and rollback all run.
+    vi.spyOn(WindowsDpapiProtector.prototype,"seal").mockImplementation(async bytes=>Buffer.from(bytes));
+    vi.spyOn(WindowsDpapiProtector.prototype,"open").mockImplementation(async bytes=>Buffer.from(bytes));
+    vi.spyOn(process,"cwd").mockReturnValue(root);
+    for(const [name,value] of Object.entries({DESKTOP_DATA_DIR:data,FILE_STORAGE_PATH:path.join(root,"files"),BACKUP_PATH:path.join(root,"backups"),APP_VERSION:"3.2.1",APP_TIMEZONE:"Asia/Novosibirsk",CRM_DEPLOYMENT_MODE:"desktop"})) vi.stubEnv(name,value);
+    await writeFile(path.join(root,"init-db.cjs"),"require('node:fs').writeFileSync("+JSON.stringify(file)+",'BROKEN SYNTHETIC MIGRATION');process.exit(1)");
+    await expect(prepareDesktopUpgrade()).rejects.toThrow("MIGRATION_FAILED");
+    const restored=new Database(file,{readonly:true});
+    expect(restored.prepare("SELECT id FROM control").get()).toEqual({id:"synthetic"}); restored.close();
+    expect(JSON.parse(await readFile(path.join(data,"desktop-version.json"),"utf8")).version).toBe("3.2.0");
+    expect(await readFile(path.join(root,"files","control.txt"),"utf8")).toBe("SYNTHETIC");
+    expect((await readdir(path.join(root,"backups"))).filter(x=>x.endsWith(".crmbackup"))).toHaveLength(1);
+    expect(await readdir(data)).not.toContain("pending-upgrade.json");
+  },30000);
+});
