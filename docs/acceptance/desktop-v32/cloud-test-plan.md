@@ -15,6 +15,20 @@ Runner должен выводить только фиксированные э�
 
 Scope `MODULE_TRANSFER_RESTORE` использует только собственные временные исходники/очереди/restore stores. Он читает cloud credentials только при явном opt-in и ограничивает remote operations уникальным prefix и созданным в этом процессе archive ID. `UI_CONFIG_PROBE` имеет отдельные требования: не запускать его на рабочей базе, так как settings PUT меняет live-настройки направления.
 
+## Безопасная диагностика отказа module scope
+
+При отказе CLI возвращает exit code 1 и JSON без stack/message/name/body/URL. `stage` ограничен значениями `CREATE_ARCHIVE`, `FIRST_QUEUE`, `RESUME_FIRST`, `SECOND_QUEUE`, `RESUME_SECOND`, `DOWNLOAD_YANDEX`, `RESTORE_YANDEX`, `DOWNLOAD_MAILRU`, `RESTORE_MAILRU`, `ANONYMOUS`, `CLEANUP`. Поле `code` допускает только типизированный `BackupError.code` из ASCII uppercase/digits/underscore, длиной до 80 символов; для остальных исключений выводится `MODULE_OPERATION_FAILED`. `provider` — только `NONE/YANDEX/MAILRU`.
+
+Пример формата, не результат LIVE:
+
+```json
+[{"scope":"MODULE_TRANSFER_RESTORE","stage":"SECOND_QUEUE","status":"FAILED","code":"S3_UPLOAD_FAILED","provider":"YANDEX","cleanupStatus":"COMPLETED","cleanupCode":"NONE","cleanupProvider":"NONE"}]
+```
+
+Runner сохраняет безопасный код до того, как production queue перехватит исключение адаптера. Первичный отказ сохраняется, а `cleanupStatus/cleanupCode/cleanupProvider` отдельно сообщают об ошибке cleanup. Если сам сценарий прошёл, но cleanup упал, `stage` будет `CLEANUP`. Для anonymous GET и List предусмотрены разные коды `S3_ANONYMOUS_GET_NOT_DENIED` и `S3_ANONYMOUS_LIST_NOT_DENIED`. ListObjectsV2 обращается к корню bucket с `prefix` текущего запуска и `max-keys=1`.
+
+Повторный `put` того же архива в `SECOND_QUEUE` намеренно проверяет идемпотентность; production S3 adapter обрабатывает HTTP 412 через контрольное скачивание. Неподдержанная условная запись или иной ответ могут дать `S3_UPLOAD_FAILED`; это гипотеза по исходнику, не установленная причина фактического LIVE-отказа. Последний сообщённый координатором запуск завершился общим `LIVE_SMOKE_FAILED`; module acceptance остаётся неподтверждённым до повторного запуска с диагностикой.
+
 ## Этапы и доказательства
 
 | Проверка | Метод | Допустимое доказательство |

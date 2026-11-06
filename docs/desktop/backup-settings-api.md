@@ -2,7 +2,7 @@
 
 Реализован **GET / PUT /api/v1/settings/backups** в server и desktop.
 Доступ: только стабильная роль **manager** (руководитель/административные функции текущего codebook).
-UI пока не реализован. Backend готов для страницы настроек; изменение настроек не запускает облачные операции.
+UI настроек реализован для руководителя в server и desktop. Фактически проверен отказ риелтору на API и странице (403). Изменение настроек само по себе не запускает облачные операции.
 
 Полная спецификация полей, write-only credentials, errors и ENV:
 [backup-format.md, раздел API настроек](backup-format.md#api-настроек-для-руководителя-server-и-desktop).
@@ -25,5 +25,6 @@ UI пока не реализован. Backend готов для страниц�
 Оба варианта не возвращают credentials в JSON. Новый ПК подключает облака заново.
 Постоянный каталог BACKUP_SETTINGS_DIR должен быть отдельным от backup components и защищён ACL/volume.
 
-Проверено: service/secret storage 4, synthetic HTTP server+desktop 2, реальные PG sessions 2, реальные SQLite sessions+DPAPI 1; UI этим не подменяется.
-Реальный D:\\crm-secrets\\clouds.env модуль не читает. Future smoke требует отдельного разрешения координатора.
+Срез подтверждений координатора `11a2778`, 2026-11-06: прежние service/secret storage и session probes остаются отдельными проверками. Через настоящую форму руководителя синтетической SQLite CRM сохранены два направления; read/list probes 2/2 PASS. Это не UI upload/restore установленной CRM.
+
+Отдельный разрешённый [LIVE модульный transfer/restore](../acceptance/desktop-v32/cloud-module-live.md) прошёл для обоих облаков, включая queue reload и failed-only retry. Credentials не публикуются и автором документации не читались. Полный restore установленного приложения ещё не подтверждён; native file restore и системный picker не следует считать проверенными в установленном EXE по backend/module тестам.

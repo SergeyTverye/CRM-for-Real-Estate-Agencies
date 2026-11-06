@@ -18,7 +18,7 @@ import { GenerationStore, restoreArchive } from "./restore";
 import { archiveRoot, commandRoot } from "./backup-control";
 import { newRecoveryKey } from "../infrastructure/encryption";
 import { JsonSettingsRepository } from "../infrastructure/settings-repository";
-import { nativeArchiveUsage, withNativeArchiveBudget } from "./native-dialog";
+import { cleanupNativeImports, nativeArchiveUsage, withNativeArchiveBudget } from "./native-dialog";
 const validator = new SqliteSnapshotValidator();
 const root = () => process.env.DESKTOP_DATA_DIR!;
 const database = () => sqliteFilePath(process.env.DATABASE_URL!);
@@ -148,7 +148,7 @@ export async function executeDesktopBackupRequest(id: string) {
           const protective = await createPortable(safetySecret);
           await atomicJson(protective.path + ".recovery.json", { secretRef: safetyRef });
           const store = new GenerationStore(path.join(root(), "runtime-generations"));
-          await restoreArchive({ archivePath: incomingPath, credential: asCredential(secret), schemaVersion: 1, validator, store, confirmed: true,
+          const restored = await restoreArchive({ archivePath: incomingPath, credential: asCredential(secret), schemaVersion: 1, validator, store, confirmed: true,
             hooks: {
               async withStoppedRuntime(work) { await disconnectDb(); return work(); },
               async protectCurrent() { return { ...protective, credential: asCredential(safetySecret) }; },
@@ -157,8 +157,7 @@ export async function executeDesktopBackupRequest(id: string) {
           });
           // The supervisor reads this single generation pointer before starting any process.
           // Retain this installation's identity; source cloud credentials are never restored.
-          const active = await store.currentPath();
-          process.env.DATABASE_URL = "file:" + path.join(active!, "database.sqlite");
+          process.env.DATABASE_URL = "file:" + path.join(restored.activePath, "database.sqlite");
           await saveLocalState(manifest, false);
           result = { status: "restored", backupId: manifest.backupId, protectiveBackupId: protective.archive.backupId };
         }
@@ -170,7 +169,14 @@ export async function executeDesktopBackupRequest(id: string) {
     await disconnectDb(); await runtimeCredentialStore().delete(request.secretRef).catch(() => undefined);
   }
   await atomicJson(path.join(commandRoot(), id + ".result.json"), { id, action: cmd.action, createdAt: request.createdAt, finishedAt: new Date().toISOString(), ...result });
-  await rm(requestFile, { force: true });
+  await withNativeArchiveBudget(archiveRoot(), async () => {
+    await rm(requestFile, { force: true });
+    if (!cmd.destinationId && cmd.backupId) {
+      try { await cleanupNativeImports(archiveRoot(), commandRoot(), cmd.backupId); }
+      catch (e) { result.cleanupDiagnostic = e instanceof BackupError ? e.code : "IMPORT_CACHE_CLEANUP_FAILED"; }
+    }
+  });
+  if (result.cleanupDiagnostic) await atomicJson(path.join(commandRoot(), id + ".result.json"), { id, action: cmd.action, createdAt: request.createdAt, finishedAt: new Date().toISOString(), ...result });
   return result;
 }
 export async function scheduledCredential() {

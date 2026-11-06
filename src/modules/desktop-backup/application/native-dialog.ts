@@ -7,17 +7,75 @@ import { protectedDir, regularFile, hashFile } from "../infrastructure/fs";
 import { z } from "zod";
 import { extractArchive, type Credential } from "../infrastructure/archive";
 import { SqliteSnapshotValidator } from "../infrastructure/sqlite-validator";
-import { BackupError } from "../domain/contracts";
+import { BackupError, archiveRefSchema } from "../domain/contracts";
 import { JsonSettingsRepository } from "../infrastructure/settings-repository";
 
-/** Shared by native publication and protective snapshot creation. Never steal a
- * stale lock: an interrupted operation requires operator diagnosis, not a sweep. */
+const lockOwnerSchema = z.object({ pid: z.number().int().positive().max(2147483647), token: z.uuid(), createdAt: z.string().datetime() }).strict();
+type LockOwner = z.infer<typeof lockOwnerSchema>;
+async function inspectLock(file: string) {
+  await regularFile(file);
+  const handle = await open(file, "r");
+  try {
+    const identity = await handle.stat({ bigint: true });
+    if (identity.size > 1024n) throw new BackupError("NATIVE_LOCK_INVALID");
+    const owner = lockOwnerSchema.parse(JSON.parse(await handle.readFile("utf8")));
+    return { identity, owner };
+  } finally { await handle.close(); }
+}
+type LockSnapshot = Awaited<ReturnType<typeof inspectLock>>;
+async function sameLock(file: string, expected: LockSnapshot) {
+  try {
+    const current = await inspectLock(file);
+    return current.identity.ino === expected.identity.ino && current.identity.dev === expected.identity.dev
+      && current.identity.birthtimeNs === expected.identity.birthtimeNs && current.owner.token === expected.owner.token;
+  } catch { return false; }
+}
+function ownerDead(owner: LockOwner) {
+  // A reused Windows PID looks alive: never infer death from age or timestamps.
+  try { process.kill(owner.pid, 0); return false; }
+  catch (e) { return (e as NodeJS.ErrnoException).code === "ESRCH"; }
+}
+async function acquireBudgetLock(file: string, depth = 0): Promise<() => Promise<void>> {
+  if (depth > 8) throw new BackupError("NATIVE_LOCK_RECOVERY_LIMIT");
+  const owner: LockOwner = { pid: process.pid, token: randomUUID(), createdAt: new Date().toISOString() };
+  const candidate = file + ".owner-" + owner.token;
+  // Publish fully written metadata atomically; a crash cannot leave an empty main lock.
+  const handle = await open(candidate, "wx", 0o600);
+  let snapshot: LockSnapshot;
+  try {
+    await handle.writeFile(JSON.stringify(owner)); await handle.sync();
+    snapshot = { owner, identity: await handle.stat({ bigint: true }) };
+  } finally { await handle.close(); }
+  try {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        await link(candidate, file);
+        return async () => { if (await sameLock(file, snapshot)) await rm(file); };
+      } catch (e) { if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e; }
+      const previous = await inspectLock(file);
+      if (!ownerDead(previous.owner)) throw Object.assign(new BackupError("NATIVE_LOCK_BUSY"), { code: "EEXIST" });
+      // Serialize retirement for this exact nonce. The guard uses the same
+      // dead-owner protocol, so a crash during recovery is itself recoverable.
+      const release = await acquireBudgetLock(file + ".retire-" + previous.owner.token, depth + 1);
+      try {
+        if (ownerDead(previous.owner) && await sameLock(file, previous)) {
+          const retired = file + ".retired-" + owner.token;
+          await rename(file, retired);
+          await rm(retired);
+        }
+      } finally { await release(); }
+    }
+    throw new BackupError("NATIVE_LOCK_BUSY");
+  } finally { await rm(candidate); }
+}
+
+/** Shared by native publication and protective snapshot creation. */
 export async function withNativeArchiveBudget<T>(outputDir: string, work: () => Promise<T>): Promise<T> {
   await protectedDir(outputDir);
   const lock = path.join(outputDir, ".native-budget.lock");
-  const handle = await open(lock, "wx", 0o600);
+  const release = await acquireBudgetLock(lock);
   try { return await work(); }
-  finally { await handle.close(); await rm(lock); }
+  finally { await release(); }
 }
 
 export async function nativeArchiveUsage(outputDir: string) {
@@ -33,6 +91,46 @@ export async function nativeArchiveUsage(outputDir: string) {
     if (!Number.isSafeInteger(bytes)) throw new BackupError("LOCAL_BACKUP_CAPACITY");
   }
   return { bytes, pendingBytes, imports };
+}
+/** Caller holds the budget lock through command publication/removal and cleanup.
+ * Only exact UUID import refs are candidates; command files remain the running lease. */
+export async function cleanupNativeImports(outputDir: string, commands: string, onlyId?: string) {
+  if (onlyId !== undefined && !z.uuid().safeParse(onlyId).success) throw new BackupError("IMPORT_ID_INVALID");
+  await protectedDir(outputDir); await protectedDir(commands);
+  const referenced = new Set<string>();
+  for (const name of await readdir(commands)) {
+    if (!/^[a-f0-9-]{36}\.json$/.test(name)) continue;
+    try {
+      const file = path.join(commands, name); const info = await regularFile(file);
+      if (info.size > 128 * 1024) throw new Error();
+      const request = JSON.parse(await readFile(file, "utf8"));
+      if (!request.command || typeof request.command.action !== "string") throw new Error();
+      if (request.command.backupId !== undefined) {
+        if (!z.uuid().safeParse(request.command.backupId).success) throw new Error();
+        referenced.add(request.command.backupId);
+      } else if (!["create", "give"].includes(request.command.action)) throw new Error();
+    } catch { throw new BackupError("IMPORT_COMMANDS_AMBIGUOUS"); }
+  }
+  const retained: string[] = [];
+  for (const name of await readdir(outputDir)) {
+    const match = /^([a-f0-9-]{36})\.crmbackup\.import\.json$/.exec(name);
+    if (!match || (onlyId !== undefined && match[1] !== onlyId)) continue;
+    const id = match[1]!;
+    if (!z.uuid().safeParse(id).success || referenced.has(id)) continue;
+    const archive = path.join(outputDir, id + ".crmbackup"), sidecar = path.join(outputDir, name);
+    try {
+      // Any ordinary catalog marker, even malformed, permanently excludes this candidate.
+      try { await lstat(archive + ".json"); continue; }
+      catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
+      const info = await regularFile(sidecar); if (info.size > 16384) throw new Error();
+      const parsed = z.object({ archive: archiveRefSchema }).strict().parse(JSON.parse(await readFile(sidecar, "utf8")));
+      if (parsed.archive.backupId !== id) throw new Error();
+      await regularFile(archive); const actual = await hashFile(archive);
+      if (actual.sha256 !== parsed.archive.sha256 || actual.size !== parsed.archive.size) throw new Error();
+      await rm(archive); await rm(sidecar);
+    } catch { retained.push(id); }
+  }
+  if (retained.length) throw new BackupError("IMPORT_CACHE_RETAINED_INVALID");
 }
 export const nativeDialogRoot = () => path.join(backupRuntimeRoot(), "native-dialogs");
 export const nativeIncomingRoot = () => path.join(nativeDialogRoot(), "incoming");
@@ -57,7 +155,7 @@ export async function readNativeDialog(id: string, actorUserId?: string) {
  * The encrypted manifest, not the selected filename, determines archive identity.
  * Publication happens only after full authenticated extraction and SQLite validation.
  */
-export async function importNativeArchive(id: string, actorUserId: string, credential: Credential, outputDir: string) {
+export async function importNativeArchive(id: string, actorUserId: string, credential: Credential, outputDir: string, publish?: (backupId: string) => Promise<void>) {
   if (!z.uuid().safeParse(id).success) throw new ValidationError();
   const dir = path.join(nativeIncomingRoot(), id);
   const metadataPath = path.join(dir, "metadata.json");
@@ -71,6 +169,7 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
     const hash = await hashFile(file);
     if (hash.size !== metadata.size || hash.sha256 !== metadata.sha256) throw new BackupError("IMPORT_CHECKSUM");
     return await withNativeArchiveBudget(outputDir, async () => {
+    if (publish) await cleanupNativeImports(outputDir, path.join(backupRuntimeRoot(), "commands"));
     const settings = await new JsonSettingsRepository(backupRuntimeRoot()).read();
     const usage = await nativeArchiveUsage(outputDir);
     if (usage.imports >= 4 || usage.bytes + metadata.size > settings.retention.maxBytes) throw new BackupError("IMPORT_CAPACITY");
@@ -102,6 +201,13 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
       } finally { if (ownsPending) await rm(pending, { force: true }); }
       // Do not enroll the incoming snapshot in ordinary age-based retention:
       // protectCurrent may prune old catalog entries before the generation switch.
+      if (publish) {
+        try { await publish(backupId); }
+        catch (e) {
+          await cleanupNativeImports(outputDir, path.join(backupRuntimeRoot(), "commands"), backupId);
+          throw e;
+        }
+      }
       return backupId;
     } finally { await checked.dispose(); }
     });

@@ -1,4 +1,4 @@
-import { requestNativeDialog, readNativeDialog, importNativeArchive } from "./native-dialog";
+import { requestNativeDialog, readNativeDialog, importNativeArchive, cleanupNativeImports, withNativeArchiveBudget } from "./native-dialog";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, readdir, readFile, rm, stat, statfs, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -77,24 +77,32 @@ export async function backupControlStatus(actor: Actor) {
 }
 /** HTTP boundary never exposes provider exceptions or entered values. */
 export async function backupControlCommand(actor: Actor, raw: unknown) {
+  return backupControlCommandInternal(actor, raw);
+}
+async function backupControlCommandInternal(actor: Actor, raw: unknown, budgetHeld = false) {
   requireBackupManager(actor);
   const parsed = backupCommandSchema.safeParse(raw);
   if (!parsed.success) throw new ValidationError("Проверьте поля операции резервирования");
    const input = parsed.data;
-   let normalized: BackupCommand = input;
    try {
     if (input.action === "restore-from-file") {
       if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Восстановление из файла доступно только в desktop-версии");
       if (!input.passphrase && !input.recoveryKey) throw new ValidationError("Введите кодовую фразу или ключ восстановления");
-      const backupId = await importNativeArchive(input.requestId, actor.userId, input.passphrase ? { passphrase: input.passphrase } : { recoveryKey: input.recoveryKey! }, archiveRoot());
-      normalized = { action: "restore", backupId, confirmed: true, passphrase: input.passphrase, recoveryKey: input.recoveryKey };
+       let response: unknown;
+       await importNativeArchive(input.requestId, actor.userId, input.passphrase ? { passphrase: input.passphrase } : { recoveryKey: input.recoveryKey! }, archiveRoot(), async backupId => {
+         response = await backupControlCommandInternal(actor, { action: "restore", backupId, confirmed: true, passphrase: input.passphrase, recoveryKey: input.recoveryKey }, true);
+       });
+       return response;
     }
-    const cmd = normalized;
+     const cmd = input;
     if (cmd.action === "pick-directory") return await requestNativeDialog("folder");
-    if (cmd.action === "pick-archive") return await requestNativeDialog("import", undefined, actor.userId);
+     if (cmd.action === "pick-archive") return await withNativeArchiveBudget(archiveRoot(), async () => {
+       if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Выбор архива доступен только в desktop-версии");
+       await cleanupNativeImports(archiveRoot(), commandRoot());
+       return requestNativeDialog("import", undefined, actor.userId);
+     });
     if (cmd.action === "native-export") { await archivePath(cmd.backupId); return await requestNativeDialog("export", cmd.backupId); }
     if (cmd.action === "native-result") return await readNativeDialog(cmd.requestId, actor.userId);
-    if (cmd.action === "restore-from-file") throw new ValidationError();
     if (cmd.action === "probe" || cmd.action === "list") return await withBackupDestinations(async destinations => {
       const items = await destinations[0]!.list();
       return cmd.action === "list" ? { archives: items } : { connected: true, checkedAt: new Date().toISOString(), message: "Чтение доступно. Запись и восстановление проверяются тестовой копией." };
@@ -139,7 +147,8 @@ export async function backupControlCommand(actor: Actor, raw: unknown) {
     if ((cmd.action === "restore" || cmd.action === "receive") && !cmd.confirmed) throw new ValidationError("Подтвердите замену состояния после защитной копии");
     if (cmd.action === "create" || cmd.action === "give") { const key = decodeRecoveryKey(cmd.recoveryKey); key.fill(0); }
     else if (!cmd.passphrase && !cmd.recoveryKey) throw new ValidationError("Введите кодовую фразу или ключ восстановления");
-    const id = randomUUID(); const ref = randomUUID();
+     const publish = async () => {
+     const id = randomUUID(); const ref = randomUUID();
     // Only encrypted immutable blobs contain credentials. No secret in DB/mailbox/response.
     const { passphrase, recoveryKey, ...safe } = cmd;
     await runtimeCredentialStore().put(ref, { ...(passphrase ? { passphrase } : {}), ...(recoveryKey ? { recoveryKey } : {}) });
@@ -147,8 +156,11 @@ export async function backupControlCommand(actor: Actor, raw: unknown) {
     await protectedDir(commandRoot());
     await db.backupQueueJournal.create({ data: { id: "command:" + id, payload: { action: cmd.action, status: "queued", createdAt: request.createdAt } } });
     await writeFile(path.join(commandRoot(), id + ".json"), JSON.stringify(request), { flag: "wx", mode: 0o600 });
-    return { queued: true, requestId: id, message: "Supervisor остановит запись. После операции обновите страницу." };
-  } catch (e) {
+     return { queued: true, requestId: id, message: "Supervisor остановит запись. После операции обновите страницу." };
+     };
+     return await (budgetHeld ? publish() : withNativeArchiveBudget(archiveRoot(), publish));
+   } catch (e) {
+     if (e instanceof BackupError && ["IMPORT_COMMANDS_AMBIGUOUS", "IMPORT_CACHE_RETAINED_INVALID"].includes(e.code)) throw new InfrastructureError("Входная копия сохранена: обнаружены повреждённые метаданные или неоднозначная очередь (" + e.code + ").");
     if (e instanceof ConflictError || e instanceof ValidationError || e instanceof InfrastructureError) throw e;
     if (e instanceof BackupError && e.code === "QUEUE_REVISION_CONFLICT") throw new ConflictError("STALE_UPDATE", "Очередь изменилась. Обновите данные.");
     throw new InfrastructureError("Операция не выполнена: проверьте сеть, учётные данные, доступность носителя и свободное место");
