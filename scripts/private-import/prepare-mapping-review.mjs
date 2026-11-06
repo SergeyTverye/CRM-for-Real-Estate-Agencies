@@ -1,6 +1,6 @@
 // TRUSTED LOCAL ONLY. Agents and CI must supply synthetic workbooks exclusively.
 // The generated private HTML contains headers/structure only and runs offline on file:.
-import { readFile, mkdir, open, realpath, unlink } from 'node:fs/promises';
+import { readFile, mkdir, open, realpath, unlink, lstat } from 'node:fs/promises';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { resolve, join, extname } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
@@ -236,9 +236,12 @@ export function renderMappingReview(review) {
 /** Output is restricted to a private subdirectory of the chosen workspace. */
 export async function prepareMappingReview(input, { workspaceRoot = process.cwd() } = {}) {
     if (typeof input !== 'string' || extname(input).toLowerCase() !== '.xlsx') throw new Error('INVALID_INPUT');
-    const root = join(resolve(workspaceRoot), 'private-data');
+    // Windows CI TEMP may use its 8.3 alias (RUNNER~1). Canonicalize the
+    // workspace before containment checks; still reject a redirected private root.
+    const workspace = await realpath(resolve(workspaceRoot));
+    const root = join(workspace, 'private-data');
     await mkdir(root, { recursive: true, mode: 0o700 });
-    if ((await realpath(root)).toLowerCase() !== root.toLowerCase()) throw new Error('INVALID_PRIVATE_OUTPUT');
+    if ((await lstat(root)).isSymbolicLink() || (await realpath(root)).toLowerCase() !== root.toLowerCase()) throw new Error('INVALID_PRIVATE_OUTPUT');
     const htmlPath = join(root, 'mapping-review.html');
     const candidatePath = join(root, `enterprise-profile-candidate-${randomUUID()}.json`);
     const handles = [];
