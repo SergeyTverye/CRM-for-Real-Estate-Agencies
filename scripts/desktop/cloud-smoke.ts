@@ -20,7 +20,12 @@ import type { BackupDestination } from "../../src/modules/desktop-backup/domain/
 async function main() {
   if (!process.argv.includes("--execute-real-cloud-smoke")) throw new Error("EXPLICIT_SMOKE_FLAG_REQUIRED");
   const secrets = parse(await readFile("D:\\crm-secrets\\clouds.env"));
-  const required = (name: string) => { const value = secrets[name]; if (!value) throw new Error("CLOUD_CONFIGURATION_MISSING"); return value; };
+  // Accept both the documented template names (D:\\crm-secrets\\clouds.env) and the module names.
+  const aliases: Record<string, string[]> = {
+    YANDEX_S3_BUCKET: ["YC_S3_BUCKET"], YANDEX_S3_ACCESS_KEY_ID: ["YC_S3_ACCESS_KEY_ID"], YANDEX_S3_SECRET_ACCESS_KEY: ["YC_S3_SECRET_ACCESS_KEY"],
+    MAILRU_WEBDAV_EMAIL: ["MAILRU_EMAIL"], MAILRU_WEBDAV_APP_PASSWORD: ["MAILRU_APP_PASSWORD"],
+  };
+  const required = (name: string) => { const value = [name, ...(aliases[name] ?? [])].map(key => secrets[key]).find(Boolean); if (!value) throw new Error("CLOUD_CONFIGURATION_MISSING:" + name); return value; };
   const root = await mkdtemp(path.join(os.tmpdir(), "crm-cloud-smoke-")); const deploymentId = randomUUID();
   const prefix = "crm-synthetic-smoke/" + deploymentId;
   const validator = new SqliteSnapshotValidator(); const passphrase = randomBytes(32).toString("hex");
@@ -58,4 +63,9 @@ async function main() {
     await rm(root, { recursive: true, force: true });
   }
 }
-main().catch(() => { console.error("CLOUD_SMOKE_FAILED (credentials and provider responses redacted)"); process.exitCode = 1; });
+main().catch((error: unknown) => {
+  // Only stable error codes are printed; provider responses and credentials stay redacted.
+  const raw = error instanceof Error ? error.message : "";
+  const code = /^[A-Z][A-Z0-9_]+(:[A-Z0-9_]+)?$/.test(raw) ? raw : (error as { name?: string })?.name ?? "Error";
+  console.error("CLOUD_SMOKE_FAILED " + code + " (credentials and provider responses redacted)"); process.exitCode = 1;
+});
