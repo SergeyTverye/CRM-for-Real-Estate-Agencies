@@ -81,6 +81,7 @@ it("bundles all eight real entrypoints in memory with no external source-file de
   for (const [output, input] of Object.entries(runtimeEntries)) {
     const result = await build({ ...runtimeBuildOptions, entryPoints: [input], outfile: output, write: false, metafile: true });
     expect(result.outputFiles).toHaveLength(1);
+    if (!result.outputFiles?.[0]) throw new Error("RUNTIME_OUTPUT_MISSING");
     expect(result.outputFiles[0].contents.byteLength).toBeGreaterThan(0);
     const imports = Object.values(result.metafile!.outputs).flatMap(file => file.imports);
     for (const dependency of imports) {
