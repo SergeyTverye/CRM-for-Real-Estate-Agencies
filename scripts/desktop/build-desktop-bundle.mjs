@@ -88,10 +88,24 @@ async function measure(dir){for(const item of await readdir(dir,{withFileTypes:t
 await measure(app);
 const version = JSON.parse(await readFile('src-tauri/tauri.conf.json','utf8')).version;
 await writeFile(path.join(app,'desktop-manifest.json'),JSON.stringify({version,resourceBytes,node:versions.node,chromium:path.relative(app,executable),initEntry:entries['init-db.cjs'],backupEntry:entries['workers/backup.cjs']},null,2));
-const sbom = spawnSync(process.env.ComSpec ?? 'cmd.exe',['/d','/s','/c','npm sbom --omit=dev --sbom-format=cyclonedx'],{cwd:app,encoding:'utf8',maxBuffer:32*1024*1024,windowsHide:true});
-if (sbom.status !== 0) throw Error('SBOM_FAILED');
-await writeFile(path.join(app,'sbom.cdx.json'),sbom.stdout);
-await writeFile(path.join(app,'RUNTIMES.md'),`Node.js ${versions.node} x64 (node/LICENSE); Chromium (chromium/*/LICENSE*); WebView2 Evergreen Offline Installer (Microsoft); Tauri 2 (MIT/Apache-2.0); app-local MSVC CRT (Microsoft Visual Studio Distributable Code, node/MSVC-RUNTIME.json).\nProduction npm components/licenses: sbom.cdx.json. No host Node/npm required.\n`);
+// Generate from the exact lock used by npm ci. The standalone trace and native
+// rebuilds are not a complete Arborist install tree; npm sbom otherwise rejects
+// absent development/platform packages. The lock inventory includes production
+// optional variants for other platforms, which is declared in RUNTIMES.md.
+const sbom = spawnSync(process.env.ComSpec ?? 'cmd.exe',['/d','/s','/c','npm sbom --omit=dev --sbom-format=cyclonedx --package-lock-only'],{cwd:app,encoding:'utf8',maxBuffer:32*1024*1024,windowsHide:true});
+if (sbom.error || sbom.status !== 0) {
+  const code = sbom.stderr?.match(/npm (?:ERR!|error) code ([A-Z0-9_]+)/)?.[1] ?? 'UNKNOWN';
+  throw Error('SBOM_FAILED_' + code);
+}
+const inventory = JSON.parse(sbom.stdout);
+if (inventory.bomFormat !== 'CycloneDX' || !Array.isArray(inventory.components) || !inventory.components.length) throw Error('SBOM_INVALID');
+for (const name of ['next','better-sqlite3','@node-rs/argon2','@prisma/client']) {
+  const installed = JSON.parse(await readFile(path.join(app,'node_modules',name,'package.json'),'utf8'));
+  const slash = name.lastIndexOf('/');
+  if (!inventory.components.some(c => (c.name === name || c.name === name.slice(slash + 1) && (slash < 0 || c.group === name.slice(0,slash))) && c.version === installed.version)) throw Error('SBOM_COMPONENT_MISSING');
+}
+await writeFile(path.join(app,'sbom.cdx.json'),JSON.stringify(inventory,null,2));
+await writeFile(path.join(app,'RUNTIMES.md'),`Node.js ${versions.node} x64 (node/LICENSE); Chromium (chromium/*/LICENSE*); WebView2 Evergreen Offline Installer (Microsoft); Tauri 2 (MIT/Apache-2.0); app-local MSVC CRT (Microsoft Visual Studio Distributable Code, node/MSVC-RUNTIME.json).\nProduction npm dependency/license inventory: sbom.cdx.json, generated from the exact npm ci lockfile with dev dependencies omitted. Optional platform variants listed by the lock may not all be installed on Windows. Next, SQLite, Argon2 and Prisma versions are checked against the installed bundle. No host Node/npm required.\n`);
 await rejectPrivateFiles(app);
 run(process.execPath,['scripts/security/confidential-guard.mjs','--artifacts','--artifact','src-tauri/resources/app']);
 console.log('DESKTOP_BUNDLE_READY');

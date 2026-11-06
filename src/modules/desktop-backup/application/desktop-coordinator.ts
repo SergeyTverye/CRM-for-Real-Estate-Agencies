@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { createHash, randomUUID, randomBytes } from "node:crypto";
 import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
-import { db, disconnectDb } from "@/shared/db/client";
+import { disconnectDb } from "@/shared/db/client";
 import { sqliteFilePath } from "@/shared/db/sqlite-adapter";
 import { BackupError, type BackupManifest } from "../domain/contracts";
 import type { TransferState } from "../domain/handoff";
@@ -37,6 +37,38 @@ export function businessFingerprint(file: string) {
     }
     return hash.digest("hex");
   } finally { native.close(); }
+}
+// Only installation/configuration rows may be replaced on the first receive.
+// Everything else, including unknown future tables and business audit history,
+// is treated as local work even when clients/properties/deals are still absent.
+const emptyWorkspaceBaselineTables = new Set([
+  "users", "user_sessions", "dictionary_items", "legal_entities",
+  "ai_settings", "ai_tariffs", "planner_settings", "notification_preferences",
+  "backup_queue_journals", "backup_runs", "backup_remotes", "backup_target_runs",
+  "_prisma_migrations",
+]);
+function isEmptyWorkspace(file: string): boolean {
+  let native: Database.Database | null = null;
+  try {
+    native = new Database(file, { readonly: true, fileMustExist: true });
+    return native.transaction(() => {
+      const tables = native!.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as { name: string }[];
+      for (const { name } of tables) {
+        if (name.startsWith("sqlite_") || emptyWorkspaceBaselineTables.has(name)) continue;
+        const table = '"' + name.replaceAll('"', '""') + '"';
+        // These exact initialization events accompany an otherwise empty setup.
+        // Never ignore the whole audit table or an arbitrary setup/settings action.
+        const where = name === "audit_log" ? ` WHERE NOT COALESCE(
+          (action = 'desktop.setup_completed' AND entity_type = 'User' AND json_extract(after_jsonb, '$.initialData') = 'empty')
+          OR (action = 'ai.tariff.seed' AND entity_type = 'AiTariff'), 0)` : "";
+        if (native!.prepare("SELECT 1 FROM " + table + where + " LIMIT 1").get()) return false;
+      }
+      return true;
+    })();
+  } catch {
+    // Fail closed: an unreadable or ambiguous workspace is treated as containing local business data.
+    return false;
+  } finally { native?.close(); }
 }
 async function localState(): Promise<LocalState | null> {
   try { return JSON.parse(await readFile(stateFile(), "utf8")); } catch (e) { if ((e as NodeJS.ErrnoException).code === "ENOENT") return null; throw e; }
@@ -98,7 +130,7 @@ export async function executeDesktopBackupRequest(id: string) {
         if (manifest.backupId !== cmd.backupId) throw new BackupError("ARCHIVE_ID_MISMATCH");
         const own = await localState();
         const { compareState } = await import("../domain/handoff");
-        const empty = !own && await db.client.count() === 0 && await db.property.count() === 0 && await db.deal.count() === 0;
+        const empty = !own && isEmptyWorkspace(database());
         const comparison = own ? compareState({ ...own, dirtySinceBackup: own.fingerprint !== businessFingerprint(database()) }, manifest) : empty ? "incoming" : "conflict";
         if (cmd.action === "verify") result = { status: "verified", backupId: manifest.backupId };
         else if (cmd.action === "compare") result = { status: comparison, backupId: manifest.backupId };
