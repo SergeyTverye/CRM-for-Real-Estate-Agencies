@@ -8,16 +8,18 @@ import type { ScraperAdapter, ScraperOptions } from "../infrastructure/scraper-a
 
 /** No network requests; fixtures are synthetic, recorded parser outputs. */
 export class FixtureScraperAdapter implements ScraperAdapter {
+  private firstSource?: string;
   constructor(private options: ScraperOptions, private scenario = "success", private fixtureDirectory = "tests/fixtures/scraper") {}
   async search(raw: unknown): Promise<SearchResult> {
     const filters = SearchFilters.parse(raw);
+    this.firstSource ??= filters.sources[0];
     const listings = [] as ReturnType<typeof normalizeListing>[];
     const sources: SearchResult["sources"] = [];
-    for (const [index, source] of filters.sources.entries()) {
+    for (const source of filters.sources) {
       if (!this.options.enabled || !this.options.enabledSources?.includes(source)) {
         sources.push({ source, status: "disabled", resultCount: 0, reason: "Источник отключён" }); continue;
       }
-      if (this.scenario === "failure" || this.scenario === "partial" && index > 0) {
+      if (this.scenario === "failure" || this.scenario === "partial" && source !== this.firstSource) {
         sources.push({ source, status: "blocked", resultCount: 0, reason: "Записанный ответ: HTTP 429" }); continue;
       }
       const fixture = JSON.parse(await readFile(path.join(process.cwd(), this.fixtureDirectory, `${source}.json`), "utf8")) as { results: RealEstateScraper.Listing[] };

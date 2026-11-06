@@ -30,6 +30,7 @@ test("КП: скачать настоящий многостраничный A4 
 test("календарь: сохранить серию по будням и проверить развёрнутые встречи", async ({ page }) => {
   await login(page, "realtor1");
   await page.goto("/calendar");
+  await page.getByText("Фильтры и быстрые действия", { exact: true }).click();
   await page.getByRole("button", { name: "+ Встреча / личная запись", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Заголовок", { exact: false }).fill("E2E по будням");

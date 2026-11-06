@@ -5,7 +5,7 @@ import { db, transaction, type Tx } from "@/shared/db/client";
 import { ConflictError, DomainError, ForbiddenError, NotFoundError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import { parseInput, zCode, zDateTime, zExpectedUpdatedAt, zOptText, zUuid } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
-import { leadRequestScope, needScope } from "@/modules/access/domain/scopes";
+import { advertisementReadScope, propertyReadScope, leadRequestScope, needScope } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { assertDictionaryCode } from "@/modules/dictionaries/application/dictionaries-service";
 import { insertTask, nextActionSchema, resolveTaskResponsible } from "@/modules/tasks/application/task-service";
@@ -341,13 +341,26 @@ export async function resolveRequest(actor: Actor, requestId: string, input: unk
 
 /** Предпросмотр ответственного для формы обращения (правило «чей объект, того и клиент»). */
 export async function previewResponsible(actor: Actor, opts: { propertyId?: string; advertisementId?: string }) {
-  let propertyId = opts.propertyId;
-  if (opts.advertisementId) {
-    const ad = await db.advertisement.findUnique({ where: { id: opts.advertisementId }, select: { propertyId: true } });
-    propertyId = ad?.propertyId;
+  const d = parseInput(z.object({ propertyId: zUuid.optional(), advertisementId: zUuid.optional() }), opts);
+  const propertyWhere = { AND: [propertyReadScope(actor), { archivedAt: null, status: { not: "archived" } }] };
+  const select = { id: true, responsible: { select: { id: true, displayName: true } } } as const;
+  let property = d.propertyId ? await db.property.findFirst({ where: { id: d.propertyId, ...propertyWhere }, select }) : null;
+  if (d.propertyId && !property) throw new NotFoundError("Объект не найден");
+  if (d.advertisementId) {
+    const ad = await db.advertisement.findFirst({
+      where: { AND: [advertisementReadScope(actor), { id: d.advertisementId, property: propertyWhere }] },
+      select: { property: { select } },
+    });
+    if (!ad) throw new NotFoundError("Объявление не найдено");
+    if (property && property.id !== ad.property.id) {
+      throw new ValidationError(undefined, { advertisementId: ["Объявление относится к другому объекту"] });
+    }
+    property = ad.property;
   }
-  if (!propertyId) return { responsible: { id: actor.userId, displayName: actor.displayName }, byPropertyRule: false };
-  const p = await db.property.findUnique({ where: { id: propertyId }, select: { responsible: { select: { id: true, displayName: true } } } });
-  if (!p?.responsible) return { responsible: { id: actor.userId, displayName: actor.displayName }, byPropertyRule: false };
-  return { responsible: p.responsible, byPropertyRule: true };
+  if (!property?.responsible) return { responsible: { id: actor.userId, displayName: actor.displayName }, byPropertyRule: false };
+  // The shared catalog does not require disclosing another employee's identity in this preview.
+  const responsible = isManager(actor) || property.responsible.id === actor.userId
+    ? property.responsible
+    : { id: "", displayName: "Ответственный объекта" };
+  return { responsible, byPropertyRule: true };
 }

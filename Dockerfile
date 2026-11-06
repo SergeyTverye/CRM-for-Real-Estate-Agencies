@@ -78,6 +78,7 @@ COPY --from=build --chown=node:node /app/ops/worker ./ops/worker
 COPY --from=build --chown=node:node /app/scripts/container-smoke.mjs ./scripts/container-smoke.mjs
 COPY --from=build --chown=node:node /app/scripts/ops-gallery-fixture.ts ./scripts/ops-gallery-fixture.ts
 COPY --from=build --chown=node:node /app/scripts/ops-restore-login.ts ./scripts/ops-restore-login.ts
+COPY --from=build --chown=node:node /app/scripts/ops-verify-template-files.ts ./scripts/ops-verify-template-files.ts
 
 RUN sed -i 's/\r$//' /app/ops/backup/scripts/*.sh /app/ops/backup/scripts/*.sql \
  && mkdir -p /data/files /data/import-staging /backups && chown -R node:node /data /backups

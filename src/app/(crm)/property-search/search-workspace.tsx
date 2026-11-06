@@ -1,5 +1,6 @@
 "use client";
 import { resultAddress, resultTitle, resultPriceUnit, evidenceLabel, translatedEvidence } from "./result-display";
+import { CatalogPhoto } from "./catalog-photo";
 
 import { useEffect, useRef, useState } from "react";
 import { SearchResultsV31 } from "./search-results-v31";
@@ -107,6 +108,7 @@ export function SearchWorkspace({ initialFilters, initialRun, initialNeedId, ini
   function ResultActions({ listing }: { listing: Listing }) {
     const button = (kind: ListingDialogKind, label: string, disabled = false) => <button type="button" className="btn btn-secondary" disabled={action.pending || disabled} onClick={() => setDialog({ listing, kind })}>{label}</button>;
     return <div className="flex flex-wrap items-start gap-2">
+      {listing.propertyId && <div className="basis-full"><CatalogPhoto propertyId={listing.propertyId} address={listing.address} /></div>}
       {button("bookmark", "В закладки")}{button("selection", "В подборку клиента", !needId)}
       <details className="relative"><summary className="btn btn-secondary cursor-pointer">Ещё</summary><div className="mt-2 flex flex-wrap gap-2 rounded border bg-slate-50 p-2">
         {button("clarify", "Уточнить")}

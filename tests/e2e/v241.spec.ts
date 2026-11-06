@@ -12,11 +12,12 @@ async function listingMenu(card: Locator) {
 async function searchManually(page: Page, scenario = "success") {
   await page.getByLabel("Город", { exact: true }).fill("Новосибирск");
   await page.getByLabel(/^Операция/).selectOption("sale");
-  await page.getByLabel(/^Этаж/).selectOption("first_floor_only");
+  await page.getByRole("combobox", { name: /^Этаж/ }).selectOption("first_floor_only");
   await page.getByLabel("Цена до", { exact: true }).fill("20000000");
   await page.getByLabel("Площадь от, м²", { exact: true }).fill("80");
   await page.getByLabel("Площадь до, м²", { exact: true }).fill("150");
   await page.getByLabel("Торговля", { exact: true }).check();
+  for (const source of ["Циан", "Мир Квартир", "Авито", "Домклик", "OnRealt", "Яндекс Недвижимость", "Юла"]) await page.getByLabel(source, { exact: true }).uncheck();
   await page.getByLabel("Циан", { exact: true }).check();
   await page.getByLabel("Мир Квартир", { exact: true }).check();
   await page.getByLabel("Записанный сценарий").selectOption(scenario);
@@ -24,7 +25,10 @@ async function searchManually(page: Page, scenario = "success") {
   await page.getByRole("button", { name: "Искать", exact: true }).click();
   const res = await response;
   expect(res.ok(), await res.text()).toBeTruthy();
-  await expect(page.getByText("Поиск завершён", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Выдача поиска" }).getByText(/^(Завершён|Частично)$/, { exact: true }).first()).toBeVisible({ timeout: 60000 });
+  const results = await page.request.get(`/api/v1/property-search/runs/${(await res.json()).id}/progress`);
+  expect(["completed", "partial"]).toContain((await results.json()).status);
+  await page.getByRole("tab", { name: /^Совпадения/ }).click();
 }
 
 test("v2.4.1: обращение → поиск → подборка → КП → показ → сделка → повторный контакт", async ({ page }) => {
@@ -57,14 +61,15 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   await expect(page.getByText("Согласовать подбор объектов E2E", { exact: true }).first()).toBeVisible({ timeout: 30000 });
   await page.locator(`a[href="/property-search?needId=${lead.needId}"]`).click();
   await expect(page).toHaveURL(new RegExp(`/property-search\\?needId=${lead.needId}`));
-  await expect(page.getByText("ИИ отключён · ручные фильтры доступны")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Искать", exact: true })).toBeEnabled();
+  expect((await (await page.request.get("/api/v1/ai/limits")).json()).aiEnabled).not.toBe(true);
   await searchManually(page);
   // Earlier gallery tests may have transferred the first result. Keep this whole
   // flow on one untransferred listing, identified by its public source URL.
-  const untransferred = page.locator("section").filter({ has: page.locator("button").filter({ hasText: /^В каталог CRM$/ }) }).first();
+  const untransferred = page.locator("[data-listing-id]").filter({ has: page.locator("button").filter({ hasText: /^В каталог CRM$/ }) }).first();
   const listingUrl = await untransferred.locator('a[target="_blank"]').first().getAttribute("href");
   expect(listingUrl).toBeTruthy();
-  const listingCard = page.locator("section").filter({ has: page.locator(`a[href=${JSON.stringify(listingUrl)}]`) });
+  const listingCard = page.locator("[data-listing-id]").filter({ has: page.locator(`a[href=${JSON.stringify(listingUrl)}]`) });
   await listingCard.getByRole("button", { name: "В подборку клиента", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Подтвердить", exact: true }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 60000 });
@@ -150,14 +155,21 @@ test("v2.4.1: обращение → поиск → подборка → КП �
 test("v2.4.1: чужой клиент недоступен по прямому URL", async ({ page, browser }) => {
   await login(page, "realtor1");
   await page.goto("/clients");
-  const href = await page.locator('main a[href^="/clients/"]').filter({ hasNotText: "Новый" }).first().getAttribute("href");
+  const created = await page.request.post("/api/v1/clients", { headers: { origin: new URL(page.url()).origin }, data: { displayName: `E2E private ${Date.now()}` } });
+  expect(created.status()).toBe(201);
+  const href = `/clients/${(await created.json()).id}`;
   expect(href).toMatch(/\/clients\/[0-9a-f-]+$/);
   const context = await browser.newContext({ baseURL: test.info().project.use.baseURL });
   try {
     const other = await context.newPage();
     await login(other, "realtor2");
-    const response = await other.goto(href!);
-    expect(response?.status()).toBe(404);
+    await other.goto(href!);
+    await expect(other).toHaveURL(new RegExp(`${href}$`));
+    expect((await other.request.get(`/api/v1${href}`)).status()).toBe(404);
+    // Next streams the loading boundary with HTTP 200 before notFound resolves.
+    // The API must still deny access with an exact 404; the UI must render no data.
+    await expect(other.locator('meta[name="robots"][content="noindex"]').first()).toBeAttached();
+    await expect(other.getByRole("heading", { name: "Запись не найдена или недоступна", exact: true })).toBeVisible();
     await expect(other.locator("body")).toContainText(/не найден|нет доступа|404/i);
   } finally { await context.close(); }
 });
@@ -181,11 +193,14 @@ test("v2.4.1: частичный отказ площадки сохраняет 
   await page.goto("/property-search");
   await expect(page.getByText("Режим тестирования: записанные ответы площадок")).toBeVisible();
   await searchManually(page, "partial");
-  await expect(page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..").locator("..")).toContainText("Заблокирован");
-  await expect(page.locator("strong").filter({ hasText: /^Циан$/ }).locator("..").locator("..")).toContainText("Успешно");
-  const reason = page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..").locator("..").locator("p[title]");
+  await expect(page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..")).toContainText("Заблокирован");
+  await expect(page.locator("strong").filter({ hasText: /^Циан$/ }).locator("..")).toContainText("Получено");
+  const reason = page.locator("strong").filter({ hasText: /^Мир Квартир$/ }).locator("..");
   await expect(reason).toBeVisible();
-  await expect(reason).toContainText("Доступ ограничен площадкой");
-  await expect(reason).toHaveAttribute("title", /HTTP 429/);
+  await expect(reason).toContainText("Записанный ответ: HTTP 429");
+  await expect(reason.getByRole("button", { name: "Добавить по ссылке", exact: true })).toBeVisible();
+  const runId = new URL(page.url()).searchParams.get("runId");
+  const progress = await (await page.request.get(`/api/v1/property-search/runs/${runId}/progress`)).json();
+  expect(progress.sources.find((source: {source:string}) => source.source === "mirkvartir").reason).toContain("HTTP 429");
   await expect(page.getByRole("button", { name: "В закладки", exact: true }).first()).toBeVisible();
 });

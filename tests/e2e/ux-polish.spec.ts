@@ -26,20 +26,24 @@ test("календарь: рабочие часы и полные названи
   await page.goto("/calendar");
   await expect(page.locator('.fc-timegrid-slot[data-time="07:00:00"]').first()).toBeVisible();
   await expect(page.locator('.fc-timegrid-slot[data-time="21:30:00"]').first()).toBeVisible();
-  await expect(page.locator('.fc-timegrid-slot[data-time="22:00:00"]')).toHaveCount(0);
+  // v3.1 displays the full day so early/late deadlines are not hidden.
+  await expect(page.locator('.fc-timegrid-slot[data-time="00:00:00"]').first()).toBeAttached();
+  await expect(page.locator('.fc-timegrid-slot[data-time="23:30:00"]').first()).toBeAttached();
   const event = page.locator(".fc-event[title]").first();
   await expect(event).toHaveAttribute("title", /.+/);
-  for (const [button, view] of [["День", ".fc-timeGridDay-view"], ["Месяц", ".fc-dayGridMonth-view"], ["Повестка дня", ".fc-listWeek-view"], ["Неделя", ".fc-timeGridWeek-view"]]) {
+  for (const [button, view] of [["День", ".fc-timeGridDay-view"], ["Месяц", ".fc-dayGridMonth-view"], ["Три месяца", ".fc-dayGridQuarter-view"], ["Неделя", ".fc-timeGridWeek-view"]]) {
     await page.getByRole("button", { name: button, exact: true }).click();
     await expect(page.locator(view!)).toBeVisible();
   }
+  await page.getByText("Фильтры и быстрые действия", { exact: true }).click();
   const filtered = page.waitForResponse(r => r.url().includes("/api/v1/calendar?") && new URL(r.url()).searchParams.get("type") === "task", { timeout: 15000 });
   await page.getByRole("combobox", { name: "Тип", exact: true }).selectOption("task");
   await page.getByRole("button", { name: "Обновить", exact: true }).click();
   const { items } = await (await filtered).json() as { items: { type: string }[] };
   expect(items.length).toBeGreaterThan(0);
   expect(items.every(item => item.type === "task")).toBeTruthy();
-  await expect(page.getByRole("combobox", { name: "Сотрудник", exact: true })).toBeVisible();
+  await page.getByRole("combobox", { name: "Охват", exact: true }).selectOption("employee");
+  await expect(page.getByRole("combobox", { name: "Сотрудник планера", exact: true })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Статус", exact: true })).toBeVisible();
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/today");
@@ -56,7 +60,8 @@ test("поиск: разрешённое фото из CRM в карточке �
     const response = page.waitForResponse(r => r.url().endsWith("/property-search/runs") && r.request().method() === "POST");
     await page.getByRole("button", { name: "Искать", exact: true }).click();
     expect((await response).ok()).toBeTruthy();
-    await expect(page.getByText("Поиск завершён", { exact: true })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Выдача поиска" }).getByText("Завершён", { exact: true })).toBeVisible({ timeout: 60000 });
+    await page.getByRole("tab", { name: /^Совпадения/ }).click();
   }
   await search();
   await page.locator("summary").filter({ hasText: /^Ещё$/ }).first().click();

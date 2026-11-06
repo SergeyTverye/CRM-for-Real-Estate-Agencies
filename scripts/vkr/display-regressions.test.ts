@@ -34,7 +34,7 @@ it("uses total sale price, keeps unitless rent under review and explains it", ()
 });
 it("translates saved criterion states, sources, features and structured evidence", () => {
   for (const [group, value, label] of [["criterion_state", "unknown", "Нет данных"], ["criterion_source", "structured", "Структурированные поля"], ["criterion", "floor", "Этаж"], ["criterion", "power_from_50_kW", "Мощность от 50 кВт"]]) expect(evidenceLabel(group!, value!)).toBe(label);
-  expect(translatedEvidence("separate_entrance=true; rub_total")).toBe("Отдельный вход=да; всего");
+  expect(translatedEvidence("separate_entrance=true; rub_total")).toBe("Отдельный вход=да; за объект");
 });
 it("prefers the offer snapshot purpose and uses Russian property type only for missing legacy purpose", () => {
   const item = { addressSnapshot: "Адрес", areaSnapshot: null, priceSnapshot: null, termsSnapshot: "Назначение: Склад" };

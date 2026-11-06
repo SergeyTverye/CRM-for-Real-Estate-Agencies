@@ -1,0 +1,16 @@
+{
+  "time": "2026-11-06T01:01:22.783Z",
+  "project": "crmclean31",
+  "pages": {
+    "/property-search": 200,
+    "/calendar": 200,
+    "/collections": 200,
+    "/templates": 200,
+    "/requests": 200,
+    "/clients": 200
+  },
+  "forcedPasswordChange": true,
+  "template": true,
+  "generatedDocument": true,
+  "disabledSearch": "completed/disabled"
+}

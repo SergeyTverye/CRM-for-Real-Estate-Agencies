@@ -259,4 +259,12 @@ describe("search application integration", () => {
       if (scenario === "empty") expect(result.listings).toHaveLength(0);
     }
   });
+  it("partial fixture preserves its first source across queue calls", async () => {
+    const adapter = new FixtureScraperAdapter({enabled:true,enabledSources:["cian","avito"]}, "partial");
+    const first = await adapter.search({...filters,city:"Москва",sources:["cian"]});
+    const second = await adapter.search({...filters,city:"Москва",sources:["avito"]});
+    expect(first.sources[0]?.status).toBe("success");
+    expect(second.sources[0]?.status).toBe("blocked");
+    expect(second.listings).toHaveLength(0);
+  });
 });

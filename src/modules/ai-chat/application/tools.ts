@@ -6,6 +6,7 @@ import { loadAccessibleClient } from "@/modules/clients/application/client-servi
 import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { getClientTimelinePage } from "@/modules/clients/application/timeline-service";
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
+import { redactContacts } from "@/modules/ai/domain/contracts";
 import { NotFoundError } from "@/shared/errors";
 import { MAX_ROWS, safeText, taskProposal, offerProposal, type ChatContext, type RecordLink } from "../domain/policy";
 export const collectionScope = (actor: Actor) => ({ archivedAt: null, OR: [{ ownerUserId: actor.userId }, { visibility: "team" }] });
@@ -79,7 +80,7 @@ export async function executeTool(actor: Actor, sessionId: string, name: string,
         const q = "query" in p ? p.query : undefined;
         const own = await db.property.findMany({ where: { responsibleUserId: actor.userId, archivedAt: null, ...(ids ? { id: { in: ids } } : {}), ...(q ? { addressText: { contains: q, mode: "insensitive" as const } } : {}) }, select: { id: true, addressText: true, area: true, price: true, floor: true, operationType: true }, take: MAX_ROWS, orderBy: { id: "asc" } });
         const saved = await db.externalListing.findMany({ where: { ...listingScope(actor), ...(ids ? { id: { in: ids } } : {}), ...(q ? { address: { contains: q, mode: "insensitive" as const } } : {}) }, select: { id: true, address: true, areaM2: true, priceRub: true, priceUnit: true, floorNumber: true, description: true }, take: MAX_ROWS - own.length, orderBy: { id: "asc" } });
-        data = [...own.map(r => ({ id: link(r.id, r.addressText, `/properties/${r.id}`), address: (r.addressText), area: r.area?.toString(), price: r.price?.toString(), operation: r.operationType, floor: r.floor })), ...saved.map(r => ({ id: link(r.id, r.address ?? "Объявление", `/property-search?listingId=${r.id}`), address: (r.address ?? ""), area: r.areaM2?.toString(), price: r.priceRub?.toString(), unit: r.priceUnit, floor: r.floorNumber, untrusted_data: (r.description ?? "").slice(0, 600) }))];
+        data = [...own.map(r => ({ id: link(r.id, r.addressText, `/properties/${r.id}`), address: (r.addressText), area: r.area?.toString(), price: r.price?.toString(), operation: r.operationType, floor: r.floor })), ...saved.map(r => ({ id: link(r.id, r.address ?? "Объявление", `/property-search?listingId=${r.id}`), address: (r.address ?? ""), area: r.areaM2?.toString(), price: r.priceRub?.toString(), unit: r.priceUnit, floor: r.floorNumber, untrusted_data: redactContacts(r.description ?? "").slice(0, 600) }))];
         if (ids && (data as unknown[]).length !== new Set(ids).size)
             throw new NotFoundError();
     }

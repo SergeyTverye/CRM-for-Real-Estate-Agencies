@@ -82,6 +82,8 @@ it("AT-13 реклама и внешнее объявление выбирают
   const ext=await db.externalListing.create({data:{source:"cian",url:"https://example.test/listing",sourceMethod:"manual",operation:"rent",priceUnit:"per_month",address:"Тестовый проспект, 14"}});
   const { pickCallContext }=await import("@/modules/requests/application/call-pickers");
   expect((await pickCallContext(u.realtor1,{kind:"advertisement",q:"проспект"})).items[0]?.id).toBe(ad.id);
+  expect((await pickCallContext(u.realtor1,{kind:"external",q:"проспект"})).items).toEqual([]);
+  await db.searchBookmark.create({data:{userId:u.realtor1.userId,listingId:ext.id}});
   expect((await pickCallContext(u.realtor1,{kind:"external",q:"проспект"})).items[0]?.id).toBe(ext.id);
   const r=await registerRequest(u.realtor1,{...base,advertisementId:ad.id,externalListingId:ext.id,client:{mode:"none"},outcome:{resultCode:"one_off_service"}});
   const row=await db.leadRequest.findUniqueOrThrow({where:{id:r.requestId}});expect(row.propertyId).toBe(p.id);expect(row.externalListingId).toBe(ext.id);expect(row.responsibleUserId).toBe(u.realtor2.userId);

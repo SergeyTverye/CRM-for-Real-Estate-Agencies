@@ -1,0 +1,159 @@
+{
+  "time": "2026-11-06T01:15:52.162Z",
+  "baseSha": "32decaacd2a313dc82a7e6fadde3cfb40d387815",
+  "status": "PARTIAL_FINAL_COMMIT_PENDING",
+  "checks": {
+    "prisma": "PASS",
+    "typecheck": "PASS",
+    "eslint": "PASS",
+    "build": "PASS",
+    "unit": {
+      "passed": 1331,
+      "files": 60
+    },
+    "postgres": {
+      "passed": 315,
+      "files": 51
+    },
+    "productionE2e": {
+      "passed": 24,
+      "skipped": 1,
+      "failed": 0
+    },
+    "workingDocker": "PASS",
+    "migrations": "PASS",
+    "workingRestore": "PASS",
+    "cleanOriginalRestore": "FAIL_MISSING_TEMPLATE_VERIFY_SCRIPT",
+    "cleanPatchedRestore": "PASS"
+  },
+  "dumpSha256": "16750cf10591caf3a7ed3dffea6aa98cb3c14751e357a26b084a6a2d923cfa11",
+  "logs": {
+    "prisma-final": {
+      "bytes": 220,
+      "sha256": "c7f45ee4fe6dc5b04a38b176107829038f3eaa4cee45f32f6190cfdc043ad4bb",
+      "tail": "npm notice run crm-real-estate@1.0.0 npx\nnpm notice run prisma validate\nLoaded Prisma config from prisma.config.ts.\n\nPrisma schema loaded from prisma\\schema.prisma.\nThe schema at prisma\\schema.prisma is valid 🚀\n"
+    },
+    "typecheck-release": {
+      "bytes": 71,
+      "sha256": "4cb1c051eb08e352c81bb97c2163338af093ca879609e5cd936da3b2a89db115",
+      "tail": "npm notice run crm-real-estate@1.0.0 npx\nnpm notice run tsc --noEmit\n"
+    },
+    "eslint-release": {
+      "bytes": 84,
+      "sha256": "f7ecad1e70117ac29bcb74e366ed41afee7dec8ed8e6a886e985bc01705f9b03",
+      "tail": "npm notice run crm-real-estate@1.0.0 npx\nnpm notice run eslint . --max-warnings=0\n"
+    },
+    "unit-release": {
+      "bytes": 318,
+      "sha256": "d7c6361972d785a48eaa2878bd64e071b815fae470b95f1b3e013e666a7cba42",
+      "tail": " RUN  v5.1.0 D:/CRM-for-Real-Estate-Agencies\n\n\n Test Files  60 passed (60)\n      Tests  1331 passed (1331)\n   Start at  04:08:48\n   Duration  80.97s (import 58%, tests 39%, transform 2%, worker 1%)\n\n"
+    },
+    "integration-final": {
+      "bytes": 1770,
+      "sha256": "dcf15f1d2df69e230d6d13676cd5fb28c50d22cc43f16e413880cf3e54eb75b5",
+      "tail": "(node:25140) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\n Test Files  51 passed (51)\n      Tests  315 passed (315)\n   Start at  04:04:04\n   Duration  305.94s (tests 74%, import 25%)\n\n"
+    },
+    "build-final": {
+      "bytes": 14582,
+      "sha256": "23ce694b776e290c5ed892f7acf5187b9aefb0a80c9642f9653c980e742a71cb",
+      "tail": "├ ƒ /templates/[id]\n├ ƒ /today\n└ ƒ /today/overview\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\n"
+    },
+    "e2e-verified": {
+      "bytes": 6588,
+      "sha256": "bea6df0e4f6fe658d19921f435cfb6f64e7f6ac4792901fb1685156d59480e96",
+      "tail": "  ok 21 [chromium] › tests\\e2e\\ux-polish.spec.ts:54:5 › поиск: разрешённое фото из CRM в карточке результата (6.6s)\n  ok 22 [chromium] › tests\\e2e\\v241.spec.ts:34:5 › v2.4.1: обращение → поиск → подборка → КП → показ → сделка → повторный контакт (15.6s)\n  ok 23 [chromium] › tests\\e2e\\v241.spec.ts:155:5 › v2.4.1: чужой клиент недоступен по прямому URL (2.1s)\n  ok 24 [chromium] › tests\\e2e\\v241.spec.ts:177:5 › v2.4.1: настройки ИИ доступны только руководителю (2.3s)\n  ok 25 [chromium] › tests\\e2e\\v241.spec.ts:191:5 › v2.4.1: частичный отказ площадки сохраняет успешные результаты (4.1s)\n\n  1 skipped\n  24 passed (1.7m)\n"
+    },
+    "docker-build-release": {
+      "bytes": 31581,
+      "sha256": "d69b742a2ca62f09ba2d96375936e2d8215c41ce037854262cf3b496d5b9d743",
+      "tail": "#54 DONE 0.2s\n\n#55 [app] resolving provenance for metadata file\n#55 DONE 0.1s\n Image crm-app:local Built \n Image crm-app:local Built \n Image crm-app:local Built \n Image crm-app:local Built \n"
+    },
+    "docker-up-release": {
+      "bytes": 1218,
+      "sha256": "103874a6f7fe91093a29d2b5bd9dfccf3d2f07cd13b1279e069c35a42a0bb186",
+      "tail": " Container crm-app-1 Waiting \n Container crm-worker-1 Waiting \n Container crm-search-worker-1 Waiting \n Container crm-db-1 Healthy \n Container crm-migrate-1 Exited \n Container crm-search-worker-1 Healthy \n Container crm-app-1 Healthy \n Container crm-worker-1 Healthy \n"
+    },
+    "ops-release-restore": {
+      "bytes": 4039,
+      "sha256": "a447adcac22e2ad9a62f4f60df01d8190775248fb547fbb9a137f5c34715f38a",
+      "tail": " Container crm-restoretest-app-1 Created \n Container crm-restoretest-app-1 Starting \n Container crm-restoretest-app-1 Started \n Container crm-restoretest-db-1 Running \n Container crm-restoretest-db-1 Waiting \n Container crm-restoretest-db-1 Healthy \n Container crm-restoretest-backup-run-dae7eaa430b9 Creating \n Container crm-restoretest-backup-run-dae7eaa430b9 Created \n"
+    },
+    "clean-bootstrap": {
+      "bytes": 349,
+      "sha256": "fcc0c19da9dc4c082fdfc3b334d09d6ec5e639806b17815642ee6eaf47e9cd54",
+      "tail": "\u001b[1;34m[crm]\u001b[0m Создан .env с новыми секретами (права 600).\n\u001b[1;34m[crm]\u001b[0m Первичные пароли учётных записей: SEED_*_PASSWORD в .env (смена при первом входе).\n\u001b[1;34m[crm]\u001b[0m Конфигурация корректна. Следующий шаг: ./scripts/deploy.sh\n"
+    },
+    "clean-build": {
+      "bytes": 32247,
+      "sha256": "934769cac3ca3128053a85d69d2818a2fd7a1954327f371b63515358844cb37d",
+      "tail": "#55 DONE 0.0s\n\n#56 [worker] resolving provenance for metadata file\n#56 DONE 0.0s\n Image crm-app:clean31 Built \n Image crm-app:clean31 Built \n Image crm-app:clean31 Built \n Image crm-app:clean31 Built \n"
+    },
+    "clean-up": {
+      "bytes": 2050,
+      "sha256": "356d234a53c91f2b27241cec625d680ca25b7befcb614e15732ba20f6eca9e43",
+      "tail": " Container crmclean31-migrate-1 Waiting \n Container crmclean31-app-1 Waiting \n Container crmclean31-worker-1 Waiting \n Container crmclean31-db-1 Healthy \n Container crmclean31-migrate-1 Exited \n Container crmclean31-worker-1 Healthy \n Container crmclean31-app-1 Healthy \n Container crmclean31-search-worker-1 Healthy \n"
+    },
+    "clean-smoke-restore": {
+      "bytes": 19866,
+      "sha256": "bd060065736d57e0e56cf2e190ee185bccd44d54e5f7db6d86c6aee2e3bd2d3f",
+      "tail": "    \"  url: 'file:///app/scripts/ops-verify-template-files.ts'\\n\" +\n    '}\\n' +\n    '\\n' +\n    'Node.js v24.22.2\\n' +\n    '\\x1B[1;31m[crm] ОШИБКА:\\x1B[0m T08: есть непройденные проверки (отчёт /d/crm-clean-v31b/backups/restore-test-reports/T08-2026-11-06_01-01-33.txt)\\n'\n}\n\nNode.js v22.23.4\n"
+    },
+    "clean-build-fixed": {
+      "bytes": 31756,
+      "sha256": "523e73255700f2157258e224cac115e2b4b083ae6dba1f31f47fe8787ddd6467",
+      "tail": "#60 DONE 0.1s\n\n#61 [migrate] resolving provenance for metadata file\n#61 DONE 0.2s\n Image crm-app:clean31 Built \n Image crm-app:clean31 Built \n Image crm-app:clean31 Built \n Image crm-app:clean31 Built \n"
+    },
+    "clean-up-fixed": {
+      "bytes": 983,
+      "sha256": "8fb2d92062edf1014f30758acf52797050ec0f03ae9a66fc62258bdda6f3d52d",
+      "tail": " Container crmclean31-db-1 Waiting \n Container crmclean31-migrate-1 Waiting \n Container crmclean31-app-1 Waiting \n Container crmclean31-worker-1 Healthy \n Container crmclean31-app-1 Healthy \n Container crmclean31-search-worker-1 Healthy \n Container crmclean31-db-1 Healthy \n Container crmclean31-migrate-1 Exited \n"
+    },
+    "clean-restore-fixed": {
+      "bytes": 4397,
+      "sha256": "f8997e4023e3e7cf9fd5e57f23951ee4ae577dabd645afa7e2a5f0e9b8ac052b",
+      "tail": " Container crmclean31-restoretest-app-1 Created \n Container crmclean31-restoretest-app-1 Starting \n Container crmclean31-restoretest-app-1 Started \n Container crmclean31-restoretest-db-1 Running \n Container crmclean31-restoretest-db-1 Waiting \n Container crmclean31-restoretest-db-1 Healthy \n Container crmclean31-restoretest-backup-run-ca25d2cc0ac3 Creating \n Container crmclean31-restoretest-backup-run-ca25d2cc0ac3 Created \n"
+    },
+    "clean-down": {
+      "bytes": 1075,
+      "sha256": "bbb45c42857e028cff401a9e1443d5f546256ecb035cb843cc6d516bb031d5ee",
+      "tail": " Container crmclean31-db-1 Removing \n Container crmclean31-db-1 Removed \n Volume crmclean31_postgres_data Removing \n Network crmclean31_internal Removing \n Network crmclean31_public Removing \n Volume crmclean31_postgres_data Removed \n Network crmclean31_internal Removed \n Network crmclean31_public Removed \n"
+    },
+    "clean-restore-down": {
+      "bytes": 713,
+      "sha256": "b9b7fa5ee065e5c86d4420937ecdf8935128b12cf809b0955703f507064d9a75",
+      "tail": " Container crmclean31-restoretest-db-1 Removing \n Container crmclean31-restoretest-db-1 Removed \n Network crmclean31-restoretest_public Removing \n Network crmclean31-restoretest_internal Removing \n Volume crmclean31-restoretest_postgres_data Removing \n Volume crmclean31-restoretest_postgres_data Removed \n Network crmclean31-restoretest_internal Removed \n Network crmclean31-restoretest_public Removed \n"
+    },
+    "restore-release-down": {
+      "bytes": 615,
+      "sha256": "e78544af76b6892089f38c7555a890ff8042be55baf58302fdcb3a6dcedecac6",
+      "tail": " Container crm-restoretest-db-1 Removing \n Container crm-restoretest-db-1 Removed \n Network crm-restoretest_internal Removing \n Volume crm-restoretest_postgres_data Removing \n Network crm-restoretest_public Removing \n Volume crm-restoretest_postgres_data Removed \n Network crm-restoretest_internal Removed \n Network crm-restoretest_public Removed \n"
+    },
+    "typecheck-restored-config": {
+      "bytes": 71,
+      "sha256": "4cb1c051eb08e352c81bb97c2163338af093ca879609e5cd936da3b2a89db115",
+      "tail": "npm notice run crm-real-estate@1.0.0 npx\nnpm notice run tsc --noEmit\n"
+    },
+    "lint-final-qa": {
+      "bytes": 227,
+      "sha256": "aad31e0aa2131f9c626e4d3c7fed32ed9e7f84a041fce28beda3fb1770e6a30c",
+      "tail": "npm notice run crm-real-estate@1.0.0 npx\nnpm notice run eslint scripts/release-gate-ops.mjs scripts/release-gate-migrations.mjs tests/e2e/release-v31.spec.ts tests/e2e/v241.spec.ts tests/e2e/search-worker.ts --max-warnings=0\n"
+    }
+  },
+  "verifiedAt": "2026-11-06T01:17:39.152Z",
+  "workingTreeFiles": {
+    "Dockerfile": "851f937294e63fa0b157aae8fec97f0fc1169b00793942d9582f7328eaf6bc8c",
+    "playwright.config.ts": "e4955eab557ab64cb176d7a75bada2b45777cd235a51c376f79aa86df6722350",
+    "scripts/vkr/display-regressions.test.ts": "67c868ea5655fe1abee019f2cb8504d9d4eb9f7b3caa7cc418558ec2bf72146a",
+    "scripts/release-gate-migrations.mjs": "a57d1bc553f97a2f9262897bff8e43c6906617207b43c3588e799e7b297ace48",
+    "scripts/release-gate-ops.mjs": "3a0ecd08855321dfdf8873ac5f4768bae4fe1242fc28b7909050657000b8cbca",
+    "src/app/(crm)/property-search/catalog-photo.tsx": "ae5faa8b3984b051f363965f3194444e2bb72c55a064ab74fa0a3bc46405c782",
+    "src/app/(crm)/property-search/search-workspace.tsx": "b585460a1e606d6bfb972333ef9833516b6cf1d8c543f9a3864e3dfb78832fa2",
+    "src/modules/property-search/application/fixture-scraper.ts": "7e950f25b36e4b103c5df6c0922da494a2947cd53d70e0c56cd0a1b5de5016af",
+    "tests/e2e/qa-stage2.spec.ts": "7fa1e13381b70c1d8a15256f96554f7d83abf033218f20024d4de439f303137d",
+    "tests/e2e/ux-polish.spec.ts": "a87e03b917a945e5b2ddcf029c816b3c111d8c1c9fa5233d7d98b330e914fbd3",
+    "tests/e2e/v241.spec.ts": "2706d68827cd7aa749056bde5991a609f16e7b2a235fcbae2c026101384b2ff0",
+    "tests/e2e/release-v31.spec.ts": "87110715f79ded19678a6e17a9342c40b37baf931df5cca821274964b3d975db",
+    "tests/e2e/search-worker.ts": "2aac2cf456fb1e2c41f86d9edc14f54ed819bfd9e1d2a855ea676e7908c4cd62",
+    "tests/integration/property-search.test.ts": "b1cf76ca45e7596af4ad2e5358fd9aae87795f12af0583098faae92f57faa7f8"
+  }
+}

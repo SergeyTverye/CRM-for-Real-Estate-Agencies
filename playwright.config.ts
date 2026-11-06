@@ -52,11 +52,16 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } }],
-  webServer: {
+  webServer: [{
     command: process.env.E2E_DEV === "true" ? `npx next dev --webpack -p ${PORT}` : `npx next start -p ${PORT}`,
     url: `http://127.0.0.1:${PORT}/api/health/live`,
     timeout: 120_000,
     reuseExistingServer: false,
     env: serverEnv,
-  },
+  }, {
+    command: "node node_modules/tsx/dist/cli.mjs tests/e2e/search-worker.ts",
+    wait: { stdout: /E2E search worker ready/ },
+    env: serverEnv,
+    timeout: 30_000,
+  }],
 });
