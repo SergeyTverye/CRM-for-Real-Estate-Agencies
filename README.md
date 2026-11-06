@@ -1231,3 +1231,8 @@ LIVE: путь «запрос → подборка → каталог → КП»
 Независимые находки Iceman/Beam исправлены `9e2b71b` и `f15adc8`. QA зафиксировал unit, PostgreSQL integration/authorization и dev E2E; production build общей копии блокировался EPERM/Deny ACL. Изолированный clean deployment на `d69a3fb` прошёл build/login/PDF/restore/restart; поздний HEAD требует собственной финальной сверки. NFR-14 подтверждён только локально; UAT сотрудников и реальный Excel не закрыты.
 
 Инструкции и доказательства: [пользователь](docs/user-guide.md), [API](docs/api.md), [приёмка этапа 2](docs/acceptance/stage2-live-ai-ux.md), [LIVE](docs/vkr/live-ai-trials.md), [единая сводка тестов](docs/vkr/test-protocol.md), [чистое развёртывание](docs/operations/clean-deploy-v241.md).
+
+
+### Закрытие дефектов поиска P0-A
+
+[Протокол и границы](docs/vkr/live-search-v31.md#закрытие-дефектов-p0-a): исправлены OnRealt retail rent URL, gzip-транспорт Мир Квартир, извлечение дат и оформление штатного XLSX. Ограниченный LIVE: 4 запуска + 1 перехваченная DEMO-постановка, 0 AI/web_search; бюджет восстановлен. Отмена сохраняет 55 результатов, повтор профиля даёт 68 известных/2 новых, реальные probable межплощадочные группы показаны в UI. AT-07/09 локально PASS; AT-02, естественное изменение цены LIVE и общий production gate остаются PARTIAL. Доказательства и обновлённые кадры — в приёмке v3.1.
