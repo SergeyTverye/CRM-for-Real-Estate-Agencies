@@ -24,7 +24,8 @@ it.each(["empty", "no-photo", "long"])("exports %s offer to HTML, PDF and DOCX w
   expect(pdf.length).toBeGreaterThan(1000);
   // Same optional Poppler verification as offer-export.test.ts; Chromium is mandatory.
   const extracted = spawnSync("pdftotext", ["-", "-"], { input:pdf, encoding:"utf8" });
-  if (!extracted.error) {
+  // Optional: some Windows runners ship a pdftotext without stdin support (usage error 99).
+  if (!extracted.error && extracted.status !== 99) {
     expect(extracted.status).toBe(0);
     expect(extracted.stdout).toContain(`Объектов в предложении: ${data.items.length}`);
     if (kind === "long") expect(extracted.stdout.match(/КОНЕЦ ОПИСАНИЯ/g)).toHaveLength(3);

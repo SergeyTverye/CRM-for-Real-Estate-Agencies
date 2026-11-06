@@ -59,7 +59,8 @@ it("exports A4 PDF and DOCX with authorized gallery, requisites, comparison and 
   expect(Number(mediaBox?.[1])).toBeCloseTo(595, 0); expect(Number(mediaBox?.[2])).toBeCloseTo(842, 0);
   // Poppler is optional in CI; when installed, verify the actual PDF text as well as its source HTML.
   const extracted = spawnSync("pdftotext", ["-", "-"], { input: pdf, encoding: "utf8" });
-  if (!extracted.error) {
+  // Optional: some Windows runners ship a pdftotext without stdin support (usage error 99).
+  if (!extracted.error && extracted.status !== 99) {
     expect(extracted.status).toBe(0);
     for (const value of ["Снимок адреса", "Сравнение объектов", "123 456", "Центральный", "Примечание для клиента"]) expect(extracted.stdout.replace(/\u00a0/g, " ")).toContain(value);
     expect(extracted.stdout).not.toContain("999 999");
