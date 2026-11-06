@@ -5,6 +5,21 @@ import { mkdirSync, writeFileSync, readFileSync, realpathSync, existsSync, cpSyn
 import path from 'node:path';
 import net from 'node:net';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
+
+const { values: flags } = parseArgs({ options: {
+  image: { type: 'string', default: 'crm-app:v32-acceptance' },
+  provenance: { type: 'string', default: 'Existing image: content base ba8d271, supplied APP_COMMIT fb9a792; NOT a clean checkout/build certification.' },
+  'expected-commit': { type: 'string' },
+  'project-prefix': { type: 'string', default: 'crm-v32-qa' },
+  'restore-project-prefix': { type: 'string', default: 'crm-v32-qa-restore' },
+  'project-suffix': { type: 'string', default: '' },
+  'wait-image-seconds': { type: 'string', default: '0' },
+} });
+const projects = [flags['project-prefix'], flags['restore-project-prefix']].map(p => p + (flags['project-suffix'] ? '-' + flags['project-suffix'] : ''));
+if (projects[0] === projects[1] || projects.some(p => !/^crm-v32-[a-z0-9][a-z0-9-]*$/.test(p))) throw new Error('Invalid/distinct QA project names required');
+const waitSeconds = Number(flags['wait-image-seconds']);
+if (!Number.isInteger(waitSeconds) || waitSeconds < 0 || waitSeconds > 300) throw new Error('Image wait must be 0..300 seconds');
 
 const repo = realpathSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..'));
 const compose = path.join(repo, 'scripts/acceptance/server-production/compose.yaml');
@@ -15,7 +30,7 @@ mkdirSync(root, { recursive: true });
 const results = [], commands = [], secrets = [];
 const redact = s => secrets.reduce((v, secret) => v.replaceAll(secret, '[REDACTED]'), String(s));
 const evidence = { started: new Date().toISOString(), root, results, commands,
-  provenance: 'Existing image: content base ba8d271, supplied APP_COMMIT fb9a792; NOT a clean checkout/build certification.',
+  requestedImage: flags.image, provenance: flags.provenance, hostNode: process.version,
   exclusions: 'No private inputs, full regressions, Windows desktop acceptance, rebuild or install.' };
 function run(args, label = args.slice(0, 3).join(' ')) {
   commands.push(['docker', ...args].map(a => /\s/.test(a) ? JSON.stringify(a) : a).join(' '));
@@ -65,12 +80,23 @@ async function login(c, credentials, key) {
 }
 try {
   await free(3555); await free(3556);
-  for (const project of ['crm-v32-qa', 'crm-v32-qa-restore']) {
+  for (const project of projects) {
     if (run(['ps', '-aq', '--filter', `label=com.docker.compose.project=${project}`])) throw new Error(`Existing own project ${project}; refusing reuse`);
     if (run(['volume', 'ls', '-q', '--filter', `label=com.docker.compose.project=${project}`])) throw new Error(`Existing own volume ${project}; refusing reuse`);
   }
-  const image = run(['image', 'inspect', 'crm-app:v32-acceptance', '--format', '{{.Id}}']);
+  const imageDeadline = Date.now() + waitSeconds * 1000;
+  let image;
+  while (!image) {
+    try { image = run(['image', 'inspect', flags.image, '--format', '{{.Id}}']); }
+    catch (e) {
+      if (Date.now() >= imageDeadline) throw e;
+      console.log('Image not available; waiting up to 15 seconds (bounded image wait).');
+      await new Promise(r => setTimeout(r, Math.min(15000, imageDeadline - Date.now())));
+    }
+  }
   evidence.image = image;
+  evidence.imageCommit = run(['run', '--rm', '--network', 'none', '--entrypoint', 'node', image, '-e', 'process.stdout.write(process.env.APP_COMMIT ?? "unknown")']);
+  if (flags['expected-commit'] && evidence.imageCommit !== flags['expected-commit']) throw new Error('Image APP_COMMIT mismatch');
   evidence.postgresImage = run(['image', 'inspect', 'postgres:18.6-bookworm', '--format', '{{.Id}}']);
   const credentials = {};
   for (const key of ['MANAGER', 'REALTOR1', 'REALTOR2']) {
@@ -79,12 +105,14 @@ try {
     secrets.push(credentials[`SEED_${key}_PASSWORD`]);
   }
   const deployment = randomUUID();
-  const c = context('crm-v32-qa', 3555, image, credentials, deployment);
-  const rt = context('crm-v32-qa-restore', 3556, image, credentials, deployment);
+  const c = context(projects[0], 3555, image, credentials, deployment);
+  const rt = context(projects[1], 3556, image, credentials, deployment);
   evidence.projects = [c.project, rt.project];
   c.dc('up', '-d', '--wait', '--wait-timeout', '240', 'app', 'worker', 'search-worker');
   await ready(c);
   evidence.node = c.dc('exec', '-T', 'app', 'node', '--version');
+  evidence.runtimeCommit = c.dc('exec', '-T', 'app', 'node', '-e', 'process.stdout.write(process.env.APP_COMMIT ?? "unknown")');
+  if (evidence.runtimeCommit !== evidence.imageCommit) throw new Error('Runtime/image commit mismatch');
   evidence.postgres = c.dc('exec', '-T', 'db', 'psql', '-U', 'qa_synthetic', '-d', 'qa_synthetic', '-Atc', 'SHOW server_version');
   evidence.seedUsers = c.dc('exec', '-T', 'db', 'psql', '-U', 'qa_synthetic', '-d', 'qa_synthetic', '-Atc', 'SELECT count(*) FROM users');
   if (evidence.seedUsers !== '3') throw new Error('Seed user count != 3');

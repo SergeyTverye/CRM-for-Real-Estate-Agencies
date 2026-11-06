@@ -1,13 +1,39 @@
 import { randomUUID } from "node:crypto";
-import { readFile, writeFile, rename, rm, copyFile, link, lstat } from "node:fs/promises";
+import { readFile, writeFile, rename, rm, copyFile, link, lstat, readdir, open } from "node:fs/promises";
 import path from "node:path";
 import { InfrastructureError, ValidationError } from "@/shared/errors";
 import { backupRuntimeRoot } from "../infrastructure/destinations-runtime";
-import { protectedDir, regularFile, hashFile, atomicJson } from "../infrastructure/fs";
+import { protectedDir, regularFile, hashFile } from "../infrastructure/fs";
 import { z } from "zod";
 import { extractArchive, type Credential } from "../infrastructure/archive";
 import { SqliteSnapshotValidator } from "../infrastructure/sqlite-validator";
 import { BackupError } from "../domain/contracts";
+import { JsonSettingsRepository } from "../infrastructure/settings-repository";
+
+/** Shared by native publication and protective snapshot creation. Never steal a
+ * stale lock: an interrupted operation requires operator diagnosis, not a sweep. */
+export async function withNativeArchiveBudget<T>(outputDir: string, work: () => Promise<T>): Promise<T> {
+  await protectedDir(outputDir);
+  const lock = path.join(outputDir, ".native-budget.lock");
+  const handle = await open(lock, "wx", 0o600);
+  try { return await work(); }
+  finally { await handle.close(); await rm(lock); }
+}
+
+export async function nativeArchiveUsage(outputDir: string) {
+  let bytes = 0, pendingBytes = 0, imports = 0;
+  for (const name of await readdir(outputDir)) {
+    if (!name.endsWith(".crmbackup") && !name.endsWith(".pending") && !name.endsWith(".import.json")) continue;
+    const file = path.join(outputDir, name);
+    const info = await regularFile(file);
+    if (name.endsWith(".import.json")) { imports++; continue; }
+    bytes += info.size;
+    if (name.endsWith(".native.pending")) imports++;
+    if (name.endsWith(".pending")) pendingBytes += info.size;
+    if (!Number.isSafeInteger(bytes)) throw new BackupError("LOCAL_BACKUP_CAPACITY");
+  }
+  return { bytes, pendingBytes, imports };
+}
 export const nativeDialogRoot = () => path.join(backupRuntimeRoot(), "native-dialogs");
 export const nativeIncomingRoot = () => path.join(nativeDialogRoot(), "incoming");
 export async function requestNativeDialog(kind: "folder" | "export" | "import", backupId?: string, actorUserId?: string) {
@@ -44,6 +70,10 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
     const file = path.join(dir, "archive.crmbackup"); await regularFile(file);
     const hash = await hashFile(file);
     if (hash.size !== metadata.size || hash.sha256 !== metadata.sha256) throw new BackupError("IMPORT_CHECKSUM");
+    return await withNativeArchiveBudget(outputDir, async () => {
+    const settings = await new JsonSettingsRepository(backupRuntimeRoot()).read();
+    const usage = await nativeArchiveUsage(outputDir);
+    if (usage.imports >= 4 || usage.bytes + metadata.size > settings.retention.maxBytes) throw new BackupError("IMPORT_CAPACITY");
     const checked = await extractArchive({ archivePath: file, stagingRoot: path.join(dir, "validation"), credential, validator: new SqliteSnapshotValidator(), schemaVersion: 1 });
     try {
       if (checked.manifest.components.includes("postgres")) throw new BackupError("SQLITE_RESTORE_REQUIRED");
@@ -55,20 +85,25 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
       try { await lstat(target + ".json"); throw new ValidationError("Эта копия уже есть в локальном каталоге. Восстановите её через список копий."); }
       catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
       const pending = path.join(outputDir, id + ".native.pending");
+      let ownsPending = false, ownsRef = false, ownsTarget = false;
       try {
         await copyFile(file, pending, 1);
+        ownsPending = true;
+        // Reserve an owned reference without replacing another import's metadata.
+        await writeFile(target + ".import.json", JSON.stringify({ archive: { backupId, createdAtUtc: checked.manifest.createdAtUtc, ...hash } }), { flag: "wx", mode: 0o600 });
+        ownsRef = true;
         await link(pending, target); // atomic no-clobber publication, even on ID collision
+        ownsTarget = true;
       }
       catch (e) {
-        if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
-        await regularFile(target);
-        const existing = await hashFile(target);
-        if (existing.sha256 !== hash.sha256 || existing.size !== hash.size) throw new BackupError("ARCHIVE_ID_COLLISION");
-      } finally { await rm(pending, { force: true }); }
+        if (ownsRef && !ownsTarget) await rm(target + ".import.json");
+        if ((e as NodeJS.ErrnoException).code === "EEXIST") throw new BackupError("ARCHIVE_ID_COLLISION");
+        throw e;
+      } finally { if (ownsPending) await rm(pending, { force: true }); }
       // Do not enroll the incoming snapshot in ordinary age-based retention:
       // protectCurrent may prune old catalog entries before the generation switch.
-      await atomicJson(target + ".import.json", { archive: { backupId, createdAtUtc: checked.manifest.createdAtUtc, ...hash } });
       return backupId;
     } finally { await checked.dispose(); }
+    });
   } finally { await rm(dir, { recursive: true, force: true }); }
 }

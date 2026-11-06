@@ -18,6 +18,7 @@ import { GenerationStore, restoreArchive } from "./restore";
 import { archiveRoot, commandRoot } from "./backup-control";
 import { newRecoveryKey } from "../infrastructure/encryption";
 import { JsonSettingsRepository } from "../infrastructure/settings-repository";
+import { nativeArchiveUsage, withNativeArchiveBudget } from "./native-dialog";
 const validator = new SqliteSnapshotValidator();
 const root = () => process.env.DESKTOP_DATA_DIR!;
 const database = () => sqliteFilePath(process.env.DATABASE_URL!);
@@ -75,10 +76,13 @@ async function localState(): Promise<LocalState | null> {
 }
 async function createPortable(secret: Record<string, string>) {
   stopped();
+  return withNativeArchiveBudget(archiveRoot(), async () => {
   const settings = await new JsonSettingsRepository(backupRuntimeRoot()).read();
   const identity = JSON.parse(await readFile(path.join(root(), "identity.json"), "utf8"));
   const previous = await localState();
   await pruneLocalPortable(archiveRoot(), settings.retention);
+  const { pendingBytes } = await nativeArchiveUsage(archiveRoot());
+  if (pendingBytes >= settings.retention.maxBytes) throw new BackupError("LOCAL_BACKUP_CAPACITY");
   const result = await createArchive({
     outputDir: archiveRoot(), stagingRoot: path.join(root(), "portable-staging"), validator,
     barrier: { run: async work => { stopped(); await disconnectDb(); return work(); } },
@@ -86,10 +90,11 @@ async function createPortable(secret: Record<string, string>) {
     metadata: { ...identity, snapshotRevision: (previous?.snapshotRevision ?? 0) + 1, parentBackupId: previous?.backupId ?? null, crmVersion: process.env.APP_VERSION ?? "desktop", schemaVersion: 1 },
     passphrase: secret.passphrase!, recoveryKey: secret.recoveryKey!, recoveryKeySaved: true,
     settings: { timeZone: settings.schedule.timeZone, locale: "ru-RU" }, storage: { documents: process.env.FILE_STORAGE_PATH! },
-    localBudget: { maxArchives: settings.retention.keep + 1, maxBytes: settings.retention.maxBytes },
+    localBudget: { maxArchives: settings.retention.keep + 1, maxBytes: settings.retention.maxBytes - pendingBytes },
   });
   await atomicJson(result.path + ".json", { archive: result.archive });
   return result;
+  });
 }
 function asCredential(secret: Record<string, string>): Credential { return secret.passphrase ? { passphrase: secret.passphrase } : { recoveryKey: secret.recoveryKey! }; }
 async function saveLocalState(manifest: BackupManifest, readOnly: boolean) {
