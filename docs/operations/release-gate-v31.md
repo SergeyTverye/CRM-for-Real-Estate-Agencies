@@ -134,3 +134,9 @@ git clone --branch feature/tz-v3.1 --no-hardlinks D:/CRM-for-Real-Estate-Agencie
 - Unit точное русское ожидание `rub_total` приведено к действующей подписи «за объект» вместо «всего».
 
 **Для закрытия AT-17:** координатор коммитит перечисленные изменения, фиксирует итоговый SHA и подтверждает чистый checkout/deploy этого SHA. Запрет агенту делать commit соблюдён. Host Node22 отмечен отдельно; Docker baseline Node24 проверен. AT-18/UAT и остальные LIVE ограничения имеют собственные протоколы, здесь не закрываются.
+
+
+## Дополнение: финальный SHA 9adc8ff (06.11.2026)
+
+После gate на `c812d18` изменены только экспорт поиска и запрос результатов (ускорение полного экспорта, коммит `9adc8ff`). На `9adc8ff` повторены: `tsc` и полный ESLint — PASS; unit **1364/1364**; PostgreSQL integration/authorization **328/328**; production `next build` — PASS; production Playwright **24 passed / 1 штатный opt-in skip**; Docker `app` пересобран, app/worker/search-worker/db healthy, `/api/health/ready` = 200. Чистое развёртывание и backup/restore подтверждены на `c812d18`; изменения `9adc8ff` не затрагивают миграции, Docker-конфигурацию и резервное копирование.
+
