@@ -1267,3 +1267,9 @@ LIVE: путь «запрос → подборка → каталог → КП»
 ### Закрытие дефектов поиска P0-A
 
 [Протокол и границы](docs/vkr/live-search-v31.md#закрытие-дефектов-p0-a): исправлены OnRealt retail rent URL, gzip-транспорт Мир Квартир, извлечение дат и оформление штатного XLSX. Ограниченный LIVE: 4 запуска + 1 перехваченная DEMO-постановка, 0 AI/web_search; бюджет восстановлен. Отмена сохраняет 55 результатов, повтор профиля даёт 68 известных/2 новых, реальные probable межплощадочные группы показаны в UI. AT-07/09 локально PASS; AT-02, естественное изменение цены LIVE и общий production gate остаются PARTIAL. Доказательства и обновлённые кадры — в приёмке v3.1.
+
+### SQLite desktop backend (v3.2.1, этап 2)
+
+Серверный PostgreSQL режим сохраняется. Desktop выбирается только `CRM_DEPLOYMENT_MODE=desktop` и локальным `DATABASE_URL=file:...`. Первый запуск: `npm run desktop:init` (без предопределённых учётных записей, собственный пароль в мастере); проверенное обновление БД: `npm run desktop:upgrade-db`.
+
+Полная SQLite-регрессия: `npm run test:integration:sqlite`. Синтетический PG→SQLite тест: `npm run test:desktop:transfer` с отдельной `TEST_DATABASE_URL`; он пересоздаёт только указанную тестовую БД. Перенос существующего состояния: `npm run desktop:transfer -- <новый.db> <исходное-storage> <новое-storage>` с `SOURCE_DATABASE_URL`, при остановленных writers. Подробности, отчёт расхождений и фактические gate: [SQLite backend — этап 2](docs/desktop/sqlite-stage2.md).
