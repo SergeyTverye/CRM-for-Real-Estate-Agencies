@@ -4,7 +4,8 @@ import { mkdtemp, readdir, readFile, rm, stat, statfs, writeFile } from "node:fs
 import path from "node:path";
 import { z } from "zod";
 import { db } from "@/shared/db/client";
-import { ConflictError, ForbiddenError, InfrastructureError, NotFoundError, ValidationError } from "@/shared/errors";
+import { ConflictError, ForbiddenError, InfrastructureError, NotFoundError, ReadOnlyInstanceError, ValidationError } from "@/shared/errors";
+import { getConfig } from "@/shared/config/env";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { startManualBackup } from "@/modules/operations/application/operations-service";
 import { backupRuntimeRoot, runtimeCredentialStore, withBackupDestinations } from "../infrastructure/destinations-runtime";
@@ -83,7 +84,16 @@ async function backupControlCommandInternal(actor: Actor, raw: unknown, budgetHe
   requireBackupManager(actor);
   const parsed = backupCommandSchema.safeParse(raw);
   if (!parsed.success) throw new ValidationError("Проверьте поля операции резервирования");
-   const input = parsed.data;
+    const input = parsed.data;
+    // Do not exempt this multi-command endpoint wholesale: standby may only
+    // request the explicit handoff receive, never rollback/restore or promotion.
+    // The stopped-runtime coordinator still verifies the archive and lineage.
+    if (getConfig().isReadOnlyInstance && !(
+      process.env.CRM_DEPLOYMENT_MODE === "desktop" &&
+      process.env.CRM_DESKTOP_SUPERVISED_UPGRADE === "1" &&
+      input.action === "receive" && input.confirmed === true &&
+      (input.passphrase || input.recoveryKey)
+    )) throw new ReadOnlyInstanceError();
    try {
     if (input.action === "restore-from-file") {
       if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Восстановление из файла доступно только в desktop-версии");

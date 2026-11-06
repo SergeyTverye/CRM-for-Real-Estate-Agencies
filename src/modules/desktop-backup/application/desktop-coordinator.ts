@@ -141,6 +141,9 @@ export async function executeDesktopBackupRequest(id: string) {
         else if (cmd.action === "compare") result = { status: comparison, backupId: manifest.backupId };
         else {
           if (cmd.confirmed !== true) throw new BackupError("RESTORE_CONFIRMATION_REQUIRED");
+          // Receiving the known snapshot is not a rollback or a return of ownership.
+          if (cmd.action === "receive" && (comparison === "same" || comparison === "local_changed")) result = { status: comparison };
+          else {
           // Receive never silently overrides a divergent workspace. Ordinary restore is an explicit rollback.
           if (cmd.action === "receive" && comparison === "conflict") throw new BackupError("TRANSFER_REVISION_CONFLICT");
           const safetySecret = { passphrase: randomBytes(48).toString("base64"), recoveryKey: newRecoveryKey() };
@@ -160,6 +163,7 @@ export async function executeDesktopBackupRequest(id: string) {
           process.env.DATABASE_URL = "file:" + path.join(restored.activePath, "database.sqlite");
           await saveLocalState(manifest, false);
           result = { status: "restored", backupId: manifest.backupId, protectiveBackupId: protective.archive.backupId };
+          }
         }
       } finally { if (cleanup) await rm(incomingPath, { force: true }); }
     }
