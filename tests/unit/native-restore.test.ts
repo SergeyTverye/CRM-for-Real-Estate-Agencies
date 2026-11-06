@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, mkdir, readFile, writeFile, rm, readdir, utimes, symlink } from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import Database from "better-sqlite3";
 import { createArchive } from "@/modules/desktop-backup/infrastructure/archive";
 import { SqliteSnapshotValidator } from "@/modules/desktop-backup/infrastructure/sqlite-validator";
@@ -29,7 +30,7 @@ let runtime: {
   cleanupNativeIncoming(root: string): Promise<void>;
 };
 beforeEach(async () => {
-  temp = await mkdtemp("D:/TEMP/UserTEMP/opencode/native-restore-");
+  temp = await mkdtemp(path.join(os.tmpdir(), "native-restore-"));
   vi.stubEnv("LOCALAPPDATA", temp);
   vi.stubEnv("BACKUP_SETTINGS_DIR", path.join(temp, "settings"));
   vi.stubEnv("BACKUP_PATH", path.join(temp, "backups"));

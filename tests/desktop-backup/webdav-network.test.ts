@@ -13,7 +13,7 @@ afterEach(async () => { vi.unstubAllGlobals(); vi.useRealTimers(); for (const ro
 const disconnected = () => new TypeError("synthetic connection failure", { cause: { code: "ECONNRESET" } });
 type Call = { method: string; key: string; init: RequestInit };
 async function setup(bytes = 33) {
-  const root = await mkdtemp(path.join(process.platform === "win32" ? "D:/TEMP/UserTEMP/opencode" : os.tmpdir(), "dav-network-")); roots.push(root);
+  const root = await mkdtemp(path.join(os.tmpdir(), "dav-network-")); roots.push(root);
   const data = Buffer.alloc(bytes, 71); const source = path.join(root, "synthetic.archive"); await writeFile(source, data);
   const archive = { backupId: randomUUID(), size: data.length, sha256: sha256(data), createdAtUtc: new Date().toISOString() };
   const objects = new Map<string, Buffer>(); const calls: Call[] = []; const cancelled: number[] = [];
