@@ -39,7 +39,9 @@ export function BackupPanel() {
   const [dirty, setDirty] = useState(false), [notice, setNotice] = useState("");
   const [destination, setDestination] = useState<DestinationConfig | null>(null);
   const [password, setPassword] = useState(""), [accessKeyId, setAccessKeyId] = useState("");
-  const [dialog, setDialog] = useState<"schedule" | "create" | "give" | "restore" | "verify" | "compare" | "receive" | "list" | null>(null);
+  const [dialog, setDialog] = useState<"schedule" | "create" | "give" | "restore" | "restore-from-file" | "verify" | "compare" | "receive" | "list" | null>(null);
+  const [importRequestId, setImportRequestId] = useState("");
+  const [nativePending, setNativePending] = useState(false);
   const [sourceId, setSourceId] = useState<string | undefined>(), [selected, setSelected] = useState("");
   const [catalog, setCatalog] = useState<ArchiveRef[]>([]);
   const [phrase, setPhrase] = useState(""), [key, setKey] = useState(""), [saved, setSaved] = useState(false), [confirmed, setConfirmed] = useState(false);
@@ -66,7 +68,11 @@ export function BackupPanel() {
     if (result) { setNotice(result.message ?? "Операция выполнена"); await action.run(refresh); }
     return result;
   }
-  async function nativeDialog(kind: "pick-directory" | "native-export", backupId?: string) {
+  async function nativeDialog(kind: "pick-directory" | "native-export" | "pick-archive", backupId?: string) {
+    if (nativePending) return;
+    setNativePending(true);
+    setNotice(kind === "pick-archive" ? "Выберите зашифрованный файл .crmbackup в системном диалоге. Подготовка большого архива может занять время." : "Ожидание системного диалога…");
+    try {
     const request = await action.run(() => apiCall<{ requestId: string }>("POST", base + "/control", { action: kind, ...(backupId ? { backupId } : {}) }));
     if (!request) return;
     await action.run(async () => {
@@ -74,12 +80,18 @@ export function BackupPanel() {
         await new Promise(r => setTimeout(r, 1000));
         const result = await apiCall<{ status: string; directory?: string }>("POST", base + "/control", { action: "native-result", requestId: request.requestId });
         if (result.status === "pending") continue;
+        if (kind === "pick-archive" && result.status === "selected") {
+          setImportRequestId(request.requestId); openOperation("restore-from-file");
+          setNotice("Архив подготовлен. Введите кодовую фразу или ключ. Содержимое будет проверено до восстановления; выбор действует 15 минут.");
+          return;
+        }
         if (result.directory && destination && (destination.kind === "local" || destination.kind === "removable")) { setDestination({ ...destination, directory: result.directory }); setDirty(true); }
-        setNotice(result.status === "exported" ? "Архив проверен и сохранён на накопитель" : result.status === "failed" ? "Экспорт не выполнен: проверьте носитель и свободное место" : result.status === "cancelled" ? "Выбор отменён" : "Каталог выбран");
+        setNotice(result.status === "exported" ? "Архив проверен и сохранён на накопитель" : result.status === "failed" ? "Операция с файлом не выполнена: проверьте формат, размер, носитель и свободное место" : result.status === "cancelled" ? "Выбор отменён" : "Каталог выбран");
         return;
       }
       setNotice("Системный диалог не ответил. Повторите выбор.");
     });
+    } finally { setNativePending(false); }
   }
   async function showList(id?: string) {
     setSourceId(id); setSelected("");
@@ -90,15 +102,16 @@ export function BackupPanel() {
   async function submitOperation() {
     if (!dialog) return;
     const body = dialog === "create" || dialog === "give" ? { action: dialog, passphrase: phrase, recoveryKey: key, recoveryKeySaved: saved, ...(sourceId ? { destinationId: sourceId } : {}) }
-      : { action: dialog, backupId: selected, ...(sourceId ? { destinationId: sourceId } : {}), ...(phrase ? { passphrase: phrase } : {}), ...(key ? { recoveryKey: key } : {}), confirmed };
+      : { action: dialog, ...(dialog === "restore-from-file" ? { requestId: importRequestId } : { backupId: selected, ...(sourceId ? { destinationId: sourceId } : {}) }), ...(phrase ? { passphrase: phrase } : {}), ...(key ? { recoveryKey: key } : {}), confirmed };
     if (await command(body)) { setPhrase(""); setKey(""); setDialog(null); setDirty(false); }
   }
   const close = () => { setSettings(savedSettings.current); setDestination(null); setDialog(null); setPassword(""); setAccessKeyId(""); setPhrase(""); setKey(""); setDirty(false); };
   if (!settings || !status) return <div className="space-y-4"><h1>Локальная установка и резервные копии</h1><FormErrorBanner error={action.error} /><p role="status">{action.pending ? "Загрузка…" : "Настройки недоступны"}</p><button className="btn" onClick={() => void action.run(refresh)}>Обновить данные</button></div>;
   const localArchives = status.archives as ArchiveRef[];
-  return <div className="space-y-5" aria-busy={action.pending}>
+  return <div className="space-y-5" aria-busy={action.pending || nativePending}>
     <header className="space-y-1"><h1 className="text-xl font-semibold tracking-tight">Локальная установка и резервные копии</h1><p className="muted text-sm">Резервирование и облачные подключения доступны руководителю.</p></header>
     <FormErrorBanner error={action.error} />
+    {status.nativeDialog && status.restoreSupported && <button className="btn" disabled={action.pending || nativePending} onClick={() => void nativeDialog("pick-archive")}>{nativePending ? "Подготовка файла…" : "Восстановить из файла…"}</button>}
     {action.error?.code === "STALE_UPDATE" && <button className="btn" onClick={() => void action.run(refresh)}>Обновить данные</button>}
     {notice && <p className="alert alert-success" role="status">{notice}</p>}
     <section className="card card-body space-y-3" aria-label="Состояние установки"><h2 className="card-title">{status.mode === "desktop" ? "Работает локально" : "Работает на сервере"}</h2><dl className="grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[12rem_minmax(0,1fr)] [&>dt]:text-slate-500 [&>dd]:break-words [&>dd]:font-medium"><dt>Версия</dt><dd>{status.version}</dd><dt>Размещение данных</dt><dd>{status.dataLocation}</dd><dt>Файлы</dt><dd>{bytes(status.storageBytes)}</dd><dt>Свободно на диске файлов</dt><dd>{bytes(status.freeBytes)}</dd><dt>Последнее сохранение</dt><dd>{date(localArchives[0]?.createdAtUtc)}</dd><dt>Самопроверка</dt><dd>{status.selfCheck}</dd></dl><button className="btn" disabled={action.pending} onClick={() => void action.run(refresh)}>Самопроверка / обновить</button></section>
@@ -142,11 +155,12 @@ export function BackupPanel() {
     <Modal open={dialog === "list"} onClose={close} title="Список копий"><FormErrorBanner error={action.error} />{catalog.length ? <><label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">Выберите копию<select className="input" value={selected} onChange={e => setSelected(e.target.value)}><option value="">Выберите…</option>{catalog.map(a => <option key={a.backupId} value={a.backupId}>{date(a.createdAtUtc)} · {bytes(a.size)} · {a.backupId.slice(0, 8)}</option>)}</select></label><div className="flex flex-wrap gap-2">{(["verify", "restore", "compare", "receive"] as const).map((op, i) => <button className="btn" key={op} disabled={!selected || (op !== "verify" && !status.restoreSupported)} onClick={() => openOperation(op, sourceId)}>{["Проверить архив", "Восстановить", "Сравнить с локальной версией", "Получить состояние"][i]}</button>)}{!sourceId && selected && (status.nativeDialog ? <button className="btn" disabled={action.pending} onClick={() => void nativeDialog("native-export", selected)}>Экспорт на накопитель…</button> : <a className="btn" href={`${base}/archives/${selected}`}>Скачать архив на накопитель</a>)}</div><p>Скачивание сохраняет зашифрованный архив; выберите накопитель в диалоге сохранения браузера.</p></> : <p>Проверенных копий в этом источнике пока нет.</p>}</Modal>
     <Modal open={!!dialog && !["list", "schedule"].includes(dialog)} onClose={close} title={dialog === "give" ? "Передать состояние на другой ПК" : dialog === "create" ? "Создать зашифрованную копию" : "Проверка и восстановление"}>
       <form className="space-y-4" onChange={() => setDirty(true)} onSubmit={e => { e.preventDefault(); void submitOperation(); }}><FormErrorBanner error={action.error} />
-        {dialog !== "create" && dialog !== "give" && <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">Идентификатор архива<input className="input" required value={selected} onChange={e => setSelected(e.target.value)} /></label>}
+        {dialog === "restore-from-file" && <p>Выбранный файл будет расшифрован и полностью проверен. До замены данных supervisor остановит запись и создаст защитную локальную копию. Облачный каталог и файл метаданных рядом с архивом не нужны. Выбор одноразовый: после ошибки закройте форму и выберите файл заново.</p>}
+        {dialog !== "create" && dialog !== "give" && dialog !== "restore-from-file" && <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">Идентификатор архива<input className="input" required value={selected} onChange={e => setSelected(e.target.value)} /></label>}
         <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">Кодовая фраза<input className="input" type="password" autoComplete="new-password" minLength={12} required={dialog === "create" || dialog === "give"} value={phrase} onChange={e => setPhrase(e.target.value)} /></label>
         <label className="flex flex-col gap-1.5 text-sm font-medium text-slate-700">Ключ восстановления<input className="input" type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} /></label>
         {(dialog === "create" || dialog === "give") && <><button type="button" className="btn" onClick={() => void recoveryKey().then(value => { setKey(value); setSaved(false); })}>Сформировать ключ</button><button type="button" className="btn" disabled={!key} onClick={() => download(key, "CRM-recovery-key.txt")}>Экспорт ключа на носитель</button><label className="flex items-start gap-2 text-sm leading-5 text-slate-700"><input className="mt-0.5 size-4 shrink-0 accent-blue-600" type="checkbox" required checked={saved} onChange={e => setSaved(e.target.checked)} /> Я сохранил ключ отдельно от архива</label></>}
-        {(dialog === "restore" || dialog === "receive") && <label className="flex items-start gap-2 text-sm leading-5 text-slate-700"><input className="mt-0.5 size-4 shrink-0 accent-blue-600" type="checkbox" required checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /> Подтверждаю замену состояния после проверки и защитной копии. При конфликте версий автоматического объединения нет.</label>}
+        {(dialog === "restore" || dialog === "receive" || dialog === "restore-from-file") && <label className="flex items-start gap-2 text-sm leading-5 text-slate-700"><input className="mt-0.5 size-4 shrink-0 accent-blue-600" type="checkbox" required checked={confirmed} onChange={e => setConfirmed(e.target.checked)} /> Подтверждаю замену состояния после проверки и защитной копии. При конфликте версий автоматического объединения нет.</label>}
         {dialog === "give" && <p>После передачи исходный ПК прекращает запись. На другом ПК сравните и получите состояние. Работа с двух ПК одновременно не поддерживается.</p>}
         <p>Полный диск, отсутствие сети, неверные ключи или несовместимая версия останавливают операцию. Последняя пригодная копия сохраняется.</p>
         <button className="btn btn-primary" disabled={action.pending}>Выполнить</button><button className="btn" type="button" onClick={close}>Отмена</button>

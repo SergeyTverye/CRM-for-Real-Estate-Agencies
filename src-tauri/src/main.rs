@@ -86,7 +86,7 @@ fn main() {
                 fail.dialog().message(message).title("CRM: ошибка запуска").show(move |_| app.exit(1));
             }, move |code| {
                 if let Some((kind,id)) = code.split_once(':') {
-                    if (kind == "NATIVE_FOLDER" || kind == "NATIVE_EXPORT") && id.len() == 36 && id.bytes().all(|c| c.is_ascii_hexdigit() || c == b'-') {
+                    if (kind == "NATIVE_FOLDER" || kind == "NATIVE_EXPORT" || kind == "NATIVE_IMPORT") && id.len() == 36 && id.bytes().all(|c| c.is_ascii_hexdigit() || c == b'-') {
                         if let Ok(root) = supervisor::data_root() {
                             let result = root.join("data/backup-settings/native-dialogs").join(format!("{}.path",id));
                             let callback = move |selected: Option<tauri_plugin_dialog::FilePath>| {
@@ -95,6 +95,7 @@ fn main() {
                                 if let Ok(mut file) = std::fs::OpenOptions::new().write(true).create_new(true).open(result) { use std::io::Write; let _ = file.write_all(text.as_bytes()); }
                             };
                             if kind == "NATIVE_FOLDER" { notice.dialog().file().pick_folder(callback); }
+                            else if kind == "NATIVE_IMPORT" { notice.dialog().file().add_filter("Резервная копия CRM", &["crmbackup"]).pick_file(callback); }
                             else { notice.dialog().file().set_file_name("CRM-backup.crmbackup").add_filter("CRM backup", &["crmbackup"]).save_file(callback); }
                         }
                         return;

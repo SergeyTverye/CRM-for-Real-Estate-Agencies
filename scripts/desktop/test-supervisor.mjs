@@ -72,6 +72,11 @@ process.exit(7);
   const failedChild = spawn(process.execPath, [path.join(failApp, 'supervisor.mjs')], {
     env: { ...process.env, LOCALAPPDATA: failProfile }, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'],
   });
+  // Subscribe before checking the child-created marker: a fast failure can exit
+  // between the filesystem poll and a late event subscription.
+  const failedCompletion = new Promise((resolve, reject) => {
+    failedChild.once('exit', resolve); failedChild.once('error', reject);
+  });
   let failOutput = '';
   failedChild.stdout.setEncoding('utf8'); failedChild.stdout.on('data', value => { failOutput += value; });
   failedChild.stderr.resume();
@@ -94,7 +99,7 @@ process.exit(7);
       await new Promise(resolve => setTimeout(resolve, 25));
     }
     const code = await Promise.race([
-      new Promise((resolve, reject) => { failedChild.once('exit', resolve); failedChild.once('error', reject); }),
+      failedCompletion,
       new Promise((_, reject) => setTimeout(() => reject(Error('FAILURE_SUPERVISOR_EXIT_TIMEOUT')), 10000)),
     ]);
     assert.equal(code, 1, 'nonzero backup command must make supervisor exit 1');

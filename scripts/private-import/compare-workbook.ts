@@ -17,10 +17,17 @@ export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workboo
   check('column_order', original.blocks, exported.blocks);
   for (const [i, sheet] of before.worksheets.entries()) {
     const next = after.worksheets[i];
-    check('widths', sheet.columns.map(c => c.width), next?.columns.map(c => c.width));
+    const columnWidths = (ws: ExcelJS.Worksheet) => (ws.columns ?? []).map(c => c.width);
+    const beforeWidths = columnWidths(sheet), afterWidths = next ? columnWidths(next) : undefined;
+    check('widths', beforeWidths, afterWidths);
+    if (afterWidths && !isDeepStrictEqual(beforeWidths, afterWidths)) {
+      // Preserve a numeric diagnostic for a completely blank/formatted sheet.
+      counters[`widths_sheet_${i + 1}_before_count`] = { matched: beforeWidths.length, mismatched: 0 };
+      counters[`widths_sheet_${i + 1}_after_count`] = { matched: afterWidths.length, mismatched: 0 };
+    }
     check('filters', sheet.autoFilter, next?.autoFilter);
     check('freeze', sheet.views, next?.views);
-    check('merges', [...sheet.model.merges].sort(), next ? [...next.model.merges].sort() : undefined);
+    check('merges', [...(sheet.model.merges ?? [])].sort(), next ? [...(next.model.merges ?? [])].sort() : undefined);
     const structural = new Set([
       ...original.blocks.filter(b => b.sheet === i + 1).flatMap(b => Array.from({ length: b.endRow - b.row + 1 }, (_, j) => b.row + j)),
       ...original.sectionMarkers.filter(b => b.sheet === i + 1).map(b => b.row),

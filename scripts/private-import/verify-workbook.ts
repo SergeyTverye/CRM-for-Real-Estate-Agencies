@@ -142,12 +142,37 @@ async function main() {
     assert('repeat_counts', JSON.stringify(await counts()) === JSON.stringify(baseline));
     stage = 'EXPORT_FAILED';
     const exported = await service.exportEnterprise(manager, job.id);
+    stage = 'EXPORT_STAGING_FAILED';
     await writeFile(join(directory, 'export.xlsx'), exported.buffer, { mode: 0o600, flag: 'wx' });
     for (const [key, value] of Object.entries(exported.report)) if (allowedCompatibility.has(key)) report.compatibility[key] = value;
     const { compareWorkbook } = await import('./compare-workbook');
-    report.preservation = compareWorkbook(original, await loadEnterprise(exported.buffer), profile, imported);
+    stage = 'EXPORT_LOAD_FAILED';
+    let exportedWorkbook: Awaited<ReturnType<typeof loadEnterprise>>;
+    try { exportedWorkbook = await loadEnterprise(exported.buffer); }
+    catch {
+      // Local aggregate diagnostics only, never dependency text or source values.
+      const { unzipSync } = await import('fflate');
+      let expanded = 0, unsafe = 0, maxEntry = 0;
+      unzipSync(exported.buffer, { filter: e => { expanded += e.originalSize; maxEntry = Math.max(maxEntry, e.originalSize); unsafe += Number(/vbaProject|externalLinks/i.test(e.name)); return false; } });
+      report.errors.EXPORT_BYTES = exported.buffer.length;
+      report.errors.EXPORT_EXPANDED_BYTES = expanded;
+      report.errors.EXPORT_MAX_ENTRY_BYTES = maxEntry;
+      report.errors.EXPORT_UNSAFE_ENTRIES = unsafe;
+      const ExcelJS = (await import('exceljs')).default;
+      const direct = new ExcelJS.Workbook();
+      try {
+        await direct.xlsx.load(exported.buffer as unknown as ArrayBuffer);
+        report.errors.EXPORT_DIRECT_LOAD_OK = 1;
+        report.errors.EXPORT_MAX_ROWS = Math.max(...direct.worksheets.map(s => s.rowCount));
+        report.errors.EXPORT_MAX_COLS = Math.max(...direct.worksheets.map(s => s.columnCount));
+      } catch { report.errors.EXPORT_DIRECT_LOAD_FAILED = 1; }
+      throw new Error('VERIFY_FAILED');
+    }
+    stage = 'EXPORT_COMPARE_FAILED';
+    report.preservation = compareWorkbook(original, exportedWorkbook, profile, imported);
     report.checks.export_preservation = Number(Object.values(report.preservation).every(c => c.mismatched === 0));
     if (!report.checks.export_preservation) report.errors.EXPORT_MISMATCH = Object.values(report.preservation).reduce((n, c) => n + c.mismatched, 0);
+    stage = 'EXPORT_REIMPORT_FAILED';
     const roundtrip = await service.uploadEnterprise(manager, file(exported.buffer), profile);
     assert('export_repeat_zero_new', (await confirm(roundtrip.id)).imported === 0);
     assert('export_repeat_counts', JSON.stringify(await counts()) === JSON.stringify(baseline));
@@ -168,8 +193,13 @@ async function main() {
     if (archivedDeal) assert('rbac_historical_archive', await denied(() => getArchiveRecord(realtor, archivedDeal.id)));
     const closed = await db.client.create({ data: { displayName: 'Synthetic protected', clientKind: 'person', responsibleUserId: manager.userId, createdBy: manager.userId, status: 'archived', archivedAt: new Date() } });
     assert('rbac_foreign_closed_client', await denied(() => getClientCard(realtor, closed.id)));
-  } catch {
+  } catch (error) {
     report.errors[stage] = (report.errors[stage] ?? 0) + 1;
+    // Source coordinates only; dependency messages and workbook values stay private.
+    if (stage === 'EXPORT_COMPARE_FAILED' && error instanceof Error) {
+      const line = error.stack?.match(/compare-workbook\.ts:(\d+):\d+/)?.[1];
+      if (line) report.errors.COMPARE_SOURCE_LINE = Number(line);
+    }
   } finally {
     if (input && checksum) {
       try { assert('source_unchanged', digest(await readFile(input)) === checksum); } catch { report.errors.SOURCE_CHANGED = 1; }

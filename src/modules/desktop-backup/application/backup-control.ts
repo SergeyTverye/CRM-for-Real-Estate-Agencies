@@ -1,4 +1,4 @@
-import { requestNativeDialog, readNativeDialog } from "./native-dialog";
+import { requestNativeDialog, readNativeDialog, importNativeArchive } from "./native-dialog";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, readdir, readFile, rm, stat, statfs, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -15,6 +15,8 @@ import { BackupError, archiveRefSchema } from "../domain/contracts";
 
 export const backupCommandSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("pick-directory") }).strict(),
+  z.object({ action: z.literal("pick-archive") }).strict(),
+  z.object({ action: z.literal("restore-from-file"), requestId: z.uuid(), passphrase: z.string().min(12).max(1024).optional(), recoveryKey: z.string().max(100).optional(), confirmed: z.literal(true) }).strict(),
   z.object({ action: z.literal("native-export"), backupId: z.uuid() }).strict(),
   z.object({ action: z.literal("native-result"), requestId: z.uuid() }).strict(),
   z.object({ action: z.literal("probe"), destinationId: z.uuid() }).strict(),
@@ -78,11 +80,21 @@ export async function backupControlCommand(actor: Actor, raw: unknown) {
   requireBackupManager(actor);
   const parsed = backupCommandSchema.safeParse(raw);
   if (!parsed.success) throw new ValidationError("Проверьте поля операции резервирования");
-  const cmd = parsed.data;
-  try {
+   const input = parsed.data;
+   let normalized: BackupCommand = input;
+   try {
+    if (input.action === "restore-from-file") {
+      if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Восстановление из файла доступно только в desktop-версии");
+      if (!input.passphrase && !input.recoveryKey) throw new ValidationError("Введите кодовую фразу или ключ восстановления");
+      const backupId = await importNativeArchive(input.requestId, actor.userId, input.passphrase ? { passphrase: input.passphrase } : { recoveryKey: input.recoveryKey! }, archiveRoot());
+      normalized = { action: "restore", backupId, confirmed: true, passphrase: input.passphrase, recoveryKey: input.recoveryKey };
+    }
+    const cmd = normalized;
     if (cmd.action === "pick-directory") return await requestNativeDialog("folder");
+    if (cmd.action === "pick-archive") return await requestNativeDialog("import", undefined, actor.userId);
     if (cmd.action === "native-export") { await archivePath(cmd.backupId); return await requestNativeDialog("export", cmd.backupId); }
-    if (cmd.action === "native-result") return await readNativeDialog(cmd.requestId);
+    if (cmd.action === "native-result") return await readNativeDialog(cmd.requestId, actor.userId);
+    if (cmd.action === "restore-from-file") throw new ValidationError();
     if (cmd.action === "probe" || cmd.action === "list") return await withBackupDestinations(async destinations => {
       const items = await destinations[0]!.list();
       return cmd.action === "list" ? { archives: items } : { connected: true, checkedAt: new Date().toISOString(), message: "Чтение доступно. Запись и восстановление проверяются тестовой копией." };

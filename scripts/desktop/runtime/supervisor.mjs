@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
-import { mkdir, readFile, writeFile, lstat, rm, readdir, copyFile, rename, stat } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, lstat, rm, readdir, copyFile, rename, stat, open, statfs, chmod } from 'node:fs/promises';
 import path from 'node:path';
 import net from 'node:net';
 import { randomUUID, createHash } from 'node:crypto';
@@ -85,21 +85,93 @@ async function fileHash(file) {
   const hash = createHash('sha256'); for await (const chunk of createReadStream(file)) hash.update(chunk); return hash.digest('hex');
 }
 let nativeBusy = false;
+export const NATIVE_IMPORT_MAX_BYTES = 20 * 1024 ** 3;
+export const NATIVE_IMPORT_TTL = 15 * 60 * 1000;
+const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+async function existingLocalPath(target) {
+  if (!path.isAbsolute(target) || target.includes('\0') || target.startsWith('\\\\') || target.split(/[\\/]/).includes('..') || (process.platform === 'win32' && target.slice(2).includes(':'))) throw Error('IMPORT_PATH');
+  let current = path.parse(target).root;
+  for (const part of path.relative(current, target).split(path.sep)) {
+    current = path.join(current, part);
+    if ((await lstat(current)).isSymbolicLink()) throw Error('IMPORT_REPARSE_POINT');
+  }
+}
+/** Only the native mailbox supplies selectedPath. It is never an HTTP input. */
+export async function stageNativeImport(selectedPath, incomingRoot, id, actorUserId, maxBytes = NATIVE_IMPORT_MAX_BYTES) {
+  if (!uuid.test(id) || typeof actorUserId !== 'string' || !actorUserId) throw Error('IMPORT_ID');
+  if (path.extname(selectedPath).toLowerCase() !== '.crmbackup') throw Error('IMPORT_EXTENSION');
+  await existingLocalPath(selectedPath);
+  const source = await open(selectedPath, 'r');
+  const stage = path.join(incomingRoot, id);
+  let created = false;
+  try {
+    const before = await source.stat();
+    if (!before.isFile() || before.size < 32 || before.size > maxBytes) throw Error('IMPORT_SIZE');
+    await assertLocalDirectory(incomingRoot);
+    // Bound abandoned imports as well as each individual file.
+    if ((await readdir(incomingRoot)).length >= 4) throw Error('IMPORT_CAPACITY');
+    const disk = await statfs(incomingRoot, { bigint: true });
+    if (disk.bavail * disk.bsize < BigInt(before.size) + 1024n * 1024n) throw Error('IMPORT_SPACE');
+    await mkdir(stage, { mode: 0o700 }); created = true;
+    const pending = path.join(stage, 'archive.pending');
+    const output = await open(pending, 'wx', 0o600);
+    const hash = createHash('sha256'); let total = 0;
+    const buffer = Buffer.alloc(1024 * 1024);
+    try {
+      for (;;) {
+        const { bytesRead } = await source.read(buffer, 0, buffer.length, null);
+        if (!bytesRead) break;
+        total += bytesRead;
+        if (total > before.size || total > maxBytes) throw Error('IMPORT_SIZE');
+        if (total === bytesRead && !buffer.subarray(0, 8).equals(Buffer.from('CRMBKP1\n'))) throw Error('IMPORT_FORMAT');
+        const chunk = buffer.subarray(0, bytesRead); hash.update(chunk); await output.writeFile(chunk);
+      }
+      await output.sync();
+    } finally { await output.close(); }
+    const after = await source.stat();
+    await existingLocalPath(selectedPath);
+    if (total !== before.size || after.size !== before.size || after.mtimeMs !== before.mtimeMs || after.ctimeMs !== before.ctimeMs) throw Error('IMPORT_CHANGED');
+    const sha256 = hash.digest('hex');
+    if (await fileHash(pending) !== sha256) throw Error('IMPORT_CHECKSUM');
+    await rename(pending, path.join(stage, 'archive.crmbackup'));
+    await chmod(path.join(stage, 'archive.crmbackup'), 0o400);
+    const expiresAt = Date.now() + NATIVE_IMPORT_TTL;
+    await writeFile(path.join(stage, 'metadata.json'), JSON.stringify({ actorUserId, expiresAt, size: total, sha256 }), { flag: 'wx', mode: 0o600 });
+    return { status: 'selected', kind: 'import', actorUserId, expiresAt };
+  } catch (e) { if (created) await rm(stage, { recursive: true, force: true }); throw e; }
+  finally { await source.close(); }
+}
+export async function cleanupNativeIncoming(incomingRoot, now = Date.now()) {
+  try { await existingLocalPath(incomingRoot); } catch (e) { if (e.code === 'ENOENT') return; throw e; }
+  for (const name of await readdir(incomingRoot).catch(() => [])) {
+    if (!uuid.test(name)) continue;
+    const dir = path.join(incomingRoot, name);
+    const info = await lstat(dir);
+    if (info.isSymbolicLink() || !info.isDirectory()) continue;
+    // Never follow imported metadata paths; remove only this application's UUID staging.
+    if (now - info.mtimeMs > NATIVE_IMPORT_TTL) await rm(dir, { recursive: true, force: true });
+  }
+}
 async function nativeDialogs() {
   if (nativeBusy || stopping) return; nativeBusy = true;
   try {
     const root = path.join(dirs.data, 'backup-settings', 'native-dialogs');
+    await cleanupNativeIncoming(path.join(root, 'incoming'));
     for (const file of (await readdir(root).catch(() => [])).filter(n => /^[a-f0-9-]{36}\.request\.json$/.test(n))) {
       const id = file.slice(0,36), request = JSON.parse(await readFile(path.join(root,file),'utf8'));
-      if (Date.now() - Date.parse(request.createdAt) > 120000) { await rm(path.join(root,file),{force:true}); continue; }
+      if (!['folder','export','import'].includes(request.kind) || !Number.isFinite(Date.parse(request.createdAt)) || Date.now() - Date.parse(request.createdAt) > 120000) {
+        for (const suffix of ['.request.json','.path','.announced']) await rm(path.join(root,id+suffix),{force:true});
+        continue;
+      }
       const announced = path.join(root,id+'.announced');
-      try { await writeFile(announced,'',{flag:'wx',mode:0o600}); log('NATIVE_' + (request.kind === 'export' ? 'EXPORT' : 'FOLDER') + ':' + id); } catch (e) { if(e.code!=='EEXIST') throw e; }
+      try { await writeFile(announced,'',{flag:'wx',mode:0o600}); log('NATIVE_' + ({export:'EXPORT',import:'IMPORT',folder:'FOLDER'}[request.kind]) + ':' + id); } catch (e) { if(e.code!=='EEXIST') throw e; }
       const choice = path.join(root,id+'.path');
       let target; try { target = await readFile(choice,'utf8'); } catch(e) { if(e.code==='ENOENT') continue; throw e; }
       let result;
       try {
         if (!target) result = {status:'cancelled'};
         else if(request.kind === 'folder') result = {status:'selected',directory:target};
+        else if(request.kind === 'import') result = await stageNativeImport(target, path.join(root,'incoming'), id, request.actorUserId);
         else {
           if (!/^[a-f0-9-]{36}$/.test(request.backupId)) throw Error('EXPORT_ID');
           const source = path.join(dirs.backups,'portable',request.backupId+'.crmbackup');
@@ -114,6 +186,7 @@ async function nativeDialogs() {
           result={status:'exported'};
         }
       } catch { result={status:'failed'}; }
+      if (request.kind === 'import') result = {...result, kind:'import', actorUserId:request.actorUserId, expiresAt:Date.now()+NATIVE_IMPORT_TTL};
       await writeFile(path.join(root,id+'.result.json'),JSON.stringify(result),{flag:'wx',mode:0o600});
       await rm(path.join(root,file),{force:true}); await rm(choice,{force:true}); await rm(announced,{force:true});
     }
@@ -214,5 +287,7 @@ async function main() {
   });
   process.stdin.on('end', () => void shutdown());
 }
-for (const signal of ['SIGINT','SIGTERM']) process.on(signal, () => void shutdown());
-main().catch(error => { const safe = /^[A-Z_]+$/.test(error.message) ? error.message : 'RUNTIME_ERROR'; log('DESKTOP_START_FAILED:' + safe); void shutdown(1); });
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  for (const signal of ['SIGINT','SIGTERM']) process.on(signal, () => void shutdown());
+  main().catch(error => { const safe = /^[A-Z_]+$/.test(error.message) ? error.message : 'RUNTIME_ERROR'; log('DESKTOP_START_FAILED:' + safe); void shutdown(1); });
+}

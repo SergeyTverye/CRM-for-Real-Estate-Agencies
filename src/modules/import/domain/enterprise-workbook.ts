@@ -22,14 +22,11 @@ export const dictionary: Record<string, typeof fields[number]> = { 'адрес':
 export function parseWorkbookNumber(value: unknown): string | null {
     if (value === null || value === undefined || value === '')
         return null;
-    let s = String(value).toLowerCase().trim(), zeros = 0;
-    if (/млн/.test(s))
-        zeros = 6;
-    else if (/тыс/.test(s))
-        zeros = 3;
-    s = s.replace(/(м²|м2|кв\.?\s*м|руб\.?|р\.|₽|млн\.?|тыс\.?)/g, '').replace(/[\s\u00a0]/g, '').replace(',', '.');
-    if (!/^\d+(?:\.\d+)?$/.test(s))
-        return null;
+    // Match one complete quantity, not fragments stripped from a composite/range.
+    const quantity = /^(\d+(?:[ \u00a0\u202f]\d{3})*(?:[.,]\d+)?)\s*(?:(млн|тыс)\.?\s*)?(?:(?:руб\.?|р\.|₽)(?:\s*\/\s*(?:м²|м2|кв\.?\s*м))?(?:\s*\/\s*(?:мес\.?|месяц|год))?|(?:м²|м2|кв\.?\s*м))?$/u.exec(String(value).toLowerCase().trim());
+    if (!quantity) return null;
+    const zeros = quantity[2] === 'млн' ? 6 : quantity[2] === 'тыс' ? 3 : 0;
+    const s = quantity[1]!.replace(/[ \u00a0\u202f]/g, '').replace(',', '.');
     const [whole = '', fraction = ''] = s.split('.');
     const digits = (whole + fraction + '0'.repeat(Math.max(0, zeros - fraction.length))).replace(/^0+(?=\d)/, '');
     const scale = Math.max(0, fraction.length - zeros);
@@ -174,6 +171,7 @@ export function detectEnterpriseHeaders(ws: ExcelJS.Worksheet, config?: Enterpri
         return cells.sort((a, b) => a.column - b.column);
     };
     const score = (cells: HeaderCell[]) => new Set(cells.filter(c => c.field).map(c => c.field)).size;
+    const explicitRow = typeof config?.headerRow === 'number' ? config.headerRow : undefined;
     ws.eachRow((row, rn) => {
         if (result.length && result[result.length - 1]!.endRow >= rn) return;
         const single = read(rn);
@@ -184,7 +182,19 @@ export function detectEnterpriseHeaders(ws: ExcelJS.Worksheet, config?: Enterpri
         const hasMerged = single.some(c => row.getCell(c.column).isMerged);
         const paired = hasMerged && score(next) >= 2 && score(next) > score(single);
         const cells = paired ? next : single;
-        const explicit = typeof config?.headerRow === 'number' && config.headerRow === rn;
+        const configuredBlock = !!config?.blockTargets && Object.hasOwn(config.blockTargets, String(rn));
+        const explicit = explicitRow === rn || configuredBlock;
+        if (explicitRow !== undefined && !explicit) {
+            // A few label-like data values must not replace a confirmed mapping.
+            // Repeats require the entire original label layout, not just field aliases.
+            const original = result.find(h => h.row === explicitRow);
+            const repeated = original && rn > original.endRow && score(cells) >= 2
+                && cells.length === original.cells.length && cells.every((c, i) => {
+                    const previous = original.cells[i]!;
+                    return c.column === previous.column && headerKey(c.header) === headerKey(previous.header);
+                });
+            if (!repeated) return;
+        }
         const boundary = rn === 1 || !ws.getRow(rn - 1).actualCellCount;
         const styledUnknown = boundary && cells.length >= 2 && cells.every(c => row.getCell(c.column).font?.bold && c.header.length <= 80);
         if (!explicit && score(cells) < 2 && !styledUnknown) return;

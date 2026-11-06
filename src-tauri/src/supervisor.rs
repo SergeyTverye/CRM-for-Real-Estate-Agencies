@@ -44,7 +44,7 @@ impl Supervisor {
             let mut reached_ready = false;
             for line in BufReader::new(stdout).lines().map_while(Result::ok) {
                 if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&log_path) { let _ = writeln!(file,"{}",line); }
-                if line == "BACKUP_COMPLETE" || line == "BACKUP_FAILED" || line.starts_with("NATIVE_FOLDER:") || line.starts_with("NATIVE_EXPORT:") { on_notice(&line); }
+                if line == "BACKUP_COMPLETE" || line == "BACKUP_FAILED" || line.starts_with("NATIVE_FOLDER:") || line.starts_with("NATIVE_EXPORT:") || line.starts_with("NATIVE_IMPORT:") { on_notice(&line); }
                 if let Some(url) = line.strip_prefix("READY ") {
                     if let Ok(parsed) = url.parse::<tauri::Url>() {
                         if parsed.scheme() == "http" && parsed.host_str() == Some("127.0.0.1") && parsed.port().is_some() {
