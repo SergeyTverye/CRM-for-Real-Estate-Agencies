@@ -5,6 +5,14 @@ const residential = /(?<![\p{L}\p{N}_])(?:квартир[\p{L}]*|студи[\p{L
 const commercial = /(?<![\p{L}\p{N}_])(?:офис[\p{L}]*|торгов[\p{L}]*|псн|склад[\p{L}]*|производств[\p{L}]*|свободн[\p{L}]*\s+назначени[\p{L}]*|нежил[\p{L}]*|коммерческ[\p{L}]*)(?![\p{L}\p{N}_])/iu;
 const residentialCategory = /^(?:residential|жилая(?:\s+недвижимость)?|жилое(?:\s+помещение)?|жиль[её])$/iu;
 
+/** A mixed development description cannot corroborate a legacy inferred office category. */
+export function hasAmbiguousLegacyPurpose(listing: NormalizedListing): boolean {
+  if (listing.purposeSource || listing.purpose !== "office") return false;
+  const text = [listing.title, listing.description].filter(Boolean).join("\n");
+  return residential.test(text) && /делов\S*\s+центр|бизнес[\s-]+пространств|коммерци[яию]/iu.test(text)
+    && !commercial.test(text);
+}
+
 /** Negative evidence only: commercial wording alone never confirms a selected purpose. */
 export function residentialPurposeContradiction(listing: NormalizedListing): CriterionEvaluation | null {
   for (const key of ["category", "propertyCategory", "propertyType", "purpose"]) {

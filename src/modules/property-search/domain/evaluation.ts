@@ -1,6 +1,6 @@
 import { compareMoney, type CriterionEvaluation, type DescriptionAnalyzer, type ListingEvaluation, type NormalizedListing, type SearchFilters } from "./types";
 import { normalizeGeography, resolveDistrict } from "./geography";
-import { residentialPurposeContradiction } from "./purpose";
+import { hasAmbiguousLegacyPurpose, residentialPurposeContradiction } from "./purpose";
 import { convertPrice } from "./prices";
 import { freshnessState } from "./freshness";
 import { FEATURE_DEFINITIONS, type FeatureKey } from "./filter-catalog";
@@ -69,7 +69,10 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   else add("operation", !!listing.operation, listing.operation === filters.operation, listing.operation ?? "Операция неизвестна");
   const residentialPurpose = residentialPurposeContradiction(listing);
   if (residentialPurpose) criteria.push(residentialPurpose);
-  else if (filters.purposes.length) add("purpose", !!listing.purpose, filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? ""))), listing.purpose ?? "Назначение неизвестно");
+  else if (filters.purposes.length) {
+    const matches = filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? "")));
+    add("purpose", !!listing.purpose && !hasAmbiguousLegacyPurpose(listing), matches, listing.purpose ?? "Назначение неизвестно");
+  }
   if (filters.operation === "rent" || filters.priceFrom !== undefined || filters.priceTo !== undefined) {
     const unit = filters.operation === "sale" ? "rub_total" : filters.priceUnit;
     const converted = unit ? convertPrice(listing.price, listing.priceUnit, unit, listing.area) : null;

@@ -9,13 +9,13 @@ import { guardExternalUrl } from "@/shared/net/ssrf";
 
 export const actor: Actor = { userId: "10000000-0000-4000-8000-000000000001", sessionId: "test", displayName: "Синтетический сотрудник", role: "realtor", login: "fixture", mustChangePassword: false };
 export const input = { searchRunId: "20000000-0000-4000-8000-000000000001", source: "cian" as const };
-function setup(options: { ready?: boolean; resume?: SearchContinuationPort["resume"]; idleMs?: number; totalMs?: number; tickMs?: number; open?: () => Promise<BrowserHandle> } = {}) {
+function setup(options: { ready?: boolean; resume?: SearchContinuationPort["resume"]; idleMs?: number; totalMs?: number; tickMs?: number; rateClock?: () => number; open?: () => Promise<BrowserHandle> } = {}) {
   let clock = Date.now();
   const handle: BrowserHandle = { page: {} as Page, context: {} as BrowserContext, input: vi.fn(async () => undefined), close: vi.fn(async () => undefined), frame: () => ({ sequence: 1, jpeg: "synthetic", width: 1280, height: 800 }) };
   const search: SearchContinuationPort = { prepare: vi.fn(async () => ({ startUrl: "https://www.cian.ru/cat.php", parameters: { city: "test" } })),
     isReady: vi.fn(async () => options.ready ?? true), resume: vi.fn<SearchContinuationPort["resume"]>(options.resume ?? (async () => "completed")), blocked: vi.fn(async () => undefined) };
   const audit = vi.fn<SessionAudit>(async () => undefined); const repo = new MemorySessionRepository();
-  const service = new BrowserSessionService(repo, { open: options.open ?? (async () => handle) }, search, audit, { now: () => clock, tickMs: options.tickMs ?? 100_000, idleMs: options.idleMs, totalMs: options.totalMs });
+  const service = new BrowserSessionService(repo, { open: options.open ?? (async () => handle) }, search, audit, { now: () => clock, rateClock: options.rateClock, tickMs: options.tickMs ?? 100_000, idleMs: options.idleMs, totalMs: options.totalMs });
   return { service, search, audit, repo, handle, advance: (ms: number) => { clock += ms; } };
 }
 describe("HITL session policies", () => {
@@ -64,12 +64,55 @@ describe("HITL session policies", () => {
     expect(result.status).toBe("failed"); expect(t.search.blocked).toHaveBeenCalled(); expect(JSON.stringify(result)).not.toContain("Cookie=secret");
   });
   it("limits input and polling and rejects unbounded or unsafe input", async () => {
-    const t = setup(); const s = await t.service.create(actor, input);
+    const t = setup({ rateClock: () => 0 }); const s = await t.service.create(actor, input);
     for (let i = 0; i < 20; i++) await t.service.input(actor, s.id, { type: "click", x: 1, y: 1 });
     await expect(t.service.input(actor, s.id, { type: "key", key: "Enter" })).rejects.toMatchObject({ status: 429 });
     for (const event of [{ type: "click", x: 1280, y: 0 }, { type: "key", key: "F12" }, { type: "text", text: "a".repeat(129) }, { type: "text", text: "\n" }, { type: "navigate", url: "file:///etc/passwd" }]) await expect(t.service.input(actor, s.id, event)).rejects.toMatchObject({ status: 400 });
     for (let i = 0; i < 5; i++) await t.service.frame(actor, s.id);
     await expect(t.service.frame(actor, s.id)).rejects.toMatchObject({ status: 429 }); await t.service.shutdown();
+  });
+  it("expires rate windows independently of the lifecycle clock for frames and input", async () => {
+    let rateTime = 0;
+    const t = setup({ rateClock: () => rateTime }); const s = await t.service.create(actor, input);
+    try {
+      for (let i = 0; i < 5; i++) await t.service.frame(actor, s.id);
+      for (let i = 0; i < 20; i++) await t.service.input(actor, s.id, { type: "key", key: "Tab" });
+      t.advance(5000);
+      rateTime = 999;
+      await expect(t.service.frame(actor, s.id)).rejects.toMatchObject({ status: 429 });
+      await expect(t.service.input(actor, s.id, { type: "key", key: "Tab" })).rejects.toMatchObject({ status: 429 });
+      rateTime = 1000;
+      expect((await t.service.frame(actor, s.id)).frame?.sequence).toBe(1);
+      await expect(t.service.input(actor, s.id, { type: "key", key: "Tab" })).resolves.toEqual({ ok: true });
+      expect((await t.service.get(actor, s.id)).status).toBe("active");
+    } finally { await t.service.shutdown(); }
+  });
+  it("allows repeated empty long-polls with a frozen lifecycle clock using the default monotonic timer", async () => {
+    vi.useFakeTimers();
+    const t = setup();
+    try {
+      const s = await t.service.create(actor, input);
+      for (let i = 0; i < 7; i++) {
+        const pending = t.service.frame(actor, s.id, 1);
+        await vi.advanceTimersByTimeAsync(5100);
+        expect((await pending).frame).toBeNull();
+      }
+      expect((await t.service.get(actor, s.id)).lastActivityAt).toEqual(s.lastActivityAt);
+      expect((await t.service.get(actor, s.id)).status).toBe("active");
+    } finally { await t.service.shutdown(); vi.useRealTimers(); }
+  });
+  it("allows the production frame warm-up cadence with a frozen lifecycle clock", async () => {
+    vi.useFakeTimers();
+    const t = setup();
+    vi.spyOn(t.handle, "frame").mockReturnValue(null);
+    try {
+      const s = await t.service.create(actor, input);
+      for (let i = 0; i < 20; i++) {
+        expect((await t.service.frame(actor, s.id)).frame).toBeNull();
+        await vi.advanceTimersByTimeAsync(220);
+      }
+      expect((await t.service.get(actor, s.id)).lastActivityAt).toEqual(s.lastActivityAt);
+    } finally { await t.service.shutdown(); vi.useRealTimers(); }
   });
   it("closes a browser that finishes launching after cancellation", async () => {
     let release!: () => void; const gate = new Promise<void>(r => { release = r; });

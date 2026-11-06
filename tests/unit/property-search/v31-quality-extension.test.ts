@@ -3,8 +3,22 @@ import {describe,it,expect} from "vitest";
 import {evaluateV31} from "../../../scripts/search-quality/evaluate-v31";
 import original from "../../fixtures/search-quality/live-2026-11-05.json";
 import baseline from "../../fixtures/search-quality/baseline-v31.json";
+import extension from "../../fixtures/search-quality/live-v31-2026-11-05.json";
+import {queries} from "../../../scripts/search-quality/annotations";
+import {evaluateListing} from "@/modules/property-search/domain/evaluation";
+import {SearchFilters,type NormalizedListing} from "@/modules/property-search/domain/types";
 
 describe("v3.1 independently labelled live extension",()=>{
+ it.each(["V15","V20"])("keeps an unproven sale/rent operation unknown for %s instead of inventing a contradiction",id=>{
+  const item=extension.listings.find(x=>x.id===id)!;
+  const filters=SearchFilters.parse(queries.find(x=>x.id==="commercial-sale")!.filters);
+  // The frozen labels say rejected, but their own rationale says the operation is unproven (SR-02).
+  expect(item.input.operation).toBeNull();
+  expect(item.input.priceUnit).toBeNull();
+  expect(evaluateListing(item.input as NormalizedListing,filters)).toMatchObject({verdict:"needs_review",criteria:expect.arrayContaining([
+   expect.objectContaining({criterion:"operation",state:"unknown"}),
+  ])});
+ });
  it("retains 20 genuinely new public URLs with original date provenance and no contacts",()=>{
   const d=JSON.parse(readFileSync("tests/fixtures/search-quality/live-v31-2026-11-05.json","utf8")) as {listings:{input:{url:string;description:string;publishedAt:string|null;seller:unknown};provenance:{searchRunId:string}}[]};
   const old=new Set(original.listings.map(x=>x.input.url));

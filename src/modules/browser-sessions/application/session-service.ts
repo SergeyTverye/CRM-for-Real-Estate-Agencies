@@ -13,7 +13,7 @@ export class BrowserSessionService {
   private closing = new Map<string, Promise<void>>();
   constructor(private readonly repo: SessionRepository, private readonly browsers: BrowserFactory,
     private readonly search: SearchContinuationPort, private readonly audit: SessionAudit,
-    private readonly options: { now?: () => number; idleMs?: number; totalMs?: number; tickMs?: number; maxConcurrent?: number } = {}) {}
+    private readonly options: { now?: () => number; rateClock?: () => number; idleMs?: number; totalMs?: number; tickMs?: number; maxConcurrent?: number } = {}) {}
   private now() { return this.options.now?.() ?? Date.now(); }
   private async owned(actor: Actor, id: string) {
     await this.closing.get(id);
@@ -115,7 +115,8 @@ export class BrowserSessionService {
     return false;
   }
   private limit(values: number[], maximum: number) {
-    const now = this.now(); while (values.length && values[0]! <= now - 1000) values.shift();
+    // Rate windows must advance independently of lifecycle clocks (including frozen test clocks).
+    const now = this.options.rateClock?.() ?? performance.now(); while (values.length && values[0]! <= now - 1000) values.shift();
     if (values.length >= maximum) throw new RateLimitError(); values.push(now);
   }
   async frame(actor: Actor, id: string, after?: number, signal?: AbortSignal) {

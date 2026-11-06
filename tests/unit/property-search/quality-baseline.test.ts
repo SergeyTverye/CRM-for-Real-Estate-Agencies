@@ -5,11 +5,25 @@ import evidence from "../../../docs/vkr/live-ai-evidence.json";
 import { loadDataset, fingerprint } from "../../../scripts/search-quality/dataset";
 import { evaluateQuality, currentGrouping, renderReport, type QualityReport, type GroupingAdapter } from "../../../scripts/search-quality/evaluate";
 import type { ListingEvaluation } from "../../../src/modules/property-search/domain/types";
+import { evaluateListing } from "../../../src/modules/property-search/domain/evaluation";
 
 const baseline = baselineJson as QualityReport;
 const countedErrors = ["falseInclusions", "falseConfirmed", "falseExclusions", "exactVerdictErrors"] as const;
 
 describe("LIVE 05.11.2026 → offline REPLAY search quality", () => {
+  it("keeps L44's mixed development in review without trusting an unproven legacy office subtype", () => {
+    const data = loadDataset();
+    const item = data.listings.find(x => x.id === "L44")!;
+    const filters = data.queries.find(x => x.id === "retail-rent")!.filters;
+    expect(evaluateListing(item.listing, filters)).toMatchObject({ verdict: "needs_review", criteria: expect.arrayContaining([
+      expect.objectContaining({ criterion: "purpose", state: "unknown" }),
+    ]) });
+    expect(evaluateListing({ ...item.listing, purposeSource: "structured" }, filters).verdict).toBe("rejected");
+    expect(evaluateListing({ ...item.listing, description: "Офис в жилом доме с деловым центром." }, filters).verdict).toBe("rejected");
+    const current = evaluateQuality();
+    expect(current.totals.falseExclusions).toBe(0);
+    expect(current.totals.falseInclusions).toBeLessThanOrEqual(9);
+  });
   it("keeps the 46 live cards + 3 negative controls and manual labels fixed", () => {
     const data = loadDataset();
     expect(fingerprint()).toBe(baseline.fixtureFingerprint);
