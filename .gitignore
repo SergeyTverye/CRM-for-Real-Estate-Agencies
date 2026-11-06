@@ -182,3 +182,27 @@ next-env.d.ts
 **/~$РЕКЛАМНЫЕ ОБЪЕКТЫ_РАБОТА.xlsx
 /private-data/
 /data/private-imports/
+
+# Desktop confidential data and local build outputs
+~$*
+*.crmbackup
+**/crm-secrets/**
+clouds.env
+*.dump
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-wal
+*.db-shm
+!tests/fixtures/synthetic/**/*.dump
+!tests/fixtures/synthetic/**/*.sqlite
+!tests/fixtures/synthetic/**/*.db
+src-tauri/target/
+/desktop-build/
+/desktop-artifacts/
+*.exe
+*.msi
+*.msix
+*.appx
+*.pdb

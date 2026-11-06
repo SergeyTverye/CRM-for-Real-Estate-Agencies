@@ -29,3 +29,16 @@ secrets
 ТЗ*.md
 
 .next-*
+
+# Confidential enterprise sources must never enter Docker context
+/*.xlsx
+/private-data/
+**/private-data/
+/data/private-imports/
+*.crmbackup
+**/*.crmbackup
+**/crm-secrets/
+**/clouds.env
+src-tauri/target/
+desktop-build/
+desktop-artifacts/
