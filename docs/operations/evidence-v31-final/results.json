@@ -1,0 +1,74 @@
+{
+  "sha": "c812d18c0e835e25598e432036da9284bd9c306d",
+  "branch": "feature/tz-v3.1",
+  "date": "2026-11-06",
+  "initialWorkingTree": "clean",
+  "codeChanges": false,
+  "AT-17": "PASS",
+  "prisma": 0,
+  "typecheck": 0,
+  "eslint": 0,
+  "build": 0,
+  "unit": {
+    "passed": 1363,
+    "files": 62,
+    "seconds": 85.07
+  },
+  "integrationAuthorization": {
+    "passed": 326,
+    "files": 52,
+    "seconds": 326.15,
+    "database": "crm_test_h"
+  },
+  "productionE2E": {
+    "passed": 24,
+    "skipped": 1,
+    "reason": "opt-in SEARCH_UI_REPLAY_RUN absent",
+    "database": "crm_e2e"
+  },
+  "docker": {
+    "workingProject": "crm",
+    "cleanProject": "crmclean31f",
+    "cleanClone": "D:/crm-clean-v31-final",
+    "cleanCloneUnmodified": true,
+    "workingImage": "sha256:668e5d36340f4daf1c3aefff2c8a5921b31b413900cf6b06b0bdc0911c67762d",
+    "cleanImage": "sha256:c3269af78bcc76b73b0a3d6bfa2beff0c78f747af049043f482831acc7dbce2a",
+    "health": "app/worker/search-worker/db healthy",
+    "readiness": 200
+  },
+  "backupRestore": {
+    "crm": "PASS 39s",
+    "clean": "PASS 34s"
+  },
+  "cleanPersistence": "PASS",
+  "cleanup": {
+    "crm-restoretest": 0,
+    "crmclean31f-restoretest": 0,
+    "crmclean31f": 0,
+    "directories": "preserved",
+    "crm": "running"
+  },
+  "paidAiCalls": 0,
+  "newSourceRequests": 0,
+  "hostNode": "22.23.4",
+  "dockerNode": "24.22.2",
+  "logSha256": {
+    "build.log": "927909ffbf878824280fa276a818da3dea4d4e90d9007a7f34edb2875fef6254",
+    "clean-build.log": "332a6f2c5f591c742f2b17fe0463871c006cf8f9bbaa244c08b7cd93ac2c34f6",
+    "clean-restart.log": "926ea87698fd3cb5f2d97584287fb80c3c0328ed72f8867ab9483b90ba9b78aa",
+    "clean-up.log": "c624e5dfecab96fa3a3544645febf783f5ebd7116aaab02a0ed3f90c1bda20d4",
+    "docker-build.log": "ae2063d9ebaf1eae9e2ef5d2ad0263e2823e3c761f2086c27d675c4e14941aae",
+    "docker-up.log": "62f327affe698b38f929a73a4c6d234fc3cab6555b64900832728d15711a7f7c",
+    "down-clean-restoretest.log": "14d6a7a2a817eeabf99e1c14347fc2f6be5c16dae6dc6634c41bc8be546108bb",
+    "down-clean.log": "c51e419b2f45a0d1d41e55da2198784ee601b35555c31ffe8038faacd8183fb5",
+    "down-crm-restoretest.log": "3e17bce232a3caae0fb174cd6f8d924bb62cc9fe31133d9a2f065fd38004d33e",
+    "e2e.log": "dfd1a82ef41850dacd3c3b5d2dba638d7b36259123195e6a31f7373b3ec3abdc",
+    "eslint.log": "f7ecad1e70117ac29bcb74e366ed41afee7dec8ed8e6a886e985bc01705f9b03",
+    "integration.log": "93e23ac2ce8292dc0028f151bdde36d43e15e70843063dd34c611ee72d6d3694",
+    "ops-clean.log": "cc89959f23f9c61c7c0f2cd9e1750366d1fcc90e0f6f86a8d4829e146fa62814",
+    "ops-crm.log": "f9650f05cccd23ea2c1b8dd3d34b80b1844744a513fe886d6483b987ce855b3c",
+    "prisma.log": "c7f45ee4fe6dc5b04a38b176107829038f3eaa4cee45f32f6190cfdc043ad4bb",
+    "typecheck.log": "4cb1c051eb08e352c81bb97c2163338af093ca879609e5cd936da3b2a89db115",
+    "unit.log": "eaa99a7a76617339a9766c2a6c56f3edffb8ee7a31d129e0691423faaa0c5b73"
+  }
+}

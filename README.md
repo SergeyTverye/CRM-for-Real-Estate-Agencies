@@ -7,15 +7,29 @@
 Обычный `docker compose up -d --wait` запускает app, notification worker, search-worker,
 PostgreSQL и одноразовый migrate/seed. Шаблоны работают при выключенном AI.
 
-Release gate от 06.11.2026: unit/browser-cycle **1331**, PostgreSQL integration/authorization
-**315**, production E2E **24 passed / 1 opt-in REPLAY skipped**; Prisma/typecheck/lint/build
-и Docker healthy — PASS. Пустая БД и копия v2.4.1 мигрируют без потери строк.
-Backup/restore документов и шаблонов подтверждён на рабочем стеке и отдельном clean deploy.
-**AT-17 PARTIAL до коммита QA-исправлений и проверки окончательного SHA**;
-первый чистый клон выявил исправленный дефект упаковки restore-проверки.
-Команды, время, SHA, исходные падения и список исправлений —
+Release gate **c812d18** от 06.11.2026 — **AT-17 PASS**: unit/browser-cycle
+**1363/1363**, PostgreSQL integration/authorization **326/326**, production E2E
+**24 passed / 1 opt-in REPLAY skipped**; Prisma/typecheck/lint/build, Docker,
+чистый clone/deploy, смена пароля, restart persistence и оба backup/restore — PASS.
+
+Первый запуск (на host нужны Docker Engine, Compose plugin и Bash):
+`bash scripts/bootstrap.sh`, настройка локального `.env`, затем
+`docker compose build` и `docker compose up -d --wait`.
+Сервис migrate автоматически применяет миграции и seed. Открыть порт APP_PORT
+(по умолчанию 8080), войти с SEED_MANAGER_LOGIN/SEED_MANAGER_PASSWORD из локального
+`.env` и сменить временный пароль. Пароли не публиковать. Проверка восстановления:
+`bash scripts/backup.sh`, затем `bash scripts/restore-test.sh --keep` в отдельном контуре.
+На Windows использовать Git Bash; APP_UID/APP_GID для Linux-контейнеров — 1000/1000.
+
+Ограничения: внешний доступ Циан/Авито/Домклик BLOCKED; даты публикации части источников
+остаются unknown. Работают ручная форма/ссылка, CSV preview/commit и поиск по первому
+обнаружению CRM. HITL продолжение включается только для разрешённых источников;
+проверка на стенде не снимает блокировки площадок. AI необязателен, платные вызовы
+требуют лимитов и подтверждения; шаблоны работают без него. Полнота LIVE-охвата и
+апробация руководителем и двумя риелторами (AT-18) ещё не подтверждены.
+**Готовность всего MVP по §11 не объявляется.** Команды и доказательства —
 [release gate v3.1](docs/operations/release-gate-v31.md),
-[приёмка AT-17](docs/acceptance/v31/AT-17.md). Общая приёмка AT-01…18 остаётся отдельной.
+[AT-17](docs/acceptance/v31/AT-17.md), [вся приёмка](docs/acceptance/v31/README.md).
 
 CRM-система для ООО «Магазин недвижимости», разрабатываемая в рамках выпускной квалификационной работы по автоматизации процессов агентства недвижимости.
 

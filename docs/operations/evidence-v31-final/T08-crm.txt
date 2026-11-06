@@ -1,0 +1,15 @@
+T08 restore test
+backup_id: 2026-11-06_02-11-45
+date: 2026-11-06T02:12:33Z
+app_commit: c812d18
+restore_db_files: PASS
+migrations_compat: PASS
+readiness: PASS
+login: PASS (ops_restore_f8f584e572f6)
+control_file_storage: PASS
+control_file_api: PASS
+gallery_files: PASS (6 files)
+template_files: PASS ({"versions":4,"templateFiles":4,"generatedDocuments":4})
+temporary_profiles_excluded: PASS
+control_row_counts: PASS (сверены restore-data.sh)
+duration_sec: 39

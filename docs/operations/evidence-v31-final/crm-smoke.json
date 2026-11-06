@@ -1,0 +1,16 @@
+{
+  "time": "2026-11-06T02:11:39.259Z",
+  "project": "crm",
+  "pages": {
+    "/today": 200,
+    "/property-search": 200,
+    "/calendar": 200,
+    "/collections": 200,
+    "/templates": 200,
+    "/requests": 200,
+    "/clients": 200
+  },
+  "forcedPasswordChange": false,
+  "template": true,
+  "generatedDocument": true
+}
