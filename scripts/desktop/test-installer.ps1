@@ -111,8 +111,12 @@ try {
   Api '/api/v1/auth/login' 'POST' @{login='director';password=$password} | Out-Null
   $client=Api '/api/v1/clients' 'POST' @{displayName='CI synthetic client';clientKind='person';contacts=@()}
   Check ([bool]$client.id) 'synthetic-client-created'
-  Set-Content -LiteralPath (Join-Path $data 'files\ci-control.txt') -Value 'SYNTHETIC-CONTROL'
   $id=$client.id
+  $fetched=Api "/api/v1/clients/$id"
+  Check ($fetched.id -eq $id -and $fetched.displayName -eq 'CI synthetic client') 'synthetic-client-card-200'
+  $cardPage=Invoke-WebRequest -Uri "$script:base/clients/$id" -WebSession $script:session -TimeoutSec 30
+  Check ($cardPage.StatusCode -eq 200 -and $cardPage.Content -match '<html') 'synthetic-client-page-200'
+  Set-Content -LiteralPath (Join-Path $data 'files\ci-control.txt') -Value 'SYNTHETIC-CONTROL'
   # Uninstall while the application is running exercises stop/Job Object cleanup.
   Uninstall $false
   Check ((Get-Content -Raw -LiteralPath (Join-Path $data 'files\ci-control.txt')).Trim() -eq 'SYNTHETIC-CONTROL') 'file-retained'
@@ -130,9 +134,12 @@ try {
   Set-Content -LiteralPath "$install\app\package-lock.json" -Value '{"syntheticObsolete":true}'
   New-Item -ItemType Directory -Path "$install\app\templates" -Force | Out-Null
   Set-Content -LiteralPath "$install\app\templates\obsolete-ci-example.txt" -Value 'SYNTHETIC-OBSOLETE'
+  New-Item -ItemType Directory -Path "$install\app\public" -Force | Out-Null
+  [IO.File]::WriteAllBytes("$install\app\public\.gitkeep", [byte[]]@())
   Install; StartSmoke
   Check (-not (Test-Path -LiteralPath "$install\app\package-lock.json")) 'overinstall-obsolete-lock-removed'
   Check (-not (Test-Path -LiteralPath "$install\app\templates\obsolete-ci-example.txt")) 'overinstall-obsolete-template-removed'
+  Check (-not (Test-Path -LiteralPath "$install\app\public\.gitkeep")) 'overinstall-placeholder-gitkeep-removed'
   Check ((Get-Content -Raw -LiteralPath (Join-Path $data 'files\ci-control.txt')).Trim() -eq 'SYNTHETIC-CONTROL') 'overinstall-user-file-retained'
   Check (@(Get-ChildItem -LiteralPath (Join-Path $data 'backups') -Filter '*.crmbackup').Count -gt 0) 'pre-upgrade-encrypted-snapshot'
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()

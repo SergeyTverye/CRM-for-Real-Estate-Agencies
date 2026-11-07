@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { assertRuntimeEntries, runtimeEntries, runtimeBuildOptions } from './runtime-entries.mjs';
-import { safeCopyTrace, assertRuntimeResources, refreshRuntimeAliases } from './resource-policy.mjs';
+import { safeCopyTrace, assertRuntimeResources, refreshRuntimeAliases, supplementCompiledServer } from './resource-policy.mjs';
 import { checkFinalRuntime } from './check-final-runtime.mjs';
 const require = createRequire(import.meta.url);
 const root = process.cwd();
@@ -31,6 +31,9 @@ Object.assign(process.env,{CRM_BUILD_TARGET:'desktop',CRM_DEPLOYMENT_MODE:'deskt
 npm(['run','build']);
 await safeCopyTrace(path.join(root,dist,'standalone'),app,{dist});
 await safeCopyTrace(path.join(root,dist,'static'),path.join(app,dist,'static'),{prefix:dist+'/static',dist});
+// Standalone trace omits lazily required server chunks. Supplement the exact
+// compiled server tree from this build, then verify before later guards.
+await supplementCompiledServer(path.join(root,dist,'server'),path.join(app,dist,'server'),{dist});
 if (existsSync('public')) await safeCopyTrace('public',path.join(app,'public'),{prefix:'public',dist});
 await safeCopyTrace('import-profiles',path.join(app,'import-profiles'),{prefix:'import-profiles',dist});
 await safeCopyTrace('prisma/sqlite',path.join(app,'prisma/sqlite'),{prefix:'prisma/sqlite',dist});

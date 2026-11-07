@@ -1,28 +1,31 @@
-# Windows EXE
+# Windows desktop: текущий загруженный EXE a4 (частично проверенный кандидат)
 
-Текущий официальный EXE `71e8765` скачан в `releases/windows-x64/CRM-Setup-Windows-x64.exe`, отдельная папка исключена из Git/Docker. Размер 585603587 байт. ZIP/EXE SHA и commit build-measurements проверены.
+Текущий загруженный артефакт CI (не готовый релиз целиком): commit `a4a4120cd83b8f967b546472a25c8eb0909841de`, run [42415838070](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42415838070), статус **ALL SUCCESS**: build + installer 2022 + installer 2025.
 
-SHA-256: `a3e5ab26cbe6bcd249f2f222994052c4f985541c46b81910b9221d3262be311e`.
+Артефакт: [13592870756](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42415838070/artifacts/13592870756). Файл `releases/windows-x64/CRM-Setup-Windows-x64.exe`, **593 321 323 байт**. SHA-256: `7434e3a5c8a646fe15663ed0b3649026404bb744165cc4baa1431b8e35c1040b`. Установленный launcher SHA-256: `bc46de74eb9490deac0e666d238864e61b46d326883a425a97ca779556b48a86`.
 
-[Артефакт GitHub Actions](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42396531730/artifacts/13584259822). Windows Server2022/2025 installer lifecycle PASS. На текущем Windows11 обычное окно, setup/login, основные экраны, настоящий business cycle с DOCX/PDF/XLSX/ZIP и клиент после перезапуска проверены; [точный протокол и ограничения](../acceptance/desktop-v32/installed-71e8765.md).
+Ветки/история: текущая ветка `codex/installed-release-proof`; `main` сохранён на `a982542a40bab1e2f5667c336f2edd314ee96fa0`. Packaging-only a4 не требует дублирующей production-сборки; production/shared business base a982 и существующие Docker-стеки не затронуты.
 
-**Полный выпуск ещё не принят.** Найдены obsolete program resources при обновлении со старой версии и неверный desktop-port в PDF ссылке; source fixes подготовлены для следующего EXE. Installed cloud/USB/native picker и полный handoff/restore gate ещё выполняются. Consumer Windows10/11 VM-части BLOCKED по решению пользователя.
+## Фактические доказательства (ограниченные)
 
-## История предыдущего артефакта
-### Сборка41c39b8
+- CI-регрессии: unit **1795 PASS + 5 optional skip**; SQLite integration **398 PASS + 1 server-only skip**; Rust **1 PASS**; финальный runtime **all PASS**.
+- Installer evidence (2022/2025): каждый **74 PASS / 0 FAIL**, включая client-page 200, удаление пустого placeholder самим installer, сохранение пользовательских файлов, native window, single instance, uninstall-keeps, reinstall, update, purge cleanup. **Не** clean consumer VM proof.
+- Windows 11 (фактический overinstall): обычная тихая установка поверх старой версии — **exit 0**; база не изменена; старый точный пустой synthetic `app/public/.gitkeep` удалён самим installer. Ресурсы установленной программы не патчились вручную.
+- Strict runtime policy: **PASS**; в установке нет ТЗ/spec/исходников/ключей (runtime notices/licenses легитимно сохранены).
+- Исторические сбои a982 (client 500 и placeholder) **исправлены** `5b8613e` + `a4`, не являются текущим сбоем.
+- Installed a4 core (ограниченный): [installed-a4-core.md](../acceptance/desktop-v32/installed-a4-core.md) — PASS 12/12 parent + 12/12 business, headless packaged Chromium + supervisor smoke, не native WebView/не физический offline.
+- Installed a4 cloud (ограниченный): [installed-a4-cloud.md](../acceptance/desktop-v32/installed-a4-cloud.md) — настройка обоих облаков через UI, реальное восстановление из каждого и изоляция отказа одного направления.
 
-Локальная папка: `releases/windows-x64/`, исключена из Git и Docker context. В ней оставлена одна версия EXE с SHA-256, SBOM и сведениями runtime; проверенные дубликаты ZIP/EXE удалены.
+## Известные оставшиеся границы
 
-Текущая скачанная сборка — `41c39b8`: [артефакт GitHub Actions](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42313787406/artifacts/13550879559). Размер EXE: 585 583 866 байт.
+Текущий a4: local backup/restore 20/20 и handoff/conflict 61/61 PASS на синтетических профилях; [протокол](../acceptance/desktop-v32/installed-a4-local.md). PG→SQLite проверен на синтетической копии: 11 проверок PASS, [DT-06](../acceptance/desktop-v32/DT-06.md). Installed Excel UI: 14/14 проверок PASS, 0 новых строк при повторе; [протокол](../acceptance/desktop-v32/installed-a4-import.md). Не доказаны: физический network cut, полный native picker/tray/reboot/reminder matrix. DT-09/10/11 — ограниченный PASS; DT-25/26 — PARTIAL. Clean Windows 10/11 consumer VM — **BLOCKED** по решению пользователя (текущий Win11 + Actions Server не эквивалентны). P2 не является release gate.
 
-```text
-b56ec7501a9b9ebc9328f9e1dfc03cf452b8e10611bae0675bb4eb6f4262126b
-```
+**Итог:** частично проверенный кандидат, продолжать верификацию. Не называть весь релиз готовым.
 
-**Готовность не подтверждена.** Сборка и Rust-тесты в Windows CI прошли; обе установочные проверки завершились `SMOKE_EXIT_BEFORE_READY`. На текущем ПК после удаления предыдущей версии выполнена чистая установка (exit 0), проверено отсутствие root ТЗ/AGENTS/CLAUDE/docs/tests/src/scripts/ops в программной папке. Пользовательские данные установкой не удалялись.
+## Исторические сборки (не текущая загрузка)
 
-Причина текущего отказа воспроизведена в новом синтетическом профиле: отсутствуют Next/Turbopack hashed aliases под `.next-desktop/node_modules`; модуль `@prisma/client-2c3a283f134fdcb6/runtime/client` не найден. Исходное исправление сохраняет необходимые runtime-пакеты и скомпилированные API, материализует только проверенные внутренние junction-псевдонимы и добавляет проверку финального пакета до Rust/NSIS. Новая сборка и фактическое обычное окно ещё ожидаются.
+- `a982542a` / run [42408326567](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42408326567), artifact [13589677235](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42408326567/artifacts/13589677235), 585 556 902 B, SHA `1c818d455cf758edcba5b12aa591f1956c28f4cd8f919772304f6b062b57a0ed`. Исторически: client 500 / placeholder; **не** текущая загрузка.
+- `71e8765`: Windows Server 2022/2025 lifecycle PASS; Windows 11 setup/login/экраны/бизнес-цикл в изолированных профилях. [installed-71e8765.md](../acceptance/desktop-v32/installed-71e8765.md).
+- `41c39b8` / `7e7e47e`: ранние smoke-сборки; не приёмка текущего EXE.
 
-Предыдущая сборка `7e7e47e` имела отдельный дефект verbatim Windows resource path и избыточный trace проекта. Её installed smoke backup/verify/restore и A→B/conflict сценарии были проверены на синтетических данных, но обычное окно не работало, а обратный receive блокировался. Эти результаты не являются приёмкой новой сборки. Чистые Windows 10/11 VM отсутствуют по решению пользователя; Windows Server CI их не заменяет.
-
-См. [запуск](../acceptance/desktop-v32/native-startup.md), [перенос](../acceptance/desktop-v32/installed-handoff.md) и [матрицу приёмки](../acceptance/desktop-v32/README.md).
+Linux production (shared business base a982): образ `02d8478e47dbbee51ab8632b4b9797046b8623e3910560f70b07d4cf9c467079`, Node 24.22.2. PostgreSQL 9/9 (3 роли + файлы/RBAC + реальный pg_dump/restore PASS), SQLite 22/22 (реальный encrypted restore + file SHA PASS). Начальное прерывание транспорта не засчитано как PASS; завершённое восстановление — отдельно. Docker production не затронут.

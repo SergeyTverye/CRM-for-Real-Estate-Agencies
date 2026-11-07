@@ -4,7 +4,10 @@ export const normalize = (value) => String(value).normalize('NFKC').toLocaleLowe
 export const sha256 = (value) => createHash('sha256').update(value, 'utf8').digest('hex');
 
 export function cellForms(value) {
-  const text = normalize(value);
+  return normalizedCellForms(normalize(value));
+}
+
+function normalizedCellForms(text) {
   const forms = new Set();
   const digits = text.replace(/\D/gu, '');
   if (/^[\d\s.,()+-]+$/u.test(text)) {
@@ -23,6 +26,13 @@ export function cellForms(value) {
 // N-grams locate complete cell phrases embedded in prose, never isolated words.
 export function* textForms(text) {
   const emit = function* (candidate) { yield* cellForms(candidate); };
+  // Fast path: candidate is already a substring of a normalized line bounded by
+  // word characters, so re-running NFKC/casefold/whitespace-collapse is redundant.
+  // Branch logic stays identical inside normalizedCellForms.
+  const emitNormalized = function* (candidate) {
+    // The ASCII subset is closed under normalization; Unicode keeps the full path.
+    yield* /^[\x00-\x7f]*$/.test(candidate) ? normalizedCellForms(candidate) : cellForms(candidate);
+  };
   for (const line of String(text).split(/[\r\n]/u)) {
     yield* emit(line);
     for (const cell of line.split(/[\t;|<>`=]/u)) yield* emit(cell);
@@ -37,12 +47,12 @@ export function* textForms(text) {
         const from = words[start].index;
         const to = words[end].index + words[end][0].length;
         if (to - from > 4096) break;
-        yield* emit(normalized.slice(from, to));
+        yield* emitNormalized(normalized.slice(from, to));
       }
     }
-    for (const match of normalized.matchAll(/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/gu)) yield* emit(match[0]);
-    for (const match of normalized.matchAll(/\+?\d[\d ().-]*\d/gu)) yield* emit(match[0]);
-    for (const match of normalized.matchAll(/\d{7,}/gu)) yield* emit(match[0]);
+    for (const match of normalized.matchAll(/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/gu)) yield* emitNormalized(match[0]);
+    for (const match of normalized.matchAll(/\+?\d[\d ().-]*\d/gu)) yield* emitNormalized(match[0]);
+    for (const match of normalized.matchAll(/\d{7,}/gu)) yield* emitNormalized(match[0]);
   }
 }
 

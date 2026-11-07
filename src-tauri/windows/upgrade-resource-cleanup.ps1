@@ -72,9 +72,20 @@ function Inventory([string]$directory) {
       }
       if (-not $known) { throw 'UPGRADE_POSSIBLE_USER_DATA' }
     }
-    # Source policy has no public assets. Legacy demo paths are exact, not an
-    # extension-based permission to delete arbitrary templates or customer docs.
-    if ($rootName -eq 'public' -and $relative -ne 'public') { throw 'UPGRADE_POSSIBLE_USER_DATA' }
+    # Source policy has no public assets. Sole exception is the exact zero-byte
+    # developer placeholder public\.gitkeep left by legacy scaffolding (length 0,
+    # regular file, metadata size only). Nonempty .gitkeep and any other public
+    # entry remain user-data suspects. Reparse/scope checks above stay first.
+    if ($rootName -eq 'public' -and $relative -ne 'public') {
+      $isLegacyPlaceholder = ((-not $isDirectory) -and ($relative -eq 'public\.gitkeep'))
+      if ($isLegacyPlaceholder) {
+        try { $placeholderLength = (New-Object IO.FileInfo($full)).Length }
+        catch { throw 'UPGRADE_POSSIBLE_USER_DATA' }
+        if ($placeholderLength -ne 0) { throw 'UPGRADE_POSSIBLE_USER_DATA' }
+      } else {
+        throw 'UPGRADE_POSSIBLE_USER_DATA'
+      }
+    }
     if ($rootName -eq 'templates' -and $relative -ne 'templates') {
       $knownTemplate = if ($isDirectory) { $relative -eq 'templates\examples' } else {
         $relative -match '^templates\\examples\\(?:client\.yaml|client\.md|collection\.docx|collection\.xlsx|collection\.yaml|registry\.yaml|create-examples\.ts)$' -or
