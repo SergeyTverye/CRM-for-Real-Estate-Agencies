@@ -31,7 +31,7 @@ export function loopback(value) {
 }
 function options(args) {
   const result = {};
-  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'native-backup-proof', 'cloud-proof']);
+  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'native-backup-proof', 'cloud-proof', 'supervisor-only']);
   const values = new Set(['launcher', 'installer', 'launcher-sha256', 'installer-sha256', 'source-commit', 'evidence-root', 'chromium', 'observe-seconds']);
   for (let i = 0; i < args.length; i++) {
     const key = args[i].replace(/^--/, '');
@@ -40,6 +40,10 @@ function options(args) {
     else if (values.has(key) && args[i + 1] && !args[i + 1].startsWith('--')) result[key] = args[++i];
     else fail('ARGUMENT_REJECTED');
   }
+  if (result['focus-business'] && result['focus-backup']) fail('FOCUS_MODE_CONFLICT');
+  if (result['focus-backup'] && !result['native-backup-proof'] && !result['cloud-proof']) fail('FOCUS_BACKUP_REQUIRES_PROOF');
+  if (result['supervisor-only'] && result['native-backup-proof']) fail('SUPERVISOR_ONLY_CONFLICTS_NATIVE_BACKUP_PROOF');
+  if (result['supervisor-only'] && (!result['cloud-proof'] || !result['focus-backup'])) fail('SUPERVISOR_ONLY_REQUIRES_CLOUD_FOCUS_BACKUP');
   return result;
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -125,13 +129,21 @@ async function main() {
     TEMP: dirs.temp, TMP: dirs.temp, USERPROFILE: dirs.home, HOME: dirs.home };
   const runtime = path.join(dirs.localappdata, 'RealEstateCRM/logs/runtime.json');
   const stopFile = path.join(run, 'STOP');
+  const focusBackup = o['focus-backup'] === true;
   const checks = [];
+  const supervisorOnly = o['supervisor-only'] === true;
   const result = { schema: 1, status: 'RUNNING', syntheticDataOnly: true, runId: id,
     sourceCommit: o['source-commit'], sourceReference: 'coordinator-supplied-read-only-reference-not-binary-provenance',
-    launcherSha256: launcherHash, installerSha256: installerHash, nativeUi: 'NOT_ASSERTED_SEPARATE_OBSERVATION_REQUIRED',
+    launcherSha256: launcherHash, installerSha256: installerHash,
+    nativeUi: supervisorOnly ? 'NOT_RUN_SUPERVISOR_ONLY' : 'NOT_ASSERTED_SEPARATE_OBSERVATION_REQUIRED',
     runtime: { controllerNode: process.version, browserKind }, checks, screenshots: [],
+    businessCycle: focusBackup ? { status: 'NOTRUN' } : undefined,
     nativeBackupProof: { status: 'NOTRUN' }, cloudProof: { status: 'NOTRUN' },
-    scope: o['focus-business'] ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED' : 'CORE_SCREENS_AND_BUSINESS' };
+    scope: focusBackup
+      ? 'SETUP_LOGIN_BACKUP_PROOF_PERSISTENCE_CORE_AND_BUSINESS_CYCLE_NOT_RUN'
+      : o['focus-business']
+        ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED'
+        : 'CORE_SCREENS_AND_BUSINESS' };
   let child, context, base, page, browser, supervisorPid;
   const ownedNodes = new Set();
   let stage = 'START';
@@ -179,7 +191,8 @@ async function main() {
   async function start() {
     await noOtherLauncher(); await canonical(run);
     const previousSupervisor = supervisorPid;
-    child = spawn(launcher, [], { cwd: install, env, stdio: 'ignore', windowsHide: false });
+    const launchArgs = o['supervisor-only'] ? ['--smoke', '--smoke-seconds=1800'] : [];
+    child = spawn(launcher, launchArgs, { cwd: install, env, stdio: 'ignore', windowsHide: supervisorOnly });
     child.on('error', () => { pageFailed = true; });
     await until(async () => {
       try { await fs.access(runtime); } catch (e) { if (e.code === 'ENOENT') return false; throw e; }
@@ -450,7 +463,7 @@ async function main() {
         await visible(page.getByRole('button', { name: 'Настроить расписание', exact: true }));
       }],
     ];
-    for (const [code, route, heading, extra] of o['focus-business'] ? [] : screens) await check(code, async () => {
+    for (const [code, route, heading, extra] of o['focus-business'] || focusBackup ? [] : screens) await check(code, async () => {
       await goto(route); await visible(page.getByRole('heading', { name: heading, exact: true }));
       await extra();
       // Never capture backup settings/cloud-config values, even on a fresh profile.
@@ -464,9 +477,14 @@ async function main() {
       await visible(page.getByRole('heading', { name: clientName, exact: true }));
       cardRoute = new URL(page.url()).pathname;
       if (!/^\/clients\/[a-f0-9-]{36}$/.test(cardRoute)) fail('CLIENT_ROUTE_REJECTED');
-      await shot('synthetic-client');
+      if (!focusBackup) await shot('synthetic-client');
     });
-    await check('INSTALLED_SYNTHETIC_BUSINESS_CYCLE', async () => {
+    if (focusBackup) {
+      stage = 'INSTALLED_SYNTHETIC_BUSINESS_CYCLE';
+      result.businessCycle = { status: 'NOTRUN' };
+      await healthy();
+      checks.push({ code: stage, status: 'NOTRUN' });
+    } else await check('INSTALLED_SYNTHETIC_BUSINESS_CYCLE', async () => {
       await canonical(run);
       const directory = await canonical(path.join(run, 'business-cycle'));
       result.businessCycle = await runInstalledBusinessCycle({ page, base, clientId: cardRoute.slice('/clients/'.length), directory });
@@ -514,13 +532,14 @@ async function main() {
       await page.getByRole('button', { name: 'Войти', exact: true }).click();
       await page.waitForURL(/\/today(?:\?|$)/, { timeout: 60000 });
       await goto(cardRoute); await visible(page.getByRole('heading', { name: clientName, exact: true }));
-      await shot('client-after-restart'); await goto('/today');
+      if (!focusBackup) await shot('client-after-restart');
+      await goto('/today');
     });
     stage = 'COORDINATOR_OBSERVATION';
     await writeNew(path.join(run, 'ready.json'), JSON.stringify({ schema: 1, runId: id, pid: child.pid,
-      url: base, stopFile, observationSeconds: observe, nativeUi: 'NOT_ASSERTED', syntheticDataOnly: true,
+      url: base, stopFile, observationSeconds: observe, nativeUi: supervisorOnly ? 'NOT_RUN_SUPERVISOR_ONLY' : 'NOT_ASSERTED', syntheticDataOnly: true,
       launcherSha256: launcherHash, sourceCommit: o['source-commit'] }, null, 2));
-    console.log(JSON.stringify({ status: 'BROWSER_CHECKS_COMPLETE_NATIVE_OBSERVATION_WINDOW', runId: id, readyFile: path.join(run, 'ready.json') }));
+    console.log(JSON.stringify({ status: supervisorOnly ? 'BROWSER_CHECKS_COMPLETE_SUPERVISOR_ONLY' : 'BROWSER_CHECKS_COMPLETE_NATIVE_OBSERVATION_WINDOW', runId: id, readyFile: path.join(run, 'ready.json') }));
     const end = Date.now() + observe * 1000;
     while (Date.now() < end) {
       alive(); await canonical(stopFile);
@@ -559,6 +578,20 @@ function selfTest() {
   assert.equal(options([])['cloud-proof'], undefined);
   assert.equal(options(['--native-backup-proof', '--cloud-proof'])['cloud-proof'], true);
   assert.throws(() => options(['--cloud-proof', '--cloud-proof']));
+  assert.equal(options([])['focus-backup'], undefined);
+  assert.equal(options(['--focus-business'])['focus-business'], true);
+  assert.equal(options(['--focus-backup', '--native-backup-proof'])['focus-backup'], true);
+  assert.equal(options(['--focus-backup', '--cloud-proof'])['cloud-proof'], true);
+  assert.equal(options(['--focus-backup', '--native-backup-proof', '--cloud-proof'])['focus-backup'], true);
+  assert.throws(() => options(['--focus-backup']));
+  assert.throws(() => options(['--focus-backup', '--focus-business']));
+  assert.throws(() => options(['--focus-business', '--focus-backup']));
+  assert.equal(options(['--supervisor-only', '--focus-backup', '--cloud-proof'])['supervisor-only'], true);
+  assert.equal(options(['--supervisor-only', '--focus-backup', '--cloud-proof'])['cloud-proof'], true);
+  assert.throws(() => options(['--supervisor-only']));
+  assert.throws(() => options(['--supervisor-only', '--cloud-proof']));
+  assert.throws(() => options(['--supervisor-only', '--focus-backup', '--native-backup-proof']));
+  assert.throws(() => options(['--supervisor-only', '--focus-backup', '--cloud-proof', '--native-backup-proof']));
   console.log('PURE_HELPERS_PASS');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

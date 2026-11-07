@@ -14,6 +14,21 @@ const SYNTHETIC_DOC_BYTES = 256 * 1024;
 const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const SHA256_RE = /^[a-f0-9]{64}$/;
 const SAFE_CODE_RE = /^[A-Z][A-Z0-9_]{0,63}$/;
+const CATALOG_STEPS = Object.freeze([
+  'STATUS', 'LIST_API', 'PARSE', 'IDENTITY', 'OPEN', 'DIALOG',
+  'SELECT_VISIBLE', 'SELECT_ARCHIVE', 'RESTORE_OPEN', 'RESTORE_DIALOG',
+  'ID_VISIBLE', 'ID_VALUE', 'CANCEL', 'CLOSED',
+]);
+const DIAGNOSTIC_STAGES = new Set([
+  'PREFLIGHT', 'FRESH_PROFILE_CHECK', 'LOAD_SECRETS_IN_MEMORY',
+  'GUI_CONFIGURE_AND_PROBE_PROVIDERS', 'INJECT_S3_QUEUE_FAULT',
+  'CREATE_VERIFIED_BACKUP', 'VERIFY_INDEPENDENT_QUEUE_FAILURE_AND_RECOVERY',
+  'WAIT_BOTH_PROVIDERS_VERIFIED', 'CAT_PAGE_NAV', 'CAT_PAGE_HEADING',
+  'MUTATE_AND_RESTORE_YANDEX', 'MUTATE_AND_RESTORE_MAILRU',
+  'ANONYMOUS_S3_PROBE', 'CONFIRM_RESTORE_EVIDENCE',
+  ...['YANDEX', 'MAILRU'].flatMap(provider => CATALOG_STEPS.map(step => `CAT_${provider}_${step}`)),
+]);
+const DIAGNOSTIC_KINDS = Object.freeze(['UI_TIMEOUT', 'LOCATOR_STRICT', 'OTHER']);
 const BUCKET_RE = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/;
 const PREFIX_RE = /^crm-synthetic-installed\/[a-f0-9-]{36}\/[a-f0-9-]{36}$/i;
 const ALLOWED_RESULT_SCHEMA = Object.freeze({
@@ -54,6 +69,16 @@ const fail = code => {
   throw Object.assign(new Error(safe), { safeCode: safe });
 };
 const need = (condition, code) => { if (!condition) fail(code); };
+// Inspect only in memory. Never retain the original error, message, stack or cause.
+function diagnosticCode(error, stage) {
+  if (typeof error?.safeCode === 'string' && SAFE_CODE_RE.test(error.safeCode)) return error.safeCode;
+  const closedStage = DIAGNOSTIC_STAGES.has(stage) ? stage : 'PREFLIGHT';
+  const kind = typeof error?.message === 'string' && error.message.includes('strict mode violation')
+    ? 'LOCATOR_STRICT'
+    : error?.name === 'TimeoutError' ? 'UI_TIMEOUT' : 'OTHER';
+  const code = `CL_${kind}_${closedStage}`;
+  return SAFE_CODE_RE.test(code) ? code : 'CL_UNEXPECTED_FAILURE';
+}
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const uuid = (value, code = 'CL_UUID_REJECTED') => {
   need(typeof value === 'string' && UUID_RE.test(value), code);
@@ -508,9 +533,11 @@ export async function runInstalledCloudProof({
     pass('SECRETS_LOADED_AND_PREFIX_ALLOCATED');
 
     stage = 'GUI_CONFIGURE_AND_PROBE_PROVIDERS';
-    const openBackupsPage = async () => {
+    const openBackupsPage = async (diagnoseCatalog = false) => {
+      if (diagnoseCatalog) stage = 'CAT_PAGE_NAV';
       const response = await page.goto(base + '/settings/backups', { waitUntil: 'networkidle', timeout: 45000 });
       need(response?.ok(), 'CL_BACKUPS_PAGE_NAVIGATION_FAILED');
+      if (diagnoseCatalog) stage = 'CAT_PAGE_HEADING';
       await page.getByRole('heading', { name: 'Локальная установка и резервные копии', exact: true }).waitFor({ state: 'visible', timeout: 30000 });
     };
     await openBackupsPage();
@@ -709,34 +736,50 @@ export async function runInstalledCloudProof({
       240000,
       'CL_CLOUD_REPLICATION_TIMEOUT',
     );
-    await openBackupsPage();
+    await openBackupsPage(true);
     for (const [providerCode, destId, label] of [
       ['YANDEX', yandexId, 'Яндекс Облако'],
       ['MAILRU', mailruId, 'Облако Mail.ru'],
     ]) {
       const region = page.getByRole('region', { name: label, exact: true });
+      stage = `CAT_${providerCode}_STATUS`;
       await region.getByText(/Копия проверена/).waitFor({ state: 'visible', timeout: 30000 });
+      stage = `CAT_${providerCode}_LIST_API`;
       const listed = await postControl({ action: 'list', destinationId: destId });
+      stage = `CAT_${providerCode}_PARSE`;
       const remoteCatalog = parseCatalog(listed?.archives);
       const match = remoteCatalog.find(a => a.backupId === archive.backupId);
+      stage = `CAT_${providerCode}_IDENTITY`;
       need(match && match.sha256 === archive.sha256 && match.bytes === archive.bytes, `CL_${providerCode}_REMOTE_CATALOG_MISMATCH`);
 
       // Verify remote catalog selection and restore modal in the real GUI before queuing supervised restore.
+      stage = `CAT_${providerCode}_OPEN`;
       await region.getByRole('button', { name: 'Список копий / получить', exact: true }).click();
       const listDialog = page.getByRole('dialog', { name: 'Список копий', exact: true });
+      stage = `CAT_${providerCode}_DIALOG`;
       await listDialog.waitFor({ state: 'visible', timeout: 30000 });
-      const select = listDialog.getByLabel('Выберите копию', { exact: true });
+      // backup-panel.tsx wraps this sole select AND its options in the label.
+      // Exact label text can include option text; keep strict single-control lookup.
+      const select = listDialog.getByRole('combobox');
+      stage = `CAT_${providerCode}_SELECT_VISIBLE`;
       await select.waitFor({ state: 'visible', timeout: 30000 });
+      stage = `CAT_${providerCode}_SELECT_ARCHIVE`;
       await select.selectOption(archive.backupId);
+      stage = `CAT_${providerCode}_RESTORE_OPEN`;
       await listDialog.getByRole('button', { name: 'Восстановить', exact: true }).click();
       const restoreDialog = page.getByRole('dialog', { name: 'Проверка и восстановление', exact: true });
+      stage = `CAT_${providerCode}_RESTORE_DIALOG`;
       await restoreDialog.waitFor({ state: 'visible', timeout: 15000 });
+      stage = `CAT_${providerCode}_ID_VISIBLE`;
       await restoreDialog.getByLabel('Идентификатор архива', { exact: true }).waitFor({ state: 'visible', timeout: 15000 });
+      stage = `CAT_${providerCode}_ID_VALUE`;
       need(
         (await restoreDialog.getByLabel('Идентификатор архива', { exact: true }).inputValue()) === archive.backupId,
         `CL_${providerCode}_GUI_RESTORE_MODAL_MISMATCH`,
       );
+      stage = `CAT_${providerCode}_CANCEL`;
       await restoreDialog.getByRole('button', { name: 'Отмена', exact: true }).click();
+      stage = `CAT_${providerCode}_CLOSED`;
       await restoreDialog.waitFor({ state: 'hidden', timeout: 15000 });
       pass(`REMOTE_CATALOG_AND_GUI_MODAL_VERIFIED_${providerCode}`);
     }
@@ -859,8 +902,7 @@ export async function runInstalledCloudProof({
       remoteCleanup: RETAINED_REMOTE_EVIDENCE,
     });
   } catch (e) {
-    const code = e?.safeCode && SAFE_CODE_RE.test(e.safeCode) ? e.safeCode : `CL_FAILED_${stage}`;
-    fail(code);
+    fail(diagnosticCode(e, stage));
   } finally {
     phrase = undefined;
     recovery = undefined;
@@ -885,6 +927,22 @@ export async function runInstalledCloudProof({
 }
 
 async function selfTest() {
+  // Pure deterministic diagnostics checks: no browser, filesystem or cloud calls.
+  for (const stage of DIAGNOSTIC_STAGES) {
+    for (const kind of DIAGNOSTIC_KINDS) {
+      const code = `CL_${kind}_${stage}`;
+      assert.ok(code.length <= 64 && SAFE_CODE_RE.test(code));
+    }
+  }
+  const diagnosticStage = 'CAT_MAILRU_SELECT_ARCHIVE';
+  assert.equal(diagnosticCode({ safeCode: 'CL_HTTP_FAILED', name: 'TimeoutError' }, diagnosticStage), 'CL_HTTP_FAILED');
+  assert.equal(diagnosticCode({ safeCode: 'A'.repeat(64) }, diagnosticStage), 'A'.repeat(64));
+  assert.equal(diagnosticCode({ name: 'TimeoutError', message: 'SYNTHETIC_PRIVATE_VALUE' }, diagnosticStage), 'CL_UI_TIMEOUT_CAT_MAILRU_SELECT_ARCHIVE');
+  assert.equal(diagnosticCode({ message: 'strict mode violation: SYNTHETIC_PRIVATE_VALUE' }, diagnosticStage), 'CL_LOCATOR_STRICT_CAT_MAILRU_SELECT_ARCHIVE');
+  for (const error of [null, {}, new Error('SYNTHETIC_PRIVATE_VALUE'), { safeCode: 'A'.repeat(65) }, { safeCode: 'https://example.test/private' }]) {
+    assert.equal(diagnosticCode(error, diagnosticStage), 'CL_OTHER_CAT_MAILRU_SELECT_ARCHIVE');
+  }
+  assert.equal(diagnosticCode({}, 'SYNTHETIC_PRIVATE_VALUE'), 'CL_OTHER_PREFLIGHT');
   assert.equal(DEFAULT_SECRETS_FILE, String.raw`D:\crm-secrets\clouds.env`);
   const sampleRunId = '11111111-2222-4333-8444-555555555555';
   const sampleArchiveId = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
@@ -1022,7 +1080,7 @@ async function selfTest() {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.length === 3 && process.argv[2] === '--self-test') {
     selfTest().catch(e => {
-      console.error(JSON.stringify({ status: 'SELF_TEST_FAILED', code: e?.safeCode ?? 'CL_SELF_TEST_FAILED' }));
+      console.error(JSON.stringify({ status: 'SELF_TEST_FAILED', code: diagnosticCode(e, 'PREFLIGHT') }));
       process.exitCode = 1;
     });
   } else {

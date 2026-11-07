@@ -211,8 +211,9 @@ export async function runInstalledBackupCycle({ page, base, clientId, directory,
       protectiveSnapshot: { status: 'LINK_NOT_EXPOSED_BY_PUBLIC_API', newCatalogCandidates: protective },
       selectedFileRestore: { status: 'BLOCKED', code: 'EXISTING_LOCAL_CATALOG_ARCHIVE_REJECTED' },
       coverage: { businessActions: 'AUTHENTICATED_API', nativeDialogs: 'CALLER_CUA_PLUS_ACTOR_BOUND_API_RESULT', backupPanelUi: 'NOT_TESTED' } };
-  } catch {
+  } catch (error) {
     // Deliberately discard raw errors, callbacks' errors, response bodies and secrets.
-    fail(`BK_FAILED_${stage}`);
+    const detail = typeof error?.safeCode === 'string' && /^[A-Z][A-Z0-9_]{0,90}$/.test(error.safeCode) ? `_${error.safeCode}` : '';
+    fail(`BK_FAILED_${stage}${detail}`);
   } finally { phrase = undefined; recovery = undefined; }
 }
