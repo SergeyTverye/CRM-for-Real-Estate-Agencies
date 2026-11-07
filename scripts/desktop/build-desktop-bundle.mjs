@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { assertRuntimeEntries, runtimeEntries, runtimeBuildOptions } from './runtime-entries.mjs';
-import { safeCopyTrace, assertRuntimeResources } from './resource-policy.mjs';
+import { safeCopyTrace, assertRuntimeResources, refreshRuntimeAliases } from './resource-policy.mjs';
 import { checkFinalRuntime } from './check-final-runtime.mjs';
 const require = createRequire(import.meta.url);
 const root = process.cwd();
@@ -44,6 +44,9 @@ await mkdir(path.join(app,'vendor'),{recursive:true});
 await cp('vendor/real-estate-scrapper-2.1.0.tgz',path.join(app,'vendor/real-estate-scrapper-2.1.0.tgz'));
 npm(['ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],app);
 npm(['rebuild','better-sqlite3'],app);
+// Turbopack hashed aliases must include runtime entry files/native bindings from
+// this bundle's pinned production install, not just the partial standalone trace.
+await refreshRuntimeAliases(app,dist);
 await rm(path.join(app,'vendor'),{recursive:true,force:true});
 const entries = runtimeEntries;
 for (const [out,input] of Object.entries(entries)) await build({...runtimeBuildOptions,entryPoints:[input],outfile:path.join(app,out)});

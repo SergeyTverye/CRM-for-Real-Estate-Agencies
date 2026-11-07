@@ -58,22 +58,43 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
     }
     code('INIT_PASS');
     server = spawn(node, ['--require', path.join(app, 'graceful.cjs'), path.join(app, 'server.js')], {
-      cwd: app, env, windowsHide: true, stdio: ['pipe', 'ignore', 'ignore'],
+      cwd: app, env, windowsHide: true, stdio: ['pipe', 'ignore', 'pipe'],
     });
+    let serverErrors = '';
+    server.stderr.on('data', chunk => { serverErrors = (serverErrors + String(chunk)).slice(-16384); });
     server.stdin.on('error', () => {});
     let failed = false;
     server.on('error', () => { failed = true; });
     exit = new Promise(resolve => server.once('close', () => { closed = true; resolve(); }));
     const base = 'http://127.0.0.1:' + port;
     let ready = false;
+    let readyDiagnostic = 'NO_RESPONSE';
     const deadline = Date.now() + 120000;
     while (Date.now() < deadline) {
       if (failed || closed) throw Error('FINAL_RUNTIME_SERVER_EXIT');
-      try { ready = (await fetch(base + '/api/health/ready', { signal: AbortSignal.timeout(2000) })).ok; } catch {}
+      try {
+        const response = await fetch(base + '/api/health/ready', { signal: AbortSignal.timeout(2000) });
+        ready = response.ok;
+        readyDiagnostic = 'HTTP_' + response.status;
+        if (response.status === 503) {
+          const report = await response.json();
+          if (report?.checks?.database?.ok === false) readyDiagnostic += '_DATABASE_UNAVAILABLE';
+          if (report?.checks?.fileStorage?.ok === false) readyDiagnostic += '_STORAGE_UNAVAILABLE';
+        }
+      } catch {}
       if (ready) break;
       await new Promise(resolve => setTimeout(resolve, 300));
     }
-    if (!ready) throw Error('FINAL_RUNTIME_READY_FAILED');
+    if (!ready) {
+      // Read-only Prisma endpoint can expose a missing dynamic module to the
+      // server's own diagnostic stream even when readiness intentionally hides it.
+      try { await fetch(base + '/api/v1/desktop/setup', { signal: AbortSignal.timeout(5000) }); } catch {}
+      code('READY_' + readyDiagnostic);
+      if (/\b(?:MODULE_NOT_FOUND|ERR_MODULE_NOT_FOUND)\b/.test(serverErrors)) code('SERVER_MODULE_NOT_FOUND');
+      if (/\bERR_DLOPEN_FAILED\b/.test(serverErrors)) code('SERVER_NATIVE_LOAD_FAILED');
+      if (/\b(?:ENOENT|SQLITE_CANTOPEN)\b/.test(serverErrors)) code('SERVER_ASSET_UNAVAILABLE');
+      throw Error('FINAL_RUNTIME_READY_FAILED');
+    }
     code('READY_PASS');
     // This endpoint performs a real Prisma user.count(), exercising the
     // generated SQLite client and query-compiler WASM, not just SELECT 1.

@@ -127,6 +127,7 @@ async function main() {
     launcherSha256: launcherHash, installerSha256: installerHash, nativeUi: 'NOT_ASSERTED_SEPARATE_OBSERVATION_REQUIRED',
     runtime: { controllerNode: process.version, browserKind }, checks, screenshots: [] };
   let child, context, base, page, browser, supervisorPid;
+  const ownedNodes = new Set();
   let stage = 'START';
   let password = randomBytes(24).toString('hex') + 'Aa7!';
   const login = 'qa-' + randomBytes(10).toString('hex');
@@ -150,8 +151,10 @@ async function main() {
     try { info = JSON.parse(await fs.readFile(runtime, 'utf8')); } catch { fail('RUNTIME_METADATA_REJECTED'); }
     base = loopback(info.url);
     if (!Number.isSafeInteger(info.pid) || info.pid < 1) fail('RUNTIME_PID_REJECTED');
-    const owned = await powershell(`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${info.pid}';if(!$p -or $p.ParentProcessId -ne ${child.pid} -or $p.ExecutablePath -ine $env:QA_NODE){throw 'OWNER'};$s=@(Get-CimInstance Win32_Process -Filter 'ParentProcessId=${info.pid}' | Where-Object {$_.ExecutablePath -ieq $env:QA_NODE -and $_.CommandLine -match 'server\\.js'});if($s.Count -ne 1){throw 'SERVER'};'OWNED'`, { ...baseEnv, QA_NODE: node });
-    if (owned !== 'OWNED') fail('RUNTIME_ANCESTRY_REJECTED');
+    const owned = await powershell(`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${info.pid}';if(!$p -or $p.ParentProcessId -ne ${child.pid} -or $p.ExecutablePath -ine $env:QA_NODE){throw 'OWNER'};$s=@(Get-CimInstance Win32_Process -Filter 'ParentProcessId=${info.pid}' | Where-Object {$_.ExecutablePath -ieq $env:QA_NODE -and $_.CommandLine -match 'server\\.js'});if($s.Count -ne 1){throw 'SERVER'};'OWNED:'+ [string]$s[0].ProcessId`, { ...baseEnv, QA_NODE: node });
+    const serverPid = /^OWNED:([1-9]\d*)$/.exec(owned)?.[1];
+    if (!serverPid || !Number.isSafeInteger(Number(serverPid))) fail('RUNTIME_ANCESTRY_REJECTED');
+    ownedNodes.add(info.pid); ownedNodes.add(Number(serverPid));
     supervisorPid = info.pid;
   }
   async function start() {
@@ -172,12 +175,21 @@ async function main() {
     }, 180000, 'RUNTIME_TIMEOUT');
   }
   async function stopOwned() {
-    if (!child || child.exitCode !== null || child.signalCode !== null) return;
+    if (!child) return;
     // ChildProcess retains the Windows process handle. Never reopen PID, kill by name or signal global stop.
-    const exited = new Promise(resolve => child.once('exit', resolve));
-    if (!child.kill()) fail('OWNED_STOP_FAILED');
-    await Promise.race([exited, sleep(20000).then(() => fail('OWNED_STOP_TIMEOUT'))]);
+    if (child.exitCode === null && child.signalCode === null) {
+      const exited = new Promise(resolve => child.once('exit', resolve));
+      if (!child.kill()) fail('OWNED_STOP_FAILED');
+      await Promise.race([exited, sleep(20000).then(() => fail('OWNED_STOP_TIMEOUT'))]);
+    }
     child = undefined;
+    if (ownedNodes.size) {
+      const ids = [...ownedNodes].join(',');
+      // Observation only. Never reopen or terminate a PID discovered here.
+      const gone = await powershell(`$ids=@(${ids});$end=[DateTime]::UtcNow.AddSeconds(10);do{$p=@(Get-CimInstance Win32_Process | Where-Object { $ids -contains $_.ProcessId -and $_.ExecutablePath -ieq $env:QA_NODE });if(!$p.Count){'GONE';break};[Threading.Thread]::Sleep(100)}while([DateTime]::UtcNow -lt $end);if($p.Count){'REMAINING'}`, { ...baseEnv, QA_NODE: node });
+      if (gone !== 'GONE') fail('OWNED_NODE_REMAINS');
+      ownedNodes.clear();
+    }
     await untilNoWriter();
   }
   async function untilNoWriter() {

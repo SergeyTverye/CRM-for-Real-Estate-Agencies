@@ -98,3 +98,39 @@ export async function assertRuntimeResources(root, dist = '.next-desktop') {
   }
   await walk(root);
 }
+
+/** Next's trace may contain only package metadata. Refresh only existing hashed
+ * aliases from the exact production install, never from the host/source tree. */
+export async function refreshRuntimeAliases(root, dist = '.next-desktop') {
+  if ((await lstat(root)).isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+  const rootPath = await realpath(root);
+  const modules = path.join(root, 'node_modules');
+  if ((await lstat(modules)).isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+  const canonical = await realpath(modules);
+  const aliases = path.join(root, dist, 'node_modules');
+  for (const directory of [modules, path.join(root, dist), aliases]) {
+    if ((await lstat(directory)).isSymbolicLink() || !(await realpath(directory)).startsWith(rootPath + path.sep)) throw Error('RESOURCE_SYMLINK');
+  }
+  let count = 0;
+  async function visit(directory, scope = '') {
+    for (const item of await readdir(directory, { withFileTypes: true })) {
+      if (item.isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+      if (!item.isDirectory()) continue;
+      if (!scope && /^@[a-z0-9][a-z0-9._-]*$/i.test(item.name)) {
+        await visit(path.join(directory, item.name), item.name + '/');
+        continue;
+      }
+      const match = item.name.match(/^([a-z0-9][a-z0-9._-]*)-[a-f0-9]{16}$/i);
+      if (!match) continue;
+      const packageName = scope + match[1];
+      const source = path.join(modules, packageName);
+      if (scope && (await lstat(path.join(modules, scope))).isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+      if ((await lstat(source)).isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+      if (!(await realpath(source)).startsWith(canonical + path.sep)) throw Error('RESOURCE_SYMLINK');
+      await safeCopyTrace(source, path.join(directory, item.name), { prefix: dist + '/node_modules/' + scope + item.name, dist });
+      count++;
+    }
+  }
+  await visit(aliases);
+  return count;
+}

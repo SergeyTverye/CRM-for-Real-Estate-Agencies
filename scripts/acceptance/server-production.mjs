@@ -37,7 +37,7 @@ function run(args, label = args.slice(0, 3).join(' ')) {
   const r = spawnSync('docker', args, { cwd: root, encoding: 'utf8', timeout: 600000, maxBuffer: 16 * 1024 * 1024 });
   writeFileSync(path.join(root, 'commands.log'), redact(commands.join('\n') + '\n'));
   writeFileSync(path.join(root, 'execution.log'), redact((existsSync(path.join(root, 'execution.log')) ? readFileSync(path.join(root, 'execution.log'), 'utf8') : '') + `\n# ${label}\n${r.stdout ?? ''}${r.stderr ?? ''}`));
-  if (r.status !== 0) throw new Error(`${label}: exit ${r.status}: ${redact((r.stderr || r.stdout || r.error?.message || '').slice(-2500))}`);
+  if (r.status !== 0) throw new Error(`DOCKER_FAILED exit=${r.status} output_sha256=${sha((r.stderr || '') + (r.stdout || ''))}`);
   return r.stdout.trim();
 }
 function pass(name, detail = '') { results.push({ name, status: 'PASS', detail }); console.log(`PASS ${name} ${detail}`); }
@@ -65,7 +65,7 @@ async function ready(c) {
 async function request(c, cookie, route, options = {}, statuses = [200]) {
   const r = await fetch(c.url + '/api/v1' + route, { ...options, headers: { origin: c.url, ...(cookie ? { cookie } : {}), ...options.headers }, signal: AbortSignal.timeout(120000) });
   const data = Buffer.from(await r.arrayBuffer());
-  if (!statuses.includes(r.status)) throw new Error(`${route}: HTTP ${r.status}: ${redact(data.toString().slice(0, 1200))}`);
+  if (!statuses.includes(r.status)) throw new Error(`${route}: HTTP ${r.status}`);
   return { r, data, json: () => JSON.parse(data.toString()) };
 }
 const post = data => ({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) });
@@ -189,7 +189,7 @@ try {
   rt.dc('stop'); c.dc('stop');
   evidence.handles = 'Both owned projects stopped; volumes and synthetic artifacts retained. No existing CRM touched.';
 } catch (e) {
-  evidence.status = 'FAIL'; evidence.error = redact(e.message); console.error(evidence.error); process.exitCode = 1;
+  evidence.status = 'FAIL'; evidence.error = `failure_sha256=${sha(String(e.message))}; locations=${String(e.stack).split('\n').filter(l => /^\s+at /.test(l)).join(' | ')}`; console.error(evidence.error); process.exitCode = 1;
 } finally {
   evidence.finished = new Date().toISOString();
   writeFileSync(path.join(root, 'result.json'), JSON.stringify(evidence, null, 2));
