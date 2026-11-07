@@ -4,7 +4,7 @@ import { parseEnterprise, type EnterpriseProfile } from '../../src/modules/impor
 
 type Counter = { matched: number; mismatched: number };
 /** Values, sheet names, headers and format strings never leave this function. */
-export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workbook, profile: EnterpriseProfile, imported: Set<string>) {
+export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workbook, profile: EnterpriseProfile, imported: Set<string>, onRowMismatch?: (sheet: number, row: number, field: string) => void) {
   const counters: Record<string, Counter> = {};
   const check = (type: string, a: unknown, b: unknown) => {
     const c = counters[type] ??= { matched: 0, mismatched: 0 };
@@ -44,15 +44,19 @@ export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workboo
     const coordinate = `${row.sheetIndex}:${row.rowNumber}`;
     if (!imported.has(coordinate)) continue;
     const next = byCoordinate.get(coordinate);
-    check('row_keys', row.recordKey, next?.recordKey);
+    const compareRow = (category: string, field: string, left: unknown, right: unknown) => {
+      check(category, left, right);
+      if (!isDeepStrictEqual(left, right)) onRowMismatch?.(row.sheetIndex, row.rowNumber, field);
+    };
+    compareRow('row_keys', 'recordKey', row.recordKey, next?.recordKey);
     const keys = row.target === 'property' || row.target === 'property_agreement_control'
       ? ['addressText', 'area', 'operationType']
       : row.target === 'historical_deal_archive' ? ['addressText', 'area', 'sourceRowId', 'contractRef', 'name'] : ['name'];
-    for (const key of keys) check('key_fields', row.record[key], next?.record[key]);
+    for (const key of keys) compareRow('key_fields', key, row.record[key], next?.record[key]);
     if (row.target === 'client_request_need') check('contacts', row.record.contacts, next?.record.contacts);
     if (hasColumn(row, 'receivedDate')) check('dates', row.record.receivedAt, next?.record.receivedAt);
     for (const key of ['price', 'commissionAmount']) {
-      if (hasColumn(row, key)) check('money', row.record[key], next?.record[key]);
+      if (hasColumn(row, key)) compareRow('money', key, row.record[key], next?.record[key]);
     }
     if (row.target === 'property_agreement_control') {
       const controlData: Array<[string, string]> = [
@@ -71,7 +75,7 @@ export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workboo
       for (const [counter, field] of controlData) {
         if (!hasColumn(row, field)) continue;
         const key = recordField(field);
-        check(counter, row.record[key], next?.record[key]);
+        compareRow(counter, field, row.record[key], next?.record[key]);
       }
     }
   }

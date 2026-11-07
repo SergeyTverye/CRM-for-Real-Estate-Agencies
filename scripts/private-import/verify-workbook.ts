@@ -2,7 +2,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, mkdir, mkdtemp, rm, realpath, writeFile } from 'node:fs/promises';
 import { resolve, join, sep, relative } from 'node:path';
-import { execFileSync } from 'node:child_process';
 import type { Actor } from '../../src/modules/auth/domain/actor';
 
 // Deny diagnostic output at the process boundary, including dependency errors.
@@ -16,6 +15,7 @@ const report = {
   unresolved: [] as { sheet: number; row: number; column: number }[],
   preservation: {} as Record<string, { matched: number; mismatched: number }>,
   compatibility: {} as Record<string, number>,
+  mismatchCoordinates: [] as { sheet: number; row: number; field: string }[],
 };
 const allowedCodes = new Set(['INVALID_AREA', 'INVALID_COMMISSION', 'INVALID_FLOOR', 'INVALID_PRICE', 'INVALID_PRICE_UNIT', 'PRICE_UNIT_REQUIRED', 'MISSING_PROPERTY_KEY', 'MISSING_CLIENT_KEY', 'MISSING_ADDRESS', 'INVALID_DATE', 'HIDDEN_ROW', 'REQUIRES_MANUAL_REVIEW', 'already_imported', 'probable_duplicate']);
 const allowedCompatibility = new Set(['UNSUPPORTED_COLUMN', 'UNSUPPORTED_FIELD', 'FORMULA_CLEARED', 'FORMULA_PRESERVED', 'FORMULA_SHARED_UNSUPPORTED', 'FORMULA_CELL_NOT_ALLOWED', 'FORMULA_DEPENDENCY_REJECTED', 'FORMULA_UNSUPPORTED', 'FORMULA_VALUE_MISMATCH', 'FORMULA_RECALC_ON_LOAD', 'NUMBER_AS_TEXT', 'IMAGE_PRESERVED', 'HYPERLINK_PRESERVED', 'HYPERLINK_CLEARED', 'HYPERLINK_REJECTED']);
@@ -31,6 +31,7 @@ async function main() {
   let disconnect: (() => Promise<void>) | undefined;
   let admin: import('pg').Client | undefined;
   let locked = false, databaseCreated = false;
+  const verificationDatabase = 'crm_private_verify_' + randomUUID().replaceAll('-', '');
   try {
     const args = process.argv.slice(2);
     if (args.length !== 5 || args[1] !== '--profile' || args[3] !== '--backend' || !['pg', 'sqlite'].includes(args[4]!)) throw new Error();
@@ -47,7 +48,7 @@ async function main() {
     const backend = args[4];
     const url = backend === 'pg' ? new URL(process.env.TEST_DATABASE_URL ?? 'postgresql://crm:crm_test_password@127.0.0.1:55432/crm_test_d') : null;
     if (url && (!['postgres:', 'postgresql:'].includes(url.protocol) || url.hostname !== '127.0.0.1' || url.port !== '55432')) throw new Error();
-    if (url) url.pathname = '/crm_private_verify';
+    if (url) url.pathname = '/' + verificationDatabase;
     Object.assign(process.env, {
       NODE_ENV: 'test', CRM_DEPLOYMENT_MODE: backend === 'sqlite' ? 'desktop' : 'server',
       DATABASE_URL: url?.toString() ?? 'file:' + join(directory, 'verify.db'),
@@ -63,11 +64,18 @@ async function main() {
       const lock = await admin.query('SELECT pg_try_advisory_lock(3221223) AS acquired');
       if (!lock.rows[0]?.acquired) throw new Error();
       locked = true;
-      // Exact isolated test DB only; no production/test-suite schema is modified.
-      await admin.query('DROP DATABASE IF EXISTS crm_private_verify WITH (FORCE)');
-      await admin.query('CREATE DATABASE crm_private_verify');
+      // Only this invocation's new DB is eligible for cleanup. Do not load
+      // dotenv/Prisma CLI configuration or replace any pre-existing database.
+      await admin.query(`CREATE DATABASE "${verificationDatabase}"`);
       databaseCreated = true;
-      execFileSync(process.execPath, ['node_modules/prisma/build/index.js', 'migrate', 'deploy'], { env: process.env, stdio: 'pipe', timeout: 120000 });
+      const migrationClient = new Client({ connectionString: url.toString() });
+      try {
+        await migrationClient.connect();
+        const { readdir } = await import('node:fs/promises');
+        for (const migration of (await readdir('prisma/migrations')).filter(name => /^\d/.test(name)).sort()) {
+          await migrationClient.query(await readFile(join('prisma/migrations', migration, 'migration.sql'), 'utf8'));
+        }
+      } finally { await migrationClient.end(); }
     } else {
       const { applySqliteMigrations } = await import('../desktop/database-lifecycle');
       applySqliteMigrations(join(directory, 'verify.db'));
@@ -169,7 +177,10 @@ async function main() {
       throw new Error('VERIFY_FAILED');
     }
     stage = 'EXPORT_COMPARE_FAILED';
-    report.preservation = compareWorkbook(original, exportedWorkbook, profile, imported);
+    const mismatchFields = new Set(['recordKey', 'addressText', 'area', 'operationType', 'sourceRowId', 'contractRef', 'name', 'price', 'commissionAmount', 'agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'adPlatform', 'adStatus', 'taskText']);
+    report.preservation = compareWorkbook(original, exportedWorkbook, profile, imported, (sheet, row, field) => {
+      if (mismatchFields.has(field)) report.mismatchCoordinates.push({ sheet, row, field });
+    });
     report.checks.export_preservation = Number(Object.values(report.preservation).every(c => c.mismatched === 0));
     if (!report.checks.export_preservation) report.errors.EXPORT_MISMATCH = Object.values(report.preservation).reduce((n, c) => n + c.mismatched, 0);
     stage = 'EXPORT_REIMPORT_FAILED';
@@ -207,7 +218,7 @@ async function main() {
     let cleaned = true;
     try { await disconnect?.(); } catch { cleaned = false; }
     try {
-      if (admin && databaseCreated) await admin.query('DROP DATABASE crm_private_verify WITH (FORCE)');
+      if (admin && databaseCreated) await admin.query(`DROP DATABASE "${verificationDatabase}" WITH (FORCE)`);
       if (admin && locked) await admin.query('SELECT pg_advisory_unlock(3221223)');
     } catch { cleaned = false; }
     finally { try { await admin?.end(); } catch { cleaned = false; } }

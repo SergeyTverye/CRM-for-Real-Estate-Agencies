@@ -10,6 +10,7 @@ export default mergeConfig(base, {
             'tests/integration/enterprise-control-v2.test.ts',
             'tests/integration/enterprise-control-fidelity.test.ts',
             'tests/integration/enterprise-formula-links.test.ts',
+            'tests/integration/enterprise-control-baseline.test.ts',
         ],
     },
 });

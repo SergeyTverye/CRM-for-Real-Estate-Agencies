@@ -26,7 +26,22 @@ type Summary = {
     checksumRepeated: boolean;
     exportDates?: Record<string, string>;
     controlLinks?: Record<string, ControlLinks>;
+    controlPropertyBaselines?: Record<string, ControlPropertyBaseline>;
 };
+// Closed, export-relevant scalar projection only; never persist a Property/source payload.
+type ControlPropertyBaseline = ReturnType<typeof controlPropertyBaseline>;
+function controlPropertyBaseline(p: {
+    addressText: string; district: string | null; area: { toString(): string } | null;
+    price: { toString(): string } | null; operationType: string;
+    status: string; responsibleUserId: string | null; attributesJsonb: unknown;
+}) {
+    return {
+        addressText: p.addressText, district: p.district, area: p.area?.toString() ?? null,
+        price: p.price?.toString() ?? null,
+        operationType: p.operationType, status: p.status, responsibleUserId: p.responsibleUserId,
+        priceUnit: (p.attributesJsonb as { priceUnit?: string } | null)?.priceUnit ?? null,
+    };
+}
 const json = (value: unknown) => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 async function readSource(key: string) { const { stream } = await getStorage().read(key); const parts: Buffer[] = []; for await (const part of stream)
     parts.push(Buffer.from(part)); return Buffer.concat(parts); }
@@ -160,6 +175,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
         let imported = 0, skipped = 0;
         const exportDates: Record<string, string> = {};
         const controlLinks: Record<string, ControlLinks> = {};
+        const controlPropertyBaselines: Record<string, ControlPropertyBaseline> = {};
         for (const r of rows.filter(eligible)) {
             if (r.record.commercialPurpose && !await tx.dictionaryItem.count({ where: { category: 'commercial_purpose', code: String(r.record.commercialPurpose), isActive: true } }))
                 throw new ValidationError('INVALID_PURPOSE_CODE');
@@ -177,6 +193,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                 const responsible = String(r.record.responsibleUserId ?? actor.userId);
                 const links = r.target === 'property_agreement_control' ? await commitEnterpriseControl(tx, r, responsible, actor.userId) : null;
                 if (links) controlLinks[`${r.sheetIndex}:${r.rowNumber}`] = links;
+                if (links) controlPropertyBaselines[`${r.sheetIndex}:${r.rowNumber}`] = controlPropertyBaseline(await tx.property.findUniqueOrThrow({ where: { id: links.propertyId } }));
                 const result = links ? { type: 'Property', id: links.propertyId } : await commitRow(tx, r, { coordinatesAsPhone: true, createTasksFromFixNotes: false, responsibleUserId: responsible, jobId: id, sourceFilename: 'enterprise-workbook.xlsx', actorId: actor.userId });
                 if (!('skipped' in result)) {
                     target = result;
@@ -200,7 +217,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                 skipped++;
             await tx.importRowResult.updateMany({ where: { importJobId: id, sourceRowNumber: r.rowNumber, sheetName: r.sheetName }, data: { commitResult: target ? 'imported' : 'skipped', targetEntityType: target?.type ?? r.target, targetEntityId: target?.id ?? null, warningCodes: r.warningCodes, errorCodes: r.errorCodes } });
         }
-        await tx.importJob.update({ where: { id }, data: { status: 'completed', rowsRead: rows.length, rowsImported: imported, rowsSkipped: skipped, finishedAt: new Date(), summaryJsonb: json({ ...summary, exportDates, controlLinks }) } });
+        await tx.importJob.update({ where: { id }, data: { status: 'completed', rowsRead: rows.length, rowsImported: imported, rowsSkipped: skipped, finishedAt: new Date(), summaryJsonb: json({ ...summary, exportDates, controlLinks, controlPropertyBaselines }) } });
         await writeAudit(tx, { actorUserId: actor.userId, action: 'import.enterprise.committed', entityType: 'ImportJob', entityId: id, after: { imported, skipped } });
         return { id, status: 'completed', imported, skipped };
     });
@@ -254,6 +271,19 @@ export async function exportEnterprise(actor: Actor, id: string) {
                 values = { ...p, sourceRowId: original.get('sourceRowId'), contractRef: original.get('contractRef'), comment: original.get('comment'), receivedDate: row.record.receivedAt, propertyTypeText: p.commercialPurpose === row.record.commercialPurpose ? original.get('propertyTypeText') : p.commercialPurpose ?? p.propertyType, area: p.area?.toString(), price: p.price?.toString(), operationText: p.operationType === row.record.operationType ? original.get('operationText') : p.operationType === 'sale' ? 'Продажа' : 'Аренда', floor: p.floor !== null && p.floorsTotal !== null ? `${p.floor}/${p.floorsTotal} эт.` : p.floor, priceUnit: (p.attributesJsonb as {
                         priceUnit?: string;
                     } | null)?.priceUnit };
+            const baseline = row.target === 'property_agreement_control'
+                ? (job.summaryJsonb as unknown as Summary).controlPropertyBaselines?.[`${row.sheetIndex}:${row.rowNumber}`] : undefined;
+            if (p && baseline) {
+                const current = controlPropertyBaseline(p);
+                // Reuse only the policy-filtered parsed record, and only while each
+                // linked CRM field still equals its commit-time value. NULL is not zero.
+                for (const field of ['district', 'area', 'price', 'priceUnit', 'status', 'responsibleUserId'] as const)
+                    if (current[field] === baseline[field]) values[field] = row.record[field];
+                if (normalizeAddress(current.addressText) === normalizeAddress(baseline.addressText)
+                    && normalizeAddress(current.addressText) === normalizeAddress(String(row.record.addressText)))
+                    values.addressText = row.record.addressText;
+                if (current.operationType === baseline.operationType) values.operationText = original.get('operationText');
+            }
         }
         else if (receipt.targetEntityType === 'Client') {
             const c = await db.client.findUnique({ where: { id: receipt.targetEntityId }, include: { contacts: true, leadRequests: { orderBy: { createdAt: 'asc' }, take: 1 } } });
