@@ -18,6 +18,7 @@ export const backupCommandSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("pick-directory") }).strict(),
   z.object({ action: z.literal("pick-archive") }).strict(),
   z.object({ action: z.literal("restore-from-file"), requestId: z.uuid(), passphrase: z.string().min(12).max(1024).optional(), recoveryKey: z.string().max(100).optional(), confirmed: z.literal(true) }).strict(),
+  z.object({ action: z.literal("receive-from-file"), requestId: z.uuid(), passphrase: z.string().min(12).max(1024).optional(), recoveryKey: z.string().max(100).optional(), confirmed: z.literal(true) }).strict(),
   z.object({ action: z.literal("native-export"), backupId: z.uuid() }).strict(),
   z.object({ action: z.literal("native-result"), requestId: z.uuid() }).strict(),
   z.object({ action: z.literal("probe"), destinationId: z.uuid() }).strict(),
@@ -67,7 +68,7 @@ export async function backupControlStatus(actor: Actor) {
     try { const { archive } = JSON.parse(await readFile(path.join(archiveRoot(), e), "utf8")); archives.push(archiveRefSchema.parse(archive)); } catch {}
   }
   archives.sort((a, b) => b.createdAtUtc.localeCompare(a.createdAtUtc));
-  return { mode: desktop ? "desktop" : "server", version: process.env.APP_VERSION ?? "development", dataLocation: data, storageBytes,
+  return { mode: desktop ? "desktop" : "server", standby: getConfig().isReadOnlyInstance, version: process.env.APP_VERSION ?? "development", dataLocation: data, storageBytes,
     freeBytes: disk ? disk.bavail * disk.bsize : null, selfCheck: "База доступна; пригодность архива проверяется отдельно", archives,
     rows: rows.map(({ sourcePath: _privatePath, ...r }) => { void _privatePath; return r; }),
     jobs: [...completed, ...serverRuns.map(r => ({ id: r.backupId, action: "create", status: r.localStatus, createdAt: r.startedAt.toISOString(), finishedAt: r.finishedAt?.toISOString() })), ...jobs.filter(j => !completed.some(c => "command:" + c.id === j.id)).map(j => {
@@ -85,33 +86,34 @@ async function backupControlCommandInternal(actor: Actor, raw: unknown, budgetHe
   const parsed = backupCommandSchema.safeParse(raw);
   if (!parsed.success) throw new ValidationError("Проверьте поля операции резервирования");
     const input = parsed.data;
-    // Do not exempt this multi-command endpoint wholesale: standby may only
-    // request the explicit handoff receive, never rollback/restore or promotion.
-    // The stopped-runtime coordinator still verifies the archive and lineage.
+    // Technical archive inspection/transport is not a business write or promotion.
+    // Import uses the same one-shot native capability and budget as rollback;
+    // receive still goes through coordinator lineage/conflict checks.
     if (getConfig().isReadOnlyInstance && !(
       process.env.CRM_DEPLOYMENT_MODE === "desktop" &&
       process.env.CRM_DESKTOP_SUPERVISED_UPGRADE === "1" &&
-      input.action === "receive" && input.confirmed === true &&
-      (input.passphrase || input.recoveryKey)
+      (input.action === "list" || input.action === "pick-archive" || input.action === "native-result" || input.action === "native-export" ||
+       ((input.action === "verify" || input.action === "compare") && (input.passphrase || input.recoveryKey)) ||
+       ((input.action === "receive" || input.action === "receive-from-file") && input.confirmed === true && (input.passphrase || input.recoveryKey)))
     )) throw new ReadOnlyInstanceError();
    try {
-    if (input.action === "restore-from-file") {
+    if (input.action === "restore-from-file" || input.action === "receive-from-file") {
       if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Восстановление из файла доступно только в desktop-версии");
       if (!input.passphrase && !input.recoveryKey) throw new ValidationError("Введите кодовую фразу или ключ восстановления");
        let response: unknown;
        await importNativeArchive(input.requestId, actor.userId, input.passphrase ? { passphrase: input.passphrase } : { recoveryKey: input.recoveryKey! }, archiveRoot(), async backupId => {
-         response = await backupControlCommandInternal(actor, { action: "restore", backupId, confirmed: true, passphrase: input.passphrase, recoveryKey: input.recoveryKey }, true);
+         response = await backupControlCommandInternal(actor, { action: input.action === "receive-from-file" ? "receive" : "restore", backupId, confirmed: true, passphrase: input.passphrase, recoveryKey: input.recoveryKey }, true);
        });
        return response;
     }
      const cmd = input;
-    if (cmd.action === "pick-directory") return await requestNativeDialog("folder");
+    if (cmd.action === "pick-directory") return await requestNativeDialog("folder", undefined, actor.userId);
      if (cmd.action === "pick-archive") return await withNativeArchiveBudget(archiveRoot(), async () => {
        if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Выбор архива доступен только в desktop-версии");
        await cleanupNativeImports(archiveRoot(), commandRoot());
        return requestNativeDialog("import", undefined, actor.userId);
      });
-    if (cmd.action === "native-export") { await archivePath(cmd.backupId); return await requestNativeDialog("export", cmd.backupId); }
+    if (cmd.action === "native-export") { await archivePath(cmd.backupId); return await requestNativeDialog("export", cmd.backupId, actor.userId); }
     if (cmd.action === "native-result") return await readNativeDialog(cmd.requestId, actor.userId);
     if (cmd.action === "probe" || cmd.action === "list") return await withBackupDestinations(async destinations => {
       const items = await destinations[0]!.list();

@@ -114,14 +114,22 @@ shared test suite is part of this task.
 
 ## Source correction awaiting installed retest
 
-The manager control route now admits only schema-validated, credentialed,
-confirmed `receive` on supervised desktop standby; its other commands remain
-forbidden. A known clean/dirty snapshot returns `same`/`local_changed` without
+ The manager control route admits schema-validated archive listing, native picker,
+ native result/export, credentialed verify/compare and confirmed receive on
+ supervised desktop standby. Native file receive uses the existing one-shot,
+ actor-bound import capability and queues `receive`, not ordinary rollback.
+ Create, give, ordinary restore, retry and settings changes remain forbidden.
+ The UI exposes these recovery choices and labels the read-only state. A known clean/dirty snapshot returns `same`/`local_changed` without
 restoring, switching generation, or clearing standby. Ordinary explicit restore
 keeps its rollback semantics. Empty first adoption remains supported; existing
 foreign-deployment and divergent states are rejected.
 
-Coordinator verification: TypeScript and ESLint passed; 66 targeted tests passed
+ Earlier coordinator verification: TypeScript and ESLint passed; 66 targeted tests passed
 across six files, including 13 real synthetic SQLite/archive runtime cases and
 30 HTTP/application guard cases. These checks do not change the old installed
-BLOCKED result above. A rebuilt EXE must rerun this harness.
+ BLOCKED result above. A rebuilt EXE must rerun this harness.
+
+The current source additionally passed 39 focused guard/runtime tests and ESLint
+on the changed source/test files. These tests use synthetic data and do not prove
+the installed GUI, native picker, cloud transports or a human USB round trip. The
+installed handoff and normal manager UI gate remains pending on a rebuilt product.

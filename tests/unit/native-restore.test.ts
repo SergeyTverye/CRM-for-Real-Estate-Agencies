@@ -168,6 +168,6 @@ describe("native file restore staging", () => {
     const boundary = await readFile("src/server/api-handler.ts", "utf8"); expect(boundary).toContain("assertSameOrigin(req)");
     const ui = await readFile("src/app/(crm)/settings/backups/backup-panel.tsx", "utf8");
     expect(ui).toContain("Восстановить из файла…"); expect(ui).toContain('status.nativeDialog && status.restoreSupported');
-    expect(ui).toContain('dialog === "restore-from-file") && <label');
+    expect(ui).toContain('dialog === "restore-from-file" || dialog === "receive-from-file") && <label');
   });
 });

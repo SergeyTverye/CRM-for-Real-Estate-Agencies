@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   root: "",
   journal: vi.fn(),
   put: vi.fn(),
+  native: vi.fn(), list: vi.fn(), importArchive: vi.fn(),
 }));
 vi.mock("@/modules/auth/application/session-service", () => ({ resolveSession: async () => state.actor }));
 vi.mock("@/shared/config/env", () => ({ getConfig: () => ({ isReadOnlyInstance: state.standby }) }));
@@ -20,10 +21,10 @@ vi.mock("@/modules/operations/application/operations-service", () => ({ startMan
 vi.mock("@/modules/desktop-backup/infrastructure/destinations-runtime", () => ({
   backupRuntimeRoot: () => state.root,
   runtimeCredentialStore: () => ({ put: state.put }),
-  withBackupDestinations: vi.fn(),
+  withBackupDestinations: async (work: (d: { list: typeof state.list }[]) => Promise<unknown>) => work([{ list: state.list }]),
 }));
 vi.mock("@/modules/desktop-backup/application/native-dialog", () => ({
-  requestNativeDialog: vi.fn(), readNativeDialog: vi.fn(), importNativeArchive: vi.fn(), cleanupNativeImports: vi.fn(),
+  requestNativeDialog: state.native, readNativeDialog: state.native, importNativeArchive: state.importArchive, cleanupNativeImports: vi.fn(),
   withNativeArchiveBudget: async (_root: string, work: () => Promise<unknown>) => work(),
 }));
 import { POST } from "@/app/api/v1/settings/backups/control/route";
@@ -32,7 +33,7 @@ import { backupControlCommand } from "@/modules/desktop-backup/application/backu
 
 const host = "127.0.0.1:3511";
 const manager = { userId: "synthetic-manager", role: "manager", mustChangePassword: false };
-const original = { mode: process.env.CRM_DEPLOYMENT_MODE, supervised: process.env.CRM_DESKTOP_SUPERVISED_UPGRADE, port: process.env.CRM_DESKTOP_PORT };
+const original = { mode: process.env.CRM_DEPLOYMENT_MODE, supervised: process.env.CRM_DESKTOP_SUPERVISED_UPGRADE, port: process.env.CRM_DESKTOP_PORT, backup: process.env.BACKUP_PATH };
 const receive = () => ({ action: "receive", backupId: randomUUID(), confirmed: true, passphrase: "synthetic return phrase" });
 function request(body: unknown, origin: string | null = "http://" + host) {
   return new NextRequest("http://" + host + "/api/v1/settings/backups/control", {
@@ -42,13 +43,14 @@ function request(body: unknown, origin: string | null = "http://" + host) {
 const ctx = () => ({ params: Promise.resolve({}) });
 beforeEach(async () => {
   state.root = await mkdtemp(path.join(tmpdir(), "crm-return-handoff-guard-"));
-  state.actor = manager; state.standby = true; state.journal.mockClear(); state.put.mockClear();
+  state.actor = manager; state.standby = true; state.journal.mockClear(); state.put.mockClear(); state.native.mockReset(); state.list.mockReset();
   process.env.CRM_DEPLOYMENT_MODE = "desktop"; process.env.CRM_DESKTOP_SUPERVISED_UPGRADE = "1";
   process.env.CRM_DESKTOP_PORT = "3511";
+  process.env.BACKUP_PATH = state.root;
 });
 afterEach(async () => {
   await rm(state.root, { recursive: true, force: true });
-  for (const [key, value] of [["CRM_DEPLOYMENT_MODE", original.mode], ["CRM_DESKTOP_SUPERVISED_UPGRADE", original.supervised], ["CRM_DESKTOP_PORT", original.port]]) {
+  for (const [key, value] of [["CRM_DEPLOYMENT_MODE", original.mode], ["CRM_DESKTOP_SUPERVISED_UPGRADE", original.supervised], ["CRM_DESKTOP_PORT", original.port], ["BACKUP_PATH", original.backup]]) {
     if (value === undefined) delete process.env[key!]; else process.env[key!] = value;
   }
 });
@@ -75,7 +77,7 @@ describe("return-handoff HTTP + real application authorization (synthetic IO ada
   it.each([null, "https://evil.invalid"])("keeps CSRF rejection for %s", async origin => {
     expect((await POST(request(receive(), origin), ctx())).status).toBe(403); await noPublication();
   });
-  it.each(["create", "give", "restore", "restore-from-file", "compare", "verify", "retry", "probe", "list", "pick-directory", "pick-archive", "native-result", "native-export"])("never permits standby command %s", async action => {
+  it.each(["create", "give", "restore", "restore-from-file", "retry", "probe", "pick-directory"])("never permits standby command %s", async action => {
     const id = randomUUID();
     const body = ["pick-directory", "pick-archive"].includes(action) ? { action }
       : action === "native-result" ? { action, requestId: id }
@@ -87,6 +89,29 @@ describe("return-handoff HTTP + real application authorization (synthetic IO ada
       : { ...receive(), action };
     const response = await POST(request(body), ctx()); expect(response.status).toBe(503);
     expect((await response.json()).error.code).toBe("INSTANCE_READ_ONLY"); await noPublication();
+  });
+  it("permits only technical listing, native selection and inspection on standby", async () => {
+    state.list.mockResolvedValue([]); state.native.mockResolvedValue({ requestId: randomUUID(), status: "selected" });
+    expect((await POST(request({ action: "list", destinationId: randomUUID() }), ctx())).status).toBe(200);
+    expect((await POST(request({ action: "pick-archive" }), ctx())).status).toBe(200);
+    expect((await POST(request({ action: "native-result", requestId: randomUUID() }), ctx())).status).toBe(200);
+    for (const action of ["verify", "compare"]) {
+      expect((await POST(request({ action, backupId: randomUUID(), passphrase: "synthetic return phrase" }), ctx())).status).toBe(200);
+    }
+    expect(state.standby).toBe(true); expect(state.journal).toHaveBeenCalledTimes(2);
+  });
+  it("exports an existing archive and queues native file as receive, not rollback", async () => {
+    const backupId = randomUUID(); await mkdir(path.join(state.root, "portable"));
+    await writeFile(path.join(state.root, "portable", backupId + ".crmbackup"), "synthetic encrypted fixture");
+    state.native.mockResolvedValue({ requestId: randomUUID() });
+    expect((await POST(request({ action: "native-export", backupId }), ctx())).status).toBe(200);
+    state.importArchive.mockImplementation(async (_id, _actor, _credential, _root, publish) => publish(backupId));
+    const response = await POST(request({ action: "receive-from-file", requestId: randomUUID(), confirmed: true, passphrase: "synthetic return phrase" }), ctx());
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    const mailbox = JSON.parse(await readFile(path.join(state.root, "commands", result.requestId + ".json"), "utf8"));
+    expect(mailbox.command).toEqual({ action: "receive", backupId, confirmed: true });
+    expect(state.standby).toBe(true);
   });
   it.each([
     { confirmed: false }, { confirmed: undefined }, { passphrase: undefined }, { backupId: "../../outside" },

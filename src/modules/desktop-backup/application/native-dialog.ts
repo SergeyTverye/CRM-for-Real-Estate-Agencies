@@ -134,21 +134,35 @@ export async function cleanupNativeImports(outputDir: string, commands: string, 
 }
 export const nativeDialogRoot = () => path.join(backupRuntimeRoot(), "native-dialogs");
 export const nativeIncomingRoot = () => path.join(nativeDialogRoot(), "incoming");
+const dialogOwnerSchema = z.object({ kind: z.enum(["folder", "export", "import"]), actorUserId: z.string().min(1) }).strict();
 export async function requestNativeDialog(kind: "folder" | "export" | "import", backupId?: string, actorUserId?: string) {
   if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Системный диалог доступен в установленной desktop-версии");
+  const owner = dialogOwnerSchema.parse({ kind, actorUserId });
   const id = randomUUID(); await protectedDir(nativeDialogRoot());
-  await writeFile(path.join(nativeDialogRoot(), id + ".request.json"), JSON.stringify({ kind, backupId, actorUserId, createdAt: new Date().toISOString() }), { flag: "wx", mode: 0o600 });
+  // The supervisor removes the request after completion. Retain app-owned
+  // request metadata so folder/export results need no supervisor API change.
+  const ownerPath = path.join(nativeDialogRoot(), id + ".owner.json");
+  await writeFile(ownerPath, JSON.stringify(owner), { flag: "wx", mode: 0o600 });
+  try {
+    await writeFile(path.join(nativeDialogRoot(), id + ".request.json"), JSON.stringify({ kind, backupId, actorUserId, createdAt: new Date().toISOString() }), { flag: "wx", mode: 0o600 });
+  } catch (e) { await rm(ownerPath, { force: true }); throw e; }
   return { requestId: id };
 }
 export async function readNativeDialog(id: string, actorUserId?: string) {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new ValidationError();
   const root = nativeDialogRoot();
   try {
-    await regularFile(path.join(root, id + ".result.json"));
+    await regularFile(path.join(root, id + ".owner.json"));
+    const owner = dialogOwnerSchema.parse(JSON.parse(await readFile(path.join(root, id + ".owner.json"), "utf8")));
+    if (!actorUserId || owner.actorUserId !== actorUserId) throw new ValidationError();
+    try { await regularFile(path.join(root, id + ".result.json")); }
+    catch (e) { if ((e as NodeJS.ErrnoException).code === "ENOENT") return { status: "pending" }; throw e; }
      const result = JSON.parse(await readFile(path.join(root, id + ".result.json"), "utf8"));
-     if (result.kind === "import" && (result.actorUserId !== actorUserId || !Number.isFinite(result.expiresAt) || result.expiresAt < Date.now())) throw new ValidationError();
-     return { status: result.status as string, directory: result.kind === "import" ? undefined : result.directory as string | undefined };
-  } catch (e) { if ((e as NodeJS.ErrnoException).code === "ENOENT") return { status: "pending" }; throw new InfrastructureError("Системный диалог недоступен"); }
+     if ((result.kind !== undefined && result.kind !== owner.kind) || (result.actorUserId !== undefined && result.actorUserId !== actorUserId)) throw new ValidationError();
+     if (owner.kind === "import" && (result.kind !== "import" || result.actorUserId !== actorUserId || !Number.isFinite(result.expiresAt) || result.expiresAt < Date.now())) throw new ValidationError();
+     if (typeof result.status !== "string" || (result.directory !== undefined && typeof result.directory !== "string")) throw new ValidationError();
+     return { status: result.status, directory: owner.kind === "folder" ? result.directory as string | undefined : undefined };
+  } catch { throw new InfrastructureError("Системный диалог недоступен"); }
 }
 
 /** Consume a native-only capability; never accept a browser-supplied filesystem path.
