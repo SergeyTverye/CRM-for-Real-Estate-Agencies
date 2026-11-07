@@ -1,7 +1,9 @@
 import { afterEach, expect, it } from "vitest";
-import { cp, lstat, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdtemp, mkdir, readFile, readdir, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { isRuntimeResource, safeCopyTrace, assertRuntimeResources } from "../../scripts/desktop/resource-policy.mjs";
 import { runtimeEntries, runtimeBuildOptions } from "../../scripts/desktop/runtime-entries.mjs";
 import { build } from "esbuild";
@@ -11,7 +13,7 @@ const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(root => rm(root, { recursive: true, force: true }))); });
 
 async function fixture() {
-  const root = await mkdtemp(path.join(process.env.CRM_RESOURCE_QA_ROOT ?? tmpdir(), "resource-policy-"));
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), "resource-policy-")));
   roots.push(root);
   const source = path.join(root, "trace"), output = path.join(root, "app");
   async function put(relative: string, contents = "synthetic") {
@@ -115,9 +117,13 @@ it("bundles all eight real entrypoints in memory with no external source-file de
 
 it("runs final-resource preflight from the package with fresh profiles and detects missing runtime fs assets", async () => {
   const { root, source, output, put } = await fixture();
+  const alias = path.join(root, "profile-root-alias");
+  await symlink(root, alias, "junction");
   await put("init-db.cjs", `const fs=require('node:fs'),p=require('node:path');
-    if(process.cwd()!==__dirname || process.env.NODE_PATH || process.env.NODE_OPTIONS || process.env.BACKUP_TARGETS) process.exit(2);
-    if(!process.env.LOCALAPPDATA.startsWith(${JSON.stringify(root)}) || !process.env.APPDATA.startsWith(${JSON.stringify(root)})) process.exit(3);
+    const canonical=value=>{const result=fs.realpathSync.native(value);return process.platform==='win32'?result.toLowerCase():result;};
+    if(canonical(process.cwd())!==canonical(__dirname) || process.env.NODE_PATH || process.env.NODE_OPTIONS || process.env.BACKUP_TARGETS) process.exit(2);
+    const inside=value=>{const relative=p.relative(canonical(${JSON.stringify(alias)}),canonical(value));return relative!==''&&!p.isAbsolute(relative)&&relative!=='..'&&!relative.startsWith('..'+p.sep);};
+    if(!inside(process.env.LOCALAPPDATA) || !inside(process.env.APPDATA)) process.exit(3);
     fs.writeFileSync(p.join(process.env.DESKTOP_DATA_DIR,'crm.db'),'synthetic');`);
   await put("server.js", `const http=require('node:http'),fs=require('node:fs'),p=require('node:path');
     // Deliberately resolve dynamic filesystem dependency at runtime.
@@ -140,6 +146,24 @@ it("runs final-resource preflight from the package with fresh profiles and detec
   const before = (await readdir(root)).sort();
   await checkFinalRuntime(output, { temporaryRoot: root });
   expect((await readdir(root)).sort()).toEqual(before);
+  // Windows CI temp roots can have junction/short-path spellings. The gate
+  // canonicalizes them; validate filesystem identity, not lexical prefixes.
+  await checkFinalRuntime(output, { temporaryRoot: alias });
+  expect((await readdir(root)).sort()).toEqual(before);
+  // Exercise Node 24's Windows entry/cwd boundary too: the gate must pass
+  // canonical paths to both the initializer and the long-running server.
+  await checkFinalRuntime(path.toNamespacedPath(path.join(alias, "app")), { temporaryRoot: path.toNamespacedPath(alias) });
+  expect((await readdir(root)).sort()).toEqual(before);
+  const cli = () => spawnSync(process.execPath, [fileURLToPath(new URL("../../scripts/desktop/check-final-runtime.mjs", import.meta.url)), path.join(alias, "app")], {
+    cwd: root, encoding: "utf8", timeout: 20_000,
+    env: { NODE_ENV: "test", SystemRoot: process.env.SystemRoot, WINDIR: process.env.WINDIR, TEMP: root, TMP: root, NODE_PATH: "synthetic-forbidden-host-fallback" },
+  });
+  const passed = cli();
+  expect(passed.error).toBeUndefined();
+  expect(passed.status).toBe(0);
+  expect(passed.stdout.trim().split(/\r?\n/)).toEqual(["INIT_PASS", "READY_PASS", "PRISMA_PASS", "API_ROUTES_PASS", "PAGE_ASSETS_PASS", "PASS"].map(value => `FINAL_RUNTIME_${value}`));
+  expect(passed.stderr).toBe("");
+  expect((await readdir(root)).sort()).toEqual(before);
   const controlRoute = path.join(output, ".next-desktop/server/app/api/v1/settings/backups/control/route.js");
   await rm(controlRoute);
   await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_API_ROUTES_FAILED");
@@ -148,7 +172,18 @@ it("runs final-resource preflight from the package with fresh profiles and detec
   await rm(path.join(output, ".next-desktop/node_modules"), { recursive: true });
   await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_SERVER_EXIT");
   expect((await readdir(root)).sort()).toEqual(before);
-  await writeFile(path.join(output, "init-db.cjs"), "process.exit(1)");
-  await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_INIT_FAILED");
+  await writeFile(path.join(output, "init-db.cjs"), "console.log('synthetic-secret-stdout');console.error('synthetic-secret-stderr');process.exit(1)");
+  await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_INIT_FAILED_EXIT_1");
+  const failed = cli();
+  expect(failed.status).toBe(1);
+  expect(failed.stdout).toBe("");
+  expect(failed.stderr.trim()).toBe("FINAL_RUNTIME_INIT_FAILED_EXIT_1");
+  expect((await readdir(root)).sort()).toEqual(before);
+  await rm(path.join(output, "node/node.exe"));
+  await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_INIT_FAILED_SPAWN_ENOENT");
+  const missing = cli();
+  expect(missing.status).toBe(1);
+  expect(missing.stdout).toBe("");
+  expect(missing.stderr.trim()).toBe("FINAL_RUNTIME_INIT_FAILED_SPAWN_ENOENT");
   expect((await readdir(root)).sort()).toEqual(before);
 }, 30_000);

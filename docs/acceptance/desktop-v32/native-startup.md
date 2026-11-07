@@ -55,3 +55,27 @@ with coordinator CUA. WINDOW_CREATED/HWND alone do not prove rendered content.
 Control mutex/event, single-instance plugin, smoke shutdown wait and Job Object
 were reviewed. The observed Node error occurs before WebView construction and
 does not justify changing their safety boundaries or wait limits.
+
+## Diagnostic normal-window proof, 2026-11-07
+
+Clean installation of artifact `41c39b8` on the current PC completed with exit 0
+after the user removed the previous installation. No project TZ/AGENTS/CLAUDE,
+source, tests or internal docs were present at the installed application root.
+Its unmodified resources still failed startup: the Next hashed dependency aliases
+were missing. This is a different defect from the verbatim Node path above.
+
+For diagnosis, the coordinator materialized ten aliases from those same installed
+production packages, without copying project sources or changing the launcher.
+The original launcher SHA-256 remained
+`1553873c574f6fe60141c0a26c19f08b0ccab18154c134b42a1056cbe4a00653`.
+A new synthetic LOCALAPPDATA/APPDATA profile with Windows-only PATH opened the
+ordinary Tauri window. CUA confirmed the document at loopback `/setup`, heading
+“Первый запуск CRM”, manager setup fields, empty database choice and local storage
+confirmation. No account/password was entered. Only the retained owned launcher
+tree was stopped afterwards; no shared shutdown event was sent.
+
+Evidence metadata is retained under `data/qa-v32-native-proof/`; this is explicitly
+a **locally patched resource diagnostic**, not a PASS for an unmodified installer.
+The published EXE still requires rebuilding and installed workflow/normal-window
+retesting. Windows CI `41c39b8` Rust/path tests passed; subsequent `5a6f1ab` CI
+stopped at one final-runtime fixture init test (1602 pass, 5 skip, 1 fail).

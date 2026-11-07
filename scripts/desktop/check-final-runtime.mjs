@@ -45,7 +45,13 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
     const init = spawnSync(node, [path.join(app, 'init-db.cjs'), '--initialize'], {
       cwd: app, env, windowsHide: true, stdio: 'pipe', timeout: 60000,
     });
-    if (init.error || init.status !== 0) throw Error('FINAL_RUNTIME_INIT_FAILED');
+    if (init.error || init.status !== 0) {
+      // Only fixed OS codes / numeric exit status: never expose output, paths,
+      // arguments or environment from a failed runtime initializer.
+      const spawnCode = ['ENOENT', 'EACCES', 'EPERM', 'EINVAL', 'ETIMEDOUT', 'ENOBUFS'].includes(init.error?.code) ? init.error.code : 'OTHER';
+      const detail = init.error ? 'SPAWN_' + spawnCode : Number.isInteger(init.status) ? 'EXIT_' + (init.status >>> 0) : 'SIGNAL';
+      throw Error('FINAL_RUNTIME_INIT_FAILED_' + detail);
+    }
     code('INIT_PASS');
     server = spawn(node, ['--require', path.join(app, 'graceful.cjs'), path.join(app, 'server.js')], {
       cwd: app, env, windowsHide: true, stdio: ['pipe', 'ignore', 'ignore'],
@@ -107,7 +113,7 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   checkFinalRuntime(path.resolve(process.argv[2] ?? 'src-tauri/resources/app')).catch(error => {
-    console.error(/^FINAL_RUNTIME_[A-Z_]+$/.test(error.message) ? error.message : 'FINAL_RUNTIME_FAILED');
+    console.error(/^FINAL_RUNTIME_[A-Z_]+(?:[0-9]+)?$/.test(error.message) ? error.message : 'FINAL_RUNTIME_FAILED');
     process.exitCode = 1;
   });
 }
