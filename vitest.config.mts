@@ -12,7 +12,7 @@ import os from "node:os";
 const TEST_DB = process.env.TEST_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_test";
 const tmp = path.join(os.tmpdir(), `crm-test-${process.pid}`);
 
-const env = {
+const env: NodeJS.ProcessEnv = {
   NODE_ENV: "test",
   CRM_DEPLOYMENT_MODE: "server",
   DATABASE_URL: TEST_DB,

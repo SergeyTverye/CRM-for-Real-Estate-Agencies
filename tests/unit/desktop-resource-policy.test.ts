@@ -179,6 +179,15 @@ it("runs final-resource preflight from the package with fresh profiles and detec
   expect(failed.stdout).toBe("");
   expect(failed.stderr.trim()).toBe("FINAL_RUNTIME_INIT_FAILED_EXIT_1");
   expect((await readdir(root)).sort()).toEqual(before);
+  await writeFile(path.join(output, "init-db.cjs"), "console.error('synthetic-secret');console.error('INIT_DATABASE_FAILED_STAGE_LOCATION_CODE_ETIMEDOUT');process.exit(1)");
+  const diagnosed = cli();
+  expect(diagnosed.status).toBe(1);
+  expect(diagnosed.stdout.trim()).toBe("FINAL_RUNTIME_INIT_DATABASE_FAILED_STAGE_LOCATION_CODE_ETIMEDOUT");
+  expect(diagnosed.stderr.trim()).toBe("FINAL_RUNTIME_INIT_FAILED_EXIT_1");
+  await writeFile(path.join(output, "init-db.cjs"), "console.error('INIT_DATABASE_FAILED_STAGE_LOCATION_CODE_PRIVATE_SECRET');process.exit(1)");
+  const untrusted = cli();
+  expect(untrusted.stdout).toBe("");
+  expect(untrusted.stderr.trim()).toBe("FINAL_RUNTIME_INIT_FAILED_EXIT_1");
   await rm(path.join(output, "node/node.exe"));
   await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_INIT_FAILED_SPAWN_ENOENT");
   const missing = cli();

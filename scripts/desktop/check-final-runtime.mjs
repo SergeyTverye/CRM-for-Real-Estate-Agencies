@@ -50,6 +50,10 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
       // arguments or environment from a failed runtime initializer.
       const spawnCode = ['ENOENT', 'EACCES', 'EPERM', 'EINVAL', 'ETIMEDOUT', 'ENOBUFS'].includes(init.error?.code) ? init.error.code : 'OTHER';
       const detail = init.error ? 'SPAWN_' + spawnCode : Number.isInteger(init.status) ? 'EXIT_' + (init.status >>> 0) : 'SIGNAL';
+      // Read only an exact finite initializer diagnostic, never forward child
+      // output. Older bundles still produce the original exit-only failure.
+      const diagnostic = String(init.stderr ?? '').split(/\r?\n/).find(line => /^INIT_DATABASE_FAILED_STAGE_(?:DIRECTORY|LOCATION|SECRETS|MIGRATIONS|ACCOUNT|PROBE)_CODE_(?:ENOENT|EACCES|EPERM|EINVAL|ETIMEDOUT|ENOBUFS|ERR_DLOPEN_FAILED|SQLITE_LOCAL_VOLUME_REQUIRED|SQLITE_CLOUD_PATH_FORBIDDEN|SQLITE_LOCAL_PATH_REQUIRED|SQLITE_MIGRATION_HISTORY_MISMATCH|SQLITE_INTEGRITY_FAILED|DESKTOP_SECRETS_INVALID|OTHER)$/.test(line));
+      if (diagnostic) code(diagnostic);
       throw Error('FINAL_RUNTIME_INIT_FAILED_' + detail);
     }
     code('INIT_PASS');
