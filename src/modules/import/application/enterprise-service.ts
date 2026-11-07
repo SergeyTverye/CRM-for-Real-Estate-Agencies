@@ -12,6 +12,7 @@ import { buildProfile, enterpriseProfileSchema, loadEnterprise, parseEnterprise,
 import { normalizeAddress } from '../domain/normalize';
 import { sha256 } from '../domain/workbook-parser';
 import { commitEnterpriseControl, exportEnterpriseControl, type ControlLinks } from './enterprise-control';
+import { restoreExportFormulas, safeExportUrl, type FormulaCandidate } from './enterprise-export-safety';
 function manager(actor: Actor) { if (!isManager(actor))
     throw new ForbiddenError('Импорт рабочей книги доступен руководителю'); }
 type Summary = {
@@ -216,18 +217,26 @@ export async function exportEnterprise(actor: Actor, id: string) {
     // Only this closed vocabulary may supply source-only context. Never copy arbitrary cells,
     // ignored mappings, formulas, or excluded personal fields back into the cleared workbook.
     const contextFields = new Set(['sourceRowId', 'contractRef', 'operationText', 'propertyTypeText', 'source', 'responsible', 'stateMark', 'request', 'comment']);
-    const sourceContext = new Map(parsed.rows.map(row => [row, new Map(row.columns.filter(c => contextFields.has(c.field)).map(c => [c.field, text(wb.worksheets[row.sheetIndex - 1]!.getCell(row.rowNumber, c.column).value)]))]));
-    const sourceContacts = new Map(parsed.rows.map(row => [row, row.columns.filter(c => ['phone', 'email'].includes(c.field)).map(c => ({ ...c, value: text(wb.worksheets[row.sheetIndex - 1]!.getCell(row.rowNumber, c.column).value) }))]));
+    const literalText = (cell: import('exceljs').Cell) => cell.type === 6 ? '' : text(cell.value);
+    const sourceContext = new Map(parsed.rows.map(row => [row, new Map(row.columns.filter(c => contextFields.has(c.field)).map(c => [c.field, literalText(wb.worksheets[row.sheetIndex - 1]!.getCell(row.rowNumber, c.column))]))]));
+    const sourceContacts = new Map(parsed.rows.map(row => [row, row.columns.filter(c => ['phone', 'email'].includes(c.field)).map(c => ({ ...c, value: literalText(wb.worksheets[row.sheetIndex - 1]!.getCell(row.rowNumber, c.column)) }))]));
     const receipts = await db.importRowResult.findMany({ where: { importJobId: id, commitResult: 'imported' } });
     const headers = new Set(parsed.blocks.flatMap(b => Array.from({ length: b.endRow - b.row + 1 }, (_, i) => `${b.sheet}:${b.row + i}`)));
     const sections = new Set(parsed.sectionMarkers.map(r => `${r.sheet}:${r.row}`));
     const report: Record<string, number> = { UNSUPPORTED_COLUMN: parsed.unresolved.length + profile.sheets.reduce((n, s) => n + Object.values(s.columns).filter(v => v === 'ignore').length, 0), HYPERLINK_CLEARED: 0, UNSUPPORTED_FIELD: 0, HYPERLINK_PRESERVED: 0, FORMULA_CLEARED: 0,NUMBER_AS_TEXT:0, IMAGE_PRESERVED: wb.worksheets.reduce((n, s) => n + s.getImages().length, 0) };
-    // Clear every non-header/non-section cell, including ignored sheets and rejected rows. Never export stale source data.
+    const formulas: FormulaCandidate[] = [];
+    const numericCells = new Map<import('exceljs').Cell, number>();
+    // Headers/sections retain only literal labels, never formulas or hyperlink relationships.
     for (const [si, ws] of wb.worksheets.entries())
-        ws.eachRow((r, rn) => { if (headers.has(`${si + 1}:${rn}`) || sections.has(`${si + 1}:${rn}`))
-            return; r.eachCell(c => { if (c.hyperlink)
-            report.HYPERLINK_CLEARED!++; if (c.type === 6)
-            report.FORMULA_CLEARED!++; c.value = null; }); });
+        ws.eachRow((r, rn) => { const label = headers.has(`${si + 1}:${rn}`) || sections.has(`${si + 1}:${rn}`);
+            r.eachCell(c => {
+                if (c.type === 6) {
+                    const v = c.value as import('exceljs').CellFormulaValue & { shareType?: string };
+                    formulas.push({ cell: c, expression: v.formula, shared: !!(v.shareType || (c.value && typeof c.value === 'object' && 'sharedFormula' in c.value)) });
+                    report.FORMULA_CLEARED!++; c.value = null;
+                } else if (c.hyperlink) { report.HYPERLINK_CLEARED!++; c.value = label ? c.text : null; }
+                else if (!label) c.value = null;
+            }); });
     for (const row of parsed.rows) {
         const receipt = receipts.find(r => r.sheetName === row.sheetName && r.sourceRowNumber === row.rowNumber);
         if (!receipt?.targetEntityId)
@@ -285,12 +294,19 @@ export async function exportEnterprise(actor: Actor, id: string) {
             else if (!Object.hasOwn(values, col.field))
                 report.UNSUPPORTED_FIELD!++;
             if(typeof v==='string'&&['area','price','commissionAmount'].includes(col.field)&&/^\d+(?:\.\d+)?$/.test(v)){if(v.replace(/[^0-9]/g,'').length<=15)cell.value=Number(v);else report.NUMBER_AS_TEXT!++;}
-            if (col.field === 'description' && typeof v === 'string' && sourceUrl) {
-                cell.value = { text: v, hyperlink: sourceUrl };
+            const visible = !row.hidden && cell.worksheet.state === 'visible' && !cell.worksheet.getColumn(col.column).hidden;
+            if (visible && ['area', 'price', 'commissionAmount'].includes(col.field) && typeof cell.value === 'number' && Number.isFinite(cell.value)) numericCells.set(cell, cell.value);
+            const linkValue = col.field === 'description' ? sourceUrl : row.target === 'property_agreement_control' && col.field === 'adUrl' ? v : null;
+            const safeLink = safeExportUrl(linkValue);
+            if (visible && typeof v === 'string' && safeLink) {
+                cell.value = { text: v, hyperlink: safeLink };
                 report.HYPERLINK_PRESERVED!++;
-            }
+            } else if (linkValue) report.HYPERLINK_REJECTED = (report.HYPERLINK_REJECTED ?? 0) + 1;
         }
     }
+    restoreExportFormulas(formulas, numericCells, report);
+    // Caches already match authoritative records. Excel may recalculate after subsequent edits.
+    if (report.FORMULA_PRESERVED) { wb.calcProperties.fullCalcOnLoad = true; report.FORMULA_RECALC_ON_LOAD = report.FORMULA_PRESERVED; }
     // ExcelJS otherwise loses the occupied column span on an entirely cleared sheet.
     // A blank styled anchor preserves geometry without retaining any source value.
     for (const [index, ws] of wb.worksheets.entries()) {

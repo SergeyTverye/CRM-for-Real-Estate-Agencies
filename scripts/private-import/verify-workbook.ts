@@ -18,7 +18,7 @@ const report = {
   compatibility: {} as Record<string, number>,
 };
 const allowedCodes = new Set(['INVALID_AREA', 'INVALID_COMMISSION', 'INVALID_FLOOR', 'INVALID_PRICE', 'INVALID_PRICE_UNIT', 'PRICE_UNIT_REQUIRED', 'MISSING_PROPERTY_KEY', 'MISSING_CLIENT_KEY', 'MISSING_ADDRESS', 'INVALID_DATE', 'HIDDEN_ROW', 'REQUIRES_MANUAL_REVIEW', 'already_imported', 'probable_duplicate']);
-const allowedCompatibility = new Set(['UNSUPPORTED_COLUMN', 'UNSUPPORTED_FIELD', 'FORMULA_CLEARED', 'NUMBER_AS_TEXT', 'IMAGE_PRESERVED', 'HYPERLINK_PRESERVED', 'HYPERLINK_CLEARED']);
+const allowedCompatibility = new Set(['UNSUPPORTED_COLUMN', 'UNSUPPORTED_FIELD', 'FORMULA_CLEARED', 'FORMULA_PRESERVED', 'FORMULA_SHARED_UNSUPPORTED', 'FORMULA_CELL_NOT_ALLOWED', 'FORMULA_DEPENDENCY_REJECTED', 'FORMULA_UNSUPPORTED', 'FORMULA_VALUE_MISMATCH', 'FORMULA_RECALC_ON_LOAD', 'NUMBER_AS_TEXT', 'IMAGE_PRESERVED', 'HYPERLINK_PRESERVED', 'HYPERLINK_CLEARED', 'HYPERLINK_REJECTED']);
 const digest = (b: Buffer) => createHash('sha256').update(b).digest('hex');
 function assert(check: string, condition: boolean): asserts condition {
   report.checks[check] = Number(condition);
@@ -92,7 +92,7 @@ async function main() {
       const job = await service.inspectEnterprise(manager, id);
       return service.commitEnterprise(manager, id, { confirmed: true, acceptWarnings: true, expectedMappingVersion: job.mappingVersion });
     };
-    const counts = async () => [await db.client.count(), await db.property.count(), await db.historicalDealArchive.count(), await db.clientNeed.count(), await db.leadRequest.count(), await db.task.count(), await db.document.count()];
+    const counts = async () => [await db.client.count(), await db.property.count(), await db.historicalDealArchive.count(), await db.clientNeed.count(), await db.leadRequest.count(), await db.task.count(), await db.document.count(), await db.agreement.count(), await db.advertisement.count(), await db.taskProperty.count(), await db.taskAgreement.count(), await db.taskAdvertisement.count()];
     stage = 'DRY_RUN_FAILED';
     const job = await service.uploadEnterprise(manager, file(bytes), profile);
     report.unresolved = job.unresolved.map(c => ({ sheet: c.sheet, row: c.row, column: c.column }));

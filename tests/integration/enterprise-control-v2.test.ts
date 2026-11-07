@@ -10,7 +10,7 @@ beforeEach(async () => { await resetDatabase(); users = await seedBase(); });
 const file = (b: Buffer) => new File([new Uint8Array(b)], 'synthetic-control.xlsx');
 async function fixture() {
     const wb = new ExcelJS.Workbook(), ws = wb.addWorksheet('Контроль договоров');
-    ws.addRow(['Адрес', 'Площадь', 'Наличие договора', 'Причины, почему его нет', 'Комиссия от', 'Комиссия до', 'Что нужно исправить', 'Рекл. текст', 'Реклама', 'Задача', 'Паспорт', 'Кем выдан', 'Регистрация', 'Дата рождения']);
+    ws.addRow(['Адрес', 'Площадь', 'Наличие договора', 'Причины, почему его нет', 'Комиссия от', 'Комиссия до', 'Что нужно исправить', 'Рекл. текст', 'Ссылка на рекламу', 'Задача', 'Паспорт', 'Кем выдан', 'Регистрация', 'Дата рождения']);
     ws.addRow(['SYNTHETIC_CONTROL_A', 40, 'Нет', 'Synthetic reason', 0, 1200, 'Synthetic fix', 'Synthetic ad', 'https://example.invalid/synthetic', 'Synthetic task', ...Array(4).fill('SYNTHETIC_EXCLUDED_SECRET')]);
     ws.addRow(['SYNTHETIC_HIDDEN', 41, 'Да']).hidden = true;
     const profile = buildProfile(wb);

@@ -38,18 +38,41 @@ export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workboo
     }));
   }
   const byCoordinate = new Map(exported.rows.map(r => [`${r.sheetIndex}:${r.rowNumber}`, r]));
+  const recordField = (field: string) => field === 'agreementPresence' ? 'agreementPresent' : field;
+  const hasColumn = (row: typeof original.rows[number], field: string) => row.columns.some(c => c.field === field);
   for (const row of original.rows) {
     const coordinate = `${row.sheetIndex}:${row.rowNumber}`;
     if (!imported.has(coordinate)) continue;
     const next = byCoordinate.get(coordinate);
     check('row_keys', row.recordKey, next?.recordKey);
-    const keys = row.target === 'property' ? ['addressText', 'area', 'operationType']
+    const keys = row.target === 'property' || row.target === 'property_agreement_control'
+      ? ['addressText', 'area', 'operationType']
       : row.target === 'historical_deal_archive' ? ['addressText', 'area', 'sourceRowId', 'contractRef', 'name'] : ['name'];
     for (const key of keys) check('key_fields', row.record[key], next?.record[key]);
     if (row.target === 'client_request_need') check('contacts', row.record.contacts, next?.record.contacts);
-    if (row.columns.some(c => c.field === 'receivedDate')) check('dates', row.record.receivedAt, next?.record.receivedAt);
+    if (hasColumn(row, 'receivedDate')) check('dates', row.record.receivedAt, next?.record.receivedAt);
     for (const key of ['price', 'commissionAmount']) {
-      if (row.columns.some(c => c.field === key)) check('money', row.record[key], next?.record[key]);
+      if (hasColumn(row, key)) check('money', row.record[key], next?.record[key]);
+    }
+    if (row.target === 'property_agreement_control') {
+      const controlData: Array<[string, string]> = [
+        ['control_presence', 'agreementPresence'],
+        ['control_absence', 'absenceReason'],
+        ['control_range', 'commissionFrom'],
+        ['control_range', 'commissionTo'],
+        ['control_scalar', 'commissionAmount'],
+        ['control_scalar', 'fixNote'],
+        ['control_advertising', 'adText'],
+        ['control_advertising', 'adUrl'],
+        ['control_advertising', 'adPlatform'],
+        ['control_advertising', 'adStatus'],
+        ['control_task', 'taskText'],
+      ];
+      for (const [counter, field] of controlData) {
+        if (!hasColumn(row, field)) continue;
+        const key = recordField(field);
+        check(counter, row.record[key], next?.record[key]);
+      }
     }
   }
   return counters;

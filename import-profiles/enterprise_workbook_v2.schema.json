@@ -120,6 +120,8 @@
                     "fixNote",
                     "adText",
                     "adUrl",
+                    "adPlatform",
+                    "adStatus",
                     "taskText"
                   ]
                 },
@@ -155,6 +157,41 @@
                 "paused",
                 "closed",
                 "archived"
+              ]
+            }
+          },
+          "adPlatformMap": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "avito",
+                "cian",
+                "domclick",
+                "yandex_realty",
+                "own_site",
+                "other"
+              ]
+            }
+          },
+          "adStatusMap": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "active",
+                "paused",
+                "expired",
+                "removed"
               ]
             }
           },
@@ -276,6 +313,8 @@
           "columns",
           "hiddenRows",
           "statusMap",
+          "adPlatformMap",
+          "adStatusMap",
           "purposeMap",
           "sourceMap",
           "responsibleMap",

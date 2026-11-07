@@ -4,7 +4,23 @@ import { z } from 'zod';
 import { normalizeHeader } from './profiles';
 import { cellText, contactKind, normalizeAddress, parseDate } from './normalize';
 import { sha256, type ParsedRow } from './workbook-parser';
-export const fields = ['addressText', 'district', 'area', 'floor', 'propertyTypeText', 'operationText', 'price', 'priceUnit', 'description', 'stateMark', 'ownerName', 'ownerPhone', 'receivedDate', 'name', 'phone', 'email', 'request', 'source', 'responsible', 'comment', 'sourceRowId', 'contractRef', 'commissionAmount', 'agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'taskText'] as const;
+export const fields = ['addressText', 'district', 'area', 'floor', 'propertyTypeText', 'operationText', 'price', 'priceUnit', 'description', 'stateMark', 'ownerName', 'ownerPhone', 'receivedDate', 'name', 'phone', 'email', 'request', 'source', 'responsible', 'comment', 'sourceRowId', 'contractRef', 'commissionAmount', 'agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'adPlatform', 'adStatus', 'taskText'] as const;
+// Stable codes are deliberately separate from display labels and source-value mappings.
+export const controlAdPlatforms = ['avito', 'cian', 'domclick', 'yandex_realty', 'own_site', 'other'] as const;
+export const controlAdStatuses = ['draft', 'active', 'paused', 'expired', 'removed'] as const;
+export const controlAdPlatformLabels: Record<typeof controlAdPlatforms[number], string> = {
+    avito: 'Авито', cian: 'ЦИАН', domclick: 'Домклик', yandex_realty: 'Яндекс Недвижимость', own_site: 'Сайт агентства', other: 'Другое',
+};
+export const controlAdStatusLabels: Record<typeof controlAdStatuses[number], string> = {
+    draft: 'Не опубликовано', active: 'Опубликовано', paused: 'Приостановлено', expired: 'Истекло', removed: 'Снято',
+};
+function closedAdCode<T extends string>(value: string | undefined, codes: readonly T[], labels: Record<T, string>, mapping: Record<string, T> | undefined): T | null {
+    const key = normalizeHeader(value);
+    if (!key) return null;
+    // Exported stable codes must reimport even if the source profile remaps labels.
+    if (codes.includes(key as T)) return key as T;
+    return mapping?.[key] ?? codes.find(code => normalizeHeader(labels[code]) === key) ?? null;
+}
 const patternSchema = z.string().max(120).refine(value => { if (/[(){}+\\]/.test(value))
     return false; try {
     new RegExp(value, 'iu');
@@ -14,7 +30,7 @@ catch {
     return false;
 } }, 'INVALID_PATTERN');
 export const enterpriseProfileSchema = z.object({ version: z.literal(2), code: z.literal('enterprise_workbook_v2'), sheets: z.array(z.object({
-        index: z.number().int().positive().optional(), namePattern: patternSchema.optional(), target: z.enum(['property', 'client_request_need', 'historical_deal_archive', 'property_agreement_control', 'ignore']).nullable(), blockTargets: z.record(z.string(), z.enum(['property', 'client_request_need', 'historical_deal_archive', 'property_agreement_control', 'ignore']).nullable()).optional(), headerRow: z.union([z.literal('auto'), z.number().int().positive()]).default('auto'), columns: z.record(z.string(), z.union([z.enum(fields), z.literal('ignore'), z.null()])), hiddenRows: z.enum(['skip', 'archive']).default('skip'), statusMap: z.record(z.string(), z.enum(['draft', 'active', 'paused', 'closed', 'archived'])).default({}), purposeMap: z.record(z.string(), z.string()).default({}), sourceMap: z.record(z.string(), z.string()).default({}), responsibleMap: z.record(z.string(), z.uuid()).default({}), defaults: z.object({ propertyType: z.enum(['commercial', 'residential', 'land', 'country']).default('commercial'), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional(), priceUnit: z.enum(['rub_total', 'rub_month', 'rub_m2', 'rub_m2_month', 'rub_year', 'rub_m2_year']).optional() }).default({ propertyType: 'commercial' }), sections: z.array(z.object({ pattern: patternSchema, propertyType: z.enum(['commercial', 'residential', 'land', 'country']).optional(), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional() })).default([])
+        index: z.number().int().positive().optional(), namePattern: patternSchema.optional(), target: z.enum(['property', 'client_request_need', 'historical_deal_archive', 'property_agreement_control', 'ignore']).nullable(), blockTargets: z.record(z.string(), z.enum(['property', 'client_request_need', 'historical_deal_archive', 'property_agreement_control', 'ignore']).nullable()).optional(), headerRow: z.union([z.literal('auto'), z.number().int().positive()]).default('auto'), columns: z.record(z.string(), z.union([z.enum(fields), z.literal('ignore'), z.null()])), hiddenRows: z.enum(['skip', 'archive']).default('skip'), statusMap: z.record(z.string(), z.enum(['draft', 'active', 'paused', 'closed', 'archived'])).default({}), adPlatformMap: z.record(z.string(), z.enum(controlAdPlatforms)).default({}), adStatusMap: z.record(z.string(), z.enum(controlAdStatuses)).default({}), purposeMap: z.record(z.string(), z.string()).default({}), sourceMap: z.record(z.string(), z.string()).default({}), responsibleMap: z.record(z.string(), z.uuid()).default({}), defaults: z.object({ propertyType: z.enum(['commercial', 'residential', 'land', 'country']).default('commercial'), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional(), priceUnit: z.enum(['rub_total', 'rub_month', 'rub_m2', 'rub_m2_month', 'rub_year', 'rub_m2_year']).optional() }).default({ propertyType: 'commercial' }), sections: z.array(z.object({ pattern: patternSchema, propertyType: z.enum(['commercial', 'residential', 'land', 'country']).optional(), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional() })).default([])
     })).min(1).max(30) });
 export type EnterpriseProfile = z.infer<typeof enterpriseProfileSchema>;
 export const dictionary: Record<string, typeof fields[number]> = { 'адрес': 'addressText', 'район': 'district', 'площадь': 'area', 'этаж': 'floor', 'назначение': 'propertyTypeText', 'операция': 'operationText', 'цена': 'price', 'ставка': 'price', 'единица': 'priceUnit', 'описание': 'description', 'статус': 'stateMark', 'метка': 'stateMark', 'собственник': 'ownerName', 'контакт собственника': 'ownerPhone', 'дата': 'receivedDate', 'клиент': 'name', 'контрагент': 'name', 'телефон': 'phone', 'e-mail': 'email', 'email': 'email', 'запрос': 'request', 'источник': 'source', 'ответственный': 'responsible', 'комментарий': 'comment', '№': 'sourceRowId', 'договор': 'contractRef', 'комиссия': 'commissionAmount' };
@@ -99,7 +115,9 @@ const aliases: Partial<Record<Field, string[]>> = {
     commissionFrom: ['комиссия от', 'commission from'], commissionTo: ['комиссия до', 'commission to'],
     fixNote: ['что нужно исправить', 'что исправить', 'fix note'],
     adText: ['рекл. текст', 'рекламный текст', 'текст рекламы', 'ad text'],
-    adUrl: ['реклама', 'ссылка на рекламу', 'ссылка на объявление', 'ad url'],
+    adUrl: ['ссылка на рекламу', 'ссылка на объявление', 'ad url'],
+    adPlatform: ['рекламная площадка', 'площадка рекламы', 'площадка', 'ad platform'],
+    adStatus: ['реклама', 'статус рекламы', 'статус объявления', 'ad status'],
     taskText: ['задача', 'task'],
 };
 const headerAliases = new Map<string, Field>();
@@ -253,8 +271,9 @@ export type EnterpriseRow = ParsedRow & {
     }[];
 };
 /** Fields only meaningful for the control table; other targets must not silently drop them. */
-const controlOnlyFields = new Set<string>(['agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'taskText']);
-const controlFields = new Set<string>([...controlOnlyFields, 'addressText', 'district', 'area', 'price', 'priceUnit', 'operationText', 'stateMark', 'sourceRowId', 'responsible']);
+const controlOnlyFields = new Set<string>(['agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'adPlatform', 'adStatus', 'taskText']);
+// commissionAmount is shared with the historical archive, not control-only.
+const controlFields = new Set<string>([...controlOnlyFields, 'commissionAmount', 'addressText', 'district', 'area', 'price', 'priceUnit', 'operationText', 'stateMark', 'sourceRowId', 'responsible']);
 const maskContacts = (s?: string) => s?.replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g, '[контакт скрыт]') || null;
 export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
     const sectionMarkers: {
@@ -372,6 +391,9 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
             const presenceText = (raw.agreementPresence ?? '').trim().toLowerCase();
             const presence = /^(да|есть|\+|имеется|yes|true)$/.test(presenceText) ? true : /^(нет|отсутствует|-|no|false)$/.test(presenceText) ? false : null;
             const commissionFrom = parseWorkbookNumber(raw.commissionFrom), commissionTo = parseWorkbookNumber(raw.commissionTo);
+            const adPlatform = closedAdCode(raw.adPlatform, controlAdPlatforms, controlAdPlatformLabels, config.adPlatformMap);
+            const adStatus = closedAdCode(raw.adStatus, controlAdStatuses, controlAdStatusLabels, config.adStatusMap)
+                ?? (normalizeHeader(raw.adStatus) === 'not published' ? 'draft' : null);
             const controlLink = raw.adUrl?.trim() ?? '';
             const safeAdUrl = /^https?:\/\/\S+$/i.test(controlLink) && !/^https?:\/\/[^/]*@/i.test(controlLink) ? controlLink : null;
             const rec: Record<string, unknown> = { addressText: raw.addressText || null, district: raw.district || context.district || null, area: parseWorkbookNumber(raw.area), price: parseWorkbookNumber(raw.price), floor: floor ? Number(floor[1]) : null, floorsTotal: floor?.[2] ? Number(floor[2]) : null, propertyType: context.propertyType, operationType: target === 'client_request_need' ? (/сда|lease_out/i.test(operation) ? 'lease_out' : /куп|buy/i.test(operation) ? 'buy' : /прод|sell/i.test(operation) ? 'sell' : op === 'rent' ? 'rent' : null) : op, sourceType: 'agency_listing', description: raw.description?.replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g, '[контакт скрыт]') || null, sourceUrl: safeLink, commercialPurpose: config.purposeMap[normalizeHeader(raw.propertyTypeText)] ?? null, extraAttributes: raw.propertyTypeText ? { purposeText: raw.propertyTypeText } : undefined, name: raw.name || null, receivedAt: received, comment: [raw.request, raw.comment].filter(Boolean).join('; ') || null, channelCode: 'other', sourceCode: config.sourceMap[normalizeHeader(raw.source)] ?? 'other', needStatus: 'active', contacts: cc, coordinatesRaw: cc[0]?.raw ?? null, coordinatesNormalized: cc[0]?.normalized ?? null, coordinatesKind: cc[0]?.type ?? null, sourceRowId: raw.sourceRowId || null, objectText: raw.addressText || null, contractRef: raw.contractRef || null, commissionAmount: parseWorkbookNumber(raw.commissionAmount), dealDate: received, participantName: raw.name || null, priceUnit: raw.priceUnit || priceUnit || context.priceUnit || (op === 'sale' ? 'rub_total' : null), status: row.hidden ? 'archived' : config.statusMap[normalizeHeader(raw.stateMark)] ?? 'active', responsibleUserId: config.responsibleMap[normalizeHeader(raw.responsible)] ?? null, owner: raw.ownerName && raw.ownerPhone && contactKind(raw.ownerPhone).type === 'phone' ? { name: raw.ownerName, phone: contactKind(raw.ownerPhone).normalized } : null, ...(control ? { agreementPresent: presence, absenceReason: maskContacts(raw.absenceReason), commissionFrom, commissionTo, fixNote: maskContacts(raw.fixNote), adText: maskContacts(raw.adText), adUrl: safeAdUrl, taskText: null, actuality: raw.stateMark || null } : {}) };
@@ -384,6 +406,11 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
             if(rec.price&&String(rec.price).split('.')[0]!.length>14)errors.push('INVALID_PRICE');
             if(rec.priceUnit&&!['rub_total','rub_month','rub_m2','rub_m2_month','rub_year','rub_m2_year'].includes(String(rec.priceUnit)))errors.push('INVALID_PRICE_UNIT');
             if (control) {
+                rec.adPlatform = adPlatform;
+                rec.adStatus = adStatus;
+                if (raw.adPlatform && !adPlatform) errors.push('UNMAPPED_AD_PLATFORM');
+                if (raw.adStatus && !adStatus) errors.push('UNMAPPED_AD_STATUS');
+                if (rec.commissionAmount !== null && String(rec.commissionAmount).split('.')[0]!.length > 14) errors.push('INVALID_COMMISSION');
                 if (!rec.addressText) errors.push('MISSING_ADDRESS');
                 if (!op) errors.push('OPERATION_REQUIRED');
                 if (presence === null) errors.push('INVALID_AGREEMENT_PRESENCE');
@@ -407,6 +434,7 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
             const warningCodes = row.hidden ? ['HIDDEN_ROW'] : [];
             if (control) {
                 rec.taskText = maskContacts(raw.taskText);
+                if ((raw.adText || raw.adUrl || raw.adPlatform || raw.adStatus) && (!adPlatform || !adStatus)) warningCodes.push('AD_DETAILS_REQUIRED');
                 if (presence === true) warningCodes.push('AGREEMENT_DETAILS_REQUIRED');
             }
             if ((raw.responsible && !rec.responsibleUserId) || (raw.source && !config.sourceMap[normalizeHeader(raw.source)]) || (raw.stateMark && !config.statusMap[normalizeHeader(raw.stateMark)]) || ((raw.ownerName || raw.ownerPhone) && !rec.owner))
