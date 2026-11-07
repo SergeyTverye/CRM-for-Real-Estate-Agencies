@@ -1,10 +1,11 @@
 import { afterEach, expect, it } from "vitest";
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import { isRuntimeResource, safeCopyTrace, assertRuntimeResources } from "../../scripts/desktop/resource-policy.mjs";
 import { runtimeEntries, runtimeBuildOptions } from "../../scripts/desktop/runtime-entries.mjs";
 import { build } from "esbuild";
+import { checkFinalRuntime } from "../../scripts/desktop/check-final-runtime.mjs";
 
 const roots: string[] = [];
 afterEach(async () => { await Promise.all(roots.splice(0).map(root => rm(root, { recursive: true, force: true }))); });
@@ -26,12 +27,16 @@ it("copies runtime assets but fails closed for unknown roots, docs and private f
   const allowed = ["server.js", "package.json", ".next-desktop/BUILD_ID", ".next-desktop/required-server-files.json",
     ".next-desktop/server/app/page.js", ".next-desktop/static/chunks/app.js", "public/icon.svg",
     "templates/offer.docx", "import-profiles/example.json", "prisma/sqlite/compatibility.json",
+    ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/runtime/client.js",
+    ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/runtime/query_compiler_fast_bg.sqlite.wasm-base64.mjs",
+    ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/README.md",
     "prisma/sqlite/migrations/20260101_init/migration.sql", "node_modules/example/README.md", "node_modules/example/LICENSE"];
   const denied = ["unknown-root.json", "unknown-tree/runtime.js", "tz.md", "ТЗ_CRM_v3.md", "AGENTS.md", "CLAUDE.md",
     "docs/architecture.md", "tests/test.js", "scripts/desktop/source.ts", "src/worker.ts", "ops/backup/script.sh",
     ".env.synthetic", "clouds.env", "private-data/synthetic.json", "data/synthetic.json", "backups/synthetic.json",
     "customerdata/synthetic.json", "public/AGENTS.md", "public/customerdata/synthetic.json", "public/synthetic.sqlite",
-    "generated/sqlite/client.ts", "prisma/sqlite.config.ts"];
+    "generated/sqlite/client.ts", "prisma/sqlite.config.ts", ".next-desktop/src/client.ts",
+    ".next-desktop/docs/guide.md", ".next-desktop/node_modules/example/.env.synthetic"];
   for (const file of [...allowed, ...denied]) await put(file);
   await safeCopyTrace(source, output);
   await assertRuntimeResources(output);
@@ -51,6 +56,23 @@ it("applies destination policy to explicitly copied filesystem dependencies", as
   await safeCopyTrace(source, output, { prefix: "import-profiles" });
   expect(await readdir(output)).toEqual(["example.json"]);
   expect(isRuntimeResource("prisma/sqlite/migrations/20260101_init/migration.sql")).toBe(true);
+});
+
+it("materializes only exact Next hashed aliases to packages inside the standalone trace", async () => {
+  const { root, source, output, put } = await fixture();
+  await put("node_modules/@prisma/client/runtime/client.js");
+  const alias = ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6";
+  await mkdir(path.dirname(path.join(source, alias)), { recursive: true });
+  await symlink(path.join(source, "node_modules/@prisma/client"), path.join(source, alias), "junction");
+  await safeCopyTrace(source, output);
+  await assertRuntimeResources(output);
+  expect((await lstat(path.join(output, alias))).isSymbolicLink()).toBe(false);
+  expect(await readFile(path.join(output, alias, "runtime/client.js"), "utf8")).toBe("synthetic");
+  await rm(path.join(source, alias));
+  const outside = path.join(root, "outside");
+  await mkdir(outside);
+  await symlink(outside, path.join(source, alias), "junction");
+  await expect(safeCopyTrace(source, path.join(root, "rejected"))).rejects.toThrow("RESOURCE_SYMLINK");
 });
 
 it("preserves all eight compiled runtime entrypoints without source TypeScript fallbacks", () => {
@@ -89,4 +111,44 @@ it("bundles all eight real entrypoints in memory with no external source-file de
       expect(dependency.path).not.toMatch(/^(?:\.{1,2}[\\/]|[A-Za-z]:[\\/])|\.(?:ts|tsx|mts|cts)$/);
     }
   }
+}, 30_000);
+
+it("runs final-resource preflight from the package with fresh profiles and detects missing runtime fs assets", async () => {
+  const { root, source, output, put } = await fixture();
+  await put("init-db.cjs", `const fs=require('node:fs'),p=require('node:path');
+    if(process.cwd()!==__dirname || process.env.NODE_PATH || process.env.NODE_OPTIONS || process.env.BACKUP_TARGETS) process.exit(2);
+    if(!process.env.LOCALAPPDATA.startsWith(${JSON.stringify(root)}) || !process.env.APPDATA.startsWith(${JSON.stringify(root)})) process.exit(3);
+    fs.writeFileSync(p.join(process.env.DESKTOP_DATA_DIR,'crm.db'),'synthetic');`);
+  await put("server.js", `const http=require('node:http'),fs=require('node:fs'),p=require('node:path');
+    // Deliberately resolve dynamic filesystem dependency at runtime.
+    require('./.next-desktop/server/probe.cjs');
+    const s=http.createServer((q,r)=>{
+      if(q.url==='/api/v1/desktop/setup') {r.setHeader('content-type','application/json');r.end(JSON.stringify({available:true}));}
+      else if(q.url==='/api/v1/settings/backups/control'||q.url==='/api/v1/operations/backups') {r.statusCode=fs.existsSync(p.join(__dirname,'.next-desktop/server/app',q.url,'route.js'))?401:404;r.end('synthetic protected route');}
+      else if(q.url==='/setup') r.end('<html><script src="/_next/static/app.js"></script></html>');
+      else r.end('synthetic');
+    }).listen(Number(process.env.PORT),'127.0.0.1');
+    process.on('SIGTERM',()=>s.close(()=>process.exit(0)));`);
+  await put("graceful.cjs", `process.stdin.on('data',c=>{if(String(c).includes('STOP'))process.emit('SIGTERM');});`);
+  await put(".next-desktop/server/probe.cjs", "require('@prisma/client-2c3a283f134fdcb6/runtime/client');");
+  await put(".next-desktop/server/app/api/v1/settings/backups/control/route.js", "synthetic protected route");
+  await put(".next-desktop/server/app/api/v1/operations/backups/route.js", "synthetic protected route");
+  await put(".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/runtime/client.js", "module.exports={synthetic:true};");
+  await safeCopyTrace(source, output);
+  await mkdir(path.join(output, "node"));
+  await cp(process.execPath, path.join(output, "node/node.exe"));
+  const before = (await readdir(root)).sort();
+  await checkFinalRuntime(output, { temporaryRoot: root });
+  expect((await readdir(root)).sort()).toEqual(before);
+  const controlRoute = path.join(output, ".next-desktop/server/app/api/v1/settings/backups/control/route.js");
+  await rm(controlRoute);
+  await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_API_ROUTES_FAILED");
+  expect((await readdir(root)).sort()).toEqual(before);
+  await writeFile(controlRoute, "synthetic protected route");
+  await rm(path.join(output, ".next-desktop/node_modules"), { recursive: true });
+  await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_SERVER_EXIT");
+  expect((await readdir(root)).sort()).toEqual(before);
+  await writeFile(path.join(output, "init-db.cjs"), "process.exit(1)");
+  await expect(checkFinalRuntime(output, { temporaryRoot: root })).rejects.toThrow("FINAL_RUNTIME_INIT_FAILED");
+  expect((await readdir(root)).sort()).toEqual(before);
 }, 30_000);

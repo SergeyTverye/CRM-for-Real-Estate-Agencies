@@ -66,6 +66,19 @@ jobs:
       - name: Rust toolchain
         run: rustup toolchain install 1.90.0 --profile minimal
       - run: rustup override set 1.90.0
+      - name: Reuse Rust dependencies and compilation
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5, Node 24
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target/release/.fingerprint
+            src-tauri/target/release/build
+            src-tauri/target/release/deps
+            src-tauri/target/release/incremental
+          key: ${{ runner.os }}-rust-1.90-${{ hashFiles('src-tauri/Cargo.lock', 'src-tauri/Cargo.toml') }}-${{ hashFiles('src-tauri/src/**', 'src-tauri/build.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-1.90-${{ hashFiles('src-tauri/Cargo.lock', 'src-tauri/Cargo.toml') }}-
       - name: Windows launcher regression
         shell: pwsh
         run: |

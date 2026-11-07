@@ -7,6 +7,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { assertRuntimeEntries, runtimeEntries, runtimeBuildOptions } from './runtime-entries.mjs';
 import { safeCopyTrace, assertRuntimeResources } from './resource-policy.mjs';
+import { checkFinalRuntime } from './check-final-runtime.mjs';
 const require = createRequire(import.meta.url);
 const root = process.cwd();
 const app = path.join(root,'src-tauri/resources/app');
@@ -94,7 +95,10 @@ for (const name of ['next','better-sqlite3','@node-rs/argon2','@prisma/client'])
   if (!inventory.components.some(c => (c.name === name || c.name === name.slice(slash + 1) && (slash < 0 || c.group === name.slice(0,slash))) && c.version === installed.version)) throw Error('SBOM_COMPONENT_MISSING');
 }
 await writeFile(path.join(app,'sbom.cdx.json'),JSON.stringify(inventory,null,2));
+// The lock is required for npm ci/SBOM generation, not installed execution.
+await rm(path.join(app,'package-lock.json'));
 await writeFile(path.join(app,'RUNTIMES.md'),`Node.js ${versions.node} x64 (node/LICENSE); Chromium (chromium/*/LICENSE*); WebView2 Evergreen Offline Installer (Microsoft); Tauri 2 (MIT/Apache-2.0); app-local MSVC CRT (Microsoft Visual Studio Distributable Code, node/MSVC-RUNTIME.json).\nProduction npm dependency/license inventory: sbom.cdx.json, generated from the exact npm ci lockfile with dev dependencies omitted. Optional platform variants listed by the lock may not all be installed on Windows. Next, SQLite, Argon2 and Prisma versions are checked against the installed bundle. No host Node/npm required.\n`);
 await assertRuntimeResources(app,dist);
 run(process.execPath,['scripts/security/confidential-guard.mjs','--artifacts','--artifact','src-tauri/resources/app']);
+await checkFinalRuntime(app);
 console.log('DESKTOP_BUNDLE_READY');
