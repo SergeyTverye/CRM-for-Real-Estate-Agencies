@@ -6,6 +6,9 @@ import { randomUUID, randomBytes, createHash } from 'node:crypto';
 import { spawn, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import assert from 'node:assert/strict';
+import { runInstalledBusinessCycle } from './installed-business-cycle.mjs';
+import { runInstalledBackupCycle } from './installed-backup-cycle.mjs';
+import { runInstalledCloudProof } from './installed-cloud-proof.mjs';
 
 const exec = promisify(execFile);
 const workspace = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -28,7 +31,7 @@ export function loopback(value) {
 }
 function options(args) {
   const result = {};
-  const flags = new Set(['execute-new-installed', 'allow-portable-chromium']);
+  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'native-backup-proof', 'cloud-proof']);
   const values = new Set(['launcher', 'installer', 'launcher-sha256', 'installer-sha256', 'source-commit', 'evidence-root', 'chromium', 'observe-seconds']);
   for (let i = 0; i < args.length; i++) {
     const key = args[i].replace(/^--/, '');
@@ -53,6 +56,7 @@ async function main() {
   const system = localPath(process.env.SystemRoot ?? '');
   const ps = path.join(system, 'System32/WindowsPowerShell/v1.0/powershell.exe');
   const baseEnv = { SystemRoot: system, WINDIR: system, SystemDrive: system.slice(0, 2),
+    PATHEXT: '.COM;.EXE;.BAT;.CMD',
     PATH: `${system}\\System32;${system}\\System32\\WindowsPowerShell\\v1.0`,
     COMSPEC: path.join(system, 'System32/cmd.exe') };
   async function powershell(code, env = baseEnv) {
@@ -125,7 +129,9 @@ async function main() {
   const result = { schema: 1, status: 'RUNNING', syntheticDataOnly: true, runId: id,
     sourceCommit: o['source-commit'], sourceReference: 'coordinator-supplied-read-only-reference-not-binary-provenance',
     launcherSha256: launcherHash, installerSha256: installerHash, nativeUi: 'NOT_ASSERTED_SEPARATE_OBSERVATION_REQUIRED',
-    runtime: { controllerNode: process.version, browserKind }, checks, screenshots: [] };
+    runtime: { controllerNode: process.version, browserKind }, checks, screenshots: [],
+    nativeBackupProof: { status: 'NOTRUN' }, cloudProof: { status: 'NOTRUN' },
+    scope: o['focus-business'] ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED' : 'CORE_SCREENS_AND_BUSINESS' };
   let child, context, base, page, browser, supervisorPid;
   const ownedNodes = new Set();
   let stage = 'START';
@@ -133,6 +139,16 @@ async function main() {
   const login = 'qa-' + randomBytes(10).toString('hex');
   const clientName = `QA SYNTHETIC ${id}`;
   let networkFailed = false, pageFailed = false;
+  let helperActive = false;
+  const maintenanceRequests = new WeakMap();
+  let maintenance;
+  const networkDiagnostics = [];
+  function noteNetwork(kind, request, status) {
+    if (networkDiagnostics.length >= 20) return;
+    const url = new URL(request.url());
+    networkDiagnostics.push({ stage, kind, method: request.method(), status,
+      route: url.origin === base ? url.pathname.replace(/[a-f0-9]{8}-[a-f0-9-]{27}/gi, 'UUID') : 'EXTERNAL_ORIGIN' });
+  }
   async function writeNew(p, data) {
     if (!contained(run, p)) fail('WRITE_SCOPE_REJECTED');
     await canonical(p); await fs.writeFile(p, data, { flag: 'wx' });
@@ -143,7 +159,7 @@ async function main() {
     while (Date.now() < deadline) { alive(); if (await condition()) return; await sleep(250); }
     fail(code);
   }
-  async function identity() {
+  async function identity(waitingForServer = false) {
     await canonical(runtime);
     const stat = await fs.stat(runtime);
     if (!stat.isFile() || stat.size > 4096) fail('RUNTIME_METADATA_REJECTED');
@@ -151,11 +167,14 @@ async function main() {
     try { info = JSON.parse(await fs.readFile(runtime, 'utf8')); } catch { fail('RUNTIME_METADATA_REJECTED'); }
     base = loopback(info.url);
     if (!Number.isSafeInteger(info.pid) || info.pid < 1) fail('RUNTIME_PID_REJECTED');
-    const owned = await powershell(`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${info.pid}';if(!$p -or $p.ParentProcessId -ne ${child.pid} -or $p.ExecutablePath -ine $env:QA_NODE){throw 'OWNER'};$s=@(Get-CimInstance Win32_Process -Filter 'ParentProcessId=${info.pid}' | Where-Object {$_.ExecutablePath -ieq $env:QA_NODE -and $_.CommandLine -match 'server\\.js'});if($s.Count -ne 1){throw 'SERVER'};'OWNED:'+ [string]$s[0].ProcessId`, { ...baseEnv, QA_NODE: node });
+    if (waitingForServer && info.pid !== supervisorPid) fail('OWN_SUPERVISOR_CHANGED');
+    const owned = await powershell(`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${info.pid}';if(!$p -or $p.ParentProcessId -ne ${child.pid} -or $p.ExecutablePath -ine $env:QA_NODE){throw 'OWNER'};$s=@(Get-CimInstance Win32_Process -Filter 'ParentProcessId=${info.pid}' | Where-Object {$_.ExecutablePath -ieq $env:QA_NODE -and $_.CommandLine -match 'server\\.js'});if(!$s.Count -and $env:QA_WAIT_SERVER -eq '1'){'WAIT';exit};if($s.Count -ne 1){throw 'SERVER'};'OWNED:'+ [string]$s[0].ProcessId`, { ...baseEnv, QA_NODE: node, QA_WAIT_SERVER: waitingForServer ? '1' : '0' });
+    if (owned === 'WAIT') return false;
     const serverPid = /^OWNED:([1-9]\d*)$/.exec(owned)?.[1];
     if (!serverPid || !Number.isSafeInteger(Number(serverPid))) fail('RUNTIME_ANCESTRY_REJECTED');
     ownedNodes.add(info.pid); ownedNodes.add(Number(serverPid));
     supervisorPid = info.pid;
+    return true;
   }
   async function start() {
     await noOtherLauncher(); await canonical(run);
@@ -197,16 +216,19 @@ async function main() {
     await noOtherLauncher();
   }
   async function visible(locator) { await locator.waitFor({ state: 'visible', timeout: 30000 }); }
-  async function healthy() {
+  async function healthy(timeoutMs = 30000) {
     alive(); await identity();
     if (networkFailed) fail('BROWSER_NETWORK_FAILURE');
     if (pageFailed) fail('BROWSER_OR_LAUNCHER_ERROR');
     const loading = page.getByRole('status').filter({ hasText: /Загрузка|Загружаем/ });
-    await loading.first().waitFor({ state: 'hidden', timeout: 30000 });
-    if (await page.getByRole('alert').filter({ visible: true }).count()) fail('VISIBLE_UI_ALERT');
+    await loading.first().waitFor({ state: 'hidden', timeout: timeoutMs });
+    // Next's clipped live-region announces route titles with role=alert; it is
+    // navigation accessibility, not an application error banner.
+    if (await page.locator('[role="alert"]:not(#__next-route-announcer__)').filter({ visible: true }).count()) fail('VISIBLE_UI_ALERT');
     if (await page.getByText(/Сервер недоступен|Не удалось загрузить|Internal Server Error|Application error/).first().isVisible()) fail('VISIBLE_SERVER_ERROR');
   }
   async function shot(name) {
+    if (helperActive || /\/settings\/backups(?:\/|$)/.test(new URL(page.url()).pathname)) fail('BACKUP_SCREENSHOT_REJECTED');
     await healthy();
     if (await page.locator('input[type="password"]').count()) fail('SECRET_SCREENSHOT_REJECTED');
     if (/\/login/.test(new URL(page.url()).pathname)) fail('LOGIN_SCREENSHOT_REJECTED');
@@ -228,6 +250,136 @@ async function main() {
   async function hydrated() {
     await page.waitForFunction(() => Object.keys(document.querySelector('form') ?? {}).some(k => k.startsWith('__reactProps')), undefined, { timeout: 30000 });
   }
+  // Only the retained launcher ChildProcess handle owns lifecycle. A command may
+  // replace its server child, never the launcher/supervisor or our private run.
+  function callbackBound(timeoutMs, signal, maximum) {
+    if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > maximum || !signal) fail('CALLBACK_BOUND_REJECTED');
+    const deadline = Date.now() + timeoutMs;
+    const remaining = () => {
+      alive();
+      if (signal.aborted || Date.now() >= deadline) fail('CALLBACK_EXPIRED');
+      return Math.max(1, deadline - Date.now());
+    };
+    const pause = async () => {
+      const ms = Math.min(250, remaining());
+      await new Promise((resolve, reject) => {
+        const abort = () => { clearTimeout(timer); reject(Object.assign(new Error('CALLBACK_ABORTED'), { safeCode: 'CALLBACK_ABORTED' })); };
+        const timer = setTimeout(() => { signal.removeEventListener('abort', abort); resolve(); }, ms);
+        signal.addEventListener('abort', abort, { once: true });
+        if (signal.aborted) abort();
+      });
+      remaining();
+    };
+    return { remaining, pause };
+  }
+  async function afterCommand({ requestId, action, timeoutMs, signal }) {
+    if (!/^[a-f0-9-]{36}$/i.test(requestId) || !['create', 'verify', 'restore'].includes(action) || maintenance) fail('COMMAND_CALLBACK_REJECTED');
+    const bound = callbackBound(timeoutMs, signal, 180000);
+    const appChildProcess = child;
+    const supervisor = supervisorPid;
+    const expected = action === 'restore' ? 'restored' : 'verified';
+    maintenance = { requestId, action, deadline: Date.now() + timeoutMs };
+    // Only requests already in flight at this explicit navigation can qualify
+    // as maintenance cancellations; no blanket API error suppression.
+    for (const request of inFlightRequests) maintenanceRequests.set(request, maintenance);
+    try {
+      bound.remaining();
+      await page.goto('about:blank', { timeout: Math.min(15000, bound.remaining()) });
+      while (bound.remaining()) {
+        if (child !== appChildProcess || supervisorPid !== supervisor) fail('OWN_LIFECYCLE_CHANGED');
+        if (!await identity(true)) { await bound.pause(); continue; }
+        bound.remaining();
+        let ready;
+        try {
+          ready = await context.request.get(base + '/api/health/ready', { timeout: Math.min(3000, bound.remaining()), maxRedirects: 0 });
+          if (!ready.ok()) {
+            if (ready.status() !== 503) fail('MAINTENANCE_READY_HTTP_FAILURE');
+            await bound.pause(); continue;
+          }
+        } catch (e) {
+          if (e.safeCode) throw e;
+          if (!/ECONNREFUSED|ECONNRESET|socket hang up|Timeout .* exceeded/.test(String(e.message))) fail('MAINTENANCE_PROBE_FAILED');
+          await bound.pause(); continue;
+        } finally { await ready?.dispose(); }
+        bound.remaining();
+        let response, status;
+        try {
+          response = await context.request.get(base + '/api/v1/settings/backups/control', {
+            headers: { Origin: base }, timeout: Math.min(5000, bound.remaining()), maxRedirects: 0,
+          });
+          if (response.status() === 401) {
+            // Restore can revoke the old session. Authenticate through the real
+            // form using the original closure only; never set cookies ourselves.
+            bound.remaining();
+            await page.goto(base + '/login', { waitUntil: 'domcontentloaded', timeout: Math.min(15000, bound.remaining()) });
+            bound.remaining();
+            await page.waitForFunction(() => Object.keys(document.querySelector('form') ?? {}).some(k => k.startsWith('__reactProps')), undefined, { timeout: Math.min(15000, bound.remaining()) });
+            bound.remaining(); await page.getByLabel('Логин', { exact: true }).fill(login, { timeout: Math.min(10000, bound.remaining()) });
+            bound.remaining(); await page.getByLabel('Пароль', { exact: true }).fill(password, { timeout: Math.min(10000, bound.remaining()) });
+            bound.remaining(); await page.getByRole('button', { name: 'Войти', exact: true }).click({ timeout: Math.min(10000, bound.remaining()) });
+            bound.remaining(); await page.waitForURL(/\/today(?:\?|$)/, { timeout: Math.min(15000, bound.remaining()) });
+            bound.remaining(); await page.goto('about:blank', { timeout: Math.min(10000, bound.remaining()) });
+            continue;
+          }
+          if (!response.ok()) fail('COMMAND_STATUS_HTTP_FAILURE');
+          const body = await response.body();
+          if (body.length > 1024 * 1024) fail('COMMAND_STATUS_BOUND');
+          try { status = JSON.parse(body.toString('utf8')); } catch { fail('COMMAND_STATUS_INVALID'); }
+        } catch (e) {
+          if (e.safeCode) throw e;
+          if (!/ECONNREFUSED|ECONNRESET|socket hang up|Timeout .* exceeded/.test(String(e.message))) fail('COMMAND_STATUS_FAILED');
+          await bound.pause(); continue;
+        } finally { await response?.dispose(); }
+        bound.remaining();
+        if (!Array.isArray(status.jobs)) fail('COMMAND_JOBS_REJECTED');
+        const jobs = status.jobs.filter(j => j.id === requestId);
+        if (jobs.length > 1 || jobs.some(j => j.action !== action)) fail('COMMAND_IDENTITY_REJECTED');
+        const job = jobs[0];
+        if (job?.status === expected) {
+          if (!await identity(true)) { await bound.pause(); continue; }
+          bound.remaining();
+          // Return a same-origin authenticated business page, never settings.
+          const document = await page.goto(base + '/clients', { waitUntil: 'networkidle', timeout: Math.min(15000, bound.remaining()) });
+          if (!document?.ok() || new URL(page.url()).pathname !== '/clients') fail('COMMAND_RESUME_NOT_AUTHENTICATED');
+          bound.remaining(); await healthy(Math.min(10000, bound.remaining())); bound.remaining();
+          return { page, base };
+        }
+        if (job && !['queued', 'running', 'pending'].includes(job.status)) fail('COMMAND_TERMINAL_FAILURE');
+        await bound.pause();
+      }
+    } finally { maintenance = undefined; }
+  }
+  async function onNativeDialog(meta) {
+    const { kind, requestId, expectedPath, timeoutMs, deadlineUtc, signal } = meta;
+    if (!['export', 'import'].includes(kind) || !/^[a-f0-9-]{36}$/i.test(requestId) ||
+        localPath(expectedPath) !== path.join(run, 'backup-cycle', 'synthetic.crmbackup')) fail('NATIVE_META_REJECTED');
+    const deadline = Math.min(Date.parse(deadlineUtc), Date.now() + timeoutMs, Date.now() + 90000);
+    if (!Number.isFinite(deadline) || deadline <= Date.now()) fail('NATIVE_DEADLINE_REJECTED');
+    const bound = callbackBound(Math.min(timeoutMs, deadline - Date.now()), signal, 90000);
+    const nonce = randomUUID();
+    const controlFile = path.join(run, `native-${requestId}-${nonce}.json`);
+    const ackFile = path.join(run, `native-${requestId}-${nonce}.ack`);
+    await canonical(ackFile);
+    try { await fs.lstat(ackFile); fail('NATIVE_ACK_EXISTS'); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+    bound.remaining(); await identity(); bound.remaining();
+    await writeNew(controlFile, JSON.stringify({ kind, requestId, expectedPath, deadlineUtc: new Date(deadline).toISOString(), ackFile }));
+    console.log(JSON.stringify({ status: 'NATIVE_DIALOG_CUA_REQUIRED', controlFile, ackFile }));
+    try {
+      while (bound.remaining()) {
+        await canonical(ackFile); bound.remaining();
+        try {
+          const info = await fs.lstat(ackFile);
+          if (!info.isFile() || info.isSymbolicLink() || info.nlink !== 1 || info.size !== 0) fail('NATIVE_ACK_REJECTED');
+          bound.remaining(); await identity(); bound.remaining();
+          return;
+        } catch (e) { if (e.code !== 'ENOENT') throw e; }
+        await bound.pause();
+      }
+    } finally {
+      console.log(JSON.stringify({ status: 'NATIVE_DIALOG_CUA_WINDOW_CLOSED', controlFile, ackFile }));
+    }
+  }
+  const inFlightRequests = new Set();
   try {
     await start();
     const v = await exec(node, ['--version'], { env, windowsHide: true, timeout: 10000 });
@@ -250,8 +402,24 @@ async function main() {
     });
     page = await context.newPage();
     page.on('pageerror', () => { pageFailed = true; });
-    page.on('requestfailed', () => { networkFailed = true; });
-    page.on('response', r => { if (r.status() >= 400) networkFailed = true; });
+    page.on('request', request => { inFlightRequests.add(request); });
+    page.on('requestfinished', request => { inFlightRequests.delete(request); });
+    page.on('requestfailed', request => {
+      inFlightRequests.delete(request);
+      const aborted = request.failure()?.errorText === 'net::ERR_ABORTED';
+      const url = new URL(request.url());
+      const expectedMaintenance = maintenanceRequests.get(request);
+      if (aborted && expectedMaintenance === maintenance && maintenance && Date.now() < maintenance.deadline &&
+          request.method() === 'GET' && url.origin === base &&
+          (url.pathname === '/api/v1/settings/backups/control' || !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_next/'))) {
+        noteNetwork('EXPECTED_MAINTENANCE_CANCELLATION', request); return;
+      }
+      // Next cancels document/RSC prefetch GETs when a router transition wins.
+      // Business API failures and every non-abort/static/server failure remain errors.
+      if (aborted && request.method() === 'GET' && url.origin === base && !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_next/')) return;
+      networkFailed = true; noteNetwork(aborted ? 'ABORTED' : 'FAILED', request);
+    });
+    page.on('response', r => { if (r.status() >= 400) { networkFailed = true; noteNetwork('HTTP', r.request(), r.status()); } });
     await check('FIRST_SETUP_FORM', async () => {
       await goto('/setup'); await visible(page.getByRole('heading', { name: 'Первый запуск CRM', exact: true }));
       await hydrated(); await visible(page.getByLabel('Начальные данные'));
@@ -282,7 +450,7 @@ async function main() {
         await visible(page.getByRole('button', { name: 'Настроить расписание', exact: true }));
       }],
     ];
-    for (const [code, route, heading, extra] of screens) await check(code, async () => {
+    for (const [code, route, heading, extra] of o['focus-business'] ? [] : screens) await check(code, async () => {
       await goto(route); await visible(page.getByRole('heading', { name: heading, exact: true }));
       await extra();
       // Never capture backup settings/cloud-config values, even on a fresh profile.
@@ -291,13 +459,53 @@ async function main() {
     let cardRoute;
     await check('CREATE_SYNTHETIC_CLIENT_UI', async () => {
       await goto('/clients'); await page.getByRole('link', { name: '+ Новый клиент', exact: true }).click();
-      await hydrated(); await page.getByLabel('Имя / наименование', { exact: true }).fill(clientName);
+      await hydrated(); await page.getByLabel(/^Имя \/ наименование(?:\s*\*)?$/).fill(clientName);
       await page.getByRole('button', { name: 'Создать клиента', exact: true }).click();
       await visible(page.getByRole('heading', { name: clientName, exact: true }));
       cardRoute = new URL(page.url()).pathname;
       if (!/^\/clients\/[a-f0-9-]{36}$/.test(cardRoute)) fail('CLIENT_ROUTE_REJECTED');
       await shot('synthetic-client');
     });
+    await check('INSTALLED_SYNTHETIC_BUSINESS_CYCLE', async () => {
+      await canonical(run);
+      const directory = await canonical(path.join(run, 'business-cycle'));
+      result.businessCycle = await runInstalledBusinessCycle({ page, base, clientId: cardRoute.slice('/clients/'.length), directory });
+      await goto(cardRoute); await shot('synthetic-client-populated');
+      await goto('/offers');
+      await visible(page.getByRole('heading', { name: 'Коммерческие предложения', exact: true }));
+      await shot('synthetic-offers-populated');
+    });
+    if (o['native-backup-proof'] || o['cloud-proof']) {
+      helperActive = true;
+      try {
+        // Cloud helper owns fresh create/destination-specific restore commands;
+        // no proof callbacks or credential-bearing objects are supplied here.
+        if (o['native-backup-proof']) {
+          stage = 'INSTALLED_NATIVE_BACKUP_PROOF';
+          result.nativeBackupProof = { status: 'RUNNING' };
+          const directory = await canonical(path.join(run, 'backup-cycle'));
+          await fs.mkdir(directory); await canonical(directory);
+          if ((await fs.readdir(directory)).length) fail('BACKUP_DIRECTORY_NOT_EMPTY');
+          result.nativeBackupProof = await runInstalledBackupCycle({ page, base,
+            clientId: cardRoute.slice('/clients/'.length), directory, afterCommand, onNativeDialog });
+          await goto(cardRoute); await healthy();
+          checks.push({ code: stage, status: result.nativeBackupProof.status === 'PASS' ? 'PASS' : 'PARTIAL' });
+        }
+        // Native first: never create another automatically replicated archive
+        // after cloud helper has configured its destination-specific prefixes.
+        if (o['cloud-proof']) {
+          stage = 'INSTALLED_CLOUD_PROOF';
+          result.cloudProof = { status: 'RUNNING' };
+          await canonical(dirs.localappdata);
+          result.cloudProof = await runInstalledCloudProof({ executeInstalledCloudProof: true,
+            parentCaptureDisabledAttested: true, page, base, runId: id,
+            profileDirectory: dirs.localappdata, clientId: cardRoute.slice('/clients/'.length),
+            injectFaultMode: 'NONE', afterCommand });
+          await goto(cardRoute); await healthy();
+          checks.push({ code: stage, status: result.cloudProof.status === 'PASS' ? 'PASS' : 'PARTIAL' });
+        }
+      } finally { helperActive = false; }
+    }
     await check('PERSISTENCE_AFTER_OWNED_RESTART', async () => {
       await page.goto('about:blank'); await stopOwned(); await start();
       await context.clearCookies(); await goto('/login'); await hydrated();
@@ -320,10 +528,12 @@ async function main() {
       catch (e) { if (e.code !== 'ENOENT') throw e; }
       await sleep(500);
     }
-    result.status = 'PASS';
+    result.status = checks.some(c => c.status === 'PARTIAL') ? 'PARTIAL' : 'PASS';
   } catch (e) {
     result.status = 'FAIL';
+    for (const key of ['nativeBackupProof', 'cloudProof']) if (result[key].status === 'RUNNING') result[key] = { status: 'FAIL' };
     result.error = { stage, code: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
+    result.networkDiagnostics = networkDiagnostics;
     checks.push({ code: stage, status: 'FAIL' });
   } finally {
     password = undefined;
@@ -345,6 +555,10 @@ function selfTest() {
   assert.equal(loopback('http://127.0.0.1:12345'), 'http://127.0.0.1:12345');
   for (const url of ['http://localhost:1234', 'https://127.0.0.1:1', 'http://127.0.0.1:99999', 'http://127.0.0.1:1/private']) assert.throws(() => loopback(url));
   assert.throws(() => options(['--execute-new-installed', '--unknown']));
+  assert.equal(options([])['native-backup-proof'], undefined);
+  assert.equal(options([])['cloud-proof'], undefined);
+  assert.equal(options(['--native-backup-proof', '--cloud-proof'])['cloud-proof'], true);
+  assert.throws(() => options(['--cloud-proof', '--cloud-proof']));
   console.log('PURE_HELPERS_PASS');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

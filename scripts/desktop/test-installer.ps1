@@ -126,7 +126,14 @@ try {
   Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList '--shutdown' -WindowStyle Hidden -Wait | Out-Null
   WaitFor { $script:app.HasExited -and -not (Test-Path -LiteralPath $runtime) } 210
   Set-Content -LiteralPath (Join-Path $data 'data\desktop-version.json') -Value '{"version":"3.2.0-synthetic"}'
+  # Simulate resources shipped by an older bundle, absent from the new policy.
+  Set-Content -LiteralPath "$install\app\package-lock.json" -Value '{"syntheticObsolete":true}'
+  New-Item -ItemType Directory -Path "$install\app\templates" -Force | Out-Null
+  Set-Content -LiteralPath "$install\app\templates\obsolete-ci-example.txt" -Value 'SYNTHETIC-OBSOLETE'
   Install; StartSmoke
+  Check (-not (Test-Path -LiteralPath "$install\app\package-lock.json")) 'overinstall-obsolete-lock-removed'
+  Check (-not (Test-Path -LiteralPath "$install\app\templates\obsolete-ci-example.txt")) 'overinstall-obsolete-template-removed'
+  Check ((Get-Content -Raw -LiteralPath (Join-Path $data 'files\ci-control.txt')).Trim() -eq 'SYNTHETIC-CONTROL') 'overinstall-user-file-retained'
   Check (@(Get-ChildItem -LiteralPath (Join-Path $data 'backups') -Filter '*.crmbackup').Count -gt 0) 'pre-upgrade-encrypted-snapshot'
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
   Api '/api/v1/auth/login' 'POST' @{login='director';password=$password} | Out-Null

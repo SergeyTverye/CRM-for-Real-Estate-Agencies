@@ -82,6 +82,12 @@ jobs:
       - name: Windows launcher regression
         shell: pwsh
         run: |
+          $savedModules = $env:PSModulePath
+          try {
+            Remove-Item Env:\PSModulePath -ErrorAction SilentlyContinue
+            powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ./scripts/desktop/test-upgrade-resource-cleanup.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'UPGRADE_RESOURCE_TEST_FAILED' }
+          } finally { $env:PSModulePath = $savedModules }
           ./scripts/desktop/test-native-node-path.ps1 -Node (Resolve-Path src-tauri/resources/app/node/node.exe).Path
           cargo test --manifest-path src-tauri/Cargo.toml --release --locked
       - name: Build NSIS offline installer

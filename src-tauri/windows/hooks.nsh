@@ -15,19 +15,17 @@ crm_os_unsupported:
   MessageBox MB_OK|MB_ICONSTOP "Требуется Windows 10 22H2 (19045) или Windows 11 x64." /SD IDOK
   Abort
 crm_os_supported:
-  ; Safe upgrade: ask the installed instance to stop before replacing its runtimes.
-  IfFileExists "$INSTDIR\RealEstateCRM.exe" 0 crm_no_previous_instance
-    ExecWait '"$INSTDIR\RealEstateCRM.exe" --shutdown' $0
+  ; Embedded new helper, never an old installed script. Clean only proven app
+  ; resources after graceful shutdown, before Tauri copies the new resources.
     InitPluginsDir
     SetOutPath "$PLUGINSDIR"
-    File /oname=crm-cleanup.ps1 "${CRM_HOOK_DIR}\uninstall-cleanup.ps1"
-    nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\crm-cleanup.ps1" -Phase Stop -InstallDirectory "$INSTDIR"'
+    File /oname=crm-upgrade-cleanup.ps1 "${CRM_HOOK_DIR}\upgrade-resource-cleanup.ps1"
+    nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File "$PLUGINSDIR\crm-upgrade-cleanup.ps1" -InstallDirectory "$INSTDIR" -InstallerPath "$EXEPATH"'
     Pop $0
     ${If} $0 != 0
       SetErrorLevel 1
       Abort
     ${EndIf}
-crm_no_previous_instance:
     SetOutPath "$INSTDIR"
 !macroend
 !macro NSIS_HOOK_PREUNINSTALL
