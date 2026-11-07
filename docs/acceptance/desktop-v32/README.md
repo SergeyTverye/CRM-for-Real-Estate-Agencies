@@ -34,6 +34,6 @@
 
 ## Оставшиеся gates
 
-Текущий a4 local backup/handoff refresh (старые 71e-доказательства валидны). Installed PG→SQLite и installed Excel UI proof — pending. Физический network cut, полный native picker/tray/reboot/reminder matrix — не доказаны. Excel UI/пересчёт формул, финальный security gate артефактов, при необходимости clean-image PG/SQLite production gate на финальном релизном SHA — по плану. Чистые consumer Windows 10/11 VM — BLOCKED. P2 не release gate.
+На a4 подтверждены локальный backup/rollback (20 проверок), handoff/conflict (61), PG→SQLite с запуском установленной CRM (11), Excel UI roundtrip (14) и пересчёт в Excel 16.0. Ограничения: физический обрыв/восстановление сети и полный native picker/tray/reboot/reminder matrix не проверены. Чистые потребительские Windows 10/11 VM — BLOCKED по решению пользователя. PG/SQLite production проверены на общем business-срезе a982; a4 меняет упаковку. P2 не является условием выпуска.
 
 **Финальный статус:** частично проверенный кандидат, продолжать верификацию. Не объявлять весь релиз готовым.
