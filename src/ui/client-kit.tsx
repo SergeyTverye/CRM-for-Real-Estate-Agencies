@@ -148,15 +148,28 @@ export function NextActionFields({
 /** Модальное окно на основе <dialog>. */
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const pendingControlledCloses = useRef(0);
   const titleId = useId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
     if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
+    if (!open && d.open) {
+      // close() queues a native close event; it is not a new dismissal request.
+      // Count events (rather than reset on reopen) to cover rapid transitions.
+      pendingControlledCloses.current += 1;
+      d.close();
+    }
   }, [open]);
   return (
-    <dialog ref={ref} aria-labelledby={titleId} onClose={onClose} onCancel={e => { e.preventDefault(); onClose(); }} className={`crm-dialog ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
+    <dialog ref={ref} aria-labelledby={titleId} onClose={e => {
+      if (pendingControlledCloses.current > 0) {
+        pendingControlledCloses.current -= 1;
+        return;
+      }
+      // Ignore stale native events after a reopen or a controlled dismissal.
+      if (open && !e.currentTarget.open) onClose();
+    }} onCancel={e => { e.preventDefault(); onClose(); }} className={`crm-dialog ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
       <div className="card-header">
         <h2 id={titleId} className="card-title">{title}</h2>
         <button type="button" className="btn btn-sm btn-link" onClick={onClose} aria-label="Закрыть">
