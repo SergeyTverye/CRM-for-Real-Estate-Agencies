@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { statfsSync } from "node:fs";
-import { parse, resolve, relative } from "node:path";
+import { parse, resolve, relative, win32 } from "node:path";
 const localRoots = new Set<string>();
 /** Real drive check, including mapped Windows network drives, before WAL. */
 export function assertLocalSqliteLocation(directory: string) {
@@ -9,13 +9,27 @@ export function assertLocalSqliteLocation(directory: string) {
     const diff=relative(resolve(cloud),directory);
     if(diff===""||(!diff.startsWith("..")&&!parse(diff).root))throw new Error("SQLITE_CLOUD_PATH_FORBIDDEN");
   }
-  const root=parse(directory).root;
+  const root=process.platform==="win32" ? parse(directory).root.replaceAll("/","\\").toUpperCase() : parse(directory).root;
+  if(process.platform==="win32" && !/^[A-Z]:[\\/]$/.test(root))throw new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
   if(localRoots.has(root))return;
   if(process.platform==="win32"){
-    const drive=root.slice(0,2);
-    if(!/^[a-z]:$/i.test(drive))throw new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
-    const script="(Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='"+drive+"'\").DriveType";
-    const kind=execFileSync("powershell.exe",["-NoLogo","-NoProfile","-NonInteractive","-Command",script],{encoding:"utf8",windowsHide:true,timeout:15000}).trim();
+     // Only a validated drive root enters PowerShell, never the supplied directory.
+     // DriveInfo uses the local platform drive-type API, without WMI/CIM or module loading.
+     const script="$ErrorActionPreference='Stop'; $PSModuleAutoLoadingPreference='None'; [Console]::Write([int]([System.IO.DriveInfo]::new('"+root+"').DriveType))";
+     const systemRoot=process.env.SystemRoot??"C:\\Windows";
+     if(!/^[a-z]:[\\/]/i.test(systemRoot) || systemRoot.includes("\0"))throw new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
+     let kind: string;
+     try {
+       kind=execFileSync(win32.join(systemRoot,"System32","WindowsPowerShell","v1.0","powershell.exe"),["-NoLogo","-NoProfile","-NonInteractive","-Command",script],{
+         encoding:"utf8",windowsHide:true,timeout:15000,maxBuffer:1024,
+         cwd:systemRoot,env:{SystemRoot:systemRoot,WINDIR:systemRoot,PSModulePath:"",NODE_ENV:process.env.NODE_ENV??"production"},stdio:["ignore","pipe","pipe"],
+       }).trim();
+     } catch(error) {
+       // Child-process errors contain command/stderr/paths. Expose only finite safe codes.
+       const safe=new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
+       if(error && typeof error==="object" && "code" in error && error.code==="ETIMEDOUT")Object.assign(safe,{code:"ETIMEDOUT"});
+       throw safe;
+     }
     if(!["2","3","6"].includes(kind))throw new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
   } else {
     const type=Number(statfsSync(directory).type);

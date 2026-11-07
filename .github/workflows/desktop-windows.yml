@@ -1,7 +1,7 @@
 name: Desktop Windows
 on:
   push:
-    branches: [main, feature/desktop-v3.2]
+    branches: [main, feature/desktop-v3.2, codex/desktop-installer-fix]
     paths:
       - 'src/**'
       - 'src-tauri/**'
