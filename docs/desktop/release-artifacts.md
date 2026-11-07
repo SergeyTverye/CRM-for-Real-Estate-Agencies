@@ -1,28 +1,26 @@
-# Windows EXE
+# Windows desktop: текущий артефакт a982542a (не принят)
 
-Текущий официальный EXE `71e8765` скачан в `releases/windows-x64/CRM-Setup-Windows-x64.exe`, отдельная папка исключена из Git/Docker. Размер 585603587 байт. ZIP/EXE SHA и commit build-measurements проверены.
+Текущий официальный артефакт CI: commit `a982542a40bab1e2f5667c336f2edd314ee96fa0`, run [42408326567](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42408326567), статус полностью SUCCESS: build + installer 2022/2025, unit 1791 PASS / 5 skip, SQLite 398 PASS / 1 skip, Rust 1, финальный runtime PASS.
 
-SHA-256: `a3e5ab26cbe6bcd249f2f222994052c4f985541c46b81910b9221d3262be311e`.
+Артефакт: [13589677235](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42408326567/artifacts/13589677235). Файл `releases/windows-x64/CRM-Setup-Windows-x64.exe`, 585 556 902 байт. SHA-256: `1c818d455cf758edcba5b12aa591f1956c28f4cd8f919772304f6b062b57a0ed`. ZIP/EXE/commit проверены.
 
-[Артефакт GitHub Actions](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42396531730/artifacts/13584259822). Windows Server2022/2025 installer lifecycle PASS. На текущем Windows11 обычное окно, setup/login, основные экраны, настоящий business cycle с DOCX/PDF/XLSX/ZIP и клиент после перезапуска проверены; [точный протокол и ограничения](../acceptance/desktop-v32/installed-71e8765.md).
+Установка на Windows 11:
+- overinstall поверх 71e8765 с оставшимся маркером сборки 41: первый запуск exit 1 из-за устаревшего пустого файла `app/public/.gitkeep`; после ручного удаления только этого пустого файла повторная тихая установка exit 0;
+- пользовательские данные не изменены;
+- strict runtime policy PASS: внутренние TZ/source-файлы не попали в программу.
+- свежий профиль: setup/login и POST клиента PASS; `GET /clients/{uuid}` возвращает 500 из-за отсутствующего скомпилированного чанка Next `node_modules_next_dist_esm_build_templates_app-page_0tzz75ki_2zv7.js`;
+- cloud restore не выполнялся: остановлено до настроек облака из-за ошибки карточки клиента.
 
-**Полный выпуск ещё не принят.** Найдены obsolete program resources при обновлении со старой версии и неверный desktop-port в PDF ссылке; source fixes подготовлены для следующего EXE. Installed cloud/USB/native picker и полный handoff/restore gate ещё выполняются. Consumer Windows10/11 VM-части BLOCKED по решению пользователя.
+Сборка a982 не принята для выпуска из-за ошибки открытия карточки клиента.
 
-## История предыдущего артефакта
-### Сборка41c39b8
+Исправление пустого заполнителя: commit `5b8613e`, PS5-тесты PASS, независимое ревью без замечаний. Его CI `42414736304` отменён для экономии ресурсов, потому что всё ещё требуется исправление скомпилированного чанка. Исправление полноты скомпилированного сервера проходит проверку; нового проверенного артефакта пока нет. `main` остаётся на a982; рабочая ветка `codex/installed-release-proof`.
 
-Локальная папка: `releases/windows-x64/`, исключена из Git и Docker context. В ней оставлена одна версия EXE с SHA-256, SBOM и сведениями runtime; проверенные дубликаты ZIP/EXE удалены.
+Linux production: образ `02d8478e47dbbee51ab8632b4b9797046b8623e3910560f70b07d4cf9c467079`, Node 24.22.2. PostgreSQL 9/9, SQLite 22/22, фактический restore PASS; восстановленное прерывание транспорта не засчитано как PASS. Docker production не затронут.
 
-Текущая скачанная сборка — `41c39b8`: [артефакт GitHub Actions](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42313787406/artifacts/13550879559). Размер EXE: 585 583 866 байт.
+История и ограничения: [installed-followup-20261107.md](../acceptance/desktop-v32/installed-followup-20261107.md). Ожидается обновление follow-up по результатам следующего исправления.
 
-```text
-b56ec7501a9b9ebc9328f9e1dfc03cf452b8e10611bae0675bb4eb6f4262126b
-```
+## Исторические сборки (не текущая загрузка)
+- `71e8765`: Windows Server 2022/2025 lifecycle PASS; на Windows 11 проверены setup/login/основные экраны/бизнес-цикл. Не текущий файл для загрузки; найдены obsolete program resources и неверный desktop-port в PDF-ссылке. Протокол: [installed-71e8765.md](../acceptance/desktop-v32/installed-71e8765.md).
+- `41c39b8` / `7e7e47e`: более ранние smoke-сборки; обычное окно не работало. Их результаты не являются приёмкой a982.
 
-**Готовность не подтверждена.** Сборка и Rust-тесты в Windows CI прошли; обе установочные проверки завершились `SMOKE_EXIT_BEFORE_READY`. На текущем ПК после удаления предыдущей версии выполнена чистая установка (exit 0), проверено отсутствие root ТЗ/AGENTS/CLAUDE/docs/tests/src/scripts/ops в программной папке. Пользовательские данные установкой не удалялись.
-
-Причина текущего отказа воспроизведена в новом синтетическом профиле: отсутствуют Next/Turbopack hashed aliases под `.next-desktop/node_modules`; модуль `@prisma/client-2c3a283f134fdcb6/runtime/client` не найден. Исходное исправление сохраняет необходимые runtime-пакеты и скомпилированные API, материализует только проверенные внутренние junction-псевдонимы и добавляет проверку финального пакета до Rust/NSIS. Новая сборка и фактическое обычное окно ещё ожидаются.
-
-Предыдущая сборка `7e7e47e` имела отдельный дефект verbatim Windows resource path и избыточный trace проекта. Её installed smoke backup/verify/restore и A→B/conflict сценарии были проверены на синтетических данных, но обычное окно не работало, а обратный receive блокировался. Эти результаты не являются приёмкой новой сборки. Чистые Windows 10/11 VM отсутствуют по решению пользователя; Windows Server CI их не заменяет.
-
-См. [запуск](../acceptance/desktop-v32/native-startup.md), [перенос](../acceptance/desktop-v32/installed-handoff.md) и [матрицу приёмки](../acceptance/desktop-v32/README.md).
+Consumer Windows 10/11 VM-части остаются BLOCKED по решению пользователя.

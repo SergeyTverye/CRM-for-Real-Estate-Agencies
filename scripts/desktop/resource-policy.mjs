@@ -1,4 +1,5 @@
-import { cp, lstat, readdir, realpath } from 'node:fs/promises';
+import { cp, lstat, readdir, readFile, realpath } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { runtimeEntries } from './runtime-entries.mjs';
 
@@ -133,4 +134,138 @@ export async function refreshRuntimeAliases(root, dist = '.next-desktop') {
   }
   await visit(aliases);
   return count;
+}
+
+// Compiled server inventory covers only files accepted by the destination
+// policy. Links, escapes and policy-rejected names fail closed.
+// Pre-copy safety is once per root: destination/source ancestors and roots
+// are checked before any inventory or copy. Per-entry lstat below remains.
+function toAbsoluteNormalized(input) {
+  if (typeof input !== 'string' || !input || input.includes('\0')) throw Error('RESOURCE_SYMLINK');
+  if (!path.isAbsolute(input)) throw Error('RESOURCE_SYMLINK');
+  return path.normalize(input);
+}
+
+function assertDisjointRoots(sourceAbs, destAbs) {
+  const lower = (value) => (process.platform === 'win32' ? value.toLowerCase() : value);
+  if (lower(sourceAbs) === lower(destAbs)) throw Error('RESOURCE_SYMLINK');
+  const fromSource = process.platform === 'win32'
+    ? path.relative(lower(sourceAbs), lower(destAbs))
+    : path.relative(sourceAbs, destAbs);
+  const fromDest = process.platform === 'win32'
+    ? path.relative(lower(destAbs), lower(sourceAbs))
+    : path.relative(destAbs, sourceAbs);
+  const inside = (relative) => relative !== '' && !path.isAbsolute(relative) && relative !== '..' && !relative.startsWith('..' + path.sep);
+  if (inside(fromSource) || inside(fromDest)) throw Error('RESOURCE_SYMLINK');
+}
+
+async function assertNoReparseAncestors(absolutePath) {
+  let cursor = absolutePath;
+  let nearestPath = null;
+  let nearestStat = null;
+  while (true) {
+    try {
+      nearestStat = await lstat(cursor);
+      nearestPath = cursor;
+      break;
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw Error('RESOURCE_SYMLINK');
+      const parent = path.dirname(cursor);
+      if (parent === cursor) throw Error('RESOURCE_SYMLINK');
+      cursor = parent;
+    }
+  }
+  if (nearestPath !== absolutePath && !nearestStat.isDirectory()) throw Error('RESOURCE_SYMLINK');
+  const chain = [];
+  let walk = nearestPath;
+  while (true) {
+    chain.push(walk);
+    const parent = path.dirname(walk);
+    if (parent === walk) break;
+    walk = parent;
+  }
+  chain.reverse();
+  for (const candidate of chain) {
+    let info;
+    try {
+      info = candidate === nearestPath ? nearestStat : await lstat(candidate);
+    } catch {
+      throw Error('RESOURCE_SYMLINK');
+    }
+    if (info.isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+    if (candidate !== nearestPath && !info.isDirectory()) throw Error('RESOURCE_SYMLINK');
+  }
+}
+
+async function assertSupplementRootsSafe(compiledDir, resourcesDir) {
+  const sourceAbs = toAbsoluteNormalized(compiledDir);
+  const destAbs = toAbsoluteNormalized(resourcesDir);
+  assertDisjointRoots(sourceAbs, destAbs);
+  await assertNoReparseAncestors(sourceAbs);
+  await assertNoReparseAncestors(destAbs);
+}
+
+async function inventoryCompiledServer(directory, dist) {
+  const entries = new Map();
+  async function visit(current, prefix) {
+    for (const item of await readdir(current, { withFileTypes: true })) {
+      const relative = prefix ? prefix + '/' + item.name : item.name;
+      const full = path.join(current, item.name);
+      const info = await lstat(full);
+      if (info.isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+      const target = dist + '/server/' + relative;
+      if (!isRuntimeResource(target, info.isDirectory(), dist)) throw Error('RESOURCE_POLICY_REJECTED:' + target);
+      if (info.isDirectory()) await visit(full, relative);
+      else if (info.isFile()) {
+        const data = await readFile(full);
+        entries.set(relative, createHash('sha256').update(data).digest('hex'));
+      } else throw Error('RESOURCE_POLICY_REJECTED:' + target);
+    }
+  }
+  await visit(directory, '');
+  return entries;
+}
+
+// Fail-closed completeness check: every file from this build's compiled
+// server output must exist in the bundle destination with identical bytes.
+export async function assertCompiledServerComplete(compiledDir, resourcesDir, { dist = '.next-desktop' } = {}) {
+  await assertSupplementRootsSafe(compiledDir, resourcesDir);
+  let sourceStat;
+  try {
+    sourceStat = await lstat(compiledDir);
+  } catch {
+    throw Error('COMPILED_SERVER_MISSING');
+  }
+  let destStat;
+  try {
+    destStat = await lstat(resourcesDir);
+  } catch {
+    throw Error('COMPILED_SERVER_INCOMPLETE');
+  }
+  if (sourceStat.isSymbolicLink() || destStat.isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
+  if (!sourceStat.isDirectory() || !destStat.isDirectory()) throw Error('COMPILED_SERVER_MISSING');
+  const source = await inventoryCompiledServer(compiledDir, dist);
+  if (!source.size) throw Error('COMPILED_SERVER_MISSING');
+  const dest = await inventoryCompiledServer(resourcesDir, dist);
+  for (const [relative, hash] of source) {
+    if (dest.get(relative) !== hash) throw Error('COMPILED_SERVER_INCOMPLETE');
+  }
+}
+
+// Merge this build's compiled server tree into the bundle destination,
+// then verify completeness. Uses the same prefix/policy/link handling as
+// other resource copies and reads only the given build output directory.
+export async function supplementCompiledServer(compiledDir, resourcesDir, { dist = '.next-desktop' } = {}) {
+  await assertSupplementRootsSafe(compiledDir, resourcesDir);
+  let sourceStat;
+  try {
+    sourceStat = await lstat(compiledDir);
+  } catch {
+    throw Error('COMPILED_SERVER_MISSING');
+  }
+  if (sourceStat.isSymbolicLink() || !sourceStat.isDirectory()) throw Error('COMPILED_SERVER_MISSING');
+  const source = await inventoryCompiledServer(compiledDir, dist);
+  if (!source.size) throw Error('COMPILED_SERVER_MISSING');
+  await safeCopyTrace(compiledDir, resourcesDir, { prefix: dist + '/server', dist });
+  await assertCompiledServerComplete(compiledDir, resourcesDir, { dist });
 }

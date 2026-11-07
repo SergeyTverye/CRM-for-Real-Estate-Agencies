@@ -111,8 +111,12 @@ try {
   Api '/api/v1/auth/login' 'POST' @{login='director';password=$password} | Out-Null
   $client=Api '/api/v1/clients' 'POST' @{displayName='CI synthetic client';clientKind='person';contacts=@()}
   Check ([bool]$client.id) 'synthetic-client-created'
-  Set-Content -LiteralPath (Join-Path $data 'files\ci-control.txt') -Value 'SYNTHETIC-CONTROL'
   $id=$client.id
+  $fetched=Api "/api/v1/clients/$id"
+  Check ($fetched.id -eq $id -and $fetched.displayName -eq 'CI synthetic client') 'synthetic-client-card-200'
+  $cardPage=Invoke-WebRequest -Uri "$script:base/clients/$id" -WebSession $script:session -TimeoutSec 30
+  Check ($cardPage.StatusCode -eq 200 -and $cardPage.Content -match '<html') 'synthetic-client-page-200'
+  Set-Content -LiteralPath (Join-Path $data 'files\ci-control.txt') -Value 'SYNTHETIC-CONTROL'
   # Uninstall while the application is running exercises stop/Job Object cleanup.
   Uninstall $false
   Check ((Get-Content -Raw -LiteralPath (Join-Path $data 'files\ci-control.txt')).Trim() -eq 'SYNTHETIC-CONTROL') 'file-retained'
