@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, mkdir, writeFile, readFile, rm, readdir } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, rm, readdir, realpath } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import os from "node:os";
@@ -16,7 +16,8 @@ const ORIGINAL_DATABASE_URL = process.env.DATABASE_URL!;
 const variables = ["DESKTOP_DATA_DIR", "BACKUP_SETTINGS_DIR", "BACKUP_PATH", "FILE_STORAGE_PATH", "CRM_DESKTOP_SUPERVISED_UPGRADE", "CRM_BACKUP_WRITERS_STOPPED", "DATABASE_URL"] as const;
 const previous = Object.fromEntries(variables.map(k => [k, process.env[k]]));
 beforeAll(async () => {
-  root = await mkdtemp(path.join(os.tmpdir(), "crm-runtime-backup-"));
+  // Match the no-symlink production contract even when Windows TEMP is an alias.
+  root = await mkdtemp(path.join(await realpath(os.tmpdir()), "crm-runtime-backup-"));
   process.env.DESKTOP_DATA_DIR = root; process.env.BACKUP_SETTINGS_DIR = path.join(root, "backup-settings"); process.env.BACKUP_PATH = path.join(root, "backups"); process.env.FILE_STORAGE_PATH = path.join(root, "files");
   process.env.CRM_DESKTOP_SUPERVISED_UPGRADE = "1"; process.env.CRM_BACKUP_WRITERS_STOPPED = "1";
   await mkdir(process.env.FILE_STORAGE_PATH, { recursive: true }); await writeFile(path.join(process.env.FILE_STORAGE_PATH, "synthetic.txt"), "synthetic attachment");
@@ -36,6 +37,13 @@ it("supervisor creates encrypted online snapshot, verifies and atomically restor
   const restore = await backupControlCommand(users.manager, { action: "restore", backupId: id, passphrase: secret.passphrase, confirmed: true }) as { requestId: string };
   const restored = await executeDesktopBackupRequest(restore.requestId);
   expect(restored.status).toBe("restored");
+  expect(restored.protectiveBackupId).toEqual(expect.any(String));
+  expect(restored.protectiveBackupId).not.toBe(id);
+  const protectivePath = path.join(archiveRoot(), restored.protectiveBackupId + ".crmbackup");
+  const protectiveMetadata = JSON.parse(await readFile(protectivePath + ".json", "utf8"));
+  const protectiveBytes = await readFile(protectivePath);
+  expect(protectiveBytes.length).toBeGreaterThan(0);
+  expect(createHash("sha256").update(protectiveBytes).digest("hex")).toBe(protectiveMetadata.archive.sha256);
   const generation = await new GenerationStore(path.join(root, "runtime-generations")).currentPath();
   expect(await readFile(path.join(generation!, "documents", "synthetic.txt"), "utf8")).toBe("synthetic attachment");
   const restoredDatabase = new Database(path.join(generation!, "database.sqlite"), { readonly: true });

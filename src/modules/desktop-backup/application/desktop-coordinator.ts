@@ -4,7 +4,8 @@ import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { disconnectDb } from "@/shared/db/client";
 import { sqliteFilePath } from "@/shared/db/sqlite-adapter";
-import { BackupError, type BackupManifest } from "../domain/contracts";
+import { BackupError, identitySchema, type BackupManifest } from "../domain/contracts";
+import { z } from "zod";
 import type { TransferState } from "../domain/handoff";
 import { createArchive, extractArchive, type Credential } from "../infrastructure/archive";
 import { SqliteSnapshotValidator } from "../infrastructure/sqlite-validator";
@@ -24,6 +25,10 @@ const root = () => process.env.DESKTOP_DATA_DIR!;
 const database = () => sqliteFilePath(process.env.DATABASE_URL!);
 const stateFile = () => path.join(root(), "handoff-state.json");
 type LocalState = TransferState & { fingerprint: string };
+const localStateSchema = identitySchema.extend({
+  backupId: z.uuid(), manifestSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  dirtySinceBackup: z.boolean(), readOnly: z.boolean(), fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+}).passthrough();
 /** Only called by the supervisor after every writer process has exited. */
 function stopped() { if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_BACKUP_WRITERS_STOPPED !== "1") throw new BackupError("WRITERS_NOT_STOPPED"); }
 export function businessFingerprint(file: string) {
@@ -72,7 +77,11 @@ function isEmptyWorkspace(file: string): boolean {
   } finally { native?.close(); }
 }
 async function localState(): Promise<LocalState | null> {
-  try { return JSON.parse(await readFile(stateFile(), "utf8")); } catch (e) { if ((e as NodeJS.ErrnoException).code === "ENOENT") return null; throw e; }
+  try {
+    const parsed = localStateSchema.safeParse(JSON.parse(await readFile(stateFile(), "utf8")));
+    if (!parsed.success) throw new BackupError("HANDOFF_STATE_INVALID");
+    return parsed.data;
+  } catch (e) { if ((e as NodeJS.ErrnoException).code === "ENOENT") return null; throw new BackupError("HANDOFF_STATE_INVALID"); }
 }
 async function createPortable(secret: Record<string, string>) {
   stopped();
@@ -87,7 +96,8 @@ async function createPortable(secret: Record<string, string>) {
     outputDir: archiveRoot(), stagingRoot: path.join(root(), "portable-staging"), validator,
     barrier: { run: async work => { stopped(); await disconnectDb(); return work(); } },
     source: { async createConsistentSnapshot(dest) { const native = new Database(database()); try { await native.backup(dest); } finally { native.close(); } } },
-    metadata: { ...identity, snapshotRevision: (previous?.snapshotRevision ?? 0) + 1, parentBackupId: previous?.backupId ?? null, crmVersion: process.env.APP_VERSION ?? "desktop", schemaVersion: 1 },
+    // Handoff state owns the logical dataset; identity.json owns this installation.
+    metadata: { ...identity, deploymentId: previous?.deploymentId ?? identity.deploymentId, snapshotRevision: (previous?.snapshotRevision ?? 0) + 1, parentBackupId: previous?.backupId ?? null, crmVersion: process.env.APP_VERSION ?? "desktop", schemaVersion: 1 },
     passphrase: secret.passphrase!, recoveryKey: secret.recoveryKey!, recoveryKeySaved: true,
     settings: { timeZone: settings.schedule.timeZone, locale: "ru-RU" }, storage: { documents: process.env.FILE_STORAGE_PATH! },
     localBudget: { maxArchives: settings.retention.keep + 1, maxBytes: settings.retention.maxBytes - pendingBytes },
@@ -106,10 +116,16 @@ export async function executeDesktopBackupRequest(id: string) {
   stopped(); if (!/^[a-f0-9-]{36}$/.test(id)) throw new BackupError("COMMAND_ID");
   const requestFile = path.join(commandRoot(), id + ".json");
   const request = JSON.parse(await readFile(requestFile, "utf8"));
-  const secret = await runtimeCredentialStore().get(request.secretRef);
   const cmd = request.command;
   let result: Record<string, unknown>;
   try {
+    // Authorization at publication is not a durable authorization to write:
+    // a preceding give may have transferred ownership while this request waited.
+    const own = await localState();
+    if ((own?.readOnly || process.env.INSTANCE_ROLE === "standby") &&
+        (cmd.action === "create" || cmd.action === "give" || cmd.action === "restore")) throw new BackupError("INSTANCE_READ_ONLY");
+    if (!["create", "give", "verify", "compare", "receive", "restore"].includes(cmd.action)) throw new BackupError("COMMAND_ACTION_INVALID");
+    const secret = await runtimeCredentialStore().get(request.secretRef);
     if (cmd.action === "create" || cmd.action === "give") {
       const created = await createPortable(secret);
       const protectedRef = randomUUID();

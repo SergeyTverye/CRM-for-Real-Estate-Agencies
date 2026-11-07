@@ -192,20 +192,26 @@ async function nativeDialogs() {
     }
   } finally { nativeBusy=false; }
 }
-async function configureActiveGeneration() {
-  const pointer = path.join(dirs.data, 'runtime-generations', 'current.json');
+export async function configureActiveGeneration(dataRoot = dirs.data) {
+  const pointer = path.join(dataRoot, 'runtime-generations', 'current.json');
   let generation;
   try { generation = JSON.parse(await readFile(pointer, 'utf8')).generation; }
   catch (e) { if (e.code === 'ENOENT') return; throw Error('GENERATION_POINTER_INVALID'); }
   if (!/^[a-f0-9-]{36}$/.test(generation)) throw Error('GENERATION_POINTER_INVALID');
-  const active = path.join(dirs.data, 'runtime-generations', 'generations', generation);
+  const active = path.join(dataRoot, 'runtime-generations', 'generations', generation);
   await assertLocalDirectory(active);
   process.env.DATABASE_URL = 'file:' + path.join(active, 'database.sqlite').replaceAll('\\','/');
   process.env.SQLITE_DATABASE_URL = process.env.DATABASE_URL;
   process.env.FILE_STORAGE_PATH = path.join(active, 'documents');
 }
-async function configureHandoff() {
-  try { const state = JSON.parse(await readFile(path.join(dirs.data, 'handoff-state.json'), 'utf8')); process.env.INSTANCE_ROLE = state.readOnly ? 'standby' : 'active'; }
+export async function configureHandoff(dataRoot = dirs.data) {
+  try {
+    const state = JSON.parse(await readFile(path.join(dataRoot, 'handoff-state.json'), 'utf8'));
+    if (!state || typeof state !== 'object' || Array.isArray(state) || typeof state.deploymentId !== 'string' || !uuid.test(state.deploymentId) || typeof state.readOnly !== 'boolean') throw Error('HANDOFF_STATE_INVALID');
+    // Adoption changes the dataset, never this machine's instance/device identity.
+    process.env.DEPLOYMENT_ID = state.deploymentId;
+    process.env.INSTANCE_ROLE = state.readOnly ? 'standby' : 'active';
+  }
   catch (e) { if (e.code !== 'ENOENT') throw Error('HANDOFF_STATE_INVALID'); }
 }
 async function main() {

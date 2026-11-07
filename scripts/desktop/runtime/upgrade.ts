@@ -8,6 +8,10 @@ import { createArchive, extractArchive } from "../../../src/modules/desktop-back
 import { SqliteSnapshotValidator } from "../../../src/modules/desktop-backup/infrastructure/sqlite-validator";
 import { WindowsDpapiProtector } from "../../../src/modules/desktop-backup/infrastructure/credential-store";
 import { newRecoveryKey } from "../../../src/modules/desktop-backup/infrastructure/encryption";
+import { z } from "zod";
+// Only consume adoption after checking its safety-critical identity and role.
+// Extra fields remain compatible with existing persisted handoff versions.
+const adoptedStateSchema = z.object({ deploymentId: z.uuid(), readOnly: z.boolean() });
 const root = () => process.env.DESKTOP_DATA_DIR!;
 // Server-mode tooling may supply a PostgreSQL URL. Only an explicit SQLite
 // path can override the desktop default (including a restored generation).
@@ -30,6 +34,13 @@ async function credentials() {
 export async function createDesktopSafetySnapshot() {
   const previous = existsSync(marker()) ? await readFile(marker(),"utf8") : null;
   const identity = JSON.parse(await readFile(path.join(root(),"identity.json"),"utf8"));
+  let deploymentId = identity.deploymentId;
+   try {
+     const parsed = adoptedStateSchema.safeParse(JSON.parse(await readFile(path.join(root(), "handoff-state.json"), "utf8")));
+     if (!parsed.success) throw Error("HANDOFF_STATE_INVALID");
+     deploymentId = parsed.data.deploymentId;
+   }
+   catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw Error("HANDOFF_STATE_INVALID"); }
   const key = await credentials();
   const recoveryFile = path.join(root(), "upgrade-recovery.dpapi");
   if (!existsSync(recoveryFile)) {
@@ -42,7 +53,7 @@ export async function createDesktopSafetySnapshot() {
       outputDir:process.env.BACKUP_PATH!, stagingRoot:path.join(root(),"upgrade-staging"),
       source:{ async createConsistentSnapshot(dest) { const db = new Database(database()); try { await db.backup(dest); } finally { db.close(); } } },
       barrier:{ run: async work => work() }, validator,
-      metadata:{ ...identity, snapshotRevision:0, parentBackupId:null, crmVersion:JSON.parse(previous ?? "{}").version ?? "pre-desktop", schemaVersion:1 },
+      metadata:{ ...identity, deploymentId, snapshotRevision:0, parentBackupId:null, crmVersion:JSON.parse(previous ?? "{}").version ?? "pre-desktop", schemaVersion:1 },
       passphrase:key.toString("base64"), recoveryKey:recovery.toString("utf8"), recoveryKeySaved:true,
       settings:{timeZone:process.env.APP_TIMEZONE}, storage:{documents:process.env.FILE_STORAGE_PATH!},
     });

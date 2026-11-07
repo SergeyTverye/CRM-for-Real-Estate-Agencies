@@ -1,8 +1,10 @@
-import { mkdtempSync, copyFileSync } from "node:fs";
+import { mkdtempSync, copyFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const dir = mkdtempSync(join(tmpdir(),"crm-sqlite-core-"));
+// Windows TEMP may be a junction. Product backup paths deliberately reject
+// symlink ancestors, so synthetic fixtures must use the physical temp directory.
+const dir = mkdtempSync(join(realpathSync.native(tmpdir()),"crm-sqlite-core-"));
 process.env.DATABASE_URL = "file:" + join(dir,"core.db");
 process.env.CRM_DEPLOYMENT_MODE = "desktop";
 process.env.CRM_DESKTOP_PORT = "3511";

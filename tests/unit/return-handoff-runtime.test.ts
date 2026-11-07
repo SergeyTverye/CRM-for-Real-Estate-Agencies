@@ -103,9 +103,10 @@ describe("real stopped-runtime receive on isolated synthetic SQLite/files", () =
     expect(process.env.DATABASE_URL).toBe(beforeUrl);
     expect(state.secrets.size).toBe(0);
   });
-  it.each([false, true])("ordinary restore still applies the known snapshot (dirty=%s)", async dirty => {
+  it.each([false, true])("active ordinary restore still applies the known snapshot (dirty=%s)", async dirty => {
+    process.env.INSTANCE_ROLE = "active";
     const known = await incoming();
-    await atomicJson(path.join(state.root, "handoff-state.json"), { ...identity, backupId: known.manifest.backupId, manifestSha256: known.manifest.manifestSha256, snapshotRevision: known.manifest.snapshotRevision, parentBackupId: known.manifest.parentBackupId, readOnly: true, dirtySinceBackup: false, fingerprint: originalFingerprint });
+    await atomicJson(path.join(state.root, "handoff-state.json"), { ...identity, backupId: known.manifest.backupId, manifestSha256: known.manifest.manifestSha256, snapshotRevision: known.manifest.snapshotRevision, parentBackupId: known.manifest.parentBackupId, readOnly: false, dirtySinceBackup: false, fingerprint: originalFingerprint });
     if (dirty) { const db = new Database(path.join(state.root, "local.sqlite")); db.exec("UPDATE sample SET label = 'synthetic newer work'"); db.close(); }
     expect(await run(known.archive.backupId, "restore")).toMatchObject({ status: "restored", protectiveBackupId: expect.any(String) });
     const active = (await new GenerationStore(path.join(state.root, "runtime-generations")).currentPath())!;
@@ -114,6 +115,10 @@ describe("real stopped-runtime receive on isolated synthetic SQLite/files", () =
     expect(await readFile(path.join(active, "documents", "sample.txt"), "utf8")).toBe("synthetic returned attachment");
   });
   it("successful give records source read-only, then explicit child receive returns ownership without cloning device identity", async () => {
+    process.env.INSTANCE_ROLE = "active";
+    const initialStatePath = path.join(state.root, "handoff-state.json");
+    const initialState = JSON.parse(await readFile(initialStatePath, "utf8"));
+    await atomicJson(initialStatePath, { ...initialState, readOnly: false });
     const id = randomUUID(), ref = randomUUID(); state.secrets.set(ref, secret);
     await atomicJson(path.join(commandRoot(), id + ".json"), { id, secretRef: ref, actorUserId: "synthetic-manager", createdAt: new Date().toISOString(), command: { action: "give", recoveryKeySaved: true } });
     const given = await executeDesktopBackupRequest(id);

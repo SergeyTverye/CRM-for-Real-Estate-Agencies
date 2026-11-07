@@ -18,6 +18,9 @@ function Install {
   $p=Start-Process -FilePath $Installer -ArgumentList @('/S',"/D=$install") -WindowStyle Hidden -PassThru -Wait
   Check ($p.ExitCode -eq 0) 'silent-install'
   Check (Test-Path -LiteralPath "$install\RealEstateCRM.exe") 'installed-exe'
+  $runtimeRoots=@('.next-desktop','chromium','generated','import-profiles','node','node_modules','prisma','public','templates','workers',
+    'backup-command.cjs','backup-now.cjs','desktop-manifest.json','graceful.cjs','init-db.cjs','package.json','RUNTIMES.md','sbom.cdx.json','server.js','supervisor.mjs','upgrade.cjs')
+  Check (@(Get-ChildItem -LiteralPath "$install\app" -Force | Where-Object Name -notin $runtimeRoots).Count -eq 0) 'installed-runtime-root-allowlist'
 }
 function StartSmoke {
   # A crash can leave the previous ready marker. Never accept its port/PID.
