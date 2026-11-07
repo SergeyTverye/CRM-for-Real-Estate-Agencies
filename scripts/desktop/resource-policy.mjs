@@ -7,6 +7,10 @@ const rootFiles = new Set(['package.json', 'desktop-manifest.json', 'sbom.cdx.js
 const privateName = /^(?:\.env(?:\..*)?|clouds\.env|\.git|private-data|private-imports|customerdata)$/i;
 const privateFile = /\.(?:db|sqlite|crmbackup|dump)(?:-(?:wal|shm|journal))?$/i;
 const developmentFile = /^(?:AGENTS|CLAUDE)(?:\..*)?$|^(?:tz|ТЗ)(?:[_. -].*)?\.md$|\.(?:md|mdx|ts|tsx|mts|cts)$/i;
+// No current runtime code reads repository templates (examples are demo inputs),
+// and public/ is empty. Add exact reviewed paths here when runtime usage is added;
+// an extension allowlist would also admit unrelated logs, workbooks or secrets.
+const runtimeAssets = new Set([]);
 
 /** Destination-relative policy: never use repository-wide glob exclusions as a boundary. */
 export function isRuntimeResource(relative, directory = false, dist = '.next-desktop') {
@@ -25,6 +29,11 @@ export function isRuntimeResource(relative, directory = false, dist = '.next-des
   if (parts.some(p => /^(?:AGENTS|CLAUDE)(?:\..*)?$/i.test(p))) return false;
   // Node/Chromium distributions also carry upstream notices, not app docs.
   if (['node', 'chromium'].includes(parts[0])) return directory || parts.length > 1;
+  if (['public', 'templates'].includes(parts[0])) {
+    return directory
+      ? [...runtimeAssets].some(asset => asset.startsWith(normalized + '/'))
+      : runtimeAssets.has(normalized);
+  }
   if (!directory && developmentFile.test(parts.at(-1)) && normalized !== 'RUNTIMES.md') return false;
   if (entrypoints.has(normalized) || rootFiles.has(normalized)) return !directory;
   if (parts[0] === dist) {
@@ -32,7 +41,6 @@ export function isRuntimeResource(relative, directory = false, dist = '.next-des
     if (['server', 'static'].includes(parts[1])) return true;
     return !directory && parts.length === 2 && (parts[1] === 'BUILD_ID' || /\.(?:json|js|mjs|cjs)$/.test(parts[1]));
   }
-  if (['public', 'templates'].includes(parts[0])) return directory || parts.length > 1;
   if (parts[0] === 'import-profiles') return directory ? parts.length === 1 : parts.length === 2 && /\.json$/.test(parts[1]);
   if (parts[0] === 'prisma') {
     if (parts.length === 1) return directory;

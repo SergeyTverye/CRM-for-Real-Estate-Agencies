@@ -25,7 +25,23 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   ...(process.env.CRM_BUILD_TARGET === "desktop" ? {
     output: "standalone" as const,
-    outputFileTracingExcludes: { "/*": ["./.env*", "./private-data/**/*", "./data/**/*", "./backups/**/*"] },
+    // Root-anchored repository inputs only: never blanket-exclude node_modules,
+    // src/generated, templates, import-profiles or the compiled dist/server tree.
+    // Resource policy remains the final, destination-relative packaging boundary.
+    outputFileTracingExcludes: { "/*": [
+      "./.env*", "./clouds.env", "./.git/**/*",
+      "./private-data/**/*", "./private-imports/**/*", "./customerdata/**/*",
+      "./data/**/*", "./backups/**/*", "./logs/**/*",
+      "./docs/**/*", "./tests/**/*", "./scripts/**/*", "./ops/**/*",
+      "./Real-Estate-Scrapper/**/*", "./vendor/**/*",
+      "./src/app/**/*", "./src/modules/**/*", "./src/shared/**/*", "./src/ui/**/*", "./src/worker/**/*",
+      "./*.{md,mdx,txt,xls,xlsx,xlsm,xlsb,log,zip,7z,tar,gz,tgz,dump,crmbackup}",
+      "./AGENTS*", "./CLAUDE*", "./TZ*", "./tz*", "./ТЗ*",
+      "./public/**/*.log", "./templates/**/*.log",
+      "./coverage/**/*", "./test-results/**/*", "./playwright-report/**/*",
+      "./build/**/*", "./dist/**/*", "./src-tauri/target/**/*", "./src-tauri/resources/**/*",
+      "./.next*/cache/**/*", "./.next*/diagnostics/**/*", "./.next*/standalone/**/*",
+    ] },
   } : {}),
   devIndicators: false,
   // Отдельный каталог сборки позволяет запускать несколько dev-серверов параллельно (QA/скриншоты).

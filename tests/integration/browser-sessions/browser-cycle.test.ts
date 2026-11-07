@@ -12,6 +12,7 @@ import { viewerHarness } from "../../fixtures/captcha-stand/harness";
 
 const actor: Actor = { userId: "10000000-0000-4000-8000-000000000001", sessionId: "fixture", displayName: "Сотрудник стенда", role: "realtor", login: "fixture", mustChangePassword: false };
 const job = { searchRunId: "20000000-0000-4000-8000-000000000001", source: "cian" as const };
+const executablePath = process.env.SCRAPER_CHROME_PATH || chromium.executablePath();
 const cleanup: (() => Promise<unknown>)[] = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
 async function scenario(options: { tickMs?: number; idleMs?: number; totalMs?: number } = {}) {
@@ -20,7 +21,8 @@ async function scenario(options: { tickMs?: number; idleMs?: number; totalMs?: n
   const probe = await stand.network.transport(`${stand.origin}/check`);
   const adapterStatus = probe.data.includes("data-needs-user-action") ? "needs_user_action" : "success";
   let handle: BrowserHandle | undefined;
-  const factory = new PlaywrightSessionBrowser({ executablePath: process.env.SCRAPER_CHROME_PATH, network: stand.network });
+  const transport = vi.fn(stand.network.transport);
+  const factory = new PlaywrightSessionBrowser({ executablePath, network: { ...stand.network, transport } });
   const snapshots: { id: string; area: number; price: string }[] = []; const blocked = vi.fn(async () => undefined);
   const search: SearchContinuationPort = {
     prepare: async () => { if (adapterStatus !== "needs_user_action") throw new Error("SOURCE_NOT_WAITING_FOR_HUMAN"); return { startUrl: `${stand.origin}/check`, parameters: { purpose: "office" } }; },
@@ -37,18 +39,18 @@ async function scenario(options: { tickMs?: number; idleMs?: number; totalMs?: n
   const service = new BrowserSessionService(repo, { open: async (...args) => { handle = await factory.open(...args); return handle; } }, search, audit, { tickMs: options.tickMs ?? 100_000, idleMs: options.idleMs ?? 60_000, totalMs: options.totalMs });
   cleanup.push(() => service.shutdown());
   const session = await service.create(actor, job);
-  return { stand, adapterStatus, service, session, search, snapshots, handle: handle!, currentHandle: () => handle!, repo, audit, blocked };
+  return { stand, transport, adapterStatus, service, session, search, snapshots, handle: handle!, currentHandle: () => handle!, repo, audit, blocked };
 }
 describe("AT-05 controlled Chromium cycle", () => {
   it("detect → frame → human input FROM React viewer → continuation → validated results → profile cleanup", async () => {
-    await access(chromium.executablePath());
+    await access(executablePath);
     const profilesBefore = new Set((await readdir(os.tmpdir())).filter(n => n.startsWith("crm-browser-session-")));
     const t = await scenario();
     expect(t.adapterStatus).toBe("needs_user_action");
     expect(await t.handle.page.locator("[data-needs-user-action]").count()).toBe(1);
     expect(t.session.status).toBe("active");
     const harness = await viewerHarness(t.service, actor); cleanup.push(harness.close);
-    const browser = await chromium.launch({ headless: true }); cleanup.push(() => browser.close());
+    const browser = await chromium.launch({ executablePath, headless: true }); cleanup.push(() => browser.close());
     const page = await browser.newPage({ viewport: { width: 1360, height: 1100 } });
     await page.goto(`${harness.origin}/?id=${t.session.id}`);
     const screen = page.getByRole("application", { name: "Экран площадки" });
@@ -59,7 +61,14 @@ describe("AT-05 controlled Chromium cycle", () => {
     await vi.waitFor(async () => expect(await t.handle.page.locator("input[name=proof]").inputValue()).toBe("человек"), { timeout: 5000 });
     await screen.click({ position: { x: 200, y: 255 } });
     await vi.waitFor(async () => expect(await t.handle.page.locator("[data-listing]").count()).toBe(1), { timeout: 5000 });
-    await page.getByRole("button", { name: "Готово", exact: true }).click();
+    // Completion includes real Chromium shutdown/profile removal, not just a React render.
+    // Await its actual response before starting the unchanged UI-feedback budget.
+    const [completion] = await Promise.all([
+      page.waitForResponse(response => response.url() === `${harness.origin}/api/v1/browser-sessions/${t.session.id}/complete` && response.request().method() === "POST"),
+      page.getByRole("button", { name: "Готово", exact: true }).click(),
+    ]);
+    expect(completion.status()).toBe(200);
+    expect(await completion.json()).toMatchObject({ status: "completed", closeReason: "search_resumed" });
     await vi.waitFor(async () => expect(await page.getByRole("status").innerText()).toContain("Поиск продолжен"), { timeout: 10_000 });
     expect(t.snapshots).toEqual([{ id: "synthetic-1", area: 100, price: "5000000" }]);
     expect(t.search.resume).toHaveBeenCalledTimes(1); expect(t.handle.page.isClosed()).toBe(true);
@@ -93,18 +102,31 @@ describe("AT-05 controlled Chromium cycle", () => {
   });
   it("denies cross-domain navigation before any external request", async () => {
     const t = await scenario(); let externalRequests = 0;
+    const requestsBefore = t.stand.requests();
     t.handle.context.on("request", request => { if (new URL(request.url()).hostname === "example.org") externalRequests++; });
     await t.service.input(actor, t.session.id, { type: "click", x: 150, y: 410 });
-    await vi.waitFor(async () => expect((await t.service.get(actor, t.session.id)).status).toBe("failed"));
+    // get() awaits durable closure, including real Chromium shutdown and profile removal.
+    // Vitest's default 1s wait is shorter than that cleanup on portable Windows Chromium.
+    await vi.waitFor(async () => expect((await t.service.get(actor, t.session.id)).status).toBe("failed"), { timeout: 10_000 });
     expect(t.blocked).toHaveBeenCalledWith(job.searchRunId, "cian", "navigation_blocked");
+    expect((await t.service.get(actor, t.session.id)).closeReason).toBe("navigation_blocked");
+    expect(t.transport.mock.calls.every(([raw]) => new URL(raw).origin === t.stand.origin)).toBe(true);
+    expect(t.stand.requests()).toBe(requestsBefore);
+    expect(t.snapshots).toEqual([]);
     // Chromium can emit a request event for an aborted route; fixture transport rejects every foreign origin.
     expect(externalRequests).toBeLessThanOrEqual(1); expect(t.handle.page.isClosed()).toBe(true);
   });
   it("never lets Chromium follow an HTTP redirect outside the guarded transport", async () => {
     const t = await scenario();
+    const requestsBefore = t.stand.requests();
     await t.handle.page.goto(`${t.stand.origin}/redirect-forbidden`).catch(() => undefined);
-    await vi.waitFor(async () => expect((await t.service.get(actor, t.session.id)).status).toBe("failed"));
+    await vi.waitFor(async () => expect((await t.service.get(actor, t.session.id)).status).toBe("failed"), { timeout: 10_000 });
     expect(t.blocked).toHaveBeenCalledWith(job.searchRunId, "cian", "navigation_blocked");
+    expect((await t.service.get(actor, t.session.id)).closeReason).toBe("navigation_blocked");
+    expect(t.transport.mock.calls.every(([raw, options]) => new URL(raw).origin === t.stand.origin && options?.followRedirects === false)).toBe(true);
+    expect(t.transport.mock.calls.filter(([raw]) => new URL(raw).pathname === "/redirect-forbidden")).toHaveLength(1);
+    expect(t.stand.requests()).toBe(requestsBefore + 1);
+    expect(t.snapshots).toEqual([]);
     expect(t.handle.page.isClosed()).toBe(true);
   });
   it("idle timer actually closes Chromium without any request from CRM", async () => {

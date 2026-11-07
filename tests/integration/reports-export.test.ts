@@ -10,6 +10,7 @@ import { GET as archiveRoute } from "@/app/api/v1/archive/route";
 import { GET as reportRoute } from "@/app/api/v1/reports/manager/route";
 import { GET as exportRoute } from "@/app/api/v1/export/route";
 import { ForbiddenError } from "@/shared/errors";
+import { isSqlite } from "@/shared/db/dialect";
 
 let u: TestUsers;
 beforeEach(async () => {
@@ -99,6 +100,15 @@ describe("UC-14: экспорт ZIP/CSV + manifest", () => {
     expect(fileName).toMatch(/^crm-export-.*\.zip$/);
     const files = unzipSync(data);
     const manifest = JSON.parse(strFromU8(files["manifest.json"]!));
+    expect(manifest).toMatchObject({ format: "crm-export", formatVersion: 1 });
+    // Directly applied PostgreSQL migrations need not have a Prisma ledger.
+    if (!isSqlite()) {
+      const ledger = await db.$queryRaw<{ present: boolean }[]>`SELECT to_regclass('_prisma_migrations') IS NOT NULL AS present`;
+      const versions = ledger[0]?.present
+        ? await db.$queryRaw<{ migration_name: string }[]>`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name DESC LIMIT 1`
+        : [];
+      expect(manifest.schemaVersion).toBe(versions[0]?.migration_name ?? null);
+    }
     expect(manifest.files.find((f: { file: string }) => f.file === "clients.csv").rows).toBe(1);
     const clientsCsv = strFromU8(files["clients.csv"]!);
     expect(clientsCsv).toContain(clientId);

@@ -27,8 +27,8 @@ async function fixture() {
 it("copies runtime assets but fails closed for unknown roots, docs and private files", async () => {
   const { source, output, put } = await fixture();
   const allowed = ["server.js", "package.json", ".next-desktop/BUILD_ID", ".next-desktop/required-server-files.json",
-    ".next-desktop/server/app/page.js", ".next-desktop/static/chunks/app.js", "public/icon.svg",
-    "templates/offer.docx", "import-profiles/example.json", "prisma/sqlite/compatibility.json",
+    ".next-desktop/server/app/page.js", ".next-desktop/static/chunks/app.js",
+    "import-profiles/example.json", "prisma/sqlite/compatibility.json",
     ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/runtime/client.js",
     ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/runtime/query_compiler_fast_bg.sqlite.wasm-base64.mjs",
     ".next-desktop/node_modules/@prisma/client-2c3a283f134fdcb6/README.md",
@@ -37,6 +37,10 @@ it("copies runtime assets but fails closed for unknown roots, docs and private f
     "docs/architecture.md", "tests/test.js", "scripts/desktop/source.ts", "src/worker.ts", "ops/backup/script.sh",
     ".env.synthetic", "clouds.env", "private-data/synthetic.json", "data/synthetic.json", "backups/synthetic.json",
     "customerdata/synthetic.json", "public/AGENTS.md", "public/customerdata/synthetic.json", "public/synthetic.sqlite",
+    "public/icon.svg", "templates/offer.docx", "public/debug.log", "public/secret.txt", "public/src/internal.js",
+    "public/ТЗ.txt", "templates/TZ.txt", "templates/debug.log", "templates/secret.txt", "public/synthetic-private.xlsx",
+    "templates/examples/client.md", "templates/examples/client.yaml", "templates/examples/collection.docx",
+    "templates/examples/collection.xlsx", "templates/synthetic.zip", "public/synthetic.tar.gz",
     "generated/sqlite/client.ts", "prisma/sqlite.config.ts", ".next-desktop/src/client.ts",
     ".next-desktop/docs/guide.md", ".next-desktop/node_modules/example/.env.synthetic"];
   for (const file of [...allowed, ...denied]) await put(file);
@@ -47,7 +51,7 @@ it("copies runtime assets but fails closed for unknown roots, docs and private f
     expect(isRuntimeResource(file)).toBe(false);
     await expect(readFile(path.join(output, file))).rejects.toMatchObject({ code: "ENOENT" });
   }
-  expect((await readdir(output)).sort()).toEqual([".next-desktop", "generated", "import-profiles", "node_modules", "package.json", "prisma", "public", "server.js", "templates"].sort());
+  expect((await readdir(output)).sort()).toEqual([".next-desktop", "generated", "import-profiles", "node_modules", "package.json", "prisma", "server.js"].sort());
   await writeFile(path.join(output, "unexpected.json"), "synthetic");
   await expect(assertRuntimeResources(output)).rejects.toThrow("RESOURCE_POLICY_REJECTED:unexpected.json");
 });
@@ -58,6 +62,24 @@ it("applies destination policy to explicitly copied filesystem dependencies", as
   await safeCopyTrace(source, output, { prefix: "import-profiles" });
   expect(await readdir(output)).toEqual(["example.json"]);
   expect(isRuntimeResource("prisma/sqlite/migrations/20260101_init/migration.sql")).toBe(true);
+});
+
+it("denies unregistered asset roots without traversing their junctions and rejects injected assets", async () => {
+  const { root, source, output, put } = await fixture();
+  await put("server.js");
+  const outside = path.join(root, "synthetic-private");
+  await mkdir(outside);
+  await writeFile(path.join(outside, "secret.txt"), "synthetic");
+  for (const assetRoot of ["public", "templates"]) {
+    expect(isRuntimeResource(assetRoot, true)).toBe(false);
+    await symlink(outside, path.join(source, assetRoot), "junction");
+  }
+  await safeCopyTrace(source, output);
+  await assertRuntimeResources(output);
+  expect(await readdir(output)).toEqual(["server.js"]);
+  await mkdir(path.join(output, "public"));
+  await writeFile(path.join(output, "public", "secret.txt"), "synthetic");
+  await expect(assertRuntimeResources(output)).rejects.toThrow("RESOURCE_POLICY_REJECTED:public");
 });
 
 it("materializes only exact Next hashed aliases to packages inside the standalone trace", async () => {
@@ -130,7 +152,11 @@ it("runs final-resource preflight from the package with fresh profiles and detec
     require('./.next-desktop/server/probe.cjs');
     const s=http.createServer((q,r)=>{
       if(q.url==='/api/v1/desktop/setup') {r.setHeader('content-type','application/json');r.end(JSON.stringify({available:true}));}
-      else if(q.url==='/api/v1/settings/backups/control'||q.url==='/api/v1/operations/backups') {r.statusCode=fs.existsSync(p.join(__dirname,'.next-desktop/server/app',q.url,'route.js'))?401:404;r.end('synthetic protected route');}
+      else if(q.url==='/api/v1/settings/backups/control'||q.url==='/api/v1/operations/backups') {
+        const method=q.url==='/api/v1/operations/backups'?'POST':'GET';
+        r.statusCode=!fs.existsSync(p.join(__dirname,'.next-desktop/server/app',q.url,'route.js'))?404:q.method!==method?405:q.headers.origin!=='http://127.0.0.1:'+process.env.PORT?403:401;
+        r.end('synthetic protected route');
+      }
       else if(q.url==='/setup') r.end('<html><script src="/_next/static/app.js"></script></html>');
       else r.end('synthetic');
     }).listen(Number(process.env.PORT),'127.0.0.1');

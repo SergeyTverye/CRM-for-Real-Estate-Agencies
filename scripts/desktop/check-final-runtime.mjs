@@ -80,8 +80,10 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
     const setup = await fetch(base + '/api/v1/desktop/setup', { signal: AbortSignal.timeout(10000) });
     if (!setup.ok || (await setup.json()).available !== true) throw Error('FINAL_RUNTIME_SETUP_FAILED');
     code('PRISMA_PASS');
-    for (const route of ['/api/v1/settings/backups/control', '/api/v1/operations/backups']) {
-      const response = await fetch(base + route, { redirect: 'manual', signal: AbortSignal.timeout(10000) });
+    for (const [route, method] of [['/api/v1/settings/backups/control', 'GET'], ['/api/v1/operations/backups', 'POST']]) {
+      const response = await fetch(base + route, {
+        method, headers: { Origin: base }, redirect: 'manual', signal: AbortSignal.timeout(10000),
+      });
       if (response.status !== 401) throw Error('FINAL_RUNTIME_API_ROUTES_FAILED');
     }
     code('API_ROUTES_PASS');
