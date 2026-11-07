@@ -11,6 +11,7 @@ import { commitRow } from './import-service';
 import { buildProfile, enterpriseProfileSchema, loadEnterprise, parseEnterprise, text, type EnterpriseProfile, type EnterpriseRow } from '../domain/enterprise-workbook';
 import { normalizeAddress } from '../domain/normalize';
 import { sha256 } from '../domain/workbook-parser';
+import { commitEnterpriseControl, exportEnterpriseControl, type ControlLinks } from './enterprise-control';
 function manager(actor: Actor) { if (!isManager(actor))
     throw new ForbiddenError('Импорт рабочей книги доступен руководителю'); }
 type Summary = {
@@ -23,6 +24,7 @@ type Summary = {
     counts: Record<string, number>;
     checksumRepeated: boolean;
     exportDates?: Record<string, string>;
+    controlLinks?: Record<string, ControlLinks>;
 };
 const json = (value: unknown) => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 async function readSource(key: string) { const { stream } = await getStorage().read(key); const parts: Buffer[] = []; for await (const part of stream)
@@ -156,6 +158,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
             && !r.warningCodes.some(c => ['already_imported', 'probable_duplicate'].includes(c));
         let imported = 0, skipped = 0;
         const exportDates: Record<string, string> = {};
+        const controlLinks: Record<string, ControlLinks> = {};
         for (const r of rows.filter(eligible)) {
             if (r.record.commercialPurpose && !await tx.dictionaryItem.count({ where: { category: 'commercial_purpose', code: String(r.record.commercialPurpose), isActive: true } }))
                 throw new ValidationError('INVALID_PURPOSE_CODE');
@@ -170,11 +173,14 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                 id: string;
             } | null = null;
             if (eligible(r)) {
-                const result = await commitRow(tx, r, { coordinatesAsPhone: true, createTasksFromFixNotes: false, responsibleUserId: String(r.record.responsibleUserId ?? actor.userId), jobId: id, sourceFilename: 'enterprise-workbook.xlsx', actorId: actor.userId });
+                const responsible = String(r.record.responsibleUserId ?? actor.userId);
+                const links = r.target === 'property_agreement_control' ? await commitEnterpriseControl(tx, r, responsible, actor.userId) : null;
+                if (links) controlLinks[`${r.sheetIndex}:${r.rowNumber}`] = links;
+                const result = links ? { type: 'Property', id: links.propertyId } : await commitRow(tx, r, { coordinatesAsPhone: true, createTasksFromFixNotes: false, responsibleUserId: responsible, jobId: id, sourceFilename: 'enterprise-workbook.xlsx', actorId: actor.userId });
                 if (!('skipped' in result)) {
                     target = result;
                     imported++;
-                    if (result.type === 'Property')
+                    if (result.type === 'Property' && !links)
                         await tx.property.update({ where: { id: result.id }, data: { status: String(r.record.status), archivedAt: r.record.status === 'archived' ? new Date() : null, commercialPurpose: r.record.commercialPurpose as string | null, attributesJsonb: json({ ...(r.record.extraAttributes as Record<string,unknown>??{}),priceUnit: r.record.priceUnit }) } });
                     if (result.type === 'Client') {
                         const lead = await tx.leadRequest.findFirst({ where: { clientId: result.id }, orderBy: { createdAt: 'asc' } });
@@ -193,7 +199,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                 skipped++;
             await tx.importRowResult.updateMany({ where: { importJobId: id, sourceRowNumber: r.rowNumber, sheetName: r.sheetName }, data: { commitResult: target ? 'imported' : 'skipped', targetEntityType: target?.type ?? r.target, targetEntityId: target?.id ?? null, warningCodes: r.warningCodes, errorCodes: r.errorCodes } });
         }
-        await tx.importJob.update({ where: { id }, data: { status: 'completed', rowsRead: rows.length, rowsImported: imported, rowsSkipped: skipped, finishedAt: new Date(), summaryJsonb: json({ ...summary, exportDates }) } });
+        await tx.importJob.update({ where: { id }, data: { status: 'completed', rowsRead: rows.length, rowsImported: imported, rowsSkipped: skipped, finishedAt: new Date(), summaryJsonb: json({ ...summary, exportDates, controlLinks }) } });
         await writeAudit(tx, { actorUserId: actor.userId, action: 'import.enterprise.committed', entityType: 'ImportJob', entityId: id, after: { imported, skipped } });
         return { id, status: 'completed', imported, skipped };
     });
@@ -258,6 +264,8 @@ export async function exportEnterprise(actor: Actor, id: string) {
                 values = { ...a, sourceRowId: row.record.sourceRowId ?? null, addressText: a.objectText, receivedDate: a.dealDate, name: a.participantName, phone: a.contactPhone, email: a.contactEmail, area: a.area?.toString(), price: a.price?.toString(), commissionAmount: a.commissionAmount?.toString() };
         }
         if (values.responsibleUserId === (row.record.responsibleUserId ?? actor.userId)) values.responsible = original.get('responsible');
+        const links = (job.summaryJsonb as unknown as Summary).controlLinks?.[`${row.sheetIndex}:${row.rowNumber}`];
+        if (row.target === 'property_agreement_control' && links) Object.assign(values, await exportEnterpriseControl(db, links));
         if (receipt.targetEntityType === 'Property') values.source = original.get('source');
         if (values.status)
             values.stateMark = values.status === row.record.status ? original.get('stateMark') : Object.entries(config?.statusMap ?? {}).find(([, v]) => v === values.status)?.[0] ?? values.status;

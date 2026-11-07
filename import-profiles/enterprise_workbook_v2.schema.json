@@ -27,13 +27,44 @@
             "maxLength": 120
           },
           "target": {
-            "type": "string",
-            "enum": [
-              "property",
-              "client_request_need",
-              "historical_deal_archive",
-              "ignore"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "property",
+                  "client_request_need",
+                  "historical_deal_archive",
+                  "property_agreement_control",
+                  "ignore"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ]
+          },
+          "blockTargets": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "property",
+                    "client_request_need",
+                    "historical_deal_archive",
+                    "property_agreement_control",
+                    "ignore"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
           },
           "headerRow": {
             "default": "auto",
@@ -81,7 +112,15 @@
                     "comment",
                     "sourceRowId",
                     "contractRef",
-                    "commissionAmount"
+                    "commissionAmount",
+                    "agreementPresence",
+                    "absenceReason",
+                    "commissionFrom",
+                    "commissionTo",
+                    "fixNote",
+                    "adText",
+                    "adUrl",
+                    "taskText"
                   ]
                 },
                 {

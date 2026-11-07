@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { normalizeHeader } from './profiles';
 import { cellText, contactKind, normalizeAddress, parseDate } from './normalize';
 import { sha256, type ParsedRow } from './workbook-parser';
-export const fields = ['addressText', 'district', 'area', 'floor', 'propertyTypeText', 'operationText', 'price', 'priceUnit', 'description', 'stateMark', 'ownerName', 'ownerPhone', 'receivedDate', 'name', 'phone', 'email', 'request', 'source', 'responsible', 'comment', 'sourceRowId', 'contractRef', 'commissionAmount'] as const;
+export const fields = ['addressText', 'district', 'area', 'floor', 'propertyTypeText', 'operationText', 'price', 'priceUnit', 'description', 'stateMark', 'ownerName', 'ownerPhone', 'receivedDate', 'name', 'phone', 'email', 'request', 'source', 'responsible', 'comment', 'sourceRowId', 'contractRef', 'commissionAmount', 'agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'taskText'] as const;
 const patternSchema = z.string().max(120).refine(value => { if (/[(){}+\\]/.test(value))
     return false; try {
     new RegExp(value, 'iu');
@@ -14,7 +14,7 @@ catch {
     return false;
 } }, 'INVALID_PATTERN');
 export const enterpriseProfileSchema = z.object({ version: z.literal(2), code: z.literal('enterprise_workbook_v2'), sheets: z.array(z.object({
-        index: z.number().int().positive().optional(), namePattern: patternSchema.optional(), target: z.enum(['property', 'client_request_need', 'historical_deal_archive', 'ignore']).nullable(), blockTargets: z.record(z.string(), z.enum(['property', 'client_request_need', 'historical_deal_archive', 'ignore']).nullable()).optional(), headerRow: z.union([z.literal('auto'), z.number().int().positive()]).default('auto'), columns: z.record(z.string(), z.union([z.enum(fields), z.literal('ignore'), z.null()])), hiddenRows: z.enum(['skip', 'archive']).default('skip'), statusMap: z.record(z.string(), z.enum(['draft', 'active', 'paused', 'closed', 'archived'])).default({}), purposeMap: z.record(z.string(), z.string()).default({}), sourceMap: z.record(z.string(), z.string()).default({}), responsibleMap: z.record(z.string(), z.uuid()).default({}), defaults: z.object({ propertyType: z.enum(['commercial', 'residential', 'land', 'country']).default('commercial'), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional(), priceUnit: z.enum(['rub_total', 'rub_month', 'rub_m2', 'rub_m2_month', 'rub_year', 'rub_m2_year']).optional() }).default({ propertyType: 'commercial' }), sections: z.array(z.object({ pattern: patternSchema, propertyType: z.enum(['commercial', 'residential', 'land', 'country']).optional(), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional() })).default([])
+        index: z.number().int().positive().optional(), namePattern: patternSchema.optional(), target: z.enum(['property', 'client_request_need', 'historical_deal_archive', 'property_agreement_control', 'ignore']).nullable(), blockTargets: z.record(z.string(), z.enum(['property', 'client_request_need', 'historical_deal_archive', 'property_agreement_control', 'ignore']).nullable()).optional(), headerRow: z.union([z.literal('auto'), z.number().int().positive()]).default('auto'), columns: z.record(z.string(), z.union([z.enum(fields), z.literal('ignore'), z.null()])), hiddenRows: z.enum(['skip', 'archive']).default('skip'), statusMap: z.record(z.string(), z.enum(['draft', 'active', 'paused', 'closed', 'archived'])).default({}), purposeMap: z.record(z.string(), z.string()).default({}), sourceMap: z.record(z.string(), z.string()).default({}), responsibleMap: z.record(z.string(), z.uuid()).default({}), defaults: z.object({ propertyType: z.enum(['commercial', 'residential', 'land', 'country']).default('commercial'), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional(), priceUnit: z.enum(['rub_total', 'rub_month', 'rub_m2', 'rub_m2_month', 'rub_year', 'rub_m2_year']).optional() }).default({ propertyType: 'commercial' }), sections: z.array(z.object({ pattern: patternSchema, propertyType: z.enum(['commercial', 'residential', 'land', 'country']).optional(), operationType: z.enum(['rent', 'sale']).optional(), district: z.string().optional() })).default([])
     })).min(1).max(30) });
 export type EnterpriseProfile = z.infer<typeof enterpriseProfileSchema>;
 export const dictionary: Record<string, typeof fields[number]> = { 'адрес': 'addressText', 'район': 'district', 'площадь': 'area', 'этаж': 'floor', 'назначение': 'propertyTypeText', 'операция': 'operationText', 'цена': 'price', 'ставка': 'price', 'единица': 'priceUnit', 'описание': 'description', 'статус': 'stateMark', 'метка': 'stateMark', 'собственник': 'ownerName', 'контакт собственника': 'ownerPhone', 'дата': 'receivedDate', 'клиент': 'name', 'контрагент': 'name', 'телефон': 'phone', 'e-mail': 'email', 'email': 'email', 'запрос': 'request', 'источник': 'source', 'ответственный': 'responsible', 'комментарий': 'comment', '№': 'sourceRowId', 'договор': 'contractRef', 'комиссия': 'commissionAmount' };
@@ -93,7 +93,14 @@ const aliases: Partial<Record<Field, string[]>> = {
     source: ['источник обращения', 'source'], responsible: ['риелтор', 'ответственный сотрудник', 'responsible'],
     comment: ['примечание', 'примечания', 'comment'], sourceRowId: ['номер', 'номер п п', '№ п п', 'п п', 'id', 'number'],
     contractRef: ['номер договора', '№ договора', 'договор №', 'contract'], commissionAmount: ['сумма комиссии', 'комиссионные', 'commission'],
-    stateMark: ['состояние', 'status'],
+    stateMark: ['состояние', 'status', 'актуальность'],
+    agreementPresence: ['наличие договора', 'договор есть', 'есть договор', 'agreement present'],
+    absenceReason: ['причины, почему его нет', 'причина отсутствия договора', 'absence reason'],
+    commissionFrom: ['комиссия от', 'commission from'], commissionTo: ['комиссия до', 'commission to'],
+    fixNote: ['что нужно исправить', 'что исправить', 'fix note'],
+    adText: ['рекл. текст', 'рекламный текст', 'текст рекламы', 'ad text'],
+    adUrl: ['реклама', 'ссылка на рекламу', 'ссылка на объявление', 'ad url'],
+    taskText: ['задача', 'task'],
 };
 const headerAliases = new Map<string, Field>();
 for (const [label, field] of Object.entries(dictionary)) headerAliases.set(headerKey(label), field);
@@ -106,11 +113,12 @@ export function classifyEnterpriseHeader(label: string): Field | null {
     // Only explicitly supported measurement suffixes; unknown units remain unresolved.
     const withoutUnit = key.replace(/ (?:м2|кв м|кв метр(?:ов|а)?|m2|sqm|руб|рублей|р|₽)(?: (?:за|в))?(?: (?:м2|кв м|месяц|мес|год|m2|month))*$/, '');
     const measured = headerAliases.get(withoutUnit);
-    return measured === 'area' || measured === 'price' || measured === 'commissionAmount' ? measured : null;
+    return measured === 'area' || measured === 'price' || measured === 'commissionAmount' || measured === 'commissionFrom' || measured === 'commissionTo' ? measured : null;
 }
 function indicatorTarget(label: string): Target {
     const key = headerKey(label);
     if (['объекты', 'объекты аренды', 'объекты продажи', 'каталог объектов', 'property listings'].includes(key)) return 'property';
+    if (['анализ договоров', 'контроль договоров', 'анализ наличия договора', 'agreement control'].includes(key)) return 'property_agreement_control';
     if (['архив сделок', 'история сделок', 'historical deals'].includes(key)) return 'historical_deal_archive';
     if (['обращения клиентов', 'заявки клиентов', 'client requests'].includes(key)) return 'client_request_need';
     return null;
@@ -120,6 +128,9 @@ function targetFor(cells: HeaderCell[], indicator: Target = null): Target {
     const historical = f.has('addressText') && f.has('contractRef') && f.has('commissionAmount');
     const client = f.has('name') && (f.has('phone') || f.has('email')) && (f.has('request') || f.has('receivedDate'));
     const property = f.has('addressText') && f.has('area');
+    // Control tables are recognised only by the explicit agreement-presence header, never by data.
+    if (f.has('addressText') && f.has('agreementPresence'))
+        return client || historical || (indicator && indicator !== 'property_agreement_control') ? null : 'property_agreement_control';
     if (client && (property || historical)) return null;
     const strong = historical ? 'historical_deal_archive' : client ? 'client_request_need' : property ? 'property' : null;
     if (strong && indicator && strong !== indicator) return null;
@@ -229,7 +240,7 @@ export function buildProfile(wb: ExcelJS.Workbook): EnterpriseProfile {
                 columns[`@${block.row}:${c.column}`] = null;
         const targets = new Set(headers.map(h => h.target));
         const target = targets.size === 1 ? headers[0]!.target : null;
-        return { index: i + 1, target, ...(targets.size > 1 ? { blockTargets: Object.fromEntries(headers.map(h => [h.row, h.target])) } : {}), columns, headerRow: 'auto', hiddenRows: 'skip', defaults: { propertyType: 'commercial' }, sections: [{ pattern: 'аренд|сда', operationType: 'rent' }, { pattern: 'прод|куп', operationType: 'sale' }] };
+        return { index: i + 1, target, ...(targets.size > 1 ? { blockTargets: Object.fromEntries(headers.map(h => [h.row, h.target])) } : {}), columns, headerRow: 'auto', hiddenRows: 'skip', defaults: { propertyType: 'commercial', ...(target === 'property_agreement_control' ? { operationType: 'rent' as const } : {}) }, sections: [{ pattern: 'аренд|сда', operationType: 'rent' }, { pattern: 'прод|куп', operationType: 'sale' }] };
     }) });
 }
 export type EnterpriseRow = ParsedRow & {
@@ -241,6 +252,10 @@ export type EnterpriseRow = ParsedRow & {
         field: string;
     }[];
 };
+/** Fields only meaningful for the control table; other targets must not silently drop them. */
+const controlOnlyFields = new Set<string>(['agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'taskText']);
+const controlFields = new Set<string>([...controlOnlyFields, 'addressText', 'district', 'area', 'price', 'priceUnit', 'operationText', 'stateMark', 'sourceRowId', 'responsible']);
+const maskContacts = (s?: string) => s?.replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g, '[контакт скрыт]') || null;
 export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
     const sectionMarkers: {
         sheet: number;
@@ -304,7 +319,8 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
                     if (excludedHeader(h)) continue;
                     const field = fieldFor(c);
                     if (field === 'ignore') continue;
-                    if (field) columns.push({ column: c.column, field });
+                    if (field && ((controlOnlyFields.has(field) && target !== 'property_agreement_control') || (target === 'property_agreement_control' && !controlFields.has(field)))) unresolved.push({ sheet: si + 1, row: header.endRow, column: c.column });
+                    else if (field) columns.push({ column: c.column, field });
                     else unresolved.push({ sheet: si + 1, row: header.endRow, column: c.column });
                 }
                 // Multiple single-valued fields require coordinate-level confirmation.
@@ -329,7 +345,7 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
                 const known = headers.find(h => h.row === headerStart)!;
                 for (const c of cells) if (!known.cells.some(h => h.column === c.column)) {
                     const field = config.columns[`@${headerStart}:${c.column}`];
-                    if (field && field !== 'ignore') {
+                    if (field && field !== 'ignore' && !((controlOnlyFields.has(field) && target !== 'property_agreement_control') || (target === 'property_agreement_control' && !controlFields.has(field)))) {
                         if (!columns.some(x => x.column === c.column)) columns.push({ column: c.column, field });
                     } else if (field !== 'ignore' && !unresolved.some(x => x.sheet === si + 1 && x.row === headerStart && x.column === c.column)) {
                         unresolved.push({ sheet: si + 1, row: headerStart, column: c.column });
@@ -352,7 +368,13 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
             const linkColumn = columns.find(c => c.field === 'description');
             const hyperlink = linkColumn ? row.getCell(linkColumn.column).hyperlink : undefined;
             const safeLink = hyperlink && /^https?:\/\//i.test(hyperlink) && !/^https?:\/\/[^/]*@/i.test(hyperlink) ? hyperlink : null;
-            const rec: Record<string, unknown> = { addressText: raw.addressText || null, district: raw.district || context.district || null, area: parseWorkbookNumber(raw.area), price: parseWorkbookNumber(raw.price), floor: floor ? Number(floor[1]) : null, floorsTotal: floor?.[2] ? Number(floor[2]) : null, propertyType: context.propertyType, operationType: target === 'client_request_need' ? (/сда|lease_out/i.test(operation) ? 'lease_out' : /куп|buy/i.test(operation) ? 'buy' : /прод|sell/i.test(operation) ? 'sell' : op === 'rent' ? 'rent' : null) : op, sourceType: 'agency_listing', description: raw.description?.replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g, '[контакт скрыт]') || null, sourceUrl: safeLink, commercialPurpose: config.purposeMap[normalizeHeader(raw.propertyTypeText)] ?? null, extraAttributes: raw.propertyTypeText ? { purposeText: raw.propertyTypeText } : undefined, name: raw.name || null, receivedAt: received, comment: [raw.request, raw.comment].filter(Boolean).join('; ') || null, channelCode: 'other', sourceCode: config.sourceMap[normalizeHeader(raw.source)] ?? 'other', needStatus: 'active', contacts: cc, coordinatesRaw: cc[0]?.raw ?? null, coordinatesNormalized: cc[0]?.normalized ?? null, coordinatesKind: cc[0]?.type ?? null, sourceRowId: raw.sourceRowId || null, objectText: raw.addressText || null, contractRef: raw.contractRef || null, commissionAmount: parseWorkbookNumber(raw.commissionAmount), dealDate: received, participantName: raw.name || null, priceUnit: raw.priceUnit || priceUnit || context.priceUnit || (op === 'sale' ? 'rub_total' : null), status: row.hidden ? 'archived' : config.statusMap[normalizeHeader(raw.stateMark)] ?? 'active', responsibleUserId: config.responsibleMap[normalizeHeader(raw.responsible)] ?? null, owner: raw.ownerName && raw.ownerPhone && contactKind(raw.ownerPhone).type === 'phone' ? { name: raw.ownerName, phone: contactKind(raw.ownerPhone).normalized } : null };
+            const control = target === 'property_agreement_control';
+            const presenceText = (raw.agreementPresence ?? '').trim().toLowerCase();
+            const presence = /^(да|есть|\+|имеется|yes|true)$/.test(presenceText) ? true : /^(нет|отсутствует|-|no|false)$/.test(presenceText) ? false : null;
+            const commissionFrom = parseWorkbookNumber(raw.commissionFrom), commissionTo = parseWorkbookNumber(raw.commissionTo);
+            const controlLink = raw.adUrl?.trim() ?? '';
+            const safeAdUrl = /^https?:\/\/\S+$/i.test(controlLink) && !/^https?:\/\/[^/]*@/i.test(controlLink) ? controlLink : null;
+            const rec: Record<string, unknown> = { addressText: raw.addressText || null, district: raw.district || context.district || null, area: parseWorkbookNumber(raw.area), price: parseWorkbookNumber(raw.price), floor: floor ? Number(floor[1]) : null, floorsTotal: floor?.[2] ? Number(floor[2]) : null, propertyType: context.propertyType, operationType: target === 'client_request_need' ? (/сда|lease_out/i.test(operation) ? 'lease_out' : /куп|buy/i.test(operation) ? 'buy' : /прод|sell/i.test(operation) ? 'sell' : op === 'rent' ? 'rent' : null) : op, sourceType: 'agency_listing', description: raw.description?.replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g, '[контакт скрыт]') || null, sourceUrl: safeLink, commercialPurpose: config.purposeMap[normalizeHeader(raw.propertyTypeText)] ?? null, extraAttributes: raw.propertyTypeText ? { purposeText: raw.propertyTypeText } : undefined, name: raw.name || null, receivedAt: received, comment: [raw.request, raw.comment].filter(Boolean).join('; ') || null, channelCode: 'other', sourceCode: config.sourceMap[normalizeHeader(raw.source)] ?? 'other', needStatus: 'active', contacts: cc, coordinatesRaw: cc[0]?.raw ?? null, coordinatesNormalized: cc[0]?.normalized ?? null, coordinatesKind: cc[0]?.type ?? null, sourceRowId: raw.sourceRowId || null, objectText: raw.addressText || null, contractRef: raw.contractRef || null, commissionAmount: parseWorkbookNumber(raw.commissionAmount), dealDate: received, participantName: raw.name || null, priceUnit: raw.priceUnit || priceUnit || context.priceUnit || (op === 'sale' ? 'rub_total' : null), status: row.hidden ? 'archived' : config.statusMap[normalizeHeader(raw.stateMark)] ?? 'active', responsibleUserId: config.responsibleMap[normalizeHeader(raw.responsible)] ?? null, owner: raw.ownerName && raw.ownerPhone && contactKind(raw.ownerPhone).type === 'phone' ? { name: raw.ownerName, phone: contactKind(raw.ownerPhone).normalized } : null, ...(control ? { agreementPresent: presence, absenceReason: maskContacts(raw.absenceReason), commissionFrom, commissionTo, fixNote: maskContacts(raw.fixNote), adText: maskContacts(raw.adText), adUrl: safeAdUrl, taskText: null, actuality: raw.stateMark || null } : {}) };
             const keyFields = target === 'client_request_need' ? [cc.map(c => c.normalized).sort(), received] : [normalizeAddress(raw.addressText ?? ''), rec.area, op ?? '', target === 'historical_deal_archive' ? raw.sourceRowId : ''];
             const key = sha256(JSON.stringify([si + 1, target, keyFields]));
             const errors: string[] = [];
@@ -361,7 +383,15 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
             if(raw.floor&&!floor)errors.push('INVALID_FLOOR');
             if(rec.price&&String(rec.price).split('.')[0]!.length>14)errors.push('INVALID_PRICE');
             if(rec.priceUnit&&!['rub_total','rub_month','rub_m2','rub_m2_month','rub_year','rub_m2_year'].includes(String(rec.priceUnit)))errors.push('INVALID_PRICE_UNIT');
-            if (target === 'property' && raw.price && op === 'rent' && !raw.priceUnit && !priceUnit && !context.priceUnit)
+            if (control) {
+                if (!rec.addressText) errors.push('MISSING_ADDRESS');
+                if (!op) errors.push('OPERATION_REQUIRED');
+                if (presence === null) errors.push('INVALID_AGREEMENT_PRESENCE');
+                if (raw.adUrl && !safeAdUrl) errors.push('INVALID_AD_URL');
+                if ((raw.commissionFrom && commissionFrom === null) || (raw.commissionTo && commissionTo === null)) errors.push('INVALID_COMMISSION');
+                else if (commissionFrom !== null && commissionTo !== null && Number(commissionFrom) > Number(commissionTo)) errors.push('INVALID_COMMISSION_RANGE');
+            }
+            if ((target === 'property' || control) && raw.price && op === 'rent' && !raw.priceUnit && !priceUnit && !context.priceUnit)
                 errors.push('PRICE_UNIT_REQUIRED');
             if (target === 'property' && (!rec.addressText || !rec.area || !op))
                 errors.push('MISSING_PROPERTY_KEY');
@@ -375,6 +405,10 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
                 errors.push('INVALID_DATE');
             const skipped = row.hidden && config.hiddenRows === 'skip';
             const warningCodes = row.hidden ? ['HIDDEN_ROW'] : [];
+            if (control) {
+                rec.taskText = maskContacts(raw.taskText);
+                if (presence === true) warningCodes.push('AGREEMENT_DETAILS_REQUIRED');
+            }
             if ((raw.responsible && !rec.responsibleUserId) || (raw.source && !config.sourceMap[normalizeHeader(raw.source)]) || (raw.stateMark && !config.statusMap[normalizeHeader(raw.stateMark)]) || ((raw.ownerName || raw.ownerPhone) && !rec.owner))
                 warningCodes.push('REQUIRES_MANUAL_REVIEW');
             rows.push({ sheetIndex: si + 1, hidden: row.hidden, sectionRow, columns: [...columns], sheetName: `sheet:${si + 1}`, sectionKey: `${si + 1}:${sectionRow}`, profileCode: p.code, rowNumber: rn, recordKey: key, target, validationStatus: skipped ? 'skipped_policy' : errors.length ? 'invalid' : warningCodes.length ? 'warning' : 'ready', errorCodes: errors, warningCodes, record: rec, dedupe: { phones: cc.filter(c => c.type === 'phone').map(c => c.normalized!), emails: cc.filter(c => c.type === 'email').map(c => c.normalized!), addressKey: rec.addressText ? normalizeAddress(String(rec.addressText)) : null, archiveKey: target === 'historical_deal_archive' ? key : null } });
