@@ -21,3 +21,9 @@ tests/fixtures/** text=auto eol=lf
 *.db binary
 *.sqlite binary
 *.tgz binary
+
+# Strict SQLite migration history: raw SHA256 checksums must match byte-for-byte
+# across hosts, so these SQL inputs/outputs are always LF (CRLF breaks history).
+prisma/sqlite/migrations/**/migration.sql text eol=lf
+prisma/sqlite/constraints.sql text eol=lf
+prisma/migrations/**/migration.sql text eol=lf
