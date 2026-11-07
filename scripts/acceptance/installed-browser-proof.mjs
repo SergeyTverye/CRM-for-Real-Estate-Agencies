@@ -31,7 +31,7 @@ export function loopback(value) {
 }
 function options(args) {
   const result = {};
-  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'native-backup-proof', 'cloud-proof', 'supervisor-only']);
+  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'native-backup-proof', 'cloud-proof', 'supervisor-only', 'block-external-browser-network']);
   const values = new Set(['launcher', 'installer', 'launcher-sha256', 'installer-sha256', 'source-commit', 'evidence-root', 'chromium', 'observe-seconds']);
   for (let i = 0; i < args.length; i++) {
     const key = args[i].replace(/^--/, '');
@@ -43,7 +43,8 @@ function options(args) {
   if (result['focus-business'] && result['focus-backup']) fail('FOCUS_MODE_CONFLICT');
   if (result['focus-backup'] && !result['native-backup-proof'] && !result['cloud-proof']) fail('FOCUS_BACKUP_REQUIRES_PROOF');
   if (result['supervisor-only'] && result['native-backup-proof']) fail('SUPERVISOR_ONLY_CONFLICTS_NATIVE_BACKUP_PROOF');
-  if (result['supervisor-only'] && (!result['cloud-proof'] || !result['focus-backup'])) fail('SUPERVISOR_ONLY_REQUIRES_CLOUD_FOCUS_BACKUP');
+  if (result['block-external-browser-network'] && !result['supervisor-only']) fail('BROWSER_NETWORK_ISOLATION_REQUIRES_SUPERVISOR_ONLY');
+  if (result['block-external-browser-network'] && result['cloud-proof']) fail('BROWSER_NETWORK_ISOLATION_CONFLICTS_CLOUD_PROOF');
   return result;
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -132,18 +133,25 @@ async function main() {
   const focusBackup = o['focus-backup'] === true;
   const checks = [];
   const supervisorOnly = o['supervisor-only'] === true;
+  const blockExternalBrowserNetwork = o['block-external-browser-network'] === true;
+  const scopeBase = focusBackup
+    ? 'SETUP_LOGIN_BACKUP_PROOF_PERSISTENCE_CORE_AND_BUSINESS_CYCLE_NOT_RUN'
+    : o['focus-business']
+      ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED'
+      : 'CORE_SCREENS_AND_BUSINESS';
   const result = { schema: 1, status: 'RUNNING', syntheticDataOnly: true, runId: id,
     sourceCommit: o['source-commit'], sourceReference: 'coordinator-supplied-read-only-reference-not-binary-provenance',
     launcherSha256: launcherHash, installerSha256: installerHash,
     nativeUi: supervisorOnly ? 'NOT_RUN_SUPERVISOR_ONLY' : 'NOT_ASSERTED_SEPARATE_OBSERVATION_REQUIRED',
+    executionMode: supervisorOnly ? 'BACKGROUND_SUPERVISOR_ONLY_HEADLESS_CHROMIUM_NO_WEBVIEW' : 'DEFAULT',
     runtime: { controllerNode: process.version, browserKind }, checks, screenshots: [],
     businessCycle: focusBackup ? { status: 'NOTRUN' } : undefined,
     nativeBackupProof: { status: 'NOTRUN' }, cloudProof: { status: 'NOTRUN' },
-    scope: focusBackup
-      ? 'SETUP_LOGIN_BACKUP_PROOF_PERSISTENCE_CORE_AND_BUSINESS_CYCLE_NOT_RUN'
-      : o['focus-business']
-        ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED'
-        : 'CORE_SCREENS_AND_BUSINESS' };
+    browserIsolation: blockExternalBrowserNetwork
+      ? { mode: 'BROWSER_NETWORK_ISOLATION', externalHttpHttpsBlocked: 0,
+          note: 'Browser request isolation only; not physical/offline/OS network proof. Application worker/host network settings unchanged.' }
+      : { mode: 'NONE' },
+    scope: supervisorOnly ? `BACKGROUND_SUPERVISOR_ONLY_NO_WEBVIEW_${scopeBase}` : scopeBase };
   let child, context, base, page, browser, supervisorPid;
   const ownedNodes = new Set();
   let stage = 'START';
@@ -155,6 +163,7 @@ async function main() {
   const maintenanceRequests = new WeakMap();
   let maintenance;
   const networkDiagnostics = [];
+  let blockedExternalBrowserRequests = 0;
   function noteNetwork(kind, request, status) {
     if (networkDiagnostics.length >= 20) return;
     const url = new URL(request.url());
@@ -231,7 +240,7 @@ async function main() {
   async function visible(locator) { await locator.waitFor({ state: 'visible', timeout: 30000 }); }
   async function healthy(timeoutMs = 30000) {
     alive(); await identity();
-    if (networkFailed) fail('BROWSER_NETWORK_FAILURE');
+    if (networkFailed) fail(networkFailed === true ? 'BROWSER_NETWORK_FAILURE' : networkFailed);
     if (pageFailed) fail('BROWSER_OR_LAUNCHER_ERROR');
     const loading = page.getByRole('status').filter({ hasText: /Загрузка|Загружаем/ });
     await loading.first().waitFor({ state: 'hidden', timeout: timeoutMs });
@@ -408,9 +417,23 @@ async function main() {
     browser = await chromium.launch({ executablePath: chromiumPath, headless: true, env,
       args: ['--disable-background-networking', '--disable-component-update', '--no-first-run'] });
     result.runtime.chromium = browser.version();
+    // BROWSER_NETWORK_ISOLATION is browser-request isolation only (not physical/offline/OS network proof).
     context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block', acceptDownloads: false });
     await context.route('**/*', async route => {
-      if (new URL(route.request().url()).origin !== base) { networkFailed = true; await route.abort('blockedbyclient'); }
+      const request = route.request();
+      let url;
+      try { url = new URL(request.url()); } catch { networkFailed = networkFailed || true; await route.abort('blockedbyclient'); return; }
+      if (blockExternalBrowserNetwork) {
+        if ((url.protocol === 'http:' || url.protocol === 'https:') && url.origin !== base) {
+          blockedExternalBrowserRequests += 1;
+          if (result.browserIsolation?.mode === 'BROWSER_NETWORK_ISOLATION') result.browserIsolation.externalHttpHttpsBlocked = blockedExternalBrowserRequests;
+          noteNetwork('BLOCKED_EXTERNAL_BROWSER_HTTP', request);
+          networkFailed = networkFailed || 'BROWSER_NETWORK_ISOLATION_VIOLATION';
+          await route.abort('blockedbyclient'); return;
+        }
+        await route.continue(); return;
+      }
+      if (url.origin !== base) { networkFailed = networkFailed || true; await route.abort('blockedbyclient'); }
       else await route.continue();
     });
     page = await context.newPage();
@@ -419,8 +442,9 @@ async function main() {
     page.on('requestfinished', request => { inFlightRequests.delete(request); });
     page.on('requestfailed', request => {
       inFlightRequests.delete(request);
-      const aborted = request.failure()?.errorText === 'net::ERR_ABORTED';
-      const url = new URL(request.url());
+      const failure = request.failure()?.errorText;
+      const aborted = failure === 'net::ERR_ABORTED';
+      let url; try { url = new URL(request.url()); } catch { url = new URL(base + '/'); }
       const expectedMaintenance = maintenanceRequests.get(request);
       if (aborted && expectedMaintenance === maintenance && maintenance && Date.now() < maintenance.deadline &&
           request.method() === 'GET' && url.origin === base &&
@@ -430,9 +454,13 @@ async function main() {
       // Next cancels document/RSC prefetch GETs when a router transition wins.
       // Business API failures and every non-abort/static/server failure remain errors.
       if (aborted && request.method() === 'GET' && url.origin === base && !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_next/')) return;
-      networkFailed = true; noteNetwork(aborted ? 'ABORTED' : 'FAILED', request);
+      if (blockExternalBrowserNetwork && failure === 'net::ERR_BLOCKED_BY_CLIENT' && (url.protocol === 'http:' || url.protocol === 'https:') && url.origin !== base) {
+        networkFailed = networkFailed || 'BROWSER_NETWORK_ISOLATION_VIOLATION';
+        noteNetwork('BLOCKED_EXTERNAL_BROWSER_HTTP', request); return;
+      }
+      networkFailed = networkFailed || true; noteNetwork(aborted ? 'ABORTED' : 'FAILED', request);
     });
-    page.on('response', r => { if (r.status() >= 400) { networkFailed = true; noteNetwork('HTTP', r.request(), r.status()); } });
+    page.on('response', r => { if (r.status() >= 400) { networkFailed = networkFailed || true; noteNetwork('HTTP', r.request(), r.status()); } });
     await check('FIRST_SETUP_FORM', async () => {
       await goto('/setup'); await visible(page.getByRole('heading', { name: 'Первый запуск CRM', exact: true }));
       await hydrated(); await visible(page.getByLabel('Начальные данные'));
@@ -586,12 +614,24 @@ function selfTest() {
   assert.throws(() => options(['--focus-backup']));
   assert.throws(() => options(['--focus-backup', '--focus-business']));
   assert.throws(() => options(['--focus-business', '--focus-backup']));
+  // supervisor-only: background/no-WebView mode re-usable for default, focus-business, focus-backup (with proof).
+  assert.equal(options(['--supervisor-only'])['supervisor-only'], true);
+  assert.equal(options(['--supervisor-only', '--focus-business'])['supervisor-only'], true);
+  assert.equal(options(['--supervisor-only', '--cloud-proof'])['supervisor-only'], true);
   assert.equal(options(['--supervisor-only', '--focus-backup', '--cloud-proof'])['supervisor-only'], true);
   assert.equal(options(['--supervisor-only', '--focus-backup', '--cloud-proof'])['cloud-proof'], true);
-  assert.throws(() => options(['--supervisor-only']));
-  assert.throws(() => options(['--supervisor-only', '--cloud-proof']));
+  assert.throws(() => options(['--supervisor-only', '--focus-backup']));
   assert.throws(() => options(['--supervisor-only', '--focus-backup', '--native-backup-proof']));
   assert.throws(() => options(['--supervisor-only', '--focus-backup', '--cloud-proof', '--native-backup-proof']));
+  assert.throws(() => options(['--supervisor-only', '--native-backup-proof']));
+  // block-external-browser-network: BROWSER_NETWORK_ISOLATION only (not physical/offline/OS proof).
+  assert.equal(options([])['block-external-browser-network'], undefined);
+  assert.equal(options(['--supervisor-only', '--block-external-browser-network'])['block-external-browser-network'], true);
+  assert.equal(options(['--supervisor-only', '--focus-business', '--block-external-browser-network'])['block-external-browser-network'], true);
+  assert.throws(() => options(['--block-external-browser-network']));
+  assert.throws(() => options(['--supervisor-only', '--cloud-proof', '--block-external-browser-network']));
+  assert.throws(() => options(['--supervisor-only', '--focus-backup', '--cloud-proof', '--block-external-browser-network']));
+  assert.throws(() => options(['--block-external-browser-network', '--block-external-browser-network']));
   console.log('PURE_HELPERS_PASS');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

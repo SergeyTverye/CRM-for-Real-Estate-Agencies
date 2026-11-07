@@ -1,4 +1,4 @@
-/** Opt-in coordinator runner. Never invoke without --execute-cloud-live. */
+/** Opt-in manual runner. Never invoke without --execute-cloud-live. */
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { parse } from "dotenv";
@@ -115,8 +115,7 @@ async function main() {
       await page.getByRole("status").filter({ hasText: "Чтение доступно" }).waitFor({ timeout: 60_000 });
     }
 
-    // Deliberately stop at verifiable UI setup/probes. Backup and restore require the coordinator's
-    // isolated backend/runtime contract documented in cloud-test-plan.md; never point production at fixture data.
+    // Deliberately stop at verifiable UI setup/probes. Backup and restore require an isolated backend/runtime contract (see cloud-test-plan.md); never point production at fixture data.
     console.log(JSON.stringify([
       safeResult("UI_CONFIG_PROBE", "COMPLETED", { providers: 2, successfulProbes: 2 }),
       safeResult("RUN_PREFIX", "ALLOCATED", { characters: prefix.length }),

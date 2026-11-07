@@ -130,9 +130,12 @@ try {
   Set-Content -LiteralPath "$install\app\package-lock.json" -Value '{"syntheticObsolete":true}'
   New-Item -ItemType Directory -Path "$install\app\templates" -Force | Out-Null
   Set-Content -LiteralPath "$install\app\templates\obsolete-ci-example.txt" -Value 'SYNTHETIC-OBSOLETE'
+  New-Item -ItemType Directory -Path "$install\app\public" -Force | Out-Null
+  [IO.File]::WriteAllBytes("$install\app\public\.gitkeep", [byte[]]@())
   Install; StartSmoke
   Check (-not (Test-Path -LiteralPath "$install\app\package-lock.json")) 'overinstall-obsolete-lock-removed'
   Check (-not (Test-Path -LiteralPath "$install\app\templates\obsolete-ci-example.txt")) 'overinstall-obsolete-template-removed'
+  Check (-not (Test-Path -LiteralPath "$install\app\public\.gitkeep")) 'overinstall-placeholder-gitkeep-removed'
   Check ((Get-Content -Raw -LiteralPath (Join-Path $data 'files\ci-control.txt')).Trim() -eq 'SYNTHETIC-CONTROL') 'overinstall-user-file-retained'
   Check (@(Get-ChildItem -LiteralPath (Join-Path $data 'backups') -Filter '*.crmbackup').Count -gt 0) 'pre-upgrade-encrypted-snapshot'
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()

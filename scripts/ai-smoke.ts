@@ -17,7 +17,7 @@ async function main() {
   if (process.argv.filter((a) => a === "--live").length !== 1) throw new Error("Opt-in required");
   const config = loadConfig();
   if (!config.AI_ENABLED || !config.YANDEX_CLOUD_API_KEY) throw new Error("AI unavailable");
-  // Reviewed rates required from coordinator; never fabricate current commercial tariffs.
+  // Reviewed rates required from a maintainer; never fabricate current commercial tariffs.
   const tariff: AiTariff = {
     id: "smoke-reviewed", model: process.argv.includes("--web") ? config.YANDEX_CLOUD_WEB_MODEL || config.YANDEX_CLOUD_MODEL : config.YANDEX_CLOUD_MODEL,
     effectiveFrom: new Date(process.env.AI_SMOKE_TARIFF_EFFECTIVE_FROM ?? "invalid"),

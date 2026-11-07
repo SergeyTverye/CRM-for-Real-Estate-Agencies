@@ -74,6 +74,37 @@ try {
       (Test-Path -LiteralPath "$dir\app\package-lock.json") -and
       $global:CrmSyntheticCleanupTestState.shutdownCalls -eq $calls) "retain-before-shutdown:$relative"
   }
+  # Exact zero-byte developer placeholder public\.gitkeep (legacy41 residue)
+  # is ordinary program residue: cleanup succeeds. Size via metadata only.
+  $dir = Fixture ('placeholder-zero-' + [guid]::NewGuid().ToString('N'))
+  [IO.Directory]::CreateDirectory("$dir\app\public") | Out-Null
+  [IO.File]::WriteAllBytes("$dir\app\public\.gitkeep", [byte[]]@())
+  & $helper -InstallDirectory $dir -InstallerPath "$root\setup.exe"
+  Check (-not (Test-Path -LiteralPath "$dir\app")) 'placeholder-zero-byte-cleaned'
+  Check ((Test-Path -LiteralPath "$dir\RealEstateCRM.exe") -and
+    ((Get-Content -LiteralPath "$root\external\files\control.txt") -eq 'SYNTHETIC-CONTROL')) 'placeholder-zero-byte-side-effects-none'
+  # Nonempty .gitkeep stays suspect: refuse, remove nothing (sibling program
+  # file, placeholder and install root intact, shutdown not reached).
+  $dir = Fixture ('placeholder-nonempty-' + [guid]::NewGuid().ToString('N'))
+  [IO.Directory]::CreateDirectory("$dir\app\public") | Out-Null
+  [IO.File]::WriteAllText("$dir\app\public\.gitkeep", 'SYNTHETIC-RETAIN')
+  $calls = $global:CrmSyntheticCleanupTestState.shutdownCalls
+  Reject $dir 'UPGRADE_POSSIBLE_USER_DATA'
+  Check (([IO.File]::ReadAllText("$dir\app\public\.gitkeep") -eq 'SYNTHETIC-RETAIN') -and
+    (Test-Path -LiteralPath "$dir\app\package-lock.json") -and
+    (Test-Path -LiteralPath "$dir\RealEstateCRM.exe") -and
+    $global:CrmSyntheticCleanupTestState.shutdownCalls -eq $calls) 'placeholder-nonempty-refuses-intact'
+  # Placeholder path behind a reparse point is never trusted, even with the
+  # zero-byte allowance (reparse check precedes size check).
+  $dir = Fixture ('placeholder-link-' + [guid]::NewGuid().ToString('N'))
+  [IO.Directory]::CreateDirectory("$dir\app\public") | Out-Null
+  [IO.File]::WriteAllBytes("$dir\app\public\.gitkeep", [byte[]]@())
+  $linkDir = "$dir\app\public-link"
+  New-Item -ItemType Junction -Path $linkDir -Target "$dir\app\public" | Out-Null
+  Reject $dir 'UPGRADE_REPARSE_POINT'
+  Check ((Test-Path -LiteralPath "$dir\app\package-lock.json") -and
+    ((Get-Content -LiteralPath "$root\external\files\control.txt") -eq 'SYNTHETIC-CONTROL')) 'placeholder-junction-still-refuses'
+  [IO.Directory]::Delete($linkDir)
   $dir = Fixture 'known-program-assets'
   $legacySpec = ([string][char]0x422) + ([string][char]0x417) + '.md'
   foreach ($relative in @('package-lock.json',$legacySpec,'templates\examples\client.yaml','templates\examples\client.md',

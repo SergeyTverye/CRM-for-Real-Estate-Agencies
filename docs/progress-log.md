@@ -212,3 +212,12 @@
 
 - CI47b8e9b прошёл95unitfiles, затем397SQLitechecks и остановился на1privacy assertion: regexp /900|1234/ совпал со случайным UUID, тогда как publicDescription уже содержал [PHONE]/[REDACTED]. Это не утечка ПДн и не ошибка Modal.
 - GeminiLow через OpenCode подготовил deterministicUUID с900и1234; coordinator исключил совпадение самого placeholder[PHONE], сохранив exactDTO shape, отсутствие contact/privatefields и исходных значений, rejectioninventedevidence и cache=0. Product sanitizer не менялся. Targeted17/17SQLite и17/17PG PASS на отдельнойfreshDB; PGcreated/dropped/absentAfterDrop=true. Повтор полной CI требуется, skips/retries/timeoutнеослаблялись.
+
+## 2026-11-08 — текущий EXE a982542 и точная причина overinstall
+
+- Цель обновлена: основная разработка Muse, бесплатное ревью Beam/Iceman, Gemini low для UI; изменения ведутся в codex/installed-release-proof, main больше не изменяется. Рабочий стол не используется.
+- Официальный a982542 CI42408326567 полностьюSUCCESS: unit1791PASS5skip,SQLite398PASS1skip,finalruntimePASS,Rust1PASS,installer2022/2025PASS. EXE585556902bytes SHA1c818d455cf758edcba5b12aa591f1956c28f4cd8f919772304f6b062b57a0ed скачан с провереннымиZIP/EXE/SHA/commit.
+- Productionexacta982542 image sha256:02d8478e47dbbee51ab8632b4b9797046b8623e3910560f70b07d4cf9c467079: PG9/9PASS; прерванный transport SQLite не засчитывался. Muse восстановил контур на том жеimage безrebuild: первый recovery остановился на исчерпании Dockeraddresspool, удалена толькособственнаяorphanсеть; затем22/22PASS среальнымencryptedrestore. Собственныеконтейнерыостановлены, рабочиеCRMнеизменены.
+- Локальныйoverinstalla982542 сначалаотказалexit1 до измененияlauncher/data. ReadonlyдиагностикаMuse обнаружила public/.gitkeep старого41trace. Координатор проверилregular/zero-byte/ancestor-no-reparse и удалил толькоэтотplaceholder; readonly48549files/5310dirsPASS. Повторнаяобычнаяустановкаещёвыполняется; это manualremediation, нештатныйupgradePASSисходногоEXE.
+- Museисправилhelperтолькоexactpublic/.gitkeeplength0,непустой/junction/userdataпо-прежнемуотказ. ПолныйsyntheticPS5.1suitePASS,1200deepfiles1885/1922ms(<15s). РеальныйCIoverinstallтеперьвставляетнулевойmarkerиожидаетудаления. Дальшенужнановаясборкаизветки;mainнеизменяется.
+- Beamпереписал3самоссылочныхкомментариявacceptance/AIскриптах. LegitimateAIconfigиprivate-importпредупрежденияконфиденциальностисохранены.
