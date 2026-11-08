@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";import type { SearchFilters, NormalizedListing, CriterionEvaluation, Source } from "@/modules/property-search/domain/types";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { SearchFilters, NormalizedListing, CriterionEvaluation, Source } from "@/modules/property-search/domain/types";
 import type { DuplicateGroupDto } from "@/modules/listing-duplicates";
 import { ListingDuplicateGroups } from "@/ui/listing-duplicates";
 import { StartBrowserSession } from "@/ui/browser-session/start-session";

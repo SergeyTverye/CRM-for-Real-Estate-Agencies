@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type RealEstateScraper from "real-estate-scrapper";
 import { loadDataset } from "../../../scripts/search-quality/dataset";
+import { evaluateQuality } from "../../../scripts/search-quality/evaluate";
 import { evaluateListing } from "@/modules/property-search/domain/evaluation";
 import { SearchFilters, type NormalizedListing, type Source } from "@/modules/property-search/domain/types";
-import { deduplicateListings, normalizeAddressKey } from "@/modules/property-search/infrastructure/normalization";
+import { deduplicateListings, listingIdentity, normalizeAddressKey } from "@/modules/property-search/infrastructure/normalization";
 import { RealEstateScraperAdapter, type ScraperFactory } from "@/modules/property-search/infrastructure/scraper-adapter";
 
 function card(overrides: Partial<NormalizedListing>): NormalizedListing {
@@ -46,6 +47,16 @@ describe("v3.2.2 catalogue pages are rejected, not review", () => {
 });
 
 describe("v3.2.2 address normalization flags suspected duplicates", () => {
+  it("measures normalization candidate marks directly on all 49 REPLAY records", () => {
+    const metrics = evaluateQuality(input => {
+      const rows = deduplicateListings(input.map(({ id, listing }) => ({ ...listing, replayId: id })));
+      const ids = new Map(rows.map(row => [listingIdentity(row) ?? row.url, row.replayId]));
+      return { retained: rows.length, pairs: rows.flatMap(row => row.possibleDuplicateKeys
+        .map(key => ({ a: row.replayId, b: ids.get(key)!, relation: "suspected" as const }))
+        .filter(pair => pair.a < pair.b)) };
+    }).deduplication;
+    expect(metrics).toMatchObject({ tp: 3, fp: 0, fn: 0, tn: 2 });
+  });
   it("matches city prefixes and street abbreviations", () => {
     expect(normalizeAddressKey("Новосибирск, ул. Мира, 58", "Новосибирск")).toBe(normalizeAddressKey("улица Мира, 58", "Новосибирск"));
     expect(normalizeAddressKey("Новосибирск, ул. Петухова, 44/1", "Новосибирск")).toBe(normalizeAddressKey("улица Петухова, 44/1", "Новосибирск"));

@@ -212,6 +212,40 @@ it("ranking serializes concurrent cache misses",async()=>{
   const results=await Promise.all([rankAnalysisListings(users.realtor1,input,f.ai),rankAnalysisListings(users.realtor1,input,f.ai)]);
   expect(f.provider.requests).toHaveLength(1);expect(results.filter(r=>r.cacheHit)).toHaveLength(1);
 });
+it("ranking cache is isolated between actors, with usage attributed to each actor",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  expect((await rankAnalysisListings(users.realtor1,input,f.ai)).cacheHit).toBe(false);
+  expect((await rankAnalysisListings(users.realtor2,input,f.ai)).cacheHit).toBe(false);
+  for (const actor of [users.realtor1,users.realtor2]) {
+    expect((await rankAnalysisListings(actor,{...input,listingIds:[b.id,a.id]},f.ai)).cacheHit).toBe(true);
+  }
+  expect(f.provider.requests).toHaveLength(2);
+  expect(await db.aiAnalysisCache.count()).toBe(2);
+  const usage=await db.aiUsageLog.findMany({select:{userId:true}});
+  expect(usage.map(row=>row.userId).sort()).toEqual([users.realtor1.userId,users.realtor2.userId].sort());
+});
+it("ranking checks current need access before returning an existing paid cache",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake();
+  const client=await makeClient(users.realtor1),need=await makeNeed(users.realtor1,client.id);
+  const input={listingIds:[a.id,b.id],filters,needId:need.id};
+  await rankAnalysisListings(users.realtor1,input,f.ai);
+  await expect(rankAnalysisListings(users.realtor2,input,f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});
+  // Revocation must invalidate access even for the actor who populated the cache.
+  await db.client.update({where:{id:client.id},data:{responsibleUserId:users.realtor2.userId}});
+  await db.clientNeed.update({where:{id:need.id},data:{responsibleUserId:users.realtor2.userId}});
+  await expect(rankAnalysisListings(users.realtor1,input,f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});
+  expect(f.provider.requests).toHaveLength(1);
+});
+it("ranking cache never masks a missing listing or bypasses a newly attached private need",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  await rankAnalysisListings(users.realtor1,input,f.ai);
+  const client=await makeClient(users.realtor2),need=await makeNeed(users.realtor2,client.id);
+  await expect(rankAnalysisListings(users.realtor1,{...input,needId:need.id},f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});
+  const cache=await db.aiAnalysisCache.findFirstOrThrow();
+  await db.externalListing.delete({where:{id:cache.listingId===a.id ? b.id : a.id}});
+  await expect(rankAnalysisListings(users.realtor1,input,f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});
+  expect(f.provider.requests).toHaveLength(1);
+});
 it("ranking rejects exhausted budget before dispatch, serves paid cache at zero remaining budget",async()=>{
   const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
   await db.aiSetting.updateMany({data:{monthlyBudgetRub:"0"}});

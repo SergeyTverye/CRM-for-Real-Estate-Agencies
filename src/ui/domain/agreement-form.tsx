@@ -101,7 +101,7 @@ export function AgreementForm({
   const [finished, setFinished] = useState(false);
   const submitting = useRef(false);
   const { pending, error, run, fieldError, setError } = useApiAction();
-  const dirty = JSON.stringify(v) !== JSON.stringify(initial) || client?.id !== initialClient?.id || property?.id !== initialProperty?.id;
+  const dirty = JSON.stringify(v) !== JSON.stringify(initial) || client?.id !== initialClient?.id || property?.id !== initialProperty?.id || responsibleUserId !== "" || reminder !== "30";
   useUnsavedChangesWarning(!finished && (savedId ? files.length > 0 : dirty || files.length > 0));
   const set = <K extends keyof AgreementFormValue>(k: K, val: AgreementFormValue[K]) => setV((s) => ({ ...s, [k]: val }));
   const err = (n: string) => fieldError(n);
