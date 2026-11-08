@@ -1,0 +1,1168 @@
+{
+  "mode": "LIVE",
+  "aiCalls": 0,
+  "browser": false,
+  "startedAt": "2026-11-08T16:05:36.821Z",
+  "finishedAt": "2026-11-08T16:07:22.352Z",
+  "depth": {
+    "maxPages": 1,
+    "limit": 5
+  },
+  "perJobTimeoutMs": 25000,
+  "probeBudgetPerSource": 40,
+  "requestCounts": {
+    "cian": 6,
+    "mirkvartir": 12,
+    "onrealt": 12,
+    "domclick": 3,
+    "yandex": 9,
+    "youla": 6,
+    "avito": 3
+  },
+  "jobs": [
+    {
+      "query": "rent-office",
+      "source": "cian",
+      "status": "parse_failed",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "PARSE_FAILED",
+      "reason": "cian: PARSE_FAILED",
+      "requestCount": 1,
+      "elapsedMs": 1181,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-office",
+      "source": "mirkvartir",
+      "status": "success",
+      "resultCount": 5,
+      "confirmed": 0,
+      "needsReview": 5,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": null,
+      "reason": "╨ö╨╛╤ü╤é╨╕╨│╨╜╤â╤é ╨╗╨╕╨╝╨╕╤é ╤ü╤é╤Ç╨░╨╜╨╕╤å/╨║╨░╤Ç╤é╨╛╤ç╨╡╨║; ╤ü╨╛╤Ç╤é╨╕╤Ç╨╛╨▓╨║╨░ ╨┐╨╛ ╨┤╨░╤é╨╡ ╨┐╨╗╨╛╤ë╨░╨┤╨║╨╛╨╣ ╨╜╨╡ ╨│╨░╤Ç╨░╨╜╤é╨╕╤Ç╨╛╨▓╨░╨╜╨░; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 1/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 0, ╨╛╤ê╨╕╨▒╨╛╨║ 1",
+      "requestCount": 2,
+      "elapsedMs": 20936,
+      "fields": {
+        "price": 5,
+        "priceUnit": 0,
+        "area": 5,
+        "floor": 5,
+        "photo": 1,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-office",
+      "source": "onrealt",
+      "status": "success",
+      "resultCount": 5,
+      "confirmed": 0,
+      "needsReview": 5,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": null,
+      "reason": "╨ö╨╛╤ü╤é╨╕╨│╨╜╤â╤é ╨╗╨╕╨╝╨╕╤é ╤ü╤é╤Ç╨░╨╜╨╕╤å/╨║╨░╤Ç╤é╨╛╤ç╨╡╨║; ╤ü╨╛╤Ç╤é╨╕╤Ç╨╛╨▓╨║╨░ ╨┐╨╛ ╨┤╨░╤é╨╡ ╨┐╨╗╨╛╤ë╨░╨┤╨║╨╛╨╣ ╨╜╨╡ ╨│╨░╤Ç╨░╨╜╤é╨╕╤Ç╨╛╨▓╨░╨╜╨░; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 0/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 0, ╨╛╤ê╨╕╨▒╨╛╨║ 0",
+      "requestCount": 1,
+      "elapsedMs": 20900,
+      "fields": {
+        "price": 5,
+        "priceUnit": 0,
+        "area": 5,
+        "floor": 5,
+        "photo": 5,
+        "publishedAt": 0,
+        "district": 5
+      }
+    },
+    {
+      "query": "rent-office",
+      "source": "domclick",
+      "status": "blocked",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "ACCESS_BLOCKED",
+      "reason": "domclick: ACCESS_BLOCKED HTTP 401",
+      "requestCount": 1,
+      "elapsedMs": 601,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-office",
+      "source": "yandex",
+      "status": "needs_user_action",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "NEEDS_USER_ACTION",
+      "reason": "yandex: NEEDS_USER_ACTION HTTP 200",
+      "requestCount": 1,
+      "elapsedMs": 20902,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-office",
+      "source": "youla",
+      "status": "success",
+      "resultCount": 4,
+      "confirmed": 0,
+      "needsReview": 4,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": false,
+      "failureCode": null,
+      "reason": null,
+      "requestCount": 2,
+      "elapsedMs": 23376,
+      "fields": {
+        "price": 4,
+        "priceUnit": 0,
+        "area": 4,
+        "floor": 0,
+        "photo": 4,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-office",
+      "source": "avito",
+      "status": "blocked",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "ACCESS_BLOCKED",
+      "reason": "avito: ACCESS_BLOCKED HTTP 439",
+      "requestCount": 1,
+      "elapsedMs": 639,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "cian",
+      "status": "parse_failed",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "PARSE_FAILED",
+      "reason": "cian: PARSE_FAILED",
+      "requestCount": 2,
+      "elapsedMs": 792,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "mirkvartir",
+      "status": "success",
+      "resultCount": 5,
+      "confirmed": 5,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": null,
+      "reason": "╨ö╨╛╤ü╤é╨╕╨│╨╜╤â╤é ╨╗╨╕╨╝╨╕╤é ╤ü╤é╤Ç╨░╨╜╨╕╤å/╨║╨░╤Ç╤é╨╛╤ç╨╡╨║; ╤ü╨╛╤Ç╤é╨╕╤Ç╨╛╨▓╨║╨░ ╨┐╨╛ ╨┤╨░╤é╨╡ ╨┐╨╗╨╛╤ë╨░╨┤╨║╨╛╨╣ ╨╜╨╡ ╨│╨░╤Ç╨░╨╜╤é╨╕╤Ç╨╛╨▓╨░╨╜╨░; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 0/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 0, ╨╛╤ê╨╕╨▒╨╛╨║ 0",
+      "requestCount": 3,
+      "elapsedMs": 21125,
+      "fields": {
+        "price": 5,
+        "priceUnit": 5,
+        "area": 5,
+        "floor": 5,
+        "photo": 1,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "onrealt",
+      "status": "success",
+      "resultCount": 5,
+      "confirmed": 0,
+      "needsReview": 5,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": null,
+      "reason": "╨ó╨╛╤Ç╨│╨╛╨▓╨╗╤Å: ╨╕╤ü╨┐╨╛╨╗╤î╨╖╤â╨╡╤é╤ü╤Å ╨║╨░╤é╨╡╨│╨╛╤Ç╨╕╤Å ╨ƒ╨í╨¥ OnRealt; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╨╡ ╨┐╤Ç╨╛╨▓╨╡╤Ç╤Å╨╡╤é╤ü╤Å CRM, ╨╛╤à╨▓╨░╤é ╨╜╨╡╨┐╨╛╨╗╨╜╤ï╨╣; ╨ö╨╛╤ü╤é╨╕╨│╨╜╤â╤é ╨╗╨╕╨╝╨╕╤é ╤ü╤é╤Ç╨░╨╜╨╕╤å/╨║╨░╤Ç╤é╨╛╤ç╨╡╨║; ╤ü╨╛╤Ç╤é╨╕╤Ç╨╛╨▓╨║╨░ ╨┐╨╛ ╨┤╨░╤é╨╡ ╨┐╨╗╨╛╤ë╨░╨┤╨║╨╛╨╣ ╨╜╨╡ ╨│╨░╤Ç╨░╨╜╤é╨╕╤Ç╨╛╨▓╨░╨╜╨░; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 1/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 0, ╨╛╤ê╨╕╨▒╨╛╨║ 1",
+      "requestCount": 3,
+      "elapsedMs": 21158,
+      "fields": {
+        "price": 5,
+        "priceUnit": 5,
+        "area": 5,
+        "floor": 5,
+        "photo": 5,
+        "publishedAt": 0,
+        "district": 5
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "domclick",
+      "status": "blocked",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "ACCESS_BLOCKED",
+      "reason": "domclick: ACCESS_BLOCKED HTTP 401",
+      "requestCount": 2,
+      "elapsedMs": 393,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "yandex",
+      "status": "needs_user_action",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "NEEDS_USER_ACTION",
+      "reason": "yandex: NEEDS_USER_ACTION HTTP 200",
+      "requestCount": 2,
+      "elapsedMs": 6081,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "youla",
+      "status": "success",
+      "resultCount": 2,
+      "confirmed": 0,
+      "needsReview": 2,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": false,
+      "failureCode": null,
+      "reason": null,
+      "requestCount": 4,
+      "elapsedMs": 22349,
+      "fields": {
+        "price": 2,
+        "priceUnit": 0,
+        "area": 2,
+        "floor": 0,
+        "photo": 2,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-retail",
+      "source": "avito",
+      "status": "blocked",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "ACCESS_BLOCKED",
+      "reason": "avito: ACCESS_BLOCKED HTTP 439",
+      "requestCount": 2,
+      "elapsedMs": 427,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "cian",
+      "status": "parse_failed",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "PARSE_FAILED",
+      "reason": "cian: PARSE_FAILED",
+      "requestCount": 3,
+      "elapsedMs": 684,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "mirkvartir",
+      "status": "success",
+      "resultCount": 5,
+      "confirmed": 0,
+      "needsReview": 5,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": null,
+      "reason": "╨ö╨╛╤ü╤é╨╕╨│╨╜╤â╤é ╨╗╨╕╨╝╨╕╤é ╤ü╤é╤Ç╨░╨╜╨╕╤å/╨║╨░╤Ç╤é╨╛╤ç╨╡╨║; ╤ü╨╛╤Ç╤é╨╕╤Ç╨╛╨▓╨║╨░ ╨┐╨╛ ╨┤╨░╤é╨╡ ╨┐╨╗╨╛╤ë╨░╨┤╨║╨╛╨╣ ╨╜╨╡ ╨│╨░╤Ç╨░╨╜╤é╨╕╤Ç╨╛╨▓╨░╨╜╨░; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 2/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 0, ╨╛╤ê╨╕╨▒╨╛╨║ 1",
+      "requestCount": 6,
+      "elapsedMs": 15012,
+      "fields": {
+        "price": 5,
+        "priceUnit": 0,
+        "area": 5,
+        "floor": 5,
+        "photo": 1,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "onrealt",
+      "status": "success",
+      "resultCount": 5,
+      "confirmed": 0,
+      "needsReview": 5,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": null,
+      "reason": "╨ö╨╛╤ü╤é╨╕╨│╨╜╤â╤é ╨╗╨╕╨╝╨╕╤é ╤ü╤é╤Ç╨░╨╜╨╕╤å/╨║╨░╤Ç╤é╨╛╤ç╨╡╨║; ╤ü╨╛╤Ç╤é╨╕╤Ç╨╛╨▓╨║╨░ ╨┐╨╛ ╨┤╨░╤é╨╡ ╨┐╨╗╨╛╤ë╨░╨┤╨║╨╛╨╣ ╨╜╨╡ ╨│╨░╤Ç╨░╨╜╤é╨╕╤Ç╨╛╨▓╨░╨╜╨░; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 3/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 3, ╨╛╤ê╨╕╨▒╨╛╨║ 0",
+      "requestCount": 7,
+      "elapsedMs": 12741,
+      "fields": {
+        "price": 5,
+        "priceUnit": 0,
+        "area": 5,
+        "floor": 5,
+        "photo": 5,
+        "publishedAt": 3,
+        "district": 5
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "domclick",
+      "status": "blocked",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "ACCESS_BLOCKED",
+      "reason": "domclick: ACCESS_BLOCKED HTTP 401",
+      "requestCount": 3,
+      "elapsedMs": 386,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "yandex",
+      "status": "needs_user_action",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "NEEDS_USER_ACTION",
+      "reason": "yandex: NEEDS_USER_ACTION HTTP 200",
+      "requestCount": 3,
+      "elapsedMs": 3786,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "youla",
+      "status": "success",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": false,
+      "failureCode": null,
+      "reason": null,
+      "requestCount": 6,
+      "elapsedMs": 12096,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "rent-warehouse",
+      "source": "avito",
+      "status": "blocked",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "ACCESS_BLOCKED",
+      "reason": "avito: ACCESS_BLOCKED HTTP 439",
+      "requestCount": 3,
+      "elapsedMs": 474,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "cian",
+      "status": "parse_failed",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "PARSE_FAILED",
+      "reason": "cian: PARSE_FAILED; cian: PARSE_FAILED; cian: PARSE_FAILED; cian: UNSUPPORTED_FILTER; ╤ä╨╕╨╗╤î╤é╤Ç: type; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: house; cian: UNSUPPORTED_FILTER; ╤ä╨╕╨╗╤î╤é╤Ç: type; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: cottage; cian: UNSUPPORTED_FILTER; ╤ä╨╕╨╗╤î╤é╤Ç: type; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: townhouse",
+      "requestCount": 6,
+      "elapsedMs": 13409,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "mirkvartir",
+      "status": "partial",
+      "resultCount": 3,
+      "confirmed": 0,
+      "needsReview": 3,
+      "rejected": 0,
+      "pagesFetched": 3,
+      "incomplete": true,
+      "failureCode": "TIMEOUT",
+      "reason": "mirkvartir: TIMEOUT; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 3/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 1, ╨╛╤ê╨╕╨▒╨╛╨║ 1",
+      "requestCount": 12,
+      "elapsedMs": 36678,
+      "fields": {
+        "price": 3,
+        "priceUnit": 0,
+        "area": 3,
+        "floor": 3,
+        "photo": 3,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "onrealt",
+      "status": "partial",
+      "resultCount": 1,
+      "confirmed": 1,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 1,
+      "incomplete": true,
+      "failureCode": "TIMEOUT",
+      "reason": "onrealt: TIMEOUT; onrealt: TIMEOUT; ╨ö╨░╤é╤ï ╨║╨░╤Ç╤é╨╛╤ç╨╡╨║: ╨╖╨░╨┐╤Ç╨╛╤ü╨╛╨▓ 3/3, ╨║╨╡╤ê 0, ╨╜╨░╨╣╨┤╨╡╨╜╨╛ 3, ╨╛╤ê╨╕╨▒╨╛╨║ 0",
+      "requestCount": 12,
+      "elapsedMs": 36686,
+      "fields": {
+        "price": 1,
+        "priceUnit": 1,
+        "area": 1,
+        "floor": 1,
+        "photo": 1,
+        "publishedAt": 1,
+        "district": 1
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "domclick",
+      "status": "unsupported_filter",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "UNSUPPORTED_FILTER",
+      "reason": "domclick: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: flat; domclick: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: studio; domclick: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: room; domclick: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: house; domclick: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: cottage; domclick: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: townhouse",
+      "requestCount": 3,
+      "elapsedMs": 8,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "yandex",
+      "status": "needs_user_action",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "NEEDS_USER_ACTION",
+      "reason": "yandex: NEEDS_USER_ACTION HTTP 200; yandex: NEEDS_USER_ACTION; yandex: NEEDS_USER_ACTION; yandex: NEEDS_USER_ACTION; yandex: NEEDS_USER_ACTION; yandex: NEEDS_USER_ACTION",
+      "requestCount": 9,
+      "elapsedMs": 911,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "youla",
+      "status": "unsupported_filter",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "UNSUPPORTED_FILTER",
+      "reason": "youla: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: flat; youla: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: studio; youla: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: room; youla: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: house; youla: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: cottage; youla: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: townhouse",
+      "requestCount": 6,
+      "elapsedMs": 8,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    },
+    {
+      "query": "sale-flat",
+      "source": "avito",
+      "status": "unsupported_filter",
+      "resultCount": 0,
+      "confirmed": 0,
+      "needsReview": 0,
+      "rejected": 0,
+      "pagesFetched": 0,
+      "incomplete": true,
+      "failureCode": "UNSUPPORTED_FILTER",
+      "reason": "avito: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: flat; avito: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: studio; avito: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: room; avito: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: house; avito: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: cottage; avito: UNSUPPORTED_FILTER; ╨╜╨░╨╖╨╜╨░╤ç╨╡╨╜╨╕╤Å: townhouse",
+      "requestCount": 3,
+      "elapsedMs": 8,
+      "fields": {
+        "price": 0,
+        "priceUnit": 0,
+        "area": 0,
+        "floor": 0,
+        "photo": 0,
+        "publishedAt": 0,
+        "district": 0
+      }
+    }
+  ],
+  "combos": {
+    "rent-office": {
+      "pair_onrealt_yandex": {
+        "sources": [
+          "onrealt",
+          "yandex"
+        ],
+        "jobs": [
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 5,
+        "uniqueResults": 5,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "trio_plus_mirkvartir": {
+        "sources": [
+          "onrealt",
+          "yandex",
+          "mirkvartir"
+        ],
+        "jobs": [
+          {
+            "source": "mirkvartir",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 10,
+        "uniqueResults": 10,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "all7": {
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "jobs": [
+          {
+            "source": "cian",
+            "status": "parse_failed",
+            "resultCount": 0
+          },
+          {
+            "source": "mirkvartir",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "domclick",
+            "status": "blocked",
+            "resultCount": 0
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          },
+          {
+            "source": "youla",
+            "status": "success",
+            "resultCount": 4
+          },
+          {
+            "source": "avito",
+            "status": "blocked",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 14,
+        "uniqueResults": 14,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "domclick",
+          "yandex",
+          "avito"
+        ]
+      }
+    },
+    "sale-retail": {
+      "pair_onrealt_yandex": {
+        "sources": [
+          "onrealt",
+          "yandex"
+        ],
+        "jobs": [
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 5,
+        "uniqueResults": 5,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "trio_plus_mirkvartir": {
+        "sources": [
+          "onrealt",
+          "yandex",
+          "mirkvartir"
+        ],
+        "jobs": [
+          {
+            "source": "mirkvartir",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 10,
+        "uniqueResults": 10,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "all7": {
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "jobs": [
+          {
+            "source": "cian",
+            "status": "parse_failed",
+            "resultCount": 0
+          },
+          {
+            "source": "mirkvartir",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "domclick",
+            "status": "blocked",
+            "resultCount": 0
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          },
+          {
+            "source": "youla",
+            "status": "success",
+            "resultCount": 2
+          },
+          {
+            "source": "avito",
+            "status": "blocked",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 12,
+        "uniqueResults": 12,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "domclick",
+          "yandex",
+          "avito"
+        ]
+      }
+    },
+    "rent-warehouse": {
+      "pair_onrealt_yandex": {
+        "sources": [
+          "onrealt",
+          "yandex"
+        ],
+        "jobs": [
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 5,
+        "uniqueResults": 5,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "trio_plus_mirkvartir": {
+        "sources": [
+          "onrealt",
+          "yandex",
+          "mirkvartir"
+        ],
+        "jobs": [
+          {
+            "source": "mirkvartir",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 10,
+        "uniqueResults": 10,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "all7": {
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "jobs": [
+          {
+            "source": "cian",
+            "status": "parse_failed",
+            "resultCount": 0
+          },
+          {
+            "source": "mirkvartir",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "onrealt",
+            "status": "success",
+            "resultCount": 5
+          },
+          {
+            "source": "domclick",
+            "status": "blocked",
+            "resultCount": 0
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          },
+          {
+            "source": "youla",
+            "status": "success",
+            "resultCount": 0
+          },
+          {
+            "source": "avito",
+            "status": "blocked",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 10,
+        "uniqueResults": 10,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "domclick",
+          "yandex",
+          "avito"
+        ]
+      }
+    },
+    "sale-flat": {
+      "pair_onrealt_yandex": {
+        "sources": [
+          "onrealt",
+          "yandex"
+        ],
+        "jobs": [
+          {
+            "source": "onrealt",
+            "status": "partial",
+            "resultCount": 1
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 1,
+        "uniqueResults": 1,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "trio_plus_mirkvartir": {
+        "sources": [
+          "onrealt",
+          "yandex",
+          "mirkvartir"
+        ],
+        "jobs": [
+          {
+            "source": "mirkvartir",
+            "status": "partial",
+            "resultCount": 3
+          },
+          {
+            "source": "onrealt",
+            "status": "partial",
+            "resultCount": 1
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 4,
+        "uniqueResults": 4,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      },
+      "all7": {
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "jobs": [
+          {
+            "source": "cian",
+            "status": "parse_failed",
+            "resultCount": 0
+          },
+          {
+            "source": "mirkvartir",
+            "status": "partial",
+            "resultCount": 3
+          },
+          {
+            "source": "onrealt",
+            "status": "partial",
+            "resultCount": 1
+          },
+          {
+            "source": "domclick",
+            "status": "unsupported_filter",
+            "resultCount": 0
+          },
+          {
+            "source": "yandex",
+            "status": "needs_user_action",
+            "resultCount": 0
+          },
+          {
+            "source": "youla",
+            "status": "unsupported_filter",
+            "resultCount": 0
+          },
+          {
+            "source": "avito",
+            "status": "unsupported_filter",
+            "resultCount": 0
+          }
+        ],
+        "totalResults": 4,
+        "uniqueResults": 4,
+        "exactDuplicatesRemoved": 0,
+        "suspectedPairs": 0,
+        "partial": true,
+        "blocked": [
+          "yandex"
+        ]
+      }
+    }
+  }
+}
