@@ -220,8 +220,10 @@ export async function rankAnalysisListings(actor:Actor,raw:unknown,injected?:Sea
     const p=prepare(row,input.filters);
     return {listingId:row.id,criteria:[...p.evaluation.criteria,...p.evaluation.preferences].filter(c=>!forbiddenAnalysisCriterion(c.criterion)).map(c=>({criterion:c.criterion,state:c.state,evidence:safeListingText(c.evidence)})),pricePeriodNotice:p.listing.priceUnit ? null : "Период цены неизвестен — цены несопоставимы до проверки"};
   }).sort((a,b)=>a.listingId.localeCompare(b.listingId))};
-  // Filters and evidence are fingerprinted. Updated facts or model invalidate recommendations.
-  const cacheKey=createHash("sha256").update(JSON.stringify(["listing-ranking-v1",config.model,input.filters,facts])).digest("hex");
+  // Personal recommendations are actor/need scoped; public description evidence
+  // may be shared, but never reuse another actor's ranking or an older shared key.
+  // selected() above checks current need access and every listing before cache lookup.
+  const cacheKey=createHash("sha256").update(JSON.stringify(["listing-ranking-v2",actor.userId,actor.role,input.needId ?? null,config.model,input.filters,facts])).digest("hex");
   return independentCommitScope(async tx=>{
     await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${cacheKey},0))`));
     const cached=await tx.aiAnalysisCache.findUnique({where:{cacheKey}});
