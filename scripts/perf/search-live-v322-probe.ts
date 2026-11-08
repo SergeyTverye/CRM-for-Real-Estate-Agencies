@@ -4,11 +4,17 @@
  * No AI, no DB, no browser, no dotenv. One adapter job per (query x source),
  * depth maxPages=1/limit=5, per-job deadline 25s. Plain-HTTP factory transport
  * is wrapped to count requests (hard cap 40/source for the whole probe).
+ * --after-fixes: Cian x4 + two residential cells, append matrix.afterFixes.
+ * --residential-only: only two residential cells, append afterSchedulingOptimization.
+ * Both follow-ups count HTTP redirect hops (caps Cian 12, others 24).
  * stdout: sanitized counts/codes only (no URLs, texts, contacts, bodies).
  * Combo duplicate stats are computed in-memory and reported as counts only.
  *
  *   npx tsx scripts/perf/search-live-v322-probe.ts > docs/vkr/live-search-v322-matrix.json
  */
+import { readFileSync, writeFileSync } from "node:fs";
+import { scraperHttpRequest } from "../../src/modules/property-search/infrastructure/scraper-http";
+import { resilientTransport } from "../../src/modules/property-search/infrastructure/source-response";
 import type RealEstateScraper from "real-estate-scrapper";
 import {
   RealEstateScraperAdapter,
@@ -22,6 +28,10 @@ import {
 } from "../../src/modules/property-search/domain/types";
 import { deduplicateListings } from "../../src/modules/property-search/infrastructure/normalization";
 
+const residentialOnly = process.argv.includes("--residential-only");
+const afterFixes = process.argv.includes("--after-fixes") || residentialOnly;
+const wireCounts = new Map<Source, number>();
+const checks: { status: number; bytes: number; servicepipeCheck: boolean; ssr: boolean }[] = [];
 const PER_JOB_TIMEOUT_MS = 25_000;
 const PROBE_BUDGET_PER_SOURCE = 40;
 const QUERIES = [
@@ -75,8 +85,28 @@ async function probe(queryId: string, filters: unknown, source: Source): Promise
     },
     listings: [],
   });
-  const factory: ScraperFactory = config =>
-    defaultScraperFactory({ ...config, transport: countingTransport(config.transport, source) ?? config.transport });
+  const factory: ScraperFactory = config => {
+    if (!afterFixes) return defaultScraperFactory({ ...config, transport: countingTransport(config.transport, source) ?? config.transport });
+    // Count every HTTP redirect hop, not just calls into the package transport.
+    const measured: RealEstateScraper.Transport = async request => {
+      counters.set(source, (counters.get(source) ?? 0) + 1);
+      const response = await scraperHttpRequest(request.url, {
+        method: request.method as "GET" | "POST", headers: request.headers,
+        signal: request.signal, timeoutMs: request.timeout, maxBytes: 10_000_000,
+        beforeRequest: () => {
+          const count = (wireCounts.get(source) ?? 0) + 1;
+          if (count > (source === "cian" ? 12 : 24)) throw Object.assign(new Error("PROBE_REQUEST_BUDGET"), { code: "PROBE_REQUEST_BUDGET" });
+          wireCounts.set(source, count);
+        },
+      });
+      const data = response.data.toString("utf8");
+      if (source === "cian") checks.push({ status: response.status, bytes: response.data.length,
+        servicepipeCheck: /https:\/\/servicepipe\.tech\/static\/checkjs\//u.test(data),
+        ssr: /legacy-commercial-serp-frontend|OfferCard/u.test(data) });
+      return { data, status: response.status, url: response.url };
+    };
+    return defaultScraperFactory({ ...config, transport: resilientTransport(measured, source, config.jobDeadlineAt!, source === "cian" ? 0 : 1000) });
+  };
   const adapter = new RealEstateScraperAdapter({
     enabled: true,
     browserEnabled: false,
@@ -128,7 +158,9 @@ async function main(): Promise<void> {
   const jobs: JobResult[] = [];
   const kept = new Map<string, NormalizedListing[]>();
   for (const q of QUERIES) {
-    const probed = await Promise.all(SOURCES.map(s => probe(q.id, q.filters, s)));
+    if (residentialOnly && q.id !== "sale-flat") continue;
+    const sources = residentialOnly ? ["mirkvartir", "onrealt"] as Source[] : afterFixes ? (q.id === "sale-flat" ? ["cian", "mirkvartir", "onrealt"] as Source[] : ["cian"] as Source[]) : SOURCES;
+    const probed = await Promise.all(sources.map(s => probe(q.id, q.filters, s)));
     for (const p of probed) {
       jobs.push(p.job);
       kept.set(`${q.id}:${p.job.source}`, p.listings);
@@ -160,14 +192,21 @@ async function main(): Promise<void> {
     }
     combos[q.id] = entry;
   }
-  process.stdout.write(JSON.stringify({
+  const report = {
     mode: "LIVE", aiCalls: 0, browser: false,
     startedAt, finishedAt: new Date().toISOString(),
     depth: { maxPages: 1, limit: 5 }, perJobTimeoutMs: PER_JOB_TIMEOUT_MS,
-    probeBudgetPerSource: PROBE_BUDGET_PER_SOURCE,
+    probeBudgetPerSource: afterFixes ? { cian: 12, mirkvartir: 24, onrealt: 24 } : PROBE_BUDGET_PER_SOURCE,
     requestCounts: Object.fromEntries(counters),
-    jobs, combos,
-  }, null, 2) + "\n");
+    jobs, ...(afterFixes ? { wireRequestCounts: Object.fromEntries(wireCounts), cianResponseChecks: checks } : { combos }),
+  };
+  if (afterFixes) {
+    const path = "docs/vkr/live-search-v322-matrix.json";
+    const original = JSON.parse(readFileSync(path, "utf8"));
+    original[residentialOnly ? "afterSchedulingOptimization" : "afterFixes"] = report;
+    writeFileSync(path, JSON.stringify(original, null, 2) + "\n");
+  }
+  process.stdout.write(JSON.stringify(report, null, 2) + "\n");
 }
 
 const invoked = (process.argv[1] ?? "").replace(/\\/g, "/").includes("search-live-v322-probe");

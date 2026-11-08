@@ -15,6 +15,11 @@ export function detectAccessChallenge(url: string, payload: unknown): boolean {
   if ((host === "cian.ru" || host.endsWith(".cian.ru")) && payload.length < 20000 &&
     /<script[^>]+src=["'][^"']*\/captcha\.js(?:[?"'])/iu.test(payload) &&
     !/legacy-commercial-serp-frontend|OfferCard/u.test(payload)) return true;
+  // Servicepipe's JS check has no title/form and is returned as HTTP 200.
+  // Require its dedicated check script, not a generic analytics/captcha mention.
+  if (/(?:^|\.)cian\.ru$/u.test(host) &&
+    /<script\b[^>]*src=["']https:\/\/servicepipe\.tech\/static\/checkjs\/[^"']+["']/iu.test(payload) &&
+    !/legacy-commercial-serp-frontend|OfferCard/u.test(payload)) return true;
   // Inspect challenge UI, not arbitrary mentions of captcha in script bundles.
   return /<(?:title|h1)[^>]*>[^<]*(?:captcha|проверка|подтвердите|доступ ограничен|just a moment|access denied)/iu.test(payload) ||
     /<(?:form|div|iframe)[^>]*(?:action=["'][^"']*captcha|id=["'](?:captcha|challenge-running)|class=["'][^"']*(?:SmartCaptcha|g-recaptcha|h-captcha))/iu.test(payload) ||
@@ -28,11 +33,18 @@ export function retryAfterMs(value: string | undefined, now = Date.now()): numbe
   return Number.isFinite(at) ? Math.max(1000, at - now) : null;
 }
 /** One delayed attempt only. A missing/invalid Retry-After never triggers retries. */
-export function resilientTransport(base: RealEstateScraper.Transport, source: Source, deadline: number): RealEstateScraper.Transport {
+export function resilientTransport(base: RealEstateScraper.Transport, source: Source, deadline: number, minimumIntervalMs = 0): RealEstateScraper.Transport {
   let stopped: { code: string; status?: number; url: string } | undefined;
+  let nextStart = 0;
   return async request => {
+    // Reserve starts synchronously so concurrent branches cannot burst the host.
+    const start = Math.max(Date.now(), nextStart);
+    nextStart = start + minimumIntervalMs;
+    if (start >= deadline) throw Object.assign(new Error("TIMEOUT"), { code: "TIMEOUT" });
+    if (start > Date.now()) await delay(start - Date.now(), undefined, { signal: request.signal });
+    if (request.signal?.aborted) throw Object.assign(new Error("ABORTED"), { code: "ABORTED" });
     if (stopped) throw Object.assign(new Error(stopped.code), stopped);
-    let response = await base(request);
+    let response = await base({ ...request, timeout: Math.min(request.timeout, Math.max(1, deadline - Date.now())) });
     if (typeof response !== "string" && response.status === 429) {
       const wait = retryAfterMs(response.headers?.["retry-after"]);
       if (wait !== null && Date.now() + wait + 1000 < deadline) {

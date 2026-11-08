@@ -1164,5 +1164,280 @@
         ]
       }
     }
+  },
+  "afterFixes": {
+    "mode": "LIVE",
+    "aiCalls": 0,
+    "browser": false,
+    "startedAt": "2026-11-08T16:57:36.538Z",
+    "finishedAt": "2026-11-08T16:58:19.344Z",
+    "depth": {
+      "maxPages": 1,
+      "limit": 5
+    },
+    "perJobTimeoutMs": 25000,
+    "probeBudgetPerSource": {
+      "cian": 12,
+      "mirkvartir": 24,
+      "onrealt": 24
+    },
+    "requestCounts": {
+      "cian": 4,
+      "mirkvartir": 4,
+      "onrealt": 4
+    },
+    "jobs": [
+      {
+        "query": "rent-office",
+        "source": "cian",
+        "status": "needs_user_action",
+        "resultCount": 0,
+        "confirmed": 0,
+        "needsReview": 0,
+        "rejected": 0,
+        "pagesFetched": 0,
+        "incomplete": true,
+        "failureCode": "NEEDS_USER_ACTION",
+        "reason": "cian: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+        "requestCount": 1,
+        "elapsedMs": 1024,
+        "fields": {
+          "price": 0,
+          "priceUnit": 0,
+          "area": 0,
+          "floor": 0,
+          "photo": 0,
+          "publishedAt": 0,
+          "district": 0
+        }
+      },
+      {
+        "query": "sale-retail",
+        "source": "cian",
+        "status": "needs_user_action",
+        "resultCount": 0,
+        "confirmed": 0,
+        "needsReview": 0,
+        "rejected": 0,
+        "pagesFetched": 0,
+        "incomplete": true,
+        "failureCode": "NEEDS_USER_ACTION",
+        "reason": "cian: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+        "requestCount": 2,
+        "elapsedMs": 629,
+        "fields": {
+          "price": 0,
+          "priceUnit": 0,
+          "area": 0,
+          "floor": 0,
+          "photo": 0,
+          "publishedAt": 0,
+          "district": 0
+        }
+      },
+      {
+        "query": "rent-warehouse",
+        "source": "cian",
+        "status": "needs_user_action",
+        "resultCount": 0,
+        "confirmed": 0,
+        "needsReview": 0,
+        "rejected": 0,
+        "pagesFetched": 0,
+        "incomplete": true,
+        "failureCode": "NEEDS_USER_ACTION",
+        "reason": "cian: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+        "requestCount": 3,
+        "elapsedMs": 808,
+        "fields": {
+          "price": 0,
+          "priceUnit": 0,
+          "area": 0,
+          "floor": 0,
+          "photo": 0,
+          "publishedAt": 0,
+          "district": 0
+        }
+      },
+      {
+        "query": "sale-flat",
+        "source": "cian",
+        "status": "needs_user_action",
+        "resultCount": 0,
+        "confirmed": 0,
+        "needsReview": 0,
+        "rejected": 0,
+        "pagesFetched": 0,
+        "incomplete": true,
+        "failureCode": "NEEDS_USER_ACTION",
+        "reason": "cian: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+        "requestCount": 4,
+        "elapsedMs": 671,
+        "fields": {
+          "price": 0,
+          "priceUnit": 0,
+          "area": 0,
+          "floor": 0,
+          "photo": 0,
+          "publishedAt": 0,
+          "district": 0
+        }
+      },
+      {
+        "query": "sale-flat",
+        "source": "mirkvartir",
+        "status": "partial",
+        "resultCount": 3,
+        "confirmed": 0,
+        "needsReview": 3,
+        "rejected": 0,
+        "pagesFetched": 3,
+        "incomplete": true,
+        "failureCode": "TIMEOUT",
+        "reason": "mirkvartir: TIMEOUT; mirkvartir: TIMEOUT; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+        "requestCount": 4,
+        "elapsedMs": 28354,
+        "fields": {
+          "price": 3,
+          "priceUnit": 0,
+          "area": 3,
+          "floor": 3,
+          "photo": 3,
+          "publishedAt": 0,
+          "district": 0
+        }
+      },
+      {
+        "query": "sale-flat",
+        "source": "onrealt",
+        "status": "partial",
+        "resultCount": 3,
+        "confirmed": 3,
+        "needsReview": 0,
+        "rejected": 0,
+        "pagesFetched": 3,
+        "incomplete": true,
+        "failureCode": "TIMEOUT",
+        "reason": "onrealt: TIMEOUT; onrealt: TIMEOUT; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+        "requestCount": 4,
+        "elapsedMs": 32306,
+        "fields": {
+          "price": 3,
+          "priceUnit": 3,
+          "area": 3,
+          "floor": 3,
+          "photo": 3,
+          "publishedAt": 0,
+          "district": 3
+        }
+      }
+    ],
+    "wireRequestCounts": {
+      "cian": 8,
+      "mirkvartir": 4,
+      "onrealt": 4
+    },
+    "cianResponseChecks": [
+      {
+        "status": 200,
+        "bytes": 2293,
+        "servicepipeCheck": true,
+        "ssr": false
+      },
+      {
+        "status": 200,
+        "bytes": 2282,
+        "servicepipeCheck": true,
+        "ssr": false
+      },
+      {
+        "status": 200,
+        "bytes": 2293,
+        "servicepipeCheck": true,
+        "ssr": false
+      },
+      {
+        "status": 200,
+        "bytes": 2249,
+        "servicepipeCheck": true,
+        "ssr": false
+      }
+    ]
+  },
+  "afterSchedulingOptimization": {
+    "mode": "LIVE",
+    "aiCalls": 0,
+    "browser": false,
+    "startedAt": "2026-11-08T16:59:21.731Z",
+    "finishedAt": "2026-11-08T16:59:46.931Z",
+    "depth": {
+      "maxPages": 1,
+      "limit": 5
+    },
+    "perJobTimeoutMs": 25000,
+    "probeBudgetPerSource": {
+      "cian": 12,
+      "mirkvartir": 24,
+      "onrealt": 24
+    },
+    "requestCounts": {
+      "mirkvartir": 6,
+      "onrealt": 6
+    },
+    "jobs": [
+      {
+        "query": "sale-flat",
+        "source": "mirkvartir",
+        "status": "success",
+        "resultCount": 5,
+        "confirmed": 0,
+        "needsReview": 5,
+        "rejected": 0,
+        "pagesFetched": 6,
+        "incomplete": true,
+        "failureCode": null,
+        "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+        "requestCount": 6,
+        "elapsedMs": 11434,
+        "fields": {
+          "price": 5,
+          "priceUnit": 0,
+          "area": 5,
+          "floor": 4,
+          "photo": 5,
+          "publishedAt": 0,
+          "district": 0
+        }
+      },
+      {
+        "query": "sale-flat",
+        "source": "onrealt",
+        "status": "partial",
+        "resultCount": 5,
+        "confirmed": 5,
+        "needsReview": 0,
+        "rejected": 0,
+        "pagesFetched": 5,
+        "incomplete": true,
+        "failureCode": "FETCH_FAILED",
+        "reason": "onrealt: FETCH_FAILED; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+        "requestCount": 6,
+        "elapsedMs": 23178,
+        "fields": {
+          "price": 5,
+          "priceUnit": 5,
+          "area": 5,
+          "floor": 5,
+          "photo": 5,
+          "publishedAt": 0,
+          "district": 5
+        }
+      }
+    ],
+    "wireRequestCounts": {
+      "mirkvartir": 6,
+      "onrealt": 6
+    },
+    "cianResponseChecks": []
   }
 }
