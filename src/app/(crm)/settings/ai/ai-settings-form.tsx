@@ -49,7 +49,7 @@ export function AiSettingsForm({
   data: Data;
   ceilings: Ceilings;
   timeZone: string;
-  mode?: "all" | "sources";
+  mode?: "all" | "sources" | "ai";
   browserConfigured?: boolean;
 }) {
   const router = useRouter();
@@ -100,7 +100,7 @@ export function AiSettingsForm({
   }
 
   const envNote = (key: string) =>
-    data.effective.restrictedByEnv.includes(key) ? <span> Ограничено ENV</span> : null;
+    data.effective.restrictedByEnv.includes(key) ? <span> Ограничено настройками сервера</span> : null;
 
   return (
     <form
@@ -144,6 +144,7 @@ export function AiSettingsForm({
         </button>
       )}
 
+      {mode !== "ai" && (
       <fieldset disabled={action.pending} className="stack">
         <legend>
           {mode === "sources" ? "Скрапер, браузерный режим и площадки поиска" : "Источники поиска и скрапер (без ИИ)"}
@@ -164,7 +165,7 @@ export function AiSettingsForm({
             {envNote(key)}
             <small>
               Запрошено в настройках: {form[key] ? "включено" : "выключено"} · Действует:{" "}
-              {effectiveModes[key] ? "включено" : "выключено"} · ENV:{" "}
+              {effectiveModes[key] ? "включено" : "выключено"} · Администратор:{" "}
               {ceilings[key] ? "разрешено" : "запрещено"}
               {key === "browserEnabled" && browserConfigured !== undefined
                 ? ` · Chromium: ${browserConfigured ? "сконфигурирован" : "по умолчанию"}`
@@ -213,7 +214,7 @@ export function AiSettingsForm({
                   />{" "}
                   {labelOf("externalSource", source)}{" "}
                   <small className="text-slate-500">
-                    ({sourceEffective ? "активна" : !ceilings.scraperEnabled ? "откл. ENV" : "отключена"})
+                    ({sourceEffective ? "активна" : !ceilings.scraperEnabled ? "отключена администратором" : "отключена"})
                   </small>
                 </label>
               );
@@ -225,8 +226,9 @@ export function AiSettingsForm({
           площадок. Площадки опрашиваются напрямую без расхода бюджета Яндекс AI.
         </p>
       </fieldset>
+      )}
 
-      {mode === "all" && (
+      {mode !== "sources" && (
         <fieldset disabled={action.pending} className="stack">
           <legend>Режимы, модели и бюджет Яндекс AI</legend>
           {(Object.keys(aiSwitches) as (keyof typeof aiSwitches)[]).map((key) => (
@@ -236,7 +238,7 @@ export function AiSettingsForm({
               {envNote(key)}
               <small>
                 Запрошено: {form[key] ? "включено" : "выключено"} · Действует:{" "}
-                {effectiveModes[key] ? "включено" : "выключено"} · ENV:{" "}
+                {effectiveModes[key] ? "включено" : "выключено"} · Администратор:{" "}
                 {ceilings[key] ? "разрешено" : "запрещено"}.
               </small>
             </label>
@@ -260,7 +262,7 @@ export function AiSettingsForm({
             </select>
             {envNote("searchContextSize")}
             <small>
-              Действует: {contextLabel(data.effective.values.searchContextSize)}. ENV-потолок:{" "}
+              Действует: {contextLabel(data.effective.values.searchContextSize)}. Максимум администратора:{" "}
               {contextLabel(ceilings.searchContextSize)}.
             </small>
           </label>
@@ -277,7 +279,7 @@ export function AiSettingsForm({
               />
               {envNote(key)}
               <small>
-                Сохранено: {data.setting[key]}. Действует: {data.effective.values[key]}. ENV-потолок: {ceilings[key]}.
+                Сохранено: {data.setting[key]}. Действует: {data.effective.values[key]}. Максимум администратора: {ceilings[key]}.
               </small>
             </label>
           ))}
@@ -292,7 +294,7 @@ export function AiSettingsForm({
             />
             {envNote("monthlyBudgetRub")}
             <small>
-              Действует: {data.effective.values.monthlyBudgetRub} ₽. ENV-потолок: {ceilings.monthlyBudgetRub} ₽.
+              Действует: {data.effective.values.monthlyBudgetRub} ₽. Максимум администратора: {ceilings.monthlyBudgetRub} ₽.
             </small>
           </label>
           <p>
@@ -350,9 +352,9 @@ export function AiSettingsForm({
             </div>
           )}
           <p>
-            Ноль запрещает новые вызовы. Изменения действуют после сохранения. Значение выше ENV не увеличивает лимит;
-            ENV меняет администратор установки. Суточные ENV-потолки выведены из часового лимита × 8; общий предел на
-            задание — 10 вызовов. Для веб-поиска дополнительно действуют отдельные ENV-лимиты.
+            Ноль запрещает новые вызовы. Изменения действуют после сохранения. Значение выше максимума не увеличивает лимит;
+            Пределы задаются администратором установки. Суточные максимумы выведены из часового лимита × 8; общий предел на
+            задание — 10 вызовов. Для веб-поиска дополнительно действуют отдельные ограничения администратора.
           </p>
         </fieldset>
       )}

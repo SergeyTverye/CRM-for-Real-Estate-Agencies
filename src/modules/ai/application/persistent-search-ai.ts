@@ -6,14 +6,20 @@ import { db } from "@/shared/db/client";
 import { lockAi, singleton } from "../infrastructure/prisma-repositories";
 import { aiCredentialsService } from "./credentials-service";
 import { ConflictError } from "@/shared/errors";
+import { bootstrapAiTariffs, missingTariffMessage, searchTariffsReady } from "./tariff-bootstrap";
 
 /** Server composition entrypoint; never falls back to process-local accounting. */
 export async function createPersistentSearchAi() {
   const config = getConfig();
+  // Also covers an initialized desktop profile composed outside the native launcher.
+  // PostgreSQL retains its explicit prisma/seed.ts lifecycle.
+  if (config.CRM_DEPLOYMENT_MODE === "desktop" && !config.isReadOnlyInstance) await bootstrapAiTariffs();
   const row = await db.$transaction(async (tx) => { await lockAi(tx); return singleton(tx); });
   const { values } = effectiveAiSettings(row, config);
   const { credentials } = await aiCredentialsService(config).resolve();
   if (!credentials) throw new ConflictError("AI_CREDENTIALS_MISSING", "Требуется подключение Яндекс AI", { settingsUrl: "/settings/ai" });
+  if (!await searchTariffsReady(values.model, values.webModel))
+    throw new ConflictError("AI_TARIFF_UNAVAILABLE", missingTariffMessage, { settingsUrl: "/settings/ai" });
   return createSearchAi({ ...config, YANDEX_CLOUD_MODEL: values.model, YANDEX_CLOUD_WEB_MODEL: values.webModel,
     YANDEX_CLOUD_API_KEY: credentials.apiKey, YANDEX_CLOUD_FOLDER: credentials.folder,
     YANDEX_WEB_SEARCH_CONTEXT_SIZE: values.searchContextSize },

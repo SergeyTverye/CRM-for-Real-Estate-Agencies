@@ -58,7 +58,7 @@ export default async function SourceSettingsPage() {
               {describeAvailabilityReason(availability.scraper.reason, "scraper")}
             </Badge>{" "}
             <small className="text-slate-600">
-              (в настройках: {data.setting.scraperEnabled ? "вкл." : "выкл."}, сервер ENV:{" "}
+              (в настройках: {data.setting.scraperEnabled ? "вкл." : "выкл."}, настройки сервера:{" "}
               {config.SCRAPER_ENABLED ? "разрешён" : "запрещён"})
             </small>
           </dd>
@@ -69,7 +69,7 @@ export default async function SourceSettingsPage() {
             </Badge>{" "}
             <small className="text-slate-600">
               (исполняемый файл Chromium:{" "}
-              {availability.browser.configured ? "явно задан в окружении" : "автоопределение / встроенный"})
+              {availability.browser.configured ? "указан администратором" : "автоопределение / встроенный"})
             </small>
           </dd>
           <dt>Активные площадки</dt>

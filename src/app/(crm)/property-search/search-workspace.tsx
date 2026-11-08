@@ -112,6 +112,7 @@ export function SearchWorkspace({
 }) {
   const [filters, setFilters] = useState(initialFilters);
   const [advancedOpen, setAdvancedOpen] = useState(defaultAdvancedOpen);
+  const [primaryOpen, setPrimaryOpen] = useState(true);
   const [availability, setAvailability] = useState<SearchRuntimeAvailability | undefined>(initialAvailability);
   const [needId, setNeedId] = useState(initialNeedId ?? "");
   const [client, setClient] = useState<ClientChoice | null>(initialNeed?.client ?? null);
@@ -186,6 +187,13 @@ export function SearchWorkspace({
   const enabledSourcesCount = availability
     ? availability.sources.filter((s) => s.enabled).length
     : filters.sources.length;
+  const primarySummary = `${filters.city?.trim() ? filters.city.trim() : "Город не задан"} · ${
+    filters.operation === "sale" ? "Продажа" : "Аренда"
+  } · ${
+    filters.purposes.length > 0
+      ? filters.purposes.map((p) => PURPOSE_LABELS[p] ?? p).join(", ")
+      : "Назначения по умолчанию"
+  } · площадок: ${filters.sources.length}${activeAdvancedCount > 0 ? ` · доп. условий: ${activeAdvancedCount}` : ""}`;
 
   async function chooseProfile(id: string) {
     const profile = saved.find((item) => item.id === id);
@@ -262,6 +270,7 @@ export function SearchWorkspace({
       setDirty(false);
       setFeedback("Поиск поставлен в очередь");
       setTab("confirmed");
+      setPrimaryOpen(false);
       const url = new URL(window.location.href);
       url.searchParams.set("runId", result.id);
       window.history.replaceState(null, "", url);
@@ -406,7 +415,8 @@ export function SearchWorkspace({
             {aiPresentation.badgeText}
           </Badge>
           {(aiPresentation.reason === "credentials_missing" ||
-            aiPresentation.reason === "credential_store_unavailable") && (
+            aiPresentation.reason === "credential_store_unavailable" ||
+            aiPresentation.reason === "tariff_unavailable") && (
             <span className="text-xs text-amber-900">
               {aiPresentation.detailText}{" "}
               <Link className="link font-medium" href={aiPresentation.settingsUrl}>
@@ -422,7 +432,11 @@ export function SearchWorkspace({
                 Настроить источники поиска
               </Link>
               <Link className="btn btn-secondary" href={aiPresentation.settingsUrl}>
-                {aiPresentation.reason === "credentials_missing" ? "Подключить Яндекс AI" : "Настройки Яндекс AI"}
+                {aiPresentation.reason === "credentials_missing"
+                  ? "Подключить Яндекс AI"
+                  : aiPresentation.reason === "tariff_unavailable"
+                    ? "Настроить тарифы ИИ"
+                    : "Настройки Яндекс AI"}
               </Link>
             </>
           ) : (
@@ -435,8 +449,17 @@ export function SearchWorkspace({
 
       <Card title="Условия поиска">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 text-sm text-slate-600">
-            <span>Основные параметры открыты по умолчанию</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              aria-expanded={primaryOpen}
+              aria-controls="search-primary-filters-panel"
+              onClick={() => setPrimaryOpen((open) => !open)}
+            >
+              {primaryOpen ? "Свернуть фильтры" : "Развернуть фильтры"}
+            </button>
+            <span className="text-sm text-slate-600">Основные условия и запуск всегда наверху</span>
             <HelpTooltip label="Справка: Условия поиска" text={SEARCH_HELP.primaryFilters} />
           </div>
           <label className="flex flex-wrap items-center gap-2 text-sm">
@@ -456,6 +479,38 @@ export function SearchWorkspace({
             </select>
           </label>
         </div>
+
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded border border-slate-200 bg-slate-50/60 p-2">
+          <button
+            className="btn btn-primary"
+            disabled={action.pending || searchBusy}
+            onClick={() => (effectiveAiReady ? void confirmPaid("search") : void search())}
+          >
+            Искать
+          </button>
+          {run && effectiveManualWeb && !run.webSearchUsed && (
+            <button className="btn btn-secondary" disabled={action.pending} onClick={() => void confirmPaid("web")}>
+              Веб-поиск
+            </button>
+          )}
+          {searchBusy && (
+            <span role="status" className="text-xs text-slate-600">
+              Поиск выполняется…
+            </span>
+          )}
+        </div>
+
+        {!primaryOpen && (
+          <p role="status" aria-live="polite" className="mb-3 rounded border bg-white p-2 text-sm text-slate-700">
+            {primarySummary}
+          </p>
+        )}
+
+        <div
+          id="search-primary-filters-panel"
+          hidden={!primaryOpen}
+          className={primaryOpen ? "space-y-0" : "hidden"}
+        >
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <label>
@@ -787,7 +842,8 @@ export function SearchWorkspace({
               enabled={effectiveAiReady}
               statusMessage={
                 aiPresentation.reason === "credentials_missing" ||
-                aiPresentation.reason === "credential_store_unavailable"
+                aiPresentation.reason === "credential_store_unavailable" ||
+                aiPresentation.reason === "tariff_unavailable"
                   ? aiPresentation.badgeText
                   : null
               }
@@ -817,58 +873,47 @@ export function SearchWorkspace({
           </p>
         )}
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <SearchPicker<ClientChoice>
-            label="Клиент (необязательно)"
-            url="/api/v1/clients/pick"
-            value={client}
-            render={(c) => c.displayName}
-            onChange={(value) => {
-              setClient(value);
-              setNeed(null);
-              setNeedId("");
-              setSavedId(undefined);
-              setDirty(true);
-            }}
-          />
-          <SearchPicker<NeedChoice>
-            label="Потребность (необязательно)"
-            url={`/api/v1/property-search/pick-needs${client ? `?clientId=${client.id}` : ""}`}
-            value={need}
-            render={(n) => `${n.client?.displayName ?? "Клиент недоступен"} · ${n.label}`}
-            onChange={(value) => void selectNeed(value)}
-          />
-          {needId && (
-            <Link className="link" href={`/needs/${needId}`}>
-              Открыть потребность
-            </Link>
-          )}
-          {demoMode && (
-            <label>
-              Записанный сценарий
-              <select className="input ml-2" value={scenario} onChange={(e) => setScenario(e.target.value)}>
-                <option value="success">Успех</option>
-                <option value="partial">Частичный отказ</option>
-                <option value="failure">Полный отказ → веб-резерв</option>
-                <option value="empty">Исправный пустой ответ</option>
-              </select>
-            </label>
-          )}
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            className="btn btn-primary"
-            disabled={action.pending || searchBusy}
-            onClick={() => (effectiveAiReady ? void confirmPaid("search") : void search())}
-          >
-            Искать
-          </button>
-          {run && effectiveManualWeb && !run.webSearchUsed && (
-            <button className="btn btn-secondary" disabled={action.pending} onClick={() => void confirmPaid("web")}>
-              Веб-поиск
-            </button>
-          )}
+        <details className="mt-4 rounded border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer text-sm font-medium">Клиент и потребность (необязательно)</summary>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <SearchPicker<ClientChoice>
+              label="Клиент (необязательно)"
+              url="/api/v1/clients/pick"
+              value={client}
+              render={(c) => c.displayName}
+              onChange={(value) => {
+                setClient(value);
+                setNeed(null);
+                setNeedId("");
+                setSavedId(undefined);
+                setDirty(true);
+              }}
+            />
+            <SearchPicker<NeedChoice>
+              label="Потребность (необязательно)"
+              url={`/api/v1/property-search/pick-needs${client ? `?clientId=${client.id}` : ""}`}
+              value={need}
+              render={(n) => `${n.client?.displayName ?? "Клиент недоступен"} · ${n.label}`}
+              onChange={(value) => void selectNeed(value)}
+            />
+            {needId && (
+              <Link className="link" href={`/needs/${needId}`}>
+                Открыть потребность
+              </Link>
+            )}
+            {demoMode && (
+              <label>
+                Записанный сценарий
+                <select className="input ml-2" value={scenario} onChange={(e) => setScenario(e.target.value)}>
+                  <option value="success">Успех</option>
+                  <option value="partial">Частичный отказ</option>
+                  <option value="failure">Полный отказ → веб-резерв</option>
+                  <option value="empty">Исправный пустой ответ</option>
+                </select>
+              </label>
+            )}
+          </div>
+        </details>
         </div>
       </Card>
 
@@ -1075,7 +1120,8 @@ export function SearchWorkspace({
           aiEnabled={effectiveAiReady}
           aiStatusMessage={
             aiPresentation.reason === "credentials_missing" ||
-            aiPresentation.reason === "credential_store_unavailable"
+            aiPresentation.reason === "credential_store_unavailable" ||
+            aiPresentation.reason === "tariff_unavailable"
               ? aiPresentation.badgeText
               : null
           }

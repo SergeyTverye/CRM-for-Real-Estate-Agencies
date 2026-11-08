@@ -10,6 +10,7 @@ import {
   PURPOSE_LABELS,
   countActiveAdvancedFilters,
   describeAiAvailability,
+  describeAvailabilityReason,
   formatPurposeLabel,
   resetAdvancedSearchFilters,
   summarizeActiveAdvancedFilters,
@@ -211,5 +212,53 @@ describe("Property Search UI/UX presentation and availability helpers", () => {
     expect(visibleNav(true)).toContain("/settings/ai");
     expect(visibleNav(false)).not.toContain("/settings/sources");
     expect(visibleNav(false)).not.toContain("/settings/ai");
+  });
+
+  it("presents tariff_unavailable distinctly with manual search and settings link", () => {
+    const tariffAvailability: SearchRuntimeAvailability = {
+      scraper: { enabled: true, reason: "ready" },
+      browser: { enabled: true, configured: true },
+      sources: [{ source: "cian", enabled: true, reason: "ready" }],
+      ai: {
+        enabled: true,
+        configured: true,
+        available: false,
+        reason: "tariff_unavailable",
+        message:
+          "Для выбранной модели ИИ нет действующего полного тарифа. Руководителю: добавьте тариф или выберите модель с действующим тарифом в настройках ИИ. Ручной поиск доступен.",
+        settingsUrl: "/settings/ai",
+      },
+      manualWeb: false,
+      autoFallback: false,
+    };
+    const tariff = describeAiAvailability(tariffAvailability, true);
+    expect(tariff.ready).toBe(false);
+    expect(tariff.reason).toBe("tariff_unavailable");
+    expect(tariff.tone).toBe("yellow");
+    expect(tariff.badgeText).toBe("Нет действующего тарифа ИИ");
+    expect(tariff.badgeText).not.toContain("ИИ отключён");
+    expect(tariff.badgeText).not.toBe("Требуется подключение Яндекс AI");
+    expect(tariff.detailText).toContain("тарифа");
+    expect(tariff.detailText).toContain("ручные фильтры");
+    expect(tariff.detailText).toContain("без подтверждения оплаты");
+    expect(tariff.actionLabel).toBe("Настроить тарифы ИИ");
+    expect(tariff.settingsUrl).toBe("/settings/ai");
+    expect(tariff.enabledInSettings).toBe(true);
+
+    expect(describeAvailabilityReason("tariff_unavailable", "ai")).toBe("Нет действующего тарифа ИИ");
+    expect(describeAvailabilityReason("credentials_missing", "ai")).not.toBe(
+      describeAvailabilityReason("tariff_unavailable", "ai"),
+    );
+    expect(describeAvailabilityReason("disabled_by_settings", "ai")).toBe("Отключён в настройках агентства");
+
+    const disabled = describeAiAvailability(
+      {
+        ...tariffAvailability,
+        ai: { ...tariffAvailability.ai, reason: "disabled_by_settings", available: false },
+      },
+      true,
+    );
+    expect(disabled.badgeText).toContain("ИИ отключён");
+    expect(disabled.tone).toBe("slate");
   });
 });

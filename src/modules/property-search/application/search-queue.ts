@@ -80,6 +80,19 @@ export async function recoverSearchQueue(now = new Date()) {
   });
 }
 type SourceDetails = Omit<SourceRun, "status"> & { status: string; adapterStatus?: string; failureCode?: string; pagesFetched?: number; listingsFetched?: number; incomplete?: boolean; retryAfterAt?: string; actionUrl?: string; dateDetails?: DateDetailProgress };
+type FailureStage = "SETTINGS" | "FETCH" | "NORMALIZE" | "PERSIST" | "FINALIZE";
+/** Finite public diagnostics only: never serialize an exception or its metadata. */
+function workerFailureCode(error: unknown) {
+  if (error instanceof Prisma.PrismaClientValidationError) return "DB_INPUT_INVALID";
+  const code = error && typeof error === "object" && "code" in error ? error.code : null;
+  switch (code) {
+    case "P2000": case "P2002": case "P2003": case "P2004": return "DB_CONSTRAINT";
+    case "P2028": return "DB_TRANSACTION";
+    case "P2024": return "DB_TIMEOUT";
+    case "P2025": return "DB_RECORD_MISSING";
+    default: return "WORKER_FAILURE";
+  }
+}
 export async function trustedListing(listing: NormalizedListing) {
   const copy = { ...listing, seller: { ...listing.seller } };
   delete copy.seller.ownerVerification;
@@ -112,6 +125,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
   if (deadline <= Date.now()) stop();
   const deadlineTimer = setTimeout(stop, Math.max(1, deadline - Date.now()));
   let checking = false;
+  let failureStage: FailureStage = "SETTINGS";
   const poll = setInterval(() => {
     if (checking) return; checking = true;
     void db.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId, cancelRequested: false }, data: { heartbeatAt: new Date() } }).then(r => { if (!r.count) stop(); }).catch(stop).finally(() => { checking = false; });
@@ -128,6 +142,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
     const ai = settings.aiEnabled && params.confirmedPaid ? await getSearchAi() : null;
     for (const source of filters.sources) {
       if (controller.signal.aborted) break;
+      failureStage = "FETCH";
       const claimed = await transaction(async tx => {
         const lease = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId, cancelRequested: false }, data: { heartbeatAt: new Date() } });
         return lease.count ? tx.searchRunSource.updateMany({ where: { runId: run.id, source, status: "queued" }, data: { status: "running" } }) : { count: 0 };
@@ -150,6 +165,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
       }
       catch { result = { listings: [], sources: [{ source, status: "error", resultCount: 0, reason: "Источник недоступен; прежние данные сохранены" }] }; }
       const items: SearchResult["listings"] = [];
+      failureStage = "NORMALIZE";
       for (const item of result.listings) {
         if (item.listing.source !== source) continue;
         const listing = await trustedListing(item.listing);
@@ -173,6 +189,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
       if (detail?.dateDetails) dateDetails[source] = detail.dateDetails;
       const adapterStatus = detail?.adapterStatus ?? detail?.status ?? "error";
       const status = detail?.actionUrl || detail?.failureCode === "NEEDS_USER_ACTION" ? "needs_user_action" : adapterStatus === "rate_limited" ? "blocked" : adapterStatus === "parse_failed" ? "error" : adapterStatus === "cancelled" ? "cancelled" : adapterStatus;
+      failureStage = "PERSIST";
       await transaction(async tx => {
         const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { heartbeatAt: new Date(), progress: jsonValue({ phase: "fetching", source, dateDetails }) } });
         if (!fence.count) return;
@@ -182,6 +199,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
         if (detail?.incomplete || status !== "success") await tx.searchRun.update({ where: { id: run.id }, data: { incompleteReason: "Выборка неполная: ограничения глубины или доступности площадок" } });
       });
     }
+    failureStage = "FINALIZE";
     await transaction(async tx => {
       const fenced = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { heartbeatAt: new Date() } });
       if (!fenced.count) return;
@@ -197,9 +215,9 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
       if (run.savedSearchId && (status === "completed" || await tx.searchRunResult.count({ where: { runId: run.id } }) > 0)) await tx.savedSearch.update({ where: { id: run.savedSearchId }, data: { lastSuccessfulRunId: run.id, lastRunAt: run.startedAt } });
       await searchAudit(tx, actor, "finished", "SearchRun", run.id, { status });
     });
-  } catch {
+  } catch (error) {
     await transaction(async tx => {
-      const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { status: "partial", finishedAt: new Date(), lockedBy: null, progress: jsonValue({ phase: "partial", dateDetails }), incompleteReason: "Ошибка выполнения; сохранённые результаты доступны" } });
+      const fence = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId }, data: { status: "partial", finishedAt: new Date(), lockedBy: null, progress: jsonValue({ phase: "partial", dateDetails, failureStage, failureCode: workerFailureCode(error) }), incompleteReason: "Ошибка выполнения; сохранённые результаты доступны" } });
       if (fence.count) await tx.searchRunSource.updateMany({ where: { runId: run.id, status: { in: ["running", "queued"] } }, data: { status: "error", statusReasonRu: "Выполнение прервано; сохранённые данные доступны" } });
     });
   } finally {

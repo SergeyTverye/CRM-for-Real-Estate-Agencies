@@ -36,6 +36,7 @@
       },
       "allowDowngrades": false,
       "nsis": {
+        "compression": "zlib",
         "installMode": "currentUser",
         "languages": [
           "Russian"

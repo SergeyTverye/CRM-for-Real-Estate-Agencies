@@ -62,7 +62,10 @@ export async function persistListing(tx: Tx, runId: string, listing: NormalizedL
     pricePerM2Rub: perM2?.amount ?? null, pricePerM2Unit: perM2?.unit ?? null };
   const data = { ...observations, fetchedAt: new Date(listing.fetchedAt), source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId, url: listing.url, sourceMethod,
     operation: listing.operation ?? "sale", priceUnit: listing.priceUnit ? priceUnits[listing.priceUnit] : "total", priceRub: listing.price,
-    areaM2: listing.area !== null && listing.area > 0 ? listing.area : null, floorRaw: listing.floor.raw, floorNumber: listing.floor.number, purposes: listing.purpose ? [listing.purpose] : [],
+    // Normalized scraper areas are JS numbers, unlike money strings. Convert at
+    // this boundary to the schema's decimal(12,2), not in SQLite's exact-money
+    // adapter (which deliberately rejects fractional Number inputs).
+    areaM2: listing.area !== null && Number.isFinite(listing.area) && listing.area > 0 ? new Prisma.Decimal(String(listing.area)).toFixed(2) : null, floorRaw: listing.floor.raw, floorNumber: listing.floor.number, purposes: listing.purpose ? [listing.purpose] : [],
     address: listing.address, district: listing.district, city: listing.city ?? "", sellerType: listing.seller.type,
     description: listing.description, images: jsonValue(listing.images), lastSeenAt: new Date(listing.fetchedAt) };
   const row = existing ? await tx.externalListing.update({ where: { id: existing.id }, data: { ...data, lastPrice: existing.priceRub } }) : await tx.externalListing.create({ data: { ...data, firstSeenAt: new Date(listing.fetchedAt) } });
@@ -192,8 +195,9 @@ async function performWebSearch(actor: Actor, runId: string, ai: SearchAiPort, a
 export async function manualWebSearch(actor: Actor, runId: string) {
   await accessibleRun(actor, runId);
   const settings = await searchSettings();
-  const ai = await getSearchAi();
+  const ai = settings.aiEnabled ? await getSearchAi() : null;
   if (!settings.aiEnabled || !settings.manualAllowed || !ai) throw new ConflictError("WEB_SEARCH_DISABLED", "Ручной веб-поиск не разрешён или ИИ недоступен");
+  await ai.assertConfigured?.();
   await performWebSearch(actor, runId, ai, false);
   return getSearchRun(actor, runId);
 }

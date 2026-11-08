@@ -30,9 +30,9 @@ export async function getSearchAi(): Promise<SearchAiPort | null> {
     // and the paid port must refer to the same credential snapshot.
     return await createPersistentSearchAi();
   } catch (error) {
-    if (!(error instanceof ConflictError) || error.code !== "AI_CREDENTIALS_MISSING") throw error;
+    if (!(error instanceof ConflictError) || !["AI_CREDENTIALS_MISSING", "AI_TARIFF_UNAVAILABLE"].includes(error.code)) throw error;
     // Explicit AI actions retain their safe, actionable pre-persistence error.
-    const unavailable = async (): Promise<never> => { throw new ConflictError("AI_CREDENTIALS_MISSING", "Требуется подключение Яндекс AI", { settingsUrl: "/settings/ai" }); };
+    const unavailable = async (): Promise<never> => { throw error; };
     return { configured: false, assertConfigured: unavailable, parseSearchQuery: unavailable, analyzeDescriptions: unavailable, webSearch: unavailable,
       checkWebSearchAvailability: async () => ({ budgetAvailable: false, limitAvailable: false }) };
   }

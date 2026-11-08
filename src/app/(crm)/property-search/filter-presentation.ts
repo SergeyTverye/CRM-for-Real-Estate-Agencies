@@ -6,7 +6,8 @@ export type AvailabilityReason =
   | "disabled_by_settings"
   | "disabled_by_server"
   | "credentials_missing"
-  | "credential_store_unavailable";
+  | "credential_store_unavailable"
+  | "tariff_unavailable";
 
 export interface SearchRuntimeAvailability {
   scraper: { enabled: boolean; reason: AvailabilityReason };
@@ -230,6 +231,8 @@ export function describeAvailabilityReason(reason: AvailabilityReason, subject: 
       return "Требуется подключение Яндекс AI";
     case "credential_store_unavailable":
       return "Защищённое хранилище Яндекс AI недоступно";
+    case "tariff_unavailable":
+      return "Нет действующего тарифа ИИ";
   }
 }
 
@@ -303,6 +306,22 @@ export function describeAiAvailability(
         settingsUrl: ai.settingsUrl || "/settings/ai",
         tone: "yellow",
       };
+    case "tariff_unavailable": {
+      const baseMessage =
+        ai.message ??
+        "Для выбранной модели ИИ нет действующего полного тарифа. Руководителю: добавьте тариф или выберите модель с действующим тарифом в настройках ИИ.";
+      return {
+        ready: false,
+        enabledInSettings: true,
+        configured: ai.configured,
+        reason: "tariff_unavailable",
+        badgeText: "Нет действующего тарифа ИИ",
+        detailText: `${baseMessage} Поиск по площадкам и ручные фильтры работают штатно без подтверждения оплаты.`,
+        actionLabel: "Настроить тарифы ИИ",
+        settingsUrl: ai.settingsUrl || "/settings/ai",
+        tone: "yellow",
+      };
+    }
     case "disabled_by_server":
       return {
         ready: false,

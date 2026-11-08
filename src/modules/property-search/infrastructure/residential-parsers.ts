@@ -91,6 +91,26 @@ function correctCian(item: RealEstateScraper.Listing, offer: RecordValue): RealE
 
 /** Adapter-local attachment. No vendor mutation, requested category is never listing evidence. */
 export function attachResidentialParsers(client: RealEstateScraper): void {
+  const mir = client.parsers.mirkvartir;
+  const mirBuild = mir.buildSearchUrl.bind(mir);
+  const novosibirskCity = (value: unknown): boolean =>
+    typeof value === "string" && value.trim().toLocaleLowerCase("ru") === "новосибирск";
+  const regionSegment = encodeURIComponent("Новосибирская+область");
+  mir.buildSearchUrl = (query: RealEstateScraper.Query = {}) => {
+    if (!residential(query)) return Reflect.apply(mirBuild, mir, [query]);
+    const nativeUrl = (query.sourceOptions?.mirkvartir as { url?: unknown } | undefined)?.url;
+    if (typeof nativeUrl === "string" && nativeUrl.trim()) return Reflect.apply(mirBuild, mir, [query]);
+    if (!novosibirskCity((query as { city?: unknown }).city)) return Reflect.apply(mirBuild, mir, [query]);
+    const built = Reflect.apply(mirBuild, mir, [query]) as string;
+    const url = new URL(built);
+    const segments = url.pathname.split("/").filter(Boolean);
+    if (!segments.length) return built;
+    let first = "";
+    try { first = decodeURIComponent(segments[0]!).toLocaleLowerCase("ru"); } catch { first = ""; }
+    if (first === "новосибирская+область" || first === "новосибирская область") return url.toString();
+    url.pathname = `/${regionSegment}/${segments.join("/")}${url.pathname.endsWith("/") ? "/" : ""}`;
+    return url.toString().replace("/Новосибирская+область/", `/${regionSegment}/`);
+  };
   const cian = client.parsers.cian, parse = cian.parsePage.bind(cian);
   cian.parsePage = (payload, url, query) => {
     // Keep the original parser's validation, errors, pagination and commercial path.

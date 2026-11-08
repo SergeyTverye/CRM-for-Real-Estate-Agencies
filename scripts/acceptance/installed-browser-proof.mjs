@@ -41,7 +41,7 @@ export function loopback(value) {
 }
 function options(args) {
   const result = {};
-  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'focus-import', 'focus-search', 'native-backup-proof', 'cloud-proof', 'cloud-failure-proof', 'supervisor-only', 'block-external-browser-network']);
+  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'focus-import', 'focus-search', 'search-ai-live-proof', 'search-worker-live-proof', 'native-backup-proof', 'cloud-proof', 'cloud-failure-proof', 'supervisor-only', 'block-external-browser-network']);
   const values = new Set(['launcher', 'installer', 'launcher-sha256', 'installer-sha256', 'source-commit', 'evidence-root', 'chromium', 'observe-seconds']);
   for (let i = 0; i < args.length; i++) {
     const key = args[i].replace(/^--/, '');
@@ -57,6 +57,8 @@ function options(args) {
   if (result['focus-import'] && (!result['supervisor-only'] || !result['block-external-browser-network'])) fail('FOCUS_IMPORT_REQUIRES_SUPERVISOR_AND_BROWSER_ISOLATION');
   if (result['focus-search'] && (result['focus-business'] || result['focus-backup'] || result['focus-import'])) fail('FOCUS_MODE_CONFLICT');
   if (result['focus-search'] && (!result['supervisor-only'] || !result['block-external-browser-network'])) fail('FOCUS_SEARCH_REQUIRES_SUPERVISOR_AND_BROWSER_ISOLATION');
+  if (result['search-ai-live-proof'] && !result['focus-search']) fail('SEARCH_AI_LIVE_REQUIRES_FRESH_SEARCH_PROOF');
+  if (result['search-worker-live-proof'] && !result['focus-search']) fail('SEARCH_WORKER_LIVE_REQUIRES_FRESH_SEARCH_PROOF');
   if (result['supervisor-only'] && result['native-backup-proof']) fail('SUPERVISOR_ONLY_CONFLICTS_NATIVE_BACKUP_PROOF');
   if (result['block-external-browser-network'] && !result['supervisor-only']) fail('BROWSER_NETWORK_ISOLATION_REQUIRES_SUPERVISOR_ONLY');
   if (result['block-external-browser-network'] && result['cloud-proof']) fail('BROWSER_NETWORK_ISOLATION_CONFLICTS_CLOUD_PROOF');
@@ -170,6 +172,8 @@ async function main() {
     businessCycle: focusBackup || focusImport || focusSearch ? { status: 'NOTRUN' } : undefined,
     importCycle: focusImport ? { status: 'NOTRUN' } : undefined,
     searchCycle: focusSearch ? { status: 'NOTRUN' } : undefined,
+    searchAiLive: { status: 'NOTRUN' },
+    searchWorkerLive: { status: 'NOTRUN' },
     nativeBackupProof: { status: 'NOTRUN' }, cloudProof: { status: 'NOTRUN' },
     browserIsolation: blockExternalBrowserNetwork
       ? { mode: 'BROWSER_NETWORK_ISOLATION', externalHttpHttpsBlocked: 0,
@@ -484,7 +488,17 @@ async function main() {
       }
       networkFailed = networkFailed || true; noteNetwork(aborted ? 'ABORTED' : 'FAILED', request);
     });
-    page.on('response', r => { if (r.status() >= 400) { networkFailed = networkFailed || true; noteNetwork('HTTP', r.request(), r.status()); } });
+    page.on('response', r => {
+      if (r.status() < 400) return;
+      const url = new URL(r.url());
+      const boundedAiRejection = o['search-ai-live-proof'] && stage === 'INSTALLED_SINGLE_AI_LIVE' &&
+        r.status() === 409 && r.request().method() === 'POST' && url.origin === base &&
+        url.pathname === '/api/v1/property-search/parse';
+      // Optional provider rejection remains an explicit PARTIAL probe result.
+      // Other failures still block the following persistence check.
+      if (!boundedAiRejection) networkFailed = true;
+      noteNetwork('HTTP', r.request(), r.status());
+    });
     await check('FIRST_SETUP_FORM', async () => {
       await goto('/setup'); await visible(page.getByRole('heading', { name: 'Первый запуск CRM', exact: true }));
       await hydrated(); await visible(page.getByLabel('Начальные данные'));
@@ -566,6 +580,24 @@ async function main() {
         result.searchCycle = await runInstalledSearchCycle({ page, base, directory });
         await healthy();
         checks.push({ code: stage, status: result.searchCycle?.status === 'PASS' ? 'PASS' : (result.searchCycle?.status === 'PARTIAL' ? 'PARTIAL' : 'FAIL') });
+        if (o['search-worker-live-proof'] && result.searchCycle?.status === 'PASS') {
+          stage = 'INSTALLED_SEARCH_WORKER_LIVE';
+          result.searchWorkerLive = { status: 'RUNNING' };
+          const { runInstalledSearchWorkerLive } = await import('./installed-search-worker-live.mjs');
+          result.searchWorkerLive = await runInstalledSearchWorkerLive({ page, base });
+          checks.push({ code: stage, status: result.searchWorkerLive.status === 'PASS' ? 'PASS' : 'PARTIAL' });
+        }
+        if (o['search-ai-live-proof'] && result.searchCycle?.status === 'PASS') {
+          stage = 'INSTALLED_SINGLE_AI_LIVE';
+          result.searchAiLive = { status: 'RUNNING' };
+          const { runInstalledSearchAiLive } = await import('./installed-search-ai-live.mjs');
+          result.searchAiLive = await runInstalledSearchAiLive({ page, base, loadCredentials: async () => {
+            const { parse } = await import('dotenv');
+            const values = parse(await fs.readFile(path.join(workspace, '.env')));
+            return { apiKey: values.YANDEX_CLOUD_API_KEY, folder: values.YANDEX_CLOUD_FOLDER };
+          } });
+          checks.push({ code: stage, status: result.searchAiLive.status === 'PASS' ? 'PASS' : 'PARTIAL' });
+        }
       } finally { helperActive = false; }
     }
     if (o['native-backup-proof'] || o['cloud-proof']) {
@@ -626,7 +658,7 @@ async function main() {
     result.status = aggregateTerminalStatus(checks.map((c) => c.status));
   } catch (e) {
     result.status = 'FAIL';
-    for (const key of ['importCycle', 'nativeBackupProof', 'cloudProof', 'searchCycle']) if (result[key]?.status === 'RUNNING') result[key] = { status: 'FAIL', error: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
+    for (const key of ['importCycle', 'nativeBackupProof', 'cloudProof', 'searchCycle', 'searchAiLive', 'searchWorkerLive']) if (result[key]?.status === 'RUNNING') result[key] = { status: 'FAIL', error: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
     result.error = { stage, code: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
     result.networkDiagnostics = networkDiagnostics;
     checks.push({ code: stage, status: 'FAIL' });

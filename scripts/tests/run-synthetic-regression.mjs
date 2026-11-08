@@ -10,7 +10,11 @@ process.chdir(repo);
 const chrome = process.argv[2] ?? process.env.REGRESSION_CHROME_PATH;
 if (!chrome) throw Error('EXPLICIT_REAL_CHROME_REQUIRED');
 if (!existsSync(chrome)) throw Error('REAL_CHROME_REQUIRED');
-const selectedFiles = process.argv.slice(3);
+const runnerArgs = process.argv.slice(3);
+const backendFlags = runnerArgs.filter(arg => arg.startsWith('--backend='));
+if (backendFlags.length > 1 || backendFlags.some(arg => !['--backend=pg', '--backend=sqlite'].includes(arg))) throw Error('INVALID_BACKEND_SELECTION');
+const backends = backendFlags.length ? [backendFlags[0].slice('--backend='.length)] : ['pg', 'sqlite'];
+const selectedFiles = runnerArgs.filter(arg => !arg.startsWith('--backend='));
 if (selectedFiles.some(file => !/^tests\/(?:integration|authorization|sqlite)\/[\w./-]+\.test\.ts$/.test(file) || file.split('/').includes('..') || !existsSync(file))) throw Error('INVALID_TEST_SELECTION');
 const id = randomUUID();
 const evidence = resolve('data/coordination/dual-regression', id);
@@ -41,7 +45,7 @@ const runs = [];
 try {
   const probe = spawnSync(process.execPath, ['-e', "const D=require('better-sqlite3');new D(':memory:').close();require('@node-rs/argon2');console.log(JSON.stringify({node:process.version,abi:process.versions.modules}))"], { env, encoding: 'utf8' });
   if (probe.status !== 0) throw Error('NATIVE_ABI_PREFLIGHT_FAILED');
-  for (const backend of ['pg', 'sqlite']) {
+  for (const backend of backends) {
     const work = join(root, backend); mkdirSync(work);
     const resultPath = join(evidence, `${backend}.results.json`);
     const runEnv = { ...env, REGRESSION_ROOT: work, REGRESSION_RESULTS_PATH: resultPath, REGRESSION_EVIDENCE_PATH: join(evidence, `${backend}.environment.json`), SYNTHETIC_CONTROL_DATABASE_URL: `postgresql://crm:crm_test_password@127.0.0.1:55432/synthetic_final_regression_test_${randomUUID().replaceAll('-', '')}` };
@@ -64,4 +68,4 @@ try {
   writeFileSync(join(evidence, 'summary.json'), JSON.stringify({ id, runs, selectedFiles, changedSources, headChanged: start.head !== end.head, temporaryRootRemoved: !existsSync(root), migrationMethod: 'PostgreSQL tracked migration SQL application, not Prisma deploy; SQLite actual migration/template setup', cleanCommitProof: false }, null, 2));
   console.log(JSON.stringify({ evidence, temporaryRootRemoved: !existsSync(root), changedSources }));
 }
-process.exitCode = runs.length === 2 && runs.every(r => r.exit === 0) ? 0 : 1;
+process.exitCode = runs.length === backends.length && runs.every(r => r.exit === 0) ? 0 : 1;

@@ -58,7 +58,7 @@ export default async function AiSettingsPage({
   return (
     <div className={styles.page}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1>ИИ и источники поиска</h1>
+        <h1>Настройки Яндекс AI</h1>
         <div className="flex flex-wrap gap-2">
           <Link className="btn btn-secondary" href="/settings/sources">
             Отдельная страница: Источники поиска
@@ -69,7 +69,7 @@ export default async function AiSettingsPage({
         </div>
       </div>
       <p>
-        ENV задаёт предельные разрешения и лимиты. Неизвестный расход сохраняет резерв; повтор платного запроса требует
+        Пределы задаются администратором установки. Неизвестный расход сохраняет резерв; повтор платного запроса требует
         нового разрешения.
       </p>
 
@@ -80,7 +80,7 @@ export default async function AiSettingsPage({
         <dl className="dl">
           <dt>Месячный бюджет</dt>
           <dd>
-            {fmtMoney(data.effective.values.monthlyBudgetRub)} (ENV-потолок {fmtMoney(ceilings.monthlyBudgetRub)})
+            {fmtMoney(data.effective.values.monthlyBudgetRub)} (максимум администратора {fmtMoney(ceilings.monthlyBudgetRub)})
           </dd>
           <dt>Учтено после завершения</dt>
           <dd>{fmtMoney(availableBudget(current.committedRub, current.reservedRub))}</dd>
@@ -96,16 +96,16 @@ export default async function AiSettingsPage({
           </dd>
           <dt>На сотрудника в сутки</dt>
           <dd>
-            {data.effective.values.perUserDailyLimit} вызовов; веб-заданий: {webJobsLimit} (ENV-потолок веб-заданий:{" "}
+            {data.effective.values.perUserDailyLimit} вызовов; веб-заданий: {webJobsLimit} (максимум веб-заданий:{" "}
             {env.webJobsPerUserDay})
           </dd>
           <dt>На задание</dt>
           <dd>
             {data.effective.values.perJobLimit} AI-вызовов; веб-вызовов:{" "}
-            {Math.min(data.setting.perJobLimit, env.webCallsPerJob)} (ENV-потолок веб-вызовов: {env.webCallsPerJob})
+            {Math.min(data.setting.perJobLimit, env.webCallsPerJob)} (максимум веб-вызовов: {env.webCallsPerJob})
           </dd>
           <dt>На сотрудника в час</dt>
-          <dd>{env.requestsPerUserHour} вызовов (ENV)</dd>
+          <dd>{env.requestsPerUserHour} вызовов (настройка сервера)</dd>
         </dl>
         <p>
           Сутки и месяц считаются в {config.APP_TIMEZONE}. Резерв уменьшает остаток сразу. Учтённый расход может
@@ -148,6 +148,7 @@ export default async function AiSettingsPage({
         data={data}
         ceilings={ceilings}
         timeZone={config.APP_TIMEZONE}
+        mode="ai"
         browserConfigured={availability.browser.configured}
       />
 

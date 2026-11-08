@@ -8,7 +8,7 @@ import { sqliteFilePath } from "../../src/shared/db/sqlite-adapter";
 import { seedDesktopDemo } from "./seed-demo";
 
 export interface DesktopInitOptions { directory?: string; account?: {login:string;displayName:string;password:string}; mode?: "empty"|"demo" }
-type InitStage = "DIRECTORY" | "LOCATION" | "SECRETS" | "MIGRATIONS" | "ACCOUNT" | "PROBE";
+type InitStage = "DIRECTORY" | "LOCATION" | "SECRETS" | "MIGRATIONS" | "AI_DEFAULTS" | "ACCOUNT" | "PROBE";
 const failureStages = new WeakMap<object, InitStage>();
 const initCodes = ["ENOENT", "EACCES", "EPERM", "EINVAL", "ETIMEDOUT", "ENOBUFS", "ERR_DLOPEN_FAILED", "SQLITE_LOCAL_VOLUME_REQUIRED", "SQLITE_CLOUD_PATH_FORBIDDEN", "SQLITE_LOCAL_PATH_REQUIRED", "SQLITE_MIGRATION_HISTORY_MISMATCH", "SQLITE_INTEGRITY_FAILED", "DESKTOP_SECRETS_INVALID"];
 /** Exact finite vocabulary only: never serialize errors, paths, SQL or secrets. */
@@ -21,7 +21,7 @@ export function desktopInitFailureCode(error: unknown): string {
   const safe = initCodes.find(value => value === code || value === message) ?? "OTHER";
   return `INIT_DATABASE_FAILED_STAGE_${stage}_CODE_${safe}`;
 }
-/** --initialize only migrates; the UI then explicitly creates the manager via setup API. */
+/** --initialize migrates/seeds public defaults; the UI explicitly creates the manager. */
 export async function initializeDesktopDatabase(options: DesktopInitOptions = {}) {
   let stage: InitStage = "DIRECTORY";
   try {
@@ -40,6 +40,13 @@ export async function initializeDesktopDatabase(options: DesktopInitOptions = {}
   // Native launcher already made a verified encrypted snapshot before starting migrations.
   stage = "MIGRATIONS";
   const upgrade=existed && process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1" ? await upgradeSqlite(file) : (applySqliteMigrations(file),null);
+  stage = "AI_DEFAULTS";
+  // prepareDesktopUpgrade invokes --initialize on EVERY launch, not only upgrades.
+  // Use the resolved file directly; never load .env or touch the credential store.
+  const {createSqliteClient}=await import("../../src/shared/db/sqlite-client");
+  const {bootstrapAiTariffs}=await import("../../src/modules/ai/application/tariff-bootstrap");
+  const defaultsDb=createSqliteClient("file:"+file);
+  try { await bootstrapAiTariffs(defaultsDb); } finally { await defaultsDb.$disconnect(); }
   stage = "ACCOUNT";
   if(options.account) {
     const {resetConfigCache}=await import("../../src/shared/config/env");

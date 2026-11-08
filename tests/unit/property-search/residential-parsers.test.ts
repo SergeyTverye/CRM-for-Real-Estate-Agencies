@@ -152,4 +152,35 @@ describe("truthful residential parser attachment (synthetic real-package fixture
     attachResidentialParsers(scraper);
     expect(() => scraper.parsers.cian.parsePage(ssr([offer()]), url, query)).toThrow(failure);
   });
+
+  describe("bounded mirkvartir residential route (pure URL/planning, no transport)", () => {
+    const housing = (over: Record<string, unknown> = {}) => ({ city: "Новосибирск", category: "residential" as const, deal: "sale" as const, page: 1, ...over });
+    it("keeps commercial planning byte-identical (locationIds contract)", () => {
+      const plain = new RealEstateScraper({ maxRetries: 0 });
+      const { scraper } = client();
+      const commercial = { city: "Новосибирск", category: "commercial" as const, type: "office" as const, deal: "sale" as const, sourceOptions: { mirkvartir: { locationIds: "MK_Town|106136" } } };
+      expect(scraper.parsers.mirkvartir.buildSearchUrl(commercial)).toBe(plain.parsers.mirkvartir.buildSearchUrl(commercial));
+    });
+    it("retains region+city for sale/rent/type/page, native URL wins", () => {
+      const { scraper } = client();
+      const sale = new URL(scraper.parsers.mirkvartir.buildSearchUrl(housing({ type: "flat", sourceOptions: { mirkvartir: { locationIds: "MK_Town|106136" } } })));
+      expect(sale.hostname).toBe("www.mirkvartir.ru");
+      expect(decodeURIComponent(sale.pathname)).toBe("/Новосибирская+область/Новосибирск/");
+      const rent = new URL(scraper.parsers.mirkvartir.buildSearchUrl(housing({ type: "flat", deal: "rent" })));
+      expect(rent.hostname).toBe("arenda.mirkvartir.ru");
+      expect(decodeURIComponent(rent.pathname)).toBe("/Новосибирская+область/Новосибирск/");
+      const room = new URL(scraper.parsers.mirkvartir.buildSearchUrl(housing({ type: "room" })));
+      expect(decodeURIComponent(room.pathname)).toBe("/Новосибирская+область/Новосибирск/Комнаты/");
+      expect(new URL(scraper.parsers.mirkvartir.buildSearchUrl(housing({ type: "flat", page: 2 }))).searchParams.get("p")).toBe("2");
+      const native = "https://www.mirkvartir.ru/Новосибирская%2Bобласть/Новосибирск/";
+      expect(decodeURIComponent(new URL(scraper.parsers.mirkvartir.buildSearchUrl(housing({ type: "flat", sourceOptions: { mirkvartir: { url: native } } }))).pathname)).toBe("/Новосибирская+область/Новосибирск/");
+    });
+    it("leaves Moscow alone and keeps unknown geo explicit", () => {
+      const plain = new RealEstateScraper({ maxRetries: 0 });
+      const { scraper } = client();
+      const moscow = { city: "Москва", category: "residential" as const, type: "flat" as const, deal: "sale" as const };
+      expect(scraper.parsers.mirkvartir.buildSearchUrl(moscow)).toBe(plain.parsers.mirkvartir.buildSearchUrl(moscow));
+      expect(() => scraper.parsers.mirkvartir.buildSearchUrl(housing({ city: "Novosibirsk", type: "flat" }))).toThrow();
+    });
+  });
 });
