@@ -1,0 +1,356 @@
+{
+  "file": "notifications.png",
+  "role": "REALTOR1",
+  "path": "/notifications",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:40.130Z",
+  "sha256": "53dbc37688d215bfa0fd2b59d009742e2775ebce5e69fa980cd7838cf77adf6c",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 165.53125,
+        "height": 36
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 206,
+        "width": 331,
+        "height": 72
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "main-form",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 155,
+        "width": 1148,
+        "height": 56
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 310,
+        "width": 2296,
+        "height": 112
+      }
+    },
+    {
+      "label": "table",
+      "found": false
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Уведомления · 90",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 165.53125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Прочитать все",
+      "tag": "button",
+      "cssBox": {
+        "x": 1293.96875,
+        "y": 103,
+        "width": 122.03125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Сохранить настройку",
+      "tag": "button",
+      "cssBox": {
+        "x": 559,
+        "y": 175,
+        "width": 167.40625,
+        "height": 36
+      }
+    },
+    {
+      "label": "8 ноября 2026 г. · Вам назначена задача · 50",
+      "tag": "summary",
+      "cssBox": {
+        "x": 269,
+        "y": 265,
+        "width": 1146,
+        "height": 44
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 323.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 385.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 385.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 447.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 447.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 509.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 509.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 571.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 571.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 633.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 633.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 695.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 695.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 757.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 757.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 819.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 819.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Прочитать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1187.796875,
+        "y": 893.5,
+        "width": 82.375,
+        "height": 32
+      }
+    },
+    {
+      "label": "Напомнить позже",
+      "tag": "button",
+      "cssBox": {
+        "x": 1278.171875,
+        "y": 893.5,
+        "width": 124.828125,
+        "height": 32
+      }
+    }
+  ]
+}

@@ -23,7 +23,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
-DEST = ROOT / 'docs/user-guide/v3.2.2'
+VERSION = 'v3.2.2'
+DEST = ROOT / 'docs/user-guide' / VERSION
 TMP = ROOT / 'tmp/pdfs/guide'
 BLUE = '#1559A6'
 
@@ -132,6 +133,19 @@ def prepare_images():
         evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),
             'kind':'coordinator capture' if relative.startswith('live/') else 'prior LIVE UI / P0-C synthetic component',
             'crop':crop,'boxes':boxes,'privacyReview':'No secrets or seller contacts visible in selected area'})
+    if VERSION == 'v3.2.3':
+        for name in ['e2e-filter-locations','e2e-sources-results','e2e-ai-locations','e2e-ranking','e2e-manual-domclick']:
+            source=legacy/'v323-search'/f'{name}.png'
+            annotate(source,images/f'{name}.png')
+            evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),
+                'kind':'v323 LIVE capture or replay of same persisted LIVE run',
+                'privacyReview':'No seller contacts, person names or credentials visible'})
+        for name, original in [('assistant-client','01-client-demo.png'),('assistant-task','03-task-demo.png')]:
+            source=legacy/'v323-assistant'/original
+            annotate(source,images/f'{name}.png',crop=(790,0,1366,768))
+            evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),
+                'kind':'archived synthetic DEMO; no new provider call','crop':[790,0,1366,768],
+                'privacyReview':'Assistant panel only; customer contact fields excluded'})
     (images/'figure-sources.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 
 
@@ -147,7 +161,7 @@ def para(c, text, y, size=10.8, leading=15.2, color='#25364B', width=495, bold=F
 def footer(c, page, chapter=''):
     c.setStrokeColor(HexColor('#D6E2EF')); c.line(50,47,545,47)
     c.setFont('Arial',8); c.setFillColor(HexColor('#62758B'))
-    c.drawString(50,32,'CRM v3.2.2 · Руководство пользователя')
+    c.drawString(50,32,f'CRM {VERSION} · Руководство пользователя')
     c.drawRightString(545,32,str(page))
     if chapter:
         c.setFont('Arial',8); c.drawString(50,809,chapter)
@@ -160,14 +174,14 @@ def build():
     chapters=list(zip(chunks[1::2],chunks[2::2]))
     # Fixed one-topic pages keep steps and their figure together. Fail if edited
     # content exceeds the page rather than silently clipping or inserting blanks.
-    output=DEST/'CRM-руководство-пользователя-v3.2.2.pdf'
+    output=DEST/f'CRM-руководство-пользователя-{VERSION}.pdf'
     c=canvas.Canvas(str(output),pagesize=(595.276,841.89),pageCompression=1)
-    c.setTitle('CRM v3.2.2 — Руководство пользователя')
+    c.setTitle(f'CRM {VERSION} — Руководство пользователя')
     c.setAuthor('CRM · Документация для сотрудников агентства')
     c.setSubject('Работа с клиентами, недвижимостью, договорами и резервными копиями')
     c.setFillColor(HexColor('#102D4F')); c.rect(0,0,596,842,fill=1,stroke=0)
     c.setFillColor(HexColor('#57C9D4')); c.rect(50,690,68,6,fill=1,stroke=0)
-    para(c,'CRM v3.2.2',658,36,43,'#FFFFFF',bold=True)
+    para(c,f'CRM {VERSION}',658,36,43,'#FFFFFF',bold=True)
     para(c,'Руководство\nпользователя'.replace('\n',' '),592,29,36,'#FFFFFF',bold=True)
     para(c,'Для сотрудников агентства недвижимости',489,16,23,'#B9D8F0')
     para(c,'Клиенты · Обращения · Поиск объектов',429,12,20,'#FFFFFF')
@@ -238,7 +252,10 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--render',action='store_true')
     parser.add_argument('--font-dir',type=Path,default=Path(os.environ.get('WINDIR','C:/Windows'))/'Fonts')
+    parser.add_argument('--version',default='v3.2.2',choices=['v3.2.2','v3.2.3'])
     ARGS=parser.parse_args();FONTS=ARGS.font_dir
+    VERSION=ARGS.version; DEST=ROOT/'docs/user-guide'/VERSION
+    TMP=ROOT/'tmp/pdfs/guide'/VERSION
     for name,file in [('Arial','arial.ttf'),('Arial-Bold','arialbd.ttf'),('Arial-Italic','ariali.ttf')]:
         pdfmetrics.registerFont(TTFont(name,str(FONTS/file)))
     pdfmetrics.registerFontFamily('Arial',normal='Arial',bold='Arial-Bold',italic='Arial-Italic',boldItalic='Arial-Bold')

@@ -1,0 +1,179 @@
+{
+  "file": "ai-settings.png",
+  "role": "MANAGER",
+  "path": "/settings/ai",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:33:04.183Z",
+  "sha256": "487365c481fa9cef6fccd1550b3e50447f0edaabd1dd35bf4700e031d4edf64a",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 237.421875,
+        "height": 36
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 206,
+        "width": 475,
+        "height": 72
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 951
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1902
+      }
+    },
+    {
+      "label": "main-form",
+      "found": true,
+      "visible": false,
+      "cssBox": {
+        "x": 268,
+        "y": 1007.125,
+        "width": 1148,
+        "height": 730.1875
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 2014,
+        "width": 2296,
+        "height": 1460
+      }
+    },
+    {
+      "label": "table",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 285,
+        "y": 801,
+        "width": 1114,
+        "height": 173.125
+      },
+      "pixelBox": {
+        "x": 570,
+        "y": 1602,
+        "width": 2228,
+        "height": 346
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 899.015625,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1026.15625,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1127.265625,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "РуководительРуководитель",
+      "tag": "button",
+      "cssBox": {
+        "x": 1213.625,
+        "y": 21,
+        "width": 202.375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Настройки Яндекс AI",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 237.421875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Подключение Яндекс AI (ключ API и каталог)",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 209,
+        "width": 343.859375,
+        "height": 24
+      }
+    },
+    {
+      "label": "Диагностика подключения",
+      "tag": "summary",
+      "cssBox": {
+        "x": 285,
+        "y": 377,
+        "width": 1114,
+        "height": 16
+      }
+    },
+    {
+      "label": "Действует сейчас · текущий месяц 2026-11",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 443,
+        "width": 1114,
+        "height": 24
+      }
+    }
+  ]
+}
