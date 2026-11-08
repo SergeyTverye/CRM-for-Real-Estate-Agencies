@@ -1,5 +1,6 @@
 -- Rebuild only documents to extend its CHECK; preserve all rows, links and indexes.
 PRAGMA defer_foreign_keys=ON;
+PRAGMA foreign_keys=OFF;
 CREATE TABLE documents_type_backup AS SELECT * FROM documents;
 DROP TABLE documents;
 CREATE TABLE "documents" (
@@ -32,3 +33,5 @@ CREATE INDEX "documents_uploaded_by_idx" ON "documents"("uploaded_by");
 CREATE INDEX "documents_legal_entity_id_idx" ON "documents"("legal_entity_id");
 CREATE TRIGGER documents_clear_archived_cover AFTER UPDATE OF archived_at ON documents WHEN NEW.archived_at IS NOT NULL AND OLD.archived_at IS NOT NEW.archived_at
 BEGIN UPDATE document_properties SET is_cover=false WHERE document_id=NEW.id AND is_cover; END;
+PRAGMA foreign_keys=ON;
+PRAGMA defer_foreign_keys=OFF;
