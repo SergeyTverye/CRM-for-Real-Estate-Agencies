@@ -1,5 +1,19 @@
 # Трассировка требований ТЗ v1.6.1
 
+## Дополнительный запрос v3.2.3: ordinary browser navigation
+
+| Требование | Реализация | Проверка | Статус |
+|---|---|---|---|
+| Циан/Яндекс: page.goto + JS + прежние парсеры | browser-navigation, scraper-adapter, dependencies | LIVE HTTP queue: 5 + 5 + 20 сохранено; fake browser на PG/SQLite | PASS |
+| Циан headed, Яндекс headless; desktop default и переключатели | AiSetting nullable fields, ai-settings-form, navigationDefaults | unit default/composition; GET /settings/sources LIVE; populated/clean migrations PG/SQLite | PASS |
+| Docker без дисплея: понятный статус + HITL | headedBrowserAvailable, adapter early return, settings UI | Docker simulated unit; существующий captcha-hitl-production PG/SQLite; новый LIVE Docker не выполнялся | PASS (REPLAY/DEMO) |
+| Осталась проверка → needs_user_action, результаты → success | navigationPageState + resilientTransport + search-queue | unit/replay + production parser/queue/persistence fake integration на обеих БД | PASS |
+| Профиль на площадку, cookies между поисками, один context для пагинации/деталей | launchPersistentContext, serialized native transport | повторные LIVE задания по обоим источникам; fake page pagination/details; multi-page LIVE не заявляется | PASS (границы в протоколе) |
+| Без stealth/решения CAPTCHA/прокси, ограниченная сеть | ordinary launch, CDP per-hop validation, host allowlist/public DNS, ≥1,5с пауза | CDP redirect/private-DNS unit, LIVE без ввода/решения, ADR 0034 | PASS |
+| Полный tsc, ограниченный LIVE, остановка своих процессов | исправлен own q:typeof q; live/v323-browser-queue.ts | npx tsc --noEmit exit0, production build, ESLint; очередь 3383 остановлена | PASS |
+
+Подробности: [LIVE/REPLAY/DEMO протокол](vkr/live-search-v323-captcha.md).
+
 `требование → реализация (модуль/файлы) → автоматический тест → приёмочный сценарий → статус`
 
 Статусы: **PASS** — реализовано и проверено автоматическим тестом и/или фактическим прогоном; **PARTIAL** — реализовано частично (см. пояснение); **BLOCKED** — нужен внешний ресурс. Пути модулей — относительно `src/modules/`.

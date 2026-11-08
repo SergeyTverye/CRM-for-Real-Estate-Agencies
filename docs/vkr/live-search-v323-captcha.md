@@ -76,9 +76,12 @@
 - Новый `tests/e2e/captcha-stand-demo.spec.ts` — Playwright DEMO (стенд only); полный
   `playwright test` требует `next build` (не запускался здесь,逻辑 проверена стендом
   и `browser-cycle`). ESLint этого файла — PASS.
-- `npx tsc --noEmit` по всему репозиторию — FAIL на предсуществующих местах
-  (`scripts/demo/demo.test.ts`, `prisma/seed`, сгенерированные типы до `prisma generate`);
-  по изменённым файлам новых ошибок типов нет (проверено фильтром; детально в отчёте).
+- Исторический результат `tsc` был ошибочно назван «предсуществующими ошибками».
+  При повторной проверке найдена собственная ошибка в `v323-capture-blocked.ts`:
+  `buildSearchUrl(q: typeof q)` ссылался на тип самого параметра. Исправлено имя параметра.
+  Рабочая копия использует junction `node_modules` и требует локальной генерации обоих
+  Prisma clients и типов Next.js. После этого полный `npx tsc --noEmit` — **PASS, exit 0**
+  (без фильтрации ошибок); production `next build --webpack` с проверкой типов — PASS.
 - `node scripts/security/confidential-guard.mjs --staged` — PASS перед коммитами.
 - LIVE-запросы: 4 headed + 3 headless-блок + 2 headless-перепроверки + 3 queue-пробы,
   интервал ≥2 с, без контактов/тел/документов в evidence.
@@ -88,3 +91,69 @@
 зафиксирован честно, но не выдаётся за серверное поведение. Авито/Домклик BLOCKED даже
 в реальном браузере — обход не реализовывался. Платный LIVE AI и полный e2e приложения
 не запускались.
+
+## v3.2.3 — native navigation через очередь CRM (09.11.2026, LIVE)
+
+Это новый сквозной прогон, заменяющий прежний вывод «кандидат на будущий режим».
+Обычный Chromium выполняет настоящий `page.goto` и JavaScript, затем HTML читает
+существующий парсер. Циан — видимое окно 1100×760, Яндекс — headless. Ни ввода,
+ни решения CAPTCHA, ни stealth/прокси/подмены automation flags нет.
+
+Стенд: production build `NEXT_DIST_DIR=.next-v323-captcha`, `next start` на
+`127.0.0.1:3383`, PostgreSQL `crm_demo`, отдельный production search worker,
+`SCRAPER_ENABLED=true`, `SCRAPER_BROWSER_ENABLED=true`, AI выключен, fixtures выключены.
+Создана временная серверная сессия существующего синтетического manager через штатный
+session service, отозвана после проверки; пароль пользователя не менялся.
+Задания созданы через аутентифицированный `POST /api/v1/property-search/runs`,
+прогресс получен HTTP API, количества проверены в `search_run_results` и source rows.
+Страница `/settings/sources` HTTP 200, новый переключатель присутствует в HTML.
+
+Запрос: **«аренда офиса Новосибирск»**, depth=1, limit=5 на источник,
+общий deadline=180 с. Источники последовательны, между заданиями ≥2 с,
+между native навигациями ≥1,5 с. На native-площадках четыре запланированных
+поисковых навигации (Циан дважды, Яндекс дважды); у mirkvartir/onrealt по одному
+SERP HTTP-запросу и до трёх запросов дат карточек. Отдельных LIVE-проб/пагинации
+сверх этого прогона не выполнялось; лимит 60 навигаций не исчерпан.
+
+| Поиск | Сохранено в запуске | Время запуска | Источники | Итог |
+|---|---:|---:|---|---|
+| Циан | 5 | 16,016 с | cian: success, 11,473 с | completed; needsUserAction=false |
+| Яндекс | 5 | 23,501 с | yandex: success, 22,895 с | completed; needsUserAction=false |
+| Циан + Яндекс + Мир Квартир + OnRealt | 20 | 48,012 с | cian: 5 / success / 8,192 с; yandex: 5 / success / 15,668 с; mirkvartir: 5 / success / 7,053 с; onrealt: 5 / success / 15,148 с | completed; needsUserAction=false у всех |
+
+Всего 30 связей результатов в трёх запусках; это не утверждение о 30 уникальных
+объектах рынка. Ограничение глубины явно сохранено в reason. У OnRealt одна ошибка
+дополнительного запроса даты (2 даты обогащены, 1 ошибка), пять объявлений сохранены.
+Cookies persistent-профилей использовались повторно между отдельным и совместным
+заданиями; оба источника снова дали выдачу без участия человека.
+
+Машинный протокол: [live-search-v323-browser-queue.json](live-search-v323-browser-queue.json).
+Воспроизводимый скрипт: `scripts/live/v323-browser-queue.ts`. В evidence только
+агрегаты/служебные run ID/причины статусов; HTML, тексты объявлений, контакты и URL
+карточек не выгружались в Git. Настройки ai_settings восстановлены, тестовая сессия
+отозвана, дерево worker/Chromium и server остановлены. Повторный запрос к порту 3383
+подтвердил закрытие (`OWN_STAND_STOPPED`). Рабочая установленная программа не затронута.
+
+### REPLAY / DEMO и проверки
+
+- Финальная Unit/REPLAY регрессия поиска/browser sessions/composition/migration:
+  **33 файла, 697 passed**, включая Docker без дисплея и отключение native-режима.
+- Native fake browser: результат / оставшаяся проверка / JS wait / один context
+  для пагинации и деталей / повторный профиль / CDP redirect и private-DNS отказ.
+- Интеграция: **26 passed, 6 файлов/проектов** (PG `crm_test_b` и SQLite):
+  `property-search-browser-navigation`, `property-search-real-queue`,
+  `captcha-hitl-production`. Настоящий парсер, очередь, транзакции, сохранение,
+  чужой run ID, существующее HITL-продолжение; native browser заменён fake.
+- SQLite populated upgrade проверен внутри и вне внешней транзакции. PG миграция
+  успешно применена к заполненной `crm_demo`; чистые PG/SQLite миграции — integration.
+- Полный `npx tsc --noEmit`, ESLint изменённых TS/TSX, production build, diff check — PASS.
+- Docker Cian без дисплея: **REPLAY**, `needs_user_action`, Chromium не запускается;
+  новый LIVE Docker запуск не заявляется. Детали/пагинация native-площадок — fake/REPLAY,
+  не новый многостраничный LIVE. Авито/Домклик в новом прогоне не опрашивались.
+
+Настройки `/settings/sources`: «Автоматическая проверка в браузере» отдельно для
+Циана/Яндекса; nullable значение означает desktop/display default (Циан) либо ON
+(Яндекс). Для Циана без дисплея переключатель недоступен с объяснением и HITL-путём.
+При сохранившейся проверке source становится `needs_user_action`, доступна прежняя
+кнопка «Пройти проверку в браузере CRM». Архитектура и сетевая граница —
+[ADR 0034](../adr/0034-source-native-browser-navigation.md).
