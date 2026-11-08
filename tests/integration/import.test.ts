@@ -23,6 +23,111 @@ const operationalCounts = async () => ({
   tasks: await db.task.count(),
 });
 
+/**
+ * Детерминированная проверка отсутствия запрещённых ПДн (ТЗ 38.9).
+ * Было: JSON.stringify(payload).not.toMatch(/...|1980/) — голый "1980" случайно
+ * встречается в UUID/SHA (id, sourceSha256, sourceRecordKey...), тест флакал.
+ * Теперь сканируются только пользовательские/бизнесовые строки; структурные
+ * ID/хеши пропускаются по имени ключа и по форме UUID/SHA. DOB синтетической
+ * фикстуры ("01.01.1980" в scripts/dev/import-sample-builder.ts) ловится полными
+ * представлениями ("01.01.1980", "1980-01-01"), а не голым годом — без ослабления.
+ */
+const FORBIDDEN_VALUE_NEEDLES = ["0000 000000", "УФМС", "Регистрационная", "01.01.1980", "1980-01-01", "01/01/1980", "1980/01/01", "19800101", "01011980"];
+const UUID_METADATA_KEYS = new Set([
+  "id",
+  "importJobId",
+  "jobId",
+  "targetEntityId",
+  "clientId",
+  "startedBy",
+  "responsibleUserId",
+  "createdBy",
+]);
+const SHA_METADATA_KEYS = new Set(["sourceSha256", "sourceRecordKey", "sourceRowKey"]);
+const FORBIDDEN_KEY_RE = /паспорт|passport|выдан|issued|регистрац|registr|рожден|birth|\bdob\b/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SHA256_RE = /^[0-9a-f]{64}$/i;
+
+function findForbiddenPii(value: unknown, path = "root"): string[] {
+  const hits: string[] = [];
+  const walk = (v: unknown, p: string): void => {
+    if (typeof v === "string") {
+      for (const n of FORBIDDEN_VALUE_NEEDLES) {
+        if (v.includes(n)) {
+          hits.push(`${p} содержит ${JSON.stringify(n)}`);
+          break;
+        }
+      }
+      return;
+    }
+    if (v instanceof Date) {
+      const iso = v.toISOString();
+      for (const n of FORBIDDEN_VALUE_NEEDLES) {
+        if (iso.includes(n)) {
+          hits.push(`${p} (Date) содержит ${JSON.stringify(n)}`);
+          break;
+        }
+      }
+      return;
+    }
+    if (Array.isArray(v)) {
+      v.forEach((el, i) => walk(el, `${p}[${i}]`));
+      return;
+    }
+    if (v && typeof v === "object") {
+      for (const [k, child] of Object.entries(v as Record<string, unknown>)) {
+        if (FORBIDDEN_KEY_RE.test(k)) hits.push(`${p}.${k}: запрещённое имя поля`);
+        // Only validated scalar metadata is exempt, never a whole subtree.
+        if (typeof child === "string" && ((UUID_METADATA_KEYS.has(k) && UUID_RE.test(child)) || (SHA_METADATA_KEYS.has(k) && SHA256_RE.test(child)))) continue;
+        walk(child, `${p}.${k}`);
+      }
+    }
+  };
+  walk(value, path);
+  return hits;
+}
+
+describe("synthetic import privacy scanner regressions", () => {
+  it("allows the confirmed SHA containing 1980 in structural metadata", () => {
+    const sourceRecordKey = "cb99f3619804e812a97b15df7c0be9630f5405e253c560f3f1ca6d204169f342";
+    expect(sourceRecordKey).toMatch(SHA256_RE);
+    expect(sourceRecordKey).toContain("1980");
+    expect(findForbiddenPii({ rows: [{ sourceRecordKey, preview: { comment: "Без ПДн" } }] })).toEqual([]);
+    // A full compact DOB inside a hash is metadata only under a hash key.
+    const hashWithDobDigits = `19800101${"a".repeat(56)}`;
+    expect(findForbiddenPii({ sourceRecordKey: hashWithDobDigits })).toEqual([]);
+    expect(findForbiddenPii({ comments: hashWithDobDigits })).not.toEqual([]);
+    const id = "aaaaaaaa-aaaa-4980-8aaa-19800101aaaa";
+    expect(findForbiddenPii({ id })).toEqual([]);
+    expect(findForbiddenPii({ comments: id })).not.toEqual([]);
+    expect(findForbiddenPii({ sourceRecordKey: id })).not.toEqual([]);
+  });
+
+  it.each(["normalized", "preview", "comments", "error", "business"])("rejects injected DOB/passport in %s", (key) => {
+    for (const text of FORBIDDEN_VALUE_NEEDLES) {
+      expect(findForbiddenPii({ [key]: [{ text }] })).not.toEqual([]);
+    }
+    for (const field of ["passport", "Паспорт", "birthDate", "dob", "Регистрация", "Выдан"]) {
+      expect(findForbiddenPii({ [key]: { [field]: "redacted" } })).not.toEqual([]);
+    }
+    expect(findForbiddenPii({ [key]: new Date("1980-01-01T00:00:00.000Z") })).not.toEqual([]);
+  });
+
+  it("scans invalid metadata values and nested objects instead of dropping them", () => {
+    for (const key of [...UUID_METADATA_KEYS, ...SHA_METADATA_KEYS]) {
+      for (const text of FORBIDDEN_VALUE_NEEDLES) {
+        expect(findForbiddenPii({ [key]: text })).not.toEqual([]);
+        expect(findForbiddenPii({ [key]: { preview: { comment: text } } })).not.toEqual([]);
+        expect(findForbiddenPii({ [key]: [text] })).not.toEqual([]);
+      }
+    }
+    // SHA is not a valid UUID; arbitrary hex/business text is not exempt.
+    expect(findForbiddenPii({ id: `19800101${"a".repeat(56)}` })).not.toEqual([]);
+    expect(findForbiddenPii({ sourceRecordKey: `19800101${"a".repeat(24)}` })).not.toEqual([]);
+    expect(findForbiddenPii({ sourceStorageKey: "01.01.1980.xlsx" })).not.toEqual([]);
+  });
+});
+
 describe("T07 / UC-09: импорт dry-run и commit", () => {
   it("только руководитель", async () => {
     await expect(uploadImport(u.realtor1, file)).rejects.toBeInstanceOf(ForbiddenError);
@@ -41,10 +146,11 @@ describe("T07 / UC-09: импорт dry-run и commit", () => {
     const statuses = new Set(rows.map((r) => r.validationStatus));
     for (const s of ["ready", "warning", "invalid", "unrecognized"]) expect(statuses).toContain(s);
     expect(rows.some((r) => r.warningCodes.includes("probable_duplicate"))).toBe(true);
-    // Паспорт/«выдан»/регистрация не попадают в import_row_results ни в каком виде.
-    expect(JSON.stringify(rows)).not.toMatch(/0000 000000|УФМС|Регистрационная/);
+    // Паспорт/«выдан»/регистрация/DOB не попадают в import_row_results ни в каком виде.
+    // Детерминированно: только бизнесовые строки, без структурных ID/хешей.
+    expect(findForbiddenPii(rows, "importRowResult")).toEqual([]);
     const report = await getImportJob(u.manager, id, { problemsOnly: "yes", pageSize: 200 });
-    expect(JSON.stringify(report)).not.toMatch(/0000 000000|УФМС|Регистрационная|1980/);
+    expect(findForbiddenPii(report, "importReport")).toEqual([]);
     const hist = report.sections.find((s) => s.profileCode === "historical_deals_v1")!;
     expect(hist.excludedByPolicy).toEqual(["Дата рождения", "Паспорт", "Выдан", "Регистрация"]);
   });
@@ -62,7 +168,7 @@ describe("T07 / UC-09: импорт dry-run и commit", () => {
     expect(r1.status).toBe("dry_run_ready"); // остальные секции ещё не загружены
     const archive = await db.historicalDealArchive.findMany();
     expect(archive.length).toBe(31); // 32 строки − 1 без адреса и ФИО
-    expect(JSON.stringify(archive)).not.toMatch(/0000 000000|УФМС|Регистрационная|1980/);
+    expect(findForbiddenPii(archive, "historicalDealArchive")).toEqual([]);
     // обработанные строки получили commit_result, не обработанные секции — нет
     const processed = await db.importRowResult.findMany({ where: { importJobId: id, sourceSection: { in: ["historical_deals_v1", "incoming_clients_v1"] } } });
     expect(processed.every((r) => r.commitResult !== null)).toBe(true);
