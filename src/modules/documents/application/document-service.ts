@@ -38,7 +38,7 @@ export interface DocumentLink {
   id: string;
 }
 
-const OUTGOING_TYPES = new Set(["agreement", "commercial_offer", "act", "invoice"]);
+const OUTGOING_TYPES = new Set(["agreement", "agreement_addendum", "agreement_attachment", "commercial_offer", "act", "invoice"]);
 
 /** Право загрузить документ к сущности (запись), возвращает наследуемый legal_entity_id. */
 async function assertCanAttach(tx: DbOrTx, actor: Actor, link: DocumentLink): Promise<{ legalEntityId: string | null }> {
@@ -70,8 +70,10 @@ async function assertCanAttach(tx: DbOrTx, actor: Actor, link: DocumentLink): Pr
       if (!(await tx.advertisement.count({ where: { id: link.id, ...advertisementWriteScope(actor) } }))) fail();
       return { legalEntityId: null };
     case "agreement": {
-      const a = await tx.agreement.findFirst({ where: { id: link.id, ...agreementScope(actor) }, select: { legalEntityId: true } });
+      const a = await tx.agreement.findFirst({ where: { id: link.id, ...agreementScope(actor) }, select: { legalEntityId: true, responsibleUserId: true, status: true, archivedAt: true } });
       if (!a) fail();
+      if (!isManager(actor) && a!.responsibleUserId !== actor.userId) throw new ForbiddenError("Документы договора добавляет ответственный или руководитель");
+      if (a!.archivedAt || a!.status === "archived") throw new ValidationError("Нельзя добавлять документы в архивный договор");
       return { legalEntityId: a!.legalEntityId };
     }
     case "offer": {

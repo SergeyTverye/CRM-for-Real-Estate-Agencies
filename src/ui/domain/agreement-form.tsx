@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { optionsOf } from "@/shared/codebook";
 import { apiCall } from "../api-client";
@@ -10,6 +10,9 @@ import { SelectInput, type Option } from "../client-kit";
 import { ClientPicker, type ClientPick } from "./need-pickers";
 import { PropertySelect, type PropertyPick } from "./deal-pickers";
 import type { AgreementFormValue } from "./deal-form-values";
+import { FilePicker } from "../file-picker";
+import { requestConfirmation } from "../confirm-dialog";
+import { uploadAgreementDocuments, type PendingAgreementDocument } from "./agreement-document-uploads";
 
 /**
  * Форма договора/соглашения (ТЗ 29.14, 37.11, 40.4): создание и изменение с optimistic concurrency.
@@ -73,6 +76,7 @@ export function AgreementForm({
   initialProperty = null,
   deal = null,
   returnHref,
+  uploadPolicy,
 }: {
   mode: "create" | "edit";
   options: AgreementFormOptions;
@@ -83,6 +87,7 @@ export function AgreementForm({
   initialProperty?: PropertyPick | null;
   deal?: { id: string; label: string } | null;
   returnHref?: string;
+  uploadPolicy?: { accept: string; maxMb: number };
 }) {
   const router = useRouter();
   const [v, setV] = useState<AgreementFormValue>(initial);
@@ -90,16 +95,30 @@ export function AgreementForm({
   const [property, setProperty] = useState<PropertyPick | null>(initialProperty);
   const [responsibleUserId, setResponsible] = useState("");
   const [reminder, setReminder] = useState("30");
+  const [files, setFiles] = useState<PendingAgreementDocument[]>([]);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const submitting = useRef(false);
   const { pending, error, run, fieldError, setError } = useApiAction();
   const dirty = JSON.stringify(v) !== JSON.stringify(initial) || client?.id !== initialClient?.id || property?.id !== initialProperty?.id;
-  useUnsavedChangesWarning(dirty && !pending);
+  useUnsavedChangesWarning(!finished && (savedId ? files.length > 0 : dirty || files.length > 0));
   const set = <K extends keyof AgreementFormValue>(k: K, val: AgreementFormValue[K]) => setV((s) => ({ ...s, [k]: val }));
   const err = (n: string) => fieldError(n);
   const legalRequired = v.status === "signed" && v.onBehalfOfCompany;
   const statusOptions = optionsOf("agreementStatus").filter((o) => o.value !== "archived" || initial.status === "archived");
 
   async function submit() {
+    if (submitting.current || finished) return;
+    if (savedId) {
+      await uploadFiles(savedId);
+      return;
+    }
     const local = localErrors(v);
+    if (uploadPolicy && files.some(({ file }) => file.size === 0 || file.size > uploadPolicy.maxMb * 1024 * 1024 || !uploadPolicy.accept.split(",").includes(`.${file.name.split(".").pop()?.toLowerCase()}`))) {
+      setError({ code: "VALIDATION_ERROR", message: "Проверьте формат и размер выбранных файлов" });
+      return;
+    }
     if (mode === "create" && !client && !property && !deal) local.clientId = ["Свяжите договор с клиентом, объектом или сделкой"];
     if (Object.keys(local).length) {
       setError({ code: "VALIDATION_ERROR", message: "Проверьте заполнение формы", fieldErrors: local });
@@ -107,6 +126,7 @@ export function AgreementForm({
     }
     const payload = toPayload(v);
     if (mode === "create") {
+      submitting.current = true;
       const res = await run(() =>
         apiCall<{ id: string }>("POST", "/api/v1/agreements", {
           ...payload,
@@ -118,7 +138,10 @@ export function AgreementForm({
           reminderDaysBefore: v.validUntil && reminder ? Number(reminder) : undefined,
         }),
       );
-      if (res) router.push(`/agreements/${res.id}`);
+      if (res) {
+        setSavedId(res.id);
+        await uploadFiles(res.id);
+      } else submitting.current = false;
       return;
     }
     // Изменение: отправляются только изменённые поля (критичные изменения попадают в аудит).
@@ -131,6 +154,22 @@ export function AgreementForm({
     }
   }
 
+  async function uploadFiles(id: string) {
+    submitting.current = true;
+    setUploading(true);
+    try {
+      const failed = await uploadAgreementDocuments(id, files);
+      setFiles(failed);
+      if (!failed.length) {
+        setFinished(true);
+        router.push(`/agreements/${id}#documents`);
+      }
+    } finally {
+      setUploading(false);
+      submitting.current = false;
+    }
+  }
+
   return (
     <form
       className="space-y-5"
@@ -140,6 +179,17 @@ export function AgreementForm({
       }}
     >
       <FormErrorBanner error={error} />
+
+      {savedId && !finished ? (
+        <div className="space-y-3" role="status">
+          <p className={uploading ? "alert alert-info" : "alert alert-warning"}>{uploading ? "Договор сохранён. Загружаются документы…" : "Договор сохранён. Остались незагруженные файлы; повторная попытка загрузит только их."}</p>
+          <ul className="space-y-2">{files.map((item, i) => <li key={i}>{item.file.name} — {item.error ?? "Загрузка…"}</li>)}</ul>
+          <button type="button" className="btn btn-primary" disabled={uploading || finished} onClick={() => { if (!submitting.current) void uploadFiles(savedId); }}>{uploading ? "Загрузка файлов…" : "Повторить загрузку"}</button>
+          <button type="button" className="btn" disabled={uploading} onClick={async () => { if (await requestConfirmation("Незагруженные файлы останутся только на вашем компьютере. Перейти в карточку?")) { setFinished(true); router.push(`/agreements/${savedId}#documents`); } }}>Открыть сохранённый договор</button>
+        </div>
+      ) : null}
+
+      <fieldset disabled={pending || uploading || Boolean(savedId) || finished} className="space-y-5">
 
       {mode === "create" ? (
         <fieldset className="space-y-3">
@@ -246,12 +296,33 @@ export function AgreementForm({
         </Field>
       ) : null}
 
+      {mode === "create" && uploadPolicy ? (
+        <section aria-label="Файлы договора" className="space-y-3">
+          <h2 className="label">Документы договора</h2>
+          <p className="text-sm text-slate-600">Файлы будут загружены после сохранения договора. До {uploadPolicy.maxMb} МБ на файл. Форматы: {uploadPolicy.accept}.</p>
+          <FilePicker label="Выбрать файлы договора" multiple disabled={pending || uploading || Boolean(savedId) || finished} accept={uploadPolicy.accept} selectedCount={files.length} onFiles={(chosen) => {
+            setFiles((current) => [...current, ...Array.from(chosen ?? []).map((file) => ({ file, documentTypeCode: "agreement" }))]);
+          }} />
+          {files.map((item, i) => {
+            const extension = `.${item.file.name.split(".").pop()?.toLowerCase()}`;
+            const invalid = item.file.size === 0 ? "Пустой файл" : item.file.size > uploadPolicy.maxMb * 1024 * 1024 ? `Файл больше ${uploadPolicy.maxMb} МБ` : !uploadPolicy.accept.split(",").includes(extension) ? "Недопустимый формат файла" : null;
+            return <div key={i} className="flex flex-wrap items-center gap-2">
+              <span>{item.file.name}</span>
+              <label className="text-sm">Тип файла {item.file.name}<SelectInput value={item.documentTypeCode} options={optionsOf("documentType")} onChange={(documentTypeCode) => setFiles((current) => current.map((f, index) => index === i ? { ...f, documentTypeCode } : f))} /></label>
+              <button type="button" className="btn btn-sm" onClick={() => setFiles((current) => current.filter((_, index) => index !== i))}>Убрать {item.file.name}</button>
+              {invalid ? <span className="field-error" role="alert">{invalid}</span> : null}
+            </div>;
+          })}
+        </section>
+      ) : null}
+
       <div className="flex gap-2">
-        <SubmitButton pending={pending}>{mode === "create" ? "Создать договор" : "Сохранить"}</SubmitButton>
+        <SubmitButton pending={pending || uploading}>{mode === "create" ? "Создать договор" : "Сохранить"}</SubmitButton>
         <button type="button" className="btn" onClick={() => router.back()}>
           Отмена
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

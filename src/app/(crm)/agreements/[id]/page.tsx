@@ -116,7 +116,9 @@ export default async function AgreementCardPage({ params }: { params: Promise<{ 
 
       <div className="space-y-4">
         <TaskList title="Задачи по договору" tasks={tasks} emptyHint="Задач по договору нет" newHref={`/tasks/new?${taskParams.toString()}`} />
-        <DocumentsPanel actor={actor} link={{ kind: "agreement", id }} canUpload={!archived} />
+        <section id="documents" aria-label="Документы договора" className="scroll-mt-4">
+          <DocumentsPanel actor={actor} link={{ kind: "agreement", id }} canUpload={canEdit && !archived} />
+        </section>
       </div>
     </div>
   );

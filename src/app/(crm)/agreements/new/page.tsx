@@ -5,6 +5,7 @@ import { Card, PageHeader } from "@/ui/components";
 import { AgreementForm } from "@/ui/domain/agreement-form";
 import { emptyAgreement } from "@/ui/domain/deal-form-values";
 import { UUID_RE, legalEntityOptions, loadClientPick, loadPropertyPick, orNull } from "@/ui/domain/deal-prefill";
+import { getConfig } from "@/shared/config/env";
 
 export const metadata = { title: "Новый договор" };
 
@@ -32,6 +33,7 @@ export default async function NewAgreementPage({ searchParams }: { searchParams:
       <Card>
         <AgreementForm
           mode="create"
+          uploadPolicy={{ accept: getConfig().uploadAllowedExtensions.map((ext) => `.${ext}`).join(","), maxMb: getConfig().MAX_UPLOAD_MB }}
           initial={initial}
           initialClient={client}
           initialProperty={property ?? dealProperty}

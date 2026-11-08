@@ -203,6 +203,8 @@ export const CODEBOOK = {
 
   documentType: {
     agreement: "Договор",
+    agreement_addendum: "Дополнительное соглашение",
+    agreement_attachment: "Приложение к договору",
     title_document: "Правоустанавливающий документ",
     commercial_offer: "Коммерческое предложение",
     act: "Акт",
