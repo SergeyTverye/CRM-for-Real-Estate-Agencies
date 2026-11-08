@@ -1,3 +1,4 @@
+import { preserveSearchConditions } from "@/modules/ai/domain/listing-analysis";
 import { describe, expect, it } from "vitest";
 import { SearchAi, type AiCallContext } from "@/modules/ai/infrastructure/search-ai";
 import { FakeResponsesProvider, InMemoryAiLedger } from "@/modules/ai/infrastructure/fake";
@@ -132,5 +133,34 @@ describe("SearchAi", () => {
     expect(result.region).toBeNull();
     expect(f.provider.requests[0]?.tools?.[0]?.filters.user_location).toBeUndefined();
     expect(f.provider.requests[0]?.input).toContain("Томск");
+  });
+});
+
+// Recorded provider replies: exercise decoding + preservation, no live AI calls.
+describe("REPLAY AI-01 explicit categories survive model post-processing", () => {
+  it.each([
+    ["Аренда офиса 50–100 м² в Новосибирске до 80 000 в месяц", {operation:"rent",priceUnit:"rub_month",priceTo:"80000",areaFrom:50,areaTo:100,purposes:["office"]}],
+    ["до 80 000", {priceTo:"80000"}],
+    ["от 50 тыс", {priceFrom:"50000"}],
+    ["80к", {priceTo:"80000"}],
+    ["за 80 000 в месяц", {operation:"rent",priceUnit:"rub_month",priceTo:"80000"}],
+    ["до 7 млн", {priceTo:"7000000"}],
+    ["от 50 до 100 м2", {areaFrom:50,areaTo:100}],
+    ["от 50 до 100 квадратных метров", {areaFrom:50,areaTo:100}],
+    ["со 2 по 5 этаж", {floorFrom:2,floorTo:5}],
+    ["снять офис", {operation:"rent",priceUnit:"rub_month",purposes:["office"]}],
+    ["сдам офис", {operation:"rent",priceUnit:"rub_month",purposes:["office"]}],
+  ])("%s", async (query, changes) => {
+    const before=searchFiltersSchema.parse({operation:"sale",priceTo:"9000000",districts:["Центральный"],requiredFeatures:["парковка"]});
+    const reply=searchFiltersSchema.parse({operation:"sale",...changes});
+    const f=fixture(()=>({text:JSON.stringify({filters:reply,clarificationQuestion:null})}));
+    const parsed=await f.ai.parseSearchQuery(context,{query,currentFilters:before});
+    const after=searchFiltersSchema.parse(preserveSearchConditions(before,parsed.filters!,query));
+    expect(after).toMatchObject({...changes,districts:["Центральный"],requiredFeatures:["парковка"]});
+    expect(f.provider.requests).toHaveLength(1);
+  });
+  it.each(["до 100 м²", "от 50 до 100 м2", "с 2 до 5 этажа", "добавь парковку"])("does not erase a budget for %s", query=>{
+    const before=searchFiltersSchema.parse({operation:"sale",priceTo:"9000000",priceUnit:"rub_total"});
+    expect(preserveSearchConditions(before,searchFiltersSchema.parse({operation:"sale"}),query)).toMatchObject({priceTo:"9000000",priceUnit:"rub_total"});
   });
 });
