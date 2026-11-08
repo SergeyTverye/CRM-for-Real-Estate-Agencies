@@ -6,6 +6,7 @@ import { labelOf } from "@/shared/codebook";
 import { apiCall } from "../api-client";
 import { useApiAction, useUnsavedChangesWarning } from "../hooks";
 import { Field, FormErrorBanner, SubmitButton } from "../form";
+import { DisclosureSection } from "../disclosure-section";
 import { SelectInput, type Option } from "../client-kit";
 import { NeedPicker, PropertySelect, type NeedLabels, type NeedPick, type PropertyPick } from "./deal-pickers";
 import { itemFromPick, moneyText, type OfferFormValue, type OfferItemDraft, type OfferSuggestion } from "./deal-form-values";
@@ -217,18 +218,18 @@ export function OfferForm({
         ) : null}
       </section>
 
+      <DisclosureSection title="Текст предложения и внутренние заметки" hint="Эти поля необязательны. Внутренние заметки клиенту не передаются." defaultOpen={Boolean(initial.introText || initial.notes)} error={[fieldError("introText"), fieldError("notes")].filter(Boolean).join("; ")}>
       <Field label="Вводный текст" hint="Попадёт в начало документа КП" error={fieldError("introText")}>
         <textarea className="input min-h-28" value={v.introText} onChange={(e) => set("introText", e.target.value)} />
       </Field>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Field label="ИП/ООО" hint="Обязательно для статусов «Подготовлено» и «Отправлено», если КП от имени агентства" error={fieldError("legalEntityId")}>
-          <SelectInput value={v.legalEntityId} onChange={(x) => set("legalEntityId", x)} options={legalEntities} placeholder="Не выбрано" invalid={Boolean(fieldError("legalEntityId"))} />
-        </Field>
-        <Field label="Внутренние заметки" hint="В документ не попадают" error={fieldError("notes")}>
-          <input className="input" value={v.notes} onChange={(e) => set("notes", e.target.value)} />
-        </Field>
-      </div>
+      <Field label="Внутренние заметки" hint="В документ не попадают" error={fieldError("notes")}>
+        <input className="input" value={v.notes} onChange={(e) => set("notes", e.target.value)} />
+      </Field>
+      </DisclosureSection>
+      <Field label="От имени ИП или ООО" hint="Укажите перед подготовкой и отправкой предложения от агентства" error={fieldError("legalEntityId")}>
+        <SelectInput value={v.legalEntityId} onChange={(x) => set("legalEntityId", x)} options={legalEntities} placeholder="Не выбрано" invalid={Boolean(fieldError("legalEntityId"))} />
+      </Field>
 
       <div className="flex gap-2">
         <SubmitButton pending={pending}>{mode === "create" ? "Создать черновик КП" : "Сохранить черновик"}</SubmitButton>

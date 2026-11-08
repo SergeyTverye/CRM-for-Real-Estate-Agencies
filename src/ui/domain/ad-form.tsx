@@ -6,6 +6,7 @@ import { optionsOf } from "@/shared/codebook";
 import { apiCall } from "../api-client";
 import { useApiAction, useUnsavedChangesWarning } from "../hooks";
 import { Field, FormErrorBanner, SubmitButton } from "../form";
+import { DisclosureSection } from "../disclosure-section";
 import { DateTimeInput, SelectInput, type Option } from "../client-kit";
 import { PropertySelect, type PropertyPick } from "./deal-pickers";
 import type { AdFormValue } from "./deal-form-values";
@@ -57,7 +58,7 @@ export function AdForm({
   const [responsibleUserId, setResponsible] = useState("");
   const [markChecked, setMarkChecked] = useState(false);
   const { pending, error, run, fieldError, setError } = useApiAction();
-  const dirty = JSON.stringify(v) !== JSON.stringify(initial) || property?.id !== initialProperty?.id;
+  const dirty = JSON.stringify(v) !== JSON.stringify(initial) || property?.id !== initialProperty?.id || responsibleUserId !== "" || markChecked;
   useUnsavedChangesWarning(dirty && !pending);
   const set = <K extends keyof AdFormValue>(k: K, val: AdFormValue[K]) => setV((s) => ({ ...s, [k]: val }));
 
@@ -123,8 +124,9 @@ export function AdForm({
         </Field>
       </div>
       <Field label="Текст объявления" hint={`Рабочий текст или копия опубликованного · ${v.adText.length} симв.`} error={fieldError("adText")}>
-        <textarea className="input min-h-48 font-[inherit]" value={v.adText} onChange={(e) => set("adText", e.target.value)} />
+        <textarea className="input min-h-28 font-[inherit]" value={v.adText} onChange={(e) => set("adText", e.target.value)} />
       </Field>
+      <DisclosureSection title="Комментарий и назначение ответственного" defaultOpen={Boolean(initial.comment)} error={[fieldError("comment"), fieldError("responsibleUserId")].filter(Boolean).join("; ")}>
       <Field label="Комментарий" error={fieldError("comment")}>
         <input className="input" value={v.comment} onChange={(e) => set("comment", e.target.value)} />
       </Field>
@@ -133,6 +135,7 @@ export function AdForm({
           <SelectInput value={responsibleUserId} onChange={setResponsible} options={users} placeholder="Ответственный объекта" />
         </Field>
       ) : null}
+      </DisclosureSection>
       {mode === "edit" ? (
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={markChecked} onChange={(e) => setMarkChecked(e.target.checked)} /> Отметить: объявление проверено и актуально

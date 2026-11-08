@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { apiCall } from "@/ui/api-client";
 import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
 import { Field, FormErrorBanner, SubmitButton } from "@/ui/form";
+import { DisclosureSection } from "@/ui/disclosure-section";
 import { EntityPicker, DateTimeInput, NextActionFields, SelectInput, defaultNextAction, type NextActionValue, type Option } from "@/ui/client-kit";
 import { DuplicateNotice, emptyClient, NewClientFields, newClientPayload, type NewClientValue } from "@/ui/domain/client-fields";
 import { NeedParamsFields, emptyNeedParams, needParamsPayload, type NeedParamsOptions, type NeedParamsValue } from "@/ui/domain/need-params-fields";
@@ -301,7 +302,7 @@ function RequestFormInner({
         <Field label="Объект, о котором обращение" error={fieldError("propertyId") ?? fieldError("advertisementId")} hint={property ? undefined : "Необязательно. Если звонят по объекту или объявлению — выберите его."}>
           <PropertyPicker value={property} onChange={(p) => void changeProperty(p)} />
         </Field>
-        <details className="rounded-md border border-slate-200 p-3" open={advertisementId || external ? true : undefined}><summary className="cursor-pointer text-sm font-medium">Дополнительный контекст: объявления</summary><div className="mt-3 space-y-3">
+        <DisclosureSection title="Объявление, по которому обратились" defaultOpen={Boolean(advertisementId || external)} error={[fieldError("advertisementId"), fieldError("externalListingId")].filter(Boolean).join("; ")}>
         <Field label="Объявление агентства" error={fieldError("advertisementId")}>
           <EntityPicker url="/api/v1/requests/pick-context?kind=advertisement" value={advertisement} onChange={async (ad) => {
             setAdvertisement(ad); setProperty(null); setPreview(null);
@@ -311,7 +312,7 @@ function RequestFormInner({
         <Field label="Внешнее объявление" error={fieldError("externalListingId")}>
           <EntityPicker url="/api/v1/requests/pick-context?kind=external" value={external} onChange={setExternal} render={(ad) => ad.label} placeholder="Источник или адрес внешнего объявления…" />
         </Field>
-        </div></details>
+        </DisclosureSection>
         {advertisementId ? <div className="text-xs text-slate-500">Обращение по объявлению агентства (из ссылки).</div> : null}
         {preview ? (
           <div className="alert alert-info">
@@ -408,11 +409,11 @@ function RequestFormInner({
       </Section>
 
       {isManager && clientMode !== "existing" ? (
-        <Section title="Ответственный">
+        <DisclosureSection title="Назначить другого ответственного" error={fieldError("responsibleUserId")}>
           <Field label="Назначить ответственного вручную" hint="По умолчанию — ответственный объекта, без объекта — вы. Изменение журналируется." error={fieldError("responsibleUserId")}>
             <SelectInput value={responsibleUserId} onChange={setResponsible} options={users} placeholder="По правилу предприятия" />
           </Field>
-        </Section>
+        </DisclosureSection>
       ) : null}
 
       <div className="flex gap-2 border-t border-slate-100 pt-4">

@@ -48,7 +48,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
           {res.data.items.length === 0 ? (
             <EmptyState
               title={sp.q ? "Клиенты не найдены" : "Клиентов пока нет"}
-              hint="Новые клиенты появляются при регистрации обращения или создаются вручную."
+              hint={sp.q || sp.status || sp.hasActiveNeed || sp.responsibleUserId ? "Проверьте имя или контакт, измените условия поиска либо сбросьте фильтры." : "Новые клиенты появляются при регистрации обращения или создаются вручную."}
               action={
                 <Link href="/requests/new" className="btn btn-primary">
                   Зарегистрировать обращение
@@ -65,6 +65,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                   <th>Потребности</th>
                   <th>Ближайшее действие</th>
                   <th>Последняя активность</th>
+                  <th>Быстрые действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -93,6 +94,12 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                       )}
                     </td>
                     <td data-label="Последняя активность">{fmtDateTime(c.lastActivityAt)}</td>
+                    <td data-label="Быстрые действия">
+                      <div className="flex flex-wrap gap-2">
+                        <Link href={`/clients/${c.id}?tab=history`} className="link" aria-label={`История клиента ${c.displayName}`}>История</Link>
+                        <Link href={`/clients/${c.id}?tab=needs`} className="link" aria-label={`Потребности клиента ${c.displayName}`}>Потребности</Link>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
