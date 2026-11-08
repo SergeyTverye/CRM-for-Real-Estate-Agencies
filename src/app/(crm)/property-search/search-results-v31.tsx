@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { SearchFilters, NormalizedListing, CriterionEvaluation, Source } from "@/modules/property-search/domain/types";
+import { useEffect, useRef, useState, type ReactNode } from "react";import type { SearchFilters, NormalizedListing, CriterionEvaluation, Source } from "@/modules/property-search/domain/types";
 import type { DuplicateGroupDto } from "@/modules/listing-duplicates";
 import { ListingDuplicateGroups } from "@/ui/listing-duplicates";
 import { StartBrowserSession } from "@/ui/browser-session/start-session";
@@ -13,6 +12,7 @@ import { Modal } from "@/ui/client-kit";
 import { FormErrorBanner } from "@/ui/form";
 import { Badge, Card, EmptyState } from "@/ui/components";
 import { labelOf } from "@/shared/codebook";
+import { ListingPhoto } from "./listing-photo";
 import { SearchFallback } from "./search-fallback";
 import { sourceReason } from "./source-reason";
 import { resultAddress, resultPriceUnit, evidenceLabel, translatedEvidence } from "./result-display";
@@ -32,6 +32,25 @@ const statusLabels:Record<string,string>={rate_limited:"Ограничение �
 const number=(v:unknown)=>v===null||v===undefined?"—":Number(v).toLocaleString("ru-RU");
 const date=(v:string|null|undefined)=>v?new Date(v).toLocaleString("ru-RU",{timeZone:"Asia/Novosibirsk"}):"неизвестно";
 function listing(row:Row):Listing {return {id:row.listingId,source:row.source,sourceMethod:row.snapshot?.sourceMethod??"scraper",url:row.url,address:row.snapshot?.address??null,priceRub:row.snapshot?.price??null,areaM2:row.snapshot?.area==null?null:String(row.snapshot.area),floorRaw:row.snapshot?.floor.raw??null,lastSeenAt:row.snapshot?.fetchedAt??row.firstSeenAt,propertyId:row.propertyId??null,operation:row.snapshot?.operation??undefined,priceUnit:row.snapshot?.priceUnit??undefined};}
+function verdictBadge(verdict:string):ReactNode {
+  if (verdict==="confirmed") return <Badge tone="green">Подходит</Badge>;
+  if (verdict==="rejected") return <Badge tone="red">Исключено</Badge>;
+  return <Badge tone="yellow">Требует проверки</Badge>;
+}
+function missingFields(row:Row):string[] {
+  const s=row.snapshot,missing:string[]=[];
+  if (s?.price==null) missing.push("цена");
+  if (!s?.priceUnit) missing.push("единица цены");
+  if (s?.area==null) missing.push("площадь");
+  if (!s||s.floor.kind==="unknown") missing.push("этаж");
+  if (!s?.district) missing.push("район");
+  if (!s?.city) missing.push("город");
+  return missing;
+}
+function isSuspected(row:Row,groups:DuplicateGroupDto[]):boolean {
+  if ((row.snapshot?.possibleDuplicateKeys?.length??0)>0) return true;
+  return groups.some(g=>g.members.some(m=>m.listingId===row.listingId&&!m.releasedAt));
+}
 
 export function SearchResultsV31({runId,externalRefresh,knownFacts,filters,needId,aiEnabled,aiStatusMessage,aiSettingsUrl,replay,replayDate,view,onCompare,onBusy,renderActions}:{runId:string;externalRefresh:number;knownFacts:Record<string,Fact>;filters:SearchFilters;needId:string;aiEnabled:boolean;aiStatusMessage?:string|null;aiSettingsUrl?:string|null;replay:boolean;replayDate?:string|null;view:string;onCompare:(rows:unknown[])=>void;onBusy:(busy:boolean)=>void;renderActions:(listing:Listing)=>ReactNode}) {
   const [progress,setProgress]=useState<Progress|null>(null),[result,setResult]=useState<Results|null>(null),[loading,setLoading]=useState(true);
@@ -82,12 +101,12 @@ export function SearchResultsV31({runId,externalRefresh,knownFacts,filters,needI
       case "lastCheckedAt":return date(row.lastCheckedAt);
       case "purpose":return formatPurposeLabel(s?.purpose);
       case "district":return s?.district??"Неизвестен";
-      case "verdict":return row.verdict==="confirmed"?"Совпадение":row.verdict==="rejected"?"Исключено":"Требует проверки";
+      case "verdict":return <span>{row.verdict==="confirmed"?"Совпадение":row.verdict==="rejected"?"Исключено":"Требует проверки"}{(row.snapshot?.possibleDuplicateKeys?.length??0)>0?" · возможный дубль":""}</span>;
       case "unknown":return row.criteria.filter(c=>c.state==="unknown").map(c=>evidenceLabel("criterion",c.criterion)).join("; ")||"Нет";
       case "note":return facts[row.listingId]?.note??row.note??"?";
       case "owner":return "Сведения проверки — в действиях объявления";
       case "links":{const group=result?.duplicateGroups.find(g=>g.members.some(m=>m.listingId===row.listingId&&!m.releasedAt));return group?<ul>{group.members.filter(m=>!m.releasedAt).map(m=><li key={m.listingId}><a className="link" href={m.listing.url??"#"} target="_blank" rel="noreferrer">{labelOf("externalSource",m.listing.source)} ↗</a></li>)}</ul>:cell(row,"url");}
-      case "photos":return s?.images.length?cell(row,"url"):"Нет сведений о фото";
+      case "photos":return s?.images.length?<a className="link" href={row.url} target="_blank" rel="noreferrer">Есть у первоисточника ↗</a>:"Нет сведений о фото (площадка не указала)";
       case "url":return <a className="link" href={row.url} target="_blank" rel="noreferrer">Первоисточник ↗</a>;
       default:return "—";
     }
@@ -110,7 +129,7 @@ export function SearchResultsV31({runId,externalRefresh,knownFacts,filters,needI
     {loading&&<p role="status">Загрузка результатов…</p>}
     <ListingDuplicateGroups groups={result?.duplicateGroups??[]} loading={loading} error={result?.duplicateGroupingError??undefined} onChanged={()=>setRefresh(v=>v+1)}/>
     {!loading&&!rows.length&&<EmptyState title="В этой вкладке нет объявлений" hint="Проверьте условия, другие вкладки и статусы источников."/>}
-    {view==="table"?<div className="max-w-full overflow-x-auto rounded border bg-white"><table className="w-full text-left text-sm"><thead><tr><th className="p-3">Выбор</th>{columns.map(c=><th className="p-3" key={c}>{COLUMNS[c as keyof typeof COLUMNS]}</th>)}<th className="p-3">Доказательства и действия</th></tr></thead><tbody>{rows.map(r=><tr data-listing-id={r.listingId} key={r.id} className="border-t"><td className="p-3"><input type="checkbox" aria-label={`Выбрать ${r.snapshot?.address??"объявление"}`} checked={selected.has(r.listingId)} onChange={()=>toggle(r.listingId,r)}/></td>{columns.map(c=><td className="p-3" key={c}>{cell(r,c)}</td>)}<td className="p-3"><Evidence criteria={r.criteria}/>{renderActions(enriched(r))}</td></tr>)}</tbody></table></div>:<div className="grid min-w-0 gap-4 xl:grid-cols-2">{rows.map(r=><article data-listing-id={r.listingId} key={r.id} className="min-w-0 space-y-3 rounded border bg-white p-4"><label className="flex gap-2 font-medium"><input type="checkbox" checked={selected.has(r.listingId)} onChange={()=>toggle(r.listingId,r)}/>Выбрать {resultAddress(r.snapshot,listing(r))}</label><p className="break-words">{r.snapshot?.title}</p><div className="flex flex-wrap gap-2"><Badge>Объявление площадки</Badge>{r.isNew&&<Badge tone="blue">Новое</Badge>}{r.priceChanged&&<Badge tone="yellow">Цена изменилась</Badge>}</div><a className="link" href={r.url} target="_blank" rel="noreferrer">{labelOf("externalSource",r.source)} · Первоисточник ↗</a><p className="text-lg font-semibold">{cell(r,"price")}</p><p>{cell(r,"pricePerM2Rub")}</p><p>{cell(r,"area")} · этаж {cell(r,"floor")}</p><p className="text-xs">Опубликовано: {cell(r,"publishedAt")}<br/>Впервые найдено CRM: {cell(r,"firstSeenAt")}</p><Evidence criteria={r.criteria}/>{renderActions(enriched(r))}<button className="btn btn-secondary" onClick={()=>{setSelected(new Map([[r.listingId,r]]));void open("collection");}}>В именованную подборку</button></article>)}</div>}
+    {view==="table"?<div className="max-w-full overflow-x-auto rounded border bg-white"><table className="w-full text-left text-sm"><thead><tr><th className="p-3">Выбор</th>{columns.map(c=><th className="p-3" key={c}>{COLUMNS[c as keyof typeof COLUMNS]}</th>)}<th className="p-3">Доказательства и действия</th></tr></thead><tbody>{rows.map(r=><tr data-listing-id={r.listingId} key={r.id} className="border-t"><td className="p-3"><input type="checkbox" aria-label={`Выбрать ${r.snapshot?.address??"объявление"}`} checked={selected.has(r.listingId)} onChange={()=>toggle(r.listingId,r)}/></td>{columns.map(c=><td className="p-3" key={c}>{cell(r,c)}</td>)}<td className="p-3"><Evidence criteria={r.criteria}/>{renderActions(enriched(r))}</td></tr>)}</tbody></table></div>:<div className="grid min-w-0 gap-3 xl:grid-cols-2">{rows.map(r=>{const missing=missingFields(r);const suspected=isSuspected(r,result?.duplicateGroups??[]);const hasAi=r.criteria.some(c=>c.source==="ai");return <article data-listing-id={r.listingId} key={r.id} className="min-w-0 space-y-2 rounded border bg-white p-3"><div className="flex flex-wrap items-center gap-2"><label className="flex min-w-0 flex-1 gap-2 font-medium"><input type="checkbox" checked={selected.has(r.listingId)} onChange={()=>toggle(r.listingId,r)}/><span className="min-w-0 truncate">{resultAddress(r.snapshot,listing(r))}</span></label>{verdictBadge(r.verdict)}</div><p className="break-words text-sm text-slate-600">{r.snapshot?.title}</p><div className="flex flex-wrap gap-1"><Badge>Объявление площадки</Badge><Badge>{labelOf("externalSource",r.source)}</Badge>{r.snapshot?.purpose&&<Badge>{formatPurposeLabel(r.snapshot.purpose)}</Badge>}{r.snapshot?.district&&<Badge>{r.snapshot.district}</Badge>}{r.isNew&&<Badge tone="blue">Новое</Badge>}{r.priceChanged&&<Badge tone="yellow">Цена изменилась</Badge>}{suspected&&<Badge tone="yellow" title="Совпадение адреса и площади с другим объявлением. Слияние не выполнялось.">Возможный дубль · проверить</Badge>}</div><ListingPhoto propertyId={enriched(r).propertyId} sourceUrl={r.url}/><p className="text-lg font-semibold">{cell(r,"price")}</p><p className="text-sm">{cell(r,"pricePerM2Rub")} · {cell(r,"area")} · этаж {cell(r,"floor")}</p><p className="text-xs text-slate-600">{r.publishedAt?`Опубликовано: ${cell(r,"publishedAt")}`:"Дата публикации неизвестна"} · Впервые найдено CRM: {cell(r,"firstSeenAt")}{r.lastCheckedAt?` · Проверено: ${cell(r,"lastCheckedAt")}`:""}</p>{missing.length>0&&<p className="text-xs text-slate-600">Площадка не указала: {missing.join(", ")}. Значения не домысливаются.</p>}{hasAi&&<p className="text-xs text-slate-600">Выводы AI ниже — предположения, а не факты площадки.</p>}<Evidence criteria={r.criteria}/><div className="flex flex-wrap gap-2"><a className="btn btn-secondary" href={r.url} target="_blank" rel="noreferrer">Открыть источник ↗</a><button className="btn btn-secondary" onClick={()=>{setSelected(new Map([[r.listingId,r]]));void open("collection");}}>В именованную подборку</button><button className="btn btn-secondary" onClick={()=>{setSelected(new Map([[r.listingId,r]]));void open("catalog");}}>Сохранить</button><button className="btn btn-secondary" onClick={()=>toggle(r.listingId,r)}>{selected.has(r.listingId)?"Убрать из сравнения":"К сравнению"}</button></div>{renderActions(enriched(r))}</article>;})}</div>}
     <nav aria-label="Страницы результатов" className="flex flex-wrap items-center gap-3"><button className="btn btn-secondary" disabled={loading||page===1} onClick={()=>setPage(p=>p-1)}>Назад</button><span>Страница {page} из {Math.max(1,Math.ceil((result?.total??0)/pageSize))} · всего {result?.total??0}</span><button className="btn btn-secondary" disabled={loading||page*pageSize>=(result?.total??0)} onClick={()=>setPage(p=>p+1)}>Далее</button><label>На странице<select aria-label="На странице" className="input ml-2" value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1);}}>{[10,25,50,100].map(n=><option key={n}>{n}</option>)}</select></label></nav>
     {(aiEnabled||!!aiStatusMessage)&&selected.size>0&&<ListingAnalysisPanel key={key+[...selected.keys()].join()} listingIds={[...selected.keys()]} filters={filters} needId={needId||undefined} labels={Object.fromEntries([...selected].map(([id,r])=>[id,r.snapshot?.address??"Объявление"]))} enabled={aiEnabled} statusMessage={aiStatusMessage} settingsUrl={aiSettingsUrl}/>}
     <Modal open={!!dialog} title={dialog==="export"?"Экспорт результатов":dialog==="url"?"Добавить по ссылке":dialog==="import"?"Импорт официальной выгрузки":"Действие с выбранными объявлениями"} onClose={()=>{if(!action.pending){setDialog(null);}}}>
@@ -126,4 +145,4 @@ export function SearchResultsV31({runId,externalRefresh,knownFacts,filters,needI
     </Modal>
   </section>;
 }
-function Evidence({criteria}:{criteria:CriterionEvaluation[]}){return <details><summary className="cursor-pointer text-sm font-medium">Доказательства критериев ({criteria.length})</summary><ul className="mt-2 space-y-2">{criteria.map((c,i)=><li className="rounded border p-2 text-sm" key={i}><Badge tone={c.state==="matched"?"green":c.state==="contradicted"?"red":"yellow"}>{evidenceLabel("criterion_state",c.state)}</Badge> {evidenceLabel("criterion",c.criterion)} · {evidenceLabel("criterion_source",c.source)}<p>{translatedEvidence(c.evidence)}</p></li>)}</ul></details>;}
+function Evidence({criteria}:{criteria:CriterionEvaluation[]}){return <details><summary className="cursor-pointer text-sm font-medium">Доказательства критериев ({criteria.length})</summary><ul className="mt-2 space-y-2">{criteria.map((c,i)=><li className={c.source==="ai"?"rounded border border-violet-300 bg-violet-50 p-2 text-sm":"rounded border p-2 text-sm"} key={i}><Badge tone={c.state==="matched"?"green":c.state==="contradicted"?"red":"yellow"}>{evidenceLabel("criterion_state",c.state)}</Badge> {evidenceLabel("criterion",c.criterion)} · {c.source==="ai"?<strong>Вывод AI — требует проверки</strong>:evidenceLabel("criterion_source",c.source)}<p>{translatedEvidence(c.evidence)}</p></li>)}</ul></details>;}
