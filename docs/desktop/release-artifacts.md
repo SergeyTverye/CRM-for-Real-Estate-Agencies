@@ -1,6 +1,8 @@
-# Windows desktop: текущий загруженный EXE a4 (частично проверенный кандидат)
+# Windows desktop: установленный EXE 998b59f
 
-Текущий загруженный артефакт CI (не готовый релиз целиком): commit `a4a4120cd83b8f967b546472a25c8eb0909841de`, run [42415838070](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42415838070), статус **ALL SUCCESS**: build + installer 2022 + installer 2025.
+> Текущее (поиск): `998b59f` — [CI 42440108843](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42440108843) полностью SUCCESS, EXE 800171772 B, SHA-256 `dcccfede42424657f7fce3c4b8cac836dd05f35f0e8301ce5e90577dd3698bb3`. Установленный поиск, UI, LIVE-сбор и AI проверены; протокол: [installed-search-998b59f.md](../acceptance/desktop-v32/installed-search-998b59f.md). Ниже — исторический срез a4.
+
+Исторический артефакт a4, заменённый текущим `998b59f`: commit `a4a4120cd83b8f967b546472a25c8eb0909841de`, run [42415838070](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42415838070), статус **ALL SUCCESS**: build + installer 2022 + installer 2025.
 
 Артефакт: [13592870756](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42415838070/artifacts/13592870756). Файл `releases/windows-x64/CRM-Setup-Windows-x64.exe`, **593 321 323 байт**. SHA-256: `7434e3a5c8a646fe15663ed0b3649026404bb744165cc4baa1431b8e35c1040b`. Установленный launcher SHA-256: `bc46de74eb9490deac0e666d238864e61b46d326883a425a97ca779556b48a86`.
 
