@@ -1,3 +1,4 @@
+import { attachGeographyParsers } from "./geography-parsers";
 import { AsyncLocalStorage } from "node:async_hooks";
 import type RealEstateScraper from "real-estate-scrapper";
 import { attachYoulaParser } from "./youla-parser";
@@ -13,6 +14,7 @@ export function dateEnrichmentProgress(client: object, source: Source) { return 
 /** Extend the installed parsers in our adapter, without patching node_modules. */
 export function extendSourceParsers(client: RealEstateScraper, options: DateDetailOptions = {}): RealEstateScraper {
   attachResidentialParsers(client);
+  attachGeographyParsers(client);
   attachYoulaParser(client, options);
   const progress: Partial<Record<Source, DateDetailProgress>> = {};
   detailProgress.set(client, progress);

@@ -13,7 +13,7 @@ const num = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 const fail = (code: string): never => { throw Object.assign(new Error(code), { code, source: "youla" }); };
-const types: Record<string, string> = { flat: "kvartiri", studio: "kvartiri", room: "komnati", house: "doma" };
+const types: Record<string, string> = { flat: "kvartiri", studio: "kvartiri", room: "komnati", house: "doma", cottage: "doma" };
 const categories: Record<string, { type: string; deal: "sale" | "rent" | "daily" }> = {
   "2001": { type: "flat", deal: "sale" }, "2002": { type: "room", deal: "sale" }, "2003": { type: "house", deal: "sale" },
   "2005": { type: "flat", deal: "rent" }, "2006": { type: "room", deal: "rent" }, "2007": { type: "house", deal: "rent" },
@@ -171,7 +171,16 @@ export function attachYoulaParser(client: RealEstateScraper, options: DateDetail
       if (detailsStopped || detailCount >= detailLimit || Date.now() >= deadline || q.signal?.aborted) break;
       const item = page.results[i]!; detailCount++;
       try {
-        const state = youlaState(await request(item.url, { signal: q.signal }));
+        const detailController = new AbortController();
+        const abort = () => detailController.abort();
+        q.signal?.addEventListener("abort", abort, { once: true });
+        if (q.signal?.aborted) abort();
+        const timer = setTimeout(abort, Math.max(1, Math.min(3000, deadline - Date.now() - 1000)));
+        let detailPayload: unknown;
+        try { detailPayload = await request(item.url, { signal: detailController.signal }); }
+        catch (error) { if (detailController.signal.aborted && !q.signal?.aborted) throw Object.assign(new Error("DETAIL_TIMEOUT"), { code: "DETAIL_TIMEOUT" }); throw error; }
+        finally { clearTimeout(timer); q.signal?.removeEventListener("abort", abort); }
+        const state = youlaState(detailPayload);
         const product = row(row(row(state.entities).products)[item.id!]);
         if (product.id !== item.id) continue;
         if (product.isDeleted || product.isArchived || product.isSold || product.isBlocked) { page.results.splice(i--, 1); continue; }

@@ -112,6 +112,15 @@ export function attachResidentialParsers(client: RealEstateScraper): void {
     url.pathname = `/${regionSegment}/${segments.join("/")}${url.pathname.endsWith("/") ? "/" : ""}`;
     return url.toString().replace("/Новосибирская+область/", `/${regionSegment}/`);
   };
+  const mirParse = mir.parsePage.bind(mir);
+  mir.parsePage = (payload, url, query) => {
+    const page = mirParse(payload, url, query);
+    return { ...page, results: page.results.map(item => {
+      const host = new URL(item.url).hostname;
+      const deal = ["arenda.mirkvartir.ru", "arendadoma.mirkvartir.ru"].includes(host) ? "rent" as const : ["www.mirkvartir.ru", "dom.mirkvartir.ru"].includes(host) ? "sale" as const : item.deal;
+      return { ...item, deal };
+    }) };
+  };
   const cian = client.parsers.cian, parse = cian.parsePage.bind(cian);
   cian.parsePage = (payload, url, query) => {
     // Keep the original parser's validation, errors, pagination and commercial path.

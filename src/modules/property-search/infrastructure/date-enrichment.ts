@@ -21,7 +21,7 @@ export class DateEnrichment {
     this.cache = options.cache ?? sharedCache;
   }
   async read(source: Source, identity: { id?: string | null; url: string }, fetch: (signal: AbortSignal) => Promise<unknown>, signal?: AbortSignal): Promise<ListingDates | null> {
-    if (!["onrealt", "mirkvartir"].includes(source) || this.stopped || signal?.aborted || this.now() >= this.deadline) return null;
+    if (!["onrealt", "mirkvartir"].includes(source) || this.stopped || signal?.aborted || this.now() + 1000 >= this.deadline) return null;
     const key = `${source}:${identity.id ?? identity.url}`;
     const cached = this.cache.get(key);
     if (cached && cached.expires > this.now()) { this.progress.cacheHits++; return cached.dates; }
@@ -33,7 +33,8 @@ export class DateEnrichment {
     try {
       const payload = await Promise.race([fetch(controller.signal), new Promise<never>((_, reject) => {
         controller.signal.addEventListener("abort", () => reject(Error("DATE_DETAIL_ABORTED")), { once: true });
-        timer = setTimeout(abort, Math.max(1, this.deadline - this.now()));
+        // Optional date lookup must leave time to publish the already parsed SERP.
+        timer = setTimeout(abort, Math.max(1, Math.min(3000, this.deadline - this.now() - 1000)));
       })]);
       const response = payload && typeof payload === "object" && "data" in payload ? payload as { data: unknown; status?: number } : { data: payload, status: 200 };
       if ((response.status ?? 200) >= 400 || detectAccessChallenge(identity.url, response.data)) throw Error("DATE_DETAIL_UNAVAILABLE");

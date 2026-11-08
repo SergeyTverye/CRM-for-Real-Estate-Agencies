@@ -67,12 +67,12 @@ describe("P0-A final LIVE date evidence", () => {
     await new DateEnrichment(options).read("mirkvartir", identity, fetch); expect(fetch).toHaveBeenCalledTimes(2);
     expect(JSON.stringify([...cache.values()])).not.toContain("<section>");
   });
-  it("enforces deadline even when injected fetch ignores cancellation", async () => {
+  it("leaves publication time when an optional detail deadline is imminent", async () => {
     const service = new DateEnrichment({ deadline: Date.now() + 15, cache: new Map() });
     const fetch = vi.fn(() => new Promise(() => undefined));
     expect(await service.read("mirkvartir", identity, fetch)).toBeNull();
-    await service.read("mirkvartir", identity, fetch); expect(fetch).toHaveBeenCalledOnce();
-    expect(service.progress.failed).toBe(1);
+    await service.read("mirkvartir", identity, fetch); expect(fetch).not.toHaveBeenCalled();
+    expect(service.progress.failed).toBe(0);
   });
   it("stops source detail work after one HTTP block; does not retry on next page", async () => {
     const service = new DateEnrichment({ cache: new Map() }), fetch = vi.fn(async () => ({ status: 403, data: "" }));

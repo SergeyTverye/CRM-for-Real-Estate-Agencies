@@ -126,6 +126,7 @@ export function SearchResultsV31({runId,externalRefresh,knownFacts,filters,needI
   function reviewNotes(row:Row):ReactNode {
     const missing=missingFields(row);
     return <>{isSuspected(row,result?.duplicateGroups??[])&&<Badge tone="yellow" title="Предполагаемое совпадение, идентичность не подтверждена. Слияние не выполнялось.">Возможный дубль · проверить</Badge>}
+      {row.criteria.some(c=>c.criterion==="city"&&c.state==="unknown")&&<Badge tone="yellow">Локация требует проверки</Badge>}
       {missing.length>0&&<p className="text-xs text-slate-600">Площадка не указала: {missing.join(", ")}. Значения не домысливаются.</p>}
       {row.criteria.some(c=>c.source==="ai")&&<p className="rounded border border-violet-300 bg-violet-50 p-2 text-xs">Выводы AI ниже — предположения, а не факты площадки.</p>}</>;
   }

@@ -273,7 +273,8 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         const successfulPage = result.pages.some(p => p.errors.length === 0);
         const errors = result.errors.map(e => e.code === "ABORTED" && !signal?.aborted ? { ...e, code: "TIMEOUT" } : e);
         if (stopCode) errors.push({ source, page: result.pages.length + 1, code: stopCode, error: "" });
-        const status: AdapterSourceRun["status"] = errors.length ? successfulPage || listings.length ? "partial" : failure(errors) : invalid || result.partial ? "partial" : "success";
+        const regionalYoula = source === "youla" && filters.locations?.includes("novosibirsk-region");
+        const status: AdapterSourceRun["status"] = errors.length ? successfulPage || listings.length ? "partial" : failure(errors) : invalid || result.partial || regionalYoula ? "partial" : "success";
         const branchTails = new Map<string, RealEstateScraper.PageMetadata>();
         for (const page of result.pages) branchTails.set(JSON.stringify(page.types ?? []), page);
         const limited = resultLimited || [...branchTails.values()].some(p => p.hasNext === true || p.truncated);
@@ -286,9 +287,9 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
           ...(dateDetails ? { dateDetails: { ...dateDetails } } : {}),
           pagesFetched: result.pages.filter(p => !p.errors.length).length, listingsFetched: result.results.length,
           ...(errors[0] ? { failureCode: errors[0].code } : {}),
-          incomplete: limited || !!errors.length || invalid > 0 || result.partial || result.pages.some(p => p.hasNext === null),
+          incomplete: !!regionalYoula || limited || !!errors.length || invalid > 0 || result.partial || result.pages.some(p => p.hasNext === null),
           ...(errors.some(e => e.code === "NEEDS_USER_ACTION") ? { actionUrl: `https://${host}/` } : {}),
-          reason: [(filters.purposes as string[]).includes("residential") && filters.purposes.some(p => p !== "residential") ? "Смешанный поиск: категории commercial + residential; назначение проверяется CRM" : null, source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, housingCoverage, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
+          reason: [regionalYoula ? "Область: частичный охват Юлы — Новосибирск, Бердск, Обь, Кольцово, Краснообск, Искитим. Площадка не поддерживает область целиком; остальные адреса области ищите на другой площадке." : null, (filters.purposes as string[]).includes("residential") && filters.purposes.some(p => p !== "residential") ? "Смешанный поиск: категории commercial + residential; назначение проверяется CRM" : null, source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, housingCoverage, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
         const stopped = stopCode ? { code: stopCode } : info;
