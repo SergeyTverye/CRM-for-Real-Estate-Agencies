@@ -1,0 +1,241 @@
+{
+  "version": "3.2.3",
+  "source": "youla",
+  "city": "Новосибирск",
+  "executedAt": "2026-11-08T21:08:54.808Z",
+  "requestBudget": {
+    "limit": 30,
+    "attempts": 30,
+    "discovery": 14,
+    "diagnosticInvalidSample": 10,
+    "finalParser": 4,
+    "networkDenied": 1,
+    "webOpen": 1,
+    "minIntervalMs": 1100
+  },
+  "runs": [
+    {
+      "scenario": "flat-sale",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 30,
+      "localProducts": 26,
+      "hasNextPage": true,
+      "subcategoryIds": [
+        2001
+      ]
+    },
+    {
+      "scenario": "flat-rent",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 30,
+      "localProducts": 25,
+      "hasNextPage": true,
+      "subcategoryIds": [
+        2005
+      ]
+    },
+    {
+      "scenario": "room-sale",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 30,
+      "localProducts": 30,
+      "hasNextPage": true,
+      "subcategoryIds": [
+        2002
+      ]
+    },
+    {
+      "scenario": "room-rent",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 30,
+      "localProducts": 29,
+      "hasNextPage": true,
+      "subcategoryIds": [
+        2006
+      ]
+    },
+    {
+      "scenario": "house-sale",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 30,
+      "localProducts": 18,
+      "hasNextPage": true,
+      "subcategoryIds": [
+        2003
+      ]
+    },
+    {
+      "scenario": "house-rent",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 15,
+      "localProducts": 13,
+      "hasNextPage": false,
+      "subcategoryIds": [
+        2007
+      ]
+    },
+    {
+      "scenario": "office-rent",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 4,
+      "localProducts": 4,
+      "hasNextPage": false,
+      "subcategoryIds": [
+        2013
+      ]
+    },
+    {
+      "scenario": "warehouse-rent",
+      "mode": "LIVE",
+      "phase": "discovery-with-web-uid",
+      "httpStatus": 200,
+      "products": 0,
+      "localProducts": 0,
+      "hasNextPage": false,
+      "subcategoryIds": []
+    }
+  ],
+  "finalParserRuns": [
+    {
+      "scenario": "flat-rent",
+      "mode": "LIVE",
+      "status": "PASS",
+      "url": "https://youla.ru/novosibirsk/nedvijimost/arenda-kvartiri",
+      "count": 24,
+      "hasNext": true,
+      "elapsedMs": 1272,
+      "priceUnits": [
+        null
+      ],
+      "withArea": 24,
+      "withImages": 24,
+      "foreignCity": 0
+    },
+    {
+      "scenario": "office-rent",
+      "mode": "LIVE",
+      "status": "PASS",
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "count": 4,
+      "hasNext": false,
+      "elapsedMs": 253,
+      "priceUnits": [
+        null
+      ],
+      "withArea": 4,
+      "withImages": 4,
+      "foreignCity": 0
+    },
+    {
+      "scenario": "warehouse-rent",
+      "mode": "LIVE",
+      "status": "PASS",
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165974&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "count": 0,
+      "hasNext": false,
+      "elapsedMs": 1144,
+      "priceUnits": [],
+      "withArea": 0,
+      "withImages": 0,
+      "foreignCity": 0
+    },
+    {
+      "scenario": "warehouse-sale",
+      "mode": "LIVE",
+      "status": "PASS",
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165974&attributes%5Btip_sdelki%5D%5B0%5D=10807",
+      "count": 0,
+      "hasNext": false,
+      "elapsedMs": 1094,
+      "priceUnits": [],
+      "withArea": 0,
+      "withImages": 0,
+      "foreignCity": 0
+    }
+  ],
+  "details": {
+    "mode": "LIVE",
+    "cards": 2,
+    "fields": [
+      "area",
+      "floor",
+      "rooms",
+      "address",
+      "datePublished.timestamp",
+      "dateUpdated.timestamp"
+    ],
+    "contactsRetained": false,
+    "monthlyPriceEvidence": false
+  },
+  "invalidSample": {
+    "mode": "LIVE",
+    "status": "INVALID_SAMPLE",
+    "reason": "10 diagnostic requests omitted uid/x-uid; HTTP 200 ignored native filters. Includes cursor-page probe; excluded from acceptance counts."
+  },
+  "pagination": {
+    "mode": "REPLAY",
+    "status": "PASS",
+    "live": "Initial feeds expose cursor/hasNextPage; valid filtered page2 has not been LIVE verified within budget."
+  },
+  "checks": {
+    "unitRegression": {
+      "status": "PASS",
+      "files": 29,
+      "tests": 670,
+      "scope": "property-search before final pacing test"
+    },
+    "unitFinal": {
+      "status": "PASS",
+      "files": 2,
+      "tests": 57,
+      "scope": "youla-v323 + residential-parsers; final code, pacing/cancel"
+    },
+    "typecheck": {
+      "status": "PASS",
+      "command": "npx tsc --noEmit"
+    },
+    "eslint": {
+      "status": "PASS",
+      "command": "npx eslint <6 changed TypeScript files> --max-warnings=0"
+    },
+    "postgresql": {
+      "status": "PASS",
+      "database": "crm_test_a",
+      "tests": 1,
+      "scope": "Youla persistence + unknown rental period + foreign-run RBAC"
+    },
+    "sqlite": {
+      "status": "PASS",
+      "tests": 1,
+      "scope": "same integration replay"
+    },
+    "confidentialGuard": {
+      "status": "PASS",
+      "command": "node scripts/security/confidential-guard.mjs --staged"
+    },
+    "browserE2E": {
+      "status": "NOT_RUN"
+    }
+  },
+  "limitations": [
+    "Only flat/studio, room, house are verified residential branches; cottage/townhouse remain explicitly unsupported.",
+    "Feed lacks publication dates/floors: at most 3 detail reads per client/job, maximum configurable 10. Others remain unknown.",
+    "Rental price period unknown unless explicit source text; no monthly assumption.",
+    "Commercial feed lacks deal/subtype evidence; only details provide those facts.",
+    "No browser UI/e2e LIVE check; no CAPTCHA/stealth/proxy bypass."
+  ]
+}
