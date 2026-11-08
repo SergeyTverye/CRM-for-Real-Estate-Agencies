@@ -191,3 +191,12 @@
 | AI-03: сетевая ошибка официального Yandex не ломает core | Контролируемая AI_CALL_FAILED, независимая readiness | injected fetch reject/abort на официальном URL, успешный ручной поиск и ready 200 на PG/SQLite | PASS |
 
 Область доказательства — автоматические REPLAY/fake проверки; новый платный LIVE прогон не проводился. Команды и итоговые результаты: [v322-ai-fixes.md](vkr/v322-ai-fixes.md).
+
+## Поиск v3.2.3 — география
+
+| Требование задачи | Реализация | Проверка | Статус |
+|---|---|---|---|
+| Город / район / населённый пункт / область, несколько локаций | domain/geography.ts, source-filters.ts, location-picker.tsx | geography-v323.test.ts; LIVE matrix/retest | PARTIAL: адресная проверка и пресеты реализованы; ограничения площадок в live-search-v323-geo.md |
+| Апартаменты, квартира, дом, любое нежилое | SearchFilters.propertyKinds, evaluation.ts, search-workspace.tsx | geography-v323.test.ts, residential.test.ts, LIVE type sweep | PASS реализации; фактический юридический статус проверяется человеком |
+| Сохранение условий PG/SQLite | существующая SavedSearch.filters | property-search.test.ts round-trip locations/propertyKinds | PASS: PG/SQLite round-trip и 3 browser save/read проверки; live-search-v323-geo.md |
+| UX, 1366×768, 3 сценария | location-picker, подсказка пустой выдачи, summary типа | v323-geo-ui.cjs | PASS интерфейса: 3 сценария, 6 PNG; подбор PARTIAL из-за внешних ограничений, live-search-v323-geo.md |

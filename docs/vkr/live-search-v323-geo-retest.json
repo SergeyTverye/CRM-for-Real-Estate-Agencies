@@ -1,0 +1,150 @@
+{
+  "mode": "LIVE",
+  "updatedAt": "2026-11-08T21:16:58.734Z",
+  "aiCalls": 0,
+  "wireRequests": 7,
+  "cap": 12,
+  "sampling": "Location sweep plus type/operation coverage, not full Cartesian product; 5 cards per page; no seller contacts stored",
+  "cells": [
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 5
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 13031
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "error",
+      "reason": "onrealt: DISTRICT_LOOKUP_FAILED; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 1498
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 10058
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 10579
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "berdsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 7506
+    }
+  ]
+}

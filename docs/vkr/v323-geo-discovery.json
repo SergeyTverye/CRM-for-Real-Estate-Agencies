@@ -1,0 +1,219 @@
+[
+  {
+    "url": "https://onrealt.ru/core/api-region/?input=%D0%9A%D0%BE%D0%BB%D1%8C%D1%86%D0%BE%D0%B2%D0%BE",
+    "status": 200,
+    "final": "https://onrealt.ru/core/api-region/?input=%D0%9A%D0%BE%D0%BB%D1%8C%D1%86%D0%BE%D0%B2%D0%BE",
+    "geoLinks": [],
+    "region": [
+      {
+        "id": "14963",
+        "name": "рабочий посёлок Кольцово",
+        "region": "10",
+        "placeholder": "Введите ЖК",
+        "in-location": "1",
+        "code": "rabochij-poselok-koltcovo",
+        "longitude": "83.190894",
+        "latitude": "54.940132",
+        "zoom": "12",
+        "name_region": "Новосибирская область"
+      },
+      {
+        "id": "29243",
+        "name": "деревня Кольцово",
+        "region": "34",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "derevnya-koltcovo",
+        "longitude": "35.991586",
+        "latitude": "56.792251",
+        "zoom": "12",
+        "name_region": "Тверская область"
+      },
+      {
+        "id": "24241",
+        "name": "село Кольцово",
+        "region": "21",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "selo-koltcovo",
+        "longitude": "56.462188",
+        "latitude": "57.814782",
+        "zoom": "12",
+        "name_region": "Пермский край"
+      },
+      {
+        "id": "31749",
+        "name": "садовые участки Кольцово-1",
+        "region": "34",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "sadovye-uchastki-koltcovo-1",
+        "longitude": "35.991415",
+        "latitude": "56.785073",
+        "zoom": "12",
+        "name_region": "Тверская область"
+      },
+      {
+        "id": "17296",
+        "name": "коттеджный посёлок Кольцово парк",
+        "region": "10",
+        "placeholder": "Город, округ, район, ЖК",
+        "in-location": "0",
+        "code": "kottedzhnyj-poselok-koltcovo-park",
+        "longitude": "83.183349",
+        "latitude": "54.905586",
+        "zoom": "12",
+        "name_region": "Новосибирская область"
+      },
+      {
+        "id": "136197",
+        "name": "сельское поселение Кольцово",
+        "region": "36",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "selskoe-poselenie-koltcovo",
+        "longitude": "36.669796",
+        "latitude": "54.460604",
+        "zoom": "12",
+        "name_region": "Калужская область"
+      },
+      {
+        "id": "104709",
+        "name": "городской округ Кольцово",
+        "region": "10",
+        "placeholder": "Город, округ, район, ЖК",
+        "in-location": "0",
+        "code": "gorodskoj-okrug-koltcovo",
+        "longitude": "83.197892",
+        "latitude": "54.928318",
+        "zoom": "10",
+        "name_region": "Новосибирская область"
+      },
+      {
+        "id": "93463",
+        "name": "деревня Кольцово",
+        "region": "20",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "derevnya-koltcovo-93463",
+        "longitude": "38.416426",
+        "latitude": "53.060181",
+        "zoom": "12",
+        "name_region": "Тульская область"
+      },
+      {
+        "id": "96791",
+        "name": "деревня Большое Кольцово",
+        "region": "30",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "derevnya-bolshoe-koltcovo",
+        "longitude": "41.693606",
+        "latitude": "55.753483",
+        "zoom": "12",
+        "name_region": "Владимирская область"
+      },
+      {
+        "id": "57632",
+        "name": "деревня Сельцо-Кольцово",
+        "region": "36",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "derevnya-seltco-koltcovo",
+        "longitude": "34.898201",
+        "latitude": "54.507594",
+        "zoom": "12",
+        "name_region": "Калужская область"
+      },
+      {
+        "id": "85308",
+        "name": "село Кольцово",
+        "region": "36",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "selo-koltcovo-85308",
+        "longitude": "36.670398",
+        "latitude": "54.443989",
+        "zoom": "12",
+        "name_region": "Калужская область"
+      },
+      {
+        "id": "102468",
+        "name": "деревня Колокольцово",
+        "region": "34",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "derevnya-kolokoltcovo",
+        "longitude": "33.914941",
+        "latitude": "56.552643",
+        "zoom": "12",
+        "name_region": "Тверская область"
+      },
+      {
+        "id": "147022",
+        "name": "СНТ Заря (около д. Кольцово)",
+        "region": "34",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "snt-zarya-okolo-d-koltcovo",
+        "longitude": "35.999805",
+        "latitude": "56.785098",
+        "zoom": "12",
+        "name_region": "Тверская область"
+      },
+      {
+        "id": "138845",
+        "name": "деревня Кольцово",
+        "region": "6",
+        "placeholder": "Город, округ, район, ЖК",
+        "in-location": "0",
+        "code": "derevnya-koltcovo-138845",
+        "longitude": "44.192683",
+        "latitude": "56.424023",
+        "zoom": "12",
+        "name_region": "Нижегородская область"
+      },
+      {
+        "id": "91232",
+        "name": "деревня Кольцово",
+        "region": "36",
+        "placeholder": "Город, округ, район",
+        "in-location": "0",
+        "code": "derevnya-koltcovo-91232",
+        "longitude": "35.595411",
+        "latitude": "54.759945",
+        "zoom": "12",
+        "name_region": "Калужская область"
+      },
+      {
+        "id": "63336",
+        "name": "коттеджный посёлок Кольцово-парк",
+        "region": "10",
+        "placeholder": "Город, округ, район, ЖК",
+        "in-location": "0",
+        "code": "kottedzhnyj-poselok-koltcovo-park-63336",
+        "longitude": "83.183349",
+        "latitude": "54.905586",
+        "zoom": "12",
+        "name_region": "Новосибирская область"
+      }
+    ]
+  },
+  {
+    "url": "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa",
+    "status": 200,
+    "final": "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa",
+    "head": "\nАренда офиса без посредников в Новосибирской области\t",
+    "geoLinks": []
+  },
+  {
+    "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/",
+    "status": 200,
+    "final": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/",
+    "head": "Аренда коммерческой недвижимости в Новосибирской области",
+    "geoLinks": [
+      "https://arendacre.mirkvartir.ru/Новосибирская+область/Кольцово+рабочий+поселок/",
+      "https://arendacre.mirkvartir.ru/Новосибирская+область/Новосибирский+район/Краснообск+рабочий+поселок/"
+    ]
+  }
+]
