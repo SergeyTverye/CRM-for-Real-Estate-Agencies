@@ -80,7 +80,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                         {c.clientKind === "organization" ? <span className="text-xs text-slate-400">организация</span> : null}
                       </div>
                     </td>
-                    <td data-label="Основной контакт">{c.primaryContact ?? "—"}</td>
+                    <td data-label="Основной контакт" className="whitespace-nowrap">{c.primaryContact ?? "—"}</td>
                     <td data-label="Ответственный">{c.responsible.displayName}</td>
                     <td data-label="Потребности">{c.activeNeeds || "—"}</td>
                     <td data-label="Ближайшее действие">
