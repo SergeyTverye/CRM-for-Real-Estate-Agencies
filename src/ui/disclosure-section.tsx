@@ -18,7 +18,7 @@ export function DisclosureSection({ title, hint, children, defaultOpen = false, 
     <details ref={ref} open={defaultOpen || Boolean(error) || undefined}
       className="rounded-md border border-slate-200 bg-white p-3"
       onInvalidCapture={() => { if (ref.current) ref.current.open = true; }}>
-      <summary className="cursor-pointer rounded text-sm font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
+      <summary className="min-h-11 cursor-pointer rounded py-3 text-sm md:min-h-0 md:py-0 font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
         {title}
         {error ? <span className="ml-2 text-xs font-normal text-red-700">Проверьте поля в этом разделе</span> : null}
       </summary>
