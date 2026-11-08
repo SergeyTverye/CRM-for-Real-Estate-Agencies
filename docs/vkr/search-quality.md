@@ -3067,3 +3067,540 @@
 Исправления по живым данным: 86528882 (цоколь при source floor=1), 1520155919935608064 (тот же конфликт после дробного 231.1 в тексте), 1520155918988281323 («небоскрёб» не отрицание), явная аренда при пустой operation. Действующий арендатор/«уже сдаётся» не определяет операцию продажи — L43 защищён регрессией.
 
 Воспроизведение: **npx tsx scripts/search-quality/evaluate.ts --v31**, без БД/сети/AI; отдельная extension-регрессия v31-quality-extension.test.ts. Простой evaluate.ts по-прежнему проверяет неизменный старый набор. [Метрики](search-quality-v31-metrics.json), [LIVE протокол](live-search-v31.md). Последний LIVE smoke ограничен восемью запусками; финальный persistent worker был запущен до hot fixes, поэтому новые правила в нём не доказаны повторным сбором. Серверные правила и нормализация проверены offline и PostgreSQL, старые verdict/snapshot не переписаны.
+
+
+<!-- v322-replay:start -->
+## REPLAY v3.2.2 — 08.11.2026
+
+Офлайн-прогон того же корпуса 49, без сети и AI. Исторические измерения выше сохранены.
+
+| Запрос | Проверок | Должны отклоняться | Должны включаться | Ложные включения (confirmed / review) | Ложные исключения | Ошибки точного вердикта |
+|---|---:|---:|---:|---:|---:|---:|
+| office-sale | 49 | 30 | 19 | 0 (0 / 0) | 0 | 3 |
+| industrial-rent | 49 | 29 | 20 | 0 (0 / 0) | 0 | 0 |
+| retail-rent | 49 | 48 | 1 | 0 (0 / 0) | 0 | 0 |
+| commercial-sale | 49 | 43 | 6 | 1 (0 / 1) | 0 | 2 |
+
+### JSON: текущий результат
+
+```json
+{
+  "mode": "REPLAY",
+  "sourceMode": "LIVE",
+  "collectedOn": "2026-11-05",
+  "networkCalls": 0,
+  "aiCalls": 0,
+  "fixtureFingerprint": "8e737a9b5e62e1569c79039a66010872c05293a29839ae7151571f175e32e505",
+  "codeFingerprint": "b9d6d6009d95df37ebd62505dbdbe1412ecdaf22c0758982f9c8dc952b080556",
+  "composition": {
+    "total": 49,
+    "bySource": {
+      "mirkvartir": 15,
+      "onrealt": 21,
+      "yandex": 11,
+      "web_search": 2
+    },
+    "byTrueType": {
+      "commercial": 36,
+      "mixed": 3,
+      "residential": 5,
+      "unknown": 5
+    },
+    "byRecordKind": {
+      "listing": 46,
+      "search_page": 3
+    },
+    "populationUniqueUrls": 311
+  },
+  "totals": {
+    "cases": 196,
+    "expectedRejected": 150,
+    "expectedIncluded": 46,
+    "falseInclusions": 1,
+    "falseConfirmed": 0,
+    "falseNeedsReview": 1,
+    "falseExclusions": 0,
+    "exactVerdictErrors": 5,
+    "falseInclusionRate": 0.006667,
+    "falseExclusionRate": 0
+  },
+  "perQuery": {
+    "office-sale": {
+      "cases": 49,
+      "expectedRejected": 30,
+      "expectedIncluded": 19,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 3
+    },
+    "industrial-rent": {
+      "cases": 49,
+      "expectedRejected": 29,
+      "expectedIncluded": 20,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 0
+    },
+    "retail-rent": {
+      "cases": 49,
+      "expectedRejected": 48,
+      "expectedIncluded": 1,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 0
+    },
+    "commercial-sale": {
+      "cases": 49,
+      "expectedRejected": 43,
+      "expectedIncluded": 6,
+      "falseInclusions": 1,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 1,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 2
+    }
+  },
+  "perSource": {
+    "mirkvartir": {
+      "cases": 60,
+      "expectedRejected": 47,
+      "expectedIncluded": 13,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 0
+    },
+    "onrealt": {
+      "cases": 84,
+      "expectedRejected": 61,
+      "expectedIncluded": 23,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 4
+    },
+    "yandex": {
+      "cases": 44,
+      "expectedRejected": 34,
+      "expectedIncluded": 10,
+      "falseInclusions": 1,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 1,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 1
+    },
+    "web_search": {
+      "cases": 8,
+      "expectedRejected": 8,
+      "expectedIncluded": 0,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 0
+    }
+  },
+  "dates": {
+    "unknown": 49,
+    "total": 49,
+    "share": 1,
+    "knownPublicationDates": 0
+  },
+  "deduplication": {
+    "tp": 3,
+    "fp": 0,
+    "fn": 0,
+    "tn": 2,
+    "precision": 1,
+    "recall": 1,
+    "annotatedPairs": 5,
+    "unknownPairsExcluded": 3,
+    "unlabelledPredictions": 0,
+    "retained": 49,
+    "exactMergeAccuracy": null,
+    "predictions": [
+      {
+        "a": "L04",
+        "b": "L22",
+        "relation": "suspected"
+      },
+      {
+        "a": "L06",
+        "b": "L21",
+        "relation": "suspected"
+      },
+      {
+        "a": "L15",
+        "b": "L27",
+        "relation": "suspected"
+      }
+    ]
+  },
+  "diagnostics": {
+    "residentialPurposeRule": {
+      "total": 5,
+      "rejected": 5
+    },
+    "floorNormalization": [
+      {
+        "id": "L19",
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633004",
+        "expected": {
+          "kind": "above_ground",
+          "number": 3
+        },
+        "actual": {
+          "kind": "above_ground",
+          "number": 2,
+          "raw": "2"
+        },
+        "correct": false
+      },
+      {
+        "id": "L23",
+        "url": "https://onrealt.ru/novosibirsk/arenda-sklada/86633281",
+        "expected": {
+          "kind": "above_ground",
+          "number": 2
+        },
+        "actual": {
+          "kind": "above_ground",
+          "number": 1,
+          "raw": "1"
+        },
+        "correct": false
+      },
+      {
+        "id": "L33",
+        "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882",
+        "expected": {
+          "kind": "semi_basement",
+          "number": null
+        },
+        "actual": {
+          "kind": "above_ground",
+          "number": 1,
+          "raw": "1"
+        },
+        "correct": false
+      },
+      {
+        "id": "L48",
+        "url": "https://realty.yandex.ru/offer/889555503400285658/",
+        "expected": {
+          "kind": "above_ground",
+          "number": 19
+        },
+        "actual": {
+          "kind": "above_ground",
+          "number": 1,
+          "raw": "1"
+        },
+        "correct": false
+      }
+    ],
+    "priceUnitNormalization": [
+      {
+        "id": "L16",
+        "expected": "rub_m2_month",
+        "actual": "rub_m2_month"
+      },
+      {
+        "id": "L27",
+        "expected": "rub_total",
+        "actual": "rub_total"
+      }
+    ],
+    "features": [
+      {
+        "id": "L19",
+        "feature": "separate_entrance",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L19",
+        "feature": "gates",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L20",
+        "feature": "gates",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L22",
+        "feature": "gates",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L24",
+        "feature": "wet_point",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L26",
+        "feature": "separate_entrance",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L29",
+        "feature": "separate_entrance",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L31",
+        "feature": "separate_entrance",
+        "expected": "matched",
+        "actual": "matched"
+      },
+      {
+        "id": "L31",
+        "feature": "first_line",
+        "expected": "matched",
+        "actual": "matched"
+      }
+    ]
+  },
+  "errors": [
+    {
+      "id": "L28",
+      "query": "office-sale",
+      "expected": "needs_review",
+      "actual": "confirmed",
+      "kind": "review_boundary",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528532",
+      "reason": "Апартаменты Port i7 с обещанием представительства: юридический статус не указан; не подтверждать офис и не выдумывать жилой статус.",
+      "criteria": [
+        {
+          "criterion": "city",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "Новосибирск"
+        },
+        {
+          "criterion": "operation",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "sale"
+        },
+        {
+          "criterion": "purpose",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "office"
+        },
+        {
+          "criterion": "priceUnit",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "rub_total"
+        },
+        {
+          "criterion": "price",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "19000000.00 rub_total; rub_total"
+        },
+        {
+          "criterion": "area",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "75.5"
+        }
+      ]
+    },
+    {
+      "id": "L29",
+      "query": "office-sale",
+      "expected": "needs_review",
+      "actual": "confirmed",
+      "kind": "review_boundary",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528560",
+      "reason": "Прямо ПСН/мастерская, первый этаж, отдельный вход; офисное использование требует уточнения.",
+      "criteria": [
+        {
+          "criterion": "city",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "Новосибирск"
+        },
+        {
+          "criterion": "operation",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "sale"
+        },
+        {
+          "criterion": "purpose",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "office"
+        },
+        {
+          "criterion": "priceUnit",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "rub_total"
+        },
+        {
+          "criterion": "price",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "10000000.00 rub_total; rub_total"
+        },
+        {
+          "criterion": "area",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "92.8"
+        }
+      ]
+    },
+    {
+      "id": "L35",
+      "query": "office-sale",
+      "expected": "needs_review",
+      "actual": "confirmed",
+      "kind": "review_boundary",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86529376",
+      "reason": "Помещение в ЖК, обмен на нежилое не доказывает статус; этаж 14; требуется проверка.",
+      "criteria": [
+        {
+          "criterion": "city",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "Новосибирск"
+        },
+        {
+          "criterion": "operation",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "sale"
+        },
+        {
+          "criterion": "purpose",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "office"
+        },
+        {
+          "criterion": "priceUnit",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "rub_total"
+        },
+        {
+          "criterion": "price",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "12500000.00 rub_total; rub_total"
+        },
+        {
+          "criterion": "area",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "72"
+        }
+      ]
+    },
+    {
+      "id": "L30",
+      "query": "commercial-sale",
+      "expected": "needs_review",
+      "actual": "confirmed",
+      "kind": "review_boundary",
+      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528614",
+      "reason": "Отдельный вход только на согласовании, существование не подтверждено.",
+      "criteria": [
+        {
+          "criterion": "city",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "Новосибирск"
+        },
+        {
+          "criterion": "operation",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "sale"
+        },
+        {
+          "criterion": "purpose",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "office"
+        },
+        {
+          "criterion": "floor",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "1"
+        },
+        {
+          "criterion": "отдельный вход",
+          "source": "rule",
+          "evidence": "Подготовлена документация для согласования отдельного входа",
+          "state": "matched"
+        }
+      ]
+    },
+    {
+      "id": "L48",
+      "query": "commercial-sale",
+      "expected": "rejected",
+      "actual": "needs_review",
+      "kind": "false_inclusion",
+      "url": "https://realty.yandex.ru/offer/889555503400285658/",
+      "reason": "Офис/коммерческое помещение; в описании этаж 19 против поля 1; город/единица цены отсутствуют.",
+      "criteria": [
+        {
+          "criterion": "city",
+          "state": "unknown",
+          "source": "structured",
+          "evidence": "Город неизвестен"
+        },
+        {
+          "criterion": "operation",
+          "state": "matched",
+          "source": "rule",
+          "evidence": "Арт. 138590882 Продается стильное коммерческое помещение с панорамным видом на город! Предлагаем к продаже светлое, просторное коммерческое помещение на 19 этаже, которое станет идеальным решением для современного офиса или любого бизнеса, где важны"
+        },
+        {
+          "criterion": "purpose",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "office"
+        },
+        {
+          "criterion": "floor",
+          "state": "matched",
+          "source": "structured",
+          "evidence": "1"
+        },
+        {
+          "criterion": "отдельный вход",
+          "state": "unknown",
+          "source": "rule",
+          "evidence": "Нет подтверждающих сведений"
+        }
+      ]
+    }
+  ]
+}
+```
+<!-- v322-replay:end -->

@@ -76,6 +76,26 @@ describe("SearchAi", () => {
     await expect(f.ai.parseSearchQuery(context, { query: "Купить офис" })).rejects.toThrow("AI_ALREADY_RESERVED");
     expect(f.provider.requests).toHaveLength(1);
   });
+  it("settles provider failure, blocks duplicate retry and allows an explicit new request", async () => {
+    let failed = true;
+    const f = fixture(() => {
+      if (failed) throw new Error("synthetic provider unavailable");
+      return { text: '{"filters":{"operation":"sale"},"clarificationQuestion":null}' };
+    });
+    const input = { query: "Купить офис" };
+    await expect(f.ai.parseSearchQuery(context, input)).rejects.toThrow("AI_CALL_FAILED");
+    expect(await f.ledger.atomic(tx => tx.find(context.requestId))).toMatchObject({
+      state: "settled", outcome: "error", estimated: true,
+    });
+    expect(f.provider.requests).toHaveLength(1);
+    await expect(f.ai.parseSearchQuery(context, input)).rejects.toThrow("AI_ALREADY_RESERVED");
+    expect(f.provider.requests).toHaveLength(1);
+    failed = false;
+    await expect(f.ai.parseSearchQuery({ ...context, requestId: "explicit-retry" }, input))
+      .resolves.toMatchObject({ filters: { operation: "sale" }, testingMode: true });
+    expect(f.provider.requests).toHaveLength(2);
+    expect(await f.ledger.atomic(tx => tx.find("explicit-retry"))).toMatchObject({ state: "settled", outcome: "success" });
+  });
   it("rejects client DTO fields before provider call", async () => {
     const f = fixture();
     await expect(f.ai.parseSearchQuery(context, { query: "офис", clientName: "synthetic", clientNotes: "private" })).rejects.toThrow();

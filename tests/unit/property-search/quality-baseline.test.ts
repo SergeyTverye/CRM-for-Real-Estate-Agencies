@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import baselineJson from "../../fixtures/search-quality/baseline.json";
 import evidence from "../../../docs/vkr/live-ai-evidence.json";
 import { loadDataset, fingerprint } from "../../../scripts/search-quality/dataset";
-import { evaluateQuality, currentGrouping, renderReport, type QualityReport, type GroupingAdapter } from "../../../scripts/search-quality/evaluate";
+import { evaluateQuality, currentGrouping, renderReport, updateVersionedReport, type QualityReport, type GroupingAdapter } from "../../../scripts/search-quality/evaluate";
 import type { ListingEvaluation } from "../../../src/modules/property-search/domain/types";
 import { evaluateListing } from "../../../src/modules/property-search/domain/evaluation";
 
@@ -102,6 +102,16 @@ describe("LIVE 05.11.2026 → offline REPLAY search quality", () => {
     expect(review).toMatchObject({ falseInclusions: 150, falseConfirmed: 0, falseNeedsReview: 150, falseExclusions: 0 });
   });
 
+  it("refreshes v3.2.2 without deleting baseline or v3.1 history and later appendices", () => {
+    const history = "# История\n## Базовая линия до v3.1\nFrozen\n## Дополнительный LIVE-срез v3.1\nEvidence\n";
+    const current = evaluateQuality();
+    const first = updateVersionedReport(history, baseline, current);
+    expect(first.startsWith(history)).toBe(true);
+    expect(first).toContain("## REPLAY v3.2.2");
+    const withAppendix = first + "\n## Ручные замечания\nKeep\n";
+    expect(updateVersionedReport(withAppendix, baseline, current)).toBe(withAppendix);
+    expect(first.match(/v322-replay:start/g)).toHaveLength(1);
+  });
   it("runs deterministically without fetch and renders the frozen baseline separately", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(() => { throw new Error("Network forbidden in REPLAY"); });
     try {
