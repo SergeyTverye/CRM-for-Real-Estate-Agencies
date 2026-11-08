@@ -1,10 +1,11 @@
 "use client";
+import { locationSummary } from "@/modules/property-search/domain/geography";
 import { useEffect, useState } from "react";
 import { FEATURE_DEFINITIONS, type FilterDefinition, type FeatureKey } from "@/modules/property-search/domain/filter-catalog";
 import type { SearchFilters } from "@/modules/property-search/domain/types";
 import { apiCall } from "@/ui/api-client";
 import { labelOf } from "@/shared/codebook";
-import { PURPOSE_LABELS, SEARCH_HELP } from "./filter-presentation";
+import { PROPERTY_KIND_LABELS, PURPOSE_LABELS, SEARCH_HELP } from "./filter-presentation";
 import { HelpTooltip } from "./help-tooltip";
 
 const INITIAL_CATALOG: FilterDefinition[] = (Object.keys(FEATURE_DEFINITIONS) as FeatureKey[]).map((key) => ({
@@ -254,10 +255,10 @@ export function CatalogFilters({
         </>
       )}
       <p className="rounded border bg-slate-50 p-3 text-sm">
-        <strong>Применённые фильтры:</strong> {filters.city} ·{" "}
+        <strong>Применённые фильтры:</strong> {locationSummary(filters)} ·{" "}
         {filters.operation === "sale" ? "Продажа" : "Аренда"} ·{" "}
         {filters.districts.join(", ") || "Все районы"} ·{" "}
-        {filters.purposes.length
+        {filters.propertyKinds?.length ? filters.propertyKinds.map(k => PROPERTY_KIND_LABELS[k]).join(" ИЛИ ") : filters.purposes.length
           ? filters.purposes.map((p) => PURPOSE_LABELS[p] ?? p).join(" ИЛИ ")
           : "Все назначения"}{" "}
         · цена {filters.priceFrom ?? "—"}–{filters.priceTo ?? "—"} · площадь{" "}

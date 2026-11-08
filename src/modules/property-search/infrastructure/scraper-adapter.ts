@@ -164,6 +164,11 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     const empty = (status: AdapterSourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason, ...metadata, ...(status === "needs_user_action" ? { actionUrl: `https://${host}/` } : {}) } satisfies AdapterSourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
     if (signal?.aborted) return empty("cancelled", "Поиск отменён");
     if (!(this.options.enabled ?? process.env.SCRAPER_ENABLED === "true") || this.options.enabledSources && !this.options.enabledSources.includes(source)) return empty("disabled", "Источник отключён");
+    for (const query of plan.queries) {
+      const geo = resolveSourceGeography({ ...filters, city: query.city ?? filters.city, locations: undefined }, source, this.options.sourceOptions);
+      if (source === "cian" && !geo.regionId && !geo.url) return empty("unsupported_filter", "Для выбранной локации нет проверенного идентификатора Циан. Выберите другую площадку.");
+      if (source === "avito" && !geo.locationId && !geo.url || source === "domclick" && !geo.address && !geo.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${source === "avito" ? "locationId" : "address"}`);
+    }
     const geography = resolveSourceGeography(filters, source, this.options.sourceOptions);
     const missingGeography = source === "domclick" && !geography?.address && !geography?.params?.address ? "address" : source === "avito" && !geography?.locationId ? "locationId" : source === "mirkvartir" && !geography?.locationIds ? "locationIds" : null;
     if (missingGeography && !geography?.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${missingGeography}`);
@@ -187,7 +192,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       const factory = this.options.factory ?? defaultScraperFactory;
       const parallelHousing = ["mirkvartir", "onrealt"].includes(source) && plan.queries.length > 1;
       const work = async () => {
-        const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, dateDetailMaxCards: parallelHousing ? 0 : undefined, maxRetries: 0, transport: resilientTransport(transport, source, deadline, parallelHousing ? 1000 : 0),
+        const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, dateDetailMaxCards: parallelHousing ? 0 : undefined, maxRetries: 0, transport: resilientTransport(transport, source, deadline, 1000),
           ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
             ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
             ...this.options.browser, sources: [source] } } : {}) });

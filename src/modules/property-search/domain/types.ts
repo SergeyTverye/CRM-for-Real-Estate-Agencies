@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { featureConditions } from "./filter-catalog";
+import { LOCATION_IDS } from "./geography";
 import { freshnessSchema } from "./freshness";
 
 export const SOURCES = ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"] as const;
@@ -11,6 +12,8 @@ export type PriceUnit = typeof PRICE_UNITS[number];
 const money = z.string().regex(/^\d{1,15}(?:\.\d{1,2})?$/, "Цена — неотрицательная десятичная строка");
 export const SearchFilters = z.object({
   city: z.string().trim().min(1).max(120).default("Новосибирск"),
+  locations: z.array(z.enum(LOCATION_IDS)).min(1).max(9).optional(),
+  propertyKinds: z.array(z.enum(["flat", "house", "apartments", "non_residential"])).min(1).max(4).optional(),
   operation: z.enum(["sale", "rent"]),
   priceUnit: z.enum(PRICE_UNITS).optional(),
   purposes: z.array(z.enum(PURPOSES)).max(7).default([]),

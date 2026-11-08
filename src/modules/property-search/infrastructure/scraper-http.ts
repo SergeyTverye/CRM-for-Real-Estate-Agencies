@@ -34,7 +34,7 @@ export function canonicalScraperUrl(raw: string): string {
 
 /** Explicit site allowlist avoids guessing registrable domains from the last two labels. */
 export async function scraperHttpRequest(raw: string, options: SafeRequestOptions & {
-  beforeRequest?: (url: string) => void;
+  beforeRequest?: (url: string) => void | Promise<void>;
   onResponse?: (response: Response) => void;
 } = {}): Promise<Response> {
   let url = new URL(canonicalScraperUrl(raw));
@@ -45,7 +45,7 @@ export async function scraperHttpRequest(raw: string, options: SafeRequestOption
   for (let redirects = 0; ; redirects++) {
     const remaining = deadline - Date.now();
     if (remaining <= 0) throw new Error("NETWORK_TIMEOUT_OR_ABORT");
-    options.beforeRequest?.(url.href);
+    await options.beforeRequest?.(url.href);
     // safeRequest repeats DNS/private-IP validation and pins every individual hop.
     const request = domain === "mirkvartir.ru" ? compressedScraperRequest : safeRequest;
     const response = await request(url.href, { ...options, method, body, headers, timeoutMs: remaining, followRedirects: false });

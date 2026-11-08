@@ -1,5 +1,5 @@
 import { compareMoney, type CriterionEvaluation, type DescriptionAnalyzer, type ListingEvaluation, type NormalizedListing, type SearchFilters } from "./types";
-import { normalizeGeography, resolveDistrict } from "./geography";
+import { normalizeGeography, resolveDistrict, locationState } from "./geography";
 import { hasAmbiguousLegacyPurpose, residentialPurposeContradiction, residentialPurposeMatch } from "./purpose";
 import { convertPrice } from "./prices";
 import { freshnessState } from "./freshness";
@@ -78,12 +78,23 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   }
   const criteria: CriterionEvaluation[] = [];
   const add = (criterion: string, known: boolean, matches: boolean, evidence: string) => criteria.push({ criterion, state: !known ? "unknown" : matches ? "matched" : "contradicted", source: "structured", evidence });
-  add("city", !!listing.city, normalizeGeography(listing.city ?? "") === normalizeGeography(filters.city), listing.city ?? "Город неизвестен");
+  criteria.push({ criterion: "city", state: locationState(listing, filters), source: "rule", evidence: [listing.city, listing.address].filter(Boolean).join(", ") || "Локация неизвестна" });
   if (operationFromText) criteria.push({criterion:"operation",state:listing.operation === filters.operation ? "matched" : "contradicted",source:"rule",evidence:listing.description.slice(0,300)});
   else add("operation", !!listing.operation, listing.operation === filters.operation, listing.operation ?? "Операция неизвестна");
+  const kinds = filters.propertyKinds ?? [];
+  if (kinds.length) {
+    const text = [listing.title, listing.sourceCategoryRaw].filter(Boolean).join(" ");
+    const apartments = /апартамент/iu.test(text);
+    const flat = /квартир|студи/iu.test(text) && !apartments;
+    const house = /(?<![\p{L}])дом(?![\p{L}])|коттедж|таунхаус/iu.test(text);
+    const nonResidential = apartments || !flat && !house && (!!listing.purpose && listing.purpose !== "residential" || /нежил|коммерческ/iu.test(text));
+    const matches = kinds.some(k => k === "apartments" ? apartments : k === "flat" ? flat : k === "house" ? house : nonResidential);
+    criteria.push({ criterion: "propertyKind", state: matches ? "matched" : apartments || flat || house || nonResidential ? "contradicted" : "unknown", source: "rule", evidence: text || "Тип объекта не подтверждён" });
+  }
   const wantsResidential = (filters.purposes as string[]).includes("residential");
   const commercialPurposes = filters.purposes.filter(p => p !== "residential");
-  if (!wantsResidential) {
+  if (kinds.length && !filters.purposes.length) { /* Kind selection replaces the default commercial category. */
+  } else if (!wantsResidential) {
     const residentialPurpose = residentialPurposeContradiction(listing);
     if (residentialPurpose) criteria.push(residentialPurpose);
     else if (filters.purposes.length) {
@@ -156,7 +167,7 @@ export function redactPublicDescription(description: string): string {
 }
 export async function analyzeUnresolved(listing: NormalizedListing, evaluation: ListingEvaluation, analyzer: DescriptionAnalyzer, signal?: AbortSignal): Promise<ListingEvaluation> {
   // Typed ranges/negated boolean conditions already carry precise rules; AI cannot invent measurements.
-  const permitted = new Set([...evaluation.criteria, ...evaluation.preferences].filter(c => c.source === "rule" && !c.criterion.startsWith("features.") && !["owner", "purpose", "freshness"].includes(c.criterion)).map(c => c.criterion));
+  const permitted = new Set([...evaluation.criteria, ...evaluation.preferences].filter(c => c.source === "rule" && !c.criterion.startsWith("features.") && !["owner", "purpose", "freshness", "city", "district", "propertyKind"].includes(c.criterion)).map(c => c.criterion));
   evaluation = { ...evaluation, aiPending: evaluation.aiPending.filter(c => permitted.has(c)) };
   if (!evaluation.aiPending.length) return evaluation;
   const description = redactPublicDescription(listing.description);

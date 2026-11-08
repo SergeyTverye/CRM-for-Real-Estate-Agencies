@@ -42,6 +42,12 @@ beforeEach(async () => {
   await db.aiSetting.create({ data: { scraperEnabled: true, enabledSources: ["cian", "avito"] } });
 });
 describe("search application integration", () => {
+  it("round-trips multiple locations and property kinds in saved searches", async () => {
+    const geoFilters = SearchFilters.parse({ operation: "sale", locations: ["berdsk", "ob"], propertyKinds: ["flat"], areaFrom: 50, areaTo: 100 });
+    const saved = await saveSearch(users.realtor1, { name: "География v323", filters: geoFilters, sources: ["cian"] });
+    const row = await db.savedSearch.findUniqueOrThrow({ where: { id: saved.id } });
+    expect(SearchFilters.parse(row.filters)).toMatchObject({ locations: ["berdsk", "ob"], propertyKinds: ["flat"], areaFrom: 50, areaTo: 100 });
+  });
   it("persists residential rejection and mixed-purpose review with their evidence", async () => {
     const residential = { ...listing(), purpose: null, description: "Квартира в квартале бизнес-класса…" };
     const mixed = { ...listing("10000000", "synthetic-mixed"), purpose: null, description: "ЖК: коммерческие помещения на первом этаже" };
