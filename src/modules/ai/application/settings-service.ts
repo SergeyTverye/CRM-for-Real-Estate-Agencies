@@ -10,6 +10,7 @@ import { effectiveLimits, periodKeys } from "../domain/gate";
 import { rubToMicros } from "../domain/cost";
 import { envAiLimits } from "../infrastructure/config";
 import { decodeReservation, lockAi, microsToRub, PrismaAiLedger, settingsLimits, singleton } from "../infrastructure/prisma-repositories";
+import { headedBrowserAvailable, navigationDefaults } from "@/modules/property-search/infrastructure/browser-navigation";
 
 function manager(actor: Actor) { if (actor.role !== "manager") throw new ForbiddenError(); }
 async function readSetting() { return db.$transaction(async (tx) => { await lockAi(tx); return singleton(tx); }); }
@@ -37,6 +38,7 @@ export async function getAiSettings(actor: Actor) {
   void _limits;
   const tariffs = await db.aiTariff.findMany({ orderBy: [{ effectiveFrom: "desc" }, { model: "asc" }, { unit: "asc" }], take: 200 });
   return { setting: { ...row, monthlyBudgetRub: row.monthlyBudgetRub.toString(), updatedAt: row.updatedAt.toISOString() },
+    navigation: { defaults: navigationDefaults(getConfig().CRM_DEPLOYMENT_MODE), displayAvailable: headedBrowserAvailable() },
     effective, tariffs: tariffs.map((r) => ({ ...r, priceRub: r.priceRub.toString(), effectiveFrom: r.effectiveFrom.toISOString() })) };
 }
 export async function updateAiSettings(actor: Actor, input: unknown) {

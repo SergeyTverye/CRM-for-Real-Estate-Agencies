@@ -58,6 +58,8 @@ export function AiSettingsForm({
     aiEnabled: data.setting.aiEnabled,
     scraperEnabled: data.setting.scraperEnabled,
     browserEnabled: data.setting.browserEnabled,
+    cianAutoBrowser: data.setting.cianAutoBrowser,
+    yandexAutoBrowser: data.setting.yandexAutoBrowser,
     enabledSources: data.setting.enabledSources as AiSettingsInput["enabledSources"],
     webSearchManualAllowed: data.setting.webSearchManualAllowed,
     webSearchAutoFallback: data.setting.webSearchAutoFallback,
@@ -174,6 +176,20 @@ export function AiSettingsForm({
             </small>
           </label>
         ))}
+
+        <div className="space-y-2">
+          <strong>Автоматическая проверка в браузере</strong>
+          {(["cian", "yandex"] as const).map(source => {
+            const key = source === "cian" ? "cianAutoBrowser" : "yandexAutoBrowser";
+            const available = source !== "cian" || data.navigation.displayAvailable;
+            return <label key={key} className="block">
+              <input type="checkbox" disabled={!available} checked={form[key] ?? data.navigation.defaults[source]}
+                onChange={e => change(key, e.target.checked)} /> {labelOf("externalSource", source)} — автоматическая проверка в браузере
+              <small> {available ? source === "cian" ? "Обычное видимое окно Chromium; cookies сохраняются между поисками." : "Chromium без окна; cookies сохраняются между поисками." : "Недоступно: нет дисплея (сервер/Docker). Используйте «Пройти проверку в браузере CRM» или импорт выгрузки."}</small>
+            </label>;
+          })}
+          <small>Действует при включённом браузерном режиме. Если проверка останется на странице, поиск запросит действие сотрудника.</small>
+        </div>
 
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">

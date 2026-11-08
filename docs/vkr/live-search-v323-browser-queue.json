@@ -1,0 +1,109 @@
+{
+  "mode": "LIVE",
+  "at": "2026-11-08T22:04:33.796Z",
+  "database": "crm_demo",
+  "port": 3383,
+  "query": "аренда офиса Новосибирск",
+  "browser": "ordinary Chromium; Cian headed, Yandex headless; no stealth",
+  "depth": {
+    "maxPages": 1,
+    "limit": 5
+  },
+  "settingsUi": true,
+  "processCleanup": true,
+  "results": [
+    {
+      "mode": "LIVE",
+      "runId": "ac3a8dfa-e7a0-4bfc-a28a-1b6177d9bea6",
+      "sources": [
+        "cian"
+      ],
+      "status": "completed",
+      "elapsedMs": 16016,
+      "persisted": 5,
+      "sourceResults": [
+        {
+          "source": "cian",
+          "status": "success",
+          "saved": 5,
+          "durationMs": 11473,
+          "pages": 1,
+          "needsUserAction": false,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        }
+      ]
+    },
+    {
+      "mode": "LIVE",
+      "runId": "462c7efe-743a-4870-bc50-55414f2c5f4f",
+      "sources": [
+        "yandex"
+      ],
+      "status": "completed",
+      "elapsedMs": 23501,
+      "persisted": 5,
+      "sourceResults": [
+        {
+          "source": "yandex",
+          "status": "success",
+          "saved": 5,
+          "durationMs": 22895,
+          "pages": 1,
+          "needsUserAction": false,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        }
+      ]
+    },
+    {
+      "mode": "LIVE",
+      "runId": "f95064b3-f0ef-4f5c-9026-ceb06129de12",
+      "sources": [
+        "cian",
+        "yandex",
+        "mirkvartir",
+        "onrealt"
+      ],
+      "status": "completed",
+      "elapsedMs": 48012,
+      "persisted": 20,
+      "sourceResults": [
+        {
+          "source": "cian",
+          "status": "success",
+          "saved": 5,
+          "durationMs": 8192,
+          "pages": 1,
+          "needsUserAction": false,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "saved": 5,
+          "durationMs": 7053,
+          "pages": 1,
+          "needsUserAction": false,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 2, ошибок 0"
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "saved": 5,
+          "durationMs": 15148,
+          "pages": 1,
+          "needsUserAction": false,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 2, ошибок 1"
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "saved": 5,
+          "durationMs": 15668,
+          "pages": 1,
+          "needsUserAction": false,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована"
+        }
+      ]
+    }
+  ]
+}

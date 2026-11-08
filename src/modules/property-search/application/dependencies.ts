@@ -6,6 +6,7 @@ import { getConfig } from "@/shared/config/env";
 import { db } from "@/shared/db/client";
 import { SOURCES, type Source } from "../domain/types";
 import { ConflictError } from "@/shared/errors";
+import { navigationDefaults } from "../infrastructure/browser-navigation";
 
 export type SearchAiPort = Pick<SearchAi, "parseSearchQuery" | "analyzeDescriptions" | "webSearch" | "checkWebSearchAvailability"> & {
   /** Server-composed readiness, never supplied by the search request. */
@@ -47,7 +48,9 @@ export async function searchSettings() {
     autoFallback: config.YANDEX_WEB_SEARCH_AUTO_FALLBACK && !!settings?.webSearchAutoFallback };
 }
 export function scraperFor(settings: Awaited<ReturnType<typeof searchSettings>>, scenario = "success", depthOptions: Pick<import("../infrastructure/scraper-adapter").ScraperOptions, "depth" | "sourceDepth"> = {}): ScraperAdapter {
+  const defaults = navigationDefaults(settings.config.CRM_DEPLOYMENT_MODE);
   const options = { enabled: settings.enabled, enabledSources: settings.sources,
+    navigationSources: (["cian", "yandex"] as const).filter(source => (source === "cian" ? settings.settings?.cianAutoBrowser : settings.settings?.yandexAutoBrowser) ?? defaults[source]),
     browserEnabled: settings.config.SCRAPER_BROWSER_ENABLED && !!settings.settings?.browserEnabled,
     ...(settings.config.SCRAPER_CHROME_PATH ? { browser: { executablePath: settings.config.SCRAPER_CHROME_PATH } } : {}),
     jobTimeoutMs: settings.config.SCRAPER_JOB_TIMEOUT_MS, maxConcurrentJobs: settings.config.SCRAPER_MAX_CONCURRENT_JOBS, ...depthOptions };

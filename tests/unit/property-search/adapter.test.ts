@@ -17,6 +17,14 @@ function adapter(searchSite: (source: Source) => Promise<ReturnType<typeof fixtu
   return { instance: new RealEstateScraperAdapter({ enabled: true, browserEnabled: false, factory, ...extra }), factory, close };
 }
 describe("seven source contract fixtures (synthetic, offline)", () => {
+  it("turning native navigation off never silently selects the legacy intercepted browser", async () => {
+    const { instance, factory } = adapter(async source => fixture(source), { browserEnabled: true, navigationSources: [] });
+    await instance.searchDetailed({ operation: "sale", purposes: ["office"], sources: ["cian", "yandex"] });
+    expect(factory).toHaveBeenCalledTimes(2);
+    for (const [config] of vi.mocked(factory).mock.calls) {
+      expect(config.browser).toBeUndefined(); expect(config.navigationSource).toBeUndefined();
+    }
+  });
   it("browser subrequests consume the remaining absolute deadline and stop when exhausted", async () => {
     let handle!: (route: { request(): unknown; abort(): Promise<void>; fulfill(input: unknown): Promise<void> }) => Promise<void>;
     const context = { route: vi.fn(async (_pattern: string, callback: typeof handle) => { handle = callback; }), routeWebSocket: vi.fn(async () => {}) };

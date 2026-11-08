@@ -1482,6 +1482,8 @@ model AiSetting {
   aiEnabled              Boolean  @default(false) @map("ai_enabled")
   scraperEnabled         Boolean  @default(false) @map("scraper_enabled")
   browserEnabled         Boolean  @default(true) @map("browser_enabled")
+  cianAutoBrowser        Boolean? @map("cian_auto_browser")
+  yandexAutoBrowser      Boolean? @map("yandex_auto_browser")
   enabledSources         String[] @default([]) @map("enabled_sources")
   webSearchManualAllowed Boolean  @default(false) @map("web_search_manual_allowed")
   webSearchAutoFallback  Boolean  @default(false) @map("web_search_auto_fallback")

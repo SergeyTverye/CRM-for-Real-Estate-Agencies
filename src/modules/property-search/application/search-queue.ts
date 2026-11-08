@@ -18,6 +18,7 @@ import { resolveSourceDepth } from "../infrastructure/source-limits";
 import { getConfig } from "@/shared/config/env";
 import { regroupRunListings } from "./duplicate-ingestion";
 import type { DateDetailProgress } from "../infrastructure/date-enrichment";
+import { headedBrowserAvailable, navigationDefaults } from "../infrastructure/browser-navigation";
 const depthSchema = z.object({ maxPages: z.number().int().min(1).max(10).default(2), limit: z.number().int().min(1).max(500).default(100) }).strict();
 export async function stopSearchWorker() { await disconnectDb(); }
 export const queueInput = z.object({ filters: SearchFilters, sources: z.array(z.enum(SOURCES)).min(1).max(7), idempotencyKey: z.string().trim().min(8).max(120), needId: zUuid.optional(), savedSearchId: zUuid.optional(),
@@ -143,9 +144,12 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
     for (const source of filters.sources) {
       if (controller.signal.aborted) break;
       failureStage = "FETCH";
+      const autoBrowser = settings.config.SCRAPER_BROWSER_ENABLED && settings.settings?.browserEnabled &&
+        (source === "cian" ? settings.settings.cianAutoBrowser ?? navigationDefaults(settings.config.CRM_DEPLOYMENT_MODE).cian : source === "yandex" ? settings.settings.yandexAutoBrowser ?? true : false);
+      const runningReason = autoBrowser ? source === "cian" && !headedBrowserAvailable() ? "Автоматическая проверка недоступна: нет дисплея; потребуется проверка сотрудника" : "Автоматическая проверка в браузере: ожидаем выдачу или страницу проверки" : null;
       const claimed = await transaction(async tx => {
         const lease = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId, cancelRequested: false }, data: { heartbeatAt: new Date() } });
-        return lease.count ? tx.searchRunSource.updateMany({ where: { runId: run.id, source, status: "queued" }, data: { status: "running" } }) : { count: 0 };
+        return lease.count ? tx.searchRunSource.updateMany({ where: { runId: run.id, source, status: "queued" }, data: { status: "running", statusReasonRu: runningReason } }) : { count: 0 };
       });
       if (!claimed.count) continue;
       const started = Date.now();

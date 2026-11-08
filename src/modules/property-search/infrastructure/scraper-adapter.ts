@@ -10,6 +10,7 @@ import { extendSourceParsers, dateEnrichmentProgress } from "./parser-extension"
 import { resilientTransport, type AdapterFailure } from "./source-response";
 import { boundSourceQueries, resolveSourceDepth, type DepthOptions } from "./source-limits";
 import type { DateDetailProgress } from "./date-enrichment";
+import { createBrowserNavigation, headedBrowserAvailable, type NavigationSource } from "./browser-navigation";
 
 export interface AdapterSourceRun extends Omit<SourceRun, "status"> {
   status: SourceRun["status"] | AdapterFailure;
@@ -39,7 +40,7 @@ export interface ScraperAdapter {
   searchDetailed?(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<AdapterSearchResult>;
 }
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
-export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions; jobDeadlineAt?: number; dateDetailMaxCards?: number }) => Promise<ScraperClient>;
+export type ScraperFactory = (config: RealEstateScraper.Config & { navigationSource?: NavigationSource; browser?: true | RealEstateScraper.BrowserOptions; jobDeadlineAt?: number; dateDetailMaxCards?: number }) => Promise<ScraperClient>;
 /** A small HTTP-200 challenge is not an empty market or a selector regression. */
 export function isCianAccessChallenge(url: string, data: unknown): boolean {
   const host = new URL(url).hostname;
@@ -71,6 +72,7 @@ export class ScraperJobLimiter {
 }
 export interface ScraperOptions {
   enabled?: boolean; browserEnabled?: boolean; enabledSources?: Source[];
+  navigationSources?: NavigationSource[];
   jobTimeoutMs?: number; maxConcurrentJobs?: number; limiter?: ScraperJobLimiter;
   sourceOptions?: RealEstateScraper.Query["sourceOptions"];
   browser?: RealEstateScraper.BrowserOptions;
@@ -91,14 +93,26 @@ const transport: RealEstateScraper.Transport = async request => {
 };
 /** Use the public browser lifecycle API to intercept ALL browser network, including subresources. */
 export const defaultScraperFactory: ScraperFactory = async config => {
-  const { browser, jobDeadlineAt, dateDetailMaxCards, ...provided } = config;
+  const { browser, navigationSource, jobDeadlineAt, dateDetailMaxCards, ...provided } = config;
   const deadline = jobDeadlineAt ?? Date.now() + (config.timeout ?? 30000);
   let requestDeadline = deadline;
   const httpConfig = { ...provided, transport: provided.transport ?? transport, maxRetries: 0 };
+  if (navigationSource) {
+    const navigation = await createBrowserNavigation({ source: navigationSource, deadline,
+      executablePath: (browser && browser !== true ? browser.executablePath : undefined) ?? process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ?? process.env.SCRAPER_CHROME_PATH });
+    try {
+      const client = extendSourceParsers(new RealEstateScraper({ ...httpConfig, sourceConfigs: { ...httpConfig.sourceConfigs,
+        [navigationSource]: { ...httpConfig.sourceConfigs?.[navigationSource], transport: resilientTransport(navigation.transport, navigationSource, deadline) } } }), { deadline, maxCards: dateDetailMaxCards });
+      return { searchSite: client.searchSite.bind(client), close: navigation.close };
+    } catch (error) { await navigation.close(); throw error; }
+  }
   if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig), { deadline, maxCards: dateDetailMaxCards });
   const browserOptions = browser === true ? {} : browser;
   // Ordinary Playwright launch: no fingerprint changes or anti-detection scripts.
-  const browserInstance = await chromium.launch({ channel: browserOptions.channel, executablePath: browserOptions.executablePath, headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
+  // Channel is only used when explicitly configured; otherwise the bundled Chromium is used.
+  const browserInstance = await chromium.launch({ ...(browserOptions.channel ? { channel: browserOptions.channel } : {}),
+    executablePath: browserOptions.executablePath ?? process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ?? process.env.SCRAPER_CHROME_PATH,
+    headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
   const launched = { browser: browserInstance, close: () => browserInstance.close() };
   try {
     const context: BrowserContext = await launched.browser.newContext({ serviceWorkers: "block", locale: "ru-RU" });
@@ -172,6 +186,9 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     const geography = resolveSourceGeography(filters, source, this.options.sourceOptions);
     const missingGeography = source === "domclick" && !geography?.address && !geography?.params?.address ? "address" : source === "avito" && !geography?.locationId ? "locationId" : source === "mirkvartir" && !geography?.locationIds ? "locationIds" : null;
     if (missingGeography && !geography?.url) return empty("unsupported_filter", `Фильтр city: требуется sourceOptions.${source}.${missingGeography}`);
+    const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
+    if (browserEnabled && source === "cian" && !headedBrowserAvailable() && !this.options.factory)
+      return empty("needs_user_action", "Автоматическая проверка Циана недоступна: нет дисплея. Пройдите проверку в браузере CRM или импортируйте выгрузку");
     return this.limiter.run(async () => {
       // Queue time belongs to the job deadline too. Never start a new network
       // request after an earlier source consumed the entire job's budget.
@@ -188,13 +205,15 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       let finished = false;
       let stopCode: "ABORTED" | "TIMEOUT" | undefined;
       let graceTimer: ReturnType<typeof setTimeout> | undefined;
-      const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
+      const navigation = browserEnabled && (this.options.navigationSources ?? ["yandex", ...(headedBrowserAvailable() ? ["cian" as const] : [])]).includes(source as NavigationSource);
       const factory = this.options.factory ?? defaultScraperFactory;
       const parallelHousing = ["mirkvartir", "onrealt"].includes(source) && plan.queries.length > 1;
       const work = async () => {
+        const executablePath = process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ?? process.env.SCRAPER_CHROME_PATH;
         const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, dateDetailMaxCards: parallelHousing ? 0 : undefined, maxRetries: 0, transport: resilientTransport(transport, source, deadline, 1000),
-          ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
-            ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
+          ...(navigation ? { navigationSource: source as NavigationSource } : {}),
+          ...(browserEnabled && (navigation || source === "avito") ? { browser: {
+            ...(executablePath ? { executablePath } : {}),
             ...this.options.browser, sources: [source] } } : {}) });
         if (controller.signal.aborted || finished) { await created.close(); throw { code: "ABORTED" }; }
         client = created;
@@ -289,7 +308,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
           ...(errors[0] ? { failureCode: errors[0].code } : {}),
           incomplete: !!regionalYoula || limited || !!errors.length || invalid > 0 || result.partial || result.pages.some(p => p.hasNext === null),
           ...(errors.some(e => e.code === "NEEDS_USER_ACTION") ? { actionUrl: `https://${host}/` } : {}),
-          reason: [regionalYoula ? "Область: частичный охват Юлы — Новосибирск, Бердск, Обь, Кольцово, Краснообск, Искитим. Площадка не поддерживает область целиком; остальные адреса области ищите на другой площадке." : null, (filters.purposes as string[]).includes("residential") && filters.purposes.some(p => p !== "residential") ? "Смешанный поиск: категории commercial + residential; назначение проверяется CRM" : null, source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, housingCoverage, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
+          reason: [navigation ? "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически" : null, regionalYoula ? "Область: частичный охват Юлы — Новосибирск, Бердск, Обь, Кольцово, Краснообск, Искитим. Площадка не поддерживает область целиком; остальные адреса области ищите на другой площадке." : null, (filters.purposes as string[]).includes("residential") && filters.purposes.some(p => p !== "residential") ? "Смешанный поиск: категории commercial + residential; назначение проверяется CRM" : null, source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, housingCoverage, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
         const stopped = stopCode ? { code: stopCode } : info;
