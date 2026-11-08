@@ -1,5 +1,5 @@
 {
-  "sourceSha256": "8c726d524446c2575d7f1b005f55c7de69698976bda24dafcfd0ce56bdb63309",
+  "sourceSha256": "64bbdb2e5d4b80dcd51e074e5e03fd2bbb4dda53ff0ca307cbf7463fd887a83c",
   "models": {
     "User": {
       "table": "users",

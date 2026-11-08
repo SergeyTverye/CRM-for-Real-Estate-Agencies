@@ -307,7 +307,7 @@ export const CODEBOOK_COLUMNS: ReadonlyArray<{ table: string; column: string; bo
   { table: "external_listings", column: "source", book: "externalSource" },
   { table: "external_listings", column: "source_method", book: "externalSourceMethod" },
   { table: "external_listings", column: "operation", book: "externalOperation" },
-  { table: "external_listings", column: "price_unit", book: "externalPriceUnit" },
+  { table: "external_listings", column: "price_unit", book: "externalPriceUnit", nullable: true },
   { table: "external_listing_verifications", column: "availability", book: "listingAvailability" },
   { table: "search_bookmarks", column: "status", book: "searchBookmarkStatus" },
   { table: "search_selections", column: "review_status", book: "selectionReviewStatus" },

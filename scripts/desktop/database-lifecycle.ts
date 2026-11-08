@@ -21,10 +21,15 @@ export function applySqliteMigrations(file: string) {
       const checksum=createHash("sha256").update(sql).digest("hex");
       const applied=db.prepare("SELECT checksum,finished_at FROM _prisma_migrations WHERE migration_name=? AND rolled_back_at IS NULL").all(name) as {checksum:string;finished_at:unknown}[];
       if(applied.length) { if(applied.length!==1 || !applied[0]!.finished_at || applied[0]!.checksum!==checksum) throw new Error("SQLITE_MIGRATION_HISTORY_MISMATCH"); continue; }
-      db.transaction(()=>{
+      // Table rebuilds must preserve referencing business history. Disable FK
+      // actions outside the transaction, then validate before committing.
+      const rebuilding = sql.startsWith("-- rebuild-with-foreign-key-check");
+      if (rebuilding) db.pragma("foreign_keys=OFF");
+      try { db.transaction(()=>{
         db.exec(sql);
+        if ((db.pragma("foreign_key_check") as unknown[]).length) throw new Error("SQLITE_FOREIGN_KEY_CHECK_FAILED");
         db.prepare("INSERT INTO _prisma_migrations(id,checksum,finished_at,migration_name,started_at,applied_steps_count) VALUES(?,?,?,?,?,1)").run(randomUUID(),checksum,Date.now(),name,Date.now());
-      }).immediate();
+      }).immediate(); } finally { if (rebuilding) db.pragma("foreign_keys=ON"); }
     }
     if (db.pragma("integrity_check",{simple:true}) !== "ok" || (db.pragma("foreign_key_check") as unknown[]).length) throw new Error("SQLITE_INTEGRITY_FAILED");
   } finally { db.close(); }

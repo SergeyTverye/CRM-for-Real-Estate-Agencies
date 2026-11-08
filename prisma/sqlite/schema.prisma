@@ -1238,7 +1238,7 @@ model ExternalListing {
   sourceMethod            String                        @map("source_method")
   operation               String
   priceRub                BigInt?                      @map("price_rub")
-  priceUnit               String                        @map("price_unit")
+  priceUnit               String?                       @map("price_unit")
   areaM2                  BigInt?                      @map("area_m2")
   floorRaw                String?                       @map("floor_raw")
   floorNumber             Int?                          @map("floor_number")

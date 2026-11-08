@@ -1237,7 +1237,7 @@ model ExternalListing {
   sourceMethod            String                        @map("source_method")
   operation               String
   priceRub                Decimal?                      @map("price_rub") @db.Decimal(16, 2)
-  priceUnit               String                        @map("price_unit")
+  priceUnit               String?                       @map("price_unit")
   areaM2                  Decimal?                      @map("area_m2") @db.Decimal(12, 2)
   floorRaw                String?                       @map("floor_raw")
   floorNumber             Int?                          @map("floor_number")

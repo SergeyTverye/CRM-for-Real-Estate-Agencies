@@ -165,3 +165,25 @@ it("API requires a session and returns controlled disabled response",async()=>{
   const response=await POST(apiRequest("POST","/api/v1/property-search/analysis/batch",{cookie:await sessionCookieFor(users.realtor1),body:{listingIds:[row.id],filters}}),{params:Promise.resolve({})});
   expect((await response.json()).error.code).toBe("AI_DISABLED");
 });
+
+it("AI-01 REPLAY exact request keeps price through preview and confirmation",async()=>{
+  const before=SearchFilters.parse({operation:"sale"});
+  const f=fake(JSON.stringify({filters:{operation:"rent",priceUnit:"rub_month",purposes:["office"],areaFrom:50,areaTo:100,priceTo:"80000"},clarificationQuestion:null}));
+  const draft=await previewAnalysisQuery(users.realtor1,{text:"Аренда офиса 50–100 м² в Новосибирске до 80 000 в месяц",currentFilters:before},f.ai);
+  expect(draft.filters).toMatchObject({operation:"rent",priceUnit:"rub_month",priceTo:"80000",areaFrom:50,areaTo:100});
+  const confirmed=await confirmAnalysisQuery(users.realtor1,{pendingActionId:draft.pendingActionId,confirmed:true,currentFilters:before});
+  expect(confirmed.filters.priceTo).toBe("80000");expect(f.provider.requests).toHaveLength(1);
+});
+it.each([null,"total"])("AI-02 unknown snapshot period overrides legacy SQL period %s",async priceUnit=>{
+  const a=await listing(),b=await listing();
+  await db.externalListing.updateMany({data:{priceUnit}});
+  // Old rows may still contain total from the former fallback. The source snapshot wins.
+  const run=await db.searchRun.create({data:{userId:users.realtor1.userId,filters,status:"success"}});
+  for(const row of [a,b]) await db.externalListingSnapshot.create({data:{listingId:row.id,searchRunId:run.id,fetchedAt:new Date(),priceRub:row.priceRub,normalized:{priceUnit:null}}});
+  const f=fake('{"text":"Уточните период цены перед сравнением."}');
+  const result=await compareAnalysisListings(users.realtor1,{listingIds:[a.id,b.id],filters},f.ai);
+  const facts=JSON.parse(f.provider.requests[0]!.input).facts;
+  expect(facts.items.every((item:{priceUnit:unknown;pricePeriodNotice:string})=>item.priceUnit===null && /Период цены неизвестен/.test(item.pricePeriodNotice))).toBe(true);
+  expect(result.tradeoffs[0]!.points[0]!.price).toContain("сравнение невозможно");
+});
+
