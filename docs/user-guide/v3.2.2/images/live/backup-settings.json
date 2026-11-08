@@ -1,0 +1,313 @@
+{
+  "file": "backup-settings.png",
+  "role": "MANAGER",
+  "path": "/settings/backups",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:33:01.357Z",
+  "sha256": "128798edd1323eaa51246b0446517b6bf927039332c7ec4ab79fc2e6635b3db0",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 1148,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 206,
+        "width": 2296,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 951
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1902
+      }
+    },
+    {
+      "label": "main-form",
+      "found": false
+    },
+    {
+      "label": "table",
+      "found": false
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 899.015625,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1026.15625,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1127.265625,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "РуководительРуководитель",
+      "tag": "button",
+      "cssBox": {
+        "x": 1213.625,
+        "y": 21,
+        "width": 202.375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Локальная установка и резервные копии",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 1148,
+        "height": 28
+      }
+    },
+    {
+      "label": "Работает на сервере",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 192,
+        "width": 1114,
+        "height": 20
+      }
+    },
+    {
+      "label": "Самопроверка / обновить",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 396,
+        "width": 200.40625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Создать копию",
+      "tag": "button",
+      "cssBox": {
+        "x": 268,
+        "y": 605,
+        "width": 126.234375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Настроить расписание",
+      "tag": "button",
+      "cssBox": {
+        "x": 402.234375,
+        "y": 605,
+        "width": 175.65625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Восстановить",
+      "tag": "button",
+      "cssBox": {
+        "x": 585.890625,
+        "y": 605,
+        "width": 115.5625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Экспорт на накопитель",
+      "tag": "button",
+      "cssBox": {
+        "x": 709.453125,
+        "y": 605,
+        "width": 178.84375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Перенести работу на другой компьютер",
+      "tag": "button",
+      "cssBox": {
+        "x": 896.296875,
+        "y": 605,
+        "width": 293.28125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Проверить архив",
+      "tag": "button",
+      "cssBox": {
+        "x": 1197.578125,
+        "y": 605,
+        "width": 141.1875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Яндекс Облако",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 678,
+        "width": 532,
+        "height": 20
+      }
+    },
+    {
+      "label": "Настроить Яндекс Облако",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 776,
+        "width": 198.171875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Проверить подключение",
+      "tag": "button",
+      "cssBox": {
+        "x": 491.171875,
+        "y": 776,
+        "width": 194.0625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Сделать тестовую копию",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 820,
+        "width": 191.203125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Список копий / получить",
+      "tag": "button",
+      "cssBox": {
+        "x": 484.203125,
+        "y": 820,
+        "width": 193.296875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Облако Mail.ru",
+      "tag": "h2",
+      "cssBox": {
+        "x": 867,
+        "y": 678,
+        "width": 532,
+        "height": 20
+      }
+    },
+    {
+      "label": "Настроить Облако Mail.ru",
+      "tag": "button",
+      "cssBox": {
+        "x": 867,
+        "y": 776,
+        "width": 196.359375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Проверить подключение",
+      "tag": "button",
+      "cssBox": {
+        "x": 1071.359375,
+        "y": 776,
+        "width": 194.0625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Сделать тестовую копию",
+      "tag": "button",
+      "cssBox": {
+        "x": 867,
+        "y": 820,
+        "width": 191.203125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Список копий / получить",
+      "tag": "button",
+      "cssBox": {
+        "x": 1066.203125,
+        "y": 820,
+        "width": 193.296875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Закрыть уведомление",
+      "tag": "button",
+      "cssBox": {
+        "x": 1367,
+        "y": 831,
+        "width": 36,
+        "height": 36
+      }
+    }
+  ]
+}

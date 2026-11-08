@@ -95,11 +95,43 @@ def prepare_images():
     captured=(images/'capture-manifest.json').exists()
     for name, boxes in liveboxes.items():
         source=images/f'{name}-raw.png' if captured else legacy/historical[name]
+        fresh_name={'search':'search-expanded'}.get(name,name)
+        fresh=images/'live'/f'{fresh_name}.png'
+        sidecar=images/'live'/f'{fresh_name}.json'
+        is_fresh=fresh.exists() and sidecar.exists()
+        if is_fresh:
+            source=fresh
         if not source.exists(): raise FileNotFoundError(source)
         annotate(source,images/f'{name}.png',boxes=boxes)
         evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),
-                         'kind':'fresh synthetic demo' if captured else 'archived synthetic screenshot',
+                         'kind':'fresh synthetic demo' if captured or is_fresh else 'archived synthetic screenshot',
                          'boxes':boxes})
+    extra_specs = [
+        ('login','live/login.png',(1030,550,1850,1250),[(.02,.02,.96,.96)]),
+        ('saved-searches','live/saved-searches.png',(530,1030,2835,1760),[(.01,.01,.98,.98)]),
+        ('search-advanced','live/search-advanced.png',None,[(.18,.13,.8,.8)]),
+        ('search-collapsed','live/search-collapsed.png',(530,330,2840,1010),[(.01,.01,.98,.98)]),
+        ('agreement-files','live/agreement-files.png',(550,930,2330,1790),[(.01,.01,.98,.98)]),
+        ('agreement-retry','live/agreement-upload-retry.png',(550,390,2320,675),[(.01,.01,.98,.98)]),
+        ('agreement-documents','live/agreement-documents.png',(530,1360,2840,1755),[(.01,.01,.98,.98)]),
+        ('notifications','live/notifications.png',(530,200,2840,990),[(.01,.01,.98,.98)]),
+        ('ai-settings','live/ai-settings.png',(530,185,2840,1500),[(.01,.01,.98,.32),(.01,.34,.98,.64)]),
+        ('search-sources','live/search-sources.png',(530,185,2840,1650),[(.01,.1,.98,.35),(.01,.48,.98,.5)]),
+        ('backup-settings','live/backup-settings.png',(530,185,2840,1300),[(.01,.1,.98,.58),(.01,.7,.98,.28)]),
+        ('result-cards','../../../../screenshots/vkr/v322-search-ai/01-onrealt-results.png',(265,110,1343,768),[(.01,.01,.98,.31),(.01,.45,.98,.54)]),
+        ('result-table','../../../../vkr/live-search-v322-p0c-table.png',(145,315,1221,1065),[(.01,.01,.98,.4),(.01,.47,.98,.52)]),
+        ('ranking','../../../../screenshots/vkr/v322-search-ai/retest-02-ranking.png',(280,83,1328,355),[(.01,.01,.98,.53),(.01,.61,.98,.35)]),
+        ('comparison','../../../../screenshots/vkr/v322-search-ai/retest-01-comparison.png',(280,300,1328,675),[(.01,.01,.98,.98)]),
+    ]
+    for name,relative,crop,boxes in extra_specs:
+        source=(images/relative).resolve()
+        # Historical source paths are repository-relative, not image-relative.
+        if relative.startswith('../../../../'):
+            source=ROOT/'docs'/relative.removeprefix('../../../../')
+        annotate(source,images/f'{name}.png',crop,boxes)
+        evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),
+            'kind':'coordinator capture' if relative.startswith('live/') else 'prior LIVE UI / P0-C synthetic component',
+            'crop':crop,'boxes':boxes,'privacyReview':'No secrets or seller contacts visible in selected area'})
     (images/'figure-sources.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 
 
@@ -141,7 +173,7 @@ def build():
     para(c,'Клиенты · Обращения · Поиск объектов',429,12,20,'#FFFFFF')
     para(c,'Предложения · Задачи · Договоры',405,12,20,'#FFFFFF')
     para(c,'От первого звонка до результата — с проверкой следующего действия и сохранности данных.',321,15,23,'#FFFFFF',width=430)
-    para(c,'Windows / серверный режим\nРедакция 08.11.2026 · Синтетические иллюстрации'.replace('\n',' · '),122,10,16,'#B9D8F0')
+    para(c,'Windows / серверный режим\nРедакция 08.11.2026 · Демонстрационные и LIVE-иллюстрации'.replace('\n',' · '),122,10,16,'#B9D8F0')
     c.showPage()
     # 28 entries on one page, with destinations and final physical page numbers.
     para(c,'Оглавление',781,26,31,BLUE,bold=True)
@@ -151,7 +183,7 @@ def build():
         c.setFont('Arial',10); c.setFillColor(HexColor('#25364B'))
         c.drawString(50,y,title); c.drawRightString(545,y,str(page))
         c.linkAbsolute(title,f'chapter-{i}',Rect=(48,y-5,548,y+13),thickness=0)
-        y-=21.5
+        y-=20
     footer(c,2);c.showPage()
     qa=[]
     for i,(title,body) in enumerate(chapters):
@@ -160,12 +192,14 @@ def build():
         footer(c,page,'ПРАКТИЧЕСКОЕ РУКОВОДСТВО / '+title.split('. ',1)[0])
         y=para(c,title,780,21,26,BLUE,bold=True)-19
         blocks=re.split(r'\n\s*\n',body.strip())
+        figure_count=sum(1 for b in blocks if b.strip().startswith('!['))
+        figure_max=320 if figure_count<2 else (215 if i>=28 else 175)
         for block in blocks:
             figure=re.fullmatch(r'!\[(.*?)\]\((.*?)\)',block.strip(),flags=re.S)
             if figure:
                 caption,file=figure.groups()
                 image=Image(str(DEST/file))
-                scale=min(495/image.imageWidth,min(320,y-130)/image.imageHeight)
+                scale=min(495/image.imageWidth,min(figure_max,y-130)/image.imageHeight)
                 w,h=image.imageWidth*scale,image.imageHeight*scale
                 image.drawWidth=w; image.drawHeight=h
                 y-=8

@@ -1,0 +1,232 @@
+{
+  "file": "agreement-documents.png",
+  "role": "REALTOR1",
+  "path": "/agreements/41fa984a-3ed0-4b72-9028-21d36dc7fcf5",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 87
+  },
+  "capturedAt": "2026-11-08T18:32:58.392Z",
+  "sha256": "1a5f3db03531deb1c3f782b2f0e7f16c822aec42f32af3de2217049d17cd021f",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 39,
+        "width": 563.078125,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 78,
+        "width": 1126,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "documents",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 682,
+        "width": 1148,
+        "height": 194
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 1364,
+        "width": 2296,
+        "height": 388
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Эксклюзивный договор № Пример договор 1794162776890",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 39,
+        "width": 563.078125,
+        "height": 28
+      }
+    },
+    {
+      "label": "В архив",
+      "tag": "button",
+      "cssBox": {
+        "x": 1338.921875,
+        "y": 39,
+        "width": 77.078125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Договор",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 118,
+        "width": 56.78125,
+        "height": 20
+      }
+    },
+    {
+      "label": "Связи",
+      "tag": "h2",
+      "cssBox": {
+        "x": 867,
+        "y": 118,
+        "width": 38.78125,
+        "height": 20
+      }
+    },
+    {
+      "label": "Комиссия и контроль",
+      "tag": "h2",
+      "cssBox": {
+        "x": 867,
+        "y": 281,
+        "width": 142.484375,
+        "height": 20
+      }
+    },
+    {
+      "label": "Задачи по договору",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 528,
+        "width": 132.96875,
+        "height": 20
+      }
+    },
+    {
+      "label": "Документы",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 699,
+        "width": 75.703125,
+        "height": 20
+      }
+    },
+    {
+      "label": "+ Загрузить",
+      "tag": "button",
+      "cssBox": {
+        "x": 1310.171875,
+        "y": 693,
+        "width": 88.828125,
+        "height": 32
+      }
+    },
+    {
+      "label": "В архив",
+      "tag": "button",
+      "cssBox": {
+        "x": 1349.21875,
+        "y": 777,
+        "width": 53.78125,
+        "height": 32
+      }
+    },
+    {
+      "label": "В архив",
+      "tag": "button",
+      "cssBox": {
+        "x": 1349.21875,
+        "y": 830,
+        "width": 53.78125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Закрыть уведомление",
+      "tag": "button",
+      "cssBox": {
+        "x": 1367,
+        "y": 831,
+        "width": 36,
+        "height": 36
+      }
+    }
+  ]
+}
