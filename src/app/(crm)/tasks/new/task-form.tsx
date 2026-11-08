@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { apiCall } from "@/ui/api-client";
 import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
 import { Field, FormErrorBanner, SubmitButton } from "@/ui/form";
+import { DisclosureSection } from "@/ui/disclosure-section";
 import { DateTimeInput, EntityPicker, SelectInput, defaultNextAction, type Option } from "@/ui/client-kit";
 import { optionsOf } from "@/shared/codebook";
 
@@ -92,7 +93,8 @@ export function NewTaskForm({
   const [description, setDescription] = useState("");
   const [taskType, setTaskType] = useState(initialType);
   const [subtype, setSubtype] = useState("");
-  const [dueAt, setDueAt] = useState(() => defaultNextAction().dueAt);
+  const [initialDueAt] = useState(() => defaultNextAction().dueAt);
+  const [dueAt, setDueAt] = useState(initialDueAt);
   const [priority, setPriority] = useState("normal");
   const [responsibleUserId, setResponsible] = useState(selfId);
   const [recurrenceKind, setRecurrenceKind] = useState("none");
@@ -103,7 +105,10 @@ export function NewTaskForm({
   const [property, setProperty] = useState<PickedProperty | null>(null);
   const [templateHint, setTemplateHint] = useState<string | null>(null);
   const { pending, error, run, fieldError } = useApiAction();
-  const dirty = title !== "" || description !== "";
+  const dirty = title !== "" || description !== "" || taskType !== initialType || subtype !== ""
+    || dueAt !== initialDueAt || priority !== "normal" || responsibleUserId !== selfId
+    || recurrenceKind !== "none" || recurrenceInterval !== "1" || recurrenceUntil !== ""
+    || links.length !== contextLinks.length || Boolean(client || property);
   useUnsavedChangesWarning(dirty && !pending);
 
   const hasClient = links.some((l) => l.kind === "client");
@@ -160,6 +165,7 @@ export function NewTaskForm({
     >
       <FormErrorBanner error={error} />
 
+      <DisclosureSection title="Выбрать типовую задачу" hint="Шаблон заполнит название, тип и повторение. Проверьте срок перед сохранением.">
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="text-slate-500">Шаблоны:</span>
         {TEMPLATES.map((t) => (
@@ -168,6 +174,7 @@ export function NewTaskForm({
           </button>
         ))}
       </div>
+      </DisclosureSection>
       {templateHint ? <div className="alert alert-info">{templateHint}</div> : null}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -196,8 +203,7 @@ export function NewTaskForm({
         </Field>
       </div>
 
-      <fieldset className="rounded-md border border-slate-200 p-3">
-        <legend className="px-1 text-xs font-semibold text-slate-600">Повторение</legend>
+      <DisclosureSection title="Повторение задачи" hint={recurrenceKind === "none" ? "Сейчас задача разовая. Раскройте, чтобы настроить повторение." : "Настроено повторение — параметры сохраняются при сворачивании."} error={["recurrenceKind", "recurrenceInterval", "recurrenceUntil", "recurrenceRule"].map(fieldError).filter(Boolean).join("; ")}>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <Field label="Повторять" error={fieldError("recurrenceKind")}>
             <SelectInput value={recurrenceKind} onChange={setRecurrenceKind} options={[...optionsOf("recurrenceKind"), { value: "weekdays", label: "По будням" }, { value: "quarterly", label: "Ежеквартально" }]} />
@@ -214,10 +220,9 @@ export function NewTaskForm({
           ) : null}
         </div>
         {recurrenceKind !== "none" ? <p className="mt-2 text-xs text-slate-500">Следующий экземпляр создаётся автоматически при выполнении текущего.</p> : null}
-      </fieldset>
+      </DisclosureSection>
 
-      <fieldset className="rounded-md border border-slate-200 p-3">
-        <legend className="px-1 text-xs font-semibold text-slate-600">Связана с</legend>
+      <DisclosureSection title="Связать с клиентом или объектом" defaultOpen={contextLinks.length > 0} error={linkError} hint="Связи помогают перейти к нужной карточке из задачи.">
         {links.length ? (
           <ul className="mb-3 space-y-1">
             {links.map((l) => (
@@ -258,8 +263,9 @@ export function NewTaskForm({
         </div>
         {!links.length && !client && !property ? <p className="mt-2 text-xs text-slate-500">Связь необязательна, но помогает открыть нужную карточку прямо из задачи.</p> : null}
         {linkError ? <p className="field-error">{linkError}</p> : null}
-      </fieldset>
+      </DisclosureSection>
 
+      {recurrenceKind !== "none" ? <p className="text-sm text-slate-600" role="status">Повторение: {recurrenceKind === "quarterly" ? "ежеквартально" : recurrenceKind === "weekdays" ? "по будням" : optionsOf("recurrenceKind").find(o => o.value === recurrenceKind)?.label}. Настройки — в разделе «Повторение задачи».</p> : null}
       <div className="flex gap-2">
         <SubmitButton pending={pending}>Создать задачу</SubmitButton>
         <button type="button" className="btn" onClick={() => router.back()}>

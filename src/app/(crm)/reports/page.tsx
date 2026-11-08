@@ -87,8 +87,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         }
         actions={
           <>
-            <Link href="/archive" className="btn">
-              Исторический архив
+            <Link href="/tasks?view=all" className="btn">
+              Задачи сотрудников
             </Link>
             <a href="/api/v1/export" className="btn" download title="ZIP с CSV-файлами и manifest.json">
               Выгрузить данные (ZIP/CSV)
@@ -329,9 +329,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             </Link>
             .
           </p>
-          <a href="/api/v1/export" className="btn btn-sm mt-2" download>
-            Выгрузить данные (ZIP/CSV)
-          </a>
+          <p className="mt-2 text-xs text-slate-500">Кнопка «Выгрузить данные» находится в начале страницы.</p>
         </Card>
       </div>
       <p className="mt-3 text-xs text-slate-400">

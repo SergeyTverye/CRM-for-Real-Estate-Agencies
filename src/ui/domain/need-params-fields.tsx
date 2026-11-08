@@ -1,6 +1,7 @@
 "use client";
 
 import { Field } from "../form";
+import { DisclosureSection } from "../disclosure-section";
 import { SelectInput, type Option } from "../client-kit";
 import { optionsOf } from "@/shared/codebook";
 
@@ -248,6 +249,7 @@ export function NeedParamsFields({
         </>
       ) : null}
 
+      <DisclosureSection title="Способ оплаты и ипотека" defaultOpen={Boolean(value.financingType)} error={[err("financingType"), err("mortgageStatus")].filter(Boolean).join("; ")}>
       <Section title="Финансирование">
         <Field label="Способ оплаты" error={err("financingType")}>
           <SelectInput value={value.financingType} onChange={(v) => set("financingType", v)} options={FINANCING} placeholder="Не указан" />
@@ -259,7 +261,10 @@ export function NeedParamsFields({
         ) : null}
       </Section>
 
+      </DisclosureSection>
+
       {!compact && groups.size ? (
+        <DisclosureSection title="Дополнительные требования к объекту" error={["roomsMin", "roomsMax", "floorMin", "floorMax", "commercialPurpose", "powerRequirement", "parkingRequirement", "tenantRequirement", "landAreaMin", "landAreaMax", "buildingAreaMin", "buildingAreaMax"].map(k => err(k as keyof NeedParamsValue)).filter(Boolean).join("; ")}>
         <Section title="Дополнительные требования">
           {groups.has("rooms") ? (
             <>
@@ -300,6 +305,7 @@ export function NeedParamsFields({
             </>
           ) : null}
         </Section>
+        </DisclosureSection>
       ) : null}
 
       {!compact ? (
