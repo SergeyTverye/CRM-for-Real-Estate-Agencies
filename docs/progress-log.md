@@ -271,3 +271,12 @@
 - InstalledPlaywright b09766e8: terminalPASS7parent/0fail+1businessNOTRUN; searchUI16/16, LIVEOnRealtoffice+residential2/2 с16persisted (residentialpartial), LIVEAI10/10 одинразparse0.0739₽reserved0/cap1. Restartclientpersisted, cleanupPASS. Все данные UI синтетические; headlessChrome не является nativeWebView/physicalofflineproof. Четыре реальные картинки в docs/screenshots/vkr/v32-search-*.png осмотрены.
 - Installedrollback25a5cd34:7/7PASS — compiledfailure, encryptedprotectivebackup, точныйrollbackDB/marker/document, healthyreupgrade/login/download и teardown. Рабочие данные/ресурсы не подменялись. Ранее предоставленный ENVключ отдельно подключён к отсутствовавшему подключению рабочего профиля через WindowsDPAPI; settings/budgetunchanged,0дополнительныхpaidcalls.
 - Основная Goal не объявляется завершённой: чистые consumerVM BLOCKED по решению пользователя; physicalUSB/networkcut/nativepicker и полная nativeWebViewматрица не подтверждены. Жилые Avito/Youla/Domclick явно unsupported, CAPTCHA/блокировки части площадок сохраняются; полного сбора по всем сайтам не обещается. Текущий протокол docs/acceptance/desktop-v32/installed-search-998b59f.md.
+
+## 2026-11-08 — v3.2.2: UX, поиск, документы договоров, руководство
+
+- Ветка feature/ux-search-v3.2.2 от main 6ee543c; параллельные потоки UX / поиск / документы / руководство в отдельных рабочих копиях, интеграция координатором.
+- UX: аудит, 138+138 снимков до/после, фактические клики (история клиента 3→2, параметры потребности 5→4, задачи сотрудников 2→1).
+- Поиск: LIVE-матрица 7 площадок (Мир Квартир/OnRealt/Юла дают объявления; Циан/Яндекс требуют ручной проверки; Авито/Домклик блокируют); исправлены классификация Циана, таймауты жилой выдачи, дубли, AI-01/AI-02; добавлено и исправлено AI-ранжирование; LIVE AI ≈1,07 ₽.
+- Документы договоров: выбор файлов при создании, повтор незагруженных, новые типы, RBAC; PG/SQLite/e2e PASS.
+- Руководство: PDF 34 стр., исходник Markdown.
+- Итог 92a6df8: unit 2023, PG 428, SQLite 451, backup 46 — PASS; p95 выдачи ≤249 мс на 10 000 объявлений. Отчёт: docs/acceptance/v322/README.md.
