@@ -1,0 +1,45 @@
+{
+  "mode": "DEMO_FAKE",
+  "externalCalls": 0,
+  "results": [
+    {
+      "test": "panel E2E",
+      "exitCode": 0
+    },
+    {
+      "screen": "client",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    },
+    {
+      "screen": "need",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    },
+    {
+      "screen": "task",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    },
+    {
+      "screen": "deal",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    },
+    {
+      "screen": "agreement",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    },
+    {
+      "screen": "today",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    },
+    {
+      "screen": "reports",
+      "mode": "DEMO_FAKE",
+      "result": "PASS"
+    }
+  ]
+}
