@@ -5,7 +5,8 @@ import { useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { apiCall, ApiCallError } from "@/ui/api-client";
 import { useUnsavedChangesWarning } from "@/ui/hooks";
-import type { ChatContext, RecordLink } from "@/modules/ai-chat/domain/policy";
+import { pageContext, contextLabels, quickQuestions, taskFormHref } from "@/modules/ai-chat/domain/context";
+import type { RecordLink } from "@/modules/ai-chat/domain/policy";
 type Session = {
     id: string;
     title: string;
@@ -35,7 +36,6 @@ type Chat = Session & {
     }[];
     actions: Action[];
 };
-function pageContext(path: string): ChatContext { const m = path.match(/^\/(clients|needs|collections)\/([0-9a-f-]{36})(?:\/|$)/i); return m ? { kind: ({ clients: "client", needs: "need", collections: "collection" } as const)[m[1] as "clients" | "needs" | "collections"], id: m[2] } : { kind: "none" }; }
 function Message({ text, links }: {
     text: string;
     links: RecordLink[];
@@ -53,6 +53,8 @@ export function AiChatPanel() {
     const [open, setOpen] = useState(false);
     const [sessions, setSessions] = useState<Session[]>([]);
     const [chat, setChat] = useState<Chat | null>(null);
+    const activeKind = (chat?.contextType ?? pageContext(path).kind) as keyof typeof contextLabels;
+    const contextChanged = !!chat && (chat.contextType !== pageContext(path).kind || chat.contextId !== (pageContext(path).id ?? null));
     const [text, setText] = useState("");
     const [pending, setPending] = useState(false);
     const working = useRef(false);
@@ -98,7 +100,10 @@ export function AiChatPanel() {
  <div className="flex items-center justify-between gap-2"><Dialog.Title className="text-lg font-semibold">AI-помощник</Dialog.Title><Dialog.Close className="btn btn-sm">Закрыть</Dialog.Close></div>
  <Dialog.Description className="mt-1 text-sm text-slate-600">Личная история. Изменения выполняются после предпросмотра и подтверждения.</Dialog.Description>
  <div className="my-3 flex gap-2"><select aria-label="История диалогов" className="input min-w-0 flex-1" disabled={pending || !!text} value={chat?.id ?? ""} onChange={e => void run(async () => { setChat(await apiCall<Chat>("GET", `/api/v1/ai-chat/sessions/${e.target.value}`)); })}><option value="" disabled>Личные диалоги</option>{sessions.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}</select><button className="btn btn-sm" disabled={pending || !!text} onClick={() => void run(create)}>Новый диалог</button></div>
- <p className="text-xs text-slate-600">{chat?.contextType === "client" ? "Контекст: клиент" : chat?.contextType === "need" ? "Контекст: потребность" : chat?.contextType === "collection" ? "Контекст: подборка" : "Контекст: общий"}. Новый диалог использует текущую страницу.</p>
+ <p className="text-xs text-slate-600">{contextLabels[activeKind] ?? "общий"}. Новый диалог использует текущую страницу.</p>
+ {contextChanged && <p role="status" className="mt-2 text-sm text-amber-800">Страница изменилась. Для её контекста нажмите «Новый диалог».</p>}
+ <div className="mt-2 flex flex-wrap gap-2">{quickQuestions(activeKind).map(q => <button key={q} type="button" className="btn btn-sm text-left" disabled={pending} onClick={() => setText(q)}>{q}</button>)}</div>
+ <div className="mt-2 flex gap-2"><Link className="btn btn-sm" href={taskFormHref(chat ? { kind: activeKind, ...(chat.contextId ? { id: chat.contextId } : {}) } : pageContext(path))} onClick={() => setOpen(false)}>Создать задачу</Link><span className="text-xs text-slate-500">Откроется форма: проверьте связи и срок перед сохранением.</span></div>
  <div className="my-3 flex-1 space-y-3 overflow-y-auto" aria-live="polite">{!chat?.messages.length && <p className="p-4 text-sm text-slate-500">Спросите о задачах, истории клиента или сравнении объектов. Можно подготовить черновик задачи или КП.</p>}{chat?.messages.map(m => <article key={m.id} className={`rounded border p-3 text-sm ${m.role === "user" ? "bg-slate-50" : "bg-blue-50"}`}><p className="mb-1 font-semibold">{m.role === "user" ? "Вы" : "Помощник"}</p><Message text={m.content} links={Array.isArray(m.toolArgs) ? m.toolArgs : []}/></article>)}
  {chat?.actions.map(a => <section key={a.id} className="rounded border border-amber-300 bg-amber-50 p-3 text-sm"><p className="font-semibold">Черновик {a.actionType === "task" ? "задачи" : "КП"}: {a.payload.title}</p>{a.payload.description && <p>{a.payload.description}</p>}{a.payload.dueAt && <p>Срок: {new Date(a.payload.dueAt).toLocaleString("ru-RU", { timeZone: "Asia/Novosibirsk" })} (Новосибирск)</p>}{a.payload.clientId && <Link className="text-blue-700 underline" href={`/clients/${a.payload.clientId}`}>Открыть клиента</Link>}{a.payload.clientNeedId && <Link className="text-blue-700 underline" href={`/needs/${a.payload.clientNeedId}`}>Открыть потребность</Link>}{a.payload.propertyIds?.map((id, i) => <p key={id}><Link className="text-blue-700 underline" href={`/properties/${id}`}>Объект {i + 1}</Link></p>)}{a.status === "proposed" ? <div className="mt-2 flex gap-2"><button className="btn btn-sm" disabled={pending} onClick={() => void run(() => decide(a, "confirm"))}>Подтвердить</button><button className="btn btn-sm" disabled={pending} onClick={() => void run(() => decide(a, "reject"))}>Отклонить</button></div> : <p>{a.status === "confirmed" ? "Подтверждено" : a.status === "rejected" ? "Отклонено" : "Истёк срок"}</p>}</section>)}
  </div>{error && <p role="alert" className="mb-2 text-sm text-red-700">{error} <button className="underline" onClick={() => void run(async () => { if (chat)
