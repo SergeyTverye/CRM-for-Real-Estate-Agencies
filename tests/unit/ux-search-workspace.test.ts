@@ -262,3 +262,12 @@ describe("Property Search UI/UX presentation and availability helpers", () => {
     expect(disabled.tone).toBe("slate");
   });
 });
+
+it.each([0,1,11])("disables AI ranking outside 2–10 selection (%i)", count=>{
+  const html=renderToStaticMarkup(createElement(ListingAnalysisPanel,{listingIds:Array.from({length:count},(_,n)=>String(n)),filters:baseFilters}));
+  expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Ранжировать выбранные с ИИ<\/button>/);
+});
+it.each([2,10])("offers a separate AI ranking for %i listings", count=>{
+  const html=renderToStaticMarkup(createElement(ListingAnalysisPanel,{listingIds:Array.from({length:count},(_,n)=>String(n)),filters:baseFilters}));
+  expect(html).toMatch(/<button(?![^>]*disabled)[^>]*>Ранжировать выбранные с ИИ<\/button>/);
+});

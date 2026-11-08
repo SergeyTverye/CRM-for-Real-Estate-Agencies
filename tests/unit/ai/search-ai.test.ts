@@ -159,7 +159,7 @@ describe("REPLAY AI-01 explicit categories survive model post-processing", () =>
     expect(after).toMatchObject({...changes,districts:["Центральный"],requiredFeatures:["парковка"]});
     expect(f.provider.requests).toHaveLength(1);
   });
-  it.each(["до 100 м²", "от 50 до 100 м2", "с 2 до 5 этажа", "добавь парковку"])("does not erase a budget for %s", query=>{
+  it.each(["до 100 м²", "от 50 до 100 м2", "площадь до 100", "этаж до 5", "с 2 до 5 этажа", "добавь парковку"])("does not erase a budget for %s", query=>{
     const before=searchFiltersSchema.parse({operation:"sale",priceTo:"9000000",priceUnit:"rub_total"});
     expect(preserveSearchConditions(before,searchFiltersSchema.parse({operation:"sale"}),query)).toMatchObject({priceTo:"9000000",priceUnit:"rub_total"});
   });

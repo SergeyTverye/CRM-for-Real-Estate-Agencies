@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { independentCommitScope } from "@/shared/db/client";
 import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
@@ -209,3 +210,32 @@ async function draftSelectionText(actor: Actor, raw: unknown, kind: "intro"|"com
 export const compareAnalysisListings = (actor:Actor,raw:unknown,injected?:SearchAi)=>draftSelectionText(actor,raw,"comparison",injected);
 export const collectionAnalysisText = (actor:Actor,raw:unknown,injected?:SearchAi)=>draftSelectionText(actor,raw,"intro",injected);
 
+/** Shares the durable analysis cache, cross-process lock and existing budget gate. */
+export async function rankAnalysisListings(actor:Actor,raw:unknown,injected?:SearchAi) {
+  const input=parseInput(selectionSchema,raw),config=await available();
+  if(input.listingIds.length<2 || input.listingIds.length>10) throw new DomainError("AI_RANK_COUNT","Выберите от двух до десяти объявлений.");
+  if(input.listingIds.length>config.perJobLimit) throw new DomainError("AI_ANALYSIS_LIMIT","Сократите число объявлений: достигнут лимит руководителя.");
+  const rows=await selected(actor,input);
+  const facts={items:rows.map(row=>{
+    const p=prepare(row,input.filters);
+    return {listingId:row.id,criteria:[...p.evaluation.criteria,...p.evaluation.preferences].filter(c=>!forbiddenAnalysisCriterion(c.criterion)).map(c=>({criterion:c.criterion,state:c.state,evidence:safeListingText(c.evidence)})),pricePeriodNotice:p.listing.priceUnit ? null : "Период цены неизвестен — цены несопоставимы до проверки"};
+  }).sort((a,b)=>a.listingId.localeCompare(b.listingId))};
+  // Filters and evidence are fingerprinted. Updated facts or model invalidate recommendations.
+  const cacheKey=createHash("sha256").update(JSON.stringify(["listing-ranking-v1",config.model,input.filters,facts])).digest("hex");
+  return independentCommitScope(async tx=>{
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${cacheKey},0))`));
+    const cached=await tx.aiAnalysisCache.findUnique({where:{cacheKey}});
+    if(cached) return {...cached.result as unknown as {ranking:{listingId:string;reasons:string[]}[];warning:string;recommendationOnly:boolean;model:string},cacheHit:true};
+    let requestId="";
+    const response=await withP2Ai(actor,"offer_text",(ai,c)=>{requestId=c.requestId;return ai.rankListings(c,facts);},injected);
+    const ranking=response.ranking.map(item=>({listingId:item.listingId,reasons:item.reasonCriteria.map(key=>{
+      const criterion=facts.items.find(row=>row.listingId===item.listingId)!.criteria.find(c=>c.criterion===key)!;
+      const state=criterion.state==="matched" ? "соответствует" : criterion.state==="contradicted" ? "противоречит" : "неизвестно, требует проверки";
+      return `${analysisCriterionLabel(key)}: ${state}. ${criterion.evidence}`;
+    })}));
+    const result={ranking,warning:ANALYSIS_WARNING,recommendationOnly:true,model:response.model};
+    const usage=await db.aiUsageLog.findUnique({where:{id:aiUsageLogId(requestId)},select:{id:true}});
+    await db.aiAnalysisCache.upsert({where:{cacheKey},create:{cacheKey,listingId:facts.items[0]!.listingId,result:json(result),aiUsageLogId:usage?.id},update:{}});
+    return {...result,cacheHit:false};
+  });
+}

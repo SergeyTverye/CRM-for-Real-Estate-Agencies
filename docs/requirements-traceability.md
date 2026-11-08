@@ -179,3 +179,15 @@
 | §12.1 обратный Excel, precision/geometry | [Excel](acceptance/desktop-v32/excel-local-verification.md): 0 mismatches для 122 keys/186 fields/32 money/90 contacts/90 dates/6 sheets geometry/4640 numformats/90 headers, names/sections/order. Parser 64 PASS /5 optional skip, export 14 PASS суммарно (7 PostgreSQL + 7 SQLite) | DT-23 | PARTIAL: 41 UNSUPPORTED_COLUMN, 32 HYPERLINK_CLEARED, 90 UNSUPPORTED_FIELD, 15 images. FORMULA_CLEARED=0 при отсутствии формул — не proof formula preservation |
 | §11/12 конфиденциальность | [Security review](acceptance/desktop-v32/security-review.md): подтверждённых P0/P1 (CRITICAL/HIGH) в проверенной области нет; статическое ревью не является Windows lifecycle evidence. Предыдущий аудит в [DT-24](acceptance/desktop-v32/DT-24.md); verifier source SHA/cleanup/RBAC PASS, реальные строки не передавались делегатам | DT-24 | PARTIAL: artifact/security gate установленного EXE отсутствует; новый аудит всей истории не выполнялся |
 | §13/15 общий offline/online release gate | [Матрица](acceptance/desktop-v32/README.md), [QA](acceptance/desktop-v32/regression-final.md): desktop backup 46 PASS / 2 MinIO skip, cloud synthetic 10 PASS, USB synthetic 4 PASS, backup UI 3 server + 3 desktop PASS. Targeted export 14 всего (7 PG + 7 SQLite). Три DEMO screenshot не доказательство установки | DT-27 | PARTIAL; полные PG/SQLite production DT, Windows/installer evidence остаются открытыми, clean Win10/11 BLOCKED; synthetic suites не подменяют LIVE/installed restore |
+
+## Поиск v3.2.2: исправления по результатам LIVE AI (2026-11-08)
+
+| Требование / дефект | Реализация | Проверка | Статус |
+|---|---|---|---|
+| AI-01: явная цена, площадь, этаж, операция не теряются | ai/domain/listing-analysis.ts, preview/confirm | REPLAY SearchAi + preservation; точный запрос и подтверждение; уточнение бюджета аренды | PASS |
+| AI-02: неизвестный период не становится total | nullable ExternalListing.priceUnit, PG/SQLite migrations; snapshot priority; UI и сравнение | persistence, неизвестный период в AI DTO, несовместимость цен, populated SQLite upgrade/FK/index checks | PASS |
+| Пункт 13: отдельное AI-ранжирование 2–10 выбранных | listing-analysis-service, SearchAi.rankListings, analysis/rank API, ListingAnalysisPanel | fake, cache/concurrency/invalidation, budget, provider failure, ID/criterion validation, API auth/disabled, UI границы | PASS |
+| sort=match: объяснимый score | Только preferredFeatures, обозначен в UI как сортировка без ИИ | Без предпочтений 0, подтверждённая парковка 100 | PASS |
+| AI-03: сетевая ошибка официального Yandex не ломает core | Контролируемая AI_CALL_FAILED, независимая readiness | injected fetch reject/abort на официальном URL, успешный ручной поиск и ready 200 на PG/SQLite | PASS |
+
+Область доказательства — автоматические REPLAY/fake проверки; новый платный LIVE прогон не проводился. Команды и итоговые результаты: [v322-ai-fixes.md](vkr/v322-ai-fixes.md).
