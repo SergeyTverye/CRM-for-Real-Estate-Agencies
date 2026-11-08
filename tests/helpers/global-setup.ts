@@ -19,5 +19,5 @@ export default async function setup() {
   }
   await client.query("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;");
   await client.end();
-  execSync("npx prisma migrate deploy", { stdio: "pipe", env: { ...process.env, DATABASE_URL: url } });
+  execSync("npx prisma migrate deploy --config prisma.test.config.ts", { stdio: "pipe", env: { ...process.env, DATABASE_URL: url } });
 }

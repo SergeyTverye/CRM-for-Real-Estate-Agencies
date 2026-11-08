@@ -29,3 +29,9 @@ it("sensitive public text is redacted and ownership/availability cannot be AI ve
   expect(safeListingText("+7 900 123-45-67; a@example.ru; паспорт 1234 567890; площадь 80 м²")).not.toMatch(/900|example|1234/);
   for(const c of ["owner","availability","Собственник","актуальная доступность","свободно"]) expect(forbiddenAnalysisCriterion(c)).toBe(true);
 });
+
+it("a budget-only clarification cannot replace the rental period with a model default",()=>{
+  const before=SearchFilters.parse({operation:"rent",priceUnit:"rub_month",priceTo:"100000"});
+  const proposed=SearchFilters.parse({operation:"sale",priceUnit:"rub_total",priceTo:"80000"});
+  expect(SearchFilters.parse(preserveSearchConditions(before,proposed,"бюджет до 80 000"))).toMatchObject({operation:"rent",priceUnit:"rub_month",priceTo:"80000"});
+});

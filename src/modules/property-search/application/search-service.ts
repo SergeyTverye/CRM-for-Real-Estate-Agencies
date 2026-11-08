@@ -61,7 +61,7 @@ export async function persistListing(tx: Tx, runId: string, listing: NormalizedL
     sourceCategoryRaw: listing.sourceCategoryRaw ?? null, purposeEvidence: listing.purposeEvidence ? jsonValue(listing.purposeEvidence) : Prisma.JsonNull,
     pricePerM2Rub: perM2?.amount ?? null, pricePerM2Unit: perM2?.unit ?? null };
   const data = { ...observations, fetchedAt: new Date(listing.fetchedAt), source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId, url: listing.url, sourceMethod,
-    operation: listing.operation ?? "sale", priceUnit: listing.priceUnit ? priceUnits[listing.priceUnit] : "total", priceRub: listing.price,
+    operation: listing.operation ?? "sale", priceUnit: listing.priceUnit ? priceUnits[listing.priceUnit] : null, priceRub: listing.price,
     // Normalized scraper areas are JS numbers, unlike money strings. Convert at
     // this boundary to the schema's decimal(12,2), not in SQLite's exact-money
     // adapter (which deliberately rejects fractional Number inputs).

@@ -44,7 +44,7 @@ export async function withP2Ai<T>(actor: Actor, type: "call_note" | "offer_text"
     const result = await work(ai,{user:{userId:actor.userId,active:true},jobId,ownerUserId:actor.userId,requestId:`${type}:${randomUUID()}`});
     return result;
   } catch (error) {
-    if (error instanceof AiError) throw new DomainError(error.code, error.code === "AI_DISABLED" ? "ИИ отключён. Заполните данные вручную." : "Не удалось подготовить черновик: проверьте лимиты ИИ или уточните исходные данные.");
+    if (error instanceof AiError) throw new DomainError(error.code, error.code === "AI_DISABLED" ? "ИИ отключён. Заполните данные вручную." : error.code === "AI_CALL_FAILED" ? "Сервис ИИ временно недоступен. Повторите позже. Ручной поиск доступен." : "Не удалось подготовить черновик: проверьте лимиты ИИ или уточните исходные данные.");
     throw error;
   }
 }

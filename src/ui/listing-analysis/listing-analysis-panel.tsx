@@ -7,7 +7,7 @@ import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
 import { FormErrorBanner } from "@/ui/form";
 
 type Evidence = {criterion:string;result:string;quote:string|null;reason:string};
-type Result = {text?:string;warning?:string;pendingActionId?:string|null;items?:{listingId:string;cacheHit:boolean;evidence:Evidence[];unresolved:string[];url:string}[];tasks?:{listingId?:string;title?:string;description?:string}[];questions?:{listingId:string;questions:string[]}[];tradeoffs?:{listingId:string;points:{comparedListingId:string;area:string;price:string}[]}[]};
+type Result = {ranking?:{listingId:string;reasons:string[]}[];cacheHit?:boolean;text?:string;warning?:string;pendingActionId?:string|null;items?:{listingId:string;cacheHit:boolean;evidence:Evidence[];unresolved:string[];url:string}[];tasks?:{listingId?:string;title?:string;description?:string}[];questions?:{listingId:string;questions:string[]}[];tradeoffs?:{listingId:string;points:{comparedListingId:string;area:string;price:string}[]}[]};
 /** Mount with key=selection+filters to discard old previews when the search changes. */
 export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enabled=true,statusMessage,settingsUrl}:{listingIds:string[];filters:SearchFilters;needId?:string;labels?:Record<string,string>;enabled?:boolean;statusMessage?:string|null;settingsUrl?:string|null}) {
   const action = useApiAction();
@@ -32,6 +32,7 @@ export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enable
     {!listingIds.length && <p>Выберите объявления в результатах поиска.</p>}
     <div className="flex flex-wrap gap-2">
       <button className="btn btn-secondary" disabled={!enabled || action.pending || !listingIds.length} onClick={()=>request("batch")}>Проверить неизвестные признаки</button>
+      <button className="btn btn-secondary" disabled={!enabled || action.pending || listingIds.length<2 || listingIds.length>10} onClick={()=>request("rank")}>Ранжировать выбранные с ИИ</button>
       <button className="btn btn-secondary" disabled={!enabled || action.pending || listingIds.length<2 || listingIds.length>4} onClick={()=>request("compare")}>Сравнить объекты</button>
       <button className="btn btn-secondary" disabled={!enabled || action.pending || !listingIds.length} onClick={()=>request("collection-text")}>Текст для подборки</button>
       <button className="btn btn-secondary" disabled={!enabled || action.pending || !listingIds.length} onClick={()=>request("suggest-tasks")}>Предложить задачи уточнения</button>
@@ -39,6 +40,11 @@ export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enable
     {action.pending && <p role="status">Подготавливаем результат…</p>}
     <FormErrorBanner error={action.error}/>
     {result?.warning && <p className="text-sm text-amber-800">{result.warning}</p>}
+    {result?.ranking && <aside className="rounded border border-amber-300 bg-amber-50 p-3" aria-label="Рекомендация ИИ: порядок объявлений">
+      <h3 className="font-semibold">Рекомендованный ИИ порядок {result.cacheHit ? "· из кеша" : ""}</h3>
+      <p className="text-sm">Рекомендация по критериям запроса; требует проверки сотрудником. Факты объявления не изменены.</p>
+      <ol className="list-decimal space-y-2 pl-5">{result.ranking.map(item=><li key={item.listingId}><strong>{label(item.listingId)}</strong>{item.reasons.map((reason,index)=><p className="text-sm" key={index}>{reason}</p>)}</li>)}</ol>
+    </aside>}
     {result?.text && <div className="whitespace-pre-wrap rounded bg-slate-50 p-3">{result.text}</div>}
     {result?.tradeoffs?.map(item=><div key={item.listingId}><h3 className="font-medium">{label(item.listingId)}: компромиссы</h3>{item.points.map(point=><p key={point.comparedListingId} className="text-sm">По сравнению с {label(point.comparedListingId)}: {point.area} {point.price}</p>)}</div>)}
     {result?.items?.map(item=><article key={item.listingId} className="border-t pt-3">

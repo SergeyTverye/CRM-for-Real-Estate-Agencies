@@ -18,13 +18,19 @@ export function forbiddenAnalysisCriterion(criterion: string) {
 export function preserveSearchConditions(previous: SearchFilters, proposed: SearchFilters, query: string): SearchFilters {
   if (/новый поиск|начни заново|сбрось все/iu.test(query)) return proposed;
   const next = { ...previous };
+  // Recognize money separately from area/floor ranges; bare bounds such as
+  // «до 100 м²» must never authorize erasing the existing budget.
+  const money = /цен|бюджет|руб|стоим|₽|(?:от|до|за)\s*\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}])|(?:в|за|\/)\s*(?:месяц|мес|год))|\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}]))|(?:от|до|за)\s*\d[\d\s.,]*(?![\d\s.,])(?=\s*(?:[,;.!]|$))/iu;
+  const area = /площад|м[²2]|кв\.?\s*м|квадратн\p{L}*\s+метр/iu;
+  const floor = /этаж|подвал|цокол/iu;
+  const explicitMoney = /цен|бюджет|руб|стоим|₽|\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}])|(?:в|за|\/)\s*(?:месяц|мес|год))/iu;
+  const priceMentioned = explicitMoney.test(query) || money.test(query) && (!area.test(query) && !floor.test(query) || proposed.priceFrom !== undefined || proposed.priceTo !== undefined);
   const mentions: Partial<Record<keyof SearchFilters, RegExp>> = {
     city: /город|новосибир|москв|санкт|томск|омск/iu,
-    operation: /аренд|продаж|купить|покуп/iu, priceUnit: /аренд|цен|бюджет|руб|месяц|год|м²/iu,
+    operation: /аренд|продаж|купить|покуп|снять|сним|сдам|сда[её]|(?:в|за)\s+(?:месяц|год)/iu,
     purposes: /офис|склад|псн|торгов|производ|назначен/iu,
     districts: /район|центральн|советск|ленинск|кировск|октябрьск|заельцовск/iu,
-    priceFrom: /цен|бюджет|руб|стоим/iu, priceTo: /цен|бюджет|руб|стоим/iu,
-    areaFrom: /площад|м²|кв\.?\s*м/iu, areaTo: /площад|м²|кв\.?\s*м/iu,
+    areaFrom: area, areaTo: area,
     floorMode: /этаж|подвал|цокол/iu, floorFrom: /этаж/iu, floorTo: /этаж/iu,
     seller: /собствен|продав|агент|посредник/iu, sources: /источник|площадк|циан|авито|яндекс|домклик|юла/iu,
     hasPhotos: /фото/iu, freshness: /свеж|опубликов|найден|дн[яей]|час/iu,
@@ -32,6 +38,11 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
   };
   for (const key of Object.keys(mentions) as (keyof SearchFilters)[]) {
     if (mentions[key]?.test(query)) Object.assign(next, { [key]: proposed[key] });
+  }
+  if ((mentions.operation!.test(query) || /месяц|мес\b|год|за\s*м[²2]|за\s+объект|полная\s+цена/iu.test(query)) && proposed.priceUnit) next.priceUnit = proposed.priceUnit;
+  if (priceMentioned) {
+    next.priceFrom = proposed.priceFrom;
+    next.priceTo = proposed.priceTo;
   }
   if (/вход|витрин|лини|мокр|мощност|квт|потол|ворот|разгруз|парков|арендатор|признак|особенност/iu.test(query)) {
     if (previous.features || proposed.features) next.features = { ...previous.features, ...proposed.features };

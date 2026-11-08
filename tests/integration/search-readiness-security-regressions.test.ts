@@ -1,3 +1,10 @@
+import publicFixture from "../fixtures/search-quality/price-change-v31-live.json";
+import type { NormalizedListing } from "@/modules/property-search/domain/types";
+import { evaluateListing } from "@/modules/property-search/domain/evaluation";
+import { GET as readinessGet } from "@/app/api/health/ready/route";
+import { previewAnalysisQuery } from "@/modules/ai/application/listing-analysis-service";
+import { YandexResponsesClient } from "@/modules/ai/infrastructure/yandex-responses-client";
+import { PrismaAiLedger, PrismaAiSettings, PrismaAiTariffs } from "@/modules/ai/infrastructure/prisma-repositories";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { db, resetDatabase, seedBase, sessionCookieFor, apiRequest, routeParams, type TestUsers } from "../helpers/fixtures";
 import { resetConfigCache } from "@/shared/config/env";
@@ -109,4 +116,25 @@ describe("credential readiness persistence and route guards (both backends)", ()
     expect(factory).not.toHaveBeenCalled();
     expect(store.get).not.toHaveBeenCalled(); expect(store.put).not.toHaveBeenCalled(); expect(store.delete).not.toHaveBeenCalled();
   });
+});
+
+it.each(["reject","timeout"])("AI-03 official Yandex transport %s leaves manual search and readiness available",async failure=>{
+  const fetcher=vi.fn<typeof fetch>(async (_url,init)=>{
+    if(failure==="reject") throw new TypeError("synthetic offline");
+    return new Promise<Response>((_resolve,reject)=>init?.signal?.addEventListener("abort",()=>reject(new DOMException("synthetic timeout","AbortError")),{once:true}));
+  });
+  const provider=new YandexResponsesClient({apiKey:"synthetic-only-key",folder:"synthetic-folder",baseUrl:"https://ai.api.cloud.yandex.net/v1",timeoutMs:20},fetcher);
+  await seedAiTariffs(db);
+  const ai=aiComposition.createSearchAi(getConfig(),{ledger:new PrismaAiLedger(),settings:new PrismaAiSettings(),tariffs:new PrismaAiTariffs()},provider);
+  await expect(previewAnalysisQuery(users.realtor1,{text:"Аренда офиса",currentFilters:filters},ai)).rejects.toMatchObject({code:"AI_CALL_FAILED",message:expect.stringContaining("Ручной поиск доступен")});
+  expect(fetcher).toHaveBeenCalledOnce();expect(fetcher.mock.calls[0]![0]).toBe("https://ai.api.cloud.yandex.net/v1/responses");
+  // Explicitly turn off optional AI: the same process must still accept manual search.
+  vi.stubEnv("AI_ENABLED","false");resetConfigCache();
+  const listing={...publicFixture.listing,operation:"rent",priceUnit:null} as NormalizedListing;
+  const scraper={search:vi.fn(async()=>({listings:[{listing,evaluation:evaluateListing(listing,filters)}],sources:[{source:"onrealt" as const,status:"success" as const,resultCount:1,reason:null}]}))};
+  const run=await runSearch(users.realtor1,{filters,sources:["onrealt"]},{scraper});
+  expect(run.status).toBe("success");expect(await db.searchRunResult.count({where:{runId:run.id}})).toBe(1);
+  expect(fetcher).toHaveBeenCalledOnce();
+  vi.stubEnv("AI_ENABLED","true");resetConfigCache();
+  const ready=await readinessGet();expect(ready.status).toBe(200);expect((await ready.json()).status).toBe("ok");
 });
