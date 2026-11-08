@@ -78,5 +78,6 @@ export function scraperErrorReason(error: TechnicalError): string {
     "flat", "studio", "room", "house", "cottage", "townhouse", "land", "garage", "residential"].includes(t));
   const smokeReason = ["SMOKE_REQUEST_BUDGET", "SMOKE_REDIRECT_STOPPED"].find(value => error.error === value);
   const challenge = error.error === "CIAN_ACCESS_CHALLENGE" ? "; CIAN_ACCESS_CHALLENGE (CAPTCHA/антибот)" : "";
+  if (code === "NEEDS_USER_ACTION") return "NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт";
   return `${code}${error.status ? ` HTTP ${error.status}` : ""}${field ? `; фильтр: ${field}` : ""}${types?.length ? `; назначения: ${types.join(", ")}` : ""}${smokeReason ? `; ${smokeReason}` : ""}${challenge}`;
 }

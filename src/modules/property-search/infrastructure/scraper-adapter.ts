@@ -39,7 +39,7 @@ export interface ScraperAdapter {
   searchDetailed?(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<AdapterSearchResult>;
 }
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
-export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions; jobDeadlineAt?: number }) => Promise<ScraperClient>;
+export type ScraperFactory = (config: RealEstateScraper.Config & { browser?: true | RealEstateScraper.BrowserOptions; jobDeadlineAt?: number; dateDetailMaxCards?: number }) => Promise<ScraperClient>;
 /** A small HTTP-200 challenge is not an empty market or a selector regression. */
 export function isCianAccessChallenge(url: string, data: unknown): boolean {
   const host = new URL(url).hostname;
@@ -91,11 +91,11 @@ const transport: RealEstateScraper.Transport = async request => {
 };
 /** Use the public browser lifecycle API to intercept ALL browser network, including subresources. */
 export const defaultScraperFactory: ScraperFactory = async config => {
-  const { browser, jobDeadlineAt, ...provided } = config;
+  const { browser, jobDeadlineAt, dateDetailMaxCards, ...provided } = config;
   const deadline = jobDeadlineAt ?? Date.now() + (config.timeout ?? 30000);
   let requestDeadline = deadline;
   const httpConfig = { ...provided, transport: provided.transport ?? transport, maxRetries: 0 };
-  if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig), { deadline });
+  if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig), { deadline, maxCards: dateDetailMaxCards });
   const browserOptions = browser === true ? {} : browser;
   // Ordinary Playwright launch: no fingerprint changes or anti-detection scripts.
   const browserInstance = await chromium.launch({ channel: browserOptions.channel, executablePath: browserOptions.executablePath, headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
@@ -185,8 +185,9 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       let graceTimer: ReturnType<typeof setTimeout> | undefined;
       const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
       const factory = this.options.factory ?? defaultScraperFactory;
+      const parallelHousing = ["mirkvartir", "onrealt"].includes(source) && plan.queries.length > 1;
       const work = async () => {
-        const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, maxRetries: 0, transport: resilientTransport(transport, source, deadline),
+        const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, dateDetailMaxCards: parallelHousing ? 0 : undefined, maxRetries: 0, transport: resilientTransport(transport, source, deadline, parallelHousing ? 1000 : 0),
           ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
             ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
             ...this.options.browser, sources: [source] } } : {}) });
@@ -198,28 +199,38 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         const queries = plan.queries.map(query => ({ ...query, signal: controller.signal }));
         const merged = await (async (): Promise<RealEstateScraper.SearchResult> => {
           let acc: RealEstateScraper.SearchResult | undefined;
-          for (const query of queries) {
-            if (controller.signal.aborted || Date.now() >= deadline) { controller.abort(); break; }
-            try {
-              const next = await client.searchSite(source, query);
-              if (finished) break;
-              batches.push(next);
-              if (!acc) acc = { ...next, results: [...next.results], pages: [...next.pages], errors: [...next.errors] };
-              else { acc.results.push(...next.results); acc.pages.push(...next.pages); acc.errors.push(...next.errors); acc.total += next.total; acc.partial = acc.partial || next.partial; }
-            } catch (branch) {
-              if (finished) break;
-              const info = branch && typeof branch === "object" ? branch as { code?: string; message?: string; status?: number; url?: string } : {};
-              const entry = { source, page: 1, code: typeof info.code === "string" ? info.code : "SEARCH_FAILED",
-                error: typeof info.message === "string" && info.message ? info.message : String(branch),
-                ...(info.status !== undefined ? { status: info.status } : {}),
-                ...(query.type ? { types: [query.type as RealEstateScraper.PropertyType] } : {}) };
-              if (!acc) acc = { query, timestamp: new Date().toISOString(), total: 0, results: [], errors: [entry], pages: [], partial: false };
-              else { acc.errors.push(entry); acc.partial = true; }
-            }
+          let cursor = 0;
+          let accessStopped = false;
+          const worker = async () => {
+            while (cursor < queries.length && !accessStopped) {
+              const branchIndex = cursor++;
+              const query = queries[branchIndex]!;
+              if (controller.signal.aborted || Date.now() >= deadline) { controller.abort(); break; }
+              try {
+                const next = await created.searchSite(source, query);
+                if (finished) break;
+                batches[branchIndex] = next;
+                if (next.errors.some(error => ["NEEDS_USER_ACTION", "ACCESS_BLOCKED", "RATE_LIMITED"].includes(error.code ?? ""))) accessStopped = true;
+                if (!acc) acc = { ...next, results: [...next.results], pages: [...next.pages], errors: [...next.errors] };
+                else { acc.results.push(...next.results); acc.pages.push(...next.pages); acc.errors.push(...next.errors); acc.total += next.total; acc.partial = acc.partial || next.partial; }
+              } catch (branch) {
+                if (finished) break;
+                const info = branch && typeof branch === "object" ? branch as { code?: string; message?: string; status?: number; url?: string } : {};
+                if (["NEEDS_USER_ACTION", "ACCESS_BLOCKED", "RATE_LIMITED"].includes(info.code ?? "")) accessStopped = true;
+                const entry = { source, page: 1, code: typeof info.code === "string" ? info.code : "SEARCH_FAILED",
+                  error: typeof info.message === "string" && info.message ? info.message : String(branch),
+                  ...(info.status !== undefined ? { status: info.status } : {}),
+                  ...(query.type ? { types: [query.type as RealEstateScraper.PropertyType] } : {}) };
+                if (!acc) acc = { query, timestamp: new Date().toISOString(), total: 0, results: [], errors: [entry], pages: [], partial: false };
+                else { acc.errors.push(entry); acc.partial = true; }
+              }
               // Publish at every branch boundary: a later hung call must not erase it.
               partial = acc;
-            if (Date.now() >= deadline) controller.abort();
-          }
+              if (Date.now() >= deadline) controller.abort();
+            }
+          };
+          // Flat/studio come first in the plan; two workers bound in-flight work.
+          await Promise.all(Array.from({ length: parallelHousing ? 2 : 1 }, () => worker()));
           if (!acc) throw { code: "ABORTED" };
           return acc;
         })();
@@ -241,7 +252,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         const result = await Promise.race([stopped, work()]);
         finished = true;
         let invalid = 0;
-        const normalized = batches.map(batch => batch.results.flatMap(raw => {
+        const normalized = batches.filter(Boolean).map(batch => batch.results.flatMap(raw => {
           try { if (raw.source !== source) throw new Error("SOURCE_MISMATCH"); return [normalizeListing(raw, batch.timestamp)]; }
           catch { invalid++; return []; }
         }));

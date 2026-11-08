@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type RealEstateScraper from "real-estate-scrapper";
 import { attachResidentialParsers } from "./residential-parsers";
 import { extractListingDates } from "./listing-dates";
@@ -17,13 +18,13 @@ export function extendSourceParsers(client: RealEstateScraper, options: DateDeta
     const details = new DateEnrichment(options);
     if (["onrealt", "mirkvartir"].includes(source)) progress[source as Source] = details.progress;
     const fetch = parser.fetch.bind(parser), searchPage = parser.searchPage.bind(parser), parse = parser.parsePage.bind(parser);
-    let documents: { payload: unknown; fetchedAt: string }[] = [];
+    const documents = new AsyncLocalStorage<{ payload: unknown; fetchedAt: string }[]>();
     parser.fetch = async (url, options) => {
       try {
         const response = await fetch(url, options);
         const payload = response && typeof response === "object" && "data" in response ? response.data : response;
         if (detectAccessChallenge(url, payload)) throw Object.assign(new Error("NEEDS_USER_ACTION"), { code: "NEEDS_USER_ACTION", url: `https://${new URL(url).hostname}/` });
-        documents.push({ payload, fetchedAt: new Date().toISOString() });
+        documents.getStore()?.push({ payload, fetchedAt: new Date().toISOString() });
         return response;
       } catch (error) {
         const e = error as { cause?: { code?: string }; code?: string };
@@ -35,27 +36,29 @@ export function extendSourceParsers(client: RealEstateScraper, options: DateDeta
       if (detectAccessChallenge(url, payload)) throw Object.assign(new Error("NEEDS_USER_ACTION"), { code: "NEEDS_USER_ACTION", url: `https://${new URL(url).hostname}/` });
       return parse(payload, url, query);
     };
-    parser.searchPage = async query => {
-      documents = [];
+    parser.searchPage = async query => documents.run([], async () => {
       const page = await searchPage(query);
-      page.results = page.results.map(raw => {
+      // The package applies query.limit after this hook. Do not repeatedly parse
+      // the entire SERP for dozens of cards that it will immediately discard.
+      const selectedCount = Math.min(page.results.length, query?.limit ?? page.results.length);
+      page.results = page.results.map((raw, index) => {
+        if (index >= selectedCount) return raw;
         let fields = extractListingDates(raw.source, raw, { id: raw.parentId ?? raw.id, url: raw.url }, raw.timestamp);
-        for (const document of documents) {
+        for (const document of documents.getStore() ?? []) {
           const dates = extractListingDates(raw.source, document.payload, { id: raw.parentId ?? raw.id, url: raw.url }, document.fetchedAt);
           if (dates.publishedAt || dates.sourceUpdatedAt) fields = { ...dates, publishedAt: dates.publishedAt ?? fields.publishedAt, sourceUpdatedAt: dates.sourceUpdatedAt ?? fields.sourceUpdatedAt };
         }
         return { ...raw, ...fields };
       });
       // At most N detail GETs per source/job, shared deadline, date-only TTL cache.
-      for (let index = 0; index < page.results.length; index++) {
+      for (let index = 0; index < selectedCount; index++) {
         const raw = page.results[index]!;
         if ((raw as typeof raw & { publishedAt?: string | null }).publishedAt) continue;
         const dates = await details.read(raw.source, { id: raw.id, url: raw.url }, signal => fetch(raw.url, { signal }), query?.signal);
         if (dates?.publishedAt || dates?.sourceUpdatedAt) page.results[index] = { ...raw, ...dates };
       }
-      documents = [];
       return page;
-    };
+    });
   }
   // The package loses previous pages on abort. Accumulate at the page boundary.
   client.searchSite = async (source, query = {}) => {
