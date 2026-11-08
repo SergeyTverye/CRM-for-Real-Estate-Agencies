@@ -1,3 +1,5 @@
+import { labelOf } from "@/shared/codebook";
+import { dealChecklistTemplate } from "@/modules/deals/domain/checklist-template";
 import type { Prisma } from "@/generated/prisma/client";
 import { db, type DbOrTx } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
@@ -65,7 +67,7 @@ export async function assembleScreenContext(actor: Actor, c: ChatContext) {
     // Free text is isolated as untrusted and filtered again at the provider boundary.
     data = { ...c, task: { ...facts, untrusted_data: { title, description } } };
   } else if (c.kind === "deal") {
-    const deal = await db.deal.findFirstOrThrow({ where: { id: c.id, ...safeDeal(actor) }, select: { id: true, status: true, openedAt: true, preliminaryAgreementAt: true, mainAgreementAt: true, registrationAt: true, closedAt: true,
+    const deal = await db.deal.findFirstOrThrow({ where: { id: c.id, ...safeDeal(actor) }, select: { id: true, status: true, property: { select: { operationType: true } }, openedAt: true, preliminaryAgreementAt: true, mainAgreementAt: true, registrationAt: true, closedAt: true,
       parties: { select: { clientId: true, partyRole: true }, take: MAX_ROWS, orderBy: { id: "asc" } },
       checklistItems: { select: { code: true, status: true, checkedAt: true }, take: MAX_ROWS, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
       taskLinks: { where: { task: taskWhere }, select: { task: { select: taskSelect } }, take: MAX_ROWS, orderBy: { task: { dueAt: "asc" } } },
@@ -73,7 +75,8 @@ export async function assembleScreenContext(actor: Actor, c: ChatContext) {
     link(deal.id, "deals", "сделку");
     deal.parties.forEach(p => { if (p.clientId) link(p.clientId, "clients", "участника"); });
     deal.taskLinks.forEach(l => link(l.task.id, "tasks", "задачу"));
-    data = { ...c, deal };
+    const titles = new Map(dealChecklistTemplate(deal.property.operationType).map(item => [item.code, item.title]));
+    data = { ...c, deal: { ...deal, checklistItems: deal.checklistItems.map(item => ({ ...item, label: titles.get(item.code) ?? "Проверка по сделке", statusLabel: labelOf("dealChecklistStatus", item.status) })) } };
   } else if (c.kind === "agreement") {
     const agreement = await db.agreement.findFirstOrThrow({ where: { id: c.id, ...safeAgreement(actor) }, select: { id: true, clientId: true, dealId: true, agreementType: true, status: true, signedAt: true, validFrom: true, validUntil: true, isExclusive: true } });
     link(agreement.id, "agreements", "договор");

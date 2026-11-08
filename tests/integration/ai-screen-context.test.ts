@@ -43,7 +43,7 @@ it("task links, deal parties/checklist and agreement dates are available without
   const deal = await db.deal.create({ data: { propertyId: p.id, legalEntityId: users.llcId, responsibleUserId: users.realtor1.userId, createdBy: users.realtor1.userId, status: "draft", parties: { create: { clientId: c.id, partyRole: "buyer" } }, checklistItems: { create: { code: "documents", title: "SecretTitle", responsibleUserId: users.realtor1.userId } } } });
   await expect(assembleScreenContext(users.manager, { kind: "deal", id: deal.id })).resolves.toHaveProperty("data");
   const d = await assembleScreenContext(users.realtor1, { kind: "deal", id: deal.id });
-  expect(d.data).toMatchObject({ deal: { parties: [{ clientId: c.id, partyRole: "buyer" }], checklistItems: [{ code: "documents" }] } });
+  expect(d.data).toMatchObject({ deal: { parties: [{ clientId: c.id, partyRole: "buyer" }], checklistItems: [{ code: "documents", label: "Проверка по сделке", statusLabel: "Нет" }] } });
   expect(JSON.stringify(d)).not.toContain("SecretTitle");
   const agreement = await db.agreement.create({ data: { clientId: c.id, dealId: deal.id, responsibleUserId: users.realtor1.userId, agreementType: "information", status: "draft", validUntil: new Date("2026-12-01"), notes: "secretNotes" } });
   await expect(assembleScreenContext(users.manager, { kind: "agreement", id: agreement.id })).resolves.toHaveProperty("data");

@@ -58,3 +58,10 @@ it("chat reserve includes UTF-8 text, instructions, tools and protocol overhead"
  expect(estimatedChatInputTokens(request)).toBeLessThan(24000);
  expect(estimatedChatInputTokens({input:"x".repeat(24000)})).toBeGreaterThan(24000);
 });
+
+it("privacy preserves negations and ordinary CRM questions without preserving credentials", () => {
+ const text=safeText("Не используй инструменты. Как проверить задачи? password=secretCredential; Иван Петров +7 900 123-45-67");
+ expect(text).toContain("Не используй инструменты");
+ expect(text).toContain("Как проверить задачи");
+ expect(text).not.toMatch(/secretCredential|Иван|Петров|900/);
+});
