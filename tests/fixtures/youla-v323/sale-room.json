@@ -1,0 +1,159 @@
+{
+  "data": {
+    "feed": {
+      "items": [
+        {
+          "__typename": "Advert"
+        },
+        {
+          "product": {
+            "id": "replay-sale-room-0",
+            "categoryId": 20,
+            "subcategoryId": 2002,
+            "price": {
+              "origPrice": {
+                "price": 210000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 210000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "2 100 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-room/replay-sale-room-0",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Комната, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-sale-room-1",
+            "categoryId": 20,
+            "subcategoryId": 2002,
+            "price": {
+              "origPrice": {
+                "price": 130000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 130000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "1 300 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-room/replay-sale-room-1",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Комната, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-sale-room-2",
+            "categoryId": 20,
+            "subcategoryId": 2002,
+            "price": {
+              "origPrice": {
+                "price": 200000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 200000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "2 000 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-room/replay-sale-room-2",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Комната, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-sale-room-3",
+            "categoryId": 20,
+            "subcategoryId": 2002,
+            "price": {
+              "origPrice": {
+                "price": 100000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 100000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "1 000 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-room/replay-sale-room-3",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Комната, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true,
+        "cursor": "replay-cursor-1"
+      }
+    }
+  }
+}

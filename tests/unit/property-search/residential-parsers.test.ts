@@ -109,7 +109,7 @@ describe("truthful residential parser attachment (synthetic real-package fixture
     expect(absent).toMatchObject({ area: null, floor: null, rooms: null, price: null });
   });
 
-  it.each(["youla", "avito", "domclick"] as const)("rejects unverified %s residential planning/page retrieval before transport", async source => {
+  it.each(["avito", "domclick"] as const)("rejects unverified %s residential planning/page retrieval before transport", async source => {
     const { scraper, transport } = client();
     const nativeQuery = { ...query, sourceOptions: { [source]: { url: `https://${source === "avito" ? "www.avito.ru" : `${source}.ru`}/residential/` } } };
     expect(() => scraper.parsers[source].buildSearchUrl(nativeQuery)).toThrowError(/residential parser contract/);

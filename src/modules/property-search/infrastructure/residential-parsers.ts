@@ -125,9 +125,8 @@ export function attachResidentialParsers(client: RealEstateScraper): void {
     }) };
   };
   // These package specializations have no verified residential parsing contract.
-  // In particular Youla.searchPage unconditionally sends the commercial category,
-  // even with a residential native URL. Guard planning AND direct page callers.
-  for (const source of ["youla", "avito", "domclick"] as const) {
+  // Guard planning AND direct page callers. Youla has its own verified adapter.
+  for (const source of ["avito", "domclick"] as const) {
     const parser = client.parsers[source];
     const build = parser.buildSearchUrl, search = parser.searchPage;
     const assertSupported = (query: RealEstateScraper.Query = {}) => {

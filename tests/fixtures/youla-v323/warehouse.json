@@ -1,0 +1,15 @@
+{
+  "data": {
+    "feed": {
+      "items": [
+        {
+          "__typename": "Advert"
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": false,
+        "cursor": null
+      }
+    }
+  }
+}

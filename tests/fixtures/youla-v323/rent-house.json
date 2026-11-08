@@ -1,0 +1,159 @@
+{
+  "data": {
+    "feed": {
+      "items": [
+        {
+          "__typename": "Advert"
+        },
+        {
+          "product": {
+            "id": "replay-rent-house-0",
+            "categoryId": 20,
+            "subcategoryId": 2007,
+            "price": {
+              "origPrice": {
+                "price": 2500000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 2500000,
+                "__typename": "Price"
+              },
+              "realPriceText": "25 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/rent-house/replay-rent-house-0",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-rent-house-1",
+            "categoryId": 20,
+            "subcategoryId": 2007,
+            "price": {
+              "origPrice": {
+                "price": 2500000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 2500000,
+                "__typename": "Price"
+              },
+              "realPriceText": "25 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/rent-house/replay-rent-house-1",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f92c0",
+              "cityName": "ЛМС",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-rent-house-2",
+            "categoryId": 20,
+            "subcategoryId": 2007,
+            "price": {
+              "origPrice": {
+                "price": 3200000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 3200000,
+                "__typename": "Price"
+              },
+              "realPriceText": "32 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/rent-house/replay-rent-house-2",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-rent-house-3",
+            "categoryId": 20,
+            "subcategoryId": 2007,
+            "price": {
+              "origPrice": {
+                "price": 1450000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 1450000,
+                "__typename": "Price"
+              },
+              "realPriceText": "14 500 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/rent-house/replay-rent-house-3",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": false,
+        "cursor": null
+      }
+    }
+  }
+}

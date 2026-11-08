@@ -1,0 +1,156 @@
+{
+  "data": {
+    "feed": {
+      "items": [
+        {
+          "__typename": "Advert"
+        },
+        {
+          "product": {
+            "id": "replay-office-0",
+            "categoryId": 20,
+            "subcategoryId": 2013,
+            "price": {
+              "origPrice": {
+                "price": 1300000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 1300000,
+                "__typename": "Price"
+              },
+              "realPriceText": "13 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/office/replay-office-0",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Офисное помещение, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-office-1",
+            "categoryId": 20,
+            "subcategoryId": 2013,
+            "price": {
+              "origPrice": {
+                "price": 650000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 650000,
+                "__typename": "Price"
+              },
+              "realPriceText": "6 500 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/office/replay-office-1",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              }
+            ],
+            "name": "Офисное помещение, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-office-2",
+            "categoryId": 20,
+            "subcategoryId": 2013,
+            "price": {
+              "origPrice": {
+                "price": 1000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 1000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "10 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/office/replay-office-2",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Офисное помещение, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-office-3",
+            "categoryId": 20,
+            "subcategoryId": 2013,
+            "price": {
+              "origPrice": {
+                "price": 1300000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 1300000,
+                "__typename": "Price"
+              },
+              "realPriceText": "13 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/office/replay-office-3",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Офисное помещение, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": false,
+        "cursor": null
+      }
+    }
+  }
+}

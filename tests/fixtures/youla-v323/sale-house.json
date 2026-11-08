@@ -1,0 +1,159 @@
+{
+  "data": {
+    "feed": {
+      "items": [
+        {
+          "__typename": "Advert"
+        },
+        {
+          "product": {
+            "id": "replay-sale-house-0",
+            "categoryId": 20,
+            "subcategoryId": 2003,
+            "price": {
+              "origPrice": {
+                "price": 770000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 770000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "7 700 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-house/replay-sale-house-0",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f928e",
+              "cityName": "Давыдово",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-sale-house-1",
+            "categoryId": 20,
+            "subcategoryId": 2003,
+            "price": {
+              "origPrice": {
+                "price": 2300000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 2300000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "23 000 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-house/replay-sale-house-1",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f9306",
+              "cityName": "Старая Купавна",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-sale-house-2",
+            "categoryId": 20,
+            "subcategoryId": 2003,
+            "price": {
+              "origPrice": {
+                "price": 350000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 350000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "3 500 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-house/replay-sale-house-2",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0618d53f3d80945f96b3",
+              "cityName": "Талица",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-sale-house-3",
+            "categoryId": 20,
+            "subcategoryId": 2003,
+            "price": {
+              "origPrice": {
+                "price": 330000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 330000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "3 300 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/sale-house/replay-sale-house-3",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Дом, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true,
+        "cursor": "replay-cursor-1"
+      }
+    }
+  }
+}
