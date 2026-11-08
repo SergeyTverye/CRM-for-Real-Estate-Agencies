@@ -35,4 +35,5 @@ it("upgrades populated pre-AI-02 SQLite preserving linked history and all indexe
     expect(check.pragma("foreign_key_check")).toEqual([]);
     expect(check.pragma("integrity_check",{simple:true})).toBe("ok");
   } finally { check.close(); }
-});
+// Full migration chain on a populated database: ~55 s on hosted Windows runners.
+},180_000);
