@@ -54,6 +54,25 @@ it("reports use existing calculated metrics and no primary identities", async ()
   const r = await assembleScreenContext(users.manager, { kind: "reports" });
   expect(r.data).toMatchObject({ metrics: expect.arrayContaining([expect.objectContaining({ key: "overdue", value: 0 })]), period: { timeZone: "Asia/Novosibirsk" } });
 });
+it.each(["deal", "agreement", "task"] as const)("persists and reopens an assistant conversation with %s context", async kind => {
+  const client = await makeClient(users.realtor1);
+  const need = await makeNeed(users.realtor1, client.id);
+  const property = await makeProperty(users.realtor1);
+  const task = await db.task.findFirstOrThrow({ where: { needLinks: { some: { clientNeedId: need.id } } } });
+  const deal = await db.deal.create({ data: { propertyId: property.id, legalEntityId: users.llcId, responsibleUserId: users.realtor1.userId, createdBy: users.realtor1.userId, status: "draft", parties: { create: { clientId: client.id, partyRole: "buyer" } } } });
+  const agreement = await db.agreement.create({ data: { clientId: client.id, dealId: deal.id, responsibleUserId: users.realtor1.userId, agreementType: "information", status: "draft" } });
+  const id = { deal, agreement, task }[kind].id;
+  const session = await createChat(users.realtor1, { context: { kind, id } });
+  const fake = new FakeResponsesProvider(() => ({ text: "Уточните условия перед следующим действием." }));
+  await sendMessage(users.realtor1, session.id, { text: "Что проверить?" }, fake);
+  expect(await db.aiChatSession.findUniqueOrThrow({ where: { id: session.id } })).toMatchObject({ contextType: kind, contextId: id });
+  const reopened = await getChat(users.realtor1, session.id);
+  expect(reopened.messages).toEqual(expect.arrayContaining([
+    expect.objectContaining({ role: "user", content: "Что проверить?" }),
+    expect.objectContaining({ role: "assistant", content: "Уточните условия перед следующим действием." }),
+  ]));
+  expect(fake.requests).toHaveLength(1);
+});
 it("foreign tasks, deals, linked agreements and report context are refused before a provider call", async () => {
   const c = await makeClient(users.realtor2); const n = await makeNeed(users.realtor2, c.id); const p = await makeProperty(users.realtor2);
   const task = await db.task.findFirstOrThrow({ where: { needLinks: { some: { clientNeedId: n.id } } } });
