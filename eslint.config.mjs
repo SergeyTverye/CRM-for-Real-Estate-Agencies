@@ -23,6 +23,7 @@ const config = [
       ".deploy-test/**",
       "Real-Estate-Scrapper/**",
       "private-data/**",
+      ".worktrees/**",
     ],
   },
   {
