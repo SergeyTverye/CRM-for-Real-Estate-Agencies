@@ -4,6 +4,12 @@
 
 Статус: **проверенный кандидат**, не полная приёмка. AT-18 (апробация реальными сотрудниками) остаётся отдельной задачей.
 
+## Windows-установщик
+
+[GitHub Actions run 42515144039](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42515144039) для `92a6df8`: build SUCCESS (unit, SQLite integration, Rust, пакет и проверка состава ресурсов), install SUCCESS на Windows Server 2022 и 2025 (установка, готовность, создание данных, удаление, переустановка, полное удаление). Артефакт `CRM-Windows-x64` (id 13632182955, digest `d271ddff8daf92a774af0a4966f1f9cccf8067032b550914a873692cd6e9e989`).
+
+`CRM-Setup-Windows-x64.exe`: 800 231 762 байт, SHA-256 `c76913b1b5ba7563645ac53e4cbcb74f426482d7b4ff06ed26e822757c89e547`. Локальная копия: `releases/v3.2.2-rc1/` (не в Git).
+
 ## P0-A. UX/UI
 
 Аудит, замеры и пары снимков: [v322-ux-audit.md](../../ux/v322-ux-audit.md). 138 снимков ДО (`6ee543c`) и 138 ПОСЛЕ в `docs/screenshots/vkr/v322-ux/` (1366×768, 1920×1080, 390×844; manager и realtor1, синтетическая `crm_demo`).
