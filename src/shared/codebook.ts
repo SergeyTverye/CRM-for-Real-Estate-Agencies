@@ -24,7 +24,7 @@ export const CODEBOOK = {
   collectionItemStatus: { in_collection: "В подборке", check: "Проверить", in_crm: "В базе CRM", proposed: "Предложено клиенту", excluded: "Исключено" },
   templateFormat: { markdown_docx: "Markdown → DOCX", docx: "DOCX", xlsx: "XLSX", xlsx_registry: "XLSX-реестр" },
   templateStatus: { active: "Активен", disabled: "Отключён", archived: "В архиве" },
-  aiChatContextType: { client: "Клиент", need: "Потребность", collection: "Подборка", none: "Без контекста" },
+  aiChatContextType: { client: "Клиент", need: "Потребность", collection: "Подборка", task: "Задача", deal: "Сделка", agreement: "Договор", today: "Сегодня", reports: "Отчёты", none: "Без контекста" },
   aiChatRole: { user: "Пользователь", assistant: "Помощник", tool: "Инструмент" },
   aiPendingActionStatus: { proposed: "Предложено", confirmed: "Подтверждено", rejected: "Отклонено", expired: "Истекло" },
   searchExportFormat: { xlsx: "XLSX", csv: "CSV" },
