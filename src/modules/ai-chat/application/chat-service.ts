@@ -1,3 +1,5 @@
+import { getConfig } from "@/shared/config/env";
+import { modelTimeData, modelTimeInstructions } from "@/modules/ai/domain/model-time";
 import { Prisma } from "@/generated/prisma/client";
 import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
@@ -139,9 +141,9 @@ export async function sendMessage(actor: Actor, id: string, raw: unknown, inject
         const references = [...new Map([...screen.links, ...await contextLinks(actor, sessionContext(s))].map(l => [l.id, l])).values()];
         const text = safeText(referenceText(p.text, references), names);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "user", content: text } });
-        const input: ResponseInput[] = [{ role: "user", content: JSON.stringify({ context: s.contextType === "collection" ? await modelContext(actor, sessionContext(s)) : await redactScreenData(actor, screen.data), now: new Date().toISOString(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }) }, { role: "user", content: text }];
+        const input: ResponseInput[] = [{ role: "user", content: JSON.stringify(modelTimeData({ context: s.contextType === "collection" ? await modelContext(actor, sessionContext(s)) : await redactScreenData(actor, screen.data), now: new Date(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }, getConfig().APP_TIMEZONE)) }, { role: "user", content: text }];
         const runtime = await chatRuntime(actor, id, injected);
-        const result = await runChatLoop(input, r => runtime.call(r), (name, args) => executeTool(actor, id, name, args), runtime.model);
+        const result = await runChatLoop(input, r => runtime.call(r), (name, args) => executeTool(actor, id, name, args), runtime.model, getConfig().APP_TIMEZONE);
         // Recheck before persistence/display: ownership of the CRM context may have changed.
         await loadSession(actor, id);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "assistant", content: result.text, toolArgs: JSON.parse(JSON.stringify([...references, ...result.links])) } });
@@ -205,7 +207,7 @@ export async function confirmedWebSearch(actor: Actor, id: string, raw: unknown,
     await loadSession(actor, id);
     try {
         const runtime = await chatRuntime(actor, id, injected);
-        const r = await runtime.call({ model: runtime.webModel, instructions: instructions + " Только публичный веб-поиск. Указывай источники; не изменяй CRM.", input: safeText(p.query), maxOutputTokens: 1200, tools: [{ type: "web_search", search_context_size: "low", filters: {} }] }, true);
+        const r = await runtime.call({ model: runtime.webModel, instructions: instructions + " " + modelTimeInstructions + " Только публичный веб-поиск. Указывай источники; не изменяй CRM.", input: JSON.stringify(modelTimeData({ query: safeText(p.query), now: new Date() }, getConfig().APP_TIMEZONE)), maxOutputTokens: 1200, tools: [{ type: "web_search", search_context_size: "low", filters: {} }] }, true);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "assistant", content: r.text.slice(0, 8000) } });
         return getChat(actor, id);
     }

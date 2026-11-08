@@ -1,5 +1,5 @@
 import { preserveSearchConditions } from "@/modules/ai/domain/listing-analysis";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SearchAi, type AiCallContext } from "@/modules/ai/infrastructure/search-ai";
 import { FakeResponsesProvider, InMemoryAiLedger } from "@/modules/ai/infrastructure/fake";
 import { AiGate } from "@/modules/ai/domain/gate";
@@ -231,4 +231,19 @@ describe("REPLAY AI-01 explicit categories survive model post-processing", () =>
     const before=searchFiltersSchema.parse({operation:"sale",priceTo:"9000000",priceUnit:"rub_total"});
     expect(preserveSearchConditions(before,searchFiltersSchema.parse({operation:"sale"}),query)).toMatchObject({priceTo:"9000000",priceUnit:"rub_total"});
   });
+});
+
+it("supplies local now to search parsing and description analysis", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-11-09T17:05:00Z"));
+  try {
+    const parse = fixture();
+    await parse.ai.parseSearchQuery(context, { query: "Купить офис" });
+    const analysis = fixture(() => ({ text: JSON.stringify({ evidence: [] }) }));
+    await analysis.ai.analyzeDescriptions(context, { listings: [{ id: "a", publicDescription: "офис" }], unresolvedCriteria: ["витрина"] });
+    for (const f of [parse, analysis]) {
+      expect(JSON.parse(f.provider.requests[0]!.input).now).toBe("10.11.2026, 00:05 (Asia/Novosibirsk)");
+      expect(f.provider.requests[0]!.instructions).toContain("не переводи их в UTC");
+    }
+  } finally { vi.useRealTimers(); }
 });

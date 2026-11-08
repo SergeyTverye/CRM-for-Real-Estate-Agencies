@@ -65,3 +65,10 @@ it("privacy preserves negations and ordinary CRM questions without preserving cr
  expect(text).toContain("Как проверить задачи");
  expect(text).not.toMatch(/secretCredential|Иван|Петров|900/);
 });
+
+it("localizes structured tool results at the model boundary", async () => {
+  const fake = new FakeResponsesProvider(r => r.inputItems?.length === 1 ? { functionCalls: [{ type: "function_call", call_id: "time", name: "get_tasks", arguments: "{}" }] } : { text: "готово" });
+  await runChatLoop([{ role: "user", content: "срок" }], r => fake.respond(r), async () => ({ data: { dueAt: new Date("2026-11-09T17:05:00Z") }, links: [] }), "test", "Asia/Novosibirsk");
+  expect(fake.requests[1]?.inputItems?.at(-1)).toMatchObject({ output: expect.stringContaining("10.11.2026, 00:05 (Asia/Novosibirsk)") });
+  expect(fake.requests[1]?.instructions).toContain("не переводи их в UTC");
+});
