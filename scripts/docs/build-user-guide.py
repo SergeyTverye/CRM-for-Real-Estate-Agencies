@@ -118,9 +118,9 @@ def prepare_images():
         ('ai-settings','live/ai-settings.png',(530,185,2840,1500),[(.01,.01,.98,.32),(.01,.34,.98,.64)]),
         ('search-sources','live/search-sources.png',(530,185,2840,1650),[(.01,.1,.98,.35),(.01,.48,.98,.5)]),
         ('backup-settings','live/backup-settings.png',(530,185,2840,1300),[(.01,.1,.98,.58),(.01,.7,.98,.28)]),
-        ('result-cards','../../../../screenshots/vkr/v322-search-ai/01-onrealt-results.png',(265,110,1343,768),[(.01,.01,.98,.31),(.01,.45,.98,.54)]),
+        ('result-cards','live/search-results-live.png',(530,160,2680,1536),[]),
         ('result-table','../../../../vkr/live-search-v322-p0c-table.png',(145,315,1221,1065),[(.01,.01,.98,.4),(.01,.47,.98,.52)]),
-        ('ranking','../../../../screenshots/vkr/v322-search-ai/retest-02-ranking.png',(280,83,1328,355),[(.01,.01,.98,.53),(.01,.61,.98,.35)]),
+        ('ranking','live/ranking-success.png',(560,850,2670,1510),[]),
         ('comparison','../../../../screenshots/vkr/v322-search-ai/retest-01-comparison.png',(280,300,1328,675),[(.01,.01,.98,.98)]),
     ]
     for name,relative,crop,boxes in extra_specs:

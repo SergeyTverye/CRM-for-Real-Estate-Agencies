@@ -619,28 +619,15 @@
   },
   {
     "file": "result-cards.png",
-    "source": "docs\\screenshots\\vkr\\v322-search-ai\\01-onrealt-results.png",
-    "kind": "prior LIVE UI / P0-C synthetic component",
+    "source": "docs\\user-guide\\v3.2.2\\images\\live\\search-results-live.png",
+    "kind": "coordinator capture",
     "crop": [
-      265,
-      110,
-      1343,
-      768
+      530,
+      160,
+      2680,
+      1536
     ],
-    "boxes": [
-      [
-        0.01,
-        0.01,
-        0.98,
-        0.31
-      ],
-      [
-        0.01,
-        0.45,
-        0.98,
-        0.54
-      ]
-    ],
+    "boxes": [],
     "privacyReview": "No secrets or seller contacts visible in selected area"
   },
   {
@@ -671,28 +658,15 @@
   },
   {
     "file": "ranking.png",
-    "source": "docs\\screenshots\\vkr\\v322-search-ai\\retest-02-ranking.png",
-    "kind": "prior LIVE UI / P0-C synthetic component",
+    "source": "docs\\user-guide\\v3.2.2\\images\\live\\ranking-success.png",
+    "kind": "coordinator capture",
     "crop": [
-      280,
-      83,
-      1328,
-      355
+      560,
+      850,
+      2670,
+      1510
     ],
-    "boxes": [
-      [
-        0.01,
-        0.01,
-        0.98,
-        0.53
-      ],
-      [
-        0.01,
-        0.61,
-        0.98,
-        0.35
-      ]
-    ],
+    "boxes": [],
     "privacyReview": "No secrets or seller contacts visible in selected area"
   },
   {
