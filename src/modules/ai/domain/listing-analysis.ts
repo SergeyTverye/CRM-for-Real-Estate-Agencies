@@ -21,14 +21,16 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
   // Recognize money separately from area/floor ranges; bare bounds such as
   // «до 100 м²» must never authorize erasing the existing budget.
   const money = /цен|бюджет|руб|стоим|₽|(?:от|до|за)\s*\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}])|(?:в|за|\/)\s*(?:месяц|мес|год))|\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}]))|(?:от|до|за)\s*\d[\d\s.,]*(?![\d\s.,])(?=\s*(?:[,;.!]|$))/iu;
-  const area = /площад|м[²2]|кв\.?\s*м|квадратн\p{L}*\s+метр/iu;
+  const area = /площад|м[²2]|кв\.?\s*м|квадратн\p{L}*\s+метр|\d+\s+метр/iu;
   const floor = /этаж|подвал|цокол/iu;
   const explicitMoney = /цен|бюджет|руб|стоим|₽|\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}])|(?:в|за|\/)\s*(?:месяц|мес|год))/iu;
   const priceMentioned = explicitMoney.test(query) || money.test(query) && (!area.test(query) && !floor.test(query) || proposed.priceFrom !== undefined || proposed.priceTo !== undefined);
   const mentions: Partial<Record<keyof SearchFilters, RegExp>> = {
-    city: /город|новосибир|москв|санкт|томск|омск/iu,
+    city: /город|новосибир|москв|санкт|томск|омск|бердск|об[ьи]|кольцов|краснообск|искитим|академгород|пригород/iu,
+    locations: /локаци|город|новосибир|бердск|об[ьи]|кольцов|краснообск|искитим|академгород|пригород|област/iu,
+    propertyKinds: /квартир|двушк|апартамент|дом(?:а|ов|е|ом)?(?:\s|$)|коттедж|нежил|офис|склад|псн|торгов|производ|назначен/iu,
     operation: /аренд|продаж|купить|покуп|снять|сним|сдам|сда[её]|(?:в|за)\s+(?:месяц|год)/iu,
-    purposes: /офис|склад|псн|торгов|производ|назначен/iu,
+    purposes: /офис|склад|псн|торгов|производ|назначен|квартир|двушк|апартамент|коттедж|дом(?:а|ов|е|ом)?(?:\s|$)|нежил/iu,
     districts: /район|центральн|советск|ленинск|кировск|октябрьск|заельцовск/iu,
     areaFrom: area, areaTo: area,
     floorMode: /этаж|подвал|цокол/iu, floorFrom: /этаж/iu, floorTo: /этаж/iu,
@@ -39,12 +41,17 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
   for (const key of Object.keys(mentions) as (keyof SearchFilters)[]) {
     if (mentions[key]?.test(query)) Object.assign(next, { [key]: proposed[key] });
   }
+  if (mentions.locations!.test(query)) {
+    next.city = proposed.city;
+    next.locations = proposed.locations;
+    next.districts = proposed.districts;
+  }
   if ((mentions.operation!.test(query) || /месяц|мес\b|год|за\s*м[²2]|за\s+объект|полная\s+цена/iu.test(query)) && proposed.priceUnit) next.priceUnit = proposed.priceUnit;
   if (priceMentioned) {
     next.priceFrom = proposed.priceFrom;
     next.priceTo = proposed.priceTo;
   }
-  if (/вход|витрин|лини|мокр|мощност|квт|потол|ворот|разгруз|парков|арендатор|признак|особенност/iu.test(query)) {
+  if (/комнат|двушк|вход|витрин|лини|мокр|мощност|квт|потол|ворот|разгруз|парков|арендатор|признак|особенност/iu.test(query)) {
     if (previous.features || proposed.features) next.features = { ...previous.features, ...proposed.features };
     next.requiredFeatures = [...new Set([...previous.requiredFeatures, ...proposed.requiredFeatures])];
     next.preferredFeatures = [...new Set([...previous.preferredFeatures, ...proposed.preferredFeatures])];
