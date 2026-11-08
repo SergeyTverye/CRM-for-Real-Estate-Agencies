@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import { runInstalledBusinessCycle } from './installed-business-cycle.mjs';
 import { runInstalledBackupCycle } from './installed-backup-cycle.mjs';
 import { runInstalledCloudProof } from './installed-cloud-proof.mjs';
+import { runInstalledSearchCycle } from './installed-search-cycle.mjs';
 
 const exec = promisify(execFile);
 const workspace = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -40,7 +41,7 @@ export function loopback(value) {
 }
 function options(args) {
   const result = {};
-  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'focus-import', 'native-backup-proof', 'cloud-proof', 'cloud-failure-proof', 'supervisor-only', 'block-external-browser-network']);
+  const flags = new Set(['execute-new-installed', 'allow-portable-chromium', 'focus-business', 'focus-backup', 'focus-import', 'focus-search', 'native-backup-proof', 'cloud-proof', 'cloud-failure-proof', 'supervisor-only', 'block-external-browser-network']);
   const values = new Set(['launcher', 'installer', 'launcher-sha256', 'installer-sha256', 'source-commit', 'evidence-root', 'chromium', 'observe-seconds']);
   for (let i = 0; i < args.length; i++) {
     const key = args[i].replace(/^--/, '');
@@ -54,6 +55,8 @@ function options(args) {
   if (result['focus-backup'] && !result['native-backup-proof'] && !result['cloud-proof']) fail('FOCUS_BACKUP_REQUIRES_PROOF');
   if (result['focus-import'] && (result['native-backup-proof'] || result['cloud-proof'] || result['cloud-failure-proof'])) fail('FOCUS_IMPORT_CONFLICTS_PROOF_FLAGS');
   if (result['focus-import'] && (!result['supervisor-only'] || !result['block-external-browser-network'])) fail('FOCUS_IMPORT_REQUIRES_SUPERVISOR_AND_BROWSER_ISOLATION');
+  if (result['focus-search'] && (result['focus-business'] || result['focus-backup'] || result['focus-import'])) fail('FOCUS_MODE_CONFLICT');
+  if (result['focus-search'] && (!result['supervisor-only'] || !result['block-external-browser-network'])) fail('FOCUS_SEARCH_REQUIRES_SUPERVISOR_AND_BROWSER_ISOLATION');
   if (result['supervisor-only'] && result['native-backup-proof']) fail('SUPERVISOR_ONLY_CONFLICTS_NATIVE_BACKUP_PROOF');
   if (result['block-external-browser-network'] && !result['supervisor-only']) fail('BROWSER_NETWORK_ISOLATION_REQUIRES_SUPERVISOR_ONLY');
   if (result['block-external-browser-network'] && result['cloud-proof']) fail('BROWSER_NETWORK_ISOLATION_CONFLICTS_CLOUD_PROOF');
@@ -145,6 +148,7 @@ async function main() {
   const stopFile = path.join(run, 'STOP');
   const focusBackup = o['focus-backup'] === true;
   const focusImport = o['focus-import'] === true;
+  const focusSearch = o['focus-search'] === true;
   const checks = [];
   const supervisorOnly = o['supervisor-only'] === true;
   const blockExternalBrowserNetwork = o['block-external-browser-network'] === true;
@@ -152,17 +156,20 @@ async function main() {
     ? 'SETUP_LOGIN_BACKUP_PROOF_PERSISTENCE_CORE_AND_BUSINESS_CYCLE_NOT_RUN'
     : focusImport
       ? 'SETUP_LOGIN_CLIENT_IMPORT_PERSISTENCE_SYNTHETIC_UI_PROOF_NO_WEBVIEW_BROWSER_NETWORK_ISOLATION_BOUND'
-      : o['focus-business']
-        ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED'
-        : 'CORE_SCREENS_AND_BUSINESS';
+      : focusSearch
+        ? 'SETUP_LOGIN_SEARCH_PERSISTENCE_SYNTHETIC_UI_PROOF_NO_WEBVIEW_BROWSER_NETWORK_ISOLATION_BOUND'
+        : o['focus-business']
+          ? 'SETUP_LOGIN_BUSINESS_PERSISTENCE_CORE_SCREENS_NOT_REPEATED'
+          : 'CORE_SCREENS_AND_BUSINESS';
   const result = { schema: 1, status: 'RUNNING', syntheticDataOnly: true, runId: id,
     sourceCommit: o['source-commit'], sourceReference: 'coordinator-supplied-read-only-reference-not-binary-provenance',
     launcherSha256: launcherHash, installerSha256: installerHash,
     nativeUi: supervisorOnly ? 'NOT_RUN_SUPERVISOR_ONLY' : 'NOT_ASSERTED_SEPARATE_OBSERVATION_REQUIRED',
     executionMode: supervisorOnly ? 'BACKGROUND_SUPERVISOR_ONLY_HEADLESS_CHROMIUM_NO_WEBVIEW' : 'DEFAULT',
     runtime: { controllerNode: process.version, browserKind }, checks, screenshots: [],
-    businessCycle: focusBackup || focusImport ? { status: 'NOTRUN' } : undefined,
+    businessCycle: focusBackup || focusImport || focusSearch ? { status: 'NOTRUN' } : undefined,
     importCycle: focusImport ? { status: 'NOTRUN' } : undefined,
+    searchCycle: focusSearch ? { status: 'NOTRUN' } : undefined,
     nativeBackupProof: { status: 'NOTRUN' }, cloudProof: { status: 'NOTRUN' },
     browserIsolation: blockExternalBrowserNetwork
       ? { mode: 'BROWSER_NETWORK_ISOLATION', externalHttpHttpsBlocked: 0,
@@ -508,7 +515,7 @@ async function main() {
         await visible(page.getByRole('button', { name: 'Настроить расписание', exact: true }));
       }],
     ];
-    for (const [code, route, heading, extra] of o['focus-business'] || focusBackup || focusImport ? [] : screens) await check(code, async () => {
+    for (const [code, route, heading, extra] of o['focus-business'] || focusBackup || focusImport || focusSearch ? [] : screens) await check(code, async () => {
       await goto(route); await visible(page.getByRole('heading', { name: heading, exact: true }));
       await extra();
       // Never capture backup settings/cloud-config values, even on a fresh profile.
@@ -524,7 +531,7 @@ async function main() {
       if (!/^\/clients\/[a-f0-9-]{36}$/.test(cardRoute)) fail('CLIENT_ROUTE_REJECTED');
       if (!focusBackup && !focusImport) await shot('synthetic-client');
     });
-    if (focusBackup || focusImport) {
+    if (focusBackup || focusImport || focusSearch) {
       stage = 'INSTALLED_SYNTHETIC_BUSINESS_CYCLE';
       result.businessCycle = { status: 'NOTRUN' };
       await healthy();
@@ -548,6 +555,18 @@ async function main() {
       await healthy();
       if (result.importCycle?.status === 'PASS') await shot('synthetic-import-roundtrip');
       checks.push({ code: stage, status: result.importCycle?.status === 'PASS' ? 'PASS' : 'FAIL' });
+    }
+    if (focusSearch) {
+      stage = 'INSTALLED_SYNTHETIC_SEARCH_CYCLE';
+      result.searchCycle = { status: 'RUNNING' };
+      helperActive = true;
+      try {
+        await canonical(run);
+        const directory = path.join(run, 'search-cycle');
+        result.searchCycle = await runInstalledSearchCycle({ page, base, directory });
+        await healthy();
+        checks.push({ code: stage, status: result.searchCycle?.status === 'PASS' ? 'PASS' : (result.searchCycle?.status === 'PARTIAL' ? 'PARTIAL' : 'FAIL') });
+      } finally { helperActive = false; }
     }
     if (o['native-backup-proof'] || o['cloud-proof']) {
       helperActive = true;
@@ -607,7 +626,7 @@ async function main() {
     result.status = aggregateTerminalStatus(checks.map((c) => c.status));
   } catch (e) {
     result.status = 'FAIL';
-    for (const key of ['importCycle', 'nativeBackupProof', 'cloudProof']) if (result[key]?.status === 'RUNNING') result[key] = { status: 'FAIL', error: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
+    for (const key of ['importCycle', 'nativeBackupProof', 'cloudProof', 'searchCycle']) if (result[key]?.status === 'RUNNING') result[key] = { status: 'FAIL', error: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
     result.error = { stage, code: e.safeCode ?? 'UNEXPECTED_OR_UI_ASSERTION_FAILURE' };
     result.networkDiagnostics = networkDiagnostics;
     checks.push({ code: stage, status: 'FAIL' });
@@ -676,6 +695,18 @@ function selfTest() {
   assert.throws(() => options(['--focus-import', '--supervisor-only', '--block-external-browser-network', '--native-backup-proof']));
   assert.throws(() => options(['--focus-import', '--supervisor-only', '--block-external-browser-network', '--cloud-proof']));
   assert.throws(() => options(['--focus-import', '--supervisor-only', '--block-external-browser-network', '--cloud-failure-proof']));
+  // focus-search: opt-in synthetic search UI proof; requires supervisor+browser isolation; no native/cloud/import proof.
+  assert.equal(options([])['focus-search'], undefined);
+  assert.equal(options(['--focus-search', '--supervisor-only', '--block-external-browser-network'])['focus-search'], true);
+  assert.throws(() => options(['--focus-search']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only']));
+  assert.throws(() => options(['--focus-search', '--block-external-browser-network']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only', '--block-external-browser-network', '--focus-business']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only', '--block-external-browser-network', '--focus-backup', '--cloud-proof']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only', '--block-external-browser-network', '--focus-import']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only', '--block-external-browser-network', '--native-backup-proof']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only', '--block-external-browser-network', '--cloud-proof']));
+  assert.throws(() => options(['--focus-search', '--supervisor-only', '--block-external-browser-network', '--cloud-failure-proof']));
   assert.equal(aggregateTerminalStatus(['PASS', 'FAIL']), 'FAIL');
   assert.equal(aggregateTerminalStatus(['PASS', 'PARTIAL']), 'PARTIAL');
   assert.equal(aggregateTerminalStatus(['PASS', 'PASS']), 'PASS');

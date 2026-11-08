@@ -6,7 +6,7 @@ import type { NormalizedListing, PriceUnit, Purpose } from "../domain/types";
 import { listingFields } from "./listing-fields";
 import { extractListingDates, type ListingDates } from "./listing-dates";
 
-const purposeMap: Record<string, Purpose> = { retail: "retail", freePurpose: "free_purpose", office: "office", industrial: "production", warehouse: "warehouse" };
+const purposeMap: Record<string, Purpose> = { retail: "retail", freePurpose: "free_purpose", office: "office", industrial: "production", warehouse: "warehouse", residential: "residential" };
 function safeUrl(value: string): string | null { try { return parseExternalUrl(value).href; } catch { return null; } }
 export function parsePriceUnit(text: string | null | undefined, operation: "sale" | "rent" | null): PriceUnit | null {
   if (operation === "sale") return "rub_total";

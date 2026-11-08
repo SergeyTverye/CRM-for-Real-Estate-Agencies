@@ -391,7 +391,7 @@ export function checkConstraintSql(entry: (typeof CODEBOOK_COLUMNS)[number]): st
 export const DISPLAY_LABELS: Record<string, Record<string, string>> = {
   need_operation_type: { buy: "Купить", sale: "Продажа", sell: "Продать", rent: "Арендовать", lease_out: "Сдать в аренду" },
   property_operation_type: { sale: "Продажа", rent: "Аренда" },
-  property_type: { retail: "Торговое помещение", commercial_premises: "Нежилое помещение", office: "Офис", warehouse: "Склад", production: "Производство", psn_universal: "ПСН / универсальное", free_purpose: "Свободное назначение" },
+  property_type: { retail: "Торговое помещение", commercial_premises: "Нежилое помещение", office: "Офис", warehouse: "Склад", production: "Производство", psn_universal: "ПСН / универсальное", free_purpose: "Свободное назначение", residential: "Жилая" },
   criterion_state: { matched: "Совпадает", contradicted: "Не соответствует", unknown: "Нет сведений" },
   criterion_source: { structured: "Характеристики", rule: "Проверка описания", ai: "Анализ ИИ", manual: "Ручная проверка" },
   criterion: { city: "Город", operation: "Операция", purpose: "Назначение", priceUnit: "Единица цены", price: "Цена", area: "Площадь", floor: "Этаж", district: "Район", owner: "Собственник" },
@@ -408,7 +408,7 @@ export const EVIDENCE_LABELS: Record<string, string> = {
   structured: "Структурированные поля", rule: "Правило", ai: "ИИ",
   separate_entrance: "Отдельный вход", shop_window: "Витрина", showcase: "Витрина", first_line: "Первая линия",
   wet_point: "Мокрая точка", gates: "Ворота", power_kw: "Мощность, кВт", ceiling_m: "Высота потолков, м",
-  owner_confirmed: "Собственник", price_unit: "Единица цены",
+  owner_confirmed: "Собственник", price_unit: "Единица цены", residential: "Жилая",
 };
 export function evidenceLabel(group: string, code: string): string {
   const power = code.match(/^power_from_(\d+)_kW$/iu);

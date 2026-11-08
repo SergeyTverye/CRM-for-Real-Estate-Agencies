@@ -99,9 +99,12 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
   }
   if (needId) await loadAccessibleNeed(db, actor, needId);
   const settings = await searchSettings();
-  if (settings.aiEnabled && !input.confirmedPaid) throw new ConflictError("PAID_CONFIRMATION_REQUIRED", "Подтвердите условия и возможный платный анализ/резервный поиск");
+  const composedAi = settings.aiEnabled ? dependencies?.ai ?? await getSearchAi() : null;
+  // An unavailable optional provider must not enter any AI path, including budget
+  // availability checks. Use this same server-composed port for the whole run.
+  const ai = composedAi?.configured === false ? null : composedAi;
+  if (ai && !input.confirmedPaid) throw new ConflictError("PAID_CONFIRMATION_REQUIRED", "Подтвердите условия и возможный платный анализ/резервный поиск");
   const run = await db.searchRun.create({ data: { userId: actor.userId, needId, savedSearchId: input.savedSearchId, city: filters.city, filters: jsonValue(filters), status: "running" } });
-  const ai = settings.aiEnabled ? dependencies?.ai ?? await getSearchAi() : null;
   try {
     const adapter = dependencies?.scraper ?? scraperFor(settings, input.demoScenario);
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -199,12 +202,21 @@ export async function parseQuery(actor: Actor, text: unknown, currentFilters: un
   const settings = await searchSettings();
   const ai = settings.aiEnabled ? await getSearchAi() : null;
   if (!ai) throw new ConflictError("AI_DISABLED", "Разбор с ИИ недоступен. Заполните условия в ручной форме.");
+  await ai.assertConfigured?.();
   const jobId = randomUUID();
   const startedAt = new Date();
   // Persist a job for ledger FK and permission ownership; never send need/client notes to AI.
-  await db.searchRun.create({ data: { id: jobId, userId: actor.userId, city: input.currentFilters.city, filters: jsonValue(input.currentFilters), status: "success", startedAt, finishedAt: startedAt } });
-  try { return await ai.parseSearchQuery(aiContext(actor, jobId), { query: input.text, currentFilters: input.currentFilters }); }
-  catch { throw new ConflictError("AI_UNAVAILABLE", "Разбор с ИИ недоступен или лимит исчерпан. Ручная форма доступна."); }
+  await db.searchRun.create({ data: { id: jobId, userId: actor.userId, city: input.currentFilters.city, filters: jsonValue(input.currentFilters), status: "running", startedAt } });
+  try {
+    const result = await ai.parseSearchQuery(aiContext(actor, jobId), { query: input.text, currentFilters: input.currentFilters });
+    await db.searchRun.update({ where: { id: jobId }, data: { status: "success", finishedAt: new Date() } });
+    return result;
+  }
+  catch (error) {
+    await db.searchRun.update({ where: { id: jobId }, data: { status: "error", finishedAt: new Date() } });
+    if (error instanceof ConflictError && error.code === "AI_CREDENTIALS_MISSING") throw error;
+    throw new ConflictError("AI_UNAVAILABLE", "Разбор с ИИ недоступен или лимит исчерпан. Ручная форма доступна.");
+  }
 }
 
 export async function exportSearchCsv(actor: Actor, runId: string) {

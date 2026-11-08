@@ -10,6 +10,8 @@ process.chdir(repo);
 const chrome = process.argv[2] ?? process.env.REGRESSION_CHROME_PATH;
 if (!chrome) throw Error('EXPLICIT_REAL_CHROME_REQUIRED');
 if (!existsSync(chrome)) throw Error('REAL_CHROME_REQUIRED');
+const selectedFiles = process.argv.slice(3);
+if (selectedFiles.some(file => !/^tests\/(?:integration|authorization|sqlite)\/[\w./-]+\.test\.ts$/.test(file) || file.split('/').includes('..') || !existsSync(file))) throw Error('INVALID_TEST_SELECTION');
 const id = randomUUID();
 const evidence = resolve('data/coordination/dual-regression', id);
 mkdirSync(evidence, { recursive: true });
@@ -45,7 +47,7 @@ try {
     const runEnv = { ...env, REGRESSION_ROOT: work, REGRESSION_RESULTS_PATH: resultPath, REGRESSION_EVIDENCE_PATH: join(evidence, `${backend}.environment.json`), SYNTHETIC_CONTROL_DATABASE_URL: `postgresql://crm:crm_test_password@127.0.0.1:55432/synthetic_final_regression_test_${randomUUID().replaceAll('-', '')}` };
     const started = Date.now();
     // One foreground child per contour. No timeout, no detached process, no raw logs retained.
-    const child = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', `tests/regression-synthetic/${backend}.config.mts`], { env: runEnv, stdio: ['ignore', 'ignore', 'ignore'], windowsHide: true });
+    const child = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', `tests/regression-synthetic/${backend}.config.mts`, ...selectedFiles], { env: runEnv, stdio: ['ignore', 'ignore', 'ignore'], windowsHide: true });
     const safe = existsSync(resultPath) ? JSON.parse(readFileSync(resultPath, 'utf8')) : null;
     const profiles = [];
     function profilesUnder(dir) { for (const e of readdirSync(dir, { withFileTypes: true })) if (e.isDirectory()) { if (e.name.startsWith('crm-browser-session-') || e.name.startsWith('playwright_chromiumdev_profile-')) profiles.push(e.name); profilesUnder(join(dir, e.name)); } }
@@ -59,7 +61,7 @@ try {
   writeFileSync(join(evidence, 'end.json'), JSON.stringify(end, null, 2));
   const changedSources = [...new Set([...Object.keys(start.files), ...Object.keys(end.files)])].filter(p => start.files[p] !== end.files[p]);
   rmSync(root, { recursive: true, force: true });
-  writeFileSync(join(evidence, 'summary.json'), JSON.stringify({ id, runs, changedSources, headChanged: start.head !== end.head, temporaryRootRemoved: !existsSync(root), migrationMethod: 'PostgreSQL tracked migration SQL application, not Prisma deploy; SQLite actual migration/template setup', cleanCommitProof: false }, null, 2));
+  writeFileSync(join(evidence, 'summary.json'), JSON.stringify({ id, runs, selectedFiles, changedSources, headChanged: start.head !== end.head, temporaryRootRemoved: !existsSync(root), migrationMethod: 'PostgreSQL tracked migration SQL application, not Prisma deploy; SQLite actual migration/template setup', cleanCommitProof: false }, null, 2));
   console.log(JSON.stringify({ evidence, temporaryRootRemoved: !existsSync(root), changedSources }));
 }
 process.exitCode = runs.length === 2 && runs.every(r => r.exit === 0) ? 0 : 1;

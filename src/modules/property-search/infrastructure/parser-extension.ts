@@ -1,4 +1,5 @@
 import type RealEstateScraper from "real-estate-scrapper";
+import { attachResidentialParsers } from "./residential-parsers";
 import { extractListingDates } from "./listing-dates";
 import { detectAccessChallenge } from "./source-response";
 import { DateEnrichment, type DateDetailOptions, type DateDetailProgress } from "./date-enrichment";
@@ -9,6 +10,7 @@ export function dateEnrichmentProgress(client: object, source: Source) { return 
 
 /** Extend the installed parsers in our adapter, without patching node_modules. */
 export function extendSourceParsers(client: RealEstateScraper, options: DateDetailOptions = {}): RealEstateScraper {
+  attachResidentialParsers(client);
   const progress: Partial<Record<Source, DateDetailProgress>> = {};
   detailProgress.set(client, progress);
   for (const [source, parser] of Object.entries(client.parsers)) {

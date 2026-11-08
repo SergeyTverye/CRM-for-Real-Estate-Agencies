@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import type { SearchFilters } from "@/modules/property-search/domain/types";
 import { apiCall } from "@/ui/api-client";
 import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
@@ -8,7 +9,7 @@ import { FormErrorBanner } from "@/ui/form";
 type Evidence = {criterion:string;result:string;quote:string|null;reason:string};
 type Result = {text?:string;warning?:string;pendingActionId?:string|null;items?:{listingId:string;cacheHit:boolean;evidence:Evidence[];unresolved:string[];url:string}[];tasks?:{listingId?:string;title?:string;description?:string}[];questions?:{listingId:string;questions:string[]}[];tradeoffs?:{listingId:string;points:{comparedListingId:string;area:string;price:string}[]}[]};
 /** Mount with key=selection+filters to discard old previews when the search changes. */
-export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enabled=true}:{listingIds:string[];filters:SearchFilters;needId?:string;labels?:Record<string,string>;enabled?:boolean}) {
+export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enabled=true,statusMessage,settingsUrl}:{listingIds:string[];filters:SearchFilters;needId?:string;labels?:Record<string,string>;enabled?:boolean;statusMessage?:string|null;settingsUrl?:string|null}) {
   const action = useApiAction();
   const [result,setResult] = useState<Result|null>(null);
   const [dueAt,setDueAt] = useState("");
@@ -27,7 +28,7 @@ export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enable
   return <section className="space-y-3 rounded-lg border border-slate-200 bg-white p-4" aria-label="Анализ объявлений ИИ">
     <h2 className="font-semibold">Анализ выбранных объявлений</h2>
     <p className="text-sm text-slate-600">Проверяются только неизвестные обязательные признаки. Анализ может расходовать бюджет ИИ; повтор неизменённых описаний берётся из кеша.</p>
-    {!enabled && <p role="status">ИИ отключён. Ручной поиск, фильтры и экспорт доступны.</p>}
+    {!enabled && <p role="status">{statusMessage ?? "ИИ отключён. Ручной поиск, фильтры и экспорт доступны."}{settingsUrl && statusMessage ? <> · <Link className="link" href={settingsUrl}>Перейти к подключению Яндекс AI</Link></> : null}</p>}
     {!listingIds.length && <p>Выберите объявления в результатах поиска.</p>}
     <div className="flex flex-wrap gap-2">
       <button className="btn btn-secondary" disabled={!enabled || action.pending || !listingIds.length} onClick={()=>request("batch")}>Проверить неизвестные признаки</button>

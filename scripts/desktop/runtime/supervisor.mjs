@@ -214,6 +214,11 @@ export async function configureHandoff(dataRoot = dirs.data) {
   }
   catch (e) { if (e.code !== 'ENOENT') throw Error('HANDOFF_STATE_INVALID'); }
 }
+export function configureSearchRuntime(env = process.env) {
+  for (const flag of ['AI_ENABLED', 'SCRAPER_ENABLED', 'YANDEX_WEB_SEARCH_ENABLED', 'YANDEX_WEB_SEARCH_AUTO_FALLBACK']) {
+    env[flag] ??= 'true';
+  }
+}
 async function main() {
   if (process.platform !== 'win32' || process.arch !== 'x64') throw Error('WINDOWS_X64_REQUIRED');
   for (const dir of [root, ...Object.values(dirs)]) await assertLocalDirectory(dir);
@@ -235,10 +240,14 @@ async function main() {
     DESKTOP_DATA_DIR:dirs.data, FILE_STORAGE_PATH:dirs.files, BACKUP_PATH:dirs.backups,
     IMPORT_STAGING_PATH:path.join(dirs.data,'import-staging'), DEPLOYMENT_ID:identity.deploymentId,
     INSTANCE_ID:identity.instanceId, APP_TIMEZONE:'Asia/Novosibirsk', CRM_DESKTOP_SUPERVISED_UPGRADE:'1',
-    PLAYWRIGHT_BROWSERS_PATH:path.join(app,'chromium'), AI_ENABLED:'false', SCRAPER_ENABLED:'false',
+    PLAYWRIGHT_BROWSERS_PATH:path.join(app,'chromium'),
   });
+  // These are ceilings, not opt-ins: persisted manager settings still decide.
+  // Preserve an explicit operator kill-switch; never alter spending ceilings.
+  configureSearchRuntime();
   const bundle = JSON.parse(await readFile(path.join(app,'desktop-manifest.json'),'utf8'));
   process.env.SCRAPER_CHROME_PATH = path.join(app,bundle.chromium);
+  process.env.SCRAPER_BROWSER_EXECUTABLE_PATH = process.env.SCRAPER_CHROME_PATH;
   process.env.APP_VERSION = bundle.version;
   await configureActiveGeneration();
   await configureHandoff();

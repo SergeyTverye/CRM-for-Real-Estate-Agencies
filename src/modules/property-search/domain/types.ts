@@ -3,7 +3,7 @@ import { featureConditions } from "./filter-catalog";
 import { freshnessSchema } from "./freshness";
 
 export const SOURCES = ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"] as const;
-export const PURPOSES = ["retail", "psn_universal", "office", "production", "warehouse", "free_purpose"] as const;
+export const PURPOSES = ["retail", "psn_universal", "office", "production", "warehouse", "free_purpose", "residential"] as const;
 export const PRICE_UNITS = ["rub_total", "rub_month", "rub_year", "rub_m2_month", "rub_m2_year"] as const;
 export type Source = typeof SOURCES[number];
 export type Purpose = typeof PURPOSES[number];
@@ -13,7 +13,7 @@ export const SearchFilters = z.object({
   city: z.string().trim().min(1).max(120).default("Новосибирск"),
   operation: z.enum(["sale", "rent"]),
   priceUnit: z.enum(PRICE_UNITS).optional(),
-  purposes: z.array(z.enum(PURPOSES)).max(6).default([]),
+  purposes: z.array(z.enum(PURPOSES)).max(7).default([]),
   floorMode: z.enum(["first_floor_only", "exclude_basement_and_semi_basement", "any"]).default("any"),
   priceFrom: money.optional(), priceTo: money.optional(),
   areaFrom: z.number().finite().nonnegative().optional(), areaTo: z.number().finite().nonnegative().optional(),

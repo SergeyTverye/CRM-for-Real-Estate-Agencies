@@ -1,6 +1,10 @@
 import { z } from "zod";
+import { PURPOSES } from "@/modules/property-search/domain/types";
 import { parseResultSchema } from "./contracts";
 import { decodeAiJson } from "./decode-json";
+
+/** Provider instruction allowlist mirrors domain PURPOSES; residential is required even before/after B lands. */
+export const PROVIDER_PURPOSE_ALLOWLIST: readonly string[] = [...new Set([...PURPOSES, "residential"])];
 
 const nullableText = { type: ["string", "null"] };
 const nullableNumber = { type: ["number", "null"] };
@@ -36,7 +40,7 @@ export function decodeParseResult(text: string) {
 }
 export const providerParseInstructions = `Верни ПЛОСКИЙ JSON по переданной text.format schema, без поля filters.
 operation: sale/rent; priceUnit: rub_total/rub_month/rub_year/rub_m2_month/rub_m2_year.
-purposes: retail/psn_universal/office/production/warehouse/free_purpose.
+purposes: ${PROVIDER_PURPOSE_ALLOWLIST.join("/")}.
 floorMode: first_floor_only/exclude_basement_and_semi_basement/any; seller: all/confirmed_owner_only.
 sources: cian/mirkvartir/onrealt/domclick/yandex/youla/avito (все, если не ограничены запросом).
 Неизвестные скалярные границы = null, отсутствующие признаки = []. Цена — десятичная строка рублей.

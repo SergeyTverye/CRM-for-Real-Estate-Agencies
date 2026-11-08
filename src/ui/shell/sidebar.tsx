@@ -15,7 +15,7 @@ const icons = {
   "/tasks": CheckSquare, "/calendar": CalendarDays, "/notifications": Bell,
   "/offers": FileText, "/deals": Handshake, "/agreements": FileText,
   "/advertisements": Megaphone, "/reports": ChartNoAxesCombined, "/archive": Archive,
-  "/import": Upload, "/operations": Settings, "/admin": Shield, "/settings/ai": Sparkles, "/templates": FileText,
+  "/import": Upload, "/operations": Settings, "/admin": Shield, "/settings/sources": Search, "/settings/ai": Sparkles, "/templates": FileText,
 };
 const storageKey = "crm.sidebar.collapsed";
 function subscribe(callback: () => void) {

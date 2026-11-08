@@ -29,7 +29,7 @@ export interface FilterDefinition { key: CoreKey | `features.${FeatureKey}`; lab
 export const FILTER_CATALOG: readonly FilterDefinition[] = [
   { key: "city", label: "Город", kind: "text" }, { key: "districts", label: "Районы", kind: "multi" },
   { key: "operation", label: "Операция", kind: "select", options: ["sale", "rent"] },
-  { key: "purposes", label: "Назначения (ИЛИ)", kind: "multi", options: ["office", "retail", "psn_universal", "production", "warehouse", "free_purpose"] },
+  { key: "purposes", label: "Назначения (ИЛИ)", kind: "multi", options: ["office", "retail", "psn_universal", "production", "warehouse", "free_purpose", "residential"] },
   { key: "price", label: "Бюджет / цена", kind: "range", unit: "RUB", fromField: "priceFrom", toField: "priceTo" },
   { key: "priceUnit", label: "Единица цены", kind: "select", options: ["rub_total", "rub_month", "rub_year", "rub_m2_month", "rub_m2_year"] },
   { key: "area", label: "Площадь", kind: "range", unit: "м²", fromField: "areaFrom", toField: "areaTo" }, { key: "floor", label: "Этаж", kind: "range", fromField: "floorFrom", toField: "floorTo" },

@@ -20,17 +20,45 @@ export function resolveSourceGeography(filters: SearchFilters, source: Source, s
   } : {};
   return { ...defaults, ...sourceOptions?.[source] };
 }
+/** Жилая — отдельная категория площадки, а не коммерческий подтип.
+ * Пакет real-estate-scrapper 2.1 отклоняет types:["residential"]
+ * (types принимает только коммерческие подтипы); жилые запросы используют
+ * category:"residential" + type — один тип на запрос. Пустой набор означает «вся жилая». */
+export const RESIDENTIAL_TYPES = ["flat", "studio", "room", "house", "cottage", "townhouse"] as const;
+export type ResidentialType = typeof RESIDENTIAL_TYPES[number];
+export function splitPurposes(purposes: SearchFilters["purposes"]): { commercial: Exclude<SearchFilters["purposes"][number], "residential">[]; residential: boolean } {
+  return { commercial: purposes.filter((p): p is Exclude<SearchFilters["purposes"][number], "residential"> => p !== "residential"), residential: purposes.includes("residential") };
+}
+export function buildScraperQueries(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query[] {
+  const { commercial, residential } = splitPurposes(filters.purposes);
+  const commercialQuery = (): RealEstateScraper.Query => {
+    // OnRealt has no all-commercial route; searchSite splits these OR branches.
+    // OnRealt's retail routes return 404. Its public navigation exposes PSN for
+    // both operations; retain the requested retail purpose in the local evaluator.
+    const types = commercial.length ? [...new Set(commercial.map(p => source === "onrealt" && p === "retail" ? "freePurpose" : purposeMap[p]))]
+      : source === "onrealt" ? ["freePurpose", "office", "industrial", "warehouse"] as const : ["commercial"] as const;
+    // Price, floor, ownership and districts remain local to preserve unknown candidates.
+    const { maxPages, limit } = resolveSourceDepth(source, depth);
+    return { city: filters.city, category: "commercial", types: [...types], deal: filters.operation,
+      sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages, limit, signal,
+      sourceOptions: { ...sourceOptions, [source]: resolveSourceGeography(filters, source, sourceOptions) } };
+  };
+  const residentialQueries = (): RealEstateScraper.Query[] => {
+    const { maxPages, limit } = resolveSourceDepth(source, depth);
+    const geography = resolveSourceGeography(filters, source, sourceOptions);
+    // Один запрос на жилой тип: пакет не принимает types:["residential"] и не
+    // выражает несколько жилых типов одним URL (nativeMultiType — только коммерция).
+    return RESIDENTIAL_TYPES.map(type => ({ city: filters.city, category: "residential" as const, type, deal: filters.operation,
+      sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages, limit, signal,
+      sourceOptions: { ...sourceOptions, [source]: geography } }));
+  };
+  if (residential && !commercial.length) return residentialQueries();
+  if (!residential) return [commercialQuery()];
+  return [commercialQuery(), ...residentialQueries()];
+}
 export function buildScraperQuery(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query {
-  // OnRealt has no all-commercial route; searchSite splits these OR branches.
-  // OnRealt's retail routes return 404. Its public navigation exposes PSN for
-  // both operations; retain the requested retail purpose in the local evaluator.
-  const types = filters.purposes.length ? [...new Set(filters.purposes.map(p => source === "onrealt" && p === "retail" ? "freePurpose" : purposeMap[p]))]
-    : source === "onrealt" ? ["freePurpose", "office", "industrial", "warehouse"] as const : ["commercial"] as const;
-  // Price, floor, ownership and districts remain local to preserve unknown candidates.
-  const { maxPages, limit } = resolveSourceDepth(source, depth);
-  return { city: filters.city, category: "commercial", types: [...types], deal: filters.operation,
-    sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages, limit, signal,
-    sourceOptions: { ...sourceOptions, [source]: resolveSourceGeography(filters, source, sourceOptions) } };
+  // Backward-compatible single query: mixed selections start from the commercial branch.
+  return buildScraperQueries(filters, source, signal, sourceOptions, depth)[0]!;
 }
 
 type TechnicalError = { code?: string; status?: number; error?: string; types?: RealEstateScraper.PropertyType[] };
@@ -46,7 +74,8 @@ export function scraperErrorReason(error: TechnicalError): string {
   const code = /^[A-Z_0-9]{1,60}$/u.test(error.code ?? "") ? error.code! : "SCRAPER_ERROR";
   const fields = ["city", "location", "types", "type", "areaMin", "areaMax", "floorMode", "owner", "districts", "regionId", "address", "locationId", "locationIds"];
   const field = fields.find(key => new RegExp(`\\b${key}\\b`, "u").test(error.error ?? ""));
-  const types = error.types?.filter(t => ["commercial", "office", "retail", "freePurpose", "industrial", "warehouse", "building"].includes(t));
+  const types = error.types?.filter(t => ["commercial", "office", "retail", "freePurpose", "industrial", "warehouse", "building",
+    "flat", "studio", "room", "house", "cottage", "townhouse", "land", "garage", "residential"].includes(t));
   const smokeReason = ["SMOKE_REQUEST_BUDGET", "SMOKE_REDIRECT_STOPPED"].find(value => error.error === value);
   const challenge = error.error === "CIAN_ACCESS_CHALLENGE" ? "; CIAN_ACCESS_CHALLENGE (CAPTCHA/антибот)" : "";
   return `${code}${error.status ? ` HTTP ${error.status}` : ""}${field ? `; фильтр: ${field}` : ""}${types?.length ? `; назначения: ${types.join(", ")}` : ""}${smokeReason ? `; ${smokeReason}` : ""}${challenge}`;

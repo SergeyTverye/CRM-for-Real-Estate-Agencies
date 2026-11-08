@@ -57,6 +57,10 @@ export class WindowsDpapiProtector implements SecretProtector {
   open(data: Buffer, context: string) { return this.transform(data, context, true); }
 }
 const encryptedSchema = z.object({ version: z.literal(1), protection: z.enum(["server-aes-256-gcm", "windows-dpapi-current-user"]), data: z.string().max(65536) }).strict();
+/** Fixed internal signal; never retain filesystem errors, paths or causes. */
+export class CredentialNotFoundError extends BackupError {
+  constructor() { super("SECRET_STORE_NOT_FOUND"); }
+}
 export class EncryptedFileCredentialStore implements CredentialStore {
   constructor(private readonly root: string, private readonly protector: SecretProtector) {}
   get protection() { return this.protector.protection; }
@@ -68,9 +72,16 @@ export class EncryptedFileCredentialStore implements CredentialStore {
     finally { bytes.fill(0); }
   }
   async get(ref: string) {
-    await regularFile(this.file(ref)); if ((await stat(this.file(ref))).size > 98304) throw new BackupError("SECRET_STORE_INVALID");
+    let contents: string;
     try {
-      const encrypted = encryptedSchema.parse(JSON.parse(await readFile(this.file(ref), "utf8")));
+      await regularFile(this.file(ref)); if ((await stat(this.file(ref))).size > 98304) throw new BackupError("SECRET_STORE_INVALID");
+      contents = await readFile(this.file(ref), "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code === "ENOENT") throw new CredentialNotFoundError();
+      throw new BackupError("SECRET_STORE_INVALID");
+    }
+    try {
+      const encrypted = encryptedSchema.parse(JSON.parse(contents));
       if (encrypted.protection !== this.protection) throw new BackupError("SECRET_STORE_INVALID");
       const bytes = await this.protector.open(Buffer.from(encrypted.data, "base64"), ref);
       try { return z.record(z.string(), z.string().max(4096)).parse(JSON.parse(bytes.toString("utf8"))); } finally { bytes.fill(0); }

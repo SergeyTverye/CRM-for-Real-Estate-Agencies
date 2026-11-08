@@ -7,8 +7,11 @@ import { evaluateListing } from "@/modules/property-search/domain/evaluation";
 
 const scraper = new RealEstateScraper({ transport: async () => { throw new Error("NETWORK_FORBIDDEN"); } });
 const signal = new AbortController().signal;
+// Commercial-only matrix: PURPOSES now includes "residential" (separate category/type contract),
+// which must not assert category:"commercial". Residential is covered in residential.test.ts.
+const COMMERCIAL_PURPOSES = PURPOSES.filter((p): p is Exclude<(typeof PURPOSES)[number], "residential"> => p !== "residential");
 for (const city of ["Новосибирск", "Москва"]) for (const source of SOURCES) for (const operation of ["sale", "rent"] as const) {
-  it.each(PURPOSES)(`${city}/${source}/${operation}/%s`, async purpose => {
+  it.each(COMMERCIAL_PURPOSES)(`${city}/${source}/${operation}/%s`, async purpose => {
     const query = buildScraperQuery(SearchFilters.parse({ city, operation, priceUnit: operation === "rent" ? "rub_month" : "rub_total", purposes: [purpose] }), source, signal);
     const plan = await scraper.buildSearchLinks(query);
     if (source === "mirkvartir" && purpose === "production") {
@@ -42,7 +45,7 @@ for (const city of ["Новосибирск", "Москва"]) for (const source
   });
 }
 it.each(SOURCES)("%s supports any use and OR uses without network", async source => {
-  for (const purposes of [[], [...PURPOSES]]) {
+  for (const purposes of [[], [...COMMERCIAL_PURPOSES]]) {
     const plan = await scraper.buildSearchLinks(buildScraperQuery(SearchFilters.parse({ operation: "sale", purposes }), source, signal));
     expect(plan.searches.length).toBeGreaterThan(0);
     expect(plan.errors).toHaveLength(source === "mirkvartir" && purposes.length ? 1 : 0);

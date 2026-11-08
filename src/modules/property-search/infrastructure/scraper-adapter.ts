@@ -4,16 +4,17 @@ import { safeRequest } from "@/shared/net/ssrf";
 import { SearchFilters, type SearchResult, type Source, type SourceRun } from "../domain/types";
 import { evaluateListing } from "../domain/evaluation";
 import { deduplicateListings, normalizeListing } from "./normalization";
-import { buildScraperQuery, resolveSourceGeography, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
+import { buildScraperQueries, resolveSourceGeography, classifyScraperErrors as classify, scraperErrorReason } from "./source-filters";
 import { scraperHttpRequest } from "./scraper-http";
 import { extendSourceParsers, dateEnrichmentProgress } from "./parser-extension";
 import { resilientTransport, type AdapterFailure } from "./source-response";
-import { resolveSourceDepth, type DepthOptions } from "./source-limits";
+import { boundSourceQueries, resolveSourceDepth, type DepthOptions } from "./source-limits";
 import type { DateDetailProgress } from "./date-enrichment";
 
 export interface AdapterSourceRun extends Omit<SourceRun, "status"> {
   status: SourceRun["status"] | AdapterFailure;
   incomplete: boolean; pagesFetched: number; listingsFetched: number;
+  /** Aggregate planned page allowance over all package category variants. */
   maxPages: number; limit: number; estimatedRequests: number;
   actionUrl?: string;
   failureCode?: string;
@@ -31,7 +32,7 @@ function failure(errors: { code?: string; status?: number }[]): AdapterSourceRun
   if (errors.some(e => e.code === "ABORTED")) return "cancelled";
   return classify(errors);
 }
-export { buildScraperQuery } from "./source-filters";
+export { buildScraperQueries, buildScraperQuery } from "./source-filters";
 
 export interface ScraperAdapter {
   search(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<SearchResult>;
@@ -156,8 +157,9 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     return { listings: listings.map(listing => ({ listing, evaluation: evaluateListing(listing, filters) })), sources: runs.map(r => r.run) };
   }
   private async runSource(source: Source, filters: SearchFilters, deadline: number, signal?: AbortSignal) {
-    const depth = resolveSourceDepth(source, { ...this.options.depth, ...this.options.sourceDepth?.[source] }, source === "onrealt" ? filters.purposes.length || 5 : Math.max(1, filters.purposes.length));
-    const metadata = { incomplete: true, pagesFetched: 0, listingsFetched: 0, maxPages: depth.maxPages, limit: depth.limit, estimatedRequests: depth.estimatedRequests };
+    const depth = resolveSourceDepth(source, { ...this.options.depth, ...this.options.sourceDepth?.[source] });
+    const plan = boundSourceQueries(source, buildScraperQueries(filters, source, new AbortController().signal, this.options.sourceOptions, depth), depth);
+    const metadata = { incomplete: true, pagesFetched: 0, listingsFetched: 0, maxPages: plan.maxPages, limit: depth.limit, estimatedRequests: plan.estimatedRequests };
     const host = { cian: "www.cian.ru", avito: "www.avito.ru", domclick: "domclick.ru", yandex: "realty.yandex.ru", mirkvartir: "cre.mirkvartir.ru", onrealt: "onrealt.ru", youla: "youla.ru" }[source];
     const empty = (status: AdapterSourceRun["status"], reason: string) => ({ run: { source, status, resultCount: 0, reason, ...metadata, ...(status === "needs_user_action" ? { actionUrl: `https://${host}/` } : {}) } satisfies AdapterSourceRun, listings: [] as ReturnType<typeof normalizeListing>[] });
     if (signal?.aborted) return empty("cancelled", "Поиск отменён");
@@ -176,44 +178,108 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       signal?.addEventListener("abort", abort, { once: true });
       let timer: ReturnType<typeof setTimeout> | undefined;
       let client: ScraperClient | undefined;
+      let partial: RealEstateScraper.SearchResult | undefined;
+      const batches: RealEstateScraper.SearchResult[] = [];
+      let finished = false;
+      let stopCode: "ABORTED" | "TIMEOUT" | undefined;
+      let graceTimer: ReturnType<typeof setTimeout> | undefined;
       const browserEnabled = this.options.browserEnabled ?? process.env.SCRAPER_BROWSER_ENABLED !== "false";
       const factory = this.options.factory ?? defaultScraperFactory;
       const work = async () => {
-        client = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, maxRetries: 0, transport: resilientTransport(transport, source, deadline),
+        const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, maxRetries: 0, transport: resilientTransport(transport, source, deadline),
           ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
             ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
             ...this.options.browser, sources: [source] } } : {}) });
-        if (controller.signal.aborted) { await client.close(); throw { code: "ABORTED" }; }
-        return client.searchSite(source, buildScraperQuery(filters, source, controller.signal, this.options.sourceOptions, depth));
+        if (controller.signal.aborted || finished) { await created.close(); throw { code: "ABORTED" }; }
+        client = created;
+        // Mixed commercial+residential selections query both categories; single-category searches keep one request.
+        // Жилая раскрыта в 6 однотипных запросов: площадки поддерживают не все типы жилья,
+        // поэтому ветви выполняются изолированно — успех одних сохраняется при отказе других.
+        const queries = plan.queries.map(query => ({ ...query, signal: controller.signal }));
+        const merged = await (async (): Promise<RealEstateScraper.SearchResult> => {
+          let acc: RealEstateScraper.SearchResult | undefined;
+          for (const query of queries) {
+            if (controller.signal.aborted || Date.now() >= deadline) { controller.abort(); break; }
+            try {
+              const next = await client.searchSite(source, query);
+              if (finished) break;
+              batches.push(next);
+              if (!acc) acc = { ...next, results: [...next.results], pages: [...next.pages], errors: [...next.errors] };
+              else { acc.results.push(...next.results); acc.pages.push(...next.pages); acc.errors.push(...next.errors); acc.total += next.total; acc.partial = acc.partial || next.partial; }
+            } catch (branch) {
+              if (finished) break;
+              const info = branch && typeof branch === "object" ? branch as { code?: string; message?: string; status?: number; url?: string } : {};
+              const entry = { source, page: 1, code: typeof info.code === "string" ? info.code : "SEARCH_FAILED",
+                error: typeof info.message === "string" && info.message ? info.message : String(branch),
+                ...(info.status !== undefined ? { status: info.status } : {}),
+                ...(query.type ? { types: [query.type as RealEstateScraper.PropertyType] } : {}) };
+              if (!acc) acc = { query, timestamp: new Date().toISOString(), total: 0, results: [], errors: [entry], pages: [], partial: false };
+              else { acc.errors.push(entry); acc.partial = true; }
+            }
+              // Publish at every branch boundary: a later hung call must not erase it.
+              partial = acc;
+            if (Date.now() >= deadline) controller.abort();
+          }
+          if (!acc) throw { code: "ABORTED" };
+          return acc;
+        })();
+        return merged;
       };
-      let partial: RealEstateScraper.SearchResult | undefined;
       try {
-        const result = await Promise.race([work().then(result => { partial = result; return result; }), new Promise<RealEstateScraper.SearchResult>((resolve, reject) => {
-          const stop = (code: string) => { controller.abort(); setTimeout(() => partial ? resolve(partial) : reject({ code }), 20); };
-          controller.signal.addEventListener("abort", () => { setTimeout(() => partial ? resolve(partial) : reject({ code: signal?.aborted ? "ABORTED" : "TIMEOUT" }), 20); }, { once: true });
-          timer = setTimeout(() => stop("TIMEOUT"), remaining);
-        })]);
-        const listings: ReturnType<typeof normalizeListing>[] = []; let invalid = 0;
-        for (const raw of result.results) { try { if (raw.source !== source) throw new Error("SOURCE_MISMATCH"); listings.push(normalizeListing(raw, result.timestamp)); } catch { invalid++; } }
+        // Install cancellation before starting work, including a slow factory.
+        const stopped = new Promise<RealEstateScraper.SearchResult>((resolve, reject) => {
+          const stop = () => {
+            if (finished) return;
+            stopCode = signal?.aborted ? "ABORTED" : "TIMEOUT";
+            // Give the page-accumulating parser a bounded chance to return its tail.
+            graceTimer = setTimeout(() => partial ? resolve(partial) : reject({ code: stopCode }), 20);
+          };
+          controller.signal.addEventListener("abort", stop, { once: true });
+          timer = setTimeout(() => controller.abort(), Math.max(1, deadline - Date.now()));
+          if (signal?.aborted) controller.abort();
+        });
+        const result = await Promise.race([stopped, work()]);
+        finished = true;
+        let invalid = 0;
+        const normalized = batches.map(batch => batch.results.flatMap(raw => {
+          try { if (raw.source !== source) throw new Error("SOURCE_MISMATCH"); return [normalizeListing(raw, batch.timestamp)]; }
+          catch { invalid++; return []; }
+        }));
+        // Round-robin selection keeps later housing types represented even when
+        // a client over-returns or the source allowance is smaller than fanout.
+        const interleaved: ReturnType<typeof normalizeListing>[] = [];
+        for (let row = 0; row < Math.max(0, ...normalized.map(batch => batch.length)); row++) {
+          for (const batch of normalized) if (batch[row]) interleaved.push(batch[row]!);
+        }
+        const unique = deduplicateListings(interleaved);
+        const listings = unique.slice(0, depth.limit);
+        const resultLimited = unique.length > depth.limit;
         const successfulPage = result.pages.some(p => p.errors.length === 0);
         const errors = result.errors.map(e => e.code === "ABORTED" && !signal?.aborted ? { ...e, code: "TIMEOUT" } : e);
+        if (stopCode) errors.push({ source, page: result.pages.length + 1, code: stopCode, error: "" });
         const status: AdapterSourceRun["status"] = errors.length ? successfulPage || listings.length ? "partial" : failure(errors) : invalid || result.partial ? "partial" : "success";
         const branchTails = new Map<string, RealEstateScraper.PageMetadata>();
         for (const page of result.pages) branchTails.set(JSON.stringify(page.types ?? []), page);
-        const limited = [...branchTails.values()].some(p => p.hasNext === true || p.truncated);
+        const limited = resultLimited || [...branchTails.values()].some(p => p.hasNext === true || p.truncated);
         const dateDetails = client && dateEnrichmentProgress(client, source);
         const detailReason = dateDetails ? `Даты карточек: запросов ${dateDetails.requested}/${dateDetails.limit}, кеш ${dateDetails.cacheHits}, найдено ${dateDetails.enriched}, ошибок ${dateDetails.failed}` : null;
+        const unsupportedHousing = [...new Set(errors.filter(e => ["UNSUPPORTED_FILTER", "NOT_APPLICABLE", "LOCATION_REQUIRED"].includes(e.code ?? "")).flatMap(e => e.types ?? []))];
+        const housingCoverage = (filters.purposes as string[]).includes("residential") && unsupportedHousing.length && (successfulPage || listings.length)
+          ? `Жилая: площадка не предлагает типы ${unsupportedHousing.join(", ")}; остальные варианты сохранены` : null;
         return { listings, run: { source, status, resultCount: listings.length, ...metadata,
           ...(dateDetails ? { dateDetails: { ...dateDetails } } : {}),
           pagesFetched: result.pages.filter(p => !p.errors.length).length, listingsFetched: result.results.length,
           ...(errors[0] ? { failureCode: errors[0].code } : {}),
-          incomplete: limited || !!errors.length || invalid > 0 || result.pages.some(p => p.hasNext === null),
+          incomplete: limited || !!errors.length || invalid > 0 || result.partial || result.pages.some(p => p.hasNext === null),
           ...(errors.some(e => e.code === "NEEDS_USER_ACTION") ? { actionUrl: `https://${host}/` } : {}),
-          reason: [source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
+          reason: [(filters.purposes as string[]).includes("residential") && filters.purposes.some(p => p !== "residential") ? "Смешанный поиск: категории commercial + residential; назначение проверяется CRM" : null, source === "onrealt" && filters.purposes.includes("retail") ? "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный" : null, housingCoverage, errors.length ? errors.map(e => `${source}: ${scraperErrorReason(e)}`).join("; ") : invalid ? `Некорректные записи: ${invalid}` : limited ? "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована" : null, detailReason].filter(Boolean).join("; ") || null } satisfies AdapterSourceRun };
       } catch (error) {
         const info = error && typeof error === "object" ? error as { code?: string; status?: number } : {};
-        return empty(failure([info]), `${source}: ${scraperErrorReason(info)}`);
+        const stopped = stopCode ? { code: stopCode } : info;
+        return empty(failure([stopped]), `${source}: ${scraperErrorReason(stopped)}`);
       } finally {
+        finished = true;
+        if (graceTimer) clearTimeout(graceTimer);
         signal?.removeEventListener("abort", abort);
         if (timer) clearTimeout(timer);
         controller.abort();

@@ -5,8 +5,14 @@ import { FixtureScraperAdapter } from "./fixture-scraper";
 import { getConfig } from "@/shared/config/env";
 import { db } from "@/shared/db/client";
 import { SOURCES, type Source } from "../domain/types";
+import { ConflictError } from "@/shared/errors";
 
-export type SearchAiPort = Pick<SearchAi, "parseSearchQuery" | "analyzeDescriptions" | "webSearch" | "checkWebSearchAvailability">;
+export type SearchAiPort = Pick<SearchAi, "parseSearchQuery" | "analyzeDescriptions" | "webSearch" | "checkWebSearchAvailability"> & {
+  /** Server-composed readiness, never supplied by the search request. */
+  configured?: boolean;
+  /** Local readiness only: no provider request or budget reservation. */
+  assertConfigured?: () => Promise<void>;
+};
 // Composition seam: a persistent AiGate-backed factory can be installed by the AI module.
 let aiFactory: (() => Promise<SearchAiPort | null>) | undefined;
 export function configureSearchAi(factory: () => Promise<SearchAiPort | null>) { aiFactory = factory; }
@@ -19,7 +25,17 @@ export async function getSearchAi(): Promise<SearchAiPort | null> {
     return createDemoSearchAi(config);
   }
   const { createPersistentSearchAi } = await import("@/modules/ai/application/persistent-search-ai");
-  return createPersistentSearchAi();
+  try {
+    // Resolve credentials once inside persistent composition. The readiness decision
+    // and the paid port must refer to the same credential snapshot.
+    return await createPersistentSearchAi();
+  } catch (error) {
+    if (!(error instanceof ConflictError) || error.code !== "AI_CREDENTIALS_MISSING") throw error;
+    // Explicit AI actions retain their safe, actionable pre-persistence error.
+    const unavailable = async (): Promise<never> => { throw new ConflictError("AI_CREDENTIALS_MISSING", "Требуется подключение Яндекс AI", { settingsUrl: "/settings/ai" }); };
+    return { configured: false, assertConfigured: unavailable, parseSearchQuery: unavailable, analyzeDescriptions: unavailable, webSearch: unavailable,
+      checkWebSearchAvailability: async () => ({ budgetAvailable: false, limitAvailable: false }) };
+  }
 }
 export async function searchSettings() {
   const config = getConfig();
@@ -33,6 +49,7 @@ export async function searchSettings() {
 export function scraperFor(settings: Awaited<ReturnType<typeof searchSettings>>, scenario = "success", depthOptions: Pick<import("../infrastructure/scraper-adapter").ScraperOptions, "depth" | "sourceDepth"> = {}): ScraperAdapter {
   const options = { enabled: settings.enabled, enabledSources: settings.sources,
     browserEnabled: settings.config.SCRAPER_BROWSER_ENABLED && !!settings.settings?.browserEnabled,
+    ...(settings.config.SCRAPER_CHROME_PATH ? { browser: { executablePath: settings.config.SCRAPER_CHROME_PATH } } : {}),
     jobTimeoutMs: settings.config.SCRAPER_JOB_TIMEOUT_MS, maxConcurrentJobs: settings.config.SCRAPER_MAX_CONCURRENT_JOBS, ...depthOptions };
   return settings.config.SCRAPER_DEMO_FIXTURES ? new FixtureScraperAdapter(options, scenario, "tests/fixtures/scraper/demo-novosibirsk") : new RealEstateScraperAdapter(options);
 }
