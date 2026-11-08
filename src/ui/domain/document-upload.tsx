@@ -11,7 +11,7 @@ import { Modal, SelectInput, type Option } from "../client-kit";
 export function DocumentUploadButton({ linkKind, linkId, types, accept, maxMb }: { linkKind: string; linkId: string; types: Option[]; accept: string; maxMb: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState("other");
+  const [type, setType] = useState(linkKind === "agreement" ? "agreement" : "other");
   const fileRef = useRef<HTMLInputElement>(null);
   const { pending, error, run, fieldError, setError } = useApiAction();
   return (
@@ -19,7 +19,7 @@ export function DocumentUploadButton({ linkKind, linkId, types, accept, maxMb }:
       <button type="button" className="btn btn-sm" onClick={() => { setError(null); setOpen(true); }}>
         + Загрузить
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Загрузка документа">
+      <Modal open={open} onClose={() => { if (!pending) setOpen(false); }} title="Загрузка документа">
         <form
           className="space-y-3"
           onSubmit={async (e) => {
@@ -31,6 +31,10 @@ export function DocumentUploadButton({ linkKind, linkId, types, accept, maxMb }:
             }
             if (file.size > maxMb * 1024 * 1024) {
               setError({ code: "VALIDATION_ERROR", message: `Файл больше ${maxMb} МБ`, fieldErrors: { file: [`Не более ${maxMb} МБ`] } });
+              return;
+            }
+            if (!file.size || !accept.split(",").includes(`.${file.name.split(".").pop()?.toLowerCase()}`)) {
+              setError({ code: "VALIDATION_ERROR", message: "Проверьте файл", fieldErrors: { file: [file.size ? "Недопустимый формат файла" : "Пустой файл"] } });
               return;
             }
             const fd = new FormData();
@@ -47,7 +51,7 @@ export function DocumentUploadButton({ linkKind, linkId, types, accept, maxMb }:
         >
           <FormErrorBanner error={error} />
           <Field label="Тип документа">
-            <SelectInput value={type} onChange={setType} options={types} />
+            <SelectInput value={type} onChange={setType} options={types} disabled={pending} />
           </Field>
           <div>
             <p className="label">Файл · не более {maxMb} МБ</p>
@@ -55,7 +59,7 @@ export function DocumentUploadButton({ linkKind, linkId, types, accept, maxMb }:
             {fieldError("file") ? <p className="field-error" role="alert">{fieldError("file")}</p> : null}
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" className="btn" onClick={() => setOpen(false)}>Отмена</button>
+            <button type="button" className="btn" disabled={pending} onClick={() => setOpen(false)}>Отмена</button>
             <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Загрузка…" : "Загрузить"}</button>
           </div>
         </form>
