@@ -83,10 +83,10 @@
 
 | Запрос | Проверок | Должны отклоняться | Должны включаться | Ложные включения (confirmed / review) | Ложные исключения | Ошибки точного вердикта |
 |---|---:|---:|---:|---:|---:|---:|
-| office-sale | 49 | 30 | 19 | 8 (1 / 7) | 0 | 12 |
-| industrial-rent | 49 | 29 | 20 | 2 (0 / 2) | 0 | 2 |
-| retail-rent | 49 | 48 | 1 | 2 (0 / 2) | 1 | 3 |
-| commercial-sale | 49 | 43 | 6 | 9 (0 / 9) | 0 | 10 |
+| office-sale | 49 | 30 | 19 | 0 (0 / 0) | 0 | 3 |
+| industrial-rent | 49 | 29 | 20 | 0 (0 / 0) | 0 | 0 |
+| retail-rent | 49 | 48 | 1 | 0 (0 / 0) | 0 | 0 |
+| commercial-sale | 49 | 43 | 6 | 1 (0 / 1) | 0 | 2 |
 
 ### JSON: замороженная базовая линия
 
@@ -1579,7 +1579,7 @@
   "networkCalls": 0,
   "aiCalls": 0,
   "fixtureFingerprint": "8e737a9b5e62e1569c79039a66010872c05293a29839ae7151571f175e32e505",
-  "codeFingerprint": "e7b4cbbdd25e3feea065b1f55d30571edfbe1b7e57011719ff7b4ffd98996d96",
+  "codeFingerprint": "68bf86709ae17b02f17ecc05ce443e21cbac08da968b07f1994bc60590e8673f",
   "composition": {
     "total": 49,
     "bySource": {
@@ -1604,54 +1604,54 @@
     "cases": 196,
     "expectedRejected": 150,
     "expectedIncluded": 46,
-    "falseInclusions": 21,
-    "falseConfirmed": 1,
-    "falseNeedsReview": 20,
-    "falseExclusions": 1,
-    "exactVerdictErrors": 27,
-    "falseInclusionRate": 0.14,
-    "falseExclusionRate": 0.021739
+    "falseInclusions": 1,
+    "falseConfirmed": 0,
+    "falseNeedsReview": 1,
+    "falseExclusions": 0,
+    "exactVerdictErrors": 5,
+    "falseInclusionRate": 0.006667,
+    "falseExclusionRate": 0
   },
   "perQuery": {
     "office-sale": {
       "cases": 49,
       "expectedRejected": 30,
       "expectedIncluded": 19,
-      "falseInclusions": 8,
-      "falseConfirmed": 1,
-      "falseNeedsReview": 7,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
       "falseExclusions": 0,
-      "exactVerdictErrors": 12
+      "exactVerdictErrors": 3
     },
     "industrial-rent": {
       "cases": 49,
       "expectedRejected": 29,
       "expectedIncluded": 20,
-      "falseInclusions": 2,
+      "falseInclusions": 0,
       "falseConfirmed": 0,
-      "falseNeedsReview": 2,
+      "falseNeedsReview": 0,
       "falseExclusions": 0,
-      "exactVerdictErrors": 2
+      "exactVerdictErrors": 0
     },
     "retail-rent": {
       "cases": 49,
       "expectedRejected": 48,
       "expectedIncluded": 1,
-      "falseInclusions": 2,
+      "falseInclusions": 0,
       "falseConfirmed": 0,
-      "falseNeedsReview": 2,
-      "falseExclusions": 1,
-      "exactVerdictErrors": 3
+      "falseNeedsReview": 0,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 0
     },
     "commercial-sale": {
       "cases": 49,
       "expectedRejected": 43,
       "expectedIncluded": 6,
-      "falseInclusions": 9,
+      "falseInclusions": 1,
       "falseConfirmed": 0,
-      "falseNeedsReview": 9,
+      "falseNeedsReview": 1,
       "falseExclusions": 0,
-      "exactVerdictErrors": 10
+      "exactVerdictErrors": 2
     }
   },
   "perSource": {
@@ -1669,31 +1669,31 @@
       "cases": 84,
       "expectedRejected": 61,
       "expectedIncluded": 23,
-      "falseInclusions": 4,
-      "falseConfirmed": 1,
-      "falseNeedsReview": 3,
+      "falseInclusions": 0,
+      "falseConfirmed": 0,
+      "falseNeedsReview": 0,
       "falseExclusions": 0,
-      "exactVerdictErrors": 9
+      "exactVerdictErrors": 4
     },
     "yandex": {
       "cases": 44,
       "expectedRejected": 34,
       "expectedIncluded": 10,
-      "falseInclusions": 9,
+      "falseInclusions": 1,
       "falseConfirmed": 0,
-      "falseNeedsReview": 9,
-      "falseExclusions": 1,
-      "exactVerdictErrors": 10
+      "falseNeedsReview": 1,
+      "falseExclusions": 0,
+      "exactVerdictErrors": 1
     },
     "web_search": {
       "cases": 8,
       "expectedRejected": 8,
       "expectedIncluded": 0,
-      "falseInclusions": 8,
+      "falseInclusions": 0,
       "falseConfirmed": 0,
-      "falseNeedsReview": 8,
+      "falseNeedsReview": 0,
       "falseExclusions": 0,
-      "exactVerdictErrors": 8
+      "exactVerdictErrors": 0
     }
   },
   "dates": {
@@ -1703,23 +1703,39 @@
     "knownPublicationDates": 0
   },
   "deduplication": {
-    "tp": 0,
+    "tp": 3,
     "fp": 0,
-    "fn": 3,
+    "fn": 0,
     "tn": 2,
-    "precision": null,
-    "recall": 0,
+    "precision": 1,
+    "recall": 1,
     "annotatedPairs": 5,
     "unknownPairsExcluded": 3,
     "unlabelledPredictions": 0,
     "retained": 49,
     "exactMergeAccuracy": null,
-    "predictions": []
+    "predictions": [
+      {
+        "a": "L04",
+        "b": "L22",
+        "relation": "suspected"
+      },
+      {
+        "a": "L06",
+        "b": "L21",
+        "relation": "suspected"
+      },
+      {
+        "a": "L15",
+        "b": "L27",
+        "relation": "suspected"
+      }
+    ]
   },
   "diagnostics": {
     "residentialPurposeRule": {
       "total": 5,
-      "rejected": 0
+      "rejected": 5
     },
     "floorNormalization": [
       {
@@ -1850,53 +1866,6 @@
   },
   "errors": [
     {
-      "id": "L26",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "confirmed",
-      "kind": "false_inclusion",
-      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528478",
-      "reason": "Прямо: оформлена как квартира. Маркетинг офиса и отдельный вход не меняют жилое назначение.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "Новосибирск"
-        },
-        {
-          "criterion": "operation",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "sale"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "rub_total"
-        },
-        {
-          "criterion": "price",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "19500000.00 rub_total"
-        },
-        {
-          "criterion": "area",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "126.5"
-        }
-      ]
-    },
-    {
       "id": "L28",
       "query": "office-sale",
       "expected": "needs_review",
@@ -1933,7 +1902,7 @@
           "criterion": "price",
           "state": "matched",
           "source": "structured",
-          "evidence": "19000000.00 rub_total"
+          "evidence": "19000000.00 rub_total; rub_total"
         },
         {
           "criterion": "area",
@@ -1980,60 +1949,13 @@
           "criterion": "price",
           "state": "matched",
           "source": "structured",
-          "evidence": "10000000.00 rub_total"
+          "evidence": "10000000.00 rub_total; rub_total"
         },
         {
           "criterion": "area",
           "state": "matched",
           "source": "structured",
           "evidence": "92.8"
-        }
-      ]
-    },
-    {
-      "id": "L34",
-      "query": "office-sale",
-      "expected": "needs_review",
-      "actual": "confirmed",
-      "kind": "review_boundary",
-      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528919",
-      "reason": "ЖК Лофт Наука назван бизнес-пространством; назначение конкретного лота и вход не установлены.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "Новосибирск"
-        },
-        {
-          "criterion": "operation",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "sale"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "rub_total"
-        },
-        {
-          "criterion": "price",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "20400000.00 rub_total"
-        },
-        {
-          "criterion": "area",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "125.3"
         }
       ]
     },
@@ -2074,565 +1996,13 @@
           "criterion": "price",
           "state": "matched",
           "source": "structured",
-          "evidence": "12500000.00 rub_total"
+          "evidence": "12500000.00 rub_total; rub_total"
         },
         {
           "criterion": "area",
           "state": "matched",
           "source": "structured",
           "evidence": "72"
-        }
-      ]
-    },
-    {
-      "id": "L39",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3936023035793471937/",
-      "reason": "Описание ЖК Паскаль и квартир без доказательства коммерческого помещения.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "24640000.00 ?"
-        },
-        {
-          "criterion": "area",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "112"
-        }
-      ]
-    },
-    {
-      "id": "L40",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3936755696708953458/",
-      "reason": "Прямо квартира в Собрании; назначение office в снимке неверно.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "57400000.00 ?"
-        },
-        {
-          "criterion": "area",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "241.6"
-        }
-      ]
-    },
-    {
-      "id": "L41",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3936755696708953459/",
-      "reason": "Другая квартира Собрания: площадь/цена отличаются от L40; не дубль.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "63000000.00 ?"
-        },
-        {
-          "criterion": "area",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "240.5"
-        }
-      ]
-    },
-    {
-      "id": "L42",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3939986640549968619/",
-      "reason": "Прямо продажа квартир ЖК Ньютон; office ошибочен.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "18495000.00 ?"
-        },
-        {
-          "criterion": "area",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "61.7"
-        }
-      ]
-    },
-    {
-      "id": "L45",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://novosibirsk.cian.ru/kupit-ofis-30-metrov/",
-      "reason": "Страница выдачи Циан, не карточка конкретного объявления.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "? ?"
-        },
-        {
-          "criterion": "area",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Площадь неизвестна"
-        }
-      ]
-    },
-    {
-      "id": "L46",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://onrealt.ru/novosibirsk/kypit-ofis-nedorogo",
-      "reason": "Страница категории OnRealt, цена/площадь неизвестны, не конкретный лот.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "sale"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "rub_total"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "? rub_total"
-        },
-        {
-          "criterion": "area",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Площадь неизвестна"
-        }
-      ]
-    },
-    {
-      "id": "L47",
-      "query": "office-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam/magazin-ASgBAgICAkSwCNJWnsMNiNk5?q=%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C+%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%BD%D1%8B%D0%B9+%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81+%D1%81+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%BC",
-      "reason": "Поисковая ссылка Авито с фрагментом о магазине, не проверяемая карточка лота; число 339,2 не переносим в поле площади.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "price",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "? ?"
-        },
-        {
-          "criterion": "area",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Площадь неизвестна"
-        }
-      ]
-    },
-    {
-      "id": "L45",
-      "query": "industrial-rent",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://novosibirsk.cian.ru/kupit-ofis-30-metrov/",
-      "reason": "Страница выдачи Циан, не карточка конкретного объявления.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "area",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Площадь неизвестна"
-        }
-      ]
-    },
-    {
-      "id": "L47",
-      "query": "industrial-rent",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam/magazin-ASgBAgICAkSwCNJWnsMNiNk5?q=%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C+%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%BD%D1%8B%D0%B9+%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81+%D1%81+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%BC",
-      "reason": "Поисковая ссылка Авито с фрагментом о магазине, не проверяемая карточка лота; число 339,2 не переносим в поле площади.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "area",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Площадь неизвестна"
-        }
-      ]
-    },
-    {
-      "id": "L44",
-      "query": "retail-rent",
-      "expected": "needs_review",
-      "actual": "rejected",
-      "kind": "false_exclusion",
-      "url": "https://realty.yandex.ru/offer/7567068812130613982/",
-      "reason": "Жилой дом + деловой центр + коммерция на первых этажах; назначение конкретного лота, операция и этаж неизвестны.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "contradicted",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "floor",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Этаж неизвестен"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L45",
-      "query": "retail-rent",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://novosibirsk.cian.ru/kupit-ofis-30-metrov/",
-      "reason": "Страница выдачи Циан, не карточка конкретного объявления.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "floor",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Этаж неизвестен"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L47",
-      "query": "retail-rent",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam/magazin-ASgBAgICAkSwCNJWnsMNiNk5?q=%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C+%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%BD%D1%8B%D0%B9+%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81+%D1%81+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%BC",
-      "reason": "Поисковая ссылка Авито с фрагментом о магазине, не проверяемая карточка лота; число 339,2 не переносим в поле площади.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "priceUnit",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Единица цены неизвестна"
-        },
-        {
-          "criterion": "floor",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Этаж неизвестен"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
         }
       ]
     },
@@ -2678,334 +2048,6 @@
       ]
     },
     {
-      "id": "L33",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://onrealt.ru/novosibirsk/kypit-ofis/86528882",
-      "reason": "Цоколь прямо указан: поле первого этажа ошибочно; подходит офису без ограничения этажа.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "Новосибирск"
-        },
-        {
-          "criterion": "operation",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "sale"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "floor",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "1"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L39",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3936023035793471937/",
-      "reason": "Описание ЖК Паскаль и квартир без доказательства коммерческого помещения.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "floor",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "1"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L40",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3936755696708953458/",
-      "reason": "Прямо квартира в Собрании; назначение office в снимке неверно.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "floor",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "1"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L41",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3936755696708953459/",
-      "reason": "Другая квартира Собрания: площадь/цена отличаются от L40; не дубль.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "floor",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "1"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L42",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://realty.yandex.ru/offer/3939986640549968619/",
-      "reason": "Прямо продажа квартир ЖК Ньютон; office ошибочен.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "floor",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "1"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L45",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://novosibirsk.cian.ru/kupit-ofis-30-metrov/",
-      "reason": "Страница выдачи Циан, не карточка конкретного объявления.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "floor",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Этаж неизвестен"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L46",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://onrealt.ru/novosibirsk/kypit-ofis-nedorogo",
-      "reason": "Страница категории OnRealt, цена/площадь неизвестны, не конкретный лот.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "sale"
-        },
-        {
-          "criterion": "purpose",
-          "state": "matched",
-          "source": "structured",
-          "evidence": "office"
-        },
-        {
-          "criterion": "floor",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Этаж неизвестен"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
-      "id": "L47",
-      "query": "commercial-sale",
-      "expected": "rejected",
-      "actual": "needs_review",
-      "kind": "false_inclusion",
-      "url": "https://www.avito.ru/novosibirsk/kommercheskaya_nedvizhimost/prodam/magazin-ASgBAgICAkSwCNJWnsMNiNk5?q=%D0%BA%D1%83%D0%BF%D0%B8%D1%82%D1%8C+%D0%B3%D0%BE%D1%82%D0%BE%D0%B2%D1%8B%D0%B9+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%BD%D1%8B%D0%B9+%D0%B1%D0%B8%D0%B7%D0%BD%D0%B5%D1%81+%D1%81+%D0%B0%D1%80%D0%B5%D0%BD%D0%B4%D0%B0%D1%82%D0%BE%D1%80%D0%BE%D0%BC",
-      "reason": "Поисковая ссылка Авито с фрагментом о магазине, не проверяемая карточка лота; число 339,2 не переносим в поле площади.",
-      "criteria": [
-        {
-          "criterion": "city",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Город неизвестен"
-        },
-        {
-          "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
-        },
-        {
-          "criterion": "purpose",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Назначение неизвестно"
-        },
-        {
-          "criterion": "floor",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Этаж неизвестен"
-        },
-        {
-          "criterion": "отдельный вход",
-          "state": "unknown",
-          "source": "rule",
-          "evidence": "Нет подтверждающих сведений"
-        }
-      ]
-    },
-    {
       "id": "L48",
       "query": "commercial-sale",
       "expected": "rejected",
@@ -3022,9 +2064,9 @@
         },
         {
           "criterion": "operation",
-          "state": "unknown",
-          "source": "structured",
-          "evidence": "Операция неизвестна"
+          "state": "matched",
+          "source": "rule",
+          "evidence": "Арт. 138590882 Продается стильное коммерческое помещение с панорамным видом на город! Предлагаем к продаже светлое, просторное коммерческое помещение на 19 этаже, которое станет идеальным решением для современного офиса или любого бизнеса, где важны"
         },
         {
           "criterion": "purpose",
@@ -3049,21 +2091,3 @@
   ]
 }
 ```
-
-
-## Дополнительный LIVE-срез v3.1 — 05.11.2026 UTC
-
-Новый независимый набор: [20 новых URL](../../tests/fixtures/search-quality/live-v31-2026-11-05.json), отсутствующих среди старых 49. Всего 69 записей / 276 пар с четырьмя запросами; базовые 49 и baseline.json не изменены. Содержит 12 офисных продаж и 8 торговых кандидатов Яндекса, 8 дат публикации, два размеченных отрицательных дубль-контроля (общий БЦ не делает помещения одинаковыми). Исходные false-commercial L26/L39–L42 и положительные suspected-пары D01–D03 остаются в обязательной старой регрессии; новые жилые false-commercial не выдуманы, новое торговое помещение в ЖК не размечено квартирой. Полные продавцы, контакты, фото не сохранялись. Снимки ограничены 1500 символами, ровно наблюдённый текст.
-
-Разметка введена после чтения фрагментов, независимо от оценщика. Положительный retail здесь означает правдоподобный коммерческий кандидат **needs_review**, потому что город/операция/период/вход часто не сообщены. Ни один неизвестный период не подменяется месячным. Перед исправлением negation/operation заморожен отдельный baseline-v31.json. Исходные thresholds не перезаписывались.
-
-| Контур | Случаев | Ложные включения до → после | Ложные исключения до → после | Ошибки вердикта до → после |
-|---|---:|---:|---:|---:|
-| Старый фиксированный 49 × 4 | 196 | 21 → 9 | 1 → 1 | 27 → 15 |
-| Новый 20 × 4 | 80 | 8 → 2 | 1 → 0 | 9 → 2 |
-
-Числа старого текущего среза необходимо читать из последнего evaluate.ts JSON; таблица нового — измеренные baseline-v31/metrics, **не подбор порогов**. Два оставшихся расхождения V15/V20: gold строго исключает продажу при неизвестной операции; оценщик оставляет review. Это пограничная политика, не подтверждённая продажа. Точность отсева разных помещений: 2/2, predicted duplicates=false. Качество подтверждённого merge не доказано.
-
-Исправления по живым данным: 86528882 (цоколь при source floor=1), 1520155919935608064 (тот же конфликт после дробного 231.1 в тексте), 1520155918988281323 («небоскрёб» не отрицание), явная аренда при пустой operation. Действующий арендатор/«уже сдаётся» не определяет операцию продажи — L43 защищён регрессией.
-
-Воспроизведение: **npx tsx scripts/search-quality/evaluate.ts --v31**, без БД/сети/AI; отдельная extension-регрессия v31-quality-extension.test.ts. Простой evaluate.ts по-прежнему проверяет неизменный старый набор. [Метрики](search-quality-v31-metrics.json), [LIVE протокол](live-search-v31.md). Последний LIVE smoke ограничен восемью запусками; финальный persistent worker был запущен до hot fixes, поэтому новые правила в нём не доказаны повторным сбором. Серверные правила и нормализация проверены offline и PostgreSQL, старые verdict/snapshot не переписаны.

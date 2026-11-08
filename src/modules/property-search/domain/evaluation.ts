@@ -52,7 +52,21 @@ function summarize(criteria: CriterionEvaluation[], preferences: CriterionEvalua
     aiPending: [...criteria, ...preferences].filter(c => c.state === "unknown" && c.source === "rule").map(c => c.criterion),
   };
 }
+/** Страница выдачи, а не карточка: нет ID площадки, цены, площади, заголовка и города. */
+export function isCataloguePage(listing: NormalizedListing): boolean {
+  return listing.identityNeedsReview
+    && listing.price === null
+    && listing.area === null
+    && (listing.title ?? null) === null
+    && listing.city === null;
+}
 export function evaluateListing(listing: NormalizedListing, filters: SearchFilters, now = new Date()): ListingEvaluation {
+  if (isCataloguePage(listing)) {
+    return summarize([{
+      criterion: "listing", state: "contradicted", source: "rule",
+      evidence: "Страница выдачи, а не карточка конкретного объявления: нет ID площадки, цены, площади, заголовка и города",
+    }], []);
+  }
   const describedFloor = describedUndergroundFloor(listing.description);
   if (describedFloor) listing = { ...listing, floor: describedFloor };
   let operationFromText = false;

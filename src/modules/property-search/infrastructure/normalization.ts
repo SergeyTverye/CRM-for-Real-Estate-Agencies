@@ -51,15 +51,43 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
 export function listingIdentity(listing: NormalizedListing): string | null {
   return listing.sourceListingId && !listing.identityNeedsReview ? JSON.stringify([listing.source, listing.sourceListingId, listing.sourceUnitId]) : null;
 }
+const ABBR: Record<string, string> = {
+  "ул": "улица", "пр": "проспект", "просп": "проспект", "пер": "переулок",
+  "бул": "бульвар", "бульв": "бульвар", "ш": "шоссе", "пл": "площадь",
+  "наб": "набережная",
+};
+const STREET_TYPE = new Set(["улица", "проспект", "переулок", "бульвар", "шоссе", "площадь", "набережная", "проезд", "тупик", "аллея"]);
+/** Улица без номера дома: «улица Ленина» совпадает, «улица Ленина, 21» — нет. */
+function streetOnlyKey(address: string): string {
+  return address
+    .replace(/[,\s]+(\d[\p{L}\p{N}/\\.-]*(\s*(корп|корпус|стр|строение|литер)\.?[\s\p{L}\p{N}/\\.-]*)?)\s*$/giu, "")
+    .replace(/[,\s]+$/u, "");
+}
+export function normalizeAddressKey(address: string, city: string | null): string {
+  let value = address.toLocaleLowerCase("ru").replaceAll("ё", "е").replace(/пр-т/giu, "проспект").replace(/пр-д/giu, "проезд");
+  if (city) {
+    const cityKey = city.toLocaleLowerCase("ru").replaceAll("ё", "е").replace(/[^\p{L}\p{N}]/gu, "");
+    value = value.split(",").filter(part => part.toLocaleLowerCase("ru").replaceAll("ё", "е").replace(/[^\p{L}\p{N}]/gu, "") !== cityKey).join(",");
+  }
+  const tokens = value.split(/[^\p{L}\p{N}]+/gu).filter(Boolean).map(t => ABBR[t] ?? t);
+  const type = tokens.filter(t => STREET_TYPE.has(t));
+  const rest = tokens.filter(t => !STREET_TYPE.has(t));
+  return [...type, ...rest].join("");
+}
 export function deduplicateListings<T extends NormalizedListing>(input: T[]): T[] {
   const exact = new Set<string>(); const results: T[] = [];
   for (const listing of input) { const key = listingIdentity(listing); if (key && exact.has(key)) continue; if (key) exact.add(key); results.push({ ...listing, possibleDuplicateKeys: [] }); }
+  const keyOf = (address: string, city: string | null) => normalizeAddressKey(address, city);
+  const flag = (a: T, b: T) => { a.possibleDuplicateKeys.push(listingIdentity(b) ?? b.url); b.possibleDuplicateKeys.push(listingIdentity(a) ?? a.url); };
   for (let i = 0; i < results.length; i++) for (let j = i + 1; j < results.length; j++) {
     const a = results[i]!, b = results[j]!;
-    const addressKey = (s: string) => s.toLocaleLowerCase("ru").replaceAll("ё", "е").replace(/[^\p{L}\p{N}]/gu, "");
-    if (a.source !== b.source && a.address && b.address && addressKey(a.address) === addressKey(b.address) && a.city && b.city && addressKey(a.city) === addressKey(b.city) && a.area !== null && a.area === b.area) {
-      a.possibleDuplicateKeys.push(listingIdentity(b) ?? b.url); b.possibleDuplicateKeys.push(listingIdentity(a) ?? a.url);
-    }
+    if (a.source === b.source || !a.address || !b.address || !a.city || !b.city || a.area === null || a.area !== b.area) continue;
+    if (keyOf(a.city, null) !== keyOf(b.city, null)) continue;
+    if (keyOf(a.address, a.city) === keyOf(b.address, b.city)) { flag(a, b); continue; }
+    // Одна сторона — только улица без номера дома: тоже кандидат на проверку, не слияние.
+    const streetA = keyOf(streetOnlyKey(a.address), a.city);
+    const streetB = keyOf(streetOnlyKey(b.address), b.city);
+    if (streetA && streetA === streetB && (streetOnlyKey(a.address) !== a.address || streetOnlyKey(b.address) !== b.address)) flag(a, b);
   }
   return results;
 }
