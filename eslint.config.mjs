@@ -49,6 +49,14 @@ const config = [
     files: ["src/modules/**", "src/shared/**", "prisma/**", "tests/**", "scripts/**"],
     rules: { "no-restricted-imports": "off" },
   },
+  {
+    // Одноразовые CommonJS-скрипты LIVE-проверок: запускаются вручную через node, в сборку не входят.
+    files: ["scripts/perf/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
 ];
 
 export default config;
