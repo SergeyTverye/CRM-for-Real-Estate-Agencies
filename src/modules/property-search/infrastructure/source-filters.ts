@@ -43,7 +43,24 @@ export function splitPurposes(purposes: SearchFilters["purposes"]): { commercial
 export function buildScraperQueries(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query[] {
   const locations = selectedLocations(filters);
   if (filters.locations?.length || locations.length === 1 && locations[0]!.kind === "district") {
-    return locations.flatMap(location => buildScraperQueries({ ...filters, city: location.city, locations: undefined }, source, signal, sourceOptions, depth).map(query => location.kind === "district" && ["mirkvartir", "onrealt"].includes(source) ? { ...query, districts: ["Советский"] } : query));
+    return locations.flatMap(location => {
+      if (source === "youla" && location.kind === "region") {
+        // Youla has no region slug; finite, explicitly partial coverage, never a city disguised as a region.
+        return buildScraperQueries({ ...filters, locations: ["novosibirsk", "berdsk", "ob", "koltsovo", "krasnoobsk", "iskitim"] }, source, signal, sourceOptions, depth);
+      }
+      return buildScraperQueries({ ...filters, city: location.city, locations: undefined }, source, signal, sourceOptions, depth).map(query => {
+        if (location.kind !== "district") return query;
+        if (source === "mirkvartir") {
+          const geo = query.sourceOptions?.mirkvartir ?? {};
+          const host = query.category === "commercial" ? filters.operation === "rent" ? "arendacre" : "cre" : ["house", "cottage"].includes(query.type ?? "") ? filters.operation === "rent" ? "arendadoma" : "dom" : filters.operation === "rent" ? "arenda" : "www";
+          return { ...query, sourceOptions: { ...query.sourceOptions, mirkvartir: { ...geo, url: `https://${host}.mirkvartir.ru/${mirLocationPath("Новосибирск")}${encodeURIComponent("Советский")}/${query.type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : ""}` } } };
+        }
+        // LIVE public autocomplete: type_region=1 + selected city 14898 returns
+        // group 3, district 112. The package incorrectly uses group 4.
+        if (source === "youla") return { ...query, query: "Академгородок" };
+        return source === "onrealt" ? { ...query, sourceOptions: { ...query.sourceOptions, onrealt: { ...query.sourceOptions?.onrealt, params: { ...query.sourceOptions?.onrealt?.params, location: JSON.stringify({ "3": ["112"] }) } } } } : query;
+      });
+    });
   }
   const { commercial, residential: purposeResidential } = splitPurposes(filters.purposes);
   const kinds = filters.propertyKinds ?? [];
@@ -66,7 +83,7 @@ export function buildScraperQueries(filters: SearchFilters, source: Source, sign
     const geography = resolveSourceGeography(filters, source, sourceOptions);
     // Один запрос на жилой тип: пакет не принимает types:["residential"] и не
     // выражает несколько жилых типов одним URL (nativeMultiType — только коммерция).
-    const types = kinds.length ? [...new Set(kinds.flatMap(k => k === "flat" || k === "apartments" || k === "non_residential" ? ["flat" as const] : k === "house" ? ["house" as const, "cottage" as const] : []))] : RESIDENTIAL_TYPES;
+    const types = kinds.length ? [...new Set(kinds.flatMap(k => k === "flat" || k === "apartments" || k === "non_residential" ? ["flat" as const] : k === "house" ? source === "youla" ? ["house" as const] : ["house" as const, "cottage" as const] : []))] : RESIDENTIAL_TYPES;
     return types.map(type => ({ city: filters.city, category: "residential" as const, type, deal: filters.operation,
       sources: [source], maxPages, limit, signal,
       sourceOptions: { ...sourceOptions, [source]: source === "mirkvartir" && geography.url ? { ...geography, url: `https://${["house", "cottage"].includes(type) ? filters.operation === "rent" ? "arendadoma" : "dom" : filters.operation === "rent" ? "arenda" : "www"}.mirkvartir.ru/${mirLocationPath(filters.city)}${type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : ""}` } : geography } }));
@@ -84,7 +101,7 @@ type TechnicalError = { code?: string; status?: number; error?: string; types?: 
 export function classifyScraperErrors(errors: TechnicalError[]): "blocked" | "timeout" | "unsupported_filter" | "error" {
   if (errors.some(e => e.code === "ACCESS_BLOCKED" || [401, 403, 429].includes(e.status ?? 0))) return "blocked";
   if (errors.some(e => /TIMEOUT|ABORTED|ETIMEDOUT/u.test(e.code ?? ""))) return "timeout";
-  if (errors.length && errors.every(e => ["UNSUPPORTED_FILTER", "DISTRICT_RESOLUTION_REQUIRED", "NOT_APPLICABLE", "LOCATION_REQUIRED", "LOCATION_NOT_FOUND"].includes(e.code ?? ""))) return "unsupported_filter";
+  if (errors.length && errors.every(e => ["UNSUPPORTED_FILTER", "DISTRICT_RESOLUTION_REQUIRED", "DISTRICT_LOOKUP_FAILED", "DISTRICT_NOT_FOUND", "UNSUPPORTED_LOCATION", "NOT_APPLICABLE", "LOCATION_REQUIRED", "LOCATION_NOT_FOUND"].includes(e.code ?? ""))) return "unsupported_filter";
   return "error";
 }
 
@@ -98,6 +115,7 @@ export function scraperErrorReason(error: TechnicalError): string {
   const smokeReason = ["SMOKE_REQUEST_BUDGET", "SMOKE_REDIRECT_STOPPED"].find(value => error.error === value);
   const challenge = error.error === "CIAN_ACCESS_CHALLENGE" ? "; CIAN_ACCESS_CHALLENGE (CAPTCHA/антибот)" : "";
   if (["DISTRICT_LOOKUP_FAILED", "DISTRICT_NOT_FOUND"].includes(code)) return `${code}: площадка не смогла определить выбранный район. Расширьте локацию до города или выберите другую площадку.`;
+  if (["UNSUPPORTED_LOCATION", "LOCATION_NOT_FOUND"].includes(code)) return "Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.";
   if (code === "NEEDS_USER_ACTION") return "NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт";
   return `${code}${error.status ? ` HTTP ${error.status}` : ""}${field ? `; фильтр: ${field}` : ""}${types?.length ? `; назначения: ${types.join(", ")}` : ""}${smokeReason ? `; ${smokeReason}` : ""}${challenge}`;
 }

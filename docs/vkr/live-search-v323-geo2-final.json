@@ -1,0 +1,199 @@
+{
+  "mode": "LIVE",
+  "updatedAt": "2026-11-08T21:52:00.821Z",
+  "aiCalls": 0,
+  "wireRequests": 8,
+  "cap": 8,
+  "requests": [
+    {
+      "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9E%D0%B1%D1%8C/?types=102",
+      "status": 200,
+      "elapsedMs": 8393
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/363028584/"
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806&q=%D0%90%D0%BA%D0%B0%D0%B4%D0%B5%D0%BC%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%BE%D0%BA",
+      "status": 200,
+      "elapsedMs": 2541
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 495
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-kvartiri?q=%D0%90%D0%BA%D0%B0%D0%B4%D0%B5%D0%BC%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%BE%D0%BA",
+      "status": 200,
+      "elapsedMs": 2739
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 885
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-kvartiri/kvartira-3-komnaty-60-m2-689185b18eb5ff833109acfb",
+      "status": 200,
+      "elapsedMs": 1715
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-kvartiri/kvartira-1-komnata-372-m2-6ad7963353c2e51fb10d100b",
+      "status": 200,
+      "elapsedMs": 1639
+    }
+  ],
+  "sampling": "Location sweep plus type/operation coverage, not full Cartesian product; 5 cards per page; no seller contacts stored",
+  "cells": [
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "ob",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 1/3, кеш 0, найдено 0, ошибок 1",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "samples": [
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 14",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 120",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 15",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 13",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, Геодезическая ул., 60а",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 14192
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 3158
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "akademgorodok",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "partial",
+      "reason": "youla: TIMEOUT",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 5
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 4,
+      "elapsedMs": 20332
+    }
+  ]
+}

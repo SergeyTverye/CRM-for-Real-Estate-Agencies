@@ -78,7 +78,7 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   }
   const criteria: CriterionEvaluation[] = [];
   const add = (criterion: string, known: boolean, matches: boolean, evidence: string) => criteria.push({ criterion, state: !known ? "unknown" : matches ? "matched" : "contradicted", source: "structured", evidence });
-  criteria.push({ criterion: "city", state: locationState(listing, filters), source: "rule", evidence: [listing.city, listing.address].filter(Boolean).join(", ") || "Локация неизвестна" });
+  criteria.push({ criterion: "city", state: locationState(listing, filters), source: "rule", evidence: [listing.city, listing.address, listing.district].filter(Boolean).join(", ") || "Локация неизвестна" });
   if (operationFromText) criteria.push({criterion:"operation",state:listing.operation === filters.operation ? "matched" : "contradicted",source:"rule",evidence:listing.description.slice(0,300)});
   else add("operation", !!listing.operation, listing.operation === filters.operation, listing.operation ?? "Операция неизвестна");
   const kinds = filters.propertyKinds ?? [];

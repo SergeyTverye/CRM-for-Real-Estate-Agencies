@@ -83,6 +83,19 @@ describe("Youla v323 REPLAY / sanitized LIVE shapes", () => {
     await parser.searchPage({...q,type:'room'});
     expect(transport).toHaveBeenCalledTimes(3); // 2 feeds, only 1 detail attempt.
   });
+  it("retains the feed when an optional detail exceeds three seconds", async () => {
+    vi.useFakeTimers();
+    try {
+      const { parser, transport } = client(1);
+      transport.mockResolvedValueOnce({ data: fixture("flat") }).mockImplementationOnce(request => new Promise((_, reject) => {
+        request.signal?.addEventListener("abort", () => reject(Object.assign(new Error("ABORTED"), { code: "ABORTED" })), { once: true });
+      }));
+      const result = parser.searchPage(q);
+      await vi.advanceTimersByTimeAsync(3000);
+      expect((await result).results.length).toBeGreaterThan(0);
+      expect(transport).toHaveBeenCalledTimes(2);
+    } finally { vi.useRealTimers(); }
+  });
   it("enriches only matching identity with whitelist and keeps date/floor", async () => {
     const {parser,transport}=client(1); const feed=fixture('flat'); const product=feed.data.feed.items.find((i:{product?:{location:{city:string}}})=>i.product?.location.city===cityId).product;
     const detail={...fixture('detail-flat'),id:product.id,url:product.url,owner:{phone:'must-not-escape'}};

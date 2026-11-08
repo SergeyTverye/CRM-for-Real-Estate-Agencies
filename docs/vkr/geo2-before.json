@@ -1,0 +1,77 @@
+{
+  "mode": "LIVE",
+  "updatedAt": "2026-11-08T21:42:25.880Z",
+  "aiCalls": 0,
+  "wireRequests": 1,
+  "cap": 90,
+  "requests": [
+    {
+      "url": "https://arendacre.mirkvartir.ru/listing/?locationIds=MK_Town%7C106136&types=101&p=1",
+      "status": 200,
+      "elapsedMs": 1061
+    }
+  ],
+  "sampling": "Location sweep plus type/operation coverage, not full Cartesian product; 5 cards per page; no seller contacts stored",
+  "cells": [
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Красный пр-кт, 175б",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Чаплыгина",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советская ул., 23",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советская ул., 23",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Красный пр-кт, 17/1",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 2854
+    }
+  ]
+}

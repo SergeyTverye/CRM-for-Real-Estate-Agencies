@@ -1,0 +1,2865 @@
+{
+  "mode": "LIVE",
+  "updatedAt": "2026-11-08T21:49:53.598Z",
+  "aiCalls": 0,
+  "wireRequests": 90,
+  "cap": 90,
+  "requests": [
+    {
+      "url": "https://arendacre.mirkvartir.ru/listing/?locationIds=MK_Town%7C106136&types=101&p=1",
+      "status": 200,
+      "elapsedMs": 1132
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D1%81%D0%BA%D0%B8%D0%B9/?types=101",
+      "status": 200,
+      "elapsedMs": 2083
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9A%D0%BE%D0%BB%D1%8C%D1%86%D0%BE%D0%B2%D0%BE%2B%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%2B%D0%BF%D0%BE%D1%81%D0%B5%D0%BB%D0%BE%D0%BA/?types=101",
+      "status": 200,
+      "elapsedMs": 866
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B8%D0%B9%2B%D1%80%D0%B0%D0%B9%D0%BE%D0%BD/%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%BE%D0%B1%D1%81%D0%BA%2B%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%2B%D0%BF%D0%BE%D1%81%D0%B5%D0%BB%D0%BE%D0%BA/?types=101",
+      "status": 200,
+      "elapsedMs": 1163
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/?types=101",
+      "status": 200,
+      "elapsedMs": 2846
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/listing/?locationIds=MK_Town%7C106136&types=102&p=1",
+      "status": 301,
+      "elapsedMs": 520
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/listing/?locationIds=MK_Town%7C106136&types=102&p=1",
+      "status": 200,
+      "elapsedMs": 2007
+    },
+    {
+      "url": "https://arenda.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/?p=1",
+      "status": 200,
+      "elapsedMs": 1798
+    },
+    {
+      "url": "https://arendadoma.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/?p=1"
+    },
+    {
+      "url": "https://arendadoma.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/%D0%9A%D0%BE%D1%82%D1%82%D0%B5%D0%B4%D0%B6%D0%B8/?p=1",
+      "status": 200,
+      "elapsedMs": 9310
+    },
+    {
+      "url": "https://www.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/?p=1",
+      "status": 200,
+      "elapsedMs": 1030
+    },
+    {
+      "url": "https://dom.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/?p=1"
+    },
+    {
+      "url": "https://dom.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/%D0%9A%D0%BE%D1%82%D1%82%D0%B5%D0%B4%D0%B6%D0%B8/?p=1",
+      "status": 200,
+      "elapsedMs": 3881
+    },
+    {
+      "url": "https://www.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%91%D0%B5%D1%80%D0%B4%D1%81%D0%BA/",
+      "status": 200,
+      "elapsedMs": 889
+    },
+    {
+      "url": "https://www.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D1%81%D0%BA%D0%B8%D0%B9/",
+      "status": 200,
+      "elapsedMs": 933
+    },
+    {
+      "url": "https://www.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9A%D0%BE%D0%BB%D1%8C%D1%86%D0%BE%D0%B2%D0%BE%2B%D1%80%D0%B0%D0%B1%D0%BE%D1%87%D0%B8%D0%B9%2B%D0%BF%D0%BE%D1%81%D0%B5%D0%BB%D0%BE%D0%BA/",
+      "status": 200,
+      "elapsedMs": 957
+    },
+    {
+      "url": "https://arendacre.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9E%D0%B1%D1%8C/?types=102",
+      "status": 200,
+      "elapsedMs": 3775
+    },
+    {
+      "url": "https://dom.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/"
+    },
+    {
+      "url": "https://dom.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9A%D0%BE%D1%82%D1%82%D0%B5%D0%B4%D0%B6%D0%B8/",
+      "status": 200,
+      "elapsedMs": 4947
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-ofisa?page=1",
+      "status": 200,
+      "elapsedMs": 924
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-ofisa?location=%7B%223%22%3A%5B%22112%22%5D%7D&page=1",
+      "status": 301,
+      "elapsedMs": 318
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-ofisa?location=%7B%223%22%3A%5B%22112%22%5D%7D&page=1",
+      "status": 200,
+      "elapsedMs": 2019
+    },
+    {
+      "url": "https://onrealt.ru/rabochij-poselok-koltcovo/arenda-ofisa?page=1",
+      "status": 200,
+      "elapsedMs": 628
+    },
+    {
+      "url": "https://onrealt.ru/krasnoobsk/arenda-ofisa?page=1",
+      "status": 404,
+      "elapsedMs": 601
+    },
+    {
+      "url": "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa?page=1",
+      "status": 200,
+      "elapsedMs": 1105
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/arenda-sklada?page=1",
+      "status": 200,
+      "elapsedMs": 857
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/snyat-kvartiru?page=1",
+      "status": 200,
+      "elapsedMs": 941
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/snyat-dom?page=1"
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/snyat-kottedzh?page=1",
+      "status": 200,
+      "elapsedMs": 4980
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/kypit-kvartiru?page=1",
+      "status": 200,
+      "elapsedMs": 1099
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/kypit-dom?page=1"
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/kypit-kottedzh?page=1",
+      "status": 200,
+      "elapsedMs": 1073
+    },
+    {
+      "url": "https://onrealt.ru/berdsk/kypit-kvartiru?page=1"
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/kypit-kvartiru?location=%7B%223%22%3A%5B%22112%22%5D%7D&page=1",
+      "status": 301,
+      "elapsedMs": 335
+    },
+    {
+      "url": "https://onrealt.ru/novosibirsk/kypit-kvartiru?location=%7B%223%22%3A%5B%22112%22%5D%7D&page=1",
+      "status": 200,
+      "elapsedMs": 2148
+    },
+    {
+      "url": "https://onrealt.ru/rabochij-poselok-koltcovo/kypit-kvartiru?page=1",
+      "status": 200,
+      "elapsedMs": 914
+    },
+    {
+      "url": "https://onrealt.ru/ob/arenda-sklada?page=1",
+      "status": 200,
+      "elapsedMs": 735
+    },
+    {
+      "url": "https://onrealt.ru/novosibirskaya-oblast/kypit-dom?page=1"
+    },
+    {
+      "url": "https://onrealt.ru/novosibirskaya-oblast/kypit-kottedzh?page=1",
+      "status": 200,
+      "elapsedMs": 4543
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 2208
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 751
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 1908
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 481
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 302,
+      "elapsedMs": 396
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 7487
+    },
+    {
+      "url": "https://youla.ru/krasnoobsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 2338
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 538
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 2582
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 468
+    },
+    {
+      "url": "https://youla.ru/berdsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 1941
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 504
+    },
+    {
+      "url": "https://youla.ru/ob/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 301,
+      "elapsedMs": 587
+    },
+    {
+      "url": "https://youla.ru/ob/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 2659
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 599
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 302,
+      "elapsedMs": 395
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 7311
+    },
+    {
+      "url": "https://youla.ru/krasnoobsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 1716
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 494
+    },
+    {
+      "url": "https://youla.ru/iskitim/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165972&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 2077
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 567
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165974&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 301,
+      "elapsedMs": 1142
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165974&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 3270
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 492
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/arenda-kvartiri",
+      "status": 200,
+      "elapsedMs": 3159
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 779
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/arenda-doma",
+      "status": 200,
+      "elapsedMs": 2427
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 629
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-kvartiri",
+      "status": 200,
+      "elapsedMs": 2690
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 778
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-doma",
+      "status": 200,
+      "elapsedMs": 2268
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 746
+    },
+    {
+      "url": "https://youla.ru/berdsk/nedvijimost/prodaja-kvartiri",
+      "status": 200,
+      "elapsedMs": 2126
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 818
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-kvartiri",
+      "status": 200,
+      "elapsedMs": 2037
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 611
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/prodaja-kvartiri",
+      "status": 302,
+      "elapsedMs": 419
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/prodaja-kvartiri",
+      "status": 200,
+      "elapsedMs": 7166
+    },
+    {
+      "url": "https://youla.ru/ob/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165974&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 301,
+      "elapsedMs": 460
+    },
+    {
+      "url": "https://youla.ru/ob/nedvijimost/kommercheskaya-nedvijimost?attributes%5Bkommer_realty_tip_stroeniya%5D%5B0%5D=165974&attributes%5Btip_sdelki%5D%5B0%5D=10806",
+      "status": 200,
+      "elapsedMs": 2833
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 518
+    },
+    {
+      "url": "https://youla.ru/novosibirsk/nedvijimost/prodaja-doma",
+      "status": 200,
+      "elapsedMs": 2907
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 665
+    },
+    {
+      "url": "https://youla.ru/berdsk/nedvijimost/prodaja-doma",
+      "status": 200,
+      "elapsedMs": 2240
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 638
+    },
+    {
+      "url": "https://youla.ru/ob/nedvijimost/prodaja-doma",
+      "status": 200,
+      "elapsedMs": 2190
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 524
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/prodaja-doma",
+      "status": 302,
+      "elapsedMs": 420
+    },
+    {
+      "url": "https://youla.ru/koltsovo/nedvijimost/prodaja-doma",
+      "status": 200,
+      "elapsedMs": 7111
+    },
+    {
+      "url": "https://youla.ru/krasnoobsk/nedvijimost/prodaja-doma",
+      "status": 200,
+      "elapsedMs": 1886
+    },
+    {
+      "url": "https://api-gw.youla.ru/graphql",
+      "status": 200,
+      "elapsedMs": 781
+    }
+  ],
+  "sampling": "Location sweep plus type/operation coverage, not full Cartesian product; 5 cards per page; no seller contacts stored",
+  "cells": [
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Красный пр-кт, 175б",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Чаплыгина",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советская ул., 23",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советская ул., 23",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Красный пр-кт, 17/1",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4504
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 5
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 3,
+        "rejected": 2
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Варшавская ул., 6",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Российская ул., 8",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, б-р Молодежи, 38/2",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Сиреневая ул., 31",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Сиреневая ул., 31",
+          "district": null,
+          "location": "unknown"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4882
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "samples": [
+        {
+          "city": "рп. Кольцово",
+          "address": "рп. Кольцово, ул. Весенняя, 17",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рп. Кольцово",
+          "address": "рп. Кольцово, Кленовая ул., 19",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рп. Кольцово",
+          "address": "рп. Кольцово, Вознесенская ул., 10",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рп. Кольцово",
+          "address": "рп. Кольцово, 401",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рп. Кольцово",
+          "address": "рп. Кольцово, 401",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3593
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "samples": [
+        {
+          "city": "Новосибирский р-н",
+          "address": "Новосибирский р-н, рп. Краснообск, кв-л 1-й, 47",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирский р-н",
+          "address": "Новосибирский р-н, рп. Краснообск, кв-л 1-й, 47",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирский р-н",
+          "address": "Новосибирский р-н, рп. Краснообск, Центральная ул.",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирский р-н",
+          "address": "Новосибирский р-н, рп. Краснообск",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирский р-н",
+          "address": "Новосибирский р-н, рп. Краснообск, Восточная ул., 45",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4301
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk-region",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 4,
+        "contradicted": 0,
+        "unknown": 1
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Дуси Ковальчук, 238",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Колыванский р-н",
+          "address": "Колыванский р-н, рп. Колывань, Советская ул., 57",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Толмачевское ш., 25/2",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Комсомольский пр-кт, 24",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Аэропорт, 58/1",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5403
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Военная ул., 41648",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Толмачевское ш., 25/2",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Ленина, 134",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Большая ул.",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Фабричная ул.",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 4313
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирск, Депутатская ул., 38",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Депутатская ул., 38",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Серебренниковская ул., 37",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Серебренниковская ул., 37",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Красный пр-кт, 304",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4088
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирск, ул. Максима Горького, 18",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Коммунстроевская ул., 204",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, ул. Чулымская 2-я",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, пер. Бронный 8-й, 29",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Молодежная ул., 16",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 10545
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 4,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирск, Советская ул., 17",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Серебренниковская ул., 37а",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Серебренниковская ул., 37",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Красный пр-кт, 304",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Депутатская ул., 38",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 2722
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 4,
+      "locationCounts": {
+        "matched": 4,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 3,
+        "needs_review": 0,
+        "rejected": 1
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирск, ул. Ленина",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Спринтерская ул.",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Депутатская ул., 38",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, пл. Ленина",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 4,
+        "area": 4,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 5450
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "berdsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 3,
+        "needs_review": 2,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Максима Горького, 51",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Максима Горького, 58/2",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Карла Маркса, 39",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Ленина, 92",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Максима Горького, 68",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 2977
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "akademgorodok",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 5
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирск, ул. Ивлева, 160",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Часовая ул.",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Часовая ул.",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Часовая ул., 37",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, ул. Ивлева, 183",
+          "district": null,
+          "location": "unknown"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3553
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "koltsovo",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 4,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "рп. Кольцово, Молодежная ул., 8",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "рп. Кольцово, Вознесенская ул., 4",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "рп. Кольцово, Вознесенская ул., 35",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "рп. Кольцово, Никольский пр-кт, 4",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "рп. Кольцово, Никольский пр-кт, 4",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3726
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "ob",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "samples": [
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 14",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 120",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 15",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 13",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, Геодезическая ул., 60а",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 6362
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk-region",
+      "type": "house",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 2
+      },
+      "verdicts": {
+        "confirmed": 3,
+        "needs_review": 1,
+        "rejected": 1
+      },
+      "samples": [
+        {
+          "city": null,
+          "address": "Новосибирск, Зеленая ул., 26",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Новосибирск, Спринтерская ул.",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": "Чулымский р-н, Чулым, мкр. Чулым-3, Центральная ул., 4",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": "Куйбышевский р-н, с. Горбуново, Рабочая ул., 16",
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": "рп. Кольцово, Овражная ул., 1",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 6703
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Центральный район, улица Фрунзе, 5",
+          "district": "Центральный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Центральный район, Каменская улица, 55",
+          "district": "Центральный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Железнодорожный район, улица Ленина, 48",
+          "district": "Железнодорожный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Дзержинский район, улица Красина, 74",
+          "district": "Дзержинский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Центральный район, улица Писарева, 1",
+          "district": "Центральный",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3192
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Николаева, 11/5",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Мусы Джалиля, 3/1",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Николаева, 16",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, Российская улица, 8",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, проспект Академика Лаврентьева, 2/2",
+          "district": "Советский",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 3593
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 2
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Никольский проспект, 1",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Никольский проспект, 1",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Никольский проспект, 1",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": null,
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": null,
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        }
+      ],
+      "fields": {
+        "price": 3,
+        "area": 3,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1775
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 835
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk-region",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Центральный район, улица Фрунзе, 5",
+          "district": "Центральный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Центральный район, Каменская улица, 55",
+          "district": "Центральный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Железнодорожный район, улица Ленина, 48",
+          "district": "Железнодорожный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Дзержинский район, улица Красина, 74",
+          "district": "Дзержинский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Центральный район, улица Писарева, 1",
+          "district": "Центральный",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3112
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Декабристов, 253",
+          "district": "Октябрьский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Декабристов, 253",
+          "district": "Октябрьский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Ленинский район, улица Пермитина, 24/1к2",
+          "district": "Ленинский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Панфиловцев, 62",
+          "district": "Октябрьский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Панфиловцев, 58",
+          "district": "Октябрьский",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 2961
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Кировский район, улица Немировича-Данченко, 146/2",
+          "district": "Кировский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, Большевистская улица, 35",
+          "district": "Октябрьский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, Кубовая улица, 47/1",
+          "district": "Заельцовский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Центральный район, улица Крылова, 63",
+          "district": "Центральный",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Татьяны Снежиной, 43",
+          "district": "Октябрьский",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3756
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, Добрая улица, 5",
+          "district": "Заельцовский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Первомайский район, Берилловая улица, 2",
+          "district": "Первомайский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Ленинский район, улица Немировича-Данченко, 11",
+          "district": "Ленинский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Дзержинский район, Волочаевская улица",
+          "district": "Дзержинский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, Пражская улица",
+          "district": "Заельцовский",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 6401
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, улица Дуси Ковальчук, 14",
+          "district": "Заельцовский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советский район, Русская улица, 38",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Сакко и Ванцетти, 40",
+          "district": "Октябрьский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, улица Аэропорт, 88",
+          "district": "Заельцовский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Центральный район, улица Свердлова, 10А",
+          "district": "Центральный",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3925
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "sale",
+      "filtered": false,
+      "status": "partial",
+      "reason": "onrealt: FETCH_FAILED; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 3,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 3,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советский район, Правобережная улица, 406",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Первомайский район, Бирюзовая улица, 14",
+          "district": "Первомайский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирск, Дзержинский район, Европейская улица, 24",
+          "district": "Дзержинский",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 3,
+        "area": 3,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 17998
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "berdsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "error",
+      "reason": "onrealt: FETCH_FAILED; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 15045
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "akademgorodok",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, Русская улица, 38",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Арбузова, 4/1",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, Разъездная улица, 16",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Мусы Джалиля, 17",
+          "district": "Советский",
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Арбузова, 12",
+          "district": "Советский",
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 5076
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "koltsovo",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Вознесенская улица, 1",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, жилой комплекс Счастье в Кольцово, 2",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Никольский проспект, 16",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, микрорайон Спектр, 3",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Никольский проспект, 16",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 2963
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "ob",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Обь",
+          "address": "Обь, улица Ломоносова, 104",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, улица Путейцев, 16",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, Октябрьская улица, 8/3",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, Омский тракт, 1А",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Обь, Омский тракт, 9",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1666
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk-region",
+      "type": "house",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Чулым",
+          "address": "Новосибирская область, Чулым, улица Петра Полянского, 10",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Заельцовский район, Осиновая улица, 2",
+          "district": "Заельцовский",
+          "location": "matched"
+        },
+        {
+          "city": "ДНТ Царская Усадьба",
+          "address": "Новосибирская область, ДНТ Царская Усадьба, ДНТ Царская Усадьба, 27",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": "Новосибирская область, Обь, Усадебный переулок",
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "некоммерческое садоводческое товарищество Радуга-2",
+          "address": "Новосибирская область, некоммерческое садоводческое товарищество Радуга-2, некоммерческое садоводческое товарищество Радуга-2, 140А",
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 7401
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 4,
+      "locationCounts": {
+        "matched": 4,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 4,
+        "area": 4,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 5683
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 4,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 4
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        }
+      ],
+      "fields": {
+        "price": 4,
+        "area": 4,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 4892
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "unsupported_filter",
+      "reason": "youla: Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 7647
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2954
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk-region",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "partial",
+      "reason": "Область: частичный охват Юлы — Новосибирск, Бердск, Обь, Кольцово, Краснообск, Искитим. Площадка не поддерживает область целиком; остальные адреса области ищите на другой площадке.; youla: Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.",
+      "count": 1,
+      "locationCounts": {
+        "matched": 1,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 1,
+        "area": 1,
+        "publishedAt": 0
+      },
+      "requests": 13,
+      "elapsedMs": 23673
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 3820
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 8448
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 6927
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 5894
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 5154
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "berdsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 5,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Бердск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Бердск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Бердск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Бердск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Бердск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 4931
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "akademgorodok",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 5
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        },
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "unknown"
+        }
+      ],
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 4908
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "koltsovo",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": false,
+      "status": "unsupported_filter",
+      "reason": "youla: Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 7350
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "ob",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "samples": [],
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 3447
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk-region",
+      "type": "house",
+      "operation": "sale",
+      "filtered": false,
+      "status": "partial",
+      "reason": "Область: частичный охват Юлы — Новосибирск, Бердск, Обь, Кольцово, Краснообск, Искитим. Площадка не поддерживает область целиком; остальные адреса области ищите на другой площадке.; youla: Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.; youla: FETCH_FAILED",
+      "count": 3,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 2,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "samples": [
+        {
+          "city": "Новосибирск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Бердск",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        },
+        {
+          "city": "Обь",
+          "address": null,
+          "district": null,
+          "location": "matched"
+        }
+      ],
+      "fields": {
+        "price": 3,
+        "area": 3,
+        "publishedAt": 0
+      },
+      "requests": 10,
+      "elapsedMs": 21289
+    }
+  ]
+}

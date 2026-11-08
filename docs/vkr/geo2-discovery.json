@@ -1,0 +1,88 @@
+[
+  {
+    "url": "https://onrealt.ru/core/api-region/?input=%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA",
+    "status": 200,
+    "final": "https://onrealt.ru/core/api-region/?input=%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA",
+    "regions": [
+      {
+        "id": "10",
+        "name": "Новосибирская область",
+        "placeholder": "Город, округ, район, ЖК",
+        "code": "novosibirskaya-oblast",
+        "coordinates": "79.264861 55.582396",
+        "zoom": "10",
+        "longitude": "79.264861",
+        "latitude": "55.582396"
+      },
+      {
+        "id": "14898",
+        "name": "Новосибирск",
+        "region": "10",
+        "placeholder": "Введите район, улицу, ЖК",
+        "in-location": "1",
+        "code": "novosibirsk",
+        "longitude": "82.92043",
+        "latitude": "55.030199",
+        "zoom": "12",
+        "name_region": "Новосибирская область"
+      },
+      {
+        "id": "16065",
+        "name": "СНТ Новосибирский путеец",
+        "region": "10",
+        "placeholder": "Город, округ, район, ЖК",
+        "in-location": "0",
+        "code": "snt-novosibirskij-puteetc",
+        "longitude": "82.606774",
+        "latitude": "54.994083",
+        "zoom": "12",
+        "name_region": "Новосибирская область"
+      }
+    ],
+    "addresses": [],
+    "geo": []
+  },
+  {
+    "url": "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa",
+    "status": 200,
+    "final": "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa",
+    "h1": "\nАренда офиса без посредников в Новосибирской области\t",
+    "addresses": [],
+    "geo": [
+      "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa?page=2",
+      "https://onrealt.ru/novosibirskaya-oblast/arenda-ofisa",
+      "https://onrealt.ru/novosibirskaya-oblast",
+      "/novosibirskaya-oblast/arenda-ofisa?page=2",
+      "/novosibirskaya-oblast/arenda-ofisa?page=3",
+      "/novosibirskaya-oblast/arenda-ofisa?page=4",
+      "/novosibirskaya-oblast/arenda-ofisa?page=5",
+      "/novosibirskaya-oblast/arenda-ofisa?page=6",
+      "/novosibirskaya-oblast/arenda-ofisa?page=7",
+      "/novosibirskaya-oblast/arenda-ofisa?page=8",
+      "/novosibirskaya-oblast/arenda-ofisa?page=9",
+      "/novosibirskaya-oblast/arenda-ofisa?page=19"
+    ]
+  },
+  {
+    "url": "https://onrealt.ru/rabochij-poselok-koltcovo/snyat-kvartiru",
+    "status": 200,
+    "final": "https://onrealt.ru/rabochij-poselok-koltcovo/snyat-kvartiru",
+    "h1": "\nСнять квартиру в рабочем посёлке Кольцово без посредников\t",
+    "addresses": [],
+    "geo": []
+  },
+  {
+    "url": "https://arenda.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/Новосибирск/",
+    "status": 200,
+    "final": "https://arenda.mirkvartir.ru/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F%2B%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C/%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D0%B8%D0%B1%D0%B8%D1%80%D1%81%D0%BA/",
+    "h1": "Снять  квартиру в Новосибирске",
+    "addresses": [],
+    "geo": [
+      "https://arenda.mirkvartir.ru/Новосибирская+область/Новосибирск/Советский/"
+    ]
+  },
+  {
+    "url": "https://youla.ru/novosibirskaya-oblast/nedvijimost/prodaja-doma",
+    "error": "Error: RESPONSE_TOO_LARGE"
+  }
+]

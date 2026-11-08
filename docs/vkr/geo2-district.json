@@ -1,0 +1,68 @@
+[
+  {
+    "url": "https://onrealt.ru/core/api-search-location/?json_data=%7B%22type_region%22%3A%221%22%2C%22action_region%22%3A%2210%22%2C%22length%22%3A9%2C%22enter%22%3A%22%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D1%81%D0%BA%D0%B8%D0%B9%22%7D&json_select_loc=%7B%220%22%3A%5B%22%22%5D%2C%221%22%3A%5B%22%22%5D%2C%222%22%3A%5B%2214898%22%5D%2C%223%22%3A%5B%22%22%5D%2C%224%22%3A%5B%22%22%5D%2C%225%22%3A%5B%22%22%5D%2C%226%22%3A%5B%22%22%5D%2C%227%22%3A%5B%22%22%5D%2C%228%22%3A%5B%22%22%5D%2C%229%22%3A%5B%22%22%5D%7D",
+    "requests": 1,
+    "status": 200,
+    "final": "https://onrealt.ru/core/api-search-location/?json_data=%7B%22type_region%22%3A%221%22%2C%22action_region%22%3A%2210%22%2C%22length%22%3A9%2C%22enter%22%3A%22%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D1%81%D0%BA%D0%B8%D0%B9%22%7D&json_select_loc=%7B%220%22%3A%5B%22%22%5D%2C%221%22%3A%5B%22%22%5D%2C%222%22%3A%5B%2214898%22%5D%2C%223%22%3A%5B%22%22%5D%2C%224%22%3A%5B%22%22%5D%2C%225%22%3A%5B%22%22%5D%2C%226%22%3A%5B%22%22%5D%2C%227%22%3A%5B%22%22%5D%2C%228%22%3A%5B%22%22%5D%2C%229%22%3A%5B%22%22%5D%7D",
+    "location": {
+      "location": {
+        "Город": {
+          "id": "2",
+          "area": [
+            {
+              "name": "посёлок Советский",
+              "name_part": "посёлок Советский",
+              "id": "87756",
+              "parent_name": "Новосибирская область",
+              "line_transport": false
+            }
+          ]
+        },
+        "Район": {
+          "id": "3",
+          "area": [
+            {
+              "name": "Советский район",
+              "name_part": "Советский район",
+              "id": "112",
+              "parent_name": "Новосибирск",
+              "line_transport": false
+            }
+          ]
+        },
+        "Метро": {
+          "id": "5"
+        },
+        "ЖК": {
+          "id": "9"
+        }
+      },
+      "empty": false,
+      "time_work": 0.036900043487549
+    },
+    "districtFragments": [],
+    "addressCity": [],
+    "addressString": []
+  },
+  {
+    "url": "https://onrealt.ru/novosibirsk/arenda-ofisa",
+    "requests": 1,
+    "status": 200,
+    "final": "https://onrealt.ru/novosibirsk/arenda-ofisa",
+    "districtFragments": [],
+    "addressCity": [
+      "Новосибирск, Центральный район",
+      "Новосибирск, Центральный район",
+      "Новосибирск, Железнодорожный район",
+      "Новосибирск, Дзержинский район",
+      "Новосибирск, Центральный район"
+    ],
+    "addressString": [
+      ", улица Фрунзе, 5",
+      ", Каменская улица, 55",
+      ", улица Ленина, 48",
+      ", улица Красина, 74",
+      ", улица Писарева, 1"
+    ]
+  }
+]
