@@ -1,0 +1,56 @@
+name: Desktop Backup Regression
+
+# Low-cost standalone regression for the desktop-backup Vitest project.
+# Does NOT build the Tauri/NSIS installer (see desktop-windows.yml).
+# Covers tests/desktop-backup/vitest.config.ts, including network-resume.test.ts.
+# Fixture path (tests/desktop-backup/fixtures.ts) uses better-sqlite3 directly
+# and src/modules/desktop-backup has no @prisma/client import, so no
+# prisma generate step is needed here.
+
+on:
+  push:
+    branches: [main, codex/native-offline-acceptance]
+    paths:
+      - 'src/modules/desktop-backup/**'
+      - 'src/app/api/v1/settings/backups/**'
+      - 'tests/desktop-backup/**'
+      - 'scripts/security/confidential-guard.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/desktop-backup-regression.yml'
+  pull_request:
+    paths:
+      - 'src/modules/desktop-backup/**'
+      - 'src/app/api/v1/settings/backups/**'
+      - 'tests/desktop-backup/**'
+      - 'scripts/security/confidential-guard.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/desktop-backup-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-backup-regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backup-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+          cache: npm
+      - run: npm ci
+      - name: Confidential paths and names (no private fingerprints)
+        run: node scripts/security/confidential-guard.mjs
+      - name: Standalone desktop-backup regression (no EXE rebuild)
+        run: npx vitest run --config tests/desktop-backup/vitest.config.ts
