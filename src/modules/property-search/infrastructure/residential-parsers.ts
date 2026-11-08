@@ -1,3 +1,4 @@
+import { listingQuality } from "./listing-quality";
 import { selectedLocations } from "../domain/geography";
 import type RealEstateScraper from "real-estate-scrapper";
 
@@ -87,7 +88,7 @@ function correctCian(item: RealEstateScraper.Listing, offer: RecordValue): RealE
     ...{ residentialType: kind, priceUnit: terms.priceType ?? null },
     title: text(offer.title) || labels[kind], rooms: kind === "studio" ? 0 : rooms,
     area, floor, floorType: floor === null ? null : floor > 0 ? "aboveGround" : "basement",
-    price, priceText, deal: facts.deal };
+    price, priceText: period ? `${priceText} /${period}` : priceText, deal: facts.deal };
 }
 
 /** Adapter-local attachment. No vendor mutation, requested category is never listing evidence. */
@@ -125,13 +126,18 @@ export function attachResidentialParsers(client: RealEstateScraper): void {
   cian.parsePage = (payload, url, query) => {
     // Keep the original parser's validation, errors, pagination and commercial path.
     const page = parse(payload, url, query);
-    if (!residential(query)) return page;
     const offers = offersFromSsr(payload);
     if (!offers) return page;
     const byId = new Map(offers.map(offer => [String(offer.cianId ?? offer.id), offer]));
     return { ...page, results: page.results.map(item => {
       const offer = byId.get(item.parentId ?? item.id ?? "");
-      return offer ? correctCian(item, offer) : item;
+      if (!offer || item.parentId) return item;
+      const quality = listingQuality(offer);
+      const enriched = { ...item, rooms: quality.rooms ?? item.rooms,
+        ...(quality.priceUnit ? { priceText: quality.priceUnit === "rub_m2_year" ? "₽/м² в год" : quality.priceUnit === "rub_m2_month" ? "₽/м² в месяц" : quality.priceUnit === "rub_year" ? "₽ в год" : "₽ в месяц" } : {}),
+        ...(quality.rentalPeriod === "day" ? { priceText: "₽ за сутки" } : {}),
+        ...(quality.apartments ? { isApartments: true } : {}) };
+      return residential(query) ? correctCian(enriched, offer) : enriched;
     }) };
   };
   // These package specializations have no verified residential parsing contract.

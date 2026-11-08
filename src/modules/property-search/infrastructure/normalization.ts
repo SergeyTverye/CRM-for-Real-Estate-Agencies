@@ -4,6 +4,7 @@ import { parseFloor, describedUndergroundFloor } from "../domain/floor";
 import type { NormalizedListing, PriceUnit, Purpose } from "../domain/types";
 
 import { listingFields } from "./listing-fields";
+import { listingQuality, explicitPeriod } from "./listing-quality";
 import { extractListingDates, type ListingDates } from "./listing-dates";
 
 const purposeMap: Record<string, Purpose> = { retail: "retail", freePurpose: "free_purpose", office: "office", industrial: "production", warehouse: "warehouse", residential: "residential" };
@@ -11,6 +12,8 @@ function safeUrl(value: string): string | null { try { return parseExternalUrl(v
 export function parsePriceUnit(text: string | null | undefined, operation: "sale" | "rent" | null): PriceUnit | null {
   if (operation === "sale") return "rub_total";
   if (!text || operation !== "rent") return null;
+  const explicit = explicitPeriod(text);
+  if (explicit) return explicit.unit;
   const perArea = /(?:м[²2]|кв\.?\s*м)/iu.test(text);
   if (/(?:месяц|мес\.?)(?=$|[^\p{L}\p{N}_])/iu.test(text)) return perArea ? "rub_m2_month" : "rub_month";
   if (/(?:год|года)(?=$|[^\p{L}\p{N}_])/iu.test(text)) return perArea ? "rub_m2_year" : "rub_year";
@@ -21,7 +24,8 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
   const url = safeUrl(raw.url);
   if (!url) throw new Error("INVALID_LISTING_URL");
   const part = new URL(url).hash.match(/^#part-(\d+)$/u)?.[1] ?? null;
-  const operation = raw.deal === "sale" || raw.deal === "rent" ? raw.deal : null;
+  const operation = raw.deal === "daily" ? "rent" : raw.deal === "sale" || raw.deal === "rent" ? raw.deal : null;
+  const quality = listingQuality(raw);
   let floor = parseFloor(raw.floor);
   if (raw.floorType === "basement") floor = { kind: "basement", number: floor.number, raw: raw.floor === null ? "basement" : String(raw.floor) };
   if (raw.floorRange && raw.floorRange[0] !== raw.floorRange[1]) floor = { kind: "unknown", number: null, raw: raw.floorRange.join("–") };
@@ -40,12 +44,13 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
     purpose: purposeMap[raw.propertyType ?? ""] ?? null, operation,
     // Package 2.1.0 generic parsers infer propertyType from title, not a source field.
     purposeSource: ["yandex", "onrealt"].includes(raw.source) ? "rule" : "structured",
-    price, priceUnit: parsePriceUnit(raw.priceText, operation),
+    price, priceUnit: operation === "sale" ? "rub_total" : quality.priceUnit ?? parsePriceUnit(raw.priceText, operation),
+    rooms: quality.rooms,
     area: raw.area !== null && Number.isFinite(raw.area) && raw.area >= 0 ? raw.area : null, floor,
     ...listingFields(raw),
     seller: { type: raw.sellerType === "owner" || raw.sellerType === "agent" ? raw.sellerType : "unknown" },
     description: raw.description ?? "", images: raw.images.map(safeUrl).filter((u): u is string => u !== null), fetchedAt,
-    structuredFeatures: raw.category ? { category: raw.category } : {}, possibleDuplicateKeys: [], identityNeedsReview: !(raw.parentId ?? raw.id) || !!raw.parentId && !part && !raw.id,
+    structuredFeatures: { ...(raw.category ? { category: raw.category } : {}), ...(quality.rentalPeriod ? { rentalPeriod: quality.rentalPeriod } : {}), ...(quality.apartments ? { apartments: true } : {}) }, possibleDuplicateKeys: [], identityNeedsReview: !(raw.parentId ?? raw.id) || !!raw.parentId && !part && !raw.id,
   };
 }
 export function listingIdentity(listing: NormalizedListing): string | null {

@@ -66,3 +66,9 @@ export function locationState(listing: { city: string | null; address: string | 
 export function locationSummary(filters: { city: string; locations?: SearchLocationId[] }): string {
   return filters.locations?.length ? SEARCH_LOCATIONS.filter(l => filters.locations!.includes(l.id)).map(l => l.label).join(" или ") : filters.city;
 }
+
+/** Only a fresh implicit city is replaced; restored searches keep their explicit selection. */
+export function chooseLocations(selected: SearchLocationId[], id: SearchLocationId, implicitDefault: boolean): SearchLocationId[] {
+  if (implicitDefault && selected.length === 1 && selected[0] === "novosibirsk" && id !== "novosibirsk") return [id];
+  return selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id];
+}

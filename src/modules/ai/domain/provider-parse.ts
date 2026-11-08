@@ -17,14 +17,14 @@ export const providerParseSchema = {
     city: nullableText, operation: nullableText, priceUnit: nullableText,
     priceFrom: nullableText, priceTo: nullableText, areaFrom: nullableNumber, areaTo: nullableNumber,
     floorMode: nullableText, seller: nullableText,
-    locations: strings, propertyKinds: strings, purposes: strings, districts: strings, requiredFeatures: strings, preferredFeatures: strings, sources: strings,
+    locations: strings, propertyKinds: strings, rooms: strings, purposes: strings, districts: strings, requiredFeatures: strings, preferredFeatures: strings, sources: strings,
     clarificationQuestion: nullableText,
   },
   required: ["city", "operation", "priceUnit", "priceFrom", "priceTo", "areaFrom", "areaTo", "floorMode", "seller",
-    "locations", "propertyKinds", "purposes", "districts", "requiredFeatures", "preferredFeatures", "sources", "clarificationQuestion"],
+    "locations", "propertyKinds", "rooms", "purposes", "districts", "requiredFeatures", "preferredFeatures", "sources", "clarificationQuestion"],
 };
 const flatSchema = z.object({
-  locations: z.array(z.string()).optional(), propertyKinds: z.array(z.string()).optional(),
+  locations: z.array(z.string()).optional(), propertyKinds: z.array(z.string()).optional(), rooms: z.array(z.string()).optional(),
   city: z.string().nullable(), operation: z.string().nullable(), priceUnit: z.string().nullable(),
   priceFrom: z.string().nullable(), priceTo: z.string().nullable(), areaFrom: z.number().nullable(), areaTo: z.number().nullable(),
   floorMode: z.string().nullable(), seller: z.string().nullable(), purposes: z.array(z.string()), districts: z.array(z.string()),
@@ -47,14 +47,15 @@ export function decodeParseResult(text: string) {
   if ("filters" in object) return canonicalParseResult(object);
   const { clarificationQuestion, ...flat } = flatSchema.parse(object);
   if (clarificationQuestion !== null) return parseResultSchema.parse({ filters: null, clarificationQuestion });
-  const filters = Object.fromEntries(Object.entries(flat).filter(([key, value]) => value !== null && (!(["locations", "propertyKinds"].includes(key)) || !Array.isArray(value) || value.length > 0)));
+  const filters = Object.fromEntries(Object.entries(flat).filter(([key, value]) => value !== null && (!(["locations", "propertyKinds", "rooms"].includes(key)) || !Array.isArray(value) || value.length > 0)));
   return canonicalParseResult({ filters, clarificationQuestion: null });
 }
 export const providerParseInstructions = `Верни ПЛОСКИЙ JSON по переданной text.format schema, без поля filters.
 operation: sale/rent; priceUnit: rub_total/rub_month/rub_year/rub_m2_month/rub_m2_year.
 locations: ${LOCATION_IDS.join("/")} (несколько = ИЛИ). suburbs = Новосибирск и пригороды, akademgorodok = Академгородок (Советский район), berdsk = Бердск, ob = город Обь (также «у Оби»), koltsovo = Кольцово, novosibirsk-region = область целиком. city согласуй с локацией; несколько локаций — city=Новосибирск.
 propertyKinds: flat/house/apartments/non_residential; квартира/двушка = flat, дом/коттедж = house, апартаменты = apartments (нежилое), любое нежилое = non_residential. Для этих типов purposes=[], для офиса/склада используй purposes и propertyKinds=[].
-Метры/метров после размера склада или офиса — площадь м². «В месяц» означает rent/rub_month даже без слова аренда. Для двушки сохрани «2 комнаты» в requiredFeatures: точного фильтра комнат нет, нужна проверка карточки.
+Метры/метров после размера склада или офиса — площадь м². «В месяц» означает rent/rub_month даже без слова аренда.
+rooms: массив строк studio/1/2/3/4+ (несколько = ИЛИ). Двушка/двухкомнатная = ["2"], однушка = ["1"], трёшка/трехкомнатная = ["3"], студия = ["studio"], четыре и более = ["4+"]. Для них propertyKinds=["flat"]. Не дублируй комнаты в requiredFeatures. Без указания комнат rooms=[].
 purposes: ${PROVIDER_PURPOSE_ALLOWLIST.join("/")}.
 floorMode: first_floor_only/exclude_basement_and_semi_basement/any; seller: all/confirmed_owner_only.
 sources: cian/mirkvartir/onrealt/domclick/yandex/youla/avito (все, если не ограничены запросом).

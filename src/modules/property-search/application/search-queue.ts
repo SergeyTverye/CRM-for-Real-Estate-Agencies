@@ -141,12 +141,16 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
     const params = run.depthParams as { confirmedPaid?: boolean; previousRunId?: string | null; depth?: { maxPages: number; limit: number }; sourceDepth?: Partial<Record<typeof SOURCES[number], { maxPages: number; limit: number }>>; scenario?: string };
     const adapter = options.scraper ?? scraperFor(settings, params.scenario, params);
     const ai = settings.aiEnabled && params.confirmedPaid ? await getSearchAi() : null;
-    for (const source of filters.sources) {
+    // Fast HTTP sources first. Reserve a fair slice for every remaining source.
+    const priority = ["mirkvartir", "onrealt", "youla", "yandex", "cian", "domclick", "avito"];
+    const plannedSources = [...filters.sources].sort((a,b) => priority.indexOf(a) - priority.indexOf(b));
+    for (const [sourceIndex, source] of plannedSources.entries()) {
       if (controller.signal.aborted) break;
       failureStage = "FETCH";
       const autoBrowser = settings.config.SCRAPER_BROWSER_ENABLED && settings.settings?.browserEnabled &&
         (source === "cian" ? settings.settings.cianAutoBrowser ?? navigationDefaults(settings.config.CRM_DEPLOYMENT_MODE).cian : source === "yandex" ? settings.settings.yandexAutoBrowser ?? true : false);
-      const runningReason = autoBrowser ? source === "cian" && !headedBrowserAvailable() ? "Автоматическая проверка недоступна: нет дисплея; потребуется проверка сотрудника" : "Автоматическая проверка в браузере: ожидаем выдачу или страницу проверки" : null;
+      const sourceDeadline = Math.min(deadline, Date.now() + Math.max(1000, Math.floor((deadline - Date.now()) / (plannedSources.length - sourceIndex))));
+      const runningReason = autoBrowser ? source === "cian" && !headedBrowserAvailable() ? "Автоматическая проверка недоступна: нет дисплея; потребуется проверка сотрудника" : "Автоматическая проверка в браузере: ожидаем выдачу или страницу проверки" : "Получаем ветви типов и локаций: до двух одновременно, не чаще 1 запроса/с. Завершённые ветви сохраняются при остановке.";
       const claimed = await transaction(async tx => {
         const lease = await tx.searchRun.updateMany({ where: { id: run.id, status: "running", lockedBy: workerId, cancelRequested: false }, data: { heartbeatAt: new Date() } });
         return lease.count ? tx.searchRunSource.updateMany({ where: { runId: run.id, source, status: "queued" }, data: { status: "running", statusReasonRu: runningReason } }) : { count: 0 };
@@ -160,7 +164,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
         let onAbort: (() => void) | undefined;
         try {
           const detailed = adapter as ScraperAdapter & { searchDetailed?: (input: unknown, context: { signal: AbortSignal; deadline: number }) => Promise<AdapterSearchResult> };
-          const search = detailed.searchDetailed ? detailed.searchDetailed({ ...filters, sources: [source] }, { signal: controller.signal, deadline }) : adapter.search({ ...filters, sources: [source] }, { signal: controller.signal, deadline });
+          const search = detailed.searchDetailed ? detailed.searchDetailed({ ...filters, sources: [source] }, { signal: controller.signal, deadline: sourceDeadline }) : adapter.search({ ...filters, sources: [source] }, { signal: controller.signal, deadline: sourceDeadline });
           result = await Promise.race([search, new Promise<SearchResult>(resolve => {
             onAbort = () => { abortTimer = setTimeout(() => resolve({ listings: [], sources: [{ source, status: "timeout", resultCount: 0, reason: "Отмена или общий срок выполнения" }] }), 2000); };
             if (controller.signal.aborted) onAbort(); else controller.signal.addEventListener("abort", onAbort, { once: true });

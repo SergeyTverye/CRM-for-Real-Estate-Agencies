@@ -73,7 +73,7 @@ describe("seven source contract fixtures (synthetic, offline)", () => {
   it("limits concurrency across simultaneous searches", async () => {
     let running = 0, maximum = 0;
     const { instance } = adapter(async s => { running++; maximum = Math.max(maximum, running); await new Promise(resolve => setTimeout(resolve, 5)); running--; return fixture(s); }, { limiter: new ScraperJobLimiter(1) });
-    await Promise.all([instance.search({ city: "Москва", operation: "sale", sources: ["cian", "youla"] }), instance.search({ city: "Москва", operation: "sale", sources: ["onrealt"] })]);
+    await Promise.all([instance.search({ city: "Москва", operation: "sale", sources: ["cian", "youla"] }), instance.search({ city: "Москва", operation: "sale", purposes: ["office"], sources: ["onrealt"] })]);
     expect(maximum).toBe(1);
   });
   it("uses one deadline including queue time, retains earlier results, and recovers on the next job", async () => {

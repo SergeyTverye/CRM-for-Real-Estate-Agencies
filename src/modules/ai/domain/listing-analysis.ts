@@ -26,11 +26,12 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
   const explicitMoney = /цен|бюджет|руб|стоим|₽|\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}])|(?:в|за|\/)\s*(?:месяц|мес|год))/iu;
   const priceMentioned = explicitMoney.test(query) || money.test(query) && (!area.test(query) && !floor.test(query) || proposed.priceFrom !== undefined || proposed.priceTo !== undefined);
   const mentions: Partial<Record<keyof SearchFilters, RegExp>> = {
+    rooms: /комнат|двушк|однушк|тр[её]шк|студи/iu,
     city: /город|новосибир|москв|санкт|томск|омск|бердск|об[ьи]|кольцов|краснообск|искитим|академгород|пригород/iu,
     locations: /локаци|город|новосибир|бердск|об[ьи]|кольцов|краснообск|искитим|академгород|пригород|област/iu,
-    propertyKinds: /квартир|двушк|апартамент|дом(?:а|ов|е|ом)?(?:\s|$)|коттедж|нежил|офис|склад|псн|торгов|производ|назначен/iu,
+    propertyKinds: /квартир|двушк|однушк|тр[её]шк|студи|апартамент|дом(?:а|ов|е|ом)?(?:\s|$)|коттедж|нежил|офис|склад|псн|торгов|производ|назначен/iu,
     operation: /аренд|продаж|купить|покуп|снять|сним|сдам|сда[её]|(?:в|за)\s+(?:месяц|год)/iu,
-    purposes: /офис|склад|псн|торгов|производ|назначен|квартир|двушк|апартамент|коттедж|дом(?:а|ов|е|ом)?(?:\s|$)|нежил/iu,
+    purposes: /офис|склад|псн|торгов|производ|назначен|квартир|двушк|однушк|тр[её]шк|студи|апартамент|коттедж|дом(?:а|ов|е|ом)?(?:\s|$)|нежил/iu,
     districts: /район|центральн|советск|ленинск|кировск|октябрьск|заельцовск/iu,
     areaFrom: area, areaTo: area,
     floorMode: /этаж|подвал|цокол/iu, floorFrom: /этаж/iu, floorTo: /этаж/iu,
@@ -67,7 +68,7 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
 }
 export function analysisCriterionLabel(criterion:string):string {
   if (criterion.startsWith("features.")) return FEATURE_DEFINITIONS[criterion.slice(9) as FeatureKey]?.label ?? "Дополнительная характеристика";
-  return ({city:"Город",operation:"Операция",purpose:"Назначение",priceUnit:"Единица цены",price:"Цена",area:"Площадь",floor:"Этаж",floorRange:"Диапазон этажей",district:"Район",owner:"Проверка собственника",seller:"Продавец",photos:"Фотографии",verification:"Проверка сотрудником",freshness:"Свежесть"} as Record<string,string>)[criterion] ?? criterion;
+  return ({rooms:"Комнаты",rentalPeriod:"Период аренды",propertyKind:"Тип объекта",city:"Город",operation:"Операция",purpose:"Назначение",priceUnit:"Единица цены",price:"Цена",area:"Площадь",floor:"Этаж",floorRange:"Диапазон этажей",district:"Район",owner:"Проверка собственника",seller:"Продавец",photos:"Фотографии",verification:"Проверка сотрудником",freshness:"Свежесть"} as Record<string,string>)[criterion] ?? criterion;
 }
 export function filterDiff(before: SearchFilters, after: SearchFilters) {
   return [...new Set([...Object.keys(before), ...Object.keys(after)])].sort().flatMap(key => {
