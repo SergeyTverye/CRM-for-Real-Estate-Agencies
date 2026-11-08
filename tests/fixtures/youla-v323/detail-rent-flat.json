@@ -1,0 +1,66 @@
+{
+  "id": "replay-detail-rent-flat",
+  "name": "Квартира, 2 комнаты, 43 м²",
+  "subcategory": 2005,
+  "price": 3400000,
+  "priceText": "",
+  "url": "/novosibirsk/nedvijimost/rent-flat/replay-detail-rent-flat",
+  "location": {
+    "city": "576d0616d53f3d80945f93b6",
+    "description": "Новосибирск, Центральный район, Тестовая улица, 1",
+    "showExactAddress": true
+  },
+  "images": [
+    {
+      "url": "https://cdn1.youla.io/files/images/replay.jpg"
+    }
+  ],
+  "datePublished": {
+    "timestamp": 1794171430
+  },
+  "dateUpdated": {
+    "timestamp": 1794171430
+  },
+  "attributes": [
+    {
+      "slug": "realty_obshaya_ploshad",
+      "rawValue": "4300",
+      "values": [
+        {
+          "id": null,
+          "value": "4300"
+        }
+      ]
+    },
+    {
+      "slug": "realty_etajnost_doma",
+      "rawValue": "5",
+      "values": [
+        {
+          "id": null,
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "slug": "realty_etaj",
+      "rawValue": "3",
+      "values": [
+        {
+          "id": null,
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "slug": "komnat_v_kvartire",
+      "rawValue": "2 комнаты",
+      "values": [
+        {
+          "id": 10655,
+          "value": "2 комнаты"
+        }
+      ]
+    }
+  ]
+}

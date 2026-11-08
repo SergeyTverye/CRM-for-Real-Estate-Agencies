@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type RealEstateScraper from "real-estate-scrapper";
+import { attachYoulaParser } from "./youla-parser";
 import { attachResidentialParsers } from "./residential-parsers";
 import { extractListingDates } from "./listing-dates";
 import { detectAccessChallenge } from "./source-response";
@@ -12,6 +13,7 @@ export function dateEnrichmentProgress(client: object, source: Source) { return 
 /** Extend the installed parsers in our adapter, without patching node_modules. */
 export function extendSourceParsers(client: RealEstateScraper, options: DateDetailOptions = {}): RealEstateScraper {
   attachResidentialParsers(client);
+  attachYoulaParser(client, options);
   const progress: Partial<Record<Source, DateDetailProgress>> = {};
   detailProgress.set(client, progress);
   for (const [source, parser] of Object.entries(client.parsers)) {

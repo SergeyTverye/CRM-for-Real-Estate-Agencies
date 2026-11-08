@@ -1,0 +1,156 @@
+{
+  "data": {
+    "feed": {
+      "items": [
+        {
+          "__typename": "Advert"
+        },
+        {
+          "product": {
+            "id": "replay-flat-0",
+            "categoryId": 20,
+            "subcategoryId": 2001,
+            "price": {
+              "origPrice": {
+                "price": 1330000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 1330000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "13 300 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/flat/replay-flat-0",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Квартира, 2 комнаты, 43 м²",
+            "location": {
+              "city": "576d0615d53f3d80945f90e3",
+              "cityName": "Сочи",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-flat-1",
+            "categoryId": 20,
+            "subcategoryId": 2001,
+            "price": {
+              "origPrice": {
+                "price": 449000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 449000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "4 490 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/flat/replay-flat-1",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Квартира, 2 комнаты, 43 м²",
+            "location": {
+              "city": "576d0615d53f3d80945f90e3",
+              "cityName": "Сочи",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-flat-2",
+            "categoryId": 20,
+            "subcategoryId": 2001,
+            "price": {
+              "origPrice": {
+                "price": 780000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 780000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "7 800 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/flat/replay-flat-2",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              },
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-1.jpg"
+              }
+            ],
+            "name": "Квартира, 2 комнаты, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        },
+        {
+          "product": {
+            "id": "replay-flat-3",
+            "categoryId": 20,
+            "subcategoryId": 2001,
+            "price": {
+              "origPrice": {
+                "price": 360000000,
+                "__typename": "Price"
+              },
+              "realPrice": {
+                "price": 360000000,
+                "__typename": "Price"
+              },
+              "realPriceText": "3 600 000 ₽",
+              "discount": 0,
+              "__typename": "ProductPrice"
+            },
+            "url": "/novosibirsk/nedvijimost/flat/replay-flat-3",
+            "images": [
+              {
+                "url": "https://cdn1.youla.io/files/images/replay-0.jpg"
+              }
+            ],
+            "name": "Квартира, 2 комнаты, 43 м²",
+            "location": {
+              "city": "576d0616d53f3d80945f93b6",
+              "cityName": "Новосибирск",
+              "addressText": "",
+              "description": ""
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true,
+        "cursor": "replay-cursor-1"
+      }
+    }
+  }
+}
