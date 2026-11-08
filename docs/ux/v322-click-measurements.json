@@ -1,0 +1,321 @@
+{
+  "measuredAt": "2026-11-08T16:28:09.065Z",
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "method": "Только переходы, раскрытия, выбор результата, отметки объектов и команды сохранения. Ввод и selectOption не считаются. Сохранения отправлены реальному API синтетической CRM; Параметры существующей потребности сохраняются без изменения значений; новая синтетическая задача реально переносится на час.",
+  "results": [
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "1",
+      "start": "/today",
+      "clicks": 4,
+      "steps": [
+        "Записать звонок",
+        "Новый клиент",
+        "Перспективное — Новая потребность",
+        "Зарегистрировать обращение"
+      ],
+      "status": "PASS",
+      "finalPath": "/today",
+      "evidence": {
+        "api": "/api/v1/requests",
+        "method": "POST",
+        "http": 201,
+        "nextActionConfirmed": true
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "2a",
+      "start": "/clients",
+      "clicks": 3,
+      "steps": [
+        "Применить поиск клиента",
+        "Карточка клиента",
+        "История"
+      ],
+      "status": "PASS",
+      "finalPath": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "evidence": {
+        "heading": "История клиента"
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "2b",
+      "start": "/clients?q=%D0%9E%D0%9E%D0%9E%20%C2%AB%D0%A1%D0%B8%D0%B1%D0%B8%D1%80%D1%8C%20%D0%9A%D0%BE%D0%BC%D0%BC%D0%B5%D1%80%D1%86%D0%B8%D1%8F%2025%C2%BB",
+      "clicks": 5,
+      "steps": [
+        "Карточка клиента",
+        "Потребности клиента",
+        "Открыть потребность",
+        "Изменить параметры",
+        "Сохранить параметры"
+      ],
+      "status": "PASS",
+      "finalPath": "/needs/cb5a38b6-d38b-4718-850a-11078d21ee93",
+      "evidence": {
+        "api": "/api/v1/needs/cb5a38b6-d38b-4718-850a-11078d21ee93",
+        "method": "PATCH",
+        "http": 200
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "4",
+      "start": "/collections/1f214371-ab08-41a5-aad7-85b308ab26f6",
+      "clicks": 2,
+      "steps": [
+        "Отметить один объект каталога",
+        "Создать КП из выбранных"
+      ],
+      "status": "PASS",
+      "finalPath": "/offers/08e23c75-b664-48a2-b862-dddab54b2646",
+      "evidence": {
+        "api": "/api/v1/collections/1f214371-ab08-41a5-aad7-85b308ab26f6/offer",
+        "method": "POST",
+        "http": 200,
+        "selectedObjects": 1
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "5a",
+      "start": "/tasks",
+      "clicks": 2,
+      "steps": [
+        "Новая задача",
+        "Создать задачу"
+      ],
+      "status": "PASS",
+      "finalPath": "/tasks/ddbdc099-73a4-4712-a778-45d596f62292",
+      "evidence": {
+        "api": "/api/v1/tasks",
+        "method": "POST",
+        "http": 201
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "5b",
+      "start": "/tasks",
+      "clicks": 2,
+      "steps": [
+        "Перенести из строки задачи",
+        "Подтвердить перенос"
+      ],
+      "status": "PASS",
+      "finalPath": "/tasks",
+      "evidence": {
+        "api": "/api/v1/tasks/f76e0ec8-845f-41e9-aa45-93e4edccbb83",
+        "method": "PATCH",
+        "http": 200,
+        "originalLocalDeadline": "2026-11-09T23:00",
+        "newLocalDeadline": "2026-11-10T00:00",
+        "savedDeadline": "2026-11-09T17:00:00.000Z",
+        "syntheticTask": true
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "REALTOR1",
+      "scenario": "7",
+      "start": "/advertisements",
+      "clicks": 1,
+      "steps": [
+        "Истекающая реклама"
+      ],
+      "status": "PASS",
+      "finalPath": "/advertisements?view=expiring",
+      "evidence": {
+        "query": "?view=expiring"
+      }
+    },
+    {
+      "phase": "before",
+      "revision": "6ee543c",
+      "role": "MANAGER",
+      "scenario": "8",
+      "start": "/reports",
+      "clicks": 2,
+      "steps": [
+        "Задачи в меню",
+        "Все задачи"
+      ],
+      "status": "PASS",
+      "finalPath": "/tasks?view=all",
+      "evidence": {
+        "heading": "Задачи"
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "1",
+      "start": "/today",
+      "clicks": 4,
+      "steps": [
+        "Записать звонок",
+        "Новый клиент",
+        "Перспективное — Новая потребность",
+        "Зарегистрировать обращение"
+      ],
+      "status": "PASS",
+      "finalPath": "/today",
+      "evidence": {
+        "api": "/api/v1/requests",
+        "method": "POST",
+        "http": 201,
+        "nextActionConfirmed": true
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "2a",
+      "start": "/clients",
+      "clicks": 2,
+      "steps": [
+        "Применить поиск клиента",
+        "История из строки клиента"
+      ],
+      "status": "PASS",
+      "finalPath": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "evidence": {
+        "heading": "История клиента"
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "2b",
+      "start": "/clients?q=%D0%9E%D0%9E%D0%9E%20%C2%AB%D0%A1%D0%B8%D0%B1%D0%B8%D1%80%D1%8C%20%D0%9A%D0%BE%D0%BC%D0%BC%D0%B5%D1%80%D1%86%D0%B8%D1%8F%2025%C2%BB",
+      "clicks": 4,
+      "steps": [
+        "Потребности из строки клиента",
+        "Открыть потребность",
+        "Изменить параметры",
+        "Сохранить параметры"
+      ],
+      "status": "PASS",
+      "finalPath": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "evidence": {
+        "api": "/api/v1/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+        "method": "PATCH",
+        "http": 200
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "4",
+      "start": "/collections/1f214371-ab08-41a5-aad7-85b308ab26f6",
+      "clicks": 2,
+      "steps": [
+        "Отметить один объект каталога",
+        "Создать КП из выбранных"
+      ],
+      "status": "PASS",
+      "finalPath": "/offers/9a380aac-62f6-4dba-ac4c-3aacdd2ef7a6",
+      "evidence": {
+        "api": "/api/v1/collections/1f214371-ab08-41a5-aad7-85b308ab26f6/offer",
+        "method": "POST",
+        "http": 200,
+        "selectedObjects": 1
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "5a",
+      "start": "/tasks",
+      "clicks": 2,
+      "steps": [
+        "Новая задача",
+        "Создать задачу"
+      ],
+      "status": "PASS",
+      "finalPath": "/tasks/a904fd08-1e4b-4253-8bcc-b8a5ee16033c",
+      "evidence": {
+        "api": "/api/v1/tasks",
+        "method": "POST",
+        "http": 201
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "5b",
+      "start": "/tasks",
+      "clicks": 2,
+      "steps": [
+        "Перенести из строки задачи",
+        "Подтвердить перенос"
+      ],
+      "status": "PASS",
+      "finalPath": "/tasks",
+      "evidence": {
+        "api": "/api/v1/tasks/a904fd08-1e4b-4253-8bcc-b8a5ee16033c",
+        "method": "PATCH",
+        "http": 200,
+        "originalLocalDeadline": "2026-11-09T23:00",
+        "newLocalDeadline": "2026-11-10T00:00",
+        "savedDeadline": "2026-11-09T17:00:00.000Z",
+        "syntheticTask": true
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "REALTOR1",
+      "scenario": "7",
+      "start": "/advertisements",
+      "clicks": 1,
+      "steps": [
+        "Истекающая реклама"
+      ],
+      "status": "PASS",
+      "finalPath": "/advertisements?view=expiring",
+      "evidence": {
+        "query": "?view=expiring"
+      }
+    },
+    {
+      "phase": "after",
+      "revision": "d881253",
+      "role": "MANAGER",
+      "scenario": "8",
+      "start": "/reports",
+      "clicks": 1,
+      "steps": [
+        "Задачи сотрудников"
+      ],
+      "status": "PASS",
+      "finalPath": "/tasks?view=all",
+      "evidence": {
+        "heading": "Задачи"
+      }
+    }
+  ]
+}
