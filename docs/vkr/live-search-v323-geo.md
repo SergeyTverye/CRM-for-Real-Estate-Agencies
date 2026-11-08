@@ -141,3 +141,85 @@
 
 Функциональность географии/типов/сохранения/русского UI реализована и проверена. Полная доступность каждого типа и каждой локации на каждой площадке — PARTIAL: защита/неподдержанная категория/геосправочник/неполные адресные данные перечислены выше. Миграций и изменений бизнес-правил CRM нет. Разбор Юлы и browser-continuation/CAPTCHA не изменялись.
 
+
+## После исправлений (geo2)
+
+Проверка: 9 ноября 2026 (локальное время). Ветка `feature/search-v3.2.3-geo2`. LIVE, AI=0; browser-continuation/CAPTCHA не изменялись.
+
+Исправленные причины:
+
+- Кольцово OnRealt: публичный slug `rabochij-poselok-koltcovo` подтверждён HTTP 200, квартиры и офисы доступны. Пути Мир Квартир для Кольцово и Краснообска из предыдущей правки перепроверены: ошибок URL нет.
+- OnRealt: публичный autocomplete возвращает Советский район как группу **3**, ID **112**, при `type_region=1` и выбранном городе `14898`. Пакет запрашивал `type_region=2`, не выбирал город и искал группу 4: ответ содержал только ЖК. Передаётся проверенный native `location={"3":["112"]}`.
+- В областных карточках OnRealt поле `address-city` содержит область, город и район. Пакет сохранял только первый компонент («Новосибирская область») и терял населённый пункт. Теперь сохраняются полный адрес, город и район из самой карточки; элементы навигации исключаются.
+- Мир Квартир: Советский район передаётся SEO-путём `/Новосибирск/Советский/`, включая жилые категории. Факт района из запроса не присваивается объявлению. Юла получает текстовый запрос «Академгородок»; он сужает выборку, но не доказывает адрес. При недостатке фактов UI показывает «Локация требует проверки», явное несовпадение остаётся `rejected`. Координатное подтверждение без исходных координат/границ района не заявляется.
+- Жилая аренда Мир Квартир использует реальные хосты `arenda`/`arendadoma`, как продажа — `www`/`dom`; операция читается из URL самого объявления. Перепроверены квартиры/дома обеих операций, `unsupported_filter` не воспроизводится. Юла после интеграции поддерживает квартиры/дома; для выбранного типа «дом» нет дублирующего запроса коттеджей по тому же URL.
+- Юла: URL области перенаправляется на `/cities`; отдельная область не поддержана публичным маршрутом. Реализован **частичный** поиск по Новосибирску, Бердску, Оби, Кольцово, Краснообску и Искитиму с `partial/incomplete` и явным предупреждением. Это не полный охват области. Кольцово в справочнике Юлы недоступно: `unsupported_filter` с текстом «Локация не поддерживается площадкой» и подсказкой расширить поиск, а не generic error.
+- Обь, склад: необязательный detail GET для даты мог исчерпать срок задания после получения SERP. DateEnrichment теперь оставляет резерв на публикацию и ограничивает один detail GET 3 секундами. LIVE с включёнными details: Мир Квартир 5 карточек, 5/5 по городу, success за 14,2 с при deadline 20 с; одна неудача уточнения даты не стирает SERP. Это подтверждает устранение воспроизводимого риска; прежний TIMEOUT не доказывает отсутствие складов.
+- Аналогичный риск обнаружен на деталях Юлы: запросы деталей ограничены 3 секундами, ошибка необязательного уточнения сохраняет SERP. После правки Академгородок/квартира: success, 5 карточек за 19,1 с, все 5 требуют проверки локации.
+
+### LIVE после правок
+
+Основной прогон: 45 ячеек, 90 сетевых попыток, 1 страница/до 5 карточек, details выключены. Контроль с details: 3 ячейки/8 попыток, затем 1 ячейка/5 попыток после ограничения деталей Юлы. HTTP-навигация/диагностика: 13 попыток плюс прерванный начальный прогон (1 завершённый GET, консервативно зарезервированы 3 попытки). Общий верхний бюджет **119/120**, новых LIVE-запросов не выполнялось. В сетевых прогонах попытки считаются перед DNS/HTTP и включают редиректы, обрывы и отмены; 119 — верхняя оценка upstream HTTP, не число успешных ответов. Заданный интервал начала запросов 1,1 с, retries выключены. Ещё пять первоначальных sandbox-попыток завершились ENOTFOUND до HTTP: в upstream-бюджет не включены и доступность не подтверждают.
+
+Таблица: по 5 карточек — ограниченная выборка, не полнота рынка. «да/нет/?» относится к локации, а не ко всем условиям подбора; полный verdict и причины есть в JSON.
+
+| Площадка | Локация | Тип | Операция | Статус | Карточек | да/нет/? |
+|---|---|---|---|---|---:|---|
+| mirkvartir | novosibirsk | office | rent | success | 5 | 5/0/0 |
+| mirkvartir | akademgorodok | office | rent | success | 5 | 0/0/5 |
+| mirkvartir | koltsovo | office | rent | success | 5 | 5/0/0 |
+| mirkvartir | krasnoobsk | office | rent | success | 5 | 5/0/0 |
+| mirkvartir | novosibirsk-region | office | rent | success | 5 | 4/0/1 |
+| mirkvartir | novosibirsk | warehouse | rent | success | 5 | 5/0/0 |
+| mirkvartir | novosibirsk | flat | rent | success | 5 | 5/0/0 |
+| mirkvartir | novosibirsk | house | rent | success | 5 | 5/0/0 |
+| mirkvartir | novosibirsk | flat | sale | success | 5 | 5/0/0 |
+| mirkvartir | novosibirsk | house | sale | success | 4 | 4/0/0 |
+| mirkvartir | berdsk | flat | sale | success | 5 | 5/0/0 |
+| mirkvartir | akademgorodok | flat | sale | success | 5 | 0/0/5 |
+| mirkvartir | koltsovo | flat | sale | success | 5 | 5/0/0 |
+| mirkvartir | ob | warehouse | rent | success | 5 | 5/0/0 |
+| mirkvartir | novosibirsk-region | house | sale | success | 5 | 3/0/2 |
+| onrealt | novosibirsk | office | rent | success | 5 | 5/0/0 |
+| onrealt | akademgorodok | office | rent | success | 5 | 5/0/0 |
+| onrealt | koltsovo | office | rent | success | 5 | 3/0/2 |
+| onrealt | krasnoobsk | office | rent | success | 0 | 0/0/0 |
+| onrealt | novosibirsk-region | office | rent | success | 5 | 5/0/0 |
+| onrealt | novosibirsk | warehouse | rent | success | 5 | 5/0/0 |
+| onrealt | novosibirsk | flat | rent | success | 5 | 5/0/0 |
+| onrealt | novosibirsk | house | rent | success | 5 | 5/0/0 |
+| onrealt | novosibirsk | flat | sale | success | 5 | 5/0/0 |
+| onrealt | novosibirsk | house | sale | partial | 3 | 3/0/0 |
+| onrealt | berdsk | flat | sale | error | 0 | 0/0/0 |
+| onrealt | akademgorodok | flat | sale | success | 5 | 5/0/0 |
+| onrealt | koltsovo | flat | sale | success | 5 | 5/0/0 |
+| onrealt | ob | warehouse | rent | success | 5 | 5/0/0 |
+| onrealt | novosibirsk-region | house | sale | success | 5 | 5/0/0 |
+| youla | novosibirsk | office | rent | success | 4 | 4/0/0 |
+| youla | akademgorodok | office | rent | success | 4 | 0/0/4 |
+| youla | koltsovo | office | rent | unsupported_filter | 0 | 0/0/0 |
+| youla | krasnoobsk | office | rent | success | 0 | 0/0/0 |
+| youla | novosibirsk-region | office | rent | partial | 1 | 1/0/0 |
+| youla | novosibirsk | warehouse | rent | success | 0 | 0/0/0 |
+| youla | novosibirsk | flat | rent | success | 5 | 5/0/0 |
+| youla | novosibirsk | house | rent | success | 5 | 5/0/0 |
+| youla | novosibirsk | flat | sale | success | 5 | 5/0/0 |
+| youla | novosibirsk | house | sale | success | 5 | 5/0/0 |
+| youla | berdsk | flat | sale | success | 5 | 5/0/0 |
+| youla | akademgorodok | flat | sale | success | 5 | 0/0/5 |
+| youla | koltsovo | flat | sale | unsupported_filter | 0 | 0/0/0 |
+| youla | ob | warehouse | rent | success | 0 | 0/0/0 |
+| youla | novosibirsk-region | house | sale | partial | 3 | 3/0/0 |
+
+Последний контроль Юлы заменяет первоначальный широкий поиск Академгородка: офис — 0 карточек; квартира — 5, локация 0/0/5. Не выдаём текст запроса за районное доказательство. Мир Квартир Академгородок — 0/0/5 и для офиса, и для квартиры; подтверждение района остаётся ограничением площадки. OnRealt — 5/0/0 в обоих случаях.
+
+Артефакты: `live-search-v323-geo2.json`, `live-search-v323-geo2-final.json`, `live-search-v323-geo2-detail-final.json`; публичная диагностика — `geo2-discovery.json`, `geo2-discovery-extra.json`, `geo2-district.json`. Основной `live-search-v323-geo.json` дополнен ключом `afterFixesGeo2`, прежняя матрица сохранена. Контакты и тела страниц не сохранены. Сервер/worker/браузер в этом прогоне не запускались; повторный browser QA не заявляется.
+
+### Проверки geo2 (REPLAY)
+
+- Unit property-search: **692/692 PASS**, 31 файл (`geo2-unit-final.log`). После добавления дополнительной регрессии timeout Юлы: **42/42 PASS**, два изменённых файла (`geo2-unit-detail-final.log`); числа пересекаются и не суммируются.
+- PostgreSQL `crm_test_e` + SQLite: **103/104 PASS** в совместном прогоне, один PG export-тест превысил стандартные 30 с (`geo2-integration-final.log`). Он отдельно прошёл с лимитом 90 с (`geo2-pg-export-recheck.log`, 1 PASS/24 skipped). Этот повтор не объявляется полным зелёным прогоном со штатными timeout; ограничение производительности экспорта остаётся вне geo2.
+- `npx tsc --noEmit`: PASS после генерации PG/SQLite клиентов (`geo2-typecheck-release.log`). Первоначальный запуск без generated clients падал; код схемы и миграции не менялись.
+- ESLint всех изменённых TS/TSX `--max-warnings=0`: PASS (`geo2-lint-release.log`). `git diff --check`: PASS. Production build и browser QA в этой итерации не выполнялись.
+- В основной LIVE-матрице: 39 success, 3 partial, 2 unsupported_filter, 1 error. Единственный error — OnRealt/Бердск/квартира: FETCH_FAILED без HTTP-статуса, сетевой отказ; отдельный повтор не делался из-за общего бюджета. OnRealt/Новосибирск/дом sale — partial из-за одной сетевой ветви. Юла/область остаётся partial по контракту охвата.
+- Проверки geo2 не используют AI, seller contacts, реальные CRM ПДн, browser-continuation или CAPTCHA. Все запущенные CLI-прогоны завершены.
