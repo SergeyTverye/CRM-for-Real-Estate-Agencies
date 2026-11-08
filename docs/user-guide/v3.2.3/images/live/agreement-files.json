@@ -1,0 +1,189 @@
+{
+  "file": "agreement-files.png",
+  "role": "REALTOR1",
+  "path": "/agreements/new",
+  "query": "?clientId=f81e1abf-2fef-4e8a-aebc-b82746e22ce8",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 455
+  },
+  "capturedAt": "2026-11-08T18:32:57.507Z",
+  "sha256": "89d7d7b45f24cefee20f5b641f4eb587ef41f414af7da6d54577ef7862f04d56",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": false,
+      "cssBox": {
+        "x": 268,
+        "y": -329,
+        "width": 628.140625,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": -658,
+        "width": 1256,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "file-picker",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 396.546875,
+        "y": 573.5,
+        "width": 1,
+        "height": 1
+      },
+      "pixelBox": {
+        "x": 793,
+        "y": 1147,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "label": "save",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 285,
+        "y": 854,
+        "width": 136.890625,
+        "height": 36
+      },
+      "pixelBox": {
+        "x": 570,
+        "y": 1708,
+        "width": 274,
+        "height": 72
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Документы договора",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 482,
+        "width": 862,
+        "height": 16
+      }
+    },
+    {
+      "label": "Убрать Пример договор.pdf",
+      "tag": "button",
+      "cssBox": {
+        "x": 903.0625,
+        "y": 682,
+        "width": 181.71875,
+        "height": 32
+      }
+    },
+    {
+      "label": "Убрать Пример приложение.pdf",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 802,
+        "width": 206.5,
+        "height": 32
+      }
+    },
+    {
+      "label": "Создать договор",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 854,
+        "width": 136.890625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Отмена",
+      "tag": "button",
+      "cssBox": {
+        "x": 429.890625,
+        "y": 854,
+        "width": 75.953125,
+        "height": 36
+      }
+    }
+  ]
+}

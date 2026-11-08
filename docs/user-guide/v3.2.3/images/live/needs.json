@@ -1,0 +1,159 @@
+{
+  "file": "needs.png",
+  "role": "REALTOR1",
+  "path": "/needs",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:30.475Z",
+  "sha256": "dfa37655c472b104797439beec7012bc63d973973e2290164dd6431b7d2db5b9",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 162.8125,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 210,
+        "width": 326,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "main-form",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 171,
+        "width": 1148,
+        "height": 110
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 342,
+        "width": 2296,
+        "height": 220
+      }
+    },
+    {
+      "label": "table",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 269,
+        "y": 294,
+        "width": 1146,
+        "height": 808
+      },
+      "pixelBox": {
+        "x": 538,
+        "y": 588,
+        "width": 2292,
+        "height": 1616
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Потребности",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 162.8125,
+        "height": 28
+      }
+    },
+    {
+      "label": "Применить",
+      "tag": "button",
+      "cssBox": {
+        "x": 461.5625,
+        "y": 245,
+        "width": 101.078125,
+        "height": 36
+      }
+    }
+  ]
+}

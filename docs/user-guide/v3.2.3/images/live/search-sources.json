@@ -1,0 +1,176 @@
+{
+  "file": "search-sources.png",
+  "role": "MANAGER",
+  "path": "/settings/sources",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:33:02.751Z",
+  "sha256": "ddb641a68bec64b80d73fe369db631ca96b5d1909646c7b05f2232f2496a100b",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 329.34375,
+        "height": 36
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 206,
+        "width": 659,
+        "height": 72
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 951
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1902
+      }
+    },
+    {
+      "label": "main-form",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 455,
+        "width": 1148,
+        "height": 375.59375
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 910,
+        "width": 2296,
+        "height": 751
+      }
+    },
+    {
+      "label": "table",
+      "found": false
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 899.015625,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1026.15625,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1127.265625,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "РуководительРуководитель",
+      "tag": "button",
+      "cssBox": {
+        "x": 1213.625,
+        "y": 21,
+        "width": 202.375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Источники поиска и скрапер",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 103,
+        "width": 329.34375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Фактическое состояние среды",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 230,
+        "width": 1114,
+        "height": 24
+      }
+    },
+    {
+      "label": "Включить все площадки",
+      "tag": "button",
+      "cssBox": {
+        "x": 507.78125,
+        "y": 577.59375,
+        "width": 188.921875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Отключить все",
+      "tag": "button",
+      "cssBox": {
+        "x": 704.703125,
+        "y": 577.59375,
+        "width": 125.484375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Сохранить настройки источников",
+      "tag": "button",
+      "cssBox": {
+        "x": 268,
+        "y": 794.59375,
+        "width": 249.78125,
+        "height": 36
+      }
+    }
+  ]
+}

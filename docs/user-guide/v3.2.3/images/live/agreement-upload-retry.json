@@ -1,0 +1,174 @@
+{
+  "file": "agreement-upload-retry.png",
+  "role": "REALTOR1",
+  "path": "/agreements/new",
+  "query": "?clientId=f81e1abf-2fef-4e8a-aebc-b82746e22ce8",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:57.951Z",
+  "sha256": "76fdbe5cd01da7c8104996a09543fa16f6b4fc80ebeb008c9389d12f987d93d2",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 126,
+        "width": 628.140625,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 252,
+        "width": 1256,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "retry-failed-only",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 285,
+        "y": 292,
+        "width": 156.375,
+        "height": 36
+      },
+      "pixelBox": {
+        "x": 570,
+        "y": 584,
+        "width": 313,
+        "height": 72
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Новый договор / соглашение",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 126,
+        "width": 628.140625,
+        "height": 28
+      }
+    },
+    {
+      "label": "Повторить загрузку",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 292,
+        "width": 156.375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Открыть сохранённый договор",
+      "tag": "button",
+      "cssBox": {
+        "x": 441.375,
+        "y": 292,
+        "width": 233.53125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Изменить",
+      "tag": "button",
+      "cssBox": {
+        "x": 633.1875,
+        "y": 415,
+        "width": 65.8125,
+        "height": 32
+      }
+    },
+    {
+      "label": "Закрыть уведомление",
+      "tag": "button",
+      "cssBox": {
+        "x": 1367,
+        "y": 831,
+        "width": 36,
+        "height": 36
+      }
+    }
+  ],
+  "simulatedFailure": true,
+  "note": "Second upload returned an intentional synthetic HTTP 503; no application defect implied."
+}

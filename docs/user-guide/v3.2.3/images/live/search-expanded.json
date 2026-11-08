@@ -1,0 +1,302 @@
+{
+  "file": "search-expanded.png",
+  "role": "REALTOR1",
+  "path": "/property-search",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:54.835Z",
+  "sha256": "2b44834b5e116ed94b38dc56d555acd623b29e0b44c7d1936c6712551d78c0cd",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 449.40625,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 210,
+        "width": 899,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "collapse",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 285,
+        "y": 307,
+        "width": 149.671875,
+        "height": 36
+      },
+      "pixelBox": {
+        "x": 570,
+        "y": 614,
+        "width": 299,
+        "height": 72
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Поиск объектов",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 449.40625,
+        "height": 28
+      }
+    },
+    {
+      "label": "Условия поиска",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 246,
+        "width": 104.140625,
+        "height": 20
+      }
+    },
+    {
+      "label": "Свернуть фильтры",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 307,
+        "width": 149.671875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Справка: Условия поиска",
+      "tag": "button",
+      "cssBox": {
+        "x": 733.8125,
+        "y": 315,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Искать",
+      "tag": "button",
+      "cssBox": {
+        "x": 294,
+        "y": 378,
+        "width": 71.421875,
+        "height": 36
+      }
+    },
+    {
+      "label": "Справка: Единица цены",
+      "tag": "button",
+      "cssBox": {
+        "x": 1097.5,
+        "y": 435.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Назначения объектов",
+      "tag": "button",
+      "cssBox": {
+        "x": 414.625,
+        "y": 585,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Торговля",
+      "tag": "button",
+      "cssBox": {
+        "x": 373.171875,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: ПСН / универсальное",
+      "tag": "button",
+      "cssBox": {
+        "x": 577.46875,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Офис",
+      "tag": "button",
+      "cssBox": {
+        "x": 677.234375,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Производство",
+      "tag": "button",
+      "cssBox": {
+        "x": 834.140625,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Склад",
+      "tag": "button",
+      "cssBox": {
+        "x": 936.9375,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Свободное назначение",
+      "tag": "button",
+      "cssBox": {
+        "x": 1153.046875,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Жилая",
+      "tag": "button",
+      "cssBox": {
+        "x": 1259.859375,
+        "y": 613.5,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Справка: Площадки поиска",
+      "tag": "button",
+      "cssBox": {
+        "x": 366.75,
+        "y": 650,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Расширенные фильтры",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 765,
+        "width": 180.453125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Справка: Расширенные фильтры",
+      "tag": "button",
+      "cssBox": {
+        "x": 477.453125,
+        "y": 773,
+        "width": 20,
+        "height": 20
+      }
+    },
+    {
+      "label": "Сбросить расширенные фильтры",
+      "tag": "button",
+      "cssBox": {
+        "x": 505.453125,
+        "y": 765,
+        "width": 247.03125,
+        "height": 36
+      }
+    }
+  ]
+}

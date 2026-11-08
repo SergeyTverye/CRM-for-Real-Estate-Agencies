@@ -1,0 +1,196 @@
+{
+  "file": "import.png",
+  "role": "MANAGER",
+  "path": "/import",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:59.968Z",
+  "sha256": "5355d01bc005a8dff0cefa92431f4d3fc54966d5ed5199d59a21b79fa6a7b2fb",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 739.265625,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 210,
+        "width": 1479,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 951
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1902
+      }
+    },
+    {
+      "label": "main-form",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 285,
+        "y": 449,
+        "width": 726,
+        "height": 136
+      },
+      "pixelBox": {
+        "x": 570,
+        "y": 898,
+        "width": 1452,
+        "height": 272
+      }
+    },
+    {
+      "label": "table",
+      "found": false
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 899.015625,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1026.15625,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1127.265625,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "РуководительРуководитель",
+      "tag": "button",
+      "cssBox": {
+        "x": 1213.625,
+        "y": 21,
+        "width": 202.375,
+        "height": 36
+      }
+    },
+    {
+      "label": "Импорт данных",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 739.265625,
+        "height": 28
+      }
+    },
+    {
+      "label": "Рабочая книга объектов и обращений",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 188,
+        "width": 1114,
+        "height": 28
+      }
+    },
+    {
+      "label": "Проверить без загрузки в CRM",
+      "tag": "button",
+      "cssBox": {
+        "x": 285,
+        "y": 322,
+        "width": 231.328125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Загрузить файл",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 402,
+        "width": 101.890625,
+        "height": 20
+      }
+    },
+    {
+      "label": "Загрузить файл",
+      "tag": "button",
+      "cssBox": {
+        "x": 883.109375,
+        "y": 549,
+        "width": 127.890625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Как проходит импорт",
+      "tag": "h2",
+      "cssBox": {
+        "x": 1061,
+        "y": 402,
+        "width": 143.15625,
+        "height": 20
+      }
+    },
+    {
+      "label": "Задания импорта",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 805,
+        "width": 115.375,
+        "height": 20
+      }
+    }
+  ]
+}

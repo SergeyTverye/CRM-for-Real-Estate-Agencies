@@ -10,8 +10,12 @@ from pypdf import PdfReader
 
 sys.stdout.reconfigure(encoding='utf-8')
 root=Path(__file__).resolve().parents[2]
-folder=root/'docs/user-guide/v3.2.2'
-path=folder/'CRM-руководство-пользователя-v3.2.2.pdf'
+import argparse
+parser=argparse.ArgumentParser()
+parser.add_argument('--version',default='v3.2.2',choices=['v3.2.2','v3.2.3'])
+version=parser.parse_args().version
+folder=root/'docs/user-guide'/version
+path=folder/f'CRM-руководство-пользователя-{version}.pdf'
 chapters=re.findall(r'^## (.+)$',(folder/'guide.md').read_text(encoding='utf-8-sig'),re.M)
 reader=PdfReader(path)
 assert len(reader.pages)==len(chapters)+2
@@ -42,6 +46,6 @@ for page in reader.pages:
         obj=font.get_object()
         if 'Arial' in str(obj.get('/BaseFont','')):
             assert '/FontFile2' in obj['/FontDescriptor'].get_object(), 'Font not embedded'
-output=root/'tmp/pdfs/guide/structure-check.json'
+output=root/'tmp/pdfs/guide'/version/'structure-check.json'
 output.write_text(json.dumps({'pass':True,'pages':pages,'tocLinks':len(links),'bookmarks':len(reader.outline)},ensure_ascii=False,indent=2),encoding='utf8')
 print(f'PASS: {len(reader.pages)} pages; {len(links)} working TOC links; embedded Cyrillic fonts; text inside page boundaries.')
