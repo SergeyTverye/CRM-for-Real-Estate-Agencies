@@ -243,7 +243,7 @@ it("ranking enforces count, RBAC, unique IDs and manager cap before dispatch",as
 it.each(["invented ID","invented fact","duplicate ID"])("ranking rejects %s before cache",async defect=>{
   const a=await listing(),b=await listing(),f=rankingFake();
   vi.spyOn(f.provider,"respond").mockResolvedValueOnce({mode:"test",model:"synthetic",webSearchCalls:0,sourceUrls:[],text:JSON.stringify({ranking:[{listingId:defect==="invented ID"?randomUUID():a.id,reasonCriteria:[defect==="invented fact"?"parking":"city"]},{listingId:defect==="duplicate ID"?a.id:b.id,reasonCriteria:["city"]}]})});
-  await expect(rankAnalysisListings(users.realtor1,{listingIds:[a.id,b.id],filters},f.ai)).rejects.toMatchObject({code:"AI_INVALID_JSON_RESULT"});
+  await expect(rankAnalysisListings(users.realtor1,{listingIds:[a.id,b.id],filters},f.ai)).rejects.toMatchObject({code:"AI_INVALID_JSON_RESULT",message:expect.stringContaining("Автоматического повтора нет")});
   expect(await db.aiAnalysisCache.count()).toBe(0);
 });
 

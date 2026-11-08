@@ -1,0 +1,1 @@
+{"ranking": [{"reasonCriteria": ["city", "operation", "purpose", "area", "floor"], "listingId": "00000000-0000-4000-8000-000000000001"}, {"reasonCriteria": ["city", "operation", "floor"], "listingId": "00000000-0000-4000-8000-000000000002"}, {"reasonCriteria": ["city", "operation"], "listingId": "00000000-0000-4000-8000-000000000003"}]}
