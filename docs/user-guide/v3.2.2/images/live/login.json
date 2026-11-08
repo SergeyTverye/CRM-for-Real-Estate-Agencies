@@ -1,0 +1,79 @@
+{
+  "file": "login.png",
+  "role": "REALTOR1",
+  "path": "/login",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:23.584Z",
+  "sha256": "a0ad32ce383f96e3e8582f3f19cb66d20dd65803dca332b23982d56b257e97bd",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 545,
+        "y": 300,
+        "width": 350,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 1090,
+        "y": 600,
+        "width": 700,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": false
+    },
+    {
+      "label": "login-form",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 545,
+        "y": 368,
+        "width": 350,
+        "height": 180
+      },
+      "pixelBox": {
+        "x": 1090,
+        "y": 736,
+        "width": 700,
+        "height": 360
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "CRM «Магазин недвижимости»",
+      "tag": "h1",
+      "cssBox": {
+        "x": 545,
+        "y": 300,
+        "width": 350,
+        "height": 28
+      }
+    },
+    {
+      "label": "Войти",
+      "tag": "button",
+      "cssBox": {
+        "x": 545,
+        "y": 512,
+        "width": 350,
+        "height": 36
+      }
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "file": "collections.png",
+  "role": "REALTOR1",
+  "path": "/collections",
+  "query": "",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "deviceScaleFactor": 2,
+  "scroll": {
+    "x": 0,
+    "y": 0
+  },
+  "capturedAt": "2026-11-08T18:32:32.753Z",
+  "sha256": "1627c6f13e1428abd71628e4ae419323ae05fbd29111ebb7971ea8a8b046e56d",
+  "elements": [
+    {
+      "label": "heading",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 293.734375,
+        "height": 28
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 210,
+        "width": 587,
+        "height": 56
+      }
+    },
+    {
+      "label": "navigation",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 0,
+        "y": 76,
+        "width": 244,
+        "height": 588
+      },
+      "pixelBox": {
+        "x": 0,
+        "y": 152,
+        "width": 488,
+        "height": 1176
+      }
+    },
+    {
+      "label": "main-form",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 268,
+        "y": 171,
+        "width": 1148,
+        "height": 70
+      },
+      "pixelBox": {
+        "x": 536,
+        "y": 342,
+        "width": 2296,
+        "height": 140
+      }
+    },
+    {
+      "label": "table",
+      "found": true,
+      "visible": true,
+      "cssBox": {
+        "x": 285,
+        "y": 315,
+        "width": 1114,
+        "height": 107
+      },
+      "pixelBox": {
+        "x": 570,
+        "y": 630,
+        "width": 2228,
+        "height": 214
+      }
+    }
+  ],
+  "controls": [
+    {
+      "label": "Свернуть навигацию",
+      "tag": "button",
+      "cssBox": {
+        "x": 0,
+        "y": 856,
+        "width": 244,
+        "height": 44
+      }
+    },
+    {
+      "label": "Открыть AI-помощника",
+      "tag": "button",
+      "cssBox": {
+        "x": 958.6875,
+        "y": 18,
+        "width": 83.21875,
+        "height": 42
+      }
+    },
+    {
+      "label": "Записать звонок",
+      "tag": "button",
+      "cssBox": {
+        "x": 1085.828125,
+        "y": 12,
+        "width": 93.109375,
+        "height": 54
+      }
+    },
+    {
+      "label": "+ Создать",
+      "tag": "button",
+      "cssBox": {
+        "x": 1186.9375,
+        "y": 12,
+        "width": 78.359375,
+        "height": 54
+      }
+    },
+    {
+      "label": "Риелтор 1Риелтор",
+      "tag": "button",
+      "cssBox": {
+        "x": 1273.296875,
+        "y": 21,
+        "width": 142.703125,
+        "height": 36
+      }
+    },
+    {
+      "label": "Подборки",
+      "tag": "h1",
+      "cssBox": {
+        "x": 268,
+        "y": 105,
+        "width": 293.734375,
+        "height": 28
+      }
+    },
+    {
+      "label": "Создать подборку",
+      "tag": "button",
+      "cssBox": {
+        "x": 909,
+        "y": 188,
+        "width": 146.390625,
+        "height": 36
+      }
+    },
+    {
+      "label": "Именованные подборки",
+      "tag": "h2",
+      "cssBox": {
+        "x": 285,
+        "y": 268,
+        "width": 164.15625,
+        "height": 20
+      }
+    }
+  ]
+}
