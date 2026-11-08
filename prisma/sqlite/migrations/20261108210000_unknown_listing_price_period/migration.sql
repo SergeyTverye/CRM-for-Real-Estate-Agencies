@@ -1,4 +1,6 @@
--- rebuild-with-foreign-key-check
+-- Rebuild safely both inside the desktop transaction and in Prisma deploy.
+PRAGMA defer_foreign_keys=ON;
+PRAGMA foreign_keys=OFF;
 CREATE TABLE "new_external_listings" (
     "published_at" DATETIME,
     "source_updated_at" DATETIME,
@@ -77,3 +79,5 @@ CREATE UNIQUE INDEX external_listings_source_identity_unit_key ON external_listi
 UPDATE external_listings SET price_unit = NULL
 WHERE (SELECT json_type(s.normalized, '$.priceUnit') FROM external_listing_snapshots s
        WHERE s.listing_id=external_listings.id ORDER BY s.fetched_at DESC,s.id ASC LIMIT 1) = 'null';
+PRAGMA foreign_keys=ON;
+PRAGMA defer_foreign_keys=OFF;
