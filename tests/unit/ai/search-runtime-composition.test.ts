@@ -20,10 +20,12 @@ describe("local backend composition", () => {
     const settings = { enabled: true, sources, settings: { browserEnabled: true },
       config: { SCRAPER_BROWSER_ENABLED: true, SCRAPER_CHROME_PATH: "D:\\synthetic-bundle\\chrome.exe", SCRAPER_JOB_TIMEOUT_MS: 12345, SCRAPER_MAX_CONCURRENT_JOBS: 1 } } as Awaited<ReturnType<typeof searchSettings>>;
     scraperFor(settings);
-    expect(state.options).toEqual({ enabled: true, enabledSources: sources, browserEnabled: true,
+    expect(state.options).toEqual({ enabled: true, enabledSources: sources, browserEnabled: true, navigationSources: ["yandex"],
       browser: { executablePath: "D:\\synthetic-bundle\\chrome.exe" }, jobTimeoutMs: 12345, maxConcurrentJobs: 1 });
     scraperFor({ ...settings, enabled: false, settings: { ...settings.settings!, browserEnabled: false } });
     expect(state.options).toMatchObject({ enabled: false, browserEnabled: false });
+    scraperFor({ ...settings, settings: { ...settings.settings!, cianAutoBrowser: true, yandexAutoBrowser: false } });
+    expect(state.options).toMatchObject({ navigationSources: ["cian"] });
   });
   it("does not fail scraper composition or reserve/spend when optional credentials are missing", async () => {
     const ai = await getSearchAi(); expect(ai).not.toBeNull();

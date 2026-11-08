@@ -1,5 +1,16 @@
 # Соответствие модели данных: ТЗ → Prisma → PostgreSQL
 
+## v3.2.3: настройки браузерной навигации
+
+Настройки площадок → `AiSetting` → `ai_settings` (PG и SQLite): добавлены nullable
+boolean `cianAutoBrowser` → `cian_auto_browser`, `yandexAutoBrowser` →
+`yandex_auto_browser`. NULL сохраняет автоматический default среды, false отключает
+native-режим конкретного источника. Общие `browserEnabled`, enabledSources, авторизация,
+аудит и optimistic concurrency настроек сохраняются. Аддитивные миграции
+`20261109190000_source_browser_navigation` не перезаписывают прежние записи.
+PG применена к заполненной crm_demo, SQLite populated upgrade проверен обоими путями
+исполнения; clean migrations и очередь проверены на PG crm_test_b и SQLite.
+
 ## Дополнения v2.4.1 (разделы 3–8, 10.2)
 
 Одна миграция `20261105120000_v241_extensions`, полученная через `prisma migrate diff`
