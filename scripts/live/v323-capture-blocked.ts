@@ -12,7 +12,7 @@ void (async()=>{
   ];
   for (const {source, headless} of targets) {
     const q=buildScraperQuery(filters, source, new AbortController().signal, undefined, {maxPages:1,limit:5});
-    const url=(scraper.parsers[source] as { buildSearchUrl(q: typeof q): string }).buildSearchUrl(q);
+    const url=(scraper.parsers[source] as { buildSearchUrl(query: typeof q): string }).buildSearchUrl(q);
     const browser=await chromium.launch({headless});
     const ctx=await browser.newContext({locale:"ru-RU", viewport:{width:1366,height:900}});
     const page=await ctx.newPage();
