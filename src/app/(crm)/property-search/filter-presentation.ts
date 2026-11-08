@@ -33,6 +33,8 @@ export interface SearchDepthState {
 export const DEFAULT_SEARCH_DEPTH: SearchDepthState = { maxPages: 2, limit: 100 };
 export const DEFAULT_DEADLINE_SECONDS = 180;
 
+export const PROPERTY_KIND_LABELS = { flat: "Квартира (жилая)", house: "Дом / коттедж", apartments: "Апартаменты (нежилое)", non_residential: "Любое нежилое" } as const;
+
 export const PURPOSE_LABELS: Record<Purpose, string> = {
   retail: "Торговля",
   psn_universal: "ПСН / универсальное",

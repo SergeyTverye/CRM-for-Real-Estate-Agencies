@@ -1,5 +1,6 @@
 import type RealEstateScraper from "real-estate-scrapper";
 import type { SearchFilters, Source } from "../domain/types";
+import { selectedLocations } from "../domain/geography";
 import { resolveSourceDepth, type DepthOptions } from "./source-limits";
 
 const purposeMap = { retail: "retail", psn_universal: "freePurpose", free_purpose: "freePurpose", office: "office", production: "industrial", warehouse: "warehouse" } as const;
@@ -8,6 +9,11 @@ const cities = {
   "москва": { slug: "moskva", cian: 1, avito: 637640, domclick: "1d1463ae-c80f-4d19-9331-a1b68a85b553", mirkvartir: "MK_Region|77" },
 } as const;
 
+/** Verified public navigation paths; different sites use different settlement slugs. */
+const mirLocationPath = (city: string): string => {
+  const paths: Record<string, string> = { "Кольцово": "Кольцово+рабочий+поселок", "Краснообск": "Новосибирский+район/Краснообск+рабочий+поселок" };
+  return ["Новосибирская+область", ...(city === "Новосибирская область" ? [] : (paths[city] ?? city).split("/"))].map(encodeURIComponent).join("/") + "/";
+};
 /** Site IDs are independent namespaces. Trusted server options override defaults. */
 export function resolveSourceGeography(filters: SearchFilters, source: Source, sourceOptions?: RealEstateScraper.Query["sourceOptions"]) {
   const city = cities[filters.city.trim().toLocaleLowerCase("ru") as keyof typeof cities];
@@ -18,7 +24,12 @@ export function resolveSourceGeography(filters: SearchFilters, source: Source, s
     ...(source === "domclick" ? { address: city.domclick } : {}),
     ...(source === "mirkvartir" ? { locationIds: city.mirkvartir } : {}),
   } : {};
-  return { ...defaults, ...sourceOptions?.[source] };
+  const location = selectedLocations(filters)[0];
+  const extra: RealEstateScraper.SourceOptions = location && !city ? {
+    citySlug: source === "onrealt" && location.id === "koltsovo" ? "rabochij-poselok-koltcovo" : location.slug,
+    ...(source === "mirkvartir" ? { url: `https://${filters.operation === "rent" ? "arendacre" : "cre"}.mirkvartir.ru/${mirLocationPath(location.city)}` } : {}),
+  } : {};
+  return { ...defaults, ...extra, ...sourceOptions?.[source] };
 }
 /** Жилая — отдельная категория площадки, а не коммерческий подтип.
  * Пакет real-estate-scrapper 2.1 отклоняет types:["residential"]
@@ -30,7 +41,14 @@ export function splitPurposes(purposes: SearchFilters["purposes"]): { commercial
   return { commercial: purposes.filter((p): p is Exclude<SearchFilters["purposes"][number], "residential"> => p !== "residential"), residential: purposes.includes("residential") };
 }
 export function buildScraperQueries(filters: SearchFilters, source: Source, signal: AbortSignal, sourceOptions?: RealEstateScraper.Query["sourceOptions"], depth?: DepthOptions): RealEstateScraper.Query[] {
-  const { commercial, residential } = splitPurposes(filters.purposes);
+  const locations = selectedLocations(filters);
+  if (filters.locations?.length || locations.length === 1 && locations[0]!.kind === "district") {
+    return locations.flatMap(location => buildScraperQueries({ ...filters, city: location.city, locations: undefined }, source, signal, sourceOptions, depth).map(query => location.kind === "district" && ["mirkvartir", "onrealt"].includes(source) ? { ...query, districts: ["Советский"] } : query));
+  }
+  const { commercial, residential: purposeResidential } = splitPurposes(filters.purposes);
+  const kinds = filters.propertyKinds ?? [];
+  const residential = purposeResidential || kinds.length > 0;
+  const wantsCommercial = commercial.length > 0 || kinds.includes("non_residential") || !kinds.length && !residential;
   const commercialQuery = (): RealEstateScraper.Query => {
     // OnRealt has no all-commercial route; searchSite splits these OR branches.
     // OnRealt's retail routes return 404. Its public navigation exposes PSN for
@@ -48,11 +66,12 @@ export function buildScraperQueries(filters: SearchFilters, source: Source, sign
     const geography = resolveSourceGeography(filters, source, sourceOptions);
     // Один запрос на жилой тип: пакет не принимает types:["residential"] и не
     // выражает несколько жилых типов одним URL (nativeMultiType — только коммерция).
-    return RESIDENTIAL_TYPES.map(type => ({ city: filters.city, category: "residential" as const, type, deal: filters.operation,
-      sources: [source], areaMin: filters.areaFrom, areaMax: filters.areaTo, maxPages, limit, signal,
-      sourceOptions: { ...sourceOptions, [source]: geography } }));
+    const types = kinds.length ? [...new Set(kinds.flatMap(k => k === "flat" || k === "apartments" || k === "non_residential" ? ["flat" as const] : k === "house" ? ["house" as const, "cottage" as const] : []))] : RESIDENTIAL_TYPES;
+    return types.map(type => ({ city: filters.city, category: "residential" as const, type, deal: filters.operation,
+      sources: [source], maxPages, limit, signal,
+      sourceOptions: { ...sourceOptions, [source]: source === "mirkvartir" && geography.url ? { ...geography, url: `https://${["house", "cottage"].includes(type) ? filters.operation === "rent" ? "arendadoma" : "dom" : filters.operation === "rent" ? "arenda" : "www"}.mirkvartir.ru/${mirLocationPath(filters.city)}${type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : ""}` } : geography } }));
   };
-  if (residential && !commercial.length) return residentialQueries();
+  if (residential && !wantsCommercial) return residentialQueries();
   if (!residential) return [commercialQuery()];
   return [commercialQuery(), ...residentialQueries()];
 }
@@ -78,6 +97,7 @@ export function scraperErrorReason(error: TechnicalError): string {
     "flat", "studio", "room", "house", "cottage", "townhouse", "land", "garage", "residential"].includes(t));
   const smokeReason = ["SMOKE_REQUEST_BUDGET", "SMOKE_REDIRECT_STOPPED"].find(value => error.error === value);
   const challenge = error.error === "CIAN_ACCESS_CHALLENGE" ? "; CIAN_ACCESS_CHALLENGE (CAPTCHA/антибот)" : "";
+  if (["DISTRICT_LOOKUP_FAILED", "DISTRICT_NOT_FOUND"].includes(code)) return `${code}: площадка не смогла определить выбранный район. Расширьте локацию до города или выберите другую площадку.`;
   if (code === "NEEDS_USER_ACTION") return "NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт";
   return `${code}${error.status ? ` HTTP ${error.status}` : ""}${field ? `; фильтр: ${field}` : ""}${types?.length ? `; назначения: ${types.join(", ")}` : ""}${smokeReason ? `; ${smokeReason}` : ""}${challenge}`;
 }

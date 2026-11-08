@@ -1,0 +1,167 @@
+{
+  "mode": "LIVE",
+  "aiCalls": 0,
+  "scenarios": [
+    {
+      "id": "office-akademgorodok",
+      "runId": "9f356fb6-9ca9-4c98-831c-e05bf4a50a6b",
+      "status": "completed",
+      "sources": [
+        {
+          "requestedCount": 5,
+          "receivedCount": 5,
+          "acceptedCount": 0,
+          "depthReached": 1,
+          "retryAfterAt": null,
+          "statusReasonRu": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/3, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "id": "227cf431-2755-47d1-a915-bdd51d569252",
+          "runId": "9f356fb6-9ca9-4c98-831c-e05bf4a50a6b",
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/3, кеш 0, найдено 0, ошибок 0",
+          "durationMs": 17169,
+          "dateDetails": {
+            "limit": 3,
+            "failed": 0,
+            "enriched": 0,
+            "cacheHits": 0,
+            "requested": 0
+          },
+          "browserSession": null,
+          "browserSessionAction": null
+        }
+      ]
+    },
+    {
+      "id": "office-akademgorodok",
+      "formLocationShown": true,
+      "saved": true,
+      "locations": [
+        "akademgorodok"
+      ],
+      "areaFrom": 50,
+      "areaTo": 100
+    },
+    {
+      "id": "warehouse-ob",
+      "runId": "6a5770ce-9b92-40a3-a155-ab84e64db8e7",
+      "status": "partial",
+      "sources": [
+        {
+          "requestedCount": 5,
+          "receivedCount": 5,
+          "acceptedCount": 0,
+          "depthReached": 1,
+          "retryAfterAt": null,
+          "statusReasonRu": "mirkvartir: TIMEOUT; Даты карточек: запросов 0/3, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "id": "62ed1349-edc8-4756-9f54-239974b01370",
+          "runId": "6a5770ce-9b92-40a3-a155-ab84e64db8e7",
+          "source": "mirkvartir",
+          "status": "partial",
+          "resultCount": 5,
+          "reason": "mirkvartir: TIMEOUT; Даты карточек: запросов 0/3, кеш 0, найдено 0, ошибок 0",
+          "durationMs": 20310,
+          "dateDetails": {
+            "limit": 3,
+            "failed": 0,
+            "enriched": 0,
+            "cacheHits": 0,
+            "requested": 0
+          },
+          "browserSession": null,
+          "browserSessionAction": null
+        }
+      ]
+    },
+    {
+      "id": "warehouse-ob",
+      "formLocationShown": true,
+      "saved": true,
+      "locations": [
+        "ob"
+      ]
+    },
+    {
+      "id": "flat-berdsk",
+      "runId": "a4afeb7f-2233-44b3-8b37-e06b41f14db5",
+      "status": "completed",
+      "sources": [
+        {
+          "requestedCount": 5,
+          "receivedCount": 5,
+          "acceptedCount": 5,
+          "depthReached": 1,
+          "retryAfterAt": null,
+          "statusReasonRu": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 2, ошибок 0",
+          "needsUserAction": false,
+          "id": "c0c67f5c-3ab2-436e-8f1d-8414e5cbf961",
+          "runId": "a4afeb7f-2233-44b3-8b37-e06b41f14db5",
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 2, ошибок 0",
+          "durationMs": 12109,
+          "dateDetails": {
+            "limit": 3,
+            "failed": 0,
+            "enriched": 2,
+            "cacheHits": 0,
+            "requested": 3
+          },
+          "browserSession": null,
+          "browserSessionAction": null
+        }
+      ]
+    },
+    {
+      "id": "flat-berdsk",
+      "formLocationShown": true,
+      "saved": true,
+      "locations": [
+        "berdsk"
+      ],
+      "propertyKinds": [
+        "flat"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "docs/screenshots/vkr/v323-search/office-akademgorodok.png",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/office-akademgorodok-results.png",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/warehouse-ob.png",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/warehouse-ob-results.png",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/flat-berdsk.png",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/flat-berdsk-results.png",
+      "width": 1366,
+      "height": 768
+    }
+  ],
+  "loginStatus": 200,
+  "processesStopped": true,
+  "resultsScreenshotMode": "REPLAY of persisted LIVE runs; no worker or upstream requests",
+  "recaptureProcessesStopped": true
+}

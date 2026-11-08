@@ -4,6 +4,8 @@ import { CatalogPhoto } from "./catalog-photo";
 
 import { useEffect, useRef, useState } from "react";
 import { SearchResultsV31 } from "./search-results-v31";
+import { LocationPicker } from "./location-picker";
+import { locationSummary } from "@/modules/property-search/domain/geography";
 import { CatalogFilters } from "./catalog-filters";
 import { QueryRefinement } from "@/ui/listing-analysis/query-refinement";
 import Link from "next/link";
@@ -23,6 +25,7 @@ import {
   describeAvailabilityReason,
   PURPOSE_HELP,
   PURPOSE_LABELS,
+  PROPERTY_KIND_LABELS,
   resetAdvancedSearchFilters,
   SEARCH_HELP,
   SOURCE_LABELS,
@@ -187,10 +190,10 @@ export function SearchWorkspace({
   const enabledSourcesCount = availability
     ? availability.sources.filter((s) => s.enabled).length
     : filters.sources.length;
-  const primarySummary = `${filters.city?.trim() ? filters.city.trim() : "Город не задан"} · ${
+  const primarySummary = `${locationSummary(filters) || "Локация не задана"} · ${
     filters.operation === "sale" ? "Продажа" : "Аренда"
   } · ${
-    filters.purposes.length > 0
+    filters.propertyKinds?.length ? filters.propertyKinds.map(k => PROPERTY_KIND_LABELS[k]).join(", ") : filters.purposes.length > 0
       ? filters.purposes.map((p) => PURPOSE_LABELS[p] ?? p).join(", ")
       : "Назначения по умолчанию"
   } · площадок: ${filters.sources.length}${activeAdvancedCount > 0 ? ` · доп. условий: ${activeAdvancedCount}` : ""}`;
@@ -513,16 +516,12 @@ export function SearchWorkspace({
         >
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <label>
-            Город
-            <input
-              className="input mt-1 w-full"
-              value={filters.city}
-              onChange={(e) => {
-                setFilters((f) => ({ ...f, city: e.target.value, districts: [] }));
-                setDirty(true);
-              }}
-            />
+          <LocationPicker filters={filters} onChange={next => { setFilters(next); setDirty(true); }} />
+          <label>Тип объекта
+            <select aria-label="Тип объекта" className="input mt-1 w-full" value={filters.propertyKinds?.[0] ?? ""} onChange={e => { setFilters(f => ({ ...f, propertyKinds: e.target.value ? [e.target.value as NonNullable<SearchFilters["propertyKinds"]>[number]] : undefined, purposes: [] })); setDirty(true); }}>
+              <option value="">По назначениям ниже</option><option value="flat">Квартира (жилая)</option><option value="house">Дом / коттедж</option><option value="apartments">Апартаменты (нежилое)</option><option value="non_residential">Любое нежилое</option>
+            </select>
+            {filters.propertyKinds?.includes("apartments") && <span className="text-xs text-slate-600">Апартаменты обычно нежилые. Юридический статус необходимо проверить по документам.</span>}
           </label>
           <label>
             Операция
@@ -612,12 +611,10 @@ export function SearchWorkspace({
                   <input
                     type="checkbox"
                     checked={filters.purposes.includes(p)}
-                    onChange={(e) =>
-                      edit(
-                        "purposes",
-                        e.target.checked ? [...filters.purposes, p] : filters.purposes.filter((v) => v !== p),
-                      )
-                    }
+                    onChange={(e) => {
+                      setFilters(f => ({ ...f, propertyKinds: undefined, purposes: e.target.checked ? [...f.purposes, p] : f.purposes.filter(v => v !== p) }));
+                      setDirty(true);
+                    }}
                   />
                   {PURPOSE_LABELS[p]}
                 </label>

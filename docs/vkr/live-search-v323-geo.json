@@ -1,0 +1,2241 @@
+{
+  "mode": "LIVE",
+  "updatedAt": "2026-11-08T21:13:27.046Z",
+  "aiCalls": 0,
+  "wireRequests": 95,
+  "cap": 120,
+  "sampling": "Location sweep plus type/operation coverage, not full Cartesian product; 5 cards per page; no seller contacts stored",
+  "cells": [
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 10775
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4310
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 4,
+      "locationCounts": {
+        "matched": 4,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 4,
+        "area": 4,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 6858
+    },
+    {
+      "mode": "LIVE",
+      "source": "cian",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "needs_user_action",
+      "reason": "cian: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 1714
+    },
+    {
+      "mode": "LIVE",
+      "source": "yandex",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "needs_user_action",
+      "reason": "yandex: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2099
+    },
+    {
+      "mode": "LIVE",
+      "source": "avito",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "blocked",
+      "reason": "avito: ACCESS_BLOCKED HTTP 439",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1012
+    },
+    {
+      "mode": "LIVE",
+      "source": "domclick",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "blocked",
+      "reason": "domclick: ACCESS_BLOCKED HTTP 401",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1031
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 10380
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3993
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 4,
+      "locationCounts": {
+        "matched": 4,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 4,
+        "area": 4,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 6918
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 5
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 7936
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 5,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4770
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "akademgorodok",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 4,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 4
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 4,
+        "area": 4,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 6211
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "berdsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5857
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "berdsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 5,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1447
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "berdsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2778
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "ob",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5641
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "ob",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 1,
+      "locationCounts": {
+        "matched": 1,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 1,
+        "area": 1,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 942
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "ob",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 3902
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "error",
+      "reason": "mirkvartir: FETCH_FAILED HTTP 404; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1156
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "error",
+      "reason": "onrealt: FETCH_FAILED HTTP 404; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1268
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "koltsovo",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "unsupported_filter",
+      "reason": "youla: LOCATION_NOT_FOUND; фильтр: city",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 7966
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "error",
+      "reason": "mirkvartir: FETCH_FAILED HTTP 404; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 645
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1792
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "krasnoobsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 3184
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "iskitim",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 2,
+        "rejected": 3
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 10272
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "iskitim",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 896
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "iskitim",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2745
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk-region",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 4,
+        "contradicted": 1,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 10724
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk-region",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 5,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4508
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk-region",
+      "type": "office",
+      "operation": "rent",
+      "filtered": false,
+      "status": "unsupported_filter",
+      "reason": "youla: LOCATION_NOT_FOUND; фильтр: city",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 7597
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 7395
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 1
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5656
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2676
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 8557
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 1
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3106
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 3786
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "retail",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 8928
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "retail",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 1
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3776
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "retail",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 1,
+      "locationCounts": {
+        "matched": 1,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 1,
+        "area": 1,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 3674
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "psn",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 19207
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "psn",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 1
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3834
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "psn",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 1,
+      "locationCounts": {
+        "matched": 1,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 1,
+        "area": 1,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 4200
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "apartments",
+      "operation": "rent",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: flat; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 44
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "apartments",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5789
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "apartments",
+      "operation": "rent",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "youla: UNSUPPORTED_FILTER; назначения: flat",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 36
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "rent",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: flat; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 6
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 6210
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "rent",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "youla: UNSUPPORTED_FILTER; назначения: flat",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 73
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "rent",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: house; mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: cottage; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 22
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 3,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 3,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 3,
+        "area": 3,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 3608
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "rent",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "youla: UNSUPPORTED_FILTER; назначения: house; youla: UNSUPPORTED_FILTER; назначения: cottage",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 57
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "non_residential",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 18854
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "non_residential",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 4,
+        "rejected": 1
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 2838
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "non_residential",
+      "operation": "rent",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 2,
+      "locationCounts": {
+        "matched": 2,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 2,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 2,
+        "area": 2,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 4605
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 7756
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3491
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "office",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2958
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 3,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 2
+      },
+      "fields": {
+        "price": 3,
+        "area": 3,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5730
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 3,
+      "locationCounts": {
+        "matched": 2,
+        "contradicted": 0,
+        "unknown": 1
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 2,
+        "rejected": 1
+      },
+      "fields": {
+        "price": 2,
+        "area": 2,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 1502
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "warehouse",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 3873
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "retail",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 9319
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "retail",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Торговля: используется категория ПСН OnRealt; назначение проверяется CRM, охват неполный; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 3,
+        "rejected": 2
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3193
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "retail",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 2595
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "psn",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 8928
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "psn",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 3,
+        "rejected": 2
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3760
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "psn",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 1,
+      "locationCounts": {
+        "matched": 1,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 1,
+        "area": 1,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 4163
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "apartments",
+      "operation": "sale",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: flat; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 59
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "apartments",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 4914
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "apartments",
+      "operation": "sale",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "youla: UNSUPPORTED_FILTER; назначения: flat",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 69
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: flat; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 22
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 4
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 5923
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "flat",
+      "operation": "sale",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "youla: UNSUPPORTED_FILTER; назначения: flat",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 74
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "sale",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: house; mirkvartir: UNSUPPORTED_FILTER; фильтр: areaMin; назначения: cottage; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 7
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "sale",
+      "filtered": true,
+      "status": "partial",
+      "reason": "onrealt: FETCH_FAILED; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 3,
+      "locationCounts": {
+        "matched": 3,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 3,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 3,
+        "area": 3,
+        "publishedAt": 0
+      },
+      "requests": 2,
+      "elapsedMs": 15413
+    },
+    {
+      "mode": "BLOCKED",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "house",
+      "operation": "sale",
+      "filtered": true,
+      "status": "unsupported_filter",
+      "reason": "youla: UNSUPPORTED_FILTER; назначения: house; youla: UNSUPPORTED_FILTER; назначения: cottage",
+      "count": 0,
+      "locationCounts": {
+        "matched": 0,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 0,
+        "area": 0,
+        "publishedAt": 0
+      },
+      "requests": 0,
+      "elapsedMs": 36
+    },
+    {
+      "mode": "LIVE",
+      "source": "mirkvartir",
+      "location": "novosibirsk",
+      "type": "non_residential",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 0,
+        "rejected": 5
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 12091
+    },
+    {
+      "mode": "LIVE",
+      "source": "onrealt",
+      "location": "novosibirsk",
+      "type": "non_residential",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+      "count": 5,
+      "locationCounts": {
+        "matched": 5,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 3,
+        "rejected": 2
+      },
+      "fields": {
+        "price": 5,
+        "area": 5,
+        "publishedAt": 0
+      },
+      "requests": 1,
+      "elapsedMs": 3173
+    },
+    {
+      "mode": "LIVE",
+      "source": "youla",
+      "location": "novosibirsk",
+      "type": "non_residential",
+      "operation": "sale",
+      "filtered": true,
+      "status": "success",
+      "reason": null,
+      "count": 1,
+      "locationCounts": {
+        "matched": 1,
+        "contradicted": 0,
+        "unknown": 0
+      },
+      "verdicts": {
+        "confirmed": 0,
+        "needs_review": 1,
+        "rejected": 0
+      },
+      "fields": {
+        "price": 1,
+        "area": 1,
+        "publishedAt": 0
+      },
+      "requests": 3,
+      "elapsedMs": 5229
+    }
+  ],
+  "implementationCommit": "52408a7",
+  "evidenceFiles": [
+    "live-search-v323-geo-retest.json",
+    "v323-geo-discovery.json",
+    "v323-geo-ui.json"
+  ],
+  "checks": {
+    "typecheck": "PASS",
+    "eslint": "PASS",
+    "build": "PASS webpack",
+    "unitBroad": 650,
+    "unitFinalRegression": 304,
+    "unitPolicy": 12,
+    "integrationAuthorizationPgSqlite": 70,
+    "integrationFinalRoundTripPgSqlite": 52,
+    "countsOverlap": true,
+    "uiScenarios": 3,
+    "uiScreenshots": 6
+  }
+}

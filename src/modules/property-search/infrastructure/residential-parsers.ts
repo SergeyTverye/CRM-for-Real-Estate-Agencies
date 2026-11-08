@@ -1,3 +1,4 @@
+import { selectedLocations } from "../domain/geography";
 import type RealEstateScraper from "real-estate-scrapper";
 
 type RecordValue = Record<string, unknown>;
@@ -94,7 +95,7 @@ export function attachResidentialParsers(client: RealEstateScraper): void {
   const mir = client.parsers.mirkvartir;
   const mirBuild = mir.buildSearchUrl.bind(mir);
   const novosibirskCity = (value: unknown): boolean =>
-    typeof value === "string" && value.trim().toLocaleLowerCase("ru") === "новосибирск";
+    typeof value === "string" && selectedLocations({ city: value }).some(l => l.kind !== "region");
   const regionSegment = encodeURIComponent("Новосибирская+область");
   mir.buildSearchUrl = (query: RealEstateScraper.Query = {}) => {
     if (!residential(query)) return Reflect.apply(mirBuild, mir, [query]);
