@@ -15,7 +15,7 @@ import { runChatLoop } from "../domain/loop";
 import { chatRuntime } from "../infrastructure/composition";
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
 import { assembleScreenContext } from "./screen-context";
-import { checkContext, modelContext, collectionScope, listingScope, executeTool, validateProposal, redactToolData } from "./tools";
+import { checkContext, modelContext, collectionScope, listingScope, executeTool, validateProposal, redactScreenData } from "./tools";
 const sessionContext = (s: {
     contextType: string;
     contextId: string | null;
@@ -139,7 +139,7 @@ export async function sendMessage(actor: Actor, id: string, raw: unknown, inject
         const references = [...new Map([...screen.links, ...await contextLinks(actor, sessionContext(s))].map(l => [l.id, l])).values()];
         const text = safeText(referenceText(p.text, references), names);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "user", content: text } });
-        const input: ResponseInput[] = [{ role: "user", content: JSON.stringify({ context: s.contextType === "collection" ? await modelContext(actor, sessionContext(s)) : await redactToolData(actor, screen.data), now: new Date().toISOString(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }) }, { role: "user", content: text }];
+        const input: ResponseInput[] = [{ role: "user", content: JSON.stringify({ context: s.contextType === "collection" ? await modelContext(actor, sessionContext(s)) : await redactScreenData(actor, screen.data), now: new Date().toISOString(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }) }, { role: "user", content: text }];
         const runtime = await chatRuntime(actor, id, injected);
         const result = await runChatLoop(input, r => runtime.call(r), (name, args) => executeTool(actor, id, name, args), runtime.model);
         // Recheck before persistence/display: ownership of the CRM context may have changed.

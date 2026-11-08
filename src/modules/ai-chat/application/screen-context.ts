@@ -20,7 +20,8 @@ export async function checkScreenContext(actor: Actor, c: ChatContext, tx: DbOrT
 }
 const taskSelect = { id: true, taskType: true, status: true, priority: true, dueAt: true } as const;
 const needSelect = { id: true, clientId: true, operationType: true, propertyType: true, status: true, stage: true, areaMin: true, areaMax: true, budgetMin: true, budgetMax: true, updatedAt: true } as const;
-/** Whitelist only. Free text, identities, owner links, contacts and documents are NEVER selected.
+/** Whitelist only. Identities, owner links, contacts and documents are NEVER selected.
+ * Task title/description are isolated as untrusted_data and redacted at the provider boundary.
  * Bounded records are a sample, not totals; totals are explicitly counted.
  */
 export async function assembleScreenContext(actor: Actor, c: ChatContext) {

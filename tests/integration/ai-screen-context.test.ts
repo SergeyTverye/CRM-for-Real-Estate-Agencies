@@ -10,7 +10,7 @@ beforeEach(async () => { vi.stubEnv("AI_ENABLED", "true"); resetConfigCache(); a
 afterEach(() => { vi.unstubAllEnvs(); resetConfigCache(); });
 it("client and need include events, tasks, stages and showings but no forbidden personal data in provider payload", async () => {
   const c = await makeClient(users.realtor1, { displayName: "SecretIdentity", notes: "password=secretCredential; паспорт 1234 567890" });
-  const n = await makeNeed(users.realtor1, c.id);
+  const n = await makeNeed(users.realtor1, c.id, { budgetMax: "50000000" });
   const p = await makeProperty(users.realtor2);
   await db.propertyOwner.create({ data: { propertyId: p.id, clientId: c.id } });
   await db.communication.create({ data: { clientId: c.id, clientNeedId: n.id, authorUserId: users.realtor1.userId, communicationType: "call", occurredAt: new Date(), resultCode: "followup_required", comment: "паспорт 1234 567890; token=secretToken; owner@example.com" } });
@@ -21,6 +21,7 @@ it("client and need include events, tasks, stages and showings but no forbidden 
     const before = await db.task.count();
     await sendMessage(users.realtor1, session.id, { text: "Какое следующее действие?" }, fake);
     const payload = JSON.stringify(fake.requests);
+    expect(payload).toContain("50000000");
     expect(payload).toContain('communications'); expect(payload).toContain('stages'); expect(payload).toContain('showings'); expect(payload).toContain(n.id);
     expect(payload).not.toMatch(/SecretIdentity|secretCredential|1234 567890|secretToken|owner@example|secretOwnerContact|passwordHash|normalizedValue/);
     expect(await db.task.count()).toBe(before);

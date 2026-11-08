@@ -28,7 +28,7 @@ export async function modelContext(actor: Actor, c: ChatContext) {
         const rows = await db.propertyCollectionItem.findMany({ where: { collectionId: c.id }, select: { propertyId: true, externalListingId: true }, take: MAX_ROWS, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] });
         return { ...c, items: rows };
     }
-    return redactToolData(actor, (await assembleScreenContext(actor, c)).data);
+    return redactScreenData(actor, (await assembleScreenContext(actor, c)).data);
 }
 const querySchema = z.object({ query: z.string().max(120).optional() }).strict();
 const clientSchema = z.object({ clientId: z.uuid().optional() }).strict();
@@ -126,4 +126,14 @@ export async function redactToolData(actor: Actor, data: unknown, links: RecordL
         return value;
     }
     return redact(data);
+}
+
+/** Structural whitelist facts (money, dates, stable codes) are not free text.
+ * Only the explicitly isolated text channel is redacted; treating money as a phone loses facts.
+ */
+export async function redactScreenData(actor: Actor, value: unknown): Promise<unknown> {
+    if (Array.isArray(value)) return Promise.all(value.map(v => redactScreenData(actor, v)));
+    if (value instanceof Date || !value || typeof value !== "object") return value;
+    return Object.fromEntries(await Promise.all(Object.entries(value).map(async ([key, v]) =>
+        [key, key === "untrusted_data" ? await redactToolData(actor, v) : await redactScreenData(actor, v)])));
 }
