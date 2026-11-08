@@ -1,0 +1,5608 @@
+{
+  "mode": "LIVE",
+  "startedAt": "2026-11-08T22:37:47.376Z",
+  "database": "crm_demo",
+  "origin": "http://127.0.0.1:3385",
+  "scenarios": [
+    {
+      "id": "a",
+      "name": "Офис 50–100 м² аренда, Академгородок",
+      "runId": "ecac7d0d-0776-416d-9883-8f8418a5862d",
+      "elapsedMs": 70988,
+      "filters": {
+        "city": "Новосибирск",
+        "areaTo": 100,
+        "seller": "all",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "areaFrom": 50,
+        "purposes": [
+          "office"
+        ],
+        "districts": [],
+        "floorMode": "any",
+        "locations": [
+          "akademgorodok"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "needs_user_action",
+      "total": 20,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 11,
+        "rejected": 9
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "needs_user_action",
+          "resultCount": 0,
+          "reason": "avito: NEEDS_USER_ACTION: площадка требует проверки браузера/CAPTCHA; откройте площадку вручную или используйте официальный импорт",
+          "needsUserAction": true,
+          "depthReached": 0,
+          "durationMs": 3718
+        },
+        {
+          "source": "cian",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 18391
+        },
+        {
+          "source": "domclick",
+          "status": "blocked",
+          "resultCount": 0,
+          "reason": "domclick: ACCESS_BLOCKED HTTP 401",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 513
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 2, ошибок 1",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 11617
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 3, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 4874
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 18322
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "resultCount": 0,
+          "reason": null,
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 2538
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "2c42beb9-43c4-4651-a5c7-e4d07b1b2c85",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдам в аренду офис, 69.6 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Мусы Джалиля, 3/1",
+          "area": 69.6,
+          "price": "55000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "2c3f5777-bb04-4c8f-8490-4e61ba7c0ba4",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "58 м² · офис · 1 этаж из 10",
+          "city": null,
+          "address": null,
+          "area": 58,
+          "price": "58000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "0efabfea-ccfb-4107-b7d3-8252bec67035",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "76 м² · офис · 1 этаж из 12",
+          "city": null,
+          "address": null,
+          "area": 76,
+          "price": "69000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "c6208d9f-7e70-4df2-8de9-9c0225e13ce0",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "50 м² · офис · 4 этаж из 15",
+          "city": null,
+          "address": null,
+          "area": 50,
+          "price": "125000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "fdfa209e-1051-4019-8d0c-290e570dbaba",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Офис, 81 м², 1/1 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Сиреневая ул., 31",
+          "area": 81,
+          "price": "75000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "fd81b96b-8741-49ac-b7ff-2ad2c4320bf7",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Аренда офиса, 59 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Николаева, 16",
+          "area": 59,
+          "price": "45000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "80bf44ca-5109-41ef-b940-d0c9b0189e53",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "97 м² · офис · 9 этаж из 22",
+          "city": null,
+          "address": null,
+          "area": 97,
+          "price": "100000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "0adb7bdd-bf5f-4b07-8aa4-47c64865c9a7",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдается офис, 53 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Демакова, 27",
+          "area": 53,
+          "price": "500.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "65f97b36-43fc-4c0d-af05-e7937222c58d",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдаю в аренду офис, 67 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, Инженерная улица, 5/4",
+          "area": 67,
+          "price": "850.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "ac8e4a01-b528-4d4e-9414-ddcf4cb4b8d8",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "92,8 м² · офис · 1 этаж из 7",
+          "city": null,
+          "address": null,
+          "area": 92.8,
+          "price": "90000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "4eeb6cb7-2fc3-44fb-9d41-aead5e6729e2",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдам в аренду офис, 50 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Советский район, улица Николаева, 11/5",
+          "area": 50,
+          "price": "57000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "7dfa5fb7-5dbf-4377-a0d9-35e78cd8dd62",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Офис, 6260 м², 1/6 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Зеленая Горка, 1",
+          "area": 6260,
+          "price": "6260000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "3d9d0ab0-7bd4-403f-af52-a798c706f3fb",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "Помещение свободного назначения, 96.8 м² · -1 этаж",
+          "city": "Новосибирская",
+          "address": "Новосибирская область, Новосибирск, р-н Центральный, улица Фрунзе, 5",
+          "area": 96.8,
+          "price": "101640.00",
+          "priceUnit": "rub_month",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "185f8e2f-ef34-4d0b-9b46-8f55609b088d",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "Офис, 68.5 м² · 1 этаж",
+          "city": "Новосибирская",
+          "address": "Новосибирская область, Новосибирск, р-н Заельцовский, Дачное шоссе, 22/3",
+          "area": 68.5,
+          "price": "800.00",
+          "priceUnit": "rub_month",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "5a508564-8234-4ee4-91d0-c8a9d77b5192",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "Офис, 20 м² · 9 этаж (площадь 1 из 4)",
+          "city": "Новосибирская",
+          "address": "Новосибирская область, Новосибирск, р-н Заельцовский, Красный проспект, 200",
+          "area": 20,
+          "price": "30000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "ccceb0e4-b039-4efa-b195-2bc7e9116265",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "ПСН (помещение свободного назначения), 100 м², 1/3 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, ул. Печатников, 12",
+          "area": 100,
+          "price": "150000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "8f58562c-2e89-45db-b3c2-93416d8cdb1e",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "Офис, 57.6 м² · 2 этаж",
+          "city": "Новосибирская",
+          "address": "Новосибирская область, Новосибирск, р-н Калининский, улица Богдана Хмельницкого, 5/1",
+          "area": 57.6,
+          "price": "54720.00",
+          "priceUnit": "rub_month",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "e01bf70d-9aaa-43e5-9c18-0520747b8972",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "Офис, 92.3 м² · 6 этаж",
+          "city": "Новосибирская",
+          "address": "Новосибирская область, Новосибирск, р-н Центральный, улица Фрунзе, 5",
+          "area": 92.3,
+          "price": "96915.00",
+          "priceUnit": "rub_month",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "e857cc7a-d468-4d78-9204-8b0b521d9f14",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "ПСН (помещение свободного назначения), 1000 м², 2/2 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Варшавская ул., 6",
+          "area": 1000,
+          "price": "600000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "c4f693c5-2bb1-4c7f-a89e-cdc8b18096b4",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "ПСН (помещение свободного назначения), 37.7 м², 1/17 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Сиреневая ул., 31",
+          "area": 37.7,
+          "price": "40000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "contradicted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "name": "Двухкомнатная квартира продажа до 5 млн, Бердск",
+      "runId": "2efd1e15-aee2-4b8f-9464-6271dbe4830d",
+      "elapsedMs": 55789,
+      "filters": {
+        "city": "Бердск",
+        "seller": "all",
+        "priceTo": "5000000",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "purposes": [],
+        "districts": [],
+        "floorMode": "any",
+        "locations": [
+          "berdsk"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "propertyKinds": [
+          "flat"
+        ],
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "total": 20,
+      "counts": {
+        "confirmed": 4,
+        "needs_review": 6,
+        "rejected": 10
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.avito.locationId",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 6
+        },
+        {
+          "source": "cian",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Для выбранной локации нет проверенного идентификатора Циан. Выберите другую площадку.",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 7
+        },
+        {
+          "source": "domclick",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.domclick.address",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 14
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 2, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 6025
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 3, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 5255
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 25328
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 16191
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "75c93e68-aa9b-4b2b-afb0-09b833af70eb",
+          "source": "mirkvartir",
+          "verdict": "confirmed",
+          "title": "Двухкомнатная квартира на первом этаже",
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Карла Маркса, 39",
+          "area": 43.5,
+          "price": "4700000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "ac06f75d-ede5-41aa-8687-cb8c532cda11",
+          "source": "youla",
+          "verdict": "confirmed",
+          "title": "Квартира, студия, 26 м²",
+          "city": "Бердск",
+          "address": null,
+          "area": 26,
+          "price": "3050000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "991147ab-61a7-4f1c-bf76-5e4d09df0437",
+          "source": "mirkvartir",
+          "verdict": "confirmed",
+          "title": "1-комнатная квартира на первом этаже",
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Максима Горького, 51",
+          "area": 31.7,
+          "price": "3699000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "59529b29-213a-4f10-9c17-15351ac93f4f",
+          "source": "youla",
+          "verdict": "confirmed",
+          "title": "Квартира, 2 комнаты, 46 м²",
+          "city": "Бердск",
+          "address": null,
+          "area": 46,
+          "price": "3880000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "aa001209-f3df-4cd2-9cac-294f0a3ed4c0",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "59,7 м² · 2-комнатная квартира · 1 этаж из 5",
+          "city": null,
+          "address": null,
+          "area": 59.7,
+          "price": "6550000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "968bf1ba-7c09-4b1d-87d9-85f86786c104",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "58 м² · 2-комнатная квартира · 2 этаж из 9",
+          "city": null,
+          "address": null,
+          "area": 58,
+          "price": "8100000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "200d8780-af2d-4ef9-8033-ce89481fa7f0",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "86,5 м² · 3-комнатная квартира · 6 этаж из 11",
+          "city": null,
+          "address": null,
+          "area": 86.5,
+          "price": "10000000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "6ca8ca7b-b813-4ed5-b27f-71c012e09c31",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Однушка на первом этаже",
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Максима Горького, 58/2",
+          "area": 31.7,
+          "price": "3699000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "5f9a90d9-0a30-493b-b1b8-66d432855142",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "32,6 м² · 1-комнатная квартира · 1 этаж из 4",
+          "city": null,
+          "address": null,
+          "area": 32.6,
+          "price": "3180000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "ecbe14a6-5de4-41af-8011-619ede87cd95",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "41,1 м² · 2-комнатная квартира · 6 этаж из 9",
+          "city": null,
+          "address": null,
+          "area": 41.1,
+          "price": "6300000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "3d5e7a6a-dae8-4957-bdb7-a064623878c1",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продается 2-комнатная квартира, 54.9 м2",
+          "city": "Бердск",
+          "address": "Бердск, Лунная улица, 55",
+          "area": 54.9,
+          "price": "7100000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "9b59db2f-08b9-4eb2-bf9b-488db6016a00",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продается двухкомнатная квартира, 60 м2",
+          "city": "Бердск",
+          "address": "Бердск, Салаирская улица, 3",
+          "area": 60,
+          "price": "7960000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "d40e1936-179b-4045-813c-cefb84df80b4",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 4 комнаты, 190 м²",
+          "city": "Бердск",
+          "address": null,
+          "area": 190,
+          "price": "17900000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "787e3e49-ebaa-4905-b45b-50c27d256be5",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продаю двухкомнатную квартиру, 57.6 м2",
+          "city": "Бердск",
+          "address": "Бердск, Речкуновский переулок, 1",
+          "area": 57.6,
+          "price": "8500000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "f47ba7a4-fc9d-4384-a9a6-40b42ad2f604",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 3 комнаты, 58 м²",
+          "city": "Бердск",
+          "address": null,
+          "area": 58,
+          "price": "6500000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "5c9cafe8-7b2d-4505-ab15-4698a021337d",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продаю четырехкомнатную квартиру, 76.5 м2",
+          "city": "Бердск",
+          "address": "Бердск, микрорайон Северный, 15",
+          "area": 76.5,
+          "price": "6950000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "72e18b5f-2bf6-43cf-a3f0-6d9f4ba2acc1",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Просторная трёшка без ремонта",
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Максима Горького, 68",
+          "area": 105,
+          "price": "8150000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "9e7922aa-f7fa-4ea2-a314-a844e8a41c46",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 2 комнаты, 80 м²",
+          "city": "Бердск",
+          "address": null,
+          "area": 80,
+          "price": "9300000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "ea47269e-9274-424b-810c-dd70a257b421",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Вместительная трехкомнатная квартира",
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Ленина, 92",
+          "area": 57.8,
+          "price": "5100000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "21101955-c747-4277-846e-8244badc25d9",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продам 2-ком. квартиру, 59.7 м2",
+          "city": "Бердск",
+          "address": "Бердск, территория МК Сибиряк, к4",
+          "area": 59.7,
+          "price": "9900000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "matched"
+            },
+            {
+              "criterion": "price",
+              "state": "contradicted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "name": "Склад от 300 м² аренда, Обь + Новосибирск",
+      "runId": "c1d9e6bb-660e-4c13-ac02-1f7184cc4bcc",
+      "elapsedMs": 45597,
+      "filters": {
+        "city": "Новосибирск",
+        "seller": "all",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "areaFrom": 300,
+        "purposes": [
+          "warehouse"
+        ],
+        "districts": [],
+        "floorMode": "any",
+        "locations": [
+          "novosibirsk",
+          "ob"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "total": 15,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 13,
+        "rejected": 2
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.avito.locationId",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 7
+        },
+        {
+          "source": "cian",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Для выбранной локации нет проверенного идентификатора Циан. Выберите другую площадку.",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 10
+        },
+        {
+          "source": "domclick",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.domclick.address",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 27
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 4118
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 4549
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 26781
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "resultCount": 0,
+          "reason": null,
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 6457
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "e13729d3-3fec-4e0c-bf9c-665a6475418a",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Склад, 900 м², 1/1 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Большая ул.",
+          "area": 900,
+          "price": "315000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "1e799a12-0299-4934-bc2f-b27a46613ac5",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "2540 м² · склад · 1 этаж из 1A",
+          "city": null,
+          "address": null,
+          "area": 2540,
+          "price": "3460326.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "8a949730-6196-41e2-ac71-ce86b3ec74d4",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "2540 м² · склад · 1 этаж из 1A",
+          "city": null,
+          "address": null,
+          "area": 2540,
+          "price": "3460326.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "7b4e01f2-d13b-45b4-9fcd-80b2ac032930",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдам в аренду складское помещение, 300 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Декабристов, 253",
+          "area": 300,
+          "price": "135000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "460a20bc-c95f-451e-8909-2dd5bcc51eae",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдам в аренду склад, 1435.8 м2",
+          "city": "Обь",
+          "address": "Обь, улица Путейцев, 16",
+          "area": 1435.8,
+          "price": "570000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "902da1c2-a8a9-473f-b22f-fa9f51c35f28",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "22900 м² · склад · 1 этаж",
+          "city": null,
+          "address": null,
+          "area": 22900,
+          "price": "17175000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "cf50696f-ef0a-49b6-a211-dfa4e11b0602",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "9300 м² · склад · 1 этаж",
+          "city": null,
+          "address": null,
+          "area": 9300,
+          "price": "7254000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "b2e535dd-0c37-44b2-b4fa-59678f35ee0b",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Аренда складского помещения, 900 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Ленинский район, улица Пермитина, 24/1к2",
+          "area": 900,
+          "price": "450000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "2f212d59-dd69-4c29-baab-bd490bdeb776",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "700 м² · склад",
+          "city": null,
+          "address": null,
+          "area": 700,
+          "price": "335000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "526ccc22-97b0-4ef1-9919-36a2e3d002a8",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдам склад, 640 м2",
+          "city": "Обь",
+          "address": "Обь, улица Ломоносова, 104",
+          "area": 640,
+          "price": "288000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "921427e3-326c-4847-b02c-9c804eaa48e0",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Склад, 310 м², 1/2 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Толмачевское ш., 25/2",
+          "area": 310,
+          "price": "124000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "68f02be6-6682-4408-aba1-6467a3174bf4",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдается в аренду склад, 367 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Панфиловцев, 62",
+          "area": 367,
+          "price": "201850.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "d2e2fbb3-b942-4289-971b-d09c99e44566",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Склад, 1079 м², 1/2 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Фабричная ул.",
+          "area": 1079,
+          "price": "561080.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "cf50c07b-3c9c-4dc5-89ca-07ddd4b553df",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Торговое помещение, 61.2 м², 1/1 этаж",
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 15",
+          "area": 61.2,
+          "price": "153000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "a54b49ed-ace3-4e40-887b-d162de382ff0",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Торговое помещение, 728.7 м², 1/1 этаж",
+          "city": "Обь",
+          "address": "Обь, ул. Путейцев",
+          "area": 728.7,
+          "price": "1457400.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "purpose",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "area",
+              "state": "matched"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "name": "Квартира аренда, Кольцово",
+      "runId": "ceb6800b-4d94-436f-8028-fa25273a077d",
+      "elapsedMs": 44056,
+      "filters": {
+        "city": "Кольцово",
+        "seller": "all",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "purposes": [],
+        "districts": [],
+        "floorMode": "any",
+        "locations": [
+          "koltsovo"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "propertyKinds": [
+          "flat"
+        ],
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "total": 15,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 11,
+        "rejected": 4
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.avito.locationId",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 8
+        },
+        {
+          "source": "cian",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Для выбранной локации нет проверенного идентификатора Циан. Выберите другую площадку.",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 8
+        },
+        {
+          "source": "domclick",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.domclick.address",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 9
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 1, ошибок 1",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 8921
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 3, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 4962
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 19021
+        },
+        {
+          "source": "youla",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "youla: Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 6906
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "fe4cae96-90db-445d-82f1-a2e11ef2787d",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдаю в аренду 1-комнатную квартиру, 46 м2",
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Молодёжная улица, 4",
+          "area": 46,
+          "price": "4290.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "875933bc-0a9a-4fee-95c6-db7eca071111",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдам в аренду 1-комнатную квартиру, 28 м2",
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Никольский проспект, 11",
+          "area": 28,
+          "price": "3200.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "1995135e-9d81-4225-b2f8-23bf217c8f7d",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "19 м² · 1-комнатная квартира · 10 этаж из 17",
+          "city": null,
+          "address": null,
+          "area": 19,
+          "price": "12000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "cc5d0088-d671-4332-b917-36f796271c6a",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "60 м² · 2-комнатная квартира · 3 этаж из 5",
+          "city": null,
+          "address": null,
+          "area": 60,
+          "price": "30000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "f1dd0803-765e-41be-aa27-ee9b3bbcd746",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "54 м² · 3-комнатная квартира · 16 этаж из 16",
+          "city": null,
+          "address": null,
+          "area": 54,
+          "price": "45000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "3967a360-efac-46c1-8759-6844a2e15cc9",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Крупногабаритная двушка на последнем этаже",
+          "city": null,
+          "address": "рп. Кольцово, Зеленая ул., 80",
+          "area": 56,
+          "price": "40000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "f2b176a2-f112-406c-b2e8-8477134acd72",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "44 м² · 1-комнатная квартира · 9 этаж из 18",
+          "city": null,
+          "address": null,
+          "area": 44,
+          "price": "55000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "610fc4f8-a619-4c20-9e0d-b89b95a5de05",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "66 м² · 3-комнатная квартира · 6 этаж из 10",
+          "city": null,
+          "address": null,
+          "area": 66,
+          "price": "55000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "7b934777-ca4f-404c-bdb4-37c114e015dd",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдаю 1-ком. квартиру, 45 м2",
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, Молодёжная улица, 4",
+          "area": 45,
+          "price": "4116.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "39e7afdc-318f-4abc-b192-159c7c07f660",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдается однокомнатная квартира, 44 м2",
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, рабочий посёлок Кольцово, 35",
+          "area": 44,
+          "price": "3806.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "8ec0caf2-a7c6-486c-9a5d-bdbf2bb97ab9",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "1-ком. квартира в аренду, 44 м2",
+          "city": "рабочий посёлок Кольцово",
+          "address": "рабочий посёлок Кольцово, рабочий посёлок Кольцово, 35",
+          "area": 44,
+          "price": "4290.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "a8f6d61d-c8ee-4334-8c62-6def934f1a7a",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Просторная 3-комнатная квартира",
+          "city": null,
+          "address": "рп. Кольцово, Никольский пр-кт, 4",
+          "area": 73.2,
+          "price": "12999999.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "d944ea7c-6426-45ba-aa3f-148ff05f7a9b",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "1-комн. квартира, 42.5 м², 3/10 этаж",
+          "city": null,
+          "address": "рп. Кольцово, Никольский пр-кт, 4",
+          "area": 42.5,
+          "price": "6500000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "9f87a3d5-8ed4-436a-a839-66b3edd3a2f6",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Крупногабаритная двушка с большой кухней",
+          "city": null,
+          "address": "рп. Кольцово, Вознесенская ул., 4",
+          "area": 63,
+          "price": "11600000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "537e30a9-7396-4661-b5be-2970684a865e",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Крупногабаритная 2-комнатная квартира с ремонтом",
+          "city": null,
+          "address": "рп. Кольцово, Никольский пр-кт, 4",
+          "area": 59,
+          "price": "9600000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e",
+      "name": "Дом/коттедж продажа, Новосибирская область",
+      "runId": "0b1596d7-2ced-46cc-b5df-f9154597b490",
+      "elapsedMs": 77871,
+      "filters": {
+        "city": "Новосибирская область",
+        "seller": "all",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "purposes": [],
+        "districts": [],
+        "floorMode": "any",
+        "locations": [
+          "novosibirsk-region"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "propertyKinds": [
+          "house"
+        ],
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "total": 19,
+      "counts": {
+        "confirmed": 11,
+        "needs_review": 7,
+        "rejected": 1
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.avito.locationId",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 9
+        },
+        {
+          "source": "cian",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Для выбранной локации нет проверенного идентификатора Циан. Выберите другую площадку.",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 8
+        },
+        {
+          "source": "domclick",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.domclick.address",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 6
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 7418
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 5943
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 2,
+          "durationMs": 28417
+        },
+        {
+          "source": "youla",
+          "status": "partial",
+          "resultCount": 4,
+          "reason": "Область: частичный охват Юлы — Новосибирск, Бердск, Обь, Кольцово, Краснообск, Искитим. Площадка не поддерживает область целиком; остальные адреса области ищите на другой площадке.; youla: Локация не поддерживается площадкой. Выберите Новосибирский район или область и проверьте адрес объявления.",
+          "needsUserAction": false,
+          "depthReached": 5,
+          "durationMs": 31479
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "27abb52a-77ae-4496-a0d0-bfab913cb969",
+          "source": "onrealt",
+          "verdict": "confirmed",
+          "title": "Продам дом, 84 м2",
+          "city": "ДНТ Царская Усадьба",
+          "address": "Новосибирская область, ДНТ Царская Усадьба, ДНТ Царская Усадьба, 27",
+          "area": 84,
+          "price": "14999000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "8a9cd760-513e-4f18-8888-a0ee14d3c749",
+          "source": "onrealt",
+          "verdict": "confirmed",
+          "title": "Продается коттедж, 451 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирская область, Новосибирск, Заельцовский район, Осиновая улица, 2",
+          "area": 451,
+          "price": "30300000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "84cdcc76-0457-40cb-9d48-1d544ae19d84",
+          "source": "youla",
+          "verdict": "confirmed",
+          "title": "Дом, 108.4 м²",
+          "city": "Искитим",
+          "address": null,
+          "area": 108.4,
+          "price": "5600000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "1d3aaad6-3d0c-4d52-ba15-2072cb17767b",
+          "source": "youla",
+          "verdict": "confirmed",
+          "title": "Коттедж, 390 м²",
+          "city": "Новосибирск",
+          "address": null,
+          "area": 390,
+          "price": "17000000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "c64faee4-78a2-4424-9198-512ceb4e1e23",
+          "source": "youla",
+          "verdict": "confirmed",
+          "title": "Коттедж, 2013 м²",
+          "city": "Бердск",
+          "address": null,
+          "area": 2013,
+          "price": "12300000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "cbe9e7ad-7d4e-4470-b014-c2128c0d2f44",
+          "source": "onrealt",
+          "verdict": "confirmed",
+          "title": "Продается коттедж, 282.5 м2",
+          "city": "Обь",
+          "address": "Новосибирская область, Обь, Усадебный переулок",
+          "area": 282.5,
+          "price": "12000000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "72cef4eb-d8f0-4246-926c-b2044c11eb3c",
+          "source": "onrealt",
+          "verdict": "confirmed",
+          "title": "Продам дом, 41 м2",
+          "city": "Чулым",
+          "address": "Новосибирская область, Чулым, улица Петра Полянского, 10",
+          "area": 41,
+          "price": "1900000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "2051bf92-a39e-4d07-98d8-38f92b3ab1ea",
+          "source": "onrealt",
+          "verdict": "confirmed",
+          "title": "Продаю дом, 50.6 м2",
+          "city": "некоммерческое садоводческое товарищество Радуга-2",
+          "address": "Новосибирская область, некоммерческое садоводческое товарищество Радуга-2, некоммерческое садоводческое товарищество Радуга-2, 140А",
+          "area": 50.6,
+          "price": "3550000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "3d153c12-0636-48c9-9f94-18e732acb1b4",
+          "source": "mirkvartir",
+          "verdict": "confirmed",
+          "title": "Дом, 72.9 м², 1 сотка",
+          "city": null,
+          "address": "рп. Кольцово, Овражная ул., 1",
+          "area": 72.9,
+          "price": "17300000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "7c79f696-7838-4e66-8731-62822a7d88e6",
+          "source": "mirkvartir",
+          "verdict": "confirmed",
+          "title": "Коттедж, 124.2 м², 5 соток",
+          "city": null,
+          "address": "Новосибирск, Спринтерская ул.",
+          "area": 124.2,
+          "price": "7800000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "24ee2e1f-2601-454c-98e6-40a506d19fa6",
+          "source": "mirkvartir",
+          "verdict": "confirmed",
+          "title": "Дом, 393.9 м², 15 соток",
+          "city": null,
+          "address": "Новосибирск, Зеленая ул., 26",
+          "area": 393.9,
+          "price": "147000000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "1a8f28b8-7569-4d9e-874b-38e27f45ab40",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Недорогая трёшка на первом этаже",
+          "city": null,
+          "address": "Чулымский р-н, Чулым, мкр. Чулым-3, Центральная ул., 4",
+          "area": 59.9,
+          "price": "1300000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "30e2cf40-760e-401b-a7a4-e91d272a17d2",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "511,7 м², дом + 15 соток, участок",
+          "city": null,
+          "address": null,
+          "area": 511.7,
+          "price": "87694560.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "ef2a1484-ee97-4538-b935-f41439c79abf",
+          "source": "youla",
+          "verdict": "needs_review",
+          "title": "Дача, 24 м²",
+          "city": "Обь",
+          "address": null,
+          "area": 24,
+          "price": "1700000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "527b1516-d35c-4a46-9b1e-a90c162b6efc",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "182,2 м², таунхаус",
+          "city": null,
+          "address": null,
+          "area": 182.2,
+          "price": "23649560.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "bdf6ba26-6565-4422-b305-bd9d51af0bf0",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "365 м², дом + 10 соток, участок",
+          "city": null,
+          "address": null,
+          "area": 365,
+          "price": "45000000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "3a3cce38-4382-418b-92ff-412d3945117a",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "722 м², дом + 17,4 сотки, участок",
+          "city": null,
+          "address": null,
+          "area": 722,
+          "price": "235000000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "9c7f3d9f-dad4-4115-82bf-d3365df5bbc3",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "236 м², таунхаус + 2,5 сотки, участок",
+          "city": null,
+          "address": null,
+          "area": 236,
+          "price": "59400000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            }
+          ]
+        },
+        {
+          "listingId": "7f8d2db2-9881-46fe-a0ec-f19da6a78d28",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Недорогая 2-комнатная квартира на первом этаже",
+          "city": null,
+          "address": "Куйбышевский р-н, с. Горбуново, Рабочая ул., 16",
+          "area": 34,
+          "price": "590000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f",
+      "name": "Апартаменты продажа, Новосибирск",
+      "runId": "15d4d85c-525d-42f4-b6db-993596bcb46e",
+      "elapsedMs": 94896,
+      "filters": {
+        "city": "Новосибирск",
+        "seller": "all",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "purposes": [],
+        "districts": [],
+        "floorMode": "any",
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "propertyKinds": [
+          "apartments"
+        ],
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "total": 25,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 2,
+        "rejected": 23
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "avito: UNSUPPORTED_FILTER; назначения: flat",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 3137
+        },
+        {
+          "source": "cian",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 23217
+        },
+        {
+          "source": "domclick",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "domclick: UNSUPPORTED_FILTER; назначения: flat",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 22
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 1, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 7461
+        },
+        {
+          "source": "onrealt",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 3/3, кеш 0, найдено 3, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 5994
+        },
+        {
+          "source": "yandex",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 27385
+        },
+        {
+          "source": "youla",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована",
+          "needsUserAction": false,
+          "depthReached": 1,
+          "durationMs": 22455
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "bf176d85-6550-4802-9600-a93e756e6cdf",
+          "source": "cian",
+          "verdict": "needs_review",
+          "title": "Получи ключи в день покупки",
+          "city": null,
+          "address": "Новосибирская область",
+          "area": 341.3,
+          "price": "35110000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "0a856e67-184a-42e4-9433-3e45a888c7c9",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Большая трёшка с большой кухней",
+          "city": null,
+          "address": "Новосибирск, Серебренниковская ул., 37",
+          "area": 157.4,
+          "price": "30900000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "1690b15e-daf0-4a42-a8a8-d8ccab399a9f",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "2-комн. квартира, 29,85 м², 13/16 этаж",
+          "city": null,
+          "address": "Новосибирская область",
+          "area": 29.85,
+          "price": "6970000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "b38ec809-fdae-456d-a135-4e20fe46b67e",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "2-комн. квартира 82.4 м.кв",
+          "city": null,
+          "address": "Новосибирская область",
+          "area": 82.4,
+          "price": "13900000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "ae021e31-26eb-4248-accb-6afef692585b",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продажа трехкомнатной квартиры, 89.63 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, улица Аэропорт, 88",
+          "area": 89.63,
+          "price": "11000000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "235311da-9ab8-4c96-8151-e1046ed0d5cf",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Огромная квартира под ипотеку",
+          "city": null,
+          "address": "Новосибирск, Серебренниковская ул., 37а",
+          "area": 323.3,
+          "price": "44444000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "01f30583-35d6-4992-804c-0e90553a913a",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "3-комнатная квартира на продажу, 73.3 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Заельцовский район, улица Дуси Ковальчук, 14",
+          "area": 73.3,
+          "price": "8800000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "9577acb9-e6c7-49ed-a864-fe089e3cac97",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Вместительная трехкомнатная квартира с ремонтом",
+          "city": null,
+          "address": "Новосибирск, Советская ул., 17",
+          "area": 71.7,
+          "price": "12199000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "3724e813-e4dd-4ef6-995e-1a3ca49ac06d",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продаю 3-ком. квартиру, 140.5 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Центральный район, улица Свердлова, 10А",
+          "area": 140.5,
+          "price": "37500000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "efc77002-65c8-4d43-af76-a91640fc154e",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 1 комната, 32.3 м²",
+          "city": "Новосибирск",
+          "address": null,
+          "area": 32.3,
+          "price": "3600000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "c8dfe819-b198-4c41-9072-d6dff0eb9d88",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "Квартира в ЖК Бизнес-класса",
+          "city": null,
+          "address": "Новосибирская область",
+          "area": 63.64,
+          "price": "10300000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "e5d508e9-cfb9-430c-b792-9277fdf22ff6",
+          "source": "cian",
+          "verdict": "rejected",
+          "title": "1-комн. квартира, 58,75 м², 9/10 этаж",
+          "city": null,
+          "address": "Новосибирская область",
+          "area": 58.75,
+          "price": "3800000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "cbde7f73-a80c-45e4-a4a4-93be0d0265a8",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 2 комнаты, 61.4 м²",
+          "city": "Новосибирск",
+          "address": null,
+          "area": 61.4,
+          "price": "7800000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "864ab80c-4082-4bf1-b89f-265280e191a9",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Однокомнатная квартира на продажу, 43 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Сакко и Ванцетти, 40",
+          "area": 43,
+          "price": "8000000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "1b44770e-50cb-49e6-91e9-0c9f34c22798",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 2 комнаты, 53 м²",
+          "city": "Новосибирск",
+          "address": null,
+          "area": 53,
+          "price": "7500000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "a5fcd97e-9a5c-4086-b74b-daef0c4aa210",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "60 м² · 2-комнатная квартира · 2 этаж из 15",
+          "city": null,
+          "address": null,
+          "area": 60,
+          "price": "14000000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "ced8bd51-81af-4a05-805c-ac0265526fe7",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "73,8 м² · 3-комнатная квартира · 3 этаж из 22",
+          "city": null,
+          "address": null,
+          "area": 73.8,
+          "price": "13874400.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "4f943883-f8a1-4a1f-9def-a850d3206277",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "28,4 м² · квартира-студия · 7 этаж из 24",
+          "city": null,
+          "address": null,
+          "area": 28.4,
+          "price": "8560000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "1745cf6f-e4cf-4bee-b288-00aa37f80409",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Вместительная двухкомнатная квартира с ремонтом",
+          "city": null,
+          "address": "Новосибирск, Красный пр-кт, 304",
+          "area": 52,
+          "price": "12400000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "241bbcb9-79e8-41da-981b-207fc3f2c155",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 2 комнаты, 45 м²",
+          "city": "Новосибирск",
+          "address": null,
+          "area": 45,
+          "price": "6490000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "a4ee77f7-4343-4307-841f-4a6e967d1c25",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Продается двухкомнатная квартира, 67 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Советский район, Русская улица, 38",
+          "area": 67,
+          "price": "11650000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "9172f339-d31e-4b4f-8e0f-df93394d216d",
+          "source": "youla",
+          "verdict": "rejected",
+          "title": "Квартира, 3 комнаты, 73.5 м²",
+          "city": "Новосибирск",
+          "address": null,
+          "area": 73.5,
+          "price": "13090000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "e9eccc2f-bc12-4dd9-bb3f-a68cda85c086",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "69,6 м² · 4-комнатная квартира · 3 этаж из 9",
+          "city": null,
+          "address": null,
+          "area": 69.6,
+          "price": "5800000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "dc69d98b-bf49-4ac2-a922-c62e9d29bd88",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "48,1 м² · 2-комнатная квартира · 8 этаж из 30",
+          "city": null,
+          "address": null,
+          "area": 48.1,
+          "price": "9350000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        },
+        {
+          "listingId": "732b1861-c311-4944-be7d-b84c92f66bce",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "Просторная двухкомнатная квартира в Центральном",
+          "city": null,
+          "address": "Новосибирск, Депутатская ул., 38",
+          "area": 53,
+          "price": "11700000.00",
+          "priceUnit": "rub_total",
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g",
+      "name": "Любое нежилое до 50 000/мес, Новосибирск и пригороды",
+      "runId": "c90d2b2b-5958-45f3-85ca-17639547e2aa",
+      "elapsedMs": 124109,
+      "filters": {
+        "city": "Новосибирск",
+        "seller": "all",
+        "priceTo": "50000",
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ],
+        "purposes": [],
+        "districts": [],
+        "floorMode": "any",
+        "locations": [
+          "suburbs"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "requiredFeatures": [],
+        "preferredFeatures": []
+      },
+      "status": "partial",
+      "total": 15,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 10,
+        "rejected": 5
+      },
+      "sources": [
+        {
+          "source": "avito",
+          "status": "cancelled",
+          "resultCount": 0,
+          "reason": "Отмена или общий срок выполнения",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": null
+        },
+        {
+          "source": "cian",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Для выбранной локации нет проверенного идентификатора Циан. Выберите другую площадку.",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 13
+        },
+        {
+          "source": "domclick",
+          "status": "unsupported_filter",
+          "resultCount": 0,
+          "reason": "Фильтр city: требуется sourceOptions.domclick.address",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": 11
+        },
+        {
+          "source": "mirkvartir",
+          "status": "success",
+          "resultCount": 5,
+          "reason": "Достигнут лимит страниц/карточек; сортировка по дате площадкой не гарантирована; Даты карточек: запросов 0/0, кеш 0, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 10,
+          "durationMs": 22799
+        },
+        {
+          "source": "onrealt",
+          "status": "partial",
+          "resultCount": 5,
+          "reason": "onrealt: FETCH_FAILED; onrealt: FETCH_FAILED; Даты карточек: запросов 0/0, кеш 1, найдено 0, ошибок 0",
+          "needsUserAction": false,
+          "depthReached": 12,
+          "durationMs": 38393
+        },
+        {
+          "source": "yandex",
+          "status": "partial",
+          "resultCount": 5,
+          "reason": "Браузерная навигация Chromium; проверка JavaScript выполняется автоматически; yandex: ABORTED; yandex: ABORTED",
+          "needsUserAction": false,
+          "depthReached": 8,
+          "durationMs": 58500
+        },
+        {
+          "source": "youla",
+          "status": "cancelled",
+          "resultCount": 0,
+          "reason": "Отмена или общий срок выполнения",
+          "needsUserAction": false,
+          "depthReached": 0,
+          "durationMs": null
+        }
+      ],
+      "samples": [
+        {
+          "listingId": "1a758cff-bc81-40ee-bfb3-3823ed9d161f",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "ПСН (помещение свободного назначения), 35 м², 8/10 этаж",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Комсомольский пр-кт, 24",
+          "area": 35,
+          "price": "35900.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "000d2c78-9657-49b7-b98c-67f1ef05adc1",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдаю в аренду помещение свободного назначения, 170 м2",
+          "city": "Бердск",
+          "address": "Бердск, улица Молодой Гвардии, 1А",
+          "area": 170,
+          "price": "140000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "f90b6919-a734-4e1f-9a83-8c7a4620b69c",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Сдается помещение свободного назначения, 320 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Октябрьский район, улица Якушева, 33",
+          "area": 320,
+          "price": "700.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "fd0d3d54-c5bd-440a-bd5b-1ef36ed3f27c",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "ПСН (помещение свободного назначения), 20 м², 2/2 этаж",
+          "city": "Новосибирский р-н",
+          "address": "Новосибирский р-н, Бердск, ул. Ленина, 122",
+          "area": 20,
+          "price": "19000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "6e2f2648-498b-4c49-9f4b-7681ce8db4cb",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Вместительная двушка с лифтом",
+          "city": null,
+          "address": "Новосибирск, Депутатская ул., 38",
+          "area": 56,
+          "price": "55000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "unknown"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "bf69eb87-836d-4f05-a1d0-2ec5c2fdb672",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "528 м² · торговое помещение · 1 этаж из 1",
+          "city": null,
+          "address": null,
+          "area": 528,
+          "price": "264000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "71e0a80d-f977-4706-aacb-bf34e295dd82",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "30 м² · помещение свободного назначения · 20 этаж из 26",
+          "city": null,
+          "address": null,
+          "area": 30,
+          "price": "45000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "6a62c060-8412-4969-99cb-3c758ab7bf7d",
+          "source": "onrealt",
+          "verdict": "needs_review",
+          "title": "Офис в аренду, 20 м2",
+          "city": "Обь",
+          "address": "Обь, проспект Мозжерина, 101А",
+          "area": 20,
+          "price": "58000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "fb7177f1-5e98-43ca-b83f-b8e38a2e24fe",
+          "source": "yandex",
+          "verdict": "needs_review",
+          "title": "60,6 м² · офис",
+          "city": null,
+          "address": null,
+          "area": 60.6,
+          "price": "39390.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "cf50c07b-3c9c-4dc5-89ca-07ddd4b553df",
+          "source": "mirkvartir",
+          "verdict": "needs_review",
+          "title": "Торговое помещение, 61.2 м², 1/1 этаж",
+          "city": "Обь",
+          "address": "Обь, ул. ЖКО Аэропорта, 15",
+          "area": 61.2,
+          "price": "153000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "matched"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "d6bb3d3f-7fa0-497b-8669-e2160542f8ca",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "33 м² · квартира-студия · 9 этаж из 17",
+          "city": null,
+          "address": null,
+          "area": 33,
+          "price": "34000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "12ef5c80-6b49-45d9-9152-3b046116b249",
+          "source": "yandex",
+          "verdict": "rejected",
+          "title": "26,4 м² · квартира-студия · 24 этаж из 29",
+          "city": null,
+          "address": null,
+          "area": 26.4,
+          "price": "37000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "unknown"
+            },
+            {
+              "criterion": "operation",
+              "state": "unknown"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "0a985d22-f9f4-49dc-896a-84688557de16",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Сдача в аренду 1-комнатной квартиры, 40 м2",
+          "city": "Бердск",
+          "address": "Бердск, Звёздная улица, 11",
+          "area": 40,
+          "price": "3937.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "ec6328a2-659b-4720-8e92-e6da9c18ddbb",
+          "source": "onrealt",
+          "verdict": "rejected",
+          "title": "Сдам в аренду квартиру студию, 25 м2",
+          "city": "Новосибирск",
+          "address": "Новосибирск, Кировский район, улица Немировича-Данченко, 146/2",
+          "area": 25,
+          "price": "1990.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        },
+        {
+          "listingId": "02e8cbb6-79ca-4feb-98f0-dfd05ea67a50",
+          "source": "mirkvartir",
+          "verdict": "rejected",
+          "title": "1-комнатная квартира на последнем этаже",
+          "city": null,
+          "address": "Новосибирский р-н, Бердск, ул. Ленина, 106",
+          "area": 32,
+          "price": "26000.00",
+          "priceUnit": null,
+          "criteria": [
+            {
+              "criterion": "city",
+              "state": "matched"
+            },
+            {
+              "criterion": "operation",
+              "state": "matched"
+            },
+            {
+              "criterion": "propertyKind",
+              "state": "contradicted"
+            },
+            {
+              "criterion": "priceUnit",
+              "state": "unknown"
+            },
+            {
+              "criterion": "price",
+              "state": "unknown"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ai": [
+    {
+      "scenario": "b",
+      "text": "Двушка в Бердске до 5 млн",
+      "status": 200,
+      "ms": 4094,
+      "filters": {
+        "city": "Бердск",
+        "locations": [
+          "berdsk"
+        ],
+        "propertyKinds": [
+          "flat"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "purposes": [],
+        "floorMode": "any",
+        "priceTo": "5000000",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [
+          "2 комнаты"
+        ],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [
+        {
+          "field": "requiredFeatures",
+          "before": [],
+          "after": [
+            "2 комнаты"
+          ]
+        }
+      ],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Бердск",
+        "locations": [
+          "berdsk"
+        ],
+        "propertyKinds": [
+          "flat"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "purposes": [],
+        "floorMode": "any",
+        "priceTo": "5000000",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [
+          "2 комнаты"
+        ],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    },
+    {
+      "scenario": "c",
+      "text": "Склад от 300 метров у Оби в аренду",
+      "status": 200,
+      "ms": 2815,
+      "filters": {
+        "city": "Новосибирск",
+        "locations": [
+          "ob"
+        ],
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [
+          "warehouse"
+        ],
+        "floorMode": "any",
+        "areaFrom": 300,
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [
+        {
+          "field": "locations",
+          "before": [
+            "novosibirsk",
+            "ob"
+          ],
+          "after": [
+            "ob"
+          ]
+        },
+        {
+          "field": "propertyKinds",
+          "before": null,
+          "after": [
+            "non_residential"
+          ]
+        }
+      ],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Новосибирск",
+        "locations": [
+          "ob"
+        ],
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [
+          "warehouse"
+        ],
+        "floorMode": "any",
+        "areaFrom": 300,
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    },
+    {
+      "scenario": "f",
+      "text": "Апартаменты в Новосибирске на продажу",
+      "status": 200,
+      "ms": 2952,
+      "filters": {
+        "city": "Новосибирск",
+        "locations": [
+          "novosibirsk"
+        ],
+        "propertyKinds": [
+          "apartments"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "purposes": [],
+        "floorMode": "any",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [
+        {
+          "field": "locations",
+          "before": null,
+          "after": [
+            "novosibirsk"
+          ]
+        }
+      ],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Новосибирск",
+        "locations": [
+          "novosibirsk"
+        ],
+        "propertyKinds": [
+          "apartments"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "purposes": [],
+        "floorMode": "any",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    },
+    {
+      "scenario": "g",
+      "text": "Любое нежилое до 50 тысяч в месяц в Новосибирске и пригородах",
+      "status": 200,
+      "ms": 1993,
+      "filters": {
+        "city": "Новосибирск",
+        "locations": [
+          "suburbs"
+        ],
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [],
+        "floorMode": "any",
+        "priceTo": "50000",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Новосибирск",
+        "locations": [
+          "suburbs"
+        ],
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [],
+        "floorMode": "any",
+        "priceTo": "50000",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    },
+    {
+      "scenario": "a",
+      "text": "Офис 50–100 м² в Академгородке",
+      "status": 200,
+      "ms": 2373,
+      "filters": {
+        "city": "Новосибирск",
+        "locations": [
+          "akademgorodok"
+        ],
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [
+          "office"
+        ],
+        "floorMode": "any",
+        "areaFrom": 50,
+        "areaTo": 100,
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [
+        {
+          "field": "propertyKinds",
+          "before": null,
+          "after": [
+            "non_residential"
+          ]
+        }
+      ],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Новосибирск",
+        "locations": [
+          "akademgorodok"
+        ],
+        "propertyKinds": [
+          "non_residential"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [
+          "office"
+        ],
+        "floorMode": "any",
+        "areaFrom": 50,
+        "areaTo": 100,
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    },
+    {
+      "scenario": "d",
+      "text": "Квартира в аренду в Кольцово",
+      "status": 200,
+      "ms": 2534,
+      "filters": {
+        "city": "Кольцово",
+        "locations": [
+          "koltsovo"
+        ],
+        "propertyKinds": [
+          "flat"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [],
+        "floorMode": "any",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Кольцово",
+        "locations": [
+          "koltsovo"
+        ],
+        "propertyKinds": [
+          "flat"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [],
+        "floorMode": "any",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    },
+    {
+      "scenario": "e",
+      "text": "Дом или коттедж на продажу в Новосибирской области",
+      "status": 200,
+      "ms": 2281,
+      "filters": {
+        "city": "Новосибирская область",
+        "locations": [
+          "novosibirsk-region"
+        ],
+        "propertyKinds": [
+          "house"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "purposes": [],
+        "floorMode": "any",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "clarificationQuestion": null,
+      "diff": [],
+      "confirmStatus": 200,
+      "confirmedFilters": {
+        "city": "Новосибирская область",
+        "locations": [
+          "novosibirsk-region"
+        ],
+        "propertyKinds": [
+          "house"
+        ],
+        "operation": "sale",
+        "priceUnit": "rub_total",
+        "purposes": [],
+        "floorMode": "any",
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-filter-locations.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "LIVE_UI",
+      "sha256": "0655b15539e7c5940dce4e0b14329b70c71a568c71098ddb59aefb3b7f07454c",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-sources-results.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "LIVE_UI",
+      "sha256": "1d4dbabe465eb1fe2a96f23e4ec36c4a35557e12463c9de6f7327f9dc4524325",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-ai-locations.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "LIVE_UI",
+      "sha256": "4254329d9d2cb100f951e9a3544800af434828e593f92221ed1b4fe3e208eb99",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-a-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "e910a6f92e5f0d21f31917b448045860ec907d286c25295cf383935a21ed39fd",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-b-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "1c76b3b9dabe2a536d043fe2c3b5d376925590ad1ce69c623c17cf164d86b0b4",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-c-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "b2479b20bb21f5a63e008bae716021b02d41fa64f7fb5bc8d7acb73370446624",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-d-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "6782839e2c00b4ac45e9452ba0f678a97042dd9e4603a9549eee1267b1b495bf",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-e-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "90a609def9a86e3edd0799d8a25a41abc699b852ef813a56e8936a6674185368",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-f-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "ec1705317a85c8f721d874cbc76d860a7859b4c63c3198cd6ea401241172de40",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-scenario-g-cards.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "a875852d898c588893cb96b9c6bddfd1f38f087b714b921d6d99cb70712b00dd",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-ranking.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "LIVE_UI",
+      "sha256": "baa39a5d2a265ab7d6f0cb28aa554b5d9d5a2fd0aa8d53a7c5cf753ac3fc5fff",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-card-yandex.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "e910a6f92e5f0d21f31917b448045860ec907d286c25295cf383935a21ed39fd",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-card-onrealt.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "e910a6f92e5f0d21f31917b448045860ec907d286c25295cf383935a21ed39fd",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-manual-domclick.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "5e9a17c11c0d8d09f38ce189c5557a3281fb5f082c65404cb7cc45e84d6e93a0",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-ai-multiple-locations.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "LIVE_UI",
+      "sha256": "0edab896468803cb20c14f4f2bf647bcae0f916165368943c4b5692058169c5d",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-manual-avito-domclick.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "68fea01ee4db3541261850c3392a8aaa7fcd211bde84fc3d14fb352fb8b5c0ac",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-manual-avito.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "603ce74af8c6caaea2bb0fec3509575e05756023bb825782dabebc8a5acc55c5",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    },
+    {
+      "file": "docs/screenshots/vkr/v323-search/e2e-card-cian.png",
+      "width": 1366,
+      "height": 768,
+      "deviceScaleFactor": 2,
+      "pixelWidth": 2732,
+      "pixelHeight": 1536,
+      "mode": "REPLAY_UI_FROM_SAME_LIVE_RUN",
+      "sha256": "317e69338d245406987ab35e0db6a45a33a3555c84bcc62f072509e05d2b3b57",
+      "privacyReview": "No seller phone, seller name, auth state or credentials visible"
+    }
+  ],
+  "defects": [
+    {
+      "id": "D01",
+      "status": "FIXED",
+      "description": "AI provider schema omitted locations/propertyKinds; preservation discarded settlement/type changes",
+      "commit": "2c93319",
+      "tests": "35 targeted unit; 39 PG; 39 SQLite"
+    },
+    {
+      "id": "D02",
+      "status": "FIXED",
+      "description": "needs_user_action exposed only CRM browser; add-by-link/import actions now visible and diagnostics translated",
+      "commit": "277bd7e",
+      "evidence": "e2e-manual-avito-domclick.png; e2e-manual-avito.png"
+    },
+    {
+      "id": "D03",
+      "status": "FIXED",
+      "description": "LIVE model retained broad Novosibirsk city for Ob location and added redundant non_residential to warehouse/office",
+      "commit": "f99f8f2",
+      "evidence": "2 LIVE normalization/confirmation retests; replay unit"
+    },
+    {
+      "id": "D04",
+      "status": "PARTIAL",
+      "description": "No exact room-count filter. Manual flat search includes studios/one-room; AI carries 2 rooms as unverified requiredFeature; manual review required."
+    },
+    {
+      "id": "D05",
+      "status": "PARTIAL",
+      "description": "Some sources omit address, operation or price period; retained in needs_review, never asserted as matching monthly budget."
+    },
+    {
+      "id": "D06",
+      "status": "PARTIAL",
+      "description": "Marketplace routing supports only part of location/type combinations; unsupported_filter is explicit; g reaches 120s deadline."
+    }
+  ],
+  "limits": {
+    "rub": 3,
+    "calls": 12,
+    "depth": {
+      "maxPages": 1,
+      "limit": 5
+    },
+    "monthlyCeilingRub": "9.23",
+    "dailyCeilingCalls": 37
+  },
+  "checks": [
+    {
+      "name": "LIVE-normalization-retest",
+      "pass": true
+    },
+    {
+      "name": "manual-path",
+      "pass": true
+    },
+    {
+      "name": "realtor-run-isolation",
+      "pass": true
+    }
+  ],
+  "loginStatus": 200,
+  "baseline": {
+    "committedRub": "6.231500",
+    "totalCalls": 25
+  },
+  "updatedAt": "2026-11-08T23:11:31.555Z",
+  "ranking": {
+    "status": 200,
+    "ms": 3399,
+    "ranking": [
+      {
+        "listingId": "2c42beb9-43c4-4651-a5c7-e4d07b1b2c85",
+        "reasons": [
+          "Город: соответствует. Новосибирск, Новосибирская область, Новосибирск, Советский район, улица Мусы Джалиля, 3/1, Советский",
+          "Операция: соответствует. rent",
+          "Назначение: соответствует. office"
+        ]
+      },
+      {
+        "listingId": "2c3f5777-bb04-4c8f-8490-4e61ba7c0ba4",
+        "reasons": [
+          "Назначение: соответствует. office",
+          "Площадь: соответствует. 58"
+        ]
+      }
+    ],
+    "cacheHit": false
+  },
+  "usage": {
+    "attemptedPaidCalls": 10,
+    "committedDeltaRub": 1.0449,
+    "totalCallsDelta": 10
+  },
+  "retests": [
+    {
+      "name": "warehouse-location-normalization",
+      "status": 200,
+      "ms": 4526,
+      "filters": {
+        "city": "Обь",
+        "locations": [
+          "ob"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [
+          "warehouse"
+        ],
+        "floorMode": "any",
+        "areaFrom": 300,
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "diff": [
+        {
+          "field": "areaFrom",
+          "before": null,
+          "after": 300
+        },
+        {
+          "field": "city",
+          "before": "Новосибирск",
+          "after": "Обь"
+        },
+        {
+          "field": "locations",
+          "before": null,
+          "after": [
+            "ob"
+          ]
+        },
+        {
+          "field": "operation",
+          "before": "sale",
+          "after": "rent"
+        },
+        {
+          "field": "priceUnit",
+          "before": null,
+          "after": "rub_month"
+        },
+        {
+          "field": "purposes",
+          "before": [],
+          "after": [
+            "warehouse"
+          ]
+        }
+      ],
+      "confirmed": true
+    },
+    {
+      "name": "realtor-multiple-locations",
+      "status": 200,
+      "ms": 3067,
+      "filters": {
+        "city": "Новосибирск",
+        "locations": [
+          "ob",
+          "novosibirsk"
+        ],
+        "operation": "rent",
+        "priceUnit": "rub_month",
+        "purposes": [
+          "warehouse"
+        ],
+        "floorMode": "any",
+        "areaFrom": 300,
+        "districts": [],
+        "seller": "all",
+        "requiredFeatures": [],
+        "preferredFeatures": [],
+        "sources": [
+          "cian",
+          "mirkvartir",
+          "onrealt",
+          "domclick",
+          "yandex",
+          "youla",
+          "avito"
+        ]
+      },
+      "diff": [
+        {
+          "field": "areaFrom",
+          "before": null,
+          "after": 300
+        },
+        {
+          "field": "locations",
+          "before": null,
+          "after": [
+            "ob",
+            "novosibirsk"
+          ]
+        },
+        {
+          "field": "operation",
+          "before": "sale",
+          "after": "rent"
+        },
+        {
+          "field": "priceUnit",
+          "before": null,
+          "after": "rub_month"
+        },
+        {
+          "field": "purposes",
+          "before": [],
+          "after": [
+            "warehouse"
+          ]
+        }
+      ],
+      "confirmed": true
+    }
+  ],
+  "realtor": {
+    "loginStatus": 200,
+    "managerRunStatus": 404
+  },
+  "manualRetest": {
+    "avitoUrlDialog": true,
+    "domclickUrlAction": true
+  },
+  "finalRevision": "f99f8f2",
+  "settingsRestored": true,
+  "processesStopped": true,
+  "cleanupVerification": {
+    "settingsExactlyRestored": true,
+    "at": "2026-11-08T23:12:39.425Z",
+    "noOwnHarnessOrServerProcesses": true,
+    "port3385Closed": true
+  },
+  "summary": {
+    "searchRuns": 7,
+    "sourceScenarioCells": 49,
+    "listingAppearances": 129,
+    "confirmed": 15,
+    "needsReview": 60,
+    "rejected": 54,
+    "aiParses": 7,
+    "normalizationRetests": 2,
+    "rankingCalls": 1
+  },
+  "verification": {
+    "build": "PASS npm run build -- --webpack NEXT_DIST_DIR=.next-v323-e2e",
+    "migration": "PASS crm_demo: no pending migrations",
+    "typecheck": "PASS npx tsc --noEmit",
+    "lint": "PASS changed TS/TSX/CJS --max-warnings=0",
+    "unit": {
+      "passed": 35,
+      "files": 5
+    },
+    "postgresql": {
+      "database": "crm_test_f",
+      "passed": 39,
+      "files": 2
+    },
+    "sqlite": {
+      "passed": 39,
+      "files": 2
+    },
+    "pdf": {
+      "pages": 36,
+      "tocLinks": 34,
+      "structuralCheck": "PASS",
+      "visuallyReviewedPages": [
+        1,
+        2,
+        11,
+        12,
+        13,
+        32,
+        35,
+        36
+      ]
+    },
+    "excel": "not read or modified",
+    "configurationFiles": "tsconfig.json and prisma/sqlite/schema.prisma reverted per user instruction"
+  },
+  "manualVisualReview": {
+    "a": "OnRealt office 69.6 m2 at Musa Jalil 3/1, Sovetsky district; 55,000 RUB but period unknown. Cian Central/Zaeltsovsky cards correctly rejected; Yandex address unknown -> review.",
+    "b": "MirKvartir 2-room at Karla Marksa 39 Berdsk, 4.7m RUB. Youla studio 26 m2 at 3.05m also appears because manual filter has no rooms. Scenario not fully PASS.",
+    "c": "MirKvartir warehouse 900 m2 on Bolshaya Novosibirsk, 315,000 RUB period unknown. OnRealt warehouse 300 m2. Yandex 2540 m2 address unknown.",
+    "d": "OnRealt flats 46/28 m2 in Koltsovo, Molodezhnaya 4/Nikolsky 11. 4290/3200 RUB period unknown; not asserted monthly.",
+    "e": "OnRealt house 84 m2 DNT Tsarskaya Usadba Novosibirsk region and cottage 451 m2 Novosibirsk. Youla house/cottage shown; one out-of-scope item excluded.",
+    "f": "25 collected, zero confirmed; apartment legal kind not established for 2 cards, 23 rejected. Broad flat routes are candidate retrieval, not verified apartments.",
+    "g": "MirKvartir PSN 35 m2 Komsomolsky 24 Novosibirsk, 35,900 RUB period unknown; OnRealt PSN Berdsk 140,000 RUB unknown period remains review, not monthly match."
+  },
+  "assistantEvidence": {
+    "mode": "DEMO_REUSED",
+    "newPaidCalls": 0,
+    "files": [
+      "docs/screenshots/vkr/v323-assistant/01-client-demo.png",
+      "docs/screenshots/vkr/v323-assistant/03-task-demo.png"
+    ],
+    "pdfCrops": "Assistant panel only; contacts excluded"
+  },
+  "scopeNotes": [
+    "No second marketplace collection after AI confirmation: compare parsed filters against same persisted LIVE market sample; do not claim new AI-filtered collection.",
+    "Source counts include rejected/unknown candidates and may overlap; not unique market size.",
+    "Initial harness failed before dispatch due legacy budget accounting and async response timeout; repaired, no paid calls in those attempts. Recovery used last settings audit; subsequent sessions restored exact snapshots.",
+    "Node host v22.23.4; this task reuses installed toolchain, does not certify Node24 baseline.",
+    "No stealth, fingerprint changes, proxy rotation or automated CAPTCHA solving."
+  ]
+}
