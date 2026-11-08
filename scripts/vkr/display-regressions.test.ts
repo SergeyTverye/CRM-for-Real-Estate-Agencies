@@ -25,12 +25,13 @@ it("reads saved raw/normalized address without inventing geography from the titl
 it("uses total sale price, keeps unitless rent under review and explains it", () => {
   const sale = normalizeListing(raw("yandex"));
   expect(sale.priceUnit).toBe("rub_total");
-  expect(resultPriceUnit({ operation: "sale", priceUnit: null }, {})).toBe("за объект");
+  // ADR 0011: единицу цены нельзя угадывать по операции (в продаже бывает цена за м²).
+  expect(resultPriceUnit({ operation: "sale", priceUnit: null }, {})).toBe("период не указан");
   const rent = normalizeListing({ ...raw("yandex"), deal: "rent" });
   expect(rent.priceUnit).toBeNull();
   expect(evaluateListing(rent, SearchFilters.parse({ operation: "rent", priceUnit: "rub_month" })).verdict).toBe("needs_review");
-  expect(resultPriceUnit(rent, { priceUnit: "total" })).toBe("единица цены не указана");
-  expect(resultPriceUnit({ operation: null, priceUnit: null }, { operation: "sale", priceUnit: "total" }, "rent")).toBe("единица цены не указана");
+  expect(resultPriceUnit(rent, { priceUnit: "total" })).toBe("период не указан");
+  expect(resultPriceUnit({ operation: null, priceUnit: null }, { operation: "sale", priceUnit: "total" }, "rent")).toBe("период не указан");
 });
 it("translates saved criterion states, sources, features and structured evidence", () => {
   for (const [group, value, label] of [["criterion_state", "unknown", "Нет данных"], ["criterion_source", "structured", "Структурированные поля"], ["criterion", "floor", "Этаж"], ["criterion", "power_from_50_kW", "Мощность от 50 кВт"]]) expect(evidenceLabel(group!, value!)).toBe(label);
