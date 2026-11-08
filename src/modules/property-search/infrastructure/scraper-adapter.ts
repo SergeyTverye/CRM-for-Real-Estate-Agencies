@@ -98,7 +98,10 @@ export const defaultScraperFactory: ScraperFactory = async config => {
   if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig), { deadline, maxCards: dateDetailMaxCards });
   const browserOptions = browser === true ? {} : browser;
   // Ordinary Playwright launch: no fingerprint changes or anti-detection scripts.
-  const browserInstance = await chromium.launch({ channel: browserOptions.channel, executablePath: browserOptions.executablePath, headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
+  // Channel is only used when explicitly configured; otherwise the bundled Chromium is used.
+  const browserInstance = await chromium.launch({ ...(browserOptions.channel ? { channel: browserOptions.channel } : {}),
+    executablePath: browserOptions.executablePath ?? process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ?? process.env.SCRAPER_CHROME_PATH,
+    headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
   const launched = { browser: browserInstance, close: () => browserInstance.close() };
   try {
     const context: BrowserContext = await launched.browser.newContext({ serviceWorkers: "block", locale: "ru-RU" });
@@ -187,9 +190,10 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
       const factory = this.options.factory ?? defaultScraperFactory;
       const parallelHousing = ["mirkvartir", "onrealt"].includes(source) && plan.queries.length > 1;
       const work = async () => {
+        const executablePath = process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ?? process.env.SCRAPER_CHROME_PATH;
         const created = await factory({ timeout: Math.min(remaining, 30_000), jobDeadlineAt: deadline, dateDetailMaxCards: parallelHousing ? 0 : undefined, maxRetries: 0, transport: resilientTransport(transport, source, deadline, parallelHousing ? 1000 : 0),
-          ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: { channel: "chrome",
-            ...(process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ? { executablePath: process.env.SCRAPER_BROWSER_EXECUTABLE_PATH } : {}),
+          ...(browserEnabled && ["cian", "avito"].includes(source) ? { browser: {
+            ...(executablePath ? { executablePath } : {}),
             ...this.options.browser, sources: [source] } } : {}) });
         if (controller.signal.aborted || finished) { await created.close(); throw { code: "ABORTED" }; }
         client = created;
