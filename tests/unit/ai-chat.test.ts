@@ -1,6 +1,6 @@
 import { it, expect, vi } from "vitest";
 import { runChatLoop } from "@/modules/ai-chat/domain/loop";
-import { safeText, referenceText, displayText, MAX_STEPS, instructions } from "@/modules/ai-chat/domain/policy";
+import { safeText, referenceText, displayText, MAX_STEPS, instructions, estimatedChatInputTokens } from "@/modules/ai-chat/domain/policy";
 import { FakeResponsesProvider, InMemoryAiLedger } from "@/modules/ai/infrastructure/fake";
 import { AiGate } from "@/modules/ai/domain/gate";
 import { YandexResponsesClient } from "@/modules/ai/infrastructure/yandex-responses-client";
@@ -49,4 +49,12 @@ it("keeps authorized labels server-side and restores them only from record refer
     expect(model).toContain("улица Кирова, 25");
     expect(displayText(model, links)).toContain("ООО «Надежда»");
     expect(displayText(model, [])).not.toContain("Надежда");
+});
+
+it("chat reserve includes UTF-8 text, instructions, tools and protocol overhead", () => {
+ const request={input:"уточнить условия",instructions:"помощник",tools:[{name:"get_tasks"}]};
+ expect(estimatedChatInputTokens(request)).toBeGreaterThan(JSON.stringify(request).length);
+ expect(estimatedChatInputTokens(request)).toBeGreaterThan(estimatedChatInputTokens({ input: request.input }));
+ expect(estimatedChatInputTokens(request)).toBeLessThan(24000);
+ expect(estimatedChatInputTokens({input:"x".repeat(24000)})).toBeGreaterThan(24000);
 });

@@ -1,3 +1,4 @@
+import { estimatedChatInputTokens } from "../domain/policy";
 import { randomUUID, createHash } from "node:crypto";
 import { getConfig } from "@/shared/config/env";
 import { db } from "@/shared/db/client";
@@ -20,7 +21,7 @@ export async function chatRuntime(actor: Actor, sessionId: string, injected?: Re
             if (!tariff)
                 throw new AiError("AI_TARIFF_UNAVAILABLE");
             const requestId = `chat:${sessionId}:${randomUUID()}`;
-            await gate.check(web ? "chat_web" : "chat", { userId: actor.userId, active: true }, { id: turnId, ownerUserId: actor.userId, requestId, fingerprint: createHash("sha256").update(JSON.stringify(request)).digest("hex"), model: request.model, estimatedUsage: { inputTokens: 24000+(web?tariff.webInputTokenAllowance:0), outputTokens: request.maxOutputTokens }, estimatedWebCalls: web ? 1 : 0, tariff });
+            await gate.check(web ? "chat_web" : "chat", { userId: actor.userId, active: true }, { id: turnId, ownerUserId: actor.userId, requestId, fingerprint: createHash("sha256").update(JSON.stringify(request)).digest("hex"), model: request.model, estimatedUsage: { inputTokens: estimatedChatInputTokens(request) + (web ? tariff.webInputTokenAllowance : 0), outputTokens: request.maxOutputTokens }, estimatedWebCalls: web ? 1 : 0, tariff });
             // Durable relation links every reservation (also transport failures) to this personal chat.
             try {
                 await db.aiChatMessage.create({ data: { sessionId, role: "tool", content: "Внешний поиск" + (web ? " подтверждён" : " не используется"), aiUsageLogId: aiUsageLogId(requestId) } });

@@ -5,7 +5,7 @@ import { db, transaction, type Tx } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { parseInput } from "@/shared/validation";
 import { DomainError, NotFoundError } from "@/shared/errors";
-import { clientScope, taskScope, needScope, offerScope, dealScope, showingScope, documentScope, propertyReadScope } from "@/modules/access/domain/scopes";
+import { clientScope, taskScope, needScope, offerScope, showingScope, documentScope, propertyReadScope } from "@/modules/access/domain/scopes";
 import { AiError, type ResponsesProvider, type ResponseInput } from "@/modules/ai/domain/contracts";
 import { createTask } from "@/modules/tasks/application/task-service";
 import { createOffer } from "@/modules/commercial-offers/application/offer-service";
@@ -14,7 +14,8 @@ import { contextSchema, safeText, referenceText, displayText, taskProposal, offe
 import { runChatLoop } from "../domain/loop";
 import { chatRuntime } from "../infrastructure/composition";
 import { safeTaskTextScope } from "@/modules/notifications/application/notification-context";
-import { checkContext, modelContext, collectionScope, listingScope, executeTool, validateProposal } from "./tools";
+import { assembleScreenContext } from "./screen-context";
+import { checkContext, modelContext, collectionScope, listingScope, executeTool, validateProposal, redactToolData } from "./tools";
 const sessionContext = (s: {
     contextType: string;
     contextId: string | null;
@@ -66,6 +67,8 @@ async function checkSavedLinks(actor: Actor, value: unknown) {
         };
         const targetId = link.href.match(/\/([0-9a-f-]{36})(?:\/|$)/i)?.[1] ?? link.id;
         let allowed = true;
+        if (link.href.startsWith("/reports/"))
+            await checkContext(actor, { kind: "reports" });
         if (link.href.startsWith("/clients/")) {
             const client = await db.client.findFirst({ where: { id: targetId, ...clientScope(actor) }, select: { displayName: true } });
             allowed = !!client;
@@ -80,7 +83,9 @@ async function checkSavedLinks(actor: Actor, value: unknown) {
         if (link.href.startsWith("/offers/"))
             allowed = !!await db.commercialOffer.findFirst({ where: { id: targetId, AND:[offerScope(actor),{need:{client:clientScope(actor)}}] }, select: { id: true } });
         if (link.href.startsWith("/deals/"))
-            allowed = !!await db.deal.findFirst({ where: { id: targetId, ...dealScope(actor) }, select: { id: true } });
+            await checkContext(actor, { kind: "deal", id: targetId });
+        if (link.href.startsWith("/agreements/"))
+            await checkContext(actor, { kind: "agreement", id: targetId });
         if (link.href.startsWith("/showings/"))
             allowed = !!await db.showing.findFirst({ where: { id: targetId, ...showingScope(actor) }, select: { id: true } });
         if (link.href.startsWith("/collections/"))
@@ -130,10 +135,11 @@ export async function sendMessage(actor: Actor, id: string, raw: unknown, inject
         const history = await db.aiChatMessage.findMany({ where: { sessionId: id, role: { in: ["user", "assistant"] } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 6 });
         const identities = await db.client.findMany({ where: clientScope(actor), select: { displayName: true, contactPersons: { select: { fullName: true } } }, take: 500 });
         const names = identities.flatMap(c => [c.displayName, ...c.contactPersons.map(p => p.fullName)]);
-        const references = await contextLinks(actor, sessionContext(s));
+        const screen = await assembleScreenContext(actor, sessionContext(s));
+        const references = [...new Map([...screen.links, ...await contextLinks(actor, sessionContext(s))].map(l => [l.id, l])).values()];
         const text = safeText(referenceText(p.text, references), names);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "user", content: text } });
-        const input: ResponseInput[] = [{ role: "user", content: JSON.stringify({ context: await modelContext(actor, sessionContext(s)), now: new Date().toISOString(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }) }, { role: "user", content: text }];
+        const input: ResponseInput[] = [{ role: "user", content: JSON.stringify({ context: s.contextType === "collection" ? await modelContext(actor, sessionContext(s)) : await redactToolData(actor, screen.data), now: new Date().toISOString(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }) }, { role: "user", content: text }];
         const runtime = await chatRuntime(actor, id, injected);
         const result = await runChatLoop(input, r => runtime.call(r), (name, args) => executeTool(actor, id, name, args), runtime.model);
         // Recheck before persistence/display: ownership of the CRM context may have changed.

@@ -10,7 +10,9 @@ import { redactContacts } from "@/modules/ai/domain/contracts";
 import { NotFoundError } from "@/shared/errors";
 import { MAX_ROWS, safeText, referenceText, taskProposal, offerProposal, type ChatContext, type RecordLink } from "../domain/policy";
 export const collectionScope = (actor: Actor) => ({ archivedAt: null, OR: [{ ownerUserId: actor.userId }, { visibility: "team" }] });
+import { checkScreenContext, assembleScreenContext } from "./screen-context";
 export async function checkContext(actor: Actor, c: ChatContext, tx: DbOrTx = db) {
+    await checkScreenContext(actor, c, tx);
     if (c.kind === "client")
         await loadAccessibleClient(tx, actor, c.id!);
     if (c.kind === "need") {
@@ -22,15 +24,11 @@ export async function checkContext(actor: Actor, c: ChatContext, tx: DbOrTx = db
 }
 export async function modelContext(actor: Actor, c: ChatContext) {
     await checkContext(actor, c);
-    if (c.kind === "need") {
-        const n = await loadAccessibleNeed(db, actor, c.id!);
-        return { kind: c.kind, id: n.id, clientId: n.clientId, operation: n.operationType, areaMin: n.areaMin?.toString(), areaMax: n.areaMax?.toString(), budgetMin: n.budgetMin?.toString(), budgetMax: n.budgetMax?.toString() };
-    }
     if (c.kind === "collection") {
         const rows = await db.propertyCollectionItem.findMany({ where: { collectionId: c.id }, select: { propertyId: true, externalListingId: true }, take: MAX_ROWS, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] });
         return { ...c, items: rows };
     }
-    return c;
+    return redactToolData(actor, (await assembleScreenContext(actor, c)).data);
 }
 const querySchema = z.object({ query: z.string().max(120).optional() }).strict();
 const clientSchema = z.object({ clientId: z.uuid().optional() }).strict();
