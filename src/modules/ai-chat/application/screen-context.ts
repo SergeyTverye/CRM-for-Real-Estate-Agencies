@@ -1,3 +1,4 @@
+import type { Prisma } from "@/generated/prisma/client";
 import { db, type DbOrTx } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { clientScope, needScope, taskScope, dealScope, agreementScope, showingScope } from "@/modules/access/domain/scopes";
@@ -8,8 +9,8 @@ import { getManagerReport } from "@/modules/reports/application/report-service";
 import { MAX_ROWS, type ChatContext, type RecordLink } from "../domain/policy";
 
 // Stronger than card visibility: AI may not reveal ANY linked foreign client.
-const safeDeal = (actor: Actor) => ({ AND: [dealScope(actor), { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] });
-const safeAgreement = (actor: Actor) => ({ AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal: safeDeal(actor) }] }] });
+const safeDeal = (actor: Actor): Prisma.DealWhereInput => actor.role === "manager" ? {} : ({ AND: [dealScope(actor), { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] });
+const safeAgreement = (actor: Actor): Prisma.AgreementWhereInput => actor.role === "manager" ? {} : ({ AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal: safeDeal(actor) }] }] });
 export async function checkScreenContext(actor: Actor, c: ChatContext, tx: DbOrTx = db) {
   let allowed = true;
   if (c.kind === "task") allowed = !!await tx.task.findFirst({ where: { id: c.id, AND: [taskScope(actor), safeTaskTextScope(actor)] }, select: { id: true } });
