@@ -31,13 +31,13 @@ export class SearchAi {
     private readonly tariffs: TariffRepository, private readonly config: SearchAiConfig,
     private readonly clock: () => Date = () => new Date()) {}
 
-  private async prepareCall(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], reserve = true): Promise<AiRequest> {
+  private async prepareCall(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], reserve = true, responseSchema?: Record<string, unknown>, maxOutputTokens = this.config.maxOutputTokens): Promise<AiRequest> {
     const model = type === "web_search" ? this.config.webModel || this.config.model : this.config.model;
-    const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens: this.config.maxOutputTokens,
+    const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens,
       ...(type === "parse" ? { responseSchema: providerParseSchema, responseSchemaStrict: true } : {}),
       ...(type === "call_note" ? { responseSchema: providerCallNoteSchema, responseSchemaStrict: true } : {}),
       ...(type === "offer_text" ? { responseSchema: providerOfferTextSchema, responseSchemaStrict: true } : {}),
-      ...(tools ? { tools } : {}) };
+      ...(tools ? { tools } : {}), ...(responseSchema ? {responseSchema, responseSchemaStrict:true} : {}) };
     const tariff = await this.tariffs.findEffective(model, this.clock());
     if (!tariff) throw new AiError("AI_TARIFF_UNAVAILABLE");
     const inputTokens = Buffer.byteLength(request.input + instructions + JSON.stringify(request.responseSchema ?? {}), "utf8") + 1024 + (tools ? tariff.webInputTokenAllowance : 0);
@@ -50,8 +50,8 @@ export class SearchAi {
     return request;
   }
 
-  private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[]): Promise<AiResponse> {
-    const request = await this.prepareCall(type, context, input, instructions, tools);
+  private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], custom?: {schema:Record<string,unknown>;validate:(text:string)=>void;maxOutputTokens?:number}): Promise<AiResponse> {
+    const request = await this.prepareCall(type, context, input, instructions, tools, true, custom?.schema, custom?.maxOutputTokens);
     let response: AiResponse;
     try { response = await this.provider.respond(request); }
     catch (error) {
@@ -61,7 +61,8 @@ export class SearchAi {
       throw new AiError("AI_CALL_FAILED");
     }
     try {
-      if (type === "parse") decodeParseResult(response.text);
+      if (custom) custom.validate(response.text);
+      else if (type === "parse") decodeParseResult(response.text);
       else if (type === "call_note") decodeCallNote(response.text);
       else if (type === "offer_text") checkOfferNumbers(this.decode(offerTextSchema, response.text).text, input);
       else if (type === "description") this.decode(descriptionResultSchema, response.text);
@@ -92,6 +93,26 @@ export class SearchAi {
   async draftOfferText(context: AiCallContext, facts: unknown, kind: "intro" | "comparison") {
     const response = await this.call("offer_text", context, { facts, kind }, `${untrusted} Подготовь ${kind === "intro" ? "краткое введение к КП без чисел и диапазонов" : "сравнительное описание объектов: отдельный абзац по каждой позиции с её адресом и характеристиками"} только по переданным снимкам CRM. Не выдумывай факты, преимущества, условия или числа. Не делай вычислений и не обобщай диапазоны площадей и цен. Скопируй числа точно и только для соответствующего объекта, без сокращений тыс/млн. Не нумеруй список. Неизвестное опусти. Не используй личные обращения. Верни JSON {"text":"..."}.`);
     return { ...this.decode(offerTextSchema, response.text), ...this.metadata(response) };
+  }
+
+  /** Ranking returns references to server-evaluated criteria, never model facts. */
+  async rankListings(context: AiCallContext, input: {items:{listingId:string;criteria:{criterion:string;state:string;evidence:string}[];pricePeriodNotice:string|null}[]}) {
+    const schema = z.object({ranking:z.array(z.object({listingId:z.string(),reasonCriteria:z.array(z.string()).min(1).max(3)}).strict()).min(2).max(10)}).strict();
+    const validate = (text:string) => {
+      const result=this.decode(schema,text);
+      if (result.ranking.length !== input.items.length || new Set(result.ranking.map(r=>r.listingId)).size !== input.items.length) throw new AiError("AI_INVALID_RANKING");
+      for (const row of result.ranking) {
+        const item=input.items.find(item=>item.listingId===row.listingId);
+        if (!item || new Set(row.reasonCriteria).size !== row.reasonCriteria.length || row.reasonCriteria.some(key=>!item.criteria.some(c=>c.criterion===key))) throw new AiError("AI_INVALID_RANKING");
+      }
+    };
+    const response=await this.call("offer_text",context,input,`${untrusted} Упорядочи объявления по соответствию проверенным критериям запроса: совпадения, противоречия, неизвестное. Не придумывай факты, числа или доступность. Не сравнивай абсолютные цены и выгоду. Период цены неизвестен — цены несопоставимы до проверки. Верни один объект {"ranking":[{"listingId":"ID из items","reasonCriteria":["ключ criterion"]}]}. Каждое listingId ровно один раз, лучшие сначала. reasonCriteria содержит только от одного до трёх РАЗНЫХ ключей criterion этого объявления: выбери самые важные, не перечисляй все совпадения. Не добавляй другие поля или пояснения. Это рекомендация ИИ, а не факты.`,undefined,{schema:{
+      type:"object",additionalProperties:false,required:["ranking"],properties:{ranking:{type:"array",minItems:input.items.length,maxItems:input.items.length,items:{
+        type:"object",additionalProperties:false,required:["listingId","reasonCriteria"],properties:{listingId:{type:"string",enum:input.items.map(item=>item.listingId)},reasonCriteria:{type:"array",minItems:1,maxItems:3,items:{type:"string",enum:[...new Set(input.items.flatMap(item=>item.criteria.map(c=>c.criterion)))]}}},
+      }}},
+    // Reserve the full size-adjusted ceiling before dispatch; never retry a truncated paid answer.
+    },validate,maxOutputTokens:Math.max(this.config.maxOutputTokens,512+192*input.items.length)});
+    return {...this.decode(schema,response.text),...this.metadata(response)};
   }
 
   async parseSearchQuery(context: AiCallContext, rawInput: unknown) {

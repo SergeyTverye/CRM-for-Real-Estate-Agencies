@@ -1,7 +1,8 @@
+import { POST as rankPost } from "@/app/api/v1/property-search/analysis/rank/route";
 import { beforeEach,afterEach,it,expect,vi } from "vitest";
 import { randomUUID } from "node:crypto";
 import { db,resetDatabase,seedBase,makeClient,makeNeed,inDays,type TestUsers,apiRequest,sessionCookieFor } from "../helpers/fixtures";
-import { analyzeListingBatch,compareAnalysisListings,collectionAnalysisText,suggestAnalysisTasks,confirmAnalysisTasks,previewAnalysisQuery,confirmAnalysisQuery } from "@/modules/ai/application/listing-analysis-service";
+import { rankAnalysisListings,analyzeListingBatch,compareAnalysisListings,collectionAnalysisText,suggestAnalysisTasks,confirmAnalysisTasks,previewAnalysisQuery,confirmAnalysisQuery } from "@/modules/ai/application/listing-analysis-service";
 import { FakeResponsesProvider } from "@/modules/ai/infrastructure/fake";
 import { createSearchAi } from "@/modules/ai/infrastructure/create-search-ai";
 import { PrismaAiLedger,PrismaAiSettings,PrismaAiTariffs } from "@/modules/ai/infrastructure/prisma-repositories";
@@ -164,4 +165,100 @@ it("API requires a session and returns controlled disabled response",async()=>{
   await db.aiSetting.updateMany({data:{aiEnabled:false}});
   const response=await POST(apiRequest("POST","/api/v1/property-search/analysis/batch",{cookie:await sessionCookieFor(users.realtor1),body:{listingIds:[row.id],filters}}),{params:Promise.resolve({})});
   expect((await response.json()).error.code).toBe("AI_DISABLED");
+});
+
+it("AI-01 REPLAY exact request keeps price through preview and confirmation",async()=>{
+  const before=SearchFilters.parse({operation:"sale"});
+  const f=fake(JSON.stringify({filters:{operation:"rent",priceUnit:"rub_month",purposes:["office"],areaFrom:50,areaTo:100,priceTo:"80000"},clarificationQuestion:null}));
+  const draft=await previewAnalysisQuery(users.realtor1,{text:"Аренда офиса 50–100 м² в Новосибирске до 80 000 в месяц",currentFilters:before},f.ai);
+  expect(draft.filters).toMatchObject({operation:"rent",priceUnit:"rub_month",priceTo:"80000",areaFrom:50,areaTo:100});
+  const confirmed=await confirmAnalysisQuery(users.realtor1,{pendingActionId:draft.pendingActionId,confirmed:true,currentFilters:before});
+  expect(confirmed.filters.priceTo).toBe("80000");expect(f.provider.requests).toHaveLength(1);
+});
+it.each([null,"total"])("AI-02 unknown snapshot period overrides legacy SQL period %s",async priceUnit=>{
+  const a=await listing(),b=await listing();
+  await db.externalListing.updateMany({data:{priceUnit}});
+  // Old rows may still contain total from the former fallback. The source snapshot wins.
+  const run=await db.searchRun.create({data:{userId:users.realtor1.userId,filters,status:"success"}});
+  for(const row of [a,b]) await db.externalListingSnapshot.create({data:{listingId:row.id,searchRunId:run.id,fetchedAt:new Date(),priceRub:row.priceRub,normalized:{priceUnit:null}}});
+  const f=fake('{"text":"Уточните период цены перед сравнением."}');
+  const result=await compareAnalysisListings(users.realtor1,{listingIds:[a.id,b.id],filters},f.ai);
+  const facts=JSON.parse(f.provider.requests[0]!.input).facts;
+  expect(facts.items.every((item:{priceUnit:unknown;pricePeriodNotice:string})=>item.priceUnit===null && /Период цены неизвестен/.test(item.pricePeriodNotice))).toBe(true);
+  expect(result.tradeoffs[0]!.points[0]!.price).toContain("сравнение невозможно");
+});
+
+function rankingFake() {
+  const provider=new FakeResponsesProvider(request=>{
+    const data=JSON.parse(request.input);
+    return {text:JSON.stringify({ranking:[...data.items].reverse().map((row:{listingId:string;criteria:{criterion:string}[]})=>({listingId:row.listingId,reasonCriteria:[row.criteria[0]!.criterion]}))})};
+  });
+  return {provider,ai:createSearchAi(getConfig(),{ledger:new PrismaAiLedger(),settings:new PrismaAiSettings(),tariffs:new PrismaAiTariffs()},provider)};
+}
+it("ranks selected listings with grounded reasons; repeat/reordered selection is cached, changed facts invalidate",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  const result=await rankAnalysisListings(users.realtor1,input,f.ai);
+  expect(result.ranking.map(row=>row.listingId)).toEqual([a.id,b.id].sort().reverse());
+  expect(result.ranking[0]!.reasons[0]).toContain("Город: соответствует");
+  expect(result).toMatchObject({cacheHit:false,recommendationOnly:true});
+  const cached=await rankAnalysisListings(users.realtor1,{...input,listingIds:[b.id,a.id]},f.ai);
+  expect(cached).toMatchObject({cacheHit:true,ranking:result.ranking});expect(f.provider.requests).toHaveLength(1);
+  await db.externalListing.update({where:{id:a.id},data:{city:"Омск"}});
+  await rankAnalysisListings(users.realtor1,input,f.ai);expect(f.provider.requests).toHaveLength(2);
+  const cache=await db.aiAnalysisCache.findFirstOrThrow();expect(cache.aiUsageLogId).toBeTruthy();
+});
+it("ranking serializes concurrent cache misses",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  const results=await Promise.all([rankAnalysisListings(users.realtor1,input,f.ai),rankAnalysisListings(users.realtor1,input,f.ai)]);
+  expect(f.provider.requests).toHaveLength(1);expect(results.filter(r=>r.cacheHit)).toHaveLength(1);
+});
+it("ranking rejects exhausted budget before dispatch, serves paid cache at zero remaining budget",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  await db.aiSetting.updateMany({data:{monthlyBudgetRub:"0"}});
+  await expect(rankAnalysisListings(users.realtor1,input,f.ai)).rejects.toMatchObject({code:"AI_BUDGET_EXHAUSTED"});
+  expect(f.provider.requests).toHaveLength(0);expect(await db.aiAnalysisCache.count()).toBe(0);
+  await db.aiSetting.updateMany({data:{monthlyBudgetRub:"1000"}});
+  await rankAnalysisListings(users.realtor1,input,f.ai);
+  await db.aiSetting.updateMany({data:{monthlyBudgetRub:"0"}});
+  expect((await rankAnalysisListings(users.realtor1,input,f.ai)).cacheHit).toBe(true);
+  expect(f.provider.requests).toHaveLength(1);
+});
+it("ranking handles provider failure without a cache and retries normally",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  vi.spyOn(f.provider,"respond").mockRejectedValueOnce(new Error("synthetic network failure"));
+  await expect(rankAnalysisListings(users.realtor1,input,f.ai)).rejects.toMatchObject({code:"AI_CALL_FAILED",message:expect.stringContaining("временно недоступен")});
+  expect(await db.aiAnalysisCache.count()).toBe(0);
+  expect((await rankAnalysisListings(users.realtor1,input,f.ai)).ranking).toHaveLength(2);
+});
+it("ranking enforces count, RBAC, unique IDs and manager cap before dispatch",async()=>{
+  const a=await listing(),b=await listing(),f=rankingFake(),input={listingIds:[a.id,b.id],filters};
+  const client=await makeClient(users.realtor2),need=await makeNeed(users.realtor2,client.id);
+  await expect(rankAnalysisListings(users.realtor1,{...input,needId:need.id},f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});
+  await expect(rankAnalysisListings(users.realtor1,{...input,listingIds:[a.id]},f.ai)).rejects.toMatchObject({code:"AI_RANK_COUNT"});
+  await expect(rankAnalysisListings(users.realtor1,{...input,listingIds:Array.from({length:11},()=>randomUUID())},f.ai)).rejects.toMatchObject({code:"AI_RANK_COUNT"});
+  await expect(rankAnalysisListings(users.realtor1,{...input,listingIds:[a.id,a.id]},f.ai)).rejects.toMatchObject({code:"DUPLICATE_SELECTION"});
+  await db.aiSetting.updateMany({data:{perJobLimit:1}});
+  await expect(rankAnalysisListings(users.realtor1,input,f.ai)).rejects.toMatchObject({code:"AI_ANALYSIS_LIMIT"});expect(f.provider.requests).toHaveLength(0);
+});
+it.each(["invented ID","invented fact","duplicate ID"])("ranking rejects %s before cache",async defect=>{
+  const a=await listing(),b=await listing(),f=rankingFake();
+  vi.spyOn(f.provider,"respond").mockResolvedValueOnce({mode:"test",model:"synthetic",webSearchCalls:0,sourceUrls:[],text:JSON.stringify({ranking:[{listingId:defect==="invented ID"?randomUUID():a.id,reasonCriteria:[defect==="invented fact"?"parking":"city"]},{listingId:defect==="duplicate ID"?a.id:b.id,reasonCriteria:["city"]}]})});
+  await expect(rankAnalysisListings(users.realtor1,{listingIds:[a.id,b.id],filters},f.ai)).rejects.toMatchObject({code:"AI_INVALID_JSON_RESULT",message:expect.stringContaining("Автоматического повтора нет")});
+  expect(await db.aiAnalysisCache.count()).toBe(0);
+});
+
+it("ranking API requires a session and honors disabled AI without dispatch",async()=>{
+  const a=await listing(),b=await listing(),url="/api/v1/property-search/analysis/rank",body={listingIds:[a.id,b.id],filters};
+  expect((await rankPost(apiRequest("POST",url,{body}),{params:Promise.resolve({})})).status).toBe(401);
+  await db.aiSetting.updateMany({data:{aiEnabled:false}});
+  const response=await rankPost(apiRequest("POST",url,{cookie:await sessionCookieFor(users.realtor1),body}),{params:Promise.resolve({})});
+  expect((await response.json()).error.code).toBe("AI_DISABLED");expect(await db.aiUsageLog.count()).toBe(0);
+});
+
+it("ranking accepts the upper boundary of ten listings in one budgeted call",async()=>{
+  const rows=await Promise.all(Array.from({length:10},()=>listing())),f=rankingFake();
+  const result=await rankAnalysisListings(users.realtor1,{listingIds:rows.map(row=>row.id),filters},f.ai);
+  expect(result.ranking).toHaveLength(10);expect(f.provider.requests).toHaveLength(1);
+  expect(f.provider.requests[0]!.responseSchema).toMatchObject({properties:{ranking:{type:"array"}}});
+  expect(f.provider.requests[0]!.responseSchema).not.toHaveProperty("$schema");
 });

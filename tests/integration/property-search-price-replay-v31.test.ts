@@ -56,3 +56,17 @@ it("internal export crosses 2000 rows, public pagination stays capped and foreig
   await expect(exportSearch(users.realtor1,run.id,{columns:["url"]})).rejects.toMatchObject({code:"EXPORT_LIMIT"});
   expect(await db.searchExport.count()).toBe(1);
 });
+
+it("AI-02 persists a genuinely unknown period and never signals comparable price changes",async()=>{
+  const users=await seedBase(),filters=SearchFilters.parse({operation:"sale"});
+  let previous:string|null=null;
+  for(const price of ["80000","50000"]) {
+    const listing={...structuredClone(fixture.listing),price,priceUnit:null} as NormalizedListing;
+    const run=await db.searchRun.create({data:{userId:users.realtor1.userId,filters,status:"success"}});
+    await db.$transaction(tx=>persistListing(tx,run.id,listing,evaluateListing(listing,filters),previous));
+    const row=await db.externalListing.findFirstOrThrow();
+    expect(row.priceUnit).toBeNull();expect(row.pricePerM2Rub).toBeNull();
+    expect((await db.searchRunResult.findFirstOrThrow({where:{runId:run.id}})).priceChanged).toBe(false);
+    previous=run.id;
+  }
+});

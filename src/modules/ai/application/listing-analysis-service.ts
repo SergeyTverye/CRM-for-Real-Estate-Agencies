@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { independentCommitScope } from "@/shared/db/client";
 import { lockSql } from "@/shared/db/dialect";
 import { z } from "zod";
@@ -61,7 +62,7 @@ function normalized(row: Listing): NormalizedListing {
   const ownerVerification = row.ownerConfirmed && row.ownerConfirmationMethod && row.ownerConfirmedAt && employee?.ownerConfirmed ? {source:"employee",method:row.ownerConfirmationMethod,checkedAt:row.ownerConfirmedAt.toISOString(),verifiedBy:employee.verifiedBy} : undefined;
   return {source:row.source as NormalizedListing["source"],sourceListingId:row.sourceListingId,sourceUnitId:row.sourceUnitId,url:row.url,
     operation:row.operation as "sale"|"rent",purpose:(row.purposes[0] ?? null) as NormalizedListing["purpose"],
-    price:row.priceRub?.toString() ?? null,priceUnit:({total:"rub_total",per_month:"rub_month",per_year:"rub_year",per_m2_month:"rub_m2_month",per_m2_year:"rub_m2_year"}[row.priceUnit] ?? snapshot?.priceUnit ?? null) as NormalizedListing["priceUnit"],
+    price:row.priceRub?.toString() ?? null,priceUnit:(snapshot && "priceUnit" in snapshot ? snapshot.priceUnit ?? null : ({total:"rub_total",per_month:"rub_month",per_year:"rub_year",per_m2_month:"rub_m2_month",per_m2_year:"rub_m2_year"}[row.priceUnit ?? ""] ?? null)) as NormalizedListing["priceUnit"],
     area:row.areaM2 === null ? null : Number(row.areaM2),floor:parseFloor(row.floorRaw ?? row.floorNumber),city:row.city,address:row.address,district:row.district,
     seller:{type:row.sellerType === "agent" ? "agent" : "unknown",ownerVerification},description:safeListingText(row.description ?? ""),
     images:Array.isArray(row.images) ? row.images.filter((x): x is string => typeof x === "string") : [],
@@ -188,17 +189,18 @@ async function draftSelectionText(actor: Actor, raw: unknown, kind: "intro"|"com
   const items = rows.map(row=>{
     const p = prepare(row,input.filters);
     // Unverified text is never promoted to verified facts or fed into drafting.
-    return {address:safeListingText(row.address ?? "Адрес не указан"),area:row.areaM2?.toString() ?? null,price:row.priceRub?.toString() ?? null,priceUnit:row.priceUnit,
+    return {address:safeListingText(row.address ?? "Адрес не указан"),area:row.areaM2?.toString() ?? null,price:row.priceRub?.toString() ?? null,priceUnit:p.listing.priceUnit,pricePeriodNotice:p.listing.priceUnit ? null : "Период цены неизвестен — цены несопоставимы до проверки",
       confirmedCharacteristics:p.evaluation.criteria.filter(c=>c.state==="matched" && c.source==="structured").map(c=>`${c.criterion}: ${c.evidence}`)};
   });
   // Unknown criterion labels are intentionally NOT model facts: LIVE showed that
   // a model can promote the word 'unknown' to an asserted characteristic.
-  const facts = {items,requirements:"Объясни компромиссы только по полям каждого объекта. Укажи единицы площади и цены. Не подтверждай собственника или доступность. Отсутствующие характеристики не упоминай как существующие. Не придумывай характеристики и числа."};
+  const facts = {items,requirements:"Объясни компромиссы только по полям каждого объекта. Укажи единицы площади и цены. Не подтверждай собственника или доступность. Отсутствующие характеристики не упоминай как существующие. Не придумывай характеристики и числа. Если период цены неизвестен — цены несопоставимы до проверки; не называй цену общей и не делай выводов о выгоде."};
   const draft = await withP2Ai(actor,"offer_text",(ai,c)=>ai.draftOfferText(c,facts,kind),injected);
   checkOfferNumbers(draft.text,facts);
   const tradeoffs = kind === "comparison" ? rows.map(row=>({listingId:row.id,points:rows.filter(other=>other.id!==row.id).map(other=>{
     const area=row.areaM2 && other.areaM2 ? row.areaM2.comparedTo(other.areaM2) : null;
-    const price=["total","per_month","per_year","per_m2_month","per_m2_year"].includes(row.priceUnit) && row.operation===other.operation && row.priceUnit===other.priceUnit && row.priceRub && other.priceRub ? row.priceRub.comparedTo(other.priceRub) : null;
+    const unit=normalized(row).priceUnit, otherUnit=normalized(other).priceUnit;
+    const price=unit !== null && row.operation===other.operation && unit===otherUnit && row.priceRub && other.priceRub ? row.priceRub.comparedTo(other.priceRub) : null;
     return {comparedListingId:other.id,area:area===null ? "Площадь неизвестна — сравнение невозможно." : area>0 ? "Больше площади, чем у другого выбранного варианта." : area<0 ? "Меньше площади, чем у другого выбранного варианта." : "Площади совпадают.",price:price===null ? "Цены неизвестны или единицы несовместимы — сравнение невозможно." : price>0 ? "Цена выше: оцените дополнительную нагрузку на бюджет." : price<0 ? "Цена ниже: остаётся больше бюджета на остальные расходы." : "Цены совпадают при одинаковой единице цены."};
   })})) : [];
   return {...draft,text:`${draft.text}\n\n${ANALYSIS_WARNING}`,warning:ANALYSIS_WARNING,
@@ -207,3 +209,33 @@ async function draftSelectionText(actor: Actor, raw: unknown, kind: "intro"|"com
 }
 export const compareAnalysisListings = (actor:Actor,raw:unknown,injected?:SearchAi)=>draftSelectionText(actor,raw,"comparison",injected);
 export const collectionAnalysisText = (actor:Actor,raw:unknown,injected?:SearchAi)=>draftSelectionText(actor,raw,"intro",injected);
+
+/** Shares the durable analysis cache, cross-process lock and existing budget gate. */
+export async function rankAnalysisListings(actor:Actor,raw:unknown,injected?:SearchAi) {
+  const input=parseInput(selectionSchema,raw),config=await available();
+  if(input.listingIds.length<2 || input.listingIds.length>10) throw new DomainError("AI_RANK_COUNT","Выберите от двух до десяти объявлений.");
+  if(input.listingIds.length>config.perJobLimit) throw new DomainError("AI_ANALYSIS_LIMIT","Сократите число объявлений: достигнут лимит руководителя.");
+  const rows=await selected(actor,input);
+  const facts={items:rows.map(row=>{
+    const p=prepare(row,input.filters);
+    return {listingId:row.id,criteria:[...p.evaluation.criteria,...p.evaluation.preferences].filter(c=>!forbiddenAnalysisCriterion(c.criterion)).map(c=>({criterion:c.criterion,state:c.state,evidence:safeListingText(c.evidence)})),pricePeriodNotice:p.listing.priceUnit ? null : "Период цены неизвестен — цены несопоставимы до проверки"};
+  }).sort((a,b)=>a.listingId.localeCompare(b.listingId))};
+  // Filters and evidence are fingerprinted. Updated facts or model invalidate recommendations.
+  const cacheKey=createHash("sha256").update(JSON.stringify(["listing-ranking-v1",config.model,input.filters,facts])).digest("hex");
+  return independentCommitScope(async tx=>{
+    await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${cacheKey},0))`));
+    const cached=await tx.aiAnalysisCache.findUnique({where:{cacheKey}});
+    if(cached) return {...cached.result as unknown as {ranking:{listingId:string;reasons:string[]}[];warning:string;recommendationOnly:boolean;model:string},cacheHit:true};
+    let requestId="";
+    const response=await withP2Ai(actor,"offer_text",(ai,c)=>{requestId=c.requestId;return ai.rankListings(c,facts);},injected);
+    const ranking=response.ranking.map(item=>({listingId:item.listingId,reasons:item.reasonCriteria.map(key=>{
+      const criterion=facts.items.find(row=>row.listingId===item.listingId)!.criteria.find(c=>c.criterion===key)!;
+      const state=criterion.state==="matched" ? "соответствует" : criterion.state==="contradicted" ? "противоречит" : "неизвестно, требует проверки";
+      return `${analysisCriterionLabel(key)}: ${state}. ${criterion.evidence}`;
+    })}));
+    const result={ranking,warning:ANALYSIS_WARNING,recommendationOnly:true,model:response.model};
+    const usage=await db.aiUsageLog.findUnique({where:{id:aiUsageLogId(requestId)},select:{id:true}});
+    await db.aiAnalysisCache.upsert({where:{cacheKey},create:{cacheKey,listingId:facts.items[0]!.listingId,result:json(result),aiUsageLogId:usage?.id},update:{}});
+    return {...result,cacheHit:false};
+  });
+}

@@ -32,7 +32,7 @@ function candidate(row: CandidateRow): DuplicateCandidate {
     area: row.areaM2?.toNumber() ?? null, floor: row.floorNumber ?? floor.number,
     floorKind: row.floorNumber !== null ? (row.floorNumber < 0 ? "basement" : "above_ground") : floor.kind,
     price: row.priceRub?.toString() ?? null,
-    priceUnit: normalized.priceUnit === null ? null : row.operation === "rent" && row.priceUnit === "total" ? null : dbPriceUnits[row.priceUnit] ?? null, features };
+    priceUnit: normalized.priceUnit === null ? null : row.operation === "rent" && row.priceUnit === "total" ? null : dbPriceUnits[row.priceUnit ?? ""] ?? null, features };
 }
 /** Shared transaction lock serializes regroup and human decisions across workers/processes. */
 async function lock(tx: Tx) { await tx.$queryRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(310007::bigint)::text`)); }
