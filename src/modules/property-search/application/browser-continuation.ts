@@ -26,9 +26,30 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
     async prepare(actor, runId, source) {
       const run = await accessibleRun(actor, runId);
       const row = await db.searchRunSource.findUnique({ where: { runId_source: { runId, source } } });
-      if (run.cancelRequested || !row?.needsUserAction || row.status !== "needs_user_action") throw new ConflictError("SEARCH_NOT_WAITING", "Источник не ожидает проверки сотрудника");
+      if (run.cancelRequested) throw new ConflictError("SEARCH_NOT_WAITING", "Источник не ожидает проверки сотрудника");
       const params = run.depthParams as { depth?: DepthOptions; sourceDepth?: Partial<Record<SessionSource, DepthOptions>> };
-      try { return await adapter.prepare(parseInput(SearchFilters, run.filters), source, params.sourceDepth?.[source] ?? params.depth); }
+      const filters = parseInput(SearchFilters, run.filters);
+      // Ручная попытка для заблокированного источника: разрешена только когда оператор
+      // включил площадку (assertAllowed внутри адаптера). Без разрешения — понятный
+      // конфликт и подсказка про ссылку/официальный импорт, без смены статуса.
+      if (row?.status === "blocked" && !row.needsUserAction) {
+        let prepared: PreparedSearch;
+        try { prepared = await adapter.prepare(filters, source, params.sourceDepth?.[source] ?? params.depth); }
+        catch (error) {
+          if (error instanceof ConflictError && error.code === "SOURCE_CONTINUATION_NOT_ALLOWED") await port.blocked(runId, source, "access_not_allowed");
+          throw error;
+        }
+        // Переоткрываем источник для ручной проверки в той же сессии/запуске:
+        // повторные поиски в течение жизни сессии используют её, без перезапуска всего поиска.
+        await transaction(async tx => {
+          await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM search_runs WHERE id=${runId}::uuid FOR UPDATE`));
+          await tx.searchRunSource.updateMany({ where: { runId, source, status: "blocked" }, data: { status: "needs_user_action", needsUserAction: true, statusReasonRu: "Открыта ручная проверка сотрудником" } });
+          await tx.searchRun.updateMany({ where: { id: runId, status: "partial" }, data: { status: "needs_user_action", progress: { phase: "needs_user_action" }, finishedAt: null, incompleteReason: null } });
+        });
+        return prepared;
+      }
+      if (!row?.needsUserAction || row.status !== "needs_user_action") throw new ConflictError("SEARCH_NOT_WAITING", "Источник не ожидает проверки сотрудника");
+      try { return await adapter.prepare(filters, source, params.sourceDepth?.[source] ?? params.depth); }
       catch (error) {
         if (error instanceof ConflictError && error.code === "SOURCE_CONTINUATION_NOT_ALLOWED") await port.blocked(runId, source, "access_not_allowed");
         throw error;
