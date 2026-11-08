@@ -1,0 +1,1811 @@
+{
+  "complete": true,
+  "skipped": [
+    {
+      "role": "MANAGER",
+      "screen": "collection-detail",
+      "reason": "Нет доступной синтетической записи в списке"
+    },
+    {
+      "role": "MANAGER",
+      "screen": "task-detail",
+      "reason": "Нет доступной синтетической записи в списке"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "manager-today-1366x768.png",
+      "role": "MANAGER",
+      "path": "/today",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:23.822Z",
+      "sha256": "5f603730bd10ed9975718d2edf0ce55d5c07b3403fb939fb5010d3729ac6b6c1"
+    },
+    {
+      "file": "manager-request-new-1366x768.png",
+      "role": "MANAGER",
+      "path": "/requests/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:25.606Z",
+      "sha256": "af026ff33c538c66f87ef3d9f1b8bd5f9c7a36f6af55aebb831a9a40a01f5df9"
+    },
+    {
+      "file": "manager-clients-1366x768.png",
+      "role": "MANAGER",
+      "path": "/clients",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:27.672Z",
+      "sha256": "82f147aa91d7db20ec932c87c4f090a152873a76566c071e3ee8fc7ab6e5201c"
+    },
+    {
+      "file": "manager-needs-1366x768.png",
+      "role": "MANAGER",
+      "path": "/needs",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:29.714Z",
+      "sha256": "018f14d0fb63fcaf3d111994120854e266bba24bd88f67934483749563d145c1"
+    },
+    {
+      "file": "manager-need-new-1366x768.png",
+      "role": "MANAGER",
+      "path": "/needs/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:31.465Z",
+      "sha256": "f29b2970796a7f3611c1c09c262bce1903b188b773dd35b79fdbe29e7c311984"
+    },
+    {
+      "file": "manager-collections-1366x768.png",
+      "role": "MANAGER",
+      "path": "/collections",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:33.249Z",
+      "sha256": "d4a2d18457533c562aab0626c6158698af4dbdacdf453a300e1eb43df8e05edc"
+    },
+    {
+      "file": "manager-offers-1366x768.png",
+      "role": "MANAGER",
+      "path": "/offers",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:35.918Z",
+      "sha256": "46649ec57a7208322a9cea9a3c1b72ce9266ef95503dd2ffacdb562b2b382d74"
+    },
+    {
+      "file": "manager-offer-new-1366x768.png",
+      "role": "MANAGER",
+      "path": "/offers/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:38.039Z",
+      "sha256": "83e6df1ec7447112557513865b81e5ca107b422a37115ecc2d73bb80f1c420ba"
+    },
+    {
+      "file": "manager-tasks-1366x768.png",
+      "role": "MANAGER",
+      "path": "/tasks",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:39.945Z",
+      "sha256": "20da50422e2f2071a3988d38c72d04eb6e17a9adbcf648b90337db1703ad6425"
+    },
+    {
+      "file": "manager-task-new-1366x768.png",
+      "role": "MANAGER",
+      "path": "/tasks/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:41.611Z",
+      "sha256": "8cc481581af5701cc2c75560a5bfba0c03da9129691391ff3ee230d61cd99149"
+    },
+    {
+      "file": "manager-planner-1366x768.png",
+      "role": "MANAGER",
+      "path": "/calendar",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:43.629Z",
+      "sha256": "1a09633ae52a01115af42f34524bf2dbb8b96451356819e1134f4af190595d39"
+    },
+    {
+      "file": "manager-properties-1366x768.png",
+      "role": "MANAGER",
+      "path": "/properties",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:46.549Z",
+      "sha256": "d2fa519e3c1fa6037c0c9c3cf7559e2e5165364b72dc94fb9abe0cc30e27de4b"
+    },
+    {
+      "file": "manager-advertisements-expiring-1366x768.png",
+      "role": "MANAGER",
+      "path": "/advertisements?view=expiring",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:48.509Z",
+      "sha256": "4b856d29dfceea949e3388230f0dd1f4439308adb1548a6fcdcf6832f79fea4a"
+    },
+    {
+      "file": "manager-ad-new-1366x768.png",
+      "role": "MANAGER",
+      "path": "/advertisements/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:50.238Z",
+      "sha256": "72d6a9b6b01678e90bf792382f6d4c686bf8f4347c024a517fb90dc478c02333"
+    },
+    {
+      "file": "manager-agreements-expiring-1366x768.png",
+      "role": "MANAGER",
+      "path": "/agreements?view=expiring",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:52.925Z",
+      "sha256": "afbc8f94609b5bf8670395e5fc33bee49c0d27c0d3e37d3f6d56cc0b522803c4"
+    },
+    {
+      "file": "manager-employee-tasks-1366x768.png",
+      "role": "MANAGER",
+      "path": "/tasks?view=all",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:55.854Z",
+      "sha256": "3421a15ba04b68667a4af3748a76e5b9274f8600c53eee091b9f8d9f2ca0f041"
+    },
+    {
+      "file": "manager-reports-1366x768.png",
+      "role": "MANAGER",
+      "path": "/reports",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:10:58.324Z",
+      "sha256": "1730ed3e310f6442fdcc1a0a65807735032ce78264e7c070da3b20ee65dcdce9"
+    },
+    {
+      "file": "manager-client-detail-1366x768.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:00.590Z",
+      "sha256": "df42cc0b6aa33bae75fd7c86a8d3fa9ff5faa6d9c6eda97689d58b4bdb50623f"
+    },
+    {
+      "file": "manager-client-history-1366x768.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:03.184Z",
+      "sha256": "c24d1c07c2593b5a5fd2c12f4101758b145a11213f4f1319356f963f4b13bcd8"
+    },
+    {
+      "file": "manager-client-needs-1366x768.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=needs",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:05.782Z",
+      "sha256": "21f908cbfe9b777ba01ebcbda84f05f2003b9b4532c6086aefad92057de9b1bc"
+    },
+    {
+      "file": "manager-need-detail-1366x768.png",
+      "role": "MANAGER",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:08.663Z",
+      "sha256": "a198dd30e79da362ddd584b6cc893f2f929430cf1b50b3f466afbb083749a28e"
+    },
+    {
+      "file": "manager-need-edit-1366x768.png",
+      "role": "MANAGER",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3/edit",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:10.791Z",
+      "sha256": "237f224a631f1cb8d7fba36bf91887ec3780c068babda733fbceeff985e47032"
+    },
+    {
+      "file": "manager-offer-detail-1366x768.png",
+      "role": "MANAGER",
+      "path": "/offers/706ae255-629a-46c9-9be4-b4248ef3dce3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:13.385Z",
+      "sha256": "955c7150bf1de192d93d30b301848c3e8b56ddf4abb3fd5f4c3d0cda3f34846a"
+    },
+    {
+      "file": "manager-today-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/today",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:19.270Z",
+      "sha256": "7841192acd59fd093769e49fe89a6505fe3809eaeb79ec81b92d667a78aebb00"
+    },
+    {
+      "file": "manager-request-new-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/requests/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:21.473Z",
+      "sha256": "dc730b0fdfd78231e442bb978bb48334ad79bddfab9eb8230007df8174c1d27e"
+    },
+    {
+      "file": "manager-clients-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/clients",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:24.274Z",
+      "sha256": "80423d012a0a82c52c05a9ed82348165b54e8fc492576ed0161a10a400950fb7"
+    },
+    {
+      "file": "manager-needs-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/needs",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:27.417Z",
+      "sha256": "b5bdec949b65db16a86969ff2c1e29a7d610449350dca5f83379cd0d1149249c"
+    },
+    {
+      "file": "manager-need-new-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/needs/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:29.427Z",
+      "sha256": "190652c91f3f22c204b668e0471db30bb5a2ee94880fb22e5f82bcd335be22ca"
+    },
+    {
+      "file": "manager-collections-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/collections",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:31.129Z",
+      "sha256": "6c5a460454e31ee7de4ac262584b4097f0baef7b9942415dcaff874980df7751"
+    },
+    {
+      "file": "manager-offers-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/offers",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:33.220Z",
+      "sha256": "4e260a36e3c3b2754344526513e64a613ace669d85d9efa39ee1b7f8a6fb23ea"
+    },
+    {
+      "file": "manager-offer-new-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/offers/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:34.979Z",
+      "sha256": "2a13228a367c412b38d6ef48820d740c5a76ac79fea77aa9a96d63af2d13da0e"
+    },
+    {
+      "file": "manager-tasks-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/tasks",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:36.665Z",
+      "sha256": "d1ca9f1e356a904bd1492257ad49d8362b17c93e27c288c5013980c555e2a86d"
+    },
+    {
+      "file": "manager-task-new-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/tasks/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:38.410Z",
+      "sha256": "e1395746c896c6d8b95c8aa2d8eda7064c6c38b12aed2ba5dc154a4dd5fcfd59"
+    },
+    {
+      "file": "manager-planner-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/calendar",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:40.150Z",
+      "sha256": "afb79104dd85f9b951ed140bc86b38bb03ae035416c99e87d6aeabc72cf48248"
+    },
+    {
+      "file": "manager-properties-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/properties",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:42.474Z",
+      "sha256": "1e5a1c1bd781f5afd797110c0734d803e62b6c1b3110f03e77181acbdb2cf793"
+    },
+    {
+      "file": "manager-advertisements-expiring-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/advertisements?view=expiring",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:44.203Z",
+      "sha256": "9f114f27ca6cd4c09ba19d89ba4378ddde035775e15f311c35e3eb739a5a5784"
+    },
+    {
+      "file": "manager-ad-new-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/advertisements/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:45.998Z",
+      "sha256": "8a39a54ba50ba7c50b32814d92cd292c35156439d5bd81ebb485b537ff4621df"
+    },
+    {
+      "file": "manager-agreements-expiring-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/agreements?view=expiring",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:48.113Z",
+      "sha256": "9c0fc5acaed6a676029a58965a7cc82d4c62cb2a930dbe2c587d3538cb5b5f99"
+    },
+    {
+      "file": "manager-employee-tasks-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/tasks?view=all",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:50.772Z",
+      "sha256": "3df90e099708129ea088ba3a50864998a3717ec91b480bfb5422bdb419571293"
+    },
+    {
+      "file": "manager-reports-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/reports",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:53.295Z",
+      "sha256": "e3d69552f100804768657312f5aa2303fde578561c369bf2e735930844394c19"
+    },
+    {
+      "file": "manager-client-detail-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:55.700Z",
+      "sha256": "bc8d86c3a8b4479bb15ddea5f9233964a007cac4f015bf686ac1444a37d3382f"
+    },
+    {
+      "file": "manager-client-history-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:11:57.998Z",
+      "sha256": "ec33f0901120dce4166e543a3c4aa106c5e40fb313aa8a2d9d7517c1db587fa6"
+    },
+    {
+      "file": "manager-client-needs-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=needs",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:00.238Z",
+      "sha256": "bb4d5daaeb5e6950ffbeccc84b159e4b028dc28654bad448bb6e0dbce76f0b2c"
+    },
+    {
+      "file": "manager-need-detail-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:02.713Z",
+      "sha256": "323eab7e088e344a69a48cd1a93731c7d8aea6277ec1d130cd81fea225a33879"
+    },
+    {
+      "file": "manager-need-edit-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3/edit",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:04.718Z",
+      "sha256": "7f6791d8cada598498b8f23fc57ab8425fcede19e082610ea0c1fc7fd1787208"
+    },
+    {
+      "file": "manager-offer-detail-1920x1080.png",
+      "role": "MANAGER",
+      "path": "/offers/706ae255-629a-46c9-9be4-b4248ef3dce3",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:07.532Z",
+      "sha256": "f16cbf2069e576f42082cf8c3c0de58b405063255fb1b9d47d23b720790c03ab"
+    },
+    {
+      "file": "manager-today-390x844.png",
+      "role": "MANAGER",
+      "path": "/today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:09.263Z",
+      "sha256": "d62e7121a62431af63447254da9940c3698aabe4091f42f708936b1350efc898"
+    },
+    {
+      "file": "manager-request-new-390x844.png",
+      "role": "MANAGER",
+      "path": "/requests/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:10.496Z",
+      "sha256": "a5c8072b4b809422a8f733244abf9e94cdfb17e7806ee651a670bc5adc94c70f"
+    },
+    {
+      "file": "manager-clients-390x844.png",
+      "role": "MANAGER",
+      "path": "/clients",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:11.729Z",
+      "sha256": "68550dde074945b83e1b8e3b1f124329a38bafb407fcbbd8d0a68b8d8321d9d2"
+    },
+    {
+      "file": "manager-needs-390x844.png",
+      "role": "MANAGER",
+      "path": "/needs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:12.992Z",
+      "sha256": "40d526d891511891bf5cb0f55a6ebb28ca2417e18b5479325e98ec3971cf0b61"
+    },
+    {
+      "file": "manager-need-new-390x844.png",
+      "role": "MANAGER",
+      "path": "/needs/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:14.122Z",
+      "sha256": "3c26d86fb29b1ecfbcc12035f6bd05958ebacea5fdd095fd509d455bcaa7bf9f"
+    },
+    {
+      "file": "manager-collections-390x844.png",
+      "role": "MANAGER",
+      "path": "/collections",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:15.174Z",
+      "sha256": "0940f74fea0ce367eb713c39ac752a78e8d727de331354c9aaac39012d7b32f1"
+    },
+    {
+      "file": "manager-offers-390x844.png",
+      "role": "MANAGER",
+      "path": "/offers",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:16.302Z",
+      "sha256": "0a9a85a70d77817710c53977114445c4d150ebe79bda18fc26691bd3541cee60"
+    },
+    {
+      "file": "manager-offer-new-390x844.png",
+      "role": "MANAGER",
+      "path": "/offers/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:17.366Z",
+      "sha256": "e2d0c991028bf939e3b83cef75b207290029d01e0505c1772f6509fa96e0b582"
+    },
+    {
+      "file": "manager-tasks-390x844.png",
+      "role": "MANAGER",
+      "path": "/tasks",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:18.650Z",
+      "sha256": "b456a9f3995ee8b7e23401e6a062f25c99ac7a20fc6cdb03cf78f85cc23116a9"
+    },
+    {
+      "file": "manager-task-new-390x844.png",
+      "role": "MANAGER",
+      "path": "/tasks/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:19.743Z",
+      "sha256": "59d7fed60866284de3db7e740a46292a326509b743b84d25ee742d9e05330b1e"
+    },
+    {
+      "file": "manager-planner-390x844.png",
+      "role": "MANAGER",
+      "path": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:21.068Z",
+      "sha256": "23be3e55e0a95fec28973c1e0bd6f8b443f8ad85d2e847a1f2fb0d71a2eb9f42"
+    },
+    {
+      "file": "manager-properties-390x844.png",
+      "role": "MANAGER",
+      "path": "/properties",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:22.597Z",
+      "sha256": "1f587cdc427c67feb5ed07126c96a2d379afc2590e43c42b2c37edff68354b5a"
+    },
+    {
+      "file": "manager-advertisements-expiring-390x844.png",
+      "role": "MANAGER",
+      "path": "/advertisements?view=expiring",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:23.824Z",
+      "sha256": "59a38ebca20287e492cc95fdf99c010bba0c5ef88bdcb4403190a75f9b23848e"
+    },
+    {
+      "file": "manager-ad-new-390x844.png",
+      "role": "MANAGER",
+      "path": "/advertisements/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:24.869Z",
+      "sha256": "7f1bbb2ab813f52ed49b670c8351051a297ba3bbbe2e323ef66171591d65effc"
+    },
+    {
+      "file": "manager-agreements-expiring-390x844.png",
+      "role": "MANAGER",
+      "path": "/agreements?view=expiring",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:26.159Z",
+      "sha256": "be961a5770e2356e779d2a62f6ed46ed49f6a992026b59076d3e8b9b71d00193"
+    },
+    {
+      "file": "manager-employee-tasks-390x844.png",
+      "role": "MANAGER",
+      "path": "/tasks?view=all",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:27.502Z",
+      "sha256": "cdc5c4851a132f9a2d0160e800eb9f6ac84c252667d1d2527e798a670c6406a3"
+    },
+    {
+      "file": "manager-reports-390x844.png",
+      "role": "MANAGER",
+      "path": "/reports",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:28.890Z",
+      "sha256": "22632a3b5e5f96d774d3f75368e28d5fb6f84270f913cc94ff24d1dde3382f77"
+    },
+    {
+      "file": "manager-client-detail-390x844.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:30.412Z",
+      "sha256": "be576c4d338dedecb03ec6682d7fe7da2e946df69088a7fd0699aedeae56da70"
+    },
+    {
+      "file": "manager-client-history-390x844.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:31.901Z",
+      "sha256": "be576c4d338dedecb03ec6682d7fe7da2e946df69088a7fd0699aedeae56da70"
+    },
+    {
+      "file": "manager-client-needs-390x844.png",
+      "role": "MANAGER",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=needs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:33.364Z",
+      "sha256": "be576c4d338dedecb03ec6682d7fe7da2e946df69088a7fd0699aedeae56da70"
+    },
+    {
+      "file": "manager-need-detail-390x844.png",
+      "role": "MANAGER",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:34.617Z",
+      "sha256": "aa90bccb663d115a2a08e6f931c1ddba8a675e0b036626a016815740fa1d3317"
+    },
+    {
+      "file": "manager-need-edit-390x844.png",
+      "role": "MANAGER",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3/edit",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:35.649Z",
+      "sha256": "76f1689945195678a05d9385f16b387402568f5f5477716ac253cc3b2dcd950f"
+    },
+    {
+      "file": "manager-offer-detail-390x844.png",
+      "role": "MANAGER",
+      "path": "/offers/706ae255-629a-46c9-9be4-b4248ef3dce3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:36.881Z",
+      "sha256": "5b63c8a2afdde60cd58318f4490e1f1e7463cd0341f4cadf187db44e24789597"
+    },
+    {
+      "file": "realtor1-today-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/today",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:47.861Z",
+      "sha256": "9309d03514b317978dcb792b2f9ddb4fe32f5e6815a2a75bc68ea16110365c23"
+    },
+    {
+      "file": "realtor1-request-new-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/requests/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:49.407Z",
+      "sha256": "d625a1247104436816e66e5396ba06c11cb0f36d93b1ea148bb95acfcdd8e5eb"
+    },
+    {
+      "file": "realtor1-clients-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/clients",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:51.068Z",
+      "sha256": "6e63362a71813cee0b0f4e965f225c232528896d3258116d5b6a8d54f768c34e"
+    },
+    {
+      "file": "realtor1-needs-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/needs",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:53.007Z",
+      "sha256": "ce65f55d3b04883626ca91d8a3f6d3296127a28945994d28c0a8487cfba6c949"
+    },
+    {
+      "file": "realtor1-need-new-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/needs/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:54.438Z",
+      "sha256": "33311d0f2570a247f8db83f644814fd41dc0b8d342b36d57444b1a7867a972af"
+    },
+    {
+      "file": "realtor1-collections-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/collections",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:56.013Z",
+      "sha256": "5298dff3cd76e2efd1bd67cbb12ec46f12d361376ffff34252ef7ed964c4f9a2"
+    },
+    {
+      "file": "realtor1-offers-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/offers",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:57.535Z",
+      "sha256": "9ecd42761d31676b39a0621d8f67bf84c7536b0036ff5d55e1cd5b0b4606a3ee"
+    },
+    {
+      "file": "realtor1-offer-new-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/offers/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:12:59.076Z",
+      "sha256": "cd765179b6a85f4246e21fdaeb1e4bc0824ece7b9ed92fd3fcd226ae0c4ac000"
+    },
+    {
+      "file": "realtor1-tasks-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/tasks",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:01.836Z",
+      "sha256": "16919bbfb142ef246ca61e24ed6c4736de921529011f2e8b382df4be0f3f9b27"
+    },
+    {
+      "file": "realtor1-task-new-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/tasks/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:03.483Z",
+      "sha256": "f5b9099802727efd03ed15d5ecdb7d3a3fe52d7f7481488eb4ba39827c56156e"
+    },
+    {
+      "file": "realtor1-planner-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/calendar",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:05.658Z",
+      "sha256": "e376ba473583ab0f16d32b4aed4587fade164452ae160ae1a5676538ec1d2abc"
+    },
+    {
+      "file": "realtor1-properties-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/properties",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:08.429Z",
+      "sha256": "80f18961b7eea0accaa72023b8e5b3ee3b423860754497ade15313d9bcb028f0"
+    },
+    {
+      "file": "realtor1-advertisements-expiring-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/advertisements?view=expiring",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:10.258Z",
+      "sha256": "b4b113912d85cc08abe55d80ef1cb13a0f6405c7b6427b500c0b83520d4e0b13"
+    },
+    {
+      "file": "realtor1-ad-new-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/advertisements/new",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:12.123Z",
+      "sha256": "0aaeecbc69f83c02a755b66f36a6f56cffac2fe484dab85fb4f5f25f843a90ba"
+    },
+    {
+      "file": "realtor1-agreements-expiring-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/agreements?view=expiring",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:14.090Z",
+      "sha256": "7c40e88c78a8dd001ea22a072beb225872638337b36c6576f5f882835965f61e"
+    },
+    {
+      "file": "realtor1-client-detail-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:17.288Z",
+      "sha256": "fed98f0f2e335322ad5c69618081bcbf5600851be589ed711a124d7dbba452f7"
+    },
+    {
+      "file": "realtor1-client-history-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:20.667Z",
+      "sha256": "705ca4664a10ad3a640985187d2b85df644330e03781e3eb23a30d829f6337ce"
+    },
+    {
+      "file": "realtor1-client-needs-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=needs",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:22.983Z",
+      "sha256": "bf2c648e041acb7a3bca2c8a8f70fbb322060737bb531fa40bdfdbd6f6acdbdb"
+    },
+    {
+      "file": "realtor1-need-detail-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:25.677Z",
+      "sha256": "a7672b1e0c9cb418d2da93c4c0e3122cf8d15e2e3fe10a2705c76dd6953f7a6b"
+    },
+    {
+      "file": "realtor1-need-edit-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3/edit",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:27.877Z",
+      "sha256": "51c85cbaedb654210220e90624f40f539640d039a5bea15d02be4405911d4e17"
+    },
+    {
+      "file": "realtor1-collection-detail-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/collections/1f214371-ab08-41a5-aad7-85b308ab26f6",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:30.029Z",
+      "sha256": "80153803e90714d70a95fe1755cdbcb385e8528a69c12e72655f5f48fe3bed3f"
+    },
+    {
+      "file": "realtor1-offer-detail-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/offers/706ae255-629a-46c9-9be4-b4248ef3dce3",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:33.252Z",
+      "sha256": "ce157920185cb612fcadbdf0c92ba7d78f42c8baf4677192ba8463429c7836b6"
+    },
+    {
+      "file": "realtor1-task-detail-1366x768.png",
+      "role": "REALTOR1",
+      "path": "/tasks/939d479f-b730-448d-ace7-86b7f9d5791e",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:35.246Z",
+      "sha256": "7c0c2d1240cee07472bd040be12acb3b26df94653abaa48eb8ebcefa7923e8fa"
+    },
+    {
+      "file": "realtor1-today-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/today",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:39.015Z",
+      "sha256": "2f73f398398f8b5c9ae1d58f7b0710dea45d128de5b4848a7e6a5c411362f240"
+    },
+    {
+      "file": "realtor1-request-new-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/requests/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:41.398Z",
+      "sha256": "5091e3e9a8f04d516950de1d76d8b5cd88ee468131481b6010f5270694ea5c35"
+    },
+    {
+      "file": "realtor1-clients-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/clients",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:43.802Z",
+      "sha256": "bb7b747ce6f333639db11c382b833333c676241a77018497f2d778b4c318e96c"
+    },
+    {
+      "file": "realtor1-needs-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/needs",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:46.533Z",
+      "sha256": "67209e2ec32ddd65d717ae50875a396bccc4459c404496058f26edd820f740f9"
+    },
+    {
+      "file": "realtor1-need-new-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/needs/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:48.122Z",
+      "sha256": "ad0de28abf99c9ca285d87539ccbcc0e2de81e7142548c365e87eb4f9240069a"
+    },
+    {
+      "file": "realtor1-collections-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/collections",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:49.826Z",
+      "sha256": "54f41827a454fefc4d4fc0520825b1dff6b69c2b99a7c643c368327d7b7e854e"
+    },
+    {
+      "file": "realtor1-offers-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/offers",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:51.632Z",
+      "sha256": "e3d98a1cdfecc566f18ce62c18f2ce084154ccf9a8ae20955dd7084723e38ac8"
+    },
+    {
+      "file": "realtor1-offer-new-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/offers/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:53.590Z",
+      "sha256": "952efeffbf82cf43d52c7c07ee80739ab4c1d16e8eda2fe2a9a59bfafaf06d49"
+    },
+    {
+      "file": "realtor1-tasks-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/tasks",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:56.568Z",
+      "sha256": "9d7ebf0fb188b425255061b64b64e575993311b570808bb7fd94ff99e23941aa"
+    },
+    {
+      "file": "realtor1-task-new-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/tasks/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:13:58.232Z",
+      "sha256": "6e0eb35076d3767d4707070c79bf91e035e321b9f467fd4d3f872d6854402e73"
+    },
+    {
+      "file": "realtor1-planner-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/calendar",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:00.051Z",
+      "sha256": "9e220e094d90f15630084ea0aa22bc8762a18f0ef078daa0700ac85b4fb744e9"
+    },
+    {
+      "file": "realtor1-properties-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/properties",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:03.122Z",
+      "sha256": "b0b66a612435fc077c0254a6012ceca2d5ce0361cdf48ee7bc012d2945febd22"
+    },
+    {
+      "file": "realtor1-advertisements-expiring-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/advertisements?view=expiring",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:04.591Z",
+      "sha256": "f7285aaa2651f9a7e471f10fb8dab13300d92d52ccad7f09025d8bf26b49dbb2"
+    },
+    {
+      "file": "realtor1-ad-new-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/advertisements/new",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:06.048Z",
+      "sha256": "6e4eed9ac63bbd675a117b0a7ebaf42af4ff7a119db69387152f0a18b46844fe"
+    },
+    {
+      "file": "realtor1-agreements-expiring-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/agreements?view=expiring",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:07.627Z",
+      "sha256": "24f1820d05215ef7d80e8e8369deea4996c670972a8ddfd4f7144641c500befb"
+    },
+    {
+      "file": "realtor1-client-detail-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:09.561Z",
+      "sha256": "ca80e4d97d85dab203c9c64881a3bd9f72c2b1fba9363bd2521995c39fc2642b"
+    },
+    {
+      "file": "realtor1-client-history-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:11.709Z",
+      "sha256": "18305b4f56ca44b0412a59568e0d29e4decad76a24307ed2f44f2f1d2f7dcc18"
+    },
+    {
+      "file": "realtor1-client-needs-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=needs",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:13.390Z",
+      "sha256": "7d14d8f4b6c24738ca2d528a1f40804e8b1f790f28422fa762b87082c310e9d6"
+    },
+    {
+      "file": "realtor1-need-detail-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:15.134Z",
+      "sha256": "4da3701cc25e73a0fec124039a34b2a455fe1328351d911669e472e5969d2a5f"
+    },
+    {
+      "file": "realtor1-need-edit-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3/edit",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:16.519Z",
+      "sha256": "124a84dc95150e79ac1fe74f7c4a8f8306e54c40874404291e89d4490d5885c7"
+    },
+    {
+      "file": "realtor1-collection-detail-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/collections/1f214371-ab08-41a5-aad7-85b308ab26f6",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:18.026Z",
+      "sha256": "48bce87eaa63802e7a099e9157e6df0c763c6d35096a2fdd87085d25577f16d0"
+    },
+    {
+      "file": "realtor1-offer-detail-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/offers/706ae255-629a-46c9-9be4-b4248ef3dce3",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:20.038Z",
+      "sha256": "6e7980b50d8a54dcd63984e9e977d99d55725d25088937c55059f08669e37ddd"
+    },
+    {
+      "file": "realtor1-task-detail-1920x1080.png",
+      "role": "REALTOR1",
+      "path": "/tasks/939d479f-b730-448d-ace7-86b7f9d5791e",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:21.476Z",
+      "sha256": "da04c2f29cf4eb70e15465cd17202e8d0a11cf1c09e1a2e6a562457a5668de6d"
+    },
+    {
+      "file": "realtor1-today-390x844.png",
+      "role": "REALTOR1",
+      "path": "/today",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:23.410Z",
+      "sha256": "3759429daa914630ada3eeaa2e80badbf2c880eb8d0290276d574378d37983b4"
+    },
+    {
+      "file": "realtor1-request-new-390x844.png",
+      "role": "REALTOR1",
+      "path": "/requests/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:24.557Z",
+      "sha256": "1b70a0ed3d49ca6d75ffec4f5a94d5ba88895c4f0832f57abba530c78ac531ca"
+    },
+    {
+      "file": "realtor1-clients-390x844.png",
+      "role": "REALTOR1",
+      "path": "/clients",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:25.813Z",
+      "sha256": "589ef63a8550c464646ac5ac270d21f34323e1306dfb3d65f3fbe6a800c876bd"
+    },
+    {
+      "file": "realtor1-needs-390x844.png",
+      "role": "REALTOR1",
+      "path": "/needs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:27.285Z",
+      "sha256": "a20aac2c8ad1ee147551db07aae954d4b29069cefe64dc99b1fc658b33c4792e"
+    },
+    {
+      "file": "realtor1-need-new-390x844.png",
+      "role": "REALTOR1",
+      "path": "/needs/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:28.513Z",
+      "sha256": "92e3a91da23f14684339f8b3556479ed643f7bffa82351ed62ceff68e777fe4a"
+    },
+    {
+      "file": "realtor1-collections-390x844.png",
+      "role": "REALTOR1",
+      "path": "/collections",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:29.643Z",
+      "sha256": "9aabce55c18cb4f28a2e97485d934a1587e2c5f18f2f041792fbc96886034d0d"
+    },
+    {
+      "file": "realtor1-offers-390x844.png",
+      "role": "REALTOR1",
+      "path": "/offers",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:30.845Z",
+      "sha256": "d3e427186c6b5e1b9080010b555170205c0da99e2dc4d7388c50ebe6085abe41"
+    },
+    {
+      "file": "realtor1-offer-new-390x844.png",
+      "role": "REALTOR1",
+      "path": "/offers/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:31.910Z",
+      "sha256": "0e664f2a8356086604c2302319391b0b8a85eb522bad6cdc4f0507a3625c3aee"
+    },
+    {
+      "file": "realtor1-tasks-390x844.png",
+      "role": "REALTOR1",
+      "path": "/tasks",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:33.265Z",
+      "sha256": "7dfffddfc05e1f24c59c015b8cdfa39f2db97a4470817826fd4a3efe323d2840"
+    },
+    {
+      "file": "realtor1-task-new-390x844.png",
+      "role": "REALTOR1",
+      "path": "/tasks/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:34.579Z",
+      "sha256": "f849cf0a0c743f01d057cc8b25fb2b4617ad6d6840346e913daae5ecaccbe9be"
+    },
+    {
+      "file": "realtor1-planner-390x844.png",
+      "role": "REALTOR1",
+      "path": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:35.937Z",
+      "sha256": "49111bc49411572f92183f3613193edc9c86a4d83b1820653bdaf5136f05dcdc"
+    },
+    {
+      "file": "realtor1-properties-390x844.png",
+      "role": "REALTOR1",
+      "path": "/properties",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:37.609Z",
+      "sha256": "d85dffbec820dd3a007072ddeae5161dd5e5a6643c87ff760d7c363ebe63f70a"
+    },
+    {
+      "file": "realtor1-advertisements-expiring-390x844.png",
+      "role": "REALTOR1",
+      "path": "/advertisements?view=expiring",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:38.858Z",
+      "sha256": "8f2c7af3866df9df7742cb93175b7399309edeb03f30cf988c1e44f49374ff34"
+    },
+    {
+      "file": "realtor1-ad-new-390x844.png",
+      "role": "REALTOR1",
+      "path": "/advertisements/new",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:39.955Z",
+      "sha256": "70171a4950b4f420732bc646405b4270161ea484f1b3304432ac28cdce2d2ecc"
+    },
+    {
+      "file": "realtor1-agreements-expiring-390x844.png",
+      "role": "REALTOR1",
+      "path": "/agreements?view=expiring",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:41.296Z",
+      "sha256": "5324308c03fa32fd3f6679ea77986c8517346b73d048ba3d5836a578fbe3bade"
+    },
+    {
+      "file": "realtor1-client-detail-390x844.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:42.902Z",
+      "sha256": "6caa3208c81d582acc77680849ec122b1458ec7d372e127427ef16a2b17c2c22"
+    },
+    {
+      "file": "realtor1-client-history-390x844.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=history",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:44.357Z",
+      "sha256": "20213518c8e15811b2141bf2f1ccef70e8a9da5d0237b98c07888e32d562b48e"
+    },
+    {
+      "file": "realtor1-client-needs-390x844.png",
+      "role": "REALTOR1",
+      "path": "/clients/e88df87c-d5e4-4658-a768-be50777c71e3?tab=needs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:45.849Z",
+      "sha256": "6caa3208c81d582acc77680849ec122b1458ec7d372e127427ef16a2b17c2c22"
+    },
+    {
+      "file": "realtor1-need-detail-390x844.png",
+      "role": "REALTOR1",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:47.161Z",
+      "sha256": "6b9cab040d186a8182b35e8f747e35b35f26eb6d67827041a05f2cb83b80b55c"
+    },
+    {
+      "file": "realtor1-need-edit-390x844.png",
+      "role": "REALTOR1",
+      "path": "/needs/a9aea5bf-2770-4080-a1f1-146865d116a3/edit",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:48.241Z",
+      "sha256": "38ef519a561a0902d3a1e5b109c80b1851e5a8616954fd101d4245ca2a94205f"
+    },
+    {
+      "file": "realtor1-collection-detail-390x844.png",
+      "role": "REALTOR1",
+      "path": "/collections/1f214371-ab08-41a5-aad7-85b308ab26f6",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:49.539Z",
+      "sha256": "e7dc045ea1b09b7cee63b0d98ac9f0ef4868f8c8f42ddaaef5c59356a5dd540e"
+    },
+    {
+      "file": "realtor1-offer-detail-390x844.png",
+      "role": "REALTOR1",
+      "path": "/offers/706ae255-629a-46c9-9be4-b4248ef3dce3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:51.196Z",
+      "sha256": "e1ad972ed8a54bdec25619a50a8d93328b581470424ac6120d02af4b04ca1195"
+    },
+    {
+      "file": "realtor1-task-detail-390x844.png",
+      "role": "REALTOR1",
+      "path": "/tasks/939d479f-b730-448d-ace7-86b7f9d5791e",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "revision": "6ee543c",
+      "scriptRevision": "49c0c5c17df452e087245b5db93e48f2b47ab221",
+      "capturedAt": "2026-11-08T16:14:52.473Z",
+      "sha256": "342c973af5178aee527c77dc1c67db72467a5a511d46d56e434c2d028ec5a88f"
+    }
+  ]
+}
