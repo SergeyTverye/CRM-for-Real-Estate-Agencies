@@ -4,6 +4,8 @@ import { SearchAi, type AiCallContext } from "@/modules/ai/infrastructure/search
 import { FakeResponsesProvider, InMemoryAiLedger } from "@/modules/ai/infrastructure/fake";
 import { AiGate } from "@/modules/ai/domain/gate";
 import { searchFiltersSchema, type AiResponse, type AiRequest } from "@/modules/ai/domain/contracts";
+import { readFileSync } from "node:fs";
+import { z } from "zod";
 
 const context: AiCallContext = { user: { userId: "u", active: true }, ownerUserId: "u", jobId: "j", requestId: "r" };
 function fixture(reply?: (r: AiRequest) => Partial<AiResponse>, enabled = true) {
@@ -17,6 +19,72 @@ function fixture(reply?: (r: AiRequest) => Partial<AiResponse>, enabled = true) 
     { model: "demo-model", webModel: "", maxOutputTokens: 100, contextSize: "low", defaultRegion: "65", allowedDomains: ["cian.ru"] });
   return { ai, provider, ledger };
 }
+describe("AI-RANK-LIVE-01 REPLAY", () => {
+  const raw = readFileSync(new URL("./fixtures/ranking-live-synthetic.txt", import.meta.url), "utf8");
+  const recorded = JSON.parse(raw) as {ranking:{listingId:string;reasonCriteria:string[]}[]};
+  const input = {items:recorded.ranking.map(row=>({listingId:row.listingId,criteria:["city","operation","purpose","area","floor"].map(criterion=>({criterion,state:"matched",evidence:"synthetic"})),pricePeriodNotice:null}))};
+  const valid = {ranking:recorded.ranking.map(row=>({...row,reasonCriteria:row.reasonCriteria.slice(0,3)}))};
+  it("replays the successful final LIVE response without changing its fields",async()=>{
+    const text=readFileSync(new URL("./fixtures/ranking-live-fixed-synthetic.txt",import.meta.url),"utf8");
+    const f=fixture(()=>({text}));
+    expect((await f.ai.rankListings(context,input)).ranking).toEqual(JSON.parse(text).ranking);
+    expect(f.provider.requests).toHaveLength(1);
+  });
+
+  it("replays the unmodified LIVE failure: five reasons violate the business schema; settle once, no paid retry", async()=>{
+    expect(recorded.ranking[0]!.reasonCriteria).toHaveLength(5);
+    const f=fixture(()=>({text:raw}));
+    await expect(f.ai.rankListings(context,input)).rejects.toThrow("AI_INVALID_JSON_RESULT");
+    expect(await f.ledger.atomic(tx=>tx.find(context.requestId))).toMatchObject({state:"settled",outcome:"error",estimated:false});
+    await expect(f.ai.rankListings(context,input)).rejects.toThrow("AI_ALREADY_RESERVED");
+    expect(f.provider.requests).toHaveLength(1);
+    const request=f.provider.requests[0]!;
+    expect(request.responseSchemaStrict).toBe(true);
+    expect(request.maxOutputTokens).toBe(1088);
+    // The provider contract now rejects the exact recorded failure, before generation.
+    const schema=z.fromJSONSchema(request.responseSchema!);
+    expect(schema.safeParse(recorded).success).toBe(false);
+    expect(schema.safeParse(valid).success).toBe(true);
+    expect(request.responseSchema).toMatchObject({properties:{ranking:{minItems:3,maxItems:3,items:{properties:{reasonCriteria:{minItems:1,maxItems:3}}}}}});
+    expect(request.instructions).toContain('"ranking"');
+  });
+  it.each(["%s","```json\n%s\n```","Результат:\n%s\nПроверьте рекомендацию.","\ufeff%s"])("extracts a single grounded object: %s",async wrap=>{
+    const f=fixture(()=>({text:wrap.replace("%s",JSON.stringify(valid))}));
+    expect((await f.ai.rankListings(context,input)).ranking).toEqual(valid.ranking);
+    expect(f.provider.requests).toHaveLength(1);
+  });
+  it.each([
+    ["empty reasons",{ranking:valid.ranking.map(r=>({...r,reasonCriteria:[]}))}],
+    ["four reasons",{ranking:valid.ranking.map(r=>({...r,reasonCriteria:["city","operation","area","floor"]}))}],
+    ["duplicate reasons",{ranking:valid.ranking.map(r=>({...r,reasonCriteria:["city","city"]}))}],
+    ["foreign criterion",{ranking:valid.ranking.map(r=>({...r,reasonCriteria:["invented"]}))}],
+    ["foreign ID",{ranking:valid.ranking.map(r=>({...r,listingId:"invented"}))}],
+    ["duplicate ID",{ranking:valid.ranking.map(r=>({...r,listingId:valid.ranking[0]!.listingId}))}],
+    ["missing ID",{ranking:valid.ranking.slice(1)}],
+    ["extra fields",{...valid,explanation:"invented"}],
+    ["extra item fields",{ranking:valid.ranking.map(r=>({...r,score:99}))}],
+  ])("rejects %s without repairing business data",async(_,reply)=>{
+    const f=fixture(()=>({text:JSON.stringify(reply)}));
+    await expect(f.ai.rankListings(context,input)).rejects.toThrow("AI_INVALID_JSON_RESULT");
+    expect(f.provider.requests).toHaveLength(1);
+  });
+  it.each(["{} {}",JSON.stringify(valid)+" {}",JSON.stringify(valid)+" {",JSON.stringify(valid).slice(0,-5),"plain text"])("rejects ambiguous/truncated text",async text=>{
+    await expect(fixture(()=>({text})).ai.rankListings(context,input)).rejects.toThrow("AI_INVALID_JSON_RESULT");
+  });
+  it("checks each criterion against its own listing, not the provider union",async()=>{
+    const restricted={items:input.items.map((item,i)=>({...item,criteria:i===0?item.criteria.filter(c=>c.criterion==="floor"):item.criteria}))};
+    await expect(fixture(()=>({text:JSON.stringify(valid)})).ai.rankListings(context,restricted)).rejects.toThrow("AI_INVALID_JSON_RESULT");
+  });
+  it.each([2,10])("budgets sufficient output for %i rows before dispatch",async count=>{
+    const items=Array.from({length:count},(_,i)=>({...input.items[0]!,listingId:`synthetic-${i}`}));
+    const ranking=items.map(item=>({listingId:item.listingId,reasonCriteria:["city"]}));
+    const f=fixture(()=>({text:JSON.stringify({ranking})}));
+    expect((await f.ai.rankListings(context,{items})).ranking).toHaveLength(count);
+    expect(f.provider.requests[0]!.maxOutputTokens).toBe(512+192*count);
+    expect((await f.ledger.atomic(tx=>tx.find(context.requestId)))?.estimatedUsage.outputTokens).toBe(512+192*count);
+    expect(f.provider.requests).toHaveLength(1);
+  });
+});
 describe("SearchAi", () => {
   it("drops catalogues and foreign hosts with deterministic reasons", async () => {
     const f = fixture(() => ({ text: JSON.stringify({ candidates: [

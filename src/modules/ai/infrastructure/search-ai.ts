@@ -31,9 +31,9 @@ export class SearchAi {
     private readonly tariffs: TariffRepository, private readonly config: SearchAiConfig,
     private readonly clock: () => Date = () => new Date()) {}
 
-  private async prepareCall(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], reserve = true, responseSchema?: Record<string, unknown>): Promise<AiRequest> {
+  private async prepareCall(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], reserve = true, responseSchema?: Record<string, unknown>, maxOutputTokens = this.config.maxOutputTokens): Promise<AiRequest> {
     const model = type === "web_search" ? this.config.webModel || this.config.model : this.config.model;
-    const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens: this.config.maxOutputTokens,
+    const request: AiRequest = { model, input: JSON.stringify(input), instructions, maxOutputTokens,
       ...(type === "parse" ? { responseSchema: providerParseSchema, responseSchemaStrict: true } : {}),
       ...(type === "call_note" ? { responseSchema: providerCallNoteSchema, responseSchemaStrict: true } : {}),
       ...(type === "offer_text" ? { responseSchema: providerOfferTextSchema, responseSchemaStrict: true } : {}),
@@ -50,8 +50,8 @@ export class SearchAi {
     return request;
   }
 
-  private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], custom?: {schema:Record<string,unknown>;validate:(text:string)=>void}): Promise<AiResponse> {
-    const request = await this.prepareCall(type, context, input, instructions, tools, true, custom?.schema);
+  private async call(type: CallType, context: AiCallContext, input: unknown, instructions: string, tools?: WebSearchTool[], custom?: {schema:Record<string,unknown>;validate:(text:string)=>void;maxOutputTokens?:number}): Promise<AiResponse> {
+    const request = await this.prepareCall(type, context, input, instructions, tools, true, custom?.schema, custom?.maxOutputTokens);
     let response: AiResponse;
     try { response = await this.provider.respond(request); }
     catch (error) {
@@ -106,11 +106,12 @@ export class SearchAi {
         if (!item || new Set(row.reasonCriteria).size !== row.reasonCriteria.length || row.reasonCriteria.some(key=>!item.criteria.some(c=>c.criterion===key))) throw new AiError("AI_INVALID_RANKING");
       }
     };
-    const response=await this.call("offer_text",context,input,`${untrusted} Упорядочи объявления по соответствию проверенным критериям запроса: совпадения, противоречия, неизвестное. Не придумывай факты, числа или доступность. Не сравнивай абсолютные цены и выгоду. Период цены неизвестен — цены несопоставимы до проверки. Верни каждое listingId ровно один раз, лучшие сначала, reasonCriteria — от одного до трёх ключей criterion этого объявления как основания. Это рекомендация ИИ, а не факты.`,undefined,{schema:{
-      type:"object",additionalProperties:false,required:["ranking"],properties:{ranking:{type:"array",items:{
-        type:"object",additionalProperties:false,required:["listingId","reasonCriteria"],properties:{listingId:{type:"string"},reasonCriteria:{type:"array",items:{type:"string"}}},
+    const response=await this.call("offer_text",context,input,`${untrusted} Упорядочи объявления по соответствию проверенным критериям запроса: совпадения, противоречия, неизвестное. Не придумывай факты, числа или доступность. Не сравнивай абсолютные цены и выгоду. Период цены неизвестен — цены несопоставимы до проверки. Верни один объект {"ranking":[{"listingId":"ID из items","reasonCriteria":["ключ criterion"]}]}. Каждое listingId ровно один раз, лучшие сначала. reasonCriteria содержит только от одного до трёх РАЗНЫХ ключей criterion этого объявления: выбери самые важные, не перечисляй все совпадения. Не добавляй другие поля или пояснения. Это рекомендация ИИ, а не факты.`,undefined,{schema:{
+      type:"object",additionalProperties:false,required:["ranking"],properties:{ranking:{type:"array",minItems:input.items.length,maxItems:input.items.length,items:{
+        type:"object",additionalProperties:false,required:["listingId","reasonCriteria"],properties:{listingId:{type:"string",enum:input.items.map(item=>item.listingId)},reasonCriteria:{type:"array",minItems:1,maxItems:3,items:{type:"string",enum:[...new Set(input.items.flatMap(item=>item.criteria.map(c=>c.criterion)))]}}},
       }}},
-    },validate});
+    // Reserve the full size-adjusted ceiling before dispatch; never retry a truncated paid answer.
+    },validate,maxOutputTokens:Math.max(this.config.maxOutputTokens,512+192*input.items.length)});
     return {...this.decode(schema,response.text),...this.metadata(response)};
   }
 
