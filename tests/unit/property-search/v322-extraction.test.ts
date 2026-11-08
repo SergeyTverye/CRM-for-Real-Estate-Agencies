@@ -69,6 +69,15 @@ describe("v3.2.2 address normalization flags suspected duplicates", () => {
       card({ source: "onrealt", sourceListingId: "b", url: "https://onrealt.ru/b", address: "Большая улица, 310/4", area: 1000 }),
     ]).flatMap(l => l.possibleDuplicateKeys)).toHaveLength(0);
   });
+  it("does not flag distinct known house numbers on the same street", () => {
+    for (const address of ["улица Мира, 59", "улица Мира, 58/1", "улица Мира, 58 корпус 2"]) {
+      const rows = deduplicateListings([
+        card({ source: "mirkvartir", address: "улица Мира, 58", area: 100 }),
+        card({ source: "onrealt", address, area: 100 }),
+      ]);
+      expect(rows.flatMap(l => l.possibleDuplicateKeys), address).toEqual([]);
+    }
+  });
   it("never flags the same source", () => {
     const listings = [card({ address: "улица Мира, 58", area: 100 }), card({ sourceListingId: "other", url: "https://onrealt.ru/other", address: "ул. Мира, 58", area: 100 })];
     expect(deduplicateListings(listings).flatMap(l => l.possibleDuplicateKeys)).toHaveLength(0);

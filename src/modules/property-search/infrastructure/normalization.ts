@@ -87,7 +87,7 @@ export function deduplicateListings<T extends NormalizedListing>(input: T[]): T[
     // Одна сторона — только улица без номера дома: тоже кандидат на проверку, не слияние.
     const streetA = keyOf(streetOnlyKey(a.address), a.city);
     const streetB = keyOf(streetOnlyKey(b.address), b.city);
-    if (streetA && streetA === streetB && (streetOnlyKey(a.address) !== a.address || streetOnlyKey(b.address) !== b.address)) flag(a, b);
+    if (streetA && streetA === streetB && ((streetOnlyKey(a.address) !== a.address) !== (streetOnlyKey(b.address) !== b.address))) flag(a, b);
   }
   return results;
 }

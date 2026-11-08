@@ -9,7 +9,7 @@ import { GET as catalogApi } from "@/app/api/v1/property-search/filter-catalog/r
 import { SearchFilters, type NormalizedListing, type SearchResult } from "@/modules/property-search/domain/types";
 import { enqueueSearch, processSearchQueue, recoverSearchQueue, cancelSearch } from "@/modules/property-search/application/search-queue";
 import { exportSearch } from "@/modules/property-search/application/export-service";
-import { saveSearch } from "@/modules/property-search/application/listing-service";
+import { saveSearch, listSavedSearches } from "@/modules/property-search/application/listing-service";
 import { querySearchResults, SORTS } from "@/modules/property-search/queries/results-query";
 import { bulkSearchAction } from "@/modules/property-search/application/bulk-service";
 import { importSearchFeed, createListingFromUrl } from "@/modules/property-search/application/manual-import-service";
@@ -42,6 +42,22 @@ describe("v3.1 queue, results, export and authorization", () => {
     expect(await db.searchRun.count()).toBe(1);
     await expect(enqueueSearch(users.realtor1, { filters: { ...filters, city: "Москва" }, sources: ["cian"], idempotencyKey: "synthetic-one" })).rejects.toMatchObject({ code: "IDEMPOTENCY_CONFLICT" });
     const foreign = await enqueueSearch(users.realtor2, { filters, sources: ["cian"], idempotencyKey: "synthetic-one" }); expect(foreign.id).not.toBe(runs[0]!.id);
+  });
+  it("retries after a source error with a new key and retains the failed run", async () => {
+    const first = await enqueue("source-failed");
+    await processSearchQueue({ scraper: adapter([], [{ source: "cian", status: "error", resultCount: 0, reason: "SYNTHETIC_FAILURE" }]) });
+    const failed = await searchProgress(users.realtor1, first.id);
+    expect(failed.status).not.toBe("completed");
+    expect(await db.searchRunResult.count({ where: { runId: first.id } })).toBe(0);
+    expect((await enqueue("source-failed")).id).toBe(first.id);
+    const second = await enqueue("source-explicit-retry");
+    const scraper = adapter();
+    await processSearchQueue({ scraper });
+    expect(scraper.search).toHaveBeenCalledOnce();
+    expect(second.id).not.toBe(first.id);
+    expect(await searchProgress(users.realtor1, second.id)).toMatchObject({ status: "completed" });
+    expect(await searchProgress(users.realtor1, first.id)).toMatchObject({ status: failed.status });
+    expect(await db.externalListing.count()).toBe(1);
   });
   it("persists dates, depth and candidates before CAPTCHA, preserving previous runs and snapshots", async () => {
     const first = await enqueue(); await processSearchQueue({ scraper: adapter() });
@@ -239,6 +255,25 @@ describe("v3.1 queue, results, export and authorization", () => {
     const results = await querySearchResults(users.realtor1, third.id);
     expect(results.rows).toHaveLength(2); expect(results.rows.every(row => row.isNew === false)).toBe(true);
     expect(results.rows.find(row => row.source === "avito")).toMatchObject({ priceChanged: true });
+  });
+  it("round-trips advanced saved filters and repeats the retrieved profile without broadening", async () => {
+    const advanced = SearchFilters.parse({ operation: "sale", city: "Новосибирск", sources: ["cian"],
+      purposes: ["office", "retail"], priceFrom: "1000000", priceTo: "10000000", areaFrom: 30, areaTo: 150,
+      districts: ["Центральный"], floorMode: "first_floor_only", requiredFeatures: ["отдельный вход"],
+      features: { power_kw: { min: 15 } }, freshness: { mode: "published", period: "7", includeUnknown: true },
+    });
+    const saved = await saveSearch(users.realtor1, { name: "Расширенный синтетический профиль", filters: advanced, sources: ["cian"] });
+    const retrieved = (await listSavedSearches(users.realtor1)).find(s => s.id === saved.id)!;
+    expect(retrieved.filters).toEqual(advanced);
+    expect(await listSavedSearches(users.realtor2)).toEqual([]);
+    const scraper = adapter([]);
+    for (const key of ["profile-first", "profile-repeat"]) {
+      const run = await enqueueSearch(users.realtor1, { filters: SearchFilters.parse(retrieved.filters), sources: retrieved.sources, savedSearchId: retrieved.id, idempotencyKey: key });
+      await processSearchQueue({ scraper });
+      expect((await db.searchRun.findUniqueOrThrow({ where: { id: run.id } })).filters).toEqual(advanced);
+    }
+    expect(scraper.search).toHaveBeenCalledTimes(2);
+    expect(scraper.search.mock.calls[1]?.[0]).toMatchObject(advanced);
   });
   it("identical saved profile preserves novelty and flags only an observed compatible price change", async () => {
     const saved = await saveSearch(users.realtor1, { name: "Синтетический повтор", filters, sources: ["cian"] });
