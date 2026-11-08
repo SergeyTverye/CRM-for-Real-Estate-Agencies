@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LOCATION_IDS } from "@/modules/property-search/domain/geography";
+import { LOCATION_IDS, SEARCH_LOCATIONS } from "@/modules/property-search/domain/geography";
 import { PURPOSES } from "@/modules/property-search/domain/types";
 import { parseResultSchema } from "./contracts";
 import { decodeAiJson } from "./decode-json";
@@ -31,14 +31,24 @@ const flatSchema = z.object({
   requiredFeatures: z.array(z.string()), preferredFeatures: z.array(z.string()), sources: z.array(z.string()),
   clarificationQuestion: z.string().nullable(),
 }).strict();
+/** Canonical UI choices: a specific commercial purpose already constrains non-residential kind.
+ * Location IDs are authoritative; a provider's broad city label must not disagree with one selected place. */
+function canonicalParseResult(value: unknown) {
+  const result = parseResultSchema.parse(value);
+  if (!result.filters) return result;
+  const filters = result.filters;
+  if (filters.locations?.length === 1) filters.city = SEARCH_LOCATIONS.find(l => l.id === filters.locations![0])!.city;
+  if (filters.propertyKinds?.length === 1 && filters.propertyKinds[0] === "non_residential" && filters.purposes.some(p => p !== "residential")) delete filters.propertyKinds;
+  return result;
+}
 export function decodeParseResult(text: string) {
   const object = decodeAiJson(z.record(z.string(), z.unknown()), text);
   // Canonical shape remains supported for recorded fixtures and older text-only responses.
-  if ("filters" in object) return parseResultSchema.parse(object);
+  if ("filters" in object) return canonicalParseResult(object);
   const { clarificationQuestion, ...flat } = flatSchema.parse(object);
   if (clarificationQuestion !== null) return parseResultSchema.parse({ filters: null, clarificationQuestion });
   const filters = Object.fromEntries(Object.entries(flat).filter(([key, value]) => value !== null && (!(["locations", "propertyKinds"].includes(key)) || !Array.isArray(value) || value.length > 0)));
-  return parseResultSchema.parse({ filters, clarificationQuestion: null });
+  return canonicalParseResult({ filters, clarificationQuestion: null });
 }
 export const providerParseInstructions = `Верни ПЛОСКИЙ JSON по переданной text.format schema, без поля filters.
 operation: sale/rent; priceUnit: rub_total/rub_month/rub_year/rub_m2_month/rub_m2_year.

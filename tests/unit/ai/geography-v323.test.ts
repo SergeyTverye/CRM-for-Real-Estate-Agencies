@@ -33,3 +33,12 @@ it("budget-only refinement preserves geography and type",()=>{
  const after=preserveSearchConditions(before,SearchFilters.parse({operation:"sale",priceTo:"5000000"}),"Бюджет до 5 млн");
  expect(after).toMatchObject({locations:["berdsk"],propertyKinds:["apartments"],priceTo:"5000000"});
 });
+
+it("normalizes LIVE provider broad-city and redundant commercial-kind responses",()=>{
+ const result=decodeParseResult(JSON.stringify({...base,city:"Новосибирск",locations:["ob"],propertyKinds:["non_residential"],purposes:["warehouse"]}));
+ expect(result.filters?.city).toBe("Обь");
+ expect(result.filters?.propertyKinds).toBeUndefined();
+ expect(result.filters?.purposes).toEqual(["warehouse"]);
+ const broad=decodeParseResult(JSON.stringify({...base,locations:["suburbs"],propertyKinds:["non_residential"]}));
+ expect(broad.filters?.propertyKinds).toEqual(["non_residential"]);
+});
