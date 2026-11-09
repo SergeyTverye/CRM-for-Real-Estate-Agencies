@@ -37,7 +37,7 @@ export function resilientTransport(base: RealEstateScraper.Transport, source: So
   let stopped: { code: string; status?: number; url: string } | undefined;
   let nextStart = 0;
   return async request => {
-    // Reserve starts synchronously so concurrent branches cannot burst the host.
+    // Слот резервируется сразу, чтобы параллельные ветви не отправили пачку запросов на площадку.
     const start = Math.max(Date.now(), nextStart);
     nextStart = start + minimumIntervalMs;
     if (start >= deadline) throw Object.assign(new Error("TIMEOUT"), { code: "TIMEOUT" });

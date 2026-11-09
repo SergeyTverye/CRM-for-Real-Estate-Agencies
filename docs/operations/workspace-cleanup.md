@@ -57,7 +57,7 @@ No file content or process command lines recorded. No processes stopped. Git que
 - No processes terminated, branch switches, commits, or Git mutations. Application code, root data/backups/private-data/secrets, releases, dependencies, documentation and screenshots were not cleanup targets.
 - Final script retains conservative refusal for unknown runtimes; the temporary external-runtime fallback used during execution was removed. External helper identity or installed-app path is required, or an already-exited process is ignored.
 
-Reuse: `powershell -NoProfile -File scripts/cleanup-workspace.ps1` (dry-run); add `-Execute` to delete. Reports reflect the latest run; historical pass totals above are fixed evidence for this cleanup, not an automatic cross-run ledger.
+Скрипт очистки рабочего каталога удалён в v3.2.3 как служебный инструмент среды разработки. Итоги выше сохранены как история.
 Safety: exact allowlist; canonical workspace containment; inspected ancestors/descendants checked for reparse points; tracked content refused; directories must be ignored; protected descendant subtrees and their ancestors retained without content inspection; candidate/repository process references and ambiguous runtimes refused; explicitly identified external Codex/OpenCode/MCP helpers and installed RealEstateCRM runtime ignored; exclusive file-open probe; inventory rechecked before deletion. No recursive deletion. Concurrent filesystem changes cannot be fully fenced: do not run alongside artifact writers. Partial removals are counted on failure.
 
 ## Reusable script follow-up

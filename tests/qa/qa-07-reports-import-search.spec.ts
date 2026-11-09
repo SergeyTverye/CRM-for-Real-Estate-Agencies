@@ -137,7 +137,7 @@ test("QA-13 AI-помощник на двух экранах", async ({ page, re
   let sent = 0;
   for (const url of ["/today", "/property-search"]) {
     await page.goto(url);
-    // Ищем панель/кнопку ассистента; если недоступна — фиксируем и идём дальше
+    // Ищем панель или кнопку помощника. Если её нет, фиксируем это и идём дальше
     const trigger = page.getByRole("button", { name: /Ассистент|ИИ-помощник|AI/i });
     if (await trigger.count()) {
       await trigger.first().click();

@@ -3,7 +3,7 @@ import path from "node:path";
 import { config } from "dotenv";
 config({ path: [".env.local", ".env"], quiet: true });
 if (!process.env.DATABASE_URL || new URL(process.env.DATABASE_URL).pathname !== "/crm_demo") throw new Error("Explicit crm_demo required");
-// Read-only acceptance of the actual seed storage; never use integration global setup.
+// Только чтение демо-хранилища. Общий setup интеграционных тестов не используется.
 export default defineConfig({
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "../../src") } },
   test: { include: ["scripts/demo/demo.test.ts"], environment: "node", fileParallelism: false, maxWorkers: 1, testTimeout: 30000,
