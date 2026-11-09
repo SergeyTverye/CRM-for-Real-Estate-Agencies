@@ -19,9 +19,9 @@ const filters = SearchFilters.parse({ operation: "rent", priceUnit: "rub_month",
 beforeEach(async () => {
   vi.stubEnv("AI_ENABLED", "true"); vi.stubEnv("SCRAPER_ENABLED", "true");
   vi.stubEnv("SCRAPER_DEMO_FIXTURES", "false"); vi.stubEnv("YANDEX_CLOUD_API_KEY", "");
-  vi.stubEnv("YANDEX_AI_MAX_MONTHLY_COST_RUB", "1"); vi.stubEnv("INSTANCE_ROLE", "active");
+  vi.stubEnv("YANDEX_AI_MAX_MONTHLY_COST_RUB", "2"); vi.stubEnv("INSTANCE_ROLE", "active");
   resetConfigCache(); await resetDatabase(); users = await seedBase();
-  await db.aiSetting.create({ data: { aiEnabled: true, model, webModel: model, monthlyBudgetRub: "1", scraperEnabled: true, enabledSources: ["cian"] } });
+  await db.aiSetting.create({ data: { aiEnabled: true, model, webModel: model, monthlyBudgetRub: "2", scraperEnabled: true, enabledSources: ["cian"] } });
 });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); resetConfigCache(); });
 

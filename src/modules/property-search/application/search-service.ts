@@ -4,6 +4,8 @@ import { z } from "zod";
 import { db, transaction, Prisma, type Tx } from "@/shared/db/client";
 import { parseInput, zUuid } from "@/shared/validation";
 import { ConflictError, NotFoundError } from "@/shared/errors";
+import { AiError } from "@/modules/ai/domain/contracts";
+import { logger } from "@/shared/logging/logger";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { writeAudit } from "@/modules/audit/application/audit";
@@ -219,6 +221,8 @@ export async function parseQuery(actor: Actor, text: unknown, currentFilters: un
   catch (error) {
     await db.searchRun.update({ where: { id: jobId }, data: { status: "error", finishedAt: new Date() } });
     if (error instanceof ConflictError && error.code === "AI_CREDENTIALS_MISSING") throw error;
+    const reason = error instanceof ConflictError || error instanceof AiError ? error.code : "UNKNOWN";
+    logger.warn({ operation: "property_search.parse", reason }, "Разбор с ИИ недоступен");
     throw new ConflictError("AI_UNAVAILABLE", "Разбор с ИИ недоступен или лимит исчерпан. Ручная форма доступна.");
   }
 }
