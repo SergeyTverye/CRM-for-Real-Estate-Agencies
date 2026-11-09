@@ -1,0 +1,152 @@
+[
+  {
+    "file": "01-today-manager.png",
+    "caption": "Экран «Сегодня»: задачи, просрочки и ближайшие события руководителя",
+    "scenario": "today"
+  },
+  {
+    "file": "02-client-card.png",
+    "caption": "Карточка клиента: контакты, потребности, история обращений и коммуникаций",
+    "scenario": "client"
+  },
+  {
+    "file": "03-requests-list.png",
+    "caption": "Экран «Обращения»: входящие звонки и заявки с фильтрами по источникам",
+    "scenario": "requests"
+  },
+  {
+    "file": "04-need-matching.png",
+    "caption": "Подбор по потребности: совпадения объектов и статусы предложений",
+    "scenario": "need"
+  },
+  {
+    "file": "05-need-card.png",
+    "caption": "Карточка потребности: параметры, подбор, стадии и следующие действия",
+    "scenario": "need"
+  },
+  {
+    "file": "06-property-card.png",
+    "caption": "Карточка объекта: адрес, параметры, фото, документы и собственники",
+    "scenario": "property"
+  },
+  {
+    "file": "07-properties-list.png",
+    "caption": "Экран «Объекты»: таблица с фильтрами по типу, операции и району",
+    "scenario": "property"
+  },
+  {
+    "file": "08-showings-list.png",
+    "caption": "Экран «Показы»: запланированные и завершённые с результатами",
+    "scenario": "showing"
+  },
+  {
+    "file": "09-today-realtor.png",
+    "caption": "«Сегодня» риелтора: просрочки, задачи на день и ближайшие события",
+    "scenario": "today"
+  },
+  {
+    "file": "10-calendar.png",
+    "caption": "Календарь: встречи, показы и повторяющиеся серии",
+    "scenario": "tasks"
+  },
+  {
+    "file": "11-notifications.png",
+    "caption": "Уведомления: напоминания воркера о задачах и событиях",
+    "scenario": "tasks"
+  },
+  {
+    "file": "12-offer-card.png",
+    "caption": "Коммерческое предложение: позиции со снапшотами цен и адресов, статусы",
+    "scenario": "offer"
+  },
+  {
+    "file": "13-offer-print.png",
+    "caption": "Печатная форма КП (A4): позиции, цены, условия",
+    "scenario": "offer"
+  },
+  {
+    "file": "14-offers-list.png",
+    "caption": "Экран «Коммерческие предложения»: черновики, отправленные, архив",
+    "scenario": "offer"
+  },
+  {
+    "file": "15-deal-card.png",
+    "caption": "Карточка сделки: стороны, две комиссионные записи, чек-лист и задачи",
+    "scenario": "deal"
+  },
+  {
+    "file": "16-deals-list.png",
+    "caption": "Экран «Сделки»: воронка по статусам и суммам",
+    "scenario": "deal"
+  },
+  {
+    "file": "17-agreement-card.png",
+    "caption": "Карточка договора: сроки, юрлицо, приложенные документы",
+    "scenario": "agreement"
+  },
+  {
+    "file": "18-agreements-list.png",
+    "caption": "Экран «Договоры»: действующие, истекающие и архив",
+    "scenario": "agreement"
+  },
+  {
+    "file": "19-ads-list.png",
+    "caption": "Экран «Реклама»: площадки, сроки публикации и истекающие объявления",
+    "scenario": "ads"
+  },
+  {
+    "file": "20-reports.png",
+    "caption": "Экран «Отчёты»: обращения, этапы, показы, просрочки, сделки, активность",
+    "scenario": "reports"
+  },
+  {
+    "file": "21-reports-sources.png",
+    "caption": "Отчёт по источникам обращений с переходом к первичным записям",
+    "scenario": "reports"
+  },
+  {
+    "file": "22-reports-detail.png",
+    "caption": "Детализация отчёта: drill-down до первичных записей",
+    "scenario": "reports"
+  },
+  {
+    "file": "23-import-dryrun-empty.png",
+    "caption": "Импорт workbook-like: корректный dry-run без распознанных строк, без утечек",
+    "scenario": "import"
+  },
+  {
+    "file": "24-import-dryrun.png",
+    "caption": "Импорт: результат dry-run по синтетической книге, статусы строк",
+    "scenario": "import"
+  },
+  {
+    "file": "25-import-commit.png",
+    "caption": "Импорт завершён: счётчики загруженных, пропущенных и ошибок",
+    "scenario": "import"
+  },
+  {
+    "file": "26-search-filters.png",
+    "caption": "Поиск объектов: локации, операция, тип, цены и площади",
+    "scenario": "search"
+  },
+  {
+    "file": "27-backup-settings.png",
+    "caption": "Настройки резервных копий: локальное назначение, расписание, каталог архивов",
+    "scenario": "backup"
+  },
+  {
+    "file": "28-rbac-forbidden.png",
+    "caption": "RBAC: чужой клиент по прямой ссылке недоступен, данные не раскрыты",
+    "scenario": "rbac"
+  },
+  {
+    "file": "29-rbac-search.png",
+    "caption": "Глобальный поиск риелтора: чужие записи отсутствуют в выдаче",
+    "scenario": "rbac"
+  },
+  {
+    "file": "30-archive.png",
+    "caption": "Исторический архив: отделён от операционного CRM, доступ по ролям",
+    "scenario": "rbac"
+  }
+]
