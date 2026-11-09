@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-
-
-
-
-
-
-
-
-
-
+# Off-site репликация логического backup_id в BackupRemote (ТЗ 39, FR-34, FR-36, NFR-19/20/25).
+#
+#
+# Каждый target описан в rclone.conf (каталог секретов, не в БД/Git/backup-наборе):
+#   [<code>]        — транспорт (s3 — Yandex Object Storage, webdav — Облако Mail.ru, local — диск/NAS)
+#   [<code>-crypt]  — rclone crypt поверх <code>: шифруются содержимое, имена файлов и каталогов.
+# Набор шифруется на стороне узла CRM до передачи провайдеру. Статус upload/verification хранится
+# отдельно по каждому target (backup_target_runs). ошибка одного target не влияет на другие и на
+# локальную копию. Повтор (--failed-only) не создаёт новый снимок. verified = чтение через crypt-слой
+# + совпадение SHA-256 manifest/checksums.
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
 
 ID=""; TARGETS=""; FAILED_ONLY=0; VERIFY_ONLY=0; LIST=0; DOWNLOAD_FROM=""
-while [ $
+while [ $# -gt 0 ]; do
   case "$1" in
     --targets|--target) TARGETS="$2"; shift 2 ;;
     --failed-only) FAILED_ONLY=1; shift ;;
@@ -76,20 +76,20 @@ current_upload_status() {
   psql_q -c "SELECT upload_status || ':' || verify_status FROM backup_target_runs WHERE backup_run_id='$run_id' AND backup_remote_id='$remote_id'"
 }
 
-
+# Безопасная диагностика: последняя строка ошибки rclone без URL с параметрами и без токенов.
 sanitize_err() { tail -3 | tr '\n' ' ' | sed -E 's#(https?://)[^ ]+#\1…#g; s/(token|key|pass(word)?|secret)[=:][^ ]+/\1=***/Ig' | cut -c1-500; }
 
 verify_remote() {
   local code="$1" dir="$2" tmp
   tmp="$(mktemp -d)"
-  
+  # Чтение через crypt-слой: manifest и checksums расшифровываются и сверяются с локальными.
   if ! "${RC[@]}" copy "$code-crypt:$ID" "$tmp" --include manifest.json --include checksums.sha256 2>"$tmp/err.log"; then
     sanitize_err <"$tmp/err.log"; rm -rf "$tmp"; return 1
   fi
   if ! cmp -s "$tmp/manifest.json" "$dir/manifest.json" || ! cmp -s "$tmp/checksums.sha256" "$dir/checksums.sha256"; then
     echo "manifest/checksums на target не совпадают с локальной копией"; rm -rf "$tmp"; return 1
   fi
-  
+  # Целостность больших компонентов: сверка хэшей зашифрованного содержимого.
   if ! "${RC[@]}" cryptcheck "$dir" "$code-crypt:$ID" --one-way 2>"$tmp/err.log"; then
     sanitize_err <"$tmp/err.log"; rm -rf "$tmp"; return 1
   fi
@@ -152,7 +152,7 @@ for code in $(resolve_targets); do
   if MSG="$(verify_remote "$code" "$DIR")"; then
     target_run "$RUN_ID" "$REMOTE_ID" "verify_status='verified', verified_at=now()"
     log "$code: verified"
-    
+    # Ротация на target — только после появления новой verified копии. текущая не удаляется.
     KEEP="${BACKUP_REMOTE_RETENTION_DAILY:-14}"
     mapfile -t OLD < <("${RC[@]}" lsf "$code-crypt:" --dirs-only 2>/dev/null | sed 's#/$##' | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}_' | sort -r | tail -n +$((KEEP + 1)))
     for o in "${OLD[@]}"; do [ "$o" != "$ID" ] && "${RC[@]}" purge "$code-crypt:$o" 2>/dev/null && log "$code: ротация — удалена $o"; done

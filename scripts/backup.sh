@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-
-
-
-
-
+# Ручной/плановый backup (ТЗ 36.4, 39.10).
+#   ./scripts/backup.sh                    — локальный backup (то же, что --local)
+#   ./scripts/backup.sh --targets all      — локальный backup + репликация во все включённые targets
+#   ./scripts/backup.sh --target <code>    — локальный backup + репликация в один target
+# Для расписания используйте cron/systemd timer хоста, например:
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
@@ -11,7 +11,7 @@ require_docker
 require_env
 
 TRIGGER="manual"; TARGETS=""
-while [ $
+while [ $# -gt 0 ]; do
   case "$1" in
     --local) shift ;;
     --targets) TARGETS="$2"; shift 2 ;;

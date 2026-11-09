@@ -193,7 +193,7 @@ $deletedFiles = 0L; $deletedBytes = 0L
 foreach ($result in $results) { $deletedFiles += $result.Files; $deletedBytes += $result.Bytes }
 $failures = @($results | Where-Object Code -notin @('DELETED','DRY_RUN','CLEANED_PROTECTED_REMAINDER'))
 $lines = [Collections.Generic.List[string]]::new()
-$lines.Add('
+$lines.Add('# Workspace cleanup')
 $lines.Add('')
 $lines.Add("UTC: $([DateTime]::UtcNow.ToString('o')); execute: $Execute; workspace: $root")
 $lines.Add("Preflight: $($plans.Count) eligible targets; $preFiles files; $preBytes bytes.")

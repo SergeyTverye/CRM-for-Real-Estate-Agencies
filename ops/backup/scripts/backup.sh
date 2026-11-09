@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-
-
-
-
-
-
-
-
-
+# Локальный логический backup (ТЗ 36.4, 39.5): один backup_id = каталог
+#   files.tar.zst      — архив пользовательских файлов StorageAdapter
+#   manifest.json      — backup_id, deployment_id, версия приложения/схемы, PostgreSQL major,
+#                        компоненты с размерами и SHA-256, контрольные счётчики строк
+#   checksums.sha256   — SHA-256 всех компонентов
+# Набор формируется в staging-каталоге и атомарно переименовывается только после
+# успешного завершения всех шагов (local_success). Выход: backup_id в stdout.
+#
+# Использование: backup.sh [--trigger scheduled|manual|pre_update|pre_migration|shutdown] [--initiated-by <user uuid>]
 set -euo pipefail
 . "$(dirname "$0")/common.sh"
 
 TRIGGER="manual"
 INITIATOR=""
-while [ $
+while [ $# -gt 0 ]; do
   case "$1" in
     --trigger) TRIGGER="$2"; shift 2 ;;
     --initiated-by) INITIATOR="$2"; shift 2 ;;
@@ -26,7 +26,7 @@ case "$TRIGGER" in scheduled|manual|pre_update|pre_migration|shutdown) ;; *) die
 [ -z "$INITIATOR" ] || [[ "$INITIATOR" =~ ^[0-9a-fA-F-]{36}$ ]] || die "некорректный --initiated-by"
 
 mkdir -p "$BACKUP_DIR"
-
+# Защита от параллельного запуска (ТЗ 37.17).
 exec 9>"$BACKUP_DIR/.backup.lock"
 flock -n 9 || die "backup уже выполняется"
 
@@ -67,7 +67,7 @@ zstd -q -t "$STAGING/files.tar.zst" || cleanup_failed "архив файлов �
 SCHEMA_VERSION="$(psql_q -c "SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name DESC LIMIT 1" || true)"
 PG_MAJOR="$(psql_q -c "SHOW server_version_num" | cut -c1-2)"
 FILES_COUNT="$(find "$FILES_DIR" -type f | wc -l | tr -d ' ')"
-
+# Контрольные счётчики строк для проверки восстановления (не содержат ПДн).
 
 DUMP_SIZE="$(file_size "$STAGING/database.dump")"
 FILES_SIZE="$(file_size "$STAGING/files.tar.zst")"
@@ -102,8 +102,8 @@ mv "$STAGING" "$FINAL"
 record_run_finish "$ID" success "$DUMP_SIZE" "$FILES_SIZE" "$MANIFEST_SHA" "$SCHEMA_VERSION" ""
 log "backup $ID создан: dump=${DUMP_SIZE}B files=${FILES_SIZE}B"
 
-
-
+# Ротация локальных копий: храним BACKUP_RETENTION_DAILY последних scheduled/manual копий.
+# Копии pre_update/pre_migration не удаляются автоматически. текущая копия не удаляется никогда.
 KEEP="${BACKUP_RETENTION_DAILY:-14}"
 if [[ "$KEEP" =~ ^[0-9]+$ ]] && [ "$KEEP" -ge 1 ]; then
   mapfile -t ROTATABLE < <(

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-
-
-
-
+# Восстановление рабочей среды из локального backup (ТЗ 36.4, 39.10):
+#   ./scripts/restore.sh --source <remote-code> --backup <backup_id> [--yes]   (off-site: загрузка через crypt)
+# Порядок: проверка manifest/checksums → явное подтверждение → защитный snapshot текущих данных →
+# остановка app → pg_restore + файлы → запуск app → healthcheck.
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env
 
 SOURCE="local"; ID=""; YES=0; VERIFY_ONLY=0
-while [ $
+while [ $# -gt 0 ]; do
   case "$1" in
     --source) SOURCE="$2"; shift 2 ;;
     --backup) ID="$2"; shift 2 ;;
