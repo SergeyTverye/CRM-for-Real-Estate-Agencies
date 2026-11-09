@@ -619,16 +619,9 @@
   },
   {
     "file": "result-cards.png",
-    "source": "docs\\user-guide\\v3.2.3\\images\\live\\search-results-live.png",
-    "kind": "coordinator capture",
-    "crop": [
-      530,
-      160,
-      2680,
-      1536
-    ],
-    "boxes": [],
-    "privacyReview": "No secrets or seller contacts visible in selected area"
+    "source": "docs\\user-guide\\v3.2.3\\images\\result-cards.png",
+    "kind": "retained tracked illustration; original capture unavailable in checkout",
+    "privacyReview": "Previously reviewed illustration retained without recropping"
   },
   {
     "file": "result-table.png",
@@ -658,16 +651,9 @@
   },
   {
     "file": "ranking.png",
-    "source": "docs\\user-guide\\v3.2.3\\images\\live\\ranking-success.png",
-    "kind": "coordinator capture",
-    "crop": [
-      560,
-      850,
-      2670,
-      1510
-    ],
-    "boxes": [],
-    "privacyReview": "No secrets or seller contacts visible in selected area"
+    "source": "docs\\user-guide\\v3.2.3\\images\\ranking.png",
+    "kind": "retained tracked illustration; original capture unavailable in checkout",
+    "privacyReview": "Previously reviewed illustration retained without recropping"
   },
   {
     "file": "comparison.png",
@@ -716,6 +702,18 @@
   {
     "file": "e2e-manual-domclick.png",
     "source": "docs\\screenshots\\vkr\\v323-search\\e2e-manual-domclick.png",
+    "kind": "v323 LIVE capture or replay of same persisted LIVE run",
+    "privacyReview": "No seller contacts, person names or credentials visible"
+  },
+  {
+    "file": "quality-room-filter.png",
+    "source": "docs\\screenshots\\vkr\\v323-search\\quality-room-filter.png",
+    "kind": "v323 LIVE capture or replay of same persisted LIVE run",
+    "privacyReview": "No seller contacts, person names or credentials visible"
+  },
+  {
+    "file": "quality-room-results.png",
+    "source": "docs\\screenshots\\vkr\\v323-search\\quality-room-results.png",
     "kind": "v323 LIVE capture or replay of same persisted LIVE run",
     "privacyReview": "No seller contacts, person names or credentials visible"
   },

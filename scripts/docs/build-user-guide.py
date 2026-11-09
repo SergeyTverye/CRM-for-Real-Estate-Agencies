@@ -129,12 +129,17 @@ def prepare_images():
         # Historical source paths are repository-relative, not image-relative.
         if relative.startswith('../../../../'):
             source=ROOT/'docs'/relative.removeprefix('../../../../')
+        if not source.exists() and (images/f'{name}.png').exists():
+            evidence.append({'file':f'{name}.png','source':str((images/f'{name}.png').relative_to(ROOT)),
+                'kind':'retained tracked illustration; original capture unavailable in checkout',
+                'privacyReview':'Previously reviewed illustration retained without recropping'})
+            continue
         annotate(source,images/f'{name}.png',crop,boxes)
         evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),
             'kind':'coordinator capture' if relative.startswith('live/') else 'prior LIVE UI / P0-C synthetic component',
             'crop':crop,'boxes':boxes,'privacyReview':'No secrets or seller contacts visible in selected area'})
     if VERSION == 'v3.2.3':
-        for name in ['e2e-filter-locations','e2e-sources-results','e2e-ai-locations','e2e-ranking','e2e-manual-domclick']:
+        for name in ['e2e-filter-locations','e2e-sources-results','e2e-ai-locations','e2e-ranking','e2e-manual-domclick','quality-room-filter','quality-room-results']:
             source=legacy/'v323-search'/f'{name}.png'
             annotate(source,images/f'{name}.png')
             evidence.append({'file':f'{name}.png','source':str(source.relative_to(ROOT)),

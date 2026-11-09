@@ -1,0 +1,135 @@
+{
+  "mode": "REPLAY",
+  "recordedAt": "2026-11-08T23:33:02.329Z",
+  "source": "crm_demo persisted normalized snapshots; no refetch, no CRM writes, no AI",
+  "scenarios": [
+    {
+      "id": "a",
+      "runId": "ecac7d0d-0776-416d-9883-8f8418a5862d",
+      "total": 20,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 11,
+        "rejected": 9
+      },
+      "unknownBefore": 16,
+      "unknownAfter": 16,
+      "daily": 0
+    },
+    {
+      "id": "b",
+      "runId": "2efd1e15-aee2-4b8f-9464-6271dbe4830d",
+      "total": 20,
+      "counts": {
+        "confirmed": 4,
+        "needs_review": 6,
+        "rejected": 10
+      },
+      "unknownBefore": 0,
+      "unknownAfter": 0,
+      "daily": 0,
+      "withRooms2": {
+        "confirmed": 2,
+        "needs_review": 3,
+        "rejected": 15
+      }
+    },
+    {
+      "id": "c",
+      "runId": "c1d9e6bb-660e-4c13-ac02-1f7184cc4bcc",
+      "total": 15,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 13,
+        "rejected": 2
+      },
+      "unknownBefore": 15,
+      "unknownAfter": 15,
+      "daily": 0
+    },
+    {
+      "id": "d",
+      "runId": "ceb6800b-4d94-436f-8028-fa25273a077d",
+      "total": 15,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 10,
+        "rejected": 5
+      },
+      "unknownBefore": 11,
+      "unknownAfter": 10,
+      "daily": 1
+    },
+    {
+      "id": "e",
+      "runId": "0b1596d7-2ced-46cc-b5df-f9154597b490",
+      "total": 19,
+      "counts": {
+        "confirmed": 11,
+        "needs_review": 7,
+        "rejected": 1
+      },
+      "unknownBefore": 0,
+      "unknownAfter": 0,
+      "daily": 0
+    },
+    {
+      "id": "f",
+      "runId": "15d4d85c-525d-42f4-b6db-993596bcb46e",
+      "total": 25,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 25,
+        "rejected": 0
+      },
+      "unknownBefore": 0,
+      "unknownAfter": 0,
+      "daily": 0
+    },
+    {
+      "id": "g",
+      "runId": "c90d2b2b-5958-45f3-85ca-17639547e2aa",
+      "total": 15,
+      "counts": {
+        "confirmed": 0,
+        "needs_review": 10,
+        "rejected": 5
+      },
+      "unknownBefore": 15,
+      "unknownAfter": 15,
+      "daily": 0
+    }
+  ],
+  "rentalPeriodBySource": {
+    "mirkvartir": {
+      "total": 20,
+      "unknownBefore": 16,
+      "unknownAfter": 16,
+      "daily": 0
+    },
+    "cian": {
+      "total": 5,
+      "unknownBefore": 1,
+      "unknownAfter": 1,
+      "daily": 0
+    },
+    "onrealt": {
+      "total": 20,
+      "unknownBefore": 20,
+      "unknownAfter": 19,
+      "daily": 1
+    },
+    "yandex": {
+      "total": 20,
+      "unknownBefore": 20,
+      "unknownAfter": 20,
+      "daily": 0
+    },
+    "youla": {
+      "total": 0,
+      "unknownBefore": 0,
+      "unknownAfter": 0,
+      "daily": 0
+    }
+  }
+}
