@@ -20,7 +20,6 @@ export async function getPropertyPrint(actor: Actor, id: string, legalEntityId?:
   const [issuer, media] = await Promise.all([getPrintIssuer(actor, issuerId), listPropertyMedia(actor, id)]);
   return { property, issuer, photos: media.filter(m => m.kind === "photo") };
 }
-/** URLs are rendered as links only, never fetched by the export service. */
 export function publicHttpUrl(value: string | null): string | null {
   if (!value) return null;
   try { const u = new URL(value); return ["https:", "http:"].includes(u.protocol) && !u.username && !u.password ? u.href : null; } catch { return null; }

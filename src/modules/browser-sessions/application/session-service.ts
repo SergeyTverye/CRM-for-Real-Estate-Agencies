@@ -18,7 +18,6 @@ export class BrowserSessionService {
   private async owned(actor: Actor, id: string) {
     await this.closing.get(id);
     const row = await this.repo.get(id);
-    // Manager has no implicit right to observe another employee's authenticated browser.
     if (!row || row.ownerUserId !== actor.userId) throw new NotFoundError();
     return row;
   }
@@ -50,7 +49,6 @@ export class BrowserSessionService {
     } catch { throw new InfrastructureError("Адаптер не предоставил безопасный адрес проверки."); }
     const existing = await this.repo.active(actor.userId, input.source);
     if (existing) {
-      // Single application worker owns live contexts. After restart no profile/cookie state is resumed.
       await this.get(actor, existing.id);
       const current = await this.repo.get(existing.id);
       if (current && isLive(current)) throw new ConflictError("BROWSER_SESSION_EXISTS", "Для этой площадки уже открыт сеанс.", { sessionUrl: `/browser-sessions/${existing.id}` });
@@ -76,7 +74,6 @@ export class BrowserSessionService {
       return this.dto(row);
     } catch {
       await this.closeById(row.id, "failed", "browser_start_failed");
-      // Never forward Playwright errors: they may include URLs, cookies or typed text.
       throw new InfrastructureError("Не удалось открыть защищённый сеанс. Доступен ручной импорт или добавление по ссылке.");
     }
   }
@@ -90,7 +87,6 @@ export class BrowserSessionService {
   }
   private async tick(id: string) {
     const rt = this.running.get(id), row = rt?.session;
-    // The security deadline must not depend on availability/latency of PostgreSQL.
     if (!row || !rt || rt.controller.signal.aborted || !isLive(row) || await this.expireIfNeeded(row)) return;
     if (await this.search.isCancelled?.(row.searchRunId)) { await this.finish(row, "cancelled", "search_cancelled"); return; }
     if (rt.handle && !rt.busy && !rt.inputBusy && !rt.probing) {
@@ -115,7 +111,6 @@ export class BrowserSessionService {
     return false;
   }
   private limit(values: number[], maximum: number) {
-    // Rate windows must advance independently of lifecycle clocks (including frozen test clocks).
     const now = this.options.rateClock?.() ?? performance.now(); while (values.length && values[0]! <= now - 1000) values.shift();
     if (values.length >= maximum) throw new RateLimitError(); values.push(now);
   }
@@ -126,8 +121,6 @@ export class BrowserSessionService {
     this.limit(rt.polls, 5);
     if (after !== undefined) {
       if (!Number.isSafeInteger(after) || after < 0) throw new ValidationError("Некорректный номер кадра");
-      // Bounded long-poll: unchanged JPEGs are not retransmitted. Deadline uses a monotonic clock,
-      // independent of the injected business clock used by deterministic lifecycle tests.
       const deadline = performance.now() + 5000;
       while ((rt.handle.frame()?.sequence ?? 0) <= after && performance.now() < deadline && !rt.controller.signal.aborted && !signal?.aborted) {
         await new Promise<void>(resolve => {
@@ -179,10 +172,8 @@ export class BrowserSessionService {
   private async closeById(id: string, status: "failed" | "expired", reason: string) { const row = this.running.get(id)?.session ?? await this.repo.get(id); if (row) await this.finish(row, status, reason); }
   private finish(row: InteractiveSession, status: "completed" | "cancelled" | "expired" | "failed", reason: string): Promise<void> {
     const pending = this.closing.get(row.id); if (pending) return pending;
-    // Fence continuation immediately. Concurrent readers await durable closure, not a transient process_lost state.
     const rt = this.running.get(row.id); rt?.controller.abort(); if (rt?.timer) clearTimeout(rt.timer);
     const operation = (async () => {
-      // Close Chromium before database/audit I/O: a DB outage cannot extend the browser lifetime.
       let cleanupFailed = false;
       try { await rt?.handle?.close(); } catch { cleanupFailed = true; }
       const latest = await this.repo.get(row.id); if (!latest || !isLive(latest)) return;
@@ -197,6 +188,5 @@ export class BrowserSessionService {
     })().finally(() => { this.running.delete(row.id); this.closing.delete(row.id); });
     this.closing.set(row.id, operation); return operation;
   }
-  /** Deployment shutdown hook; no browser survives a graceful worker exit. */
   async shutdown() { await Promise.allSettled([...this.running.keys()].map(id => this.closeById(id, "failed", "process_stopped"))); }
 }

@@ -83,7 +83,6 @@ export async function listCalendar(actor: Actor, input: unknown, options: { recu
     for (let i = 0; i < events.length; i++) {
       const e = events[i]!;
       const canRead = (e.visibility !== "private" || e.ownerUserId === actor.userId) && access[i]!;
-      // Client filtering must not reveal who attends another employee's personal meeting.
       if (client && (!canRead || (e.clientId !== client && needClient.get(e.id) !== client))) continue;
       for (const occurrence of occurrences({ start: e.startAt.toISOString(), end: e.endAt.toISOString(), recurrenceRule: e.recurrenceRule }, f.from, f.to, timeZone)) {
         const item: CalendarItem = { id: `calendar_event:${e.id}:${occurrence.start}`, sourceId: e.id,
@@ -105,7 +104,6 @@ export async function listCalendar(actor: Actor, input: unknown, options: { recu
 type Links = { clientId?: string | null; needId?: string | null; propertyId?: string | null; dealId?: string | null };
 async function linksAccessible(tx: DbOrTx, actor: Actor, data: Links): Promise<boolean> {
   if (data.clientId && !await tx.client.count({ where: { id: data.clientId, ...clientScope(actor) } })) return false;
-  // Need ownership alone does not confer access to its client.
   if (data.needId && !await tx.clientNeed.count({ where: { AND: [{ id: data.needId }, needScope(actor), { client: clientScope(actor) }] } })) return false;
   if (data.dealId && !await tx.deal.count({ where: { AND: [{ id: data.dealId }, dealScope(actor),
     { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] } })) return false;
@@ -174,7 +172,6 @@ export async function saveCalendarEvent(actor: Actor, input: unknown, id?: strin
     if (ownerUserId !== actor.userId && (!isManager(actor) || id)) throw new ForbiddenError();
     if (!await tx.user.count({ where: { id: ownerUserId, isActive: true } })) throw new ValidationError("Ответственный недоступен");
     if (!await linksAccessible(tx, actor, data)) throw new NotFoundError();
-    // Check the recipient's access as well; sharing cannot hand another employee a foreign client.
     const owner = await tx.user.findUniqueOrThrow({ where: { id: ownerUserId }, select: { roleCode: true } });
     if (!await linksAccessible(tx, { ...actor, userId: ownerUserId, role: owner.roleCode as Actor["role"] }, data)) throw new NotFoundError();
     const { ownerUserId: _owner, ...fields } = data;
@@ -223,7 +220,6 @@ export async function getCalendarEvent(actor: Actor, id: string) {
   } };
 }
 
-/** Picker DTOs use the same client boundary as event commands. */
 export async function pickCalendarLinks(actor: Actor, raw: unknown) {
   const f = parseInput(z.object({ type: z.enum(["clientId", "needId", "propertyId", "dealId"]), q: z.string().trim().max(200).default("") }), raw);
   const text = { contains: f.q, mode: "insensitive" as const };
@@ -245,7 +241,6 @@ export async function moveCalendarSource(actor: Actor, input: unknown) {
   if (d.type === "showing") return updateShowing(actor, d.id, { scheduledAt: d.startAt.toISOString(), expectedUpdatedAt: d.expectedUpdatedAt.toISOString() });
   const e = await db.calendarEvent.findFirst({ where: { id: d.id, ownerUserId: actor.userId, archivedAt: null } });
   if (!e) throw new NotFoundError();
-  // Moving a recurrence edits the series explicitly; UI disables dragging occurrences.
   if (e.recurrenceRule) throw new ValidationError("Повторяющуюся встречу измените в форме серии");
   return saveCalendarEvent(actor, { ...e, startAt: d.startAt.toISOString(), endAt: (d.endAt ?? new Date(+d.startAt + +e.endAt - +e.startAt)).toISOString(), expectedUpdatedAt: d.expectedUpdatedAt.toISOString() }, d.id);
 }

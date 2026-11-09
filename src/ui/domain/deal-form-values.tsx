@@ -95,7 +95,7 @@ export const emptyAd = (): AdFormValue => ({ platformCode: "", url: "", adText: 
 export interface OfferItemDraft {
   propertyId: string;
   addressText: string;
-  /** Текущая цена объекта — подсказка; в КП сохраняется snapshot. */
+  /** Текущая цена объекта — подсказка. в КП сохраняется snapshot. */
   currentPrice: string | null;
   price: string;
   terms: string;

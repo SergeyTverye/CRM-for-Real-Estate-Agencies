@@ -26,7 +26,7 @@ import { assertNeedInvariants } from "@/modules/needs/domain/need-invariant";
  * Факт обращения сохраняется всегда, даже без дальнейшей потребности.
  * Правило «чей объект, того и клиент»: для НОВОГО клиента с контекстом Property/Advertisement
  * Client, LeadRequest и новая ClientNeed получают ответственного объекта. Для СУЩЕСТВУЮЩЕГО клиента
- * ответственность не меняется автоматически; конфликт с ответственным объекта возвращается в ответе.
+ * ответственность не меняется автоматически. конфликт с ответственным объекта возвращается в ответе.
  */
 
 const clientChoiceSchema = z.discriminatedUnion("mode", [
@@ -358,7 +358,6 @@ export async function previewResponsible(actor: Actor, opts: { propertyId?: stri
     property = ad.property;
   }
   if (!property?.responsible) return { responsible: { id: actor.userId, displayName: actor.displayName }, byPropertyRule: false };
-  // The shared catalog does not require disclosing another employee's identity in this preview.
   const responsible = isManager(actor) || property.responsible.id === actor.userId
     ? property.responsible
     : { id: "", displayName: "Ответственный объекта" };

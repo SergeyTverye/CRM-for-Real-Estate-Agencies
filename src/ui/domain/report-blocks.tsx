@@ -3,7 +3,7 @@ import { Card, EmptyState } from "../components";
 
 /**
  * Серверные блоки отчёта руководителя (ТЗ 37.13): несколько проверяемых цифр, каждая — с drill-down.
- * Цвет — только сигнал; смысл передаётся текстом («требует внимания»).
+ * Цвет — только сигнал. смысл передаётся текстом («требует внимания»).
  */
 
 export type Signal = "attention" | "warning" | null;
@@ -40,7 +40,7 @@ export interface BarRow {
   href?: string;
 }
 
-/** Таблица «значение — количество — доля» с CSS-полосой; строка ведёт в отфильтрованный список. */
+/** Таблица «значение — количество — доля» с CSS-полосой. строка ведёт в отфильтрованный список. */
 export function BarTable({ rows, emptyTitle, totalLabel = "Всего", unit = "" }: { rows: BarRow[]; emptyTitle: string; totalLabel?: string; unit?: string }) {
   if (rows.length === 0) return <EmptyState title={emptyTitle} />;
   const total = rows.reduce((s, r) => s + r.count, 0);
@@ -110,7 +110,7 @@ export interface FunnelStep {
   note?: string;
 }
 
-/** Воронка с абсолютными числами; доля перехода от предыдущего шага — вспомогательная подпись. */
+/** Воронка с абсолютными числами. доля перехода от предыдущего шага — вспомогательная подпись. */
 export function FunnelRow({ title, steps, footnote }: { title: string; steps: FunnelStep[]; footnote?: string }) {
   return (
     <div>

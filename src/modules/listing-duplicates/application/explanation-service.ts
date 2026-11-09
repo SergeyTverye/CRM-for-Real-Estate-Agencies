@@ -7,7 +7,6 @@ import { parseInput } from "@/shared/validation";
 import { AiError } from "@/modules/ai/domain/contracts";
 import { getDuplicateGroup } from "./duplicate-service";
 
-/** Explanation preview only. The human decision endpoint remains the only state transition. */
 export async function explainDuplicateGroup(actor: Actor, id: string, raw: unknown, injected?: Pick<SearchAiPort, "analyzeDescriptions">) {
   const input = parseInput(z.object({ confirmedPaid: z.literal(true), expectedUpdatedAt: z.iso.datetime() }).strict(), raw);
   const group = await getDuplicateGroup(actor, id);
@@ -20,7 +19,6 @@ export async function explainDuplicateGroup(actor: Actor, id: string, raw: unkno
   try {
     const result = await ai.analyzeDescriptions({ user: { userId: actor.userId, active: true }, ownerUserId: actor.userId,
       jobId, requestId: `duplicate-explanation:${randomUUID()}` }, {
-      // Only rule outcomes, no seller names, descriptions, URLs, contacts, CRM/client records.
       listings: group.evidence.pairs.slice(0, 20).map((p, i) => ({ id: `pair-${i + 1}`, publicDescription: p.features.map(f => `${f.feature}: ${f.state}; ${f.explanation}`).join("\n") })),
       unresolvedCriteria: ["Есть совпадающие признаки", "Есть различающиеся признаки", "Недостаточно сведений для доказанной идентичности"],
     });

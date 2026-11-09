@@ -31,7 +31,6 @@ async function sameLock(file: string, expected: LockSnapshot) {
   } catch { return false; }
 }
 function ownerDead(owner: LockOwner) {
-  // A reused Windows PID looks alive: never infer death from age or timestamps.
   try { process.kill(owner.pid, 0); return false; }
   catch (e) { return (e as NodeJS.ErrnoException).code === "ESRCH"; }
 }
@@ -39,7 +38,6 @@ async function acquireBudgetLock(file: string, depth = 0): Promise<() => Promise
   if (depth > 8) throw new BackupError("NATIVE_LOCK_RECOVERY_LIMIT");
   const owner: LockOwner = { pid: process.pid, token: randomUUID(), createdAt: new Date().toISOString() };
   const candidate = file + ".owner-" + owner.token;
-  // Publish fully written metadata atomically; a crash cannot leave an empty main lock.
   const handle = await open(candidate, "wx", 0o600);
   let snapshot: LockSnapshot;
   try {
@@ -54,8 +52,6 @@ async function acquireBudgetLock(file: string, depth = 0): Promise<() => Promise
       } catch (e) { if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e; }
       const previous = await inspectLock(file);
       if (!ownerDead(previous.owner)) throw Object.assign(new BackupError("NATIVE_LOCK_BUSY"), { code: "EEXIST" });
-      // Serialize retirement for this exact nonce. The guard uses the same
-      // dead-owner protocol, so a crash during recovery is itself recoverable.
       const release = await acquireBudgetLock(file + ".retire-" + previous.owner.token, depth + 1);
       try {
         if (ownerDead(previous.owner) && await sameLock(file, previous)) {
@@ -69,7 +65,6 @@ async function acquireBudgetLock(file: string, depth = 0): Promise<() => Promise
   } finally { await rm(candidate); }
 }
 
-/** Shared by native publication and protective snapshot creation. */
 export async function withNativeArchiveBudget<T>(outputDir: string, work: () => Promise<T>): Promise<T> {
   await protectedDir(outputDir);
   const lock = path.join(outputDir, ".native-budget.lock");
@@ -92,8 +87,6 @@ export async function nativeArchiveUsage(outputDir: string) {
   }
   return { bytes, pendingBytes, imports };
 }
-/** Caller holds the budget lock through command publication/removal and cleanup.
- * Only exact UUID import refs are candidates; command files remain the running lease. */
 export async function cleanupNativeImports(outputDir: string, commands: string, onlyId?: string) {
   if (onlyId !== undefined && !z.uuid().safeParse(onlyId).success) throw new BackupError("IMPORT_ID_INVALID");
   await protectedDir(outputDir); await protectedDir(commands);
@@ -119,7 +112,6 @@ export async function cleanupNativeImports(outputDir: string, commands: string, 
     if (!z.uuid().safeParse(id).success || referenced.has(id)) continue;
     const archive = path.join(outputDir, id + ".crmbackup"), sidecar = path.join(outputDir, name);
     try {
-      // Any ordinary catalog marker, even malformed, permanently excludes this candidate.
       try { await lstat(archive + ".json"); continue; }
       catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
       const info = await regularFile(sidecar); if (info.size > 16384) throw new Error();
@@ -139,8 +131,6 @@ export async function requestNativeDialog(kind: "folder" | "export" | "import", 
   if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1") throw new InfrastructureError("Системный диалог доступен в установленной desktop-версии");
   const owner = dialogOwnerSchema.parse({ kind, actorUserId });
   const id = randomUUID(); await protectedDir(nativeDialogRoot());
-  // The supervisor removes the request after completion. Retain app-owned
-  // request metadata so folder/export results need no supervisor API change.
   const ownerPath = path.join(nativeDialogRoot(), id + ".owner.json");
   await writeFile(ownerPath, JSON.stringify(owner), { flag: "wx", mode: 0o600 });
   try {
@@ -165,10 +155,6 @@ export async function readNativeDialog(id: string, actorUserId?: string) {
   } catch { throw new InfrastructureError("Системный диалог недоступен"); }
 }
 
-/** Consume a native-only capability; never accept a browser-supplied filesystem path.
- * The encrypted manifest, not the selected filename, determines archive identity.
- * Publication happens only after full authenticated extraction and SQLite validation.
- */
 export async function importNativeArchive(id: string, actorUserId: string, credential: Credential, outputDir: string, publish?: (backupId: string) => Promise<void>) {
   if (!z.uuid().safeParse(id).success) throw new ValidationError();
   const dir = path.join(nativeIncomingRoot(), id);
@@ -176,7 +162,6 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
   await regularFile(metadataPath);
   const metadata = z.object({ actorUserId: z.string(), expiresAt: z.number().finite(), size: z.number().int().positive(), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict().parse(JSON.parse(await readFile(metadataPath, "utf8")));
   if (metadata.actorUserId !== actorUserId || metadata.expiresAt < Date.now()) throw new ValidationError("Выбор файла истёк. Выберите архив заново.");
-  // Atomic claim makes concurrent requests and result replay fail closed.
   await rename(metadataPath, path.join(dir, "consumed.json"));
   try {
     const file = path.join(dir, "archive.crmbackup"); await regularFile(file);
@@ -193,8 +178,6 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
       await protectedDir(outputDir);
       const backupId = checked.manifest.backupId;
       const target = path.join(outputDir, backupId + ".crmbackup");
-      // An existing catalog item may be subject to retention during protectCurrent.
-      // Use the catalog workflow instead of turning that mutable entry into input.
       try { await lstat(target + ".json"); throw new ValidationError("Эта копия уже есть в локальном каталоге. Восстановите её через список копий."); }
       catch (e) { if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e; }
       const pending = path.join(outputDir, id + ".native.pending");
@@ -202,7 +185,6 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
       try {
         await copyFile(file, pending, 1);
         ownsPending = true;
-        // Reserve an owned reference without replacing another import's metadata.
         await writeFile(target + ".import.json", JSON.stringify({ archive: { backupId, createdAtUtc: checked.manifest.createdAtUtc, ...hash } }), { flag: "wx", mode: 0o600 });
         ownsRef = true;
         await link(pending, target); // atomic no-clobber publication, even on ID collision
@@ -213,8 +195,6 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
         if ((e as NodeJS.ErrnoException).code === "EEXIST") throw new BackupError("ARCHIVE_ID_COLLISION");
         throw e;
       } finally { if (ownsPending) await rm(pending, { force: true }); }
-      // Do not enroll the incoming snapshot in ordinary age-based retention:
-      // protectCurrent may prune old catalog entries before the generation switch.
       if (publish) {
         try { await publish(backupId); }
         catch (e) {

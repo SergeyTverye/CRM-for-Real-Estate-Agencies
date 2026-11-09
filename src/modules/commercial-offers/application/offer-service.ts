@@ -243,7 +243,6 @@ export async function changeOfferStatus(actor: Actor, id: string, input: unknown
   });
 }
 
-// ───── Queries ─────
 
 export const offerFiltersSchema = zPagination.extend({
   status: zCode("offerStatus").optional(),
@@ -302,7 +301,6 @@ export async function getOffer(actor: Actor, id: string) {
   };
 }
 
-/** A new draft keeps the exact historical snapshots; no Property refresh or send side effect. */
 export async function createOfferRevision(actor: Actor, id: string, input: unknown): Promise<{ id: string }> {
   const d = parseInput(z.object({ expectedUpdatedAt: zExpectedUpdatedAt }), input);
   return transaction(async tx => {

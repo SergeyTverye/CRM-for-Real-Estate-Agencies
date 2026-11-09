@@ -4,7 +4,6 @@ import { DomainError } from "@/shared/errors";
 import { getOfferPrintData } from "./offer-print-data";
 import { offerDocx } from "@/modules/export/presentation/offer-docx";
 
-/** Same authorized content as HTML/PDF; no current Property prices or owner contacts. */
 export async function generateOfferDocument(actor: Actor, offerId: string, baseUrl = ""): Promise<{ id: string }> {
   const data = await getOfferPrintData(actor, offerId, baseUrl);
   if (data.status === "archived") throw new DomainError("OFFER_ARCHIVED", "Предложение в архиве");

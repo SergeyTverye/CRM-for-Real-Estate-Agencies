@@ -155,8 +155,6 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
     if (!d) return;
     if (open && !d.open) d.showModal();
     if (!open && d.open) {
-      // close() queues a native close event; it is not a new dismissal request.
-      // Count events (rather than reset on reopen) to cover rapid transitions.
       pendingControlledCloses.current += 1;
       d.close();
     }
@@ -167,7 +165,6 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
         pendingControlledCloses.current -= 1;
         return;
       }
-      // Ignore stale native events after a reopen or a controlled dismissal.
       if (open && !e.currentTarget.open) onClose();
     }} onCancel={e => { e.preventDefault(); onClose(); }} className={`crm-dialog ${wide ? "w-[min(960px,95vw)]" : "w-[min(560px,95vw)]"}`}>
       <div className="card-header">

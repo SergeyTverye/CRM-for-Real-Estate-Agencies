@@ -1,4 +1,4 @@
-import type { OfferPrintData } from "@/modules/commercial-offers/application/offer-print-data";
+﻿import type { OfferPrintData } from "@/modules/commercial-offers/application/offer-print-data";
 
 const esc = (value: string) => value.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const text = (value: string) => esc(value).replace(/\n/g, "<br>");
@@ -53,22 +53,22 @@ html, body { margin: 0; background: #fff; color: #172b3e; font-family: Arial, sa
 `;
 
 export function offerHtml(data: OfferPrintData): string {
-  const contacts = data.issuer?.requisites?.split("\n").filter(line => /телефон|сайт|email|почта|\+7/iu.test(line)).join("\n");
-  const issuer = `<header class="issuer">${data.logo ? `<img class="logo" src="${data.logo.dataUrl}" alt="Логотип">` : ""}<div><div class="issuer-name">${esc(data.issuer?.displayName ?? "Агентство недвижимости")}</div>${data.issuer?.requisites ? `<div class="requisites">${text(data.issuer.requisites)}</div>` : ""}</div></header>`;
+  const contacts = data.issuer?.requisites?.split("\n").filter(line => /Ñ‚ÐµÐ»ÐµÑ„Ð¾Ð½|ÑÐ°Ð¹Ñ‚|email|Ð¿Ð¾Ñ‡Ñ‚Ð°|\+7/iu.test(line)).join("\n");
+  const issuer = `<header class="issuer">${data.logo ? `<img class="logo" src="${data.logo.dataUrl}" alt="Ð›Ð¾Ð³Ð¾Ñ‚Ð¸Ð¿">` : ""}<div><div class="issuer-name">${esc(data.issuer?.displayName ?? "ÐÐ³ÐµÐ½Ñ‚ÑÑ‚Ð²Ð¾ Ð½ÐµÐ´Ð²Ð¸Ð¶Ð¸Ð¼Ð¾ÑÑ‚Ð¸")}</div>${data.issuer?.requisites ? `<div class="requisites">${text(data.issuer.requisites)}</div>` : ""}</div></header>`;
   const objects = data.items.map(i => {
     const [hero, ...extra] = i.images;
-    const facts = [["Адрес", i.address], ["Район", i.district], ["Назначение", i.purpose], ["Площадь", i.area], ["Этаж", i.floor], ["Цена / ставка", i.price], ["Цена за м²", i.perM2]];
-    return `<section class="object"><p class="eyebrow">Объект ${i.position} / ${data.items.length}</p><h2>${esc(i.address)}</h2>
-      ${hero ? `<figure><img class="hero" src="${hero.dataUrl}" alt="${esc(hero.caption)}"><figcaption>${esc(hero.caption)}</figcaption></figure>` : `<p class="muted">Фотографии в каталоге не добавлены.</p>`}
+    const facts = [["ÐÐ´Ñ€ÐµÑ", i.address], ["Ð Ð°Ð¹Ð¾Ð½", i.district], ["ÐÐ°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ", i.purpose], ["ÐŸÐ»Ð¾Ñ‰Ð°Ð´ÑŒ", i.area], ["Ð­Ñ‚Ð°Ð¶", i.floor], ["Ð¦ÐµÐ½Ð° / ÑÑ‚Ð°Ð²ÐºÐ°", i.price], ["Ð¦ÐµÐ½Ð° Ð·Ð° Ð¼Â²", i.perM2]];
+    return `<section class="object"><p class="eyebrow">ÐžÐ±ÑŠÐµÐºÑ‚ ${i.position} / ${data.items.length}</p><h2>${esc(i.address)}</h2>
+      ${hero ? `<figure><img class="hero" src="${hero.dataUrl}" alt="${esc(hero.caption)}"><figcaption>${esc(hero.caption)}</figcaption></figure>` : `<p class="muted">Ð¤Ð¾Ñ‚Ð¾Ð³Ñ€Ð°Ñ„Ð¸Ð¸ Ð² ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³Ðµ Ð½Ðµ Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ñ‹.</p>`}
       ${extra.length ? `<div class="gallery">${extra.map(p => `<figure><img src="${p.dataUrl}" alt="${esc(p.caption)}"><figcaption>${esc(p.caption)}</figcaption></figure>`).join("")}</div>` : ""}
       <table class="facts"><tbody>${facts.map(([label, value]) => `<tr><th scope="row">${label}</th><td>${esc(value!)}</td></tr>`).join("")}</tbody></table>
-      ${i.terms ? `<h3>Условия</h3><p>${text(i.terms)}</p>` : ""}${i.comment ? `<h3>Примечания</h3><p>${text(i.comment)}</p>` : ""}
-      <div class="links"><p>Карточка CRM: <a href="${esc(i.propertyUrl)}">${esc(i.propertyUrl)}</a></p>${i.sourceUrl ? `<p>Первоисточник: <a href="${esc(i.sourceUrl)}">${esc(i.sourceUrl)}</a></p>` : ""}</div></section>`;
+      ${i.terms ? `<h3>Ð£ÑÐ»Ð¾Ð²Ð¸Ñ</h3><p>${text(i.terms)}</p>` : ""}${i.comment ? `<h3>ÐŸÑ€Ð¸Ð¼ÐµÑ‡Ð°Ð½Ð¸Ñ</h3><p>${text(i.comment)}</p>` : ""}
+      <div class="links"><p>ÐšÐ°Ñ€Ñ‚Ð¾Ñ‡ÐºÐ° CRM: <a href="${esc(i.propertyUrl)}">${esc(i.propertyUrl)}</a></p>${i.sourceUrl ? `<p>ÐŸÐµÑ€Ð²Ð¾Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº: <a href="${esc(i.sourceUrl)}">${esc(i.sourceUrl)}</a></p>` : ""}</div></section>`;
   }).join("");
-  const summary = `<section><h2>Сравнение объектов</h2><table class="comparison"><thead><tr><th>Фото / №</th><th>Адрес / район</th><th>Назначение</th><th>Площадь / этаж</th><th>Цена / ставка</th><th>Цена за м²</th></tr></thead><tbody>${data.items.map(i => `<tr><td>${i.images[0] ? `<img class="thumbnail" src="${i.images[0].dataUrl}" alt="${esc(i.images[0].caption)}">` : `<small>Без фото</small>`}№ ${i.position}</td><td><strong>${esc(i.address)}</strong><small>${esc(i.district)}</small></td><td>${esc(i.purpose)}</td><td>${esc(i.area)}<small>Этаж: ${esc(i.floor)}</small></td><td>${esc(i.price)}</td><td>${esc(i.perM2)}</td></tr>`).join("")}</tbody></table></section><div class="cover-footer">
+  const summary = `<section><h2>Ð¡Ñ€Ð°Ð²Ð½ÐµÐ½Ð¸Ðµ Ð¾Ð±ÑŠÐµÐºÑ‚Ð¾Ð²</h2><table class="comparison"><thead><tr><th>Ð¤Ð¾Ñ‚Ð¾ / â„–</th><th>ÐÐ´Ñ€ÐµÑ / Ñ€Ð°Ð¹Ð¾Ð½</th><th>ÐÐ°Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ</th><th>ÐŸÐ»Ð¾Ñ‰Ð°Ð´ÑŒ / ÑÑ‚Ð°Ð¶</th><th>Ð¦ÐµÐ½Ð° / ÑÑ‚Ð°Ð²ÐºÐ°</th><th>Ð¦ÐµÐ½Ð° Ð·Ð° Ð¼Â²</th></tr></thead><tbody>${data.items.map(i => `<tr><td>${i.images[0] ? `<img class="thumbnail" src="${i.images[0].dataUrl}" alt="${esc(i.images[0].caption)}">` : `<small>Ð‘ÐµÐ· Ñ„Ð¾Ñ‚Ð¾</small>`}â„– ${i.position}</td><td><strong>${esc(i.address)}</strong><small>${esc(i.district)}</small></td><td>${esc(i.purpose)}</td><td>${esc(i.area)}<small>Ð­Ñ‚Ð°Ð¶: ${esc(i.floor)}</small></td><td>${esc(i.price)}</td><td>${esc(i.perM2)}</td></tr>`).join("")}</tbody></table></section><div class="cover-footer">
 
-    ${data.expires ? `<p>Предложение действительно до ${esc(data.expires)}.</p>` : ""}
-    <div class="contact"><h3>Ваш ответственный специалист</h3><p><strong>${esc(data.responsible)}</strong></p>${contacts ? `<div class="requisites">${text(contacts)}</div>` : ""}</div>
-    <p class="muted">Цена, адрес, площадь и условия зафиксированы в предложении. Фотографии взяты из доступного каталога CRM; материалы внешних площадок доступны по ссылке на первоисточник.</p></div>`;
-  return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(data.title)}</title><style>${OFFER_PRINT_CSS}</style></head><body><article class="offer-print"><div class="cover">${issuer}<p class="eyebrow">Подборка недвижимости · ${esc(data.date)}</p><h1>${esc(data.title)}</h1><p>${text(data.intro)}</p><p class="muted">Объектов в предложении: ${data.items.length} · Ответственный: ${esc(data.responsible)}</p>${summary}</div>${objects}</article></body></html>`;
+    ${data.expires ? `<p>ÐŸÑ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾ Ð´Ð¾ ${esc(data.expires)}.</p>` : ""}
+    <div class="contact"><h3>Ð’Ð°Ñˆ Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ð¹ ÑÐ¿ÐµÑ†Ð¸Ð°Ð»Ð¸ÑÑ‚</h3><p><strong>${esc(data.responsible)}</strong></p>${contacts ? `<div class="requisites">${text(contacts)}</div>` : ""}</div>
+    <p class="muted">Ð¦ÐµÐ½Ð°, Ð°Ð´Ñ€ÐµÑ, Ð¿Ð»Ð¾Ñ‰Ð°Ð´ÑŒ Ð¸ ÑƒÑÐ»Ð¾Ð²Ð¸Ñ Ð·Ð°Ñ„Ð¸ÐºÑÐ¸Ñ€Ð¾Ð²Ð°Ð½Ñ‹ Ð² Ð¿Ñ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ð¸. Ð¤Ð¾Ñ‚Ð¾Ð³Ñ€Ð°Ñ„Ð¸Ð¸ Ð²Ð·ÑÑ‚Ñ‹ Ð¸Ð· Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾Ð³Ð¾ ÐºÐ°Ñ‚Ð°Ð»Ð¾Ð³Ð° CRM; Ð¼Ð°Ñ‚ÐµÑ€Ð¸Ð°Ð»Ñ‹ Ð²Ð½ÐµÑˆÐ½Ð¸Ñ… Ð¿Ð»Ð¾Ñ‰Ð°Ð´Ð¾Ðº Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ‹ Ð¿Ð¾ ÑÑÑ‹Ð»ÐºÐµ Ð½Ð° Ð¿ÐµÑ€Ð²Ð¾Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº.</p></div>`;
+  return `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(data.title)}</title><style>${OFFER_PRINT_CSS}</style></head><body><article class="offer-print"><div class="cover">${issuer}<p class="eyebrow">ÐŸÐ¾Ð´Ð±Ð¾Ñ€ÐºÐ° Ð½ÐµÐ´Ð²Ð¸Ð¶Ð¸Ð¼Ð¾ÑÑ‚Ð¸ Â· ${esc(data.date)}</p><h1>${esc(data.title)}</h1><p>${text(data.intro)}</p><p class="muted">ÐžÐ±ÑŠÐµÐºÑ‚Ð¾Ð² Ð² Ð¿Ñ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ð¸: ${data.items.length} Â· ÐžÑ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ð¹: ${esc(data.responsible)}</p>${summary}</div>${objects}</article></body></html>`;
 }

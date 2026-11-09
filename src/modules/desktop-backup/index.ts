@@ -1,4 +1,3 @@
-// Desktop-only entry point. Server PostgreSQL code must not import this module.
 export * from "./domain/contracts";
 export * from "./domain/handoff";
 export * from "./domain/retention";

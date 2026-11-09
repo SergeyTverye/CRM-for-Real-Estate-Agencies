@@ -41,7 +41,6 @@ export async function saveTemplate(actor: Actor, raw: unknown, file: File | null
     if (!file || file.size > LIMITS.input || !file.name.toLowerCase().endsWith(`.${input.format}`)) fail("Выберите DOCX/XLSX без макросов размером до 5 МБ");
     data = Buffer.from(await file.arrayBuffer()); readPackage(data);
   } else if (file) fail("Этот режим не принимает бинарный файл");
-  // Upload cannot activate a syntactically invalid template.
   await renderDocument(input.format, input.markdownBody ?? null, data, [projectContext(syntheticContext(), m, "manager")], m, "manager");
   const storage = getStorage(), stored = data ? await storage.put(data, { prefix: "templates" }) : null;
   try {
@@ -123,7 +122,6 @@ export async function generateFromTemplate(actor: Actor, id: string, raw: unknow
     }
     const rendered = await renderDocument(row.format, v.markdownBody, data, contexts, m, actor.role);
     if (preview) return { ...rendered, id: null };
-    // Recheck active status within the transaction; old immutable version remains pinned.
     if (!await tx.documentTemplate.count({ where: { id, status: "active" } })) throw new NotFoundError();
     const storage = getStorage(), stored = await storage.put(rendered.data); storedKey = stored.storageKey;
     const accessRoles = ["manager", "realtor"].filter(role => m.fields.every(f => f.roles.includes(role as "manager" | "realtor")));

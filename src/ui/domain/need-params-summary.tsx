@@ -36,7 +36,7 @@ export interface NeedParamsLike {
 
 const present = (v: Num) => v !== null && v !== undefined && v.toString() !== "";
 
-/** «от a до b» / «от a» / «до b»; null — параметр не задан. */
+/** «от a до b» / «от a» / «до b». null — параметр не задан. */
 export function fmtRange(min: Num, max: Num, fmt: (v: Num) => string): string | null {
   const a = present(min);
   const b = present(max);

@@ -22,7 +22,6 @@ export class LocalDir implements BackupDestination {
       const h = await open(pending, "r+"); try { await h.sync(); } finally { await h.close(); }
       await assertArchive(pending, archive); await rename(pending, path.join(stage, "archive.crmbackup"));
       await atomicJson(path.join(stage, "manifest.json"), archive); await syncDir(stage);
-      // Non-empty generation directories cannot be replaced by rename.
       try { await rename(stage, this.folder(archive.backupId)); }
       catch (e) { if ((await this.list()).some(a => a.backupId === archive.backupId)) await this.verify(archive); else throw e; }
       await syncDir(this.root);
@@ -44,7 +43,6 @@ export class LocalDir implements BackupDestination {
   }
   async delete(id: string) {
     await this.ready(); await assertNoSymlinks(this.folder(id));
-    // Delete only the two known files, never follow arbitrary directory trees.
     await rm(path.join(this.folder(id), "manifest.json"), { force: true });
     await rm(path.join(this.folder(id), "archive.crmbackup"), { force: true });
     const { rmdir } = await import("node:fs/promises"); await rmdir(this.folder(id));

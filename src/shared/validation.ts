@@ -3,7 +3,7 @@ import { CODEBOOK, type CodebookName, codesOf } from "./codebook";
 import { NotFoundError, ValidationError, type FieldErrors } from "./errors";
 
 /**
- * Общие схемы runtime-валидации DTO (Zod). Серверная схема — доверенная граница;
+ * Общие схемы runtime-валидации DTO (Zod). Серверная схема — доверенная граница.
  * клиентская валидация в формах — только для удобства (ТЗ 37.17).
  */
 
@@ -136,7 +136,7 @@ export function zodFieldErrors(error: z.ZodError): FieldErrors {
   return out;
 }
 
-/** Валидирует данные схемой; при ошибке бросает ValidationError с ошибками полей. */
+/** Валидирует данные схемой. при ошибке бросает ValidationError с ошибками полей. */
 export function parseInput<S extends z.ZodType>(schema: S, data: unknown): z.output<S> {
   const res = schema.safeParse(data);
   if (!res.success) throw new ValidationError(undefined, zodFieldErrors(res.error));

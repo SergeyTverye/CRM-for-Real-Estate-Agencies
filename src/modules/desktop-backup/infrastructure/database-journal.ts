@@ -2,7 +2,6 @@ import { db } from "@/shared/db/client";
 import { BackupError } from "../domain/contracts";
 import { journalSchema, type ReplicationJournal, type ReplicationRow } from "../application/replication-queue";
 
-/** Identical Prisma contract on PG/SQLite. CAS prevents API retry from overwriting a worker update. */
 export class DatabaseReplicationJournal implements ReplicationJournal {
   constructor(private readonly id = "portable-replication-v1") {}
   async read() {

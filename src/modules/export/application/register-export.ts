@@ -11,7 +11,6 @@ import { ValidationError } from "@/shared/errors";
 import { toCsv } from "./export-service";
 const kindSchema = z.enum(["deals", "commissions", "tasks"]);
 const commissionFilters = z.object({ status: zCode("commissionStatus").optional(), responsibleUserId: zUuid.optional(), legalEntityId: zUuid.optional(), dealId: zUuid.optional(), from: zDateOnly.optional(), to: zDateOnly.optional() });
-/** Reuse the list services for exactly the same filters and server-side access policy. */
 export async function exportRegister(actor: Actor, kind: unknown, raw: Record<string, unknown>) {
   const name = parseInput(kindSchema, kind);
   const rows: Record<string, unknown>[] = [];

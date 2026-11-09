@@ -10,7 +10,6 @@ export type RecordLink = {
     label: string;
     href: string;
 };
-/** Labels never leave the server: the model receives stable references instead. */
 export function referenceText(text: string, links: RecordLink[]) {
     for (const link of [...links].sort((a, b) => b.label.length - a.label.length)) {
         if (link.label.trim().length < 2) continue;
@@ -24,10 +23,8 @@ export function displayText(text: string, links: RecordLink[]) {
 }
 export function safeText(text: string, names: string[] = []) {
     const facts: string[] = [];
-    // Dates and CRM identifiers are facts, not phone numbers or personal names.
     const protect = (v: string) => { facts.push(v); return `\uE200${String.fromCodePoint(0xE300 + facts.length - 1)}\uE201`; };
     const protectedText = text.replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})\b|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, protect)
-        // A small vocabulary of CRM commands, not arbitrary capitalized words.
         .replace(/(?<!\p{L})(?:не|нет|без|как|какое|какая|какие|что|дай|чего|начать|используй|использовать|отправляй|отправить|отправки|подготовь|подготовить|уточнить|уточни|проверить|проверь|задача|задачи|условия|предложение|черновик|новосибирская область)(?!\p{L})/giu, protect);
     return sanitizeFreeNote(protectedText.replace(/(?:authorization|bearer|api[_ -]?key|password|пароль|token|токен|cookie)\s*[:= ]+[^\s;]+/giu, "[REDACTED]"), names)
         .replace(/\uE200([\s\S])\uE201/gu, (token, index: string) => facts[index.codePointAt(0)! - 0xE300] ?? token).slice(0, 4000);
@@ -49,7 +46,6 @@ export const chatTools: FunctionTool[] = [
     tool("prepare_offer", "Подготовить только ЧЕРНОВИК КП из 1–4 объектов каталога CRM", { clientNeedId: id, title: str, propertyIds: { type: "array", items: id, minItems: 1, maxItems: 4 } }, ["clientNeedId", "title", "propertyIds"]),
 ];
 
-/** UTF-8 bytes bound ordinary provider tokenizers conservatively; include protocol overhead. */
 export function estimatedChatInputTokens(request: unknown) {
     return Buffer.byteLength(JSON.stringify(request), "utf8") + 256;
 }

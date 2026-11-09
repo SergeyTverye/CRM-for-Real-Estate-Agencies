@@ -59,7 +59,6 @@ export async function getCollection(actor: Actor, id: string) {
     items: items.map(i => ({ ...i, status: !canReadNotes && i.status === "proposed" ? (i.propertyId || i.externalListing?.propertyId ? "in_crm" : "in_collection") : i.status })), needs };
 }
 const itemRef = z.object({ externalListingId: zUuid.optional(), propertyId: zUuid.optional() }).strict().refine(d => Boolean(d.externalListingId) !== Boolean(d.propertyId), "Укажите объявление или объект CRM");
-/** Search bulk contract: XOR refs, <=500; atomic, idempotent, ordered append; no Property/Match creation. */
 export async function addItems(actor: Actor, collectionId: string, items: unknown) {
   const refs = parseInput(z.array(itemRef).min(1).max(500), items);
   return transaction(async tx => {

@@ -44,7 +44,6 @@ export function formatValue(value: unknown, type: string): string {
   if (type === "date") { const date = new Date(String(value)); if (!Number.isFinite(+date)) fail("Некорректная дата"); return new Intl.DateTimeFormat("ru-RU", { timeZone: "Asia/Novosibirsk" }).format(date); }
   if (type === "money" || type === "area") {
     if (!/^-?\d+(\.\d+)?$/.test(String(value))) fail("Некорректное числовое значение");
-    // Intl formats decimal strings without first rounding them through Number.
     return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2, minimumFractionDigits: type === "money" ? 2 : 0 }).format(value as number) + (type === "money" ? " ₽" : " м²");
   }
   return String(value);
@@ -76,7 +75,6 @@ export function renderText(text: string, context: Context, manifest: Manifest, r
       size += out.length; if (size > LIMITS.expanded) fail("Результат слишком большой"); return out;
     }).join("");
   }
-  // Validate required fields even when a template never references them.
   for (const field of manifest.fields.filter(f => f.required && f.roles.includes(role as "manager" | "realtor"))) {
     if (field.path.startsWith("properties.")) {
       const rows = context.properties;

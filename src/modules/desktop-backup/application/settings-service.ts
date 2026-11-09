@@ -41,12 +41,10 @@ export class BackupSettingsService {
         return { state, result: this.dto(state) };
       });
       committed = true;
-      // Failure to remove retired encrypted blobs must not roll back the committed credential pointer.
       for (const ref of retired) { try { await this.credentials.delete(ref); } catch {} }
       return result;
     } catch (e) {
       if (!committed) {
-        // Publication may have succeeded before a directory flush failure. Never delete an active secret.
         let active: Set<string> | undefined;
         try { active = new Set((await this.repository.read()).destinations.flatMap(d => d.secretRef ? [d.secretRef] : [])); } catch {}
         if (active) for (const ref of created) if (!active.has(ref)) { try { await this.credentials.delete(ref); } catch {} }

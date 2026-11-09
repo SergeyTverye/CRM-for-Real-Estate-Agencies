@@ -5,7 +5,6 @@ export function dialectSql(pg: Prisma.Sql, sqlite: Prisma.Sql) { return isSqlite
 const constantSql = (sql: string) => Prisma.sql([sql] as unknown as TemplateStringsArray);
 const rebuild = (pg: Prisma.Sql, strings: string[]) => Prisma.sql(strings as unknown as TemplateStringsArray, ...pg.values);
 
-/** SQLite facade queues the entire transaction and acquires BEGIN IMMEDIATE. */
 export function lockSql(pg: Prisma.Sql): Prisma.Sql {
   if (!isSqlite()) return pg;
   const text = pg.strings.join("?");
@@ -13,7 +12,6 @@ export function lockSql(pg: Prisma.Sql): Prisma.Sql {
   if (text.includes("pg_advisory_xact_lock")) return constantSql("SELECT 1");
   return rebuild(pg, pg.strings.map(s => s.replace(/::uuid\b/g, "").replace(/ FOR (?:UPDATE|SHARE)(?: SKIP LOCKED)?/g, "")));
 }
-/** Explicit planner grammar, covered against the scoped calendar projection. */
 export function plannerSql(pg: Prisma.Sql): Prisma.Sql {
   if (!isSqlite()) return pg;
   return rebuild(pg, pg.strings.map(s => s
@@ -23,7 +21,6 @@ export function plannerSql(pg: Prisma.Sql): Prisma.Sql {
     .replace("to_char(at AT TIME ZONE ", "crm_local_day(at, ")
     .replace(",'YYYY-MM-DD')", ")")));
 }
-/** Search SQL has an explicit equivalent; correlated latest-snapshot join uses its index. */
 export function searchSql(pg: Prisma.Sql): Prisma.Sql {
   if (!isSqlite()) return pg;
   return rebuild(pg, pg.strings.map(s => s
@@ -46,7 +43,6 @@ export function reactivationSql(pg: Prisma.Sql): Prisma.Sql {
 }
 
 
-/** Raw SQLite expression integers are Int64 in Prisma; preserve existing DTOs. */
 export function normalizeSqliteRawResult(value: unknown): unknown {
   const numberColumns = new Set(["total","red","yellow","green","gray","calls","clients","needs","showings","deals"]);
   if (!Array.isArray(value)) return value;

@@ -202,7 +202,7 @@ export async function listTasksLinkedTo(
   if (link.agreementId) and.push({ agreementLinks: { some: { agreementId: link.agreementId } } });
   if (link.advertisementId) and.push({ advertisementLinks: { some: { advertisementId: link.advertisementId } } });
   if (link.offerId) and.push({ offerLinks: { some: { commercialOfferId: link.offerId } } });
-  // Открытые задачи всегда загружаются полностью и идут первыми; завершённые — отдельно, с лимитом.
+  // Открытые задачи всегда загружаются полностью и идут первыми. завершённые — отдельно, с лимитом.
   const open = await db.task.findMany({
     where: { AND: [...and, { status: { in: [...OPEN_TASK_STATUSES] } }] },
     include: taskIncludeFor(actor),
@@ -239,7 +239,6 @@ export async function listRecurrenceSeries(actor: Actor, task: TaskView): Promis
   });
 }
 
-/** React request cache gives layout indicators and the page the same clock tick. */
 export const getTodayReferenceTime = cache(() => new Date());
 
 export async function countTodayTasks(actor: Actor, now = getTodayReferenceTime(), responsibleUserId: string | null = actor.userId) {
@@ -259,7 +258,6 @@ export async function countOverdueTasks(actor: Actor, now = getTodayReferenceTim
   return (await countTodayTasks(actor, now)).overdue;
 }
 
-// ───────────────────────────── UC-10 GetTodayView ─────────────────────────────
 
 export interface ControlItem {
   kind: "showing" | "agreement" | "advertisement" | "offer";
@@ -290,7 +288,7 @@ const todayFiltersSchema = z.object({
 /**
  * Экран «Сегодня» (UC-10, FR-25, ТЗ 37.4): вычисляемое представление над Task и контрольными датами
  * показов, договоров, рекламы и КП. Отдельной таблицы нет. Руководитель может переключить «Мои/Все»
- * и фильтр по сотруднику; риелтор видит только свои действия.
+ * и фильтр по сотруднику. риелтор видит только свои действия.
  */
 export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now = getTodayReferenceTime()): Promise<TodayView> {
   const f = parseInput(todayFiltersSchema, rawFilters);
@@ -306,7 +304,6 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     status: { in: [...OPEN_TASK_STATUSES] },
     ...(scope === "all" ? {} : { responsibleUserId: userId }),
   };
-  // A large overdue queue must not displace today's or next week's actions.
   const tasks = (await Promise.all([
     ...Object.values(todayTaskRanges(now, startTomorrow, weekEnd)),
   ].map(dueAt => db.task.findMany({ where: { ...taskWhere, dueAt }, include: taskIncludeFor(actor), orderBy: [{ dueAt: "asc" }, { id: "asc" }], take: 200 })))).flat();

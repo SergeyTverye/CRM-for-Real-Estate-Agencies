@@ -7,7 +7,7 @@ import { isManager, type Actor } from "@/modules/auth/domain/actor";
 
 /**
  * HistoricalDealArchive (FR-18, ТЗ 19.5, 29.10): изолированный read-only архив прошлых сделок.
- * Доступ — только руководителю; паспортных и регистрационных полей в модели нет.
+ * Доступ — только руководителю. паспортных и регистрационных полей в модели нет.
  */
 function requireManager(actor: Actor) {
   if (!isManager(actor)) throw new ForbiddenError("Исторический архив доступен только руководителю");

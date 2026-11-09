@@ -1,7 +1,6 @@
 import type { Actor } from "@/modules/auth/domain/actor";
 import { canSeeClient } from "../domain/scopes";
 
-/** Never serialize an inaccessible client, even when the containing record is visible. */
 export function redactClient<T extends { responsibleUserId: string }>(actor: Actor, client: T | null): T | null {
   return client && canSeeClient(actor, client) ? client : null;
 }

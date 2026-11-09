@@ -144,7 +144,6 @@ export async function sendMessage(actor: Actor, id: string, raw: unknown, inject
         const input: ResponseInput[] = [{ role: "user", content: JSON.stringify(modelTimeData({ context: s.contextType === "collection" ? await modelContext(actor, sessionContext(s)) : await redactScreenData(actor, screen.data), now: new Date(), untrusted_data: history.reverse().map(m => ({ role: m.role, content: safeText(m.content), links: Array.isArray(m.toolArgs)?m.toolArgs.map(v=>({id:(v as {id?:string})?.id})):[] })) }, getConfig().APP_TIMEZONE)) }, { role: "user", content: text }];
         const runtime = await chatRuntime(actor, id, injected);
         const result = await runChatLoop(input, r => runtime.call(r), (name, args) => executeTool(actor, id, name, args), runtime.model, getConfig().APP_TIMEZONE);
-        // Recheck before persistence/display: ownership of the CRM context may have changed.
         await loadSession(actor, id);
         await db.aiChatMessage.create({ data: { sessionId: id, role: "assistant", content: result.text, toolArgs: JSON.parse(JSON.stringify([...references, ...result.links])) } });
         await db.aiChatSession.update({ where: { id }, data: { title: s.title === "Новый диалог" ? displayText(text, references).slice(0, 70) : s.title, updatedAt: new Date() } });
@@ -152,8 +151,6 @@ export async function sendMessage(actor: Actor, id: string, raw: unknown, inject
     }
     catch (e) {
         if (e instanceof AiError && await db.aiPendingAction.count({ where: { sessionId: id, createdAt: { gte: turnStartedAt } } })) {
-            // A tool can persist a draft before the next model call hits a gate.
-            // Return the authorized snapshot now, without retrying the paid call.
             return { ...await getChat(actor, id), warning: `Ответ помощника прерван (${e.code}). Сохранённый черновик доступен для проверки.` };
         }
         if (e instanceof AiError)
@@ -168,7 +165,6 @@ export async function decideAction(actor: Actor, sessionId: string, actionId: st
     const p = parseInput(z.object({ decision: z.enum(["confirm", "reject"]), confirmed: z.literal(true) }).strict(), raw);
     return transaction(async (tx) => {
         await loadSession(actor, sessionId, tx);
-        // Row lock + CRM command + decision share one transaction: retry cannot duplicate a task/offer.
         await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM ai_pending_actions WHERE id=${actionId}::uuid FOR UPDATE`));
         const a = await tx.aiPendingAction.findFirst({ where: { id: actionId, sessionId } });
         if (!a)

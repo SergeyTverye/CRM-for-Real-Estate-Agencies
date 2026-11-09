@@ -34,14 +34,9 @@ function candidate(row: CandidateRow): DuplicateCandidate {
     price: row.priceRub?.toString() ?? null,
     priceUnit: normalized.priceUnit === null ? null : row.operation === "rent" && row.priceUnit === "total" ? null : dbPriceUnits[row.priceUnit ?? ""] ?? null, features };
 }
-/** Shared transaction lock serializes regroup and human decisions across workers/processes. */
 async function lock(tx: Tx) { await tx.$queryRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(310007::bigint)::text`)); }
 const pairKey = (a: string, b: string) => [a, b].sort().join(":");
 
-/** Internal ingestion hook, no actor needed. Does not mutate ExternalListing or create Property.
- * Input: 1..500 persisted listing UUIDs. Returns active group IDs touching the batch.
- * Candidate universe: same city/operation, capped explicitly at 5000 (no silent truncation).
- */
 export async function regroupForListings(listingIds: string[]): Promise<{ groupIds: string[] }> {
   const ids = [...new Set(parseInput(idsSchema, listingIds))];
   return transaction(async tx => {
@@ -58,7 +53,6 @@ export async function regroupForListings(listingIds: string[]): Promise<{ groupI
     }
     const active = existing.filter(g => g.status !== "rejected");
     const assigned = new Set(active.flatMap(g => g.members.filter(m => !m.releasedAt).map(m => m.listingId)));
-    // Human-reviewed groups are frozen: new candidates cannot silently alter their meaning.
     for (const g of active.filter(g => g.status === "probable" && !g.decisions.length)) {
       const members = g.members.filter(m => !m.releasedAt).map(m => byId.get(m.listingId));
       if (!members.length || members.some(m => !m)) continue;
@@ -108,7 +102,6 @@ export async function getDuplicateGroup(actor: Actor, id: string) {
           priceUnit: typeof n.priceUnit === "string" && ["rub_total", "rub_month", "rub_year", "rub_m2_month", "rub_m2_year"].includes(n.priceUnit) ? n.priceUnit : null };
       }),
     } }));
-  // Recompute safe, structured evidence instead of trusting arbitrary JSON/legacy descriptions.
   const current = row.members.filter(m => !m.releasedAt).map(m => candidate(m.listing));
   return { id: row.id, status: row.status, updatedAt: row.updatedAt.toISOString(), members,
     evidence: { pairs: current.flatMap((a, i) => current.slice(i + 1).map(b => compareListings(a, b))) },
@@ -116,7 +109,6 @@ export async function getDuplicateGroup(actor: Actor, id: string) {
 }
 export type DuplicateGroupDto = Awaited<ReturnType<typeof getDuplicateGroup>>;
 
-/** Team-wide public external listings; no client, owner-contact, snapshot JSON or seller notes. */
 export async function getGroupsForListings(actor: Actor, listingIds: string[]): Promise<DuplicateGroupDto[]> {
   assertDuplicateStaff(actor);
   if (!listingIds.length) return [];

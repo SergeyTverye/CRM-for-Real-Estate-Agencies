@@ -49,7 +49,7 @@ export interface ParsedRow {
   validationStatus: ValidationStatus;
   errorCodes: string[];
   warningCodes: string[];
-  /** Нормализованная запись для commit; без исключённых политикой полей. */
+  /** Нормализованная запись для commit. без исключённых политикой полей. */
   record: Record<string, unknown>;
   /** Признаки для поиска дублей. */
   dedupe: { phones: string[]; emails: string[]; addressKey: string | null; archiveKey: string | null };

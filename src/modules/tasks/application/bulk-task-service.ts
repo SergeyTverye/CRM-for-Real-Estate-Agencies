@@ -13,7 +13,6 @@ const schema = z.object({ clientIds: z.array(zUuid).min(1).max(100), task: taskI
 export async function bulkCreateTasks(actor: Actor, input: unknown) {
   const data = parseInput(schema, input);
   const clientIds = [...new Set(data.clientIds)].sort();
-  // Other links must not silently attach all clients to a single unrelated context.
   if (Object.values(data.task.links).some(ids => ids?.length)) throw new DomainError("BULK_LINKS", "Для массовой задачи используются только выбранные клиенты");
   const clients = await db.client.findMany({ where: { AND: [clientScope(actor), { id: { in: clientIds }, status: { not: "archived" } }] }, select: { id: true, displayName: true }, orderBy: { displayName: "asc" } });
   if (clients.length !== clientIds.length) throw new NotFoundError();
@@ -28,7 +27,6 @@ export async function bulkCreateTasks(actor: Actor, input: unknown) {
       if (previous.createdBy !== actor.userId || canonical(previous.template) !== canonical(template)) throw new DomainError("IDEMPOTENCY_CONFLICT", "Ключ уже использован для другой операции");
       return { preview: false as const, batchId: previous.id, count: previous.count, repeated: true };
     }
-    // Recheck ownership inside the commit transaction.
     if (await tx.client.count({ where: { AND: [clientScope(actor), { id: { in: clientIds }, status: { not: "archived" } }] } }) !== clientIds.length) throw new NotFoundError();
     const responsibleUserId = await resolveTaskResponsible(tx, actor, data.task.responsibleUserId, actor.userId);
     const batch = await tx.bulkTaskBatch.create({ data: { idempotencyKey: data.idempotencyKey, createdBy: actor.userId, count: clients.length, template } });

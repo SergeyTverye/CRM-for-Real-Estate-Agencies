@@ -1,7 +1,6 @@
 import type { NormalizedListing } from "../../property-search/domain/types";
 import { compareListings, type DuplicateCandidate } from "./matching";
 
-/** Pure replay seam: preserve every source, predict probable pairs without merging. */
 export function duplicateQualityGrouping(input: { id: string; listing: NormalizedListing }[]) {
   const candidates: DuplicateCandidate[] = input.map(({ id, listing: l }) => ({ id, source: l.source,
     sourceListingId: l.sourceListingId, sourceUnitId: l.sourceUnitId, city: l.city, address: l.address, area: l.area,

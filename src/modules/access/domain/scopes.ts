@@ -7,11 +7,11 @@ import { isManager, type Actor } from "@/modules/auth/domain/actor";
  * поэтому прямой API-запрос, поиск, экспорт и выдача файла подчиняются одним правилам.
  *
  * Руководитель видит всё. Риелтор:
- *  - Client — только свои (responsible_user_id = риелтор);
- *  - ClientNeed / LeadRequest — свои по ответственному либо принадлежащие его клиенту;
- *  - Property — весь каталог для чтения; изменение — только закреплённых за ним;
- *  - контакты собственника — закреплённый объект либо действующий grant руководителя;
- *  - Deal — свои по ответственному либо где участник — его клиент;
+ *  - Client — только свои (responsible_user_id = риелтор).
+ *  - ClientNeed / LeadRequest — свои по ответственному либо принадлежащие его клиенту.
+ *  - Property — весь каталог для чтения. изменение — только закреплённых за ним.
+ *  - контакты собственника — закреплённый объект либо действующий grant руководителя.
+ *  - Deal — свои по ответственному либо где участник — его клиент.
  *  - HistoricalDealArchive, импорт, отчёты, эксплуатация, администрирование — недоступны.
  */
 
@@ -93,7 +93,6 @@ export function advertisementWriteScope(actor: Actor): Prisma.AdvertisementWhere
   return isManager(actor) ? {} : { OR: [{ responsibleUserId: actor.userId }, { property: { responsibleUserId: actor.userId } }] };
 }
 
-/** Every protected link must pass; public links cannot override a denied link. */
 export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
   if (isManager(actor)) return {};
   const collection: Prisma.PropertyCollectionWhereInput = { archivedAt: null, OR: [{ ownerUserId: actor.userId }, { visibility: "team" }] };
@@ -104,7 +103,6 @@ export function documentScope(actor: Actor): Prisma.DocumentWhereInput {
   const agreement: Prisma.AgreementWhereInput = { AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal }] }] };
   return {
     AND: [
-      // Template field restrictions survive generation and apply to every file route/search.
       { OR: [{ templateVersionId: null }, { valuesSnapshot: { path: ["accessRoles"], array_contains: [actor.role] } }] },
       { collectionLinks: { none: { collection: { NOT: collection } } } },
       { clientLinks: { none: { client: { NOT: clientScope(actor) } } } },

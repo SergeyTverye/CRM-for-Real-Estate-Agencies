@@ -47,8 +47,6 @@ function input(model: string, value: unknown, projection = false, dataContext = 
     else if (!dataContext && v && typeof v === "object" && !Array.isArray(v) && "mode" in v) {
       const { mode, ...filter } = v as Record<string, unknown>;
       if (mode !== "insensitive" && mode !== "default") throw new Error("SQLITE_STRING_MODE_UNSUPPORTED");
-      // Equality must not become contains; an exact Unicode comparison is
-      // implemented by exact Unicode lower() candidate IDs below.
       if (mode === "insensitive" && ("equals" in filter || "in" in filter || "notIn" in filter)) throw new Error("SQLITE_INSENSITIVE_EQUALITY_UNSUPPORTED");
       out[key] = filter;
     } else out[key] = v;
@@ -171,7 +169,6 @@ export function createSqliteClient(url: string): PrismaClient {
           if (!["ReadCommitted","RepeatableRead","Serializable"].includes(String(opts.isolationLevel))) throw new Error("SQLITE_ISOLATION_UNSUPPORTED");
           opts.isolationLevel = "Serializable";
         }
-        // PG-typed facade; conversion is applied to every query inside tx too.
         return (target.$transaction as unknown as (work: unknown, options: Record<string,unknown>) => Promise<unknown>)((tx: Record<string, unknown>) => activeTx.run(tx, () => work(tx)), opts);
       });
       const value = Reflect.get(activeTx.getStore() ?? target, prop);
@@ -182,9 +179,6 @@ export function createSqliteClient(url: string): PrismaClient {
 }
 
 
-/** Resolve unsupported Prisma filters to candidate IDs on the SAME native connection.
- * Outer AND/OR/NOT and relation predicates remain intact, preserving RBAC.
- */
 function resolveSpecialFilters(model: string, value: unknown, adapter: DesktopSqliteAdapter, filterContext = false): unknown {
   if (Array.isArray(value)) return value.map(v => resolveSpecialFilters(model,v,adapter,filterContext));
   if (!value || typeof value !== "object" || value instanceof Date || value instanceof Prisma.Decimal) return value;

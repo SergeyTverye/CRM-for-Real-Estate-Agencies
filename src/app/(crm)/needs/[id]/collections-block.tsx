@@ -3,7 +3,6 @@ import type { Actor } from "@/modules/auth/domain/actor";
 import { listCollections } from "@/modules/collections/application/collection-service";
 import { Card } from "@/ui/components";
 export async function NeedCollectionsBlock({ actor, needId }: { actor: Actor; needId: string }) {
-  // The need card has its own policy; collections require client visibility too.
   let result;
   try {
     result = await listCollections(actor, { needId });

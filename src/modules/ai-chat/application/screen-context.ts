@@ -10,7 +10,6 @@ import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { getManagerReport } from "@/modules/reports/application/report-service";
 import { MAX_ROWS, type ChatContext, type RecordLink } from "../domain/policy";
 
-// Stronger than card visibility: AI may not reveal ANY linked foreign client.
 const safeDeal = (actor: Actor): Prisma.DealWhereInput => actor.role === "manager" ? {} : ({ AND: [dealScope(actor), { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] });
 const safeAgreement = (actor: Actor): Prisma.AgreementWhereInput => actor.role === "manager" ? {} : ({ AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal: safeDeal(actor) }] }] });
 export async function checkScreenContext(actor: Actor, c: ChatContext, tx: DbOrTx = db) {
@@ -23,10 +22,6 @@ export async function checkScreenContext(actor: Actor, c: ChatContext, tx: DbOrT
 }
 const taskSelect = { id: true, taskType: true, status: true, priority: true, dueAt: true } as const;
 const needSelect = { id: true, clientId: true, operationType: true, propertyType: true, status: true, stage: true, areaMin: true, areaMax: true, budgetMin: true, budgetMax: true, updatedAt: true } as const;
-/** Whitelist only. Identities, owner links, contacts and documents are NEVER selected.
- * Task title/description are isolated as untrusted_data and redacted at the provider boundary.
- * Bounded records are a sample, not totals; totals are explicitly counted.
- */
 export async function assembleScreenContext(actor: Actor, c: ChatContext) {
   await checkScreenContext(actor, c);
   const links: RecordLink[] = [];
@@ -64,7 +59,6 @@ export async function assembleScreenContext(actor: Actor, c: ChatContext) {
     task.agreementLinks.forEach(l => link(l.agreementId, "agreements", "договор"));
     task.propertyLinks.forEach(l => link(l.propertyId, "properties", "объект"));
     const { title, description, ...facts } = task;
-    // Free text is isolated as untrusted and filtered again at the provider boundary.
     data = { ...c, task: { ...facts, untrusted_data: { title, description } } };
   } else if (c.kind === "deal") {
     const deal = await db.deal.findFirstOrThrow({ where: { id: c.id, ...safeDeal(actor) }, select: { id: true, status: true, property: { select: { operationType: true } }, openedAt: true, preliminaryAgreementAt: true, mainAgreementAt: true, registrationAt: true, closedAt: true,

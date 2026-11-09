@@ -26,7 +26,7 @@ function shiftDate(ymd: string, days: number): string {
   return new Date(new Date(`${ymd}T00:00:00.000Z`).getTime() + days * 86_400_000).toISOString().slice(0, 10);
 }
 
-/** Быстрые периоды; «90 дней» — baseline апробации (ТЗ 31.5). */
+/** Быстрые периоды. «90 дней» — baseline апробации (ТЗ 31.5). */
 function periodPresets(today: string): { label: string; from: string; to: string }[] {
   const monthStart = `${today.slice(0, 8)}01`;
   const prevMonthEnd = shiftDate(monthStart, -1);

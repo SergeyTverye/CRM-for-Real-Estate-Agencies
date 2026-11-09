@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-/** Only route metadata is accepted from the browser; never page contents. */
 export const contextSchema = z.object({
   kind: z.enum(["none", "client", "need", "collection", "task", "deal", "agreement", "today", "reports"]),
   id: z.uuid().optional(),
@@ -27,7 +26,6 @@ export function quickQuestions(kind: ChatContext["kind"]): string[] {
   }
 }
 
-/** Existing form retains validation, permissions and explicit save confirmation. */
 export function taskFormHref(context: ChatContext) {
   const param = { client: "clientId", need: "needId", deal: "dealId", agreement: "agreementId" }[context.kind as "client" | "need" | "deal" | "agreement"];
   return context.id && param ? `/tasks/new?${new URLSearchParams({ [param]: context.id })}` : "/tasks/new";

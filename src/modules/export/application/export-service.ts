@@ -87,9 +87,6 @@ export async function exportData(actor: Actor): Promise<{ fileName: string; data
     files[e.file] = strToU8(toCsv(rows, e.columns));
     manifestFiles.push({ file: e.file, rows: rows.length, columns: e.columns });
   }
-  // Direct SQL provisioning can apply the schema without Prisma's migration ledger.
-  // Missing metadata means an unknown version, not an unusable business export.
-  // Keep the desktop facade's existing migration-ledger query unchanged.
   const hasMigrationLedger = isSqlite() || (await db.$queryRaw<{ present: boolean }[]>(
     Prisma.sql`SELECT to_regclass('_prisma_migrations') IS NOT NULL AS present`,
   ))[0]?.present === true;

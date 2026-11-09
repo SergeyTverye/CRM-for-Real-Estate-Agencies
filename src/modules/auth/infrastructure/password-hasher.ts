@@ -5,7 +5,7 @@ import { randomBytes } from "node:crypto";
  * Argon2id (NFR-09, ТЗ 17.4). Параметры — рекомендация OWASP:
  * m=19 MiB, t=2, p=1. Хэш в формате PHC содержит параметры и соль.
  */
-// Algorithm — const enum в типах @node-rs/argon2; 2 = Argon2id.
+// Algorithm — const enum в типах @node-rs/argon2. 2 = Argon2id.
 const ARGON2ID = 2 as Algorithm;
 const OPTIONS = { algorithm: ARGON2ID, memoryCost: 19_456, timeCost: 2, parallelism: 1 } as const;
 

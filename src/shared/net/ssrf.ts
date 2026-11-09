@@ -30,7 +30,6 @@ export interface SafeRequestOptions {
   timeoutMs?: number; maxBytes?: number; maxRedirects?: number; signal?: AbortSignal;
   method?: "GET" | "POST"; headers?: Record<string, string>; body?: string; resolve?: ResolveHost; followRedirects?: boolean;
 }
-/** DNS is checked AND pinned for the connection; every redirect is revalidated. Bytes are never executed. */
 export async function safeRequest(raw: string, options: SafeRequestOptions = {}): Promise<{ data: Buffer; status: number; url: string; headers: http.IncomingHttpHeaders }> {
   const timeoutMs = options.timeoutMs ?? 15_000, maxBytes = options.maxBytes ?? 5_000_000;
   if (!(timeoutMs > 0) || !(maxBytes > 0)) throw new Error("INVALID_NETWORK_LIMIT");
@@ -51,7 +50,6 @@ export async function safeRequest(raw: string, options: SafeRequestOptions = {})
         const req = (url.protocol === "https:" ? https : http).request(url, {
           method: options.method ?? "GET", headers: { ...Object.fromEntries(Object.entries(options.headers ?? {}).filter(([key]) => !["host", "accept-encoding"].includes(key.toLowerCase()))), "accept-encoding": "identity" }, signal: controller.signal,
           agent: false,
-          // Explicit family disables Node's multi-address lookup for this pinned connection.
           family: pinned.family,
           lookup: (_hostname, _opts, cb) => cb(null, pinned.address, pinned.family),
         }, res => {

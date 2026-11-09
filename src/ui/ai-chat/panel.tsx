@@ -84,8 +84,6 @@ export function AiChatPanel() {
         const result = await apiCall<Chat>("POST", `/api/v1/ai-chat/sessions/${active.id}/messages`, { text });
         setChat(result); setText(""); setFeedback(result.warning ?? "");
     } catch (error) {
-        // A draft or reply may already be durable after a gate/network failure.
-        // Read only: never repeat the paid POST automatically.
         try { setChat(await apiCall<Chat>("GET", `/api/v1/ai-chat/sessions/${active.id}`)); }
         catch (refreshError) { if (refreshError instanceof ApiCallError && [403, 404].includes(refreshError.status)) setChat(null); }
         throw error;

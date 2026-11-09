@@ -7,7 +7,6 @@ import type { BrowserFactory, SessionFrame, SessionInput, SessionSource } from "
 import { allowsRequest, allowsStart } from "./network-policy";
 
 type Transport = typeof safeRequest;
-/** Crash leftovers expire after the maximum lifetime. Never follow links or leave the OS temp directory. */
 export async function reapExpiredSessionProfiles(now = Date.now()) {
   const root = path.resolve(os.tmpdir());
   for (const entry of await readdir(root, { withFileTypes: true })) {
@@ -22,9 +21,7 @@ export async function reapExpiredSessionProfiles(now = Date.now()) {
 }
 export interface BrowserOptions {
   executablePath?: string;
-  /** Internal test observation only; profile paths never enter API metadata or logs. */
   profileCreated?: (profile: string) => void;
-  /** Test dependency injection only; never configurable by HTTP or a production ENV switch. */
   network?: { allows: typeof allowsRequest; transport: Transport };
 }
 export class PlaywrightSessionBrowser implements BrowserFactory {
@@ -75,8 +72,6 @@ export class PlaywrightSessionBrowser implements BrowserFactory {
           if (signal.aborted || request.frame().page() !== page || !allowed(source, request.url(), request.method(), request.resourceType(), navigation)) {
             await route.abort(); if (navigation && !signal.aborted) onViolation(); return;
           }
-          // Pin each connection to a public resolved IP, including redirect hops and nested frames.
-          // allHeaders includes browser-managed HttpOnly cookies; nothing is serialized or logged.
           const headers = await request.allHeaders();
           const response = await (this.options.network?.transport ?? safeRequest)(request.url(), {
             method: request.method() as "GET" | "POST", headers, body: request.postData() ?? undefined,
@@ -87,20 +82,14 @@ export class PlaywrightSessionBrowser implements BrowserFactory {
             if (value === undefined || ["content-encoding", "content-length", "transfer-encoding", "connection", "alt-svc"].includes(key)) continue;
             outgoing[key] = Array.isArray(value) ? value.join("\n") : String(value);
           }
-          // File downloads, including Content-Disposition responses, never reach the user agent.
           if (/attachment/iu.test(outgoing["content-disposition"] ?? "")) { await route.abort(); return; }
           if ([301, 302, 303, 307, 308].includes(response.status)) {
-            // Chromium follows an intercepted HTTP redirect without re-entering route().
-            // Never give it a 3xx: apply cookies in an inert same-origin response, then
-            // start a separate guarded navigation. Cross-origin/subresource redirects fail closed.
             const target = outgoing.location && new URL(outgoing.location, request.url()).href;
             if (!navigation || !target || ++redirectHops > 5 || !allowed(source, target, "GET", "document", true) || !["GET", "POST"].includes(request.method()) || ([307, 308].includes(response.status) && request.method() !== "GET")) {
               await route.abort(); if (navigation) onViolation(); return;
             }
             delete outgoing.location;
             const sourceFrame = request.frame();
-            // Wait for the inert response to commit before starting the next navigation;
-            // otherwise Chromium can abort the new GET while committing the form POST.
             void page.waitForEvent("framenavigated", { predicate: frame => frame === sourceFrame && frame.url() === request.url(), timeout: 20_000 })
               .then(async frame => { await frame.waitForLoadState("domcontentloaded", { timeout: 20_000 }); if (!signal.aborted) await frame.goto(target, { waitUntil: "domcontentloaded", timeout: 20_000 }); })
               .catch(() => { if (!signal.aborted) onViolation(); });

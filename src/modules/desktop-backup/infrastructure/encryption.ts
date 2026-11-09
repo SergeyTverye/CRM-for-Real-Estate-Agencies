@@ -1,6 +1,7 @@
-import { createCipheriv, createDecipheriv, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+﻿import { createCipheriv, createDecipheriv, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { BackupError, encryptionSchema } from "../domain/contracts";
+import type { ArchiveLimits } from "../domain/contracts";
 import { canonical, sha256 } from "./fs";
 export const CHUNK_BYTES = 1024 * 1024;
 const wrapSchema = z.object({ nonce: z.string().regex(/^[a-f0-9]{24}$/), ciphertext: z.string().regex(/^[a-f0-9]{64}$/), tag: z.string().regex(/^[a-f0-9]{32}$/) }).strict();
@@ -49,3 +50,9 @@ export function cryptChunk(header: Header, key: Buffer, index: number, data: Buf
   const cipher = createCipheriv("aes-256-gcm", key, nonce); cipher.setAAD(aad);
   return { data: Buffer.concat([cipher.update(data), cipher.final()]), tag: cipher.getAuthTag() };
 }
+
+export function maxChunks(limits: ArchiveLimits): number {
+  return Math.ceil(limits.totalBytes / CHUNK_BYTES) + 2;
+}
+export const maxChunksForLimits = maxChunks;
+export const computeMaxChunks = maxChunks;

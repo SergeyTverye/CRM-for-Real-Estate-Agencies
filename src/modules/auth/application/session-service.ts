@@ -31,7 +31,7 @@ export async function createSession(tx: DbOrTx, userId: string, meta: SessionMet
   return { token, expiresAt };
 }
 
-/** Проверяет токен из cookie; возвращает Actor или null (истёк/отозван/пользователь деактивирован). */
+/** Проверяет токен из cookie. возвращает Actor или null (истёк/отозван/пользователь деактивирован). */
 export async function resolveSession(token: string | null | undefined): Promise<Actor | null> {
   if (!token || token.length < 20 || token.length > 200) return null;
   const now = new Date();

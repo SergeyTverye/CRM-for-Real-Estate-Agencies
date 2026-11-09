@@ -1,7 +1,6 @@
 import type { InteractiveSession, SessionRepository } from "../domain/session";
 import { isLive } from "../domain/session";
 
-/** Tests only. Production never silently falls back to an ephemeral repository. */
 export class MemorySessionRepository implements SessionRepository {
   private rows = new Map<string, InteractiveSession>();
   async claim(session: InteractiveSession) {

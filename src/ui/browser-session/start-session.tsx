@@ -6,7 +6,6 @@ import { apiCall, ApiCallError, type ApiErrorBody } from "@/ui/api-client";
 import { FormErrorBanner } from "@/ui/form";
 import type { SessionSource } from "@/modules/browser-sessions/domain/session";
 
-/** Render for needs_user_action and for a manual retry of a blocked source; server rechecks state and ownership. */
 export function StartBrowserSession({ searchRunId, source }: { searchRunId: string; source: SessionSource }) {
   const router = useRouter(); const [busy, setBusy] = useState(false); const [error, setError] = useState<ApiErrorBody | null>(null);
   async function start() {

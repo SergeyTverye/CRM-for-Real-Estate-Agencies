@@ -6,7 +6,6 @@ import { PrismaSessionRepository } from "../infrastructure/prisma-repository";
 import { BrowserSessionService } from "./session-service";
 
 const state = globalThis as typeof globalThis & { crmBrowserSessionService?: BrowserSessionService; crmBrowserSessionSearch?: SearchContinuationPort };
-/** Called by search composition root on the server, never by client code. */
 export function configureBrowserSessionSearch(port: SearchContinuationPort) { state.crmBrowserSessionSearch = port; }
 const search: SearchContinuationPort = {
   prepare: async (...args) => (await requiredSearch()).prepare(...args),
@@ -24,7 +23,6 @@ async function requiredSearch() {
   }
   return state.crmBrowserSessionSearch!;
 }
-/** Composition/test seam; routes and application cancellation share the same owner process. */
 export function configureBrowserSessionService(service: BrowserSessionService) { state.crmBrowserSessionService = service; }
 export async function cancelRunBrowserSessions(runId: string) { await state.crmBrowserSessionService?.cancelRun(runId); }
 export function browserSessions() {

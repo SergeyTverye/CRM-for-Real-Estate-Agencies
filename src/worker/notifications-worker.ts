@@ -13,7 +13,6 @@ async function main() {
       const result = await generateNotifications();
       if (result.delivered) logger.info({ event: "notifications.delivered", count: result.delivered }, "Notifications delivered");
     } catch {
-      // Never log source text, connection strings, tokens or PII in a worker exception.
       logger.error({ event: "notifications.tick_failed" }, "Notification tick failed; retrying");
     }
     if (!stopping) await setTimeout(interval, undefined, { signal: abort.signal }).catch(() => undefined);

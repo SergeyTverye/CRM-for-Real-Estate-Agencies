@@ -1,6 +1,5 @@
 import Database from "better-sqlite3";
 import { BackupError, type SnapshotValidator } from "../domain/contracts";
-/** No dependency on PostgreSQL or a live application connection. */
 export class SqliteSnapshotValidator implements SnapshotValidator {
   async validate(file: string) {
     const db = new Database(file, { readonly: true, fileMustExist: true });

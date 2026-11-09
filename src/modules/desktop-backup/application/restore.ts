@@ -8,11 +8,8 @@ import { extractArchive, type Credential } from "../infrastructure/archive";
 import { assertArchive } from "../infrastructure/transfer";
 const pointerSchema = z.object({ generation: z.uuid(), backupId: z.uuid(), manifestSha256: z.string().regex(/^[a-f0-9]{64}$/), schemaVersion: z.number().int() }).strict();
 export interface RestoreHooks {
-  /** Holds exclusive maintenance lock, stops/closes DB + workers, restarts from pointer afterwards. */
   withStoppedRuntime<T>(work: () => Promise<T>): Promise<T>;
-  /** Full encrypted backup of current DB and files, produced while writes are stopped. */
   protectCurrent(): Promise<{ path: string; archive: ArchiveRef; credential: Credential }>;
-  /** May migrate staged SQLite, then check application counters; never accesses active data. */
   prepareStage(stage: string, manifest: BackupManifest): Promise<void | { schemaVersion: number }>;
 }
 export class GenerationStore {
@@ -25,7 +22,6 @@ export class GenerationStore {
   async activate(stage: string, manifest: BackupManifest, schemaVersion = manifest.schemaVersion) {
     const generation = randomUUID(); const generations = path.join(this.root, "generations"); await protectedDir(generations);
     const dest = path.join(generations, generation); await rename(stage, dest); await syncDir(generations);
-    // Single publication point; old generations remain available for rollback.
     await atomicJson(path.join(this.root, "current.json"), { generation, backupId: manifest.backupId, manifestSha256: manifest.manifestSha256, schemaVersion });
     return dest;
   }

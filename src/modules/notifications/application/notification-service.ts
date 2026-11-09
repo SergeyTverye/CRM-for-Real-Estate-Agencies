@@ -11,7 +11,6 @@ import { fromDateTimeLocalValue } from "@/shared/time";
 import { safeTaskTextScope } from "./notification-context";
 import { getCalendarEvent } from "@/modules/calendar/application/calendar-service";
 
-/** Recheck source access at read time: reassignment/revocation must take effect immediately. */
 async function visibleWhere(actor: Actor): Promise<Prisma.NotificationWhereInput> {
   const [tasks, showings, agreements, events] = await Promise.all([
     db.task.findMany({ where: taskScope(actor), select: { id: true } }),
@@ -38,7 +37,6 @@ export async function listNotifications(actor: Actor, input: unknown) {
     db.showing.findMany({ where: { id: { in: ids("showing") }, AND: [showingScope(actor), { need: { client: clientScope(actor) } }] }, select: { id: true, scheduledAt: true, property: { select: { addressText: true } }, need: { select: { client: { select: { displayName: true } } } } } }),
     db.agreement.findMany({ where: { id: { in: ids("agreement") }, AND: [agreementScope(actor), { OR: [{ clientId: null }, { client: clientScope(actor) }] }, { OR: [{ dealId: null }, { deal: { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } } }] }] }, select: { id: true, agreementNumber: true, validUntil: true, client: { select: { displayName: true } }, property: { select: { addressText: true } } } }),
   ]);
-  // Reconstruct title/link rather than trusting historical strings stored before access changes.
   const items = await Promise.all(rows.map(async n => {
     const task = tasks.find(t => t.id === n.sourceId), showing = showings.find(s => s.id === n.sourceId), agreement = agreements.find(a => a.id === n.sourceId);
     let context: Parameters<typeof notificationText>[1] = {};

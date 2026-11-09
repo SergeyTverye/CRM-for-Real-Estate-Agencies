@@ -5,7 +5,6 @@ import { NotFoundError } from "@/shared/errors";
 import { safeGet, type Context } from "../domain/engine";
 import { type EntityKind, type Manifest, fail } from "../domain/manifest";
 
-/** Only explicit scalar projections enter the engine. Never spread a Prisma business record. */
 export async function buildContext(tx: DbOrTx, actor: Actor, kind: EntityKind, id: string): Promise<Context> {
   const ctx: Context = { user: { displayName: actor.displayName } };
   const loadClient = async (clientId: string) => {
@@ -35,7 +34,6 @@ export async function buildContext(tx: DbOrTx, actor: Actor, kind: EntityKind, i
   if (kind === "deal") {
     const d = await tx.deal.findFirst({ where: { id, ...dealScope(actor) }, select: { openedAt: true, dealPrice: true, status: true, legalEntityId: true, propertyId: true, parties: { select: { clientId: true } } } });
     if (!d) throw new NotFoundError();
-    // A generated deal document must also be downloadable under documentScope.
     for (const p of d.parties) if (p.clientId && !await tx.client.count({ where: { id: p.clientId, ...clientScope(actor) } })) throw new NotFoundError();
     ctx.deal = { date: d.openedAt.toISOString(), price: d.dealPrice?.toString() ?? null, status: d.status };
     ctx.property = await loadProperty(d.propertyId); await loadLegalEntity(d.legalEntityId);
@@ -55,7 +53,6 @@ export async function buildContext(tx: DbOrTx, actor: Actor, kind: EntityKind, i
   }
   return ctx;
 }
-/** Snapshot contains only declared fields permitted to this role. */
 export function projectContext(ctx: Context, m: Manifest, role: string): Context {
   const output: Context = {};
   for (const f of m.fields) {

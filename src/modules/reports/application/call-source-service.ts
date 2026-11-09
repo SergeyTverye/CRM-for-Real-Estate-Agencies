@@ -12,9 +12,6 @@ export const callReportFiltersSchema = z.object({
   page: z.coerce.number().int().min(1).max(100000).default(1), pageSize: z.coerce.number().int().min(1).max(100).default(30),
 });
 type Filters = z.infer<typeof callReportFiltersSchema>;
-/** All conversion flags describe calls in this cohort, not unrelated downstream entity totals.
- * The numerator is calls that reached the stage; denominator is ALL filtered calls, including spam.
- * A deal is attributed only through the linked need's property context and after the call. */
 function cohort(actor: Actor, f: Filters) {
   const period = timelinePeriod(f.from, f.to);
   const manager = actor.role === "manager";

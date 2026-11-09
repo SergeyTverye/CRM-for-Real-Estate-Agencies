@@ -44,7 +44,7 @@ export default async function DealCardPage({ params }: { params: Promise<{ id: s
   const dueIn = (days: number) => fromDateTimeLocalValue(`${localDateString(addDays(now, days), zone)}T10:00`, zone);
   const templates: PostdealTemplateView[] = postdealTemplates.map((t) => ({ ...t, defaultDueAt: dueIn(t.offsetDays) }));
   const allUsers = canEdit && !closed ? await listActiveUsersBrief() : [];
-  // Руководитель может назначить любого сотрудника; риелтор — себя (по умолчанию — руководитель).
+  // Руководитель может назначить любого сотрудника. риелтор — себя (по умолчанию — руководитель).
   const responsibleOptions = allUsers
     .filter((u) => isManager || u.id === actor.userId)
     .map((u) => ({ value: u.id, label: `${u.displayName}${u.id === actor.userId ? " (я)" : ""}${u.roleCode === "manager" ? " — руководитель" : ""}` }));

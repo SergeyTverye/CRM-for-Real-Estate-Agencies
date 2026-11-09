@@ -28,7 +28,6 @@ type Summary = {
     controlLinks?: Record<string, ControlLinks>;
     controlPropertyBaselines?: Record<string, ControlPropertyBaseline>;
 };
-// Closed, export-relevant scalar projection only; never persist a Property/source payload.
 type ControlPropertyBaseline = ReturnType<typeof controlPropertyBaseline>;
 function controlPropertyBaseline(p: {
     addressText: string; district: string | null; area: { toString(): string } | null;
@@ -159,8 +158,6 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
         throw new ValidationError('UNRESOLVED_COLUMNS');
     if (!confirmation.acceptWarnings && parsed.rows.some(r => r.warningCodes.length))
         throw new ValidationError('WARNINGS_REQUIRE_CONFIRMATION');
-    // A single transaction owns the job claim, business records and receipts. A crash rolls everything back.
-    // One stable existing User row serializes all v2 imports, on both Prisma backends, without raw SQL.
     return transaction(async (tx) => {
         const gate = await tx.user.findFirst({ where: { roleCode: 'manager' }, orderBy: { id: 'asc' }, select: { id: true } });
         if (!gate)
@@ -231,8 +228,6 @@ export async function exportEnterprise(actor: Actor, id: string) {
     const wb = await source(job);
     const parsed = parseEnterprise(wb, profile);
     const occupiedColumnSpans = wb.worksheets.map(ws => ws.columnCount);
-    // Only this closed vocabulary may supply source-only context. Never copy arbitrary cells,
-    // ignored mappings, formulas, or excluded personal fields back into the cleared workbook.
     const contextFields = new Set(['sourceRowId', 'contractRef', 'operationText', 'propertyTypeText', 'source', 'responsible', 'stateMark', 'request', 'comment']);
     const literalText = (cell: import('exceljs').Cell) => cell.type === 6 ? '' : text(cell.value);
     const sourceContext = new Map(parsed.rows.map(row => [row, new Map(row.columns.filter(c => contextFields.has(c.field)).map(c => [c.field, literalText(wb.worksheets[row.sheetIndex - 1]!.getCell(row.rowNumber, c.column))]))]));
@@ -243,7 +238,6 @@ export async function exportEnterprise(actor: Actor, id: string) {
     const report: Record<string, number> = { UNSUPPORTED_COLUMN: parsed.unresolved.length + profile.sheets.reduce((n, s) => n + Object.values(s.columns).filter(v => v === 'ignore').length, 0), HYPERLINK_CLEARED: 0, UNSUPPORTED_FIELD: 0, HYPERLINK_PRESERVED: 0, FORMULA_CLEARED: 0,NUMBER_AS_TEXT:0, IMAGE_PRESERVED: wb.worksheets.reduce((n, s) => n + s.getImages().length, 0) };
     const formulas: FormulaCandidate[] = [];
     const numericCells = new Map<import('exceljs').Cell, number>();
-    // Headers/sections retain only literal labels, never formulas or hyperlink relationships.
     for (const [si, ws] of wb.worksheets.entries())
         ws.eachRow((r, rn) => { const label = headers.has(`${si + 1}:${rn}`) || sections.has(`${si + 1}:${rn}`);
             r.eachCell(c => {
@@ -275,8 +269,6 @@ export async function exportEnterprise(actor: Actor, id: string) {
                 ? (job.summaryJsonb as unknown as Summary).controlPropertyBaselines?.[`${row.sheetIndex}:${row.rowNumber}`] : undefined;
             if (p && baseline) {
                 const current = controlPropertyBaseline(p);
-                // Reuse only the policy-filtered parsed record, and only while each
-                // linked CRM field still equals its commit-time value. NULL is not zero.
                 for (const field of ['district', 'area', 'price', 'priceUnit', 'status', 'responsibleUserId'] as const)
                     if (current[field] === baseline[field]) values[field] = row.record[field];
                 if (normalizeAddress(current.addressText) === normalizeAddress(baseline.addressText)
@@ -290,7 +282,6 @@ export async function exportEnterprise(actor: Actor, id: string) {
             if (c) {
                 const lead = c.leadRequests[0];
                 const baseline = (job.summaryJsonb as unknown as Summary).exportDates?.[`${row.sheetIndex}:${row.rowNumber}`];
-                // A mandatory CRM timestamp is not evidence that the source supplied a date.
                 const receivedDate = baseline && lead?.occurredAt.toISOString() !== baseline ? lead?.occurredAt : row.record.receivedAt;
                 values = { name: c.displayName, responsibleUserId: c.responsibleUserId, source: lead?.sourceCode === row.record.sourceCode ? original.get('source') : Object.entries(config?.sourceMap ?? {}).find(([, code]) => code === lead?.sourceCode)?.[0], phone: c.contacts.filter(c => c.contactType === 'phone').map(c => c.rawValue || c.normalizedValue).join('; '), email: c.contacts.filter(c => c.contactType === 'email').map(c => c.rawValue || c.normalizedValue).join('; '), receivedDate, request: lead?.summary === row.record.comment ? original.get('request') : lead?.summary, comment: c.notes === row.record.comment ? original.get('comment') : c.notes, sourceRowId: original.get('sourceRowId'), operationText: original.get('operationText') };
                 const importedContacts = row.record.contacts as { type: string; normalized: string; raw: string }[];
@@ -335,19 +326,11 @@ export async function exportEnterprise(actor: Actor, id: string) {
         }
     }
     restoreExportFormulas(formulas, numericCells, report);
-    // Caches already match authoritative records. Excel may recalculate after subsequent edits.
     if (report.FORMULA_PRESERVED) { wb.calcProperties.fullCalcOnLoad = true; report.FORMULA_RECALC_ON_LOAD = report.FORMULA_PRESERVED; }
-    // ExcelJS otherwise loses the occupied column span on an entirely cleared sheet.
-    // A blank styled anchor preserves geometry without retaining any source value.
     for (const [index, ws] of wb.worksheets.entries()) {
-        // Column formatting may extend to XFD without any data there. Anchor
-        // the original occupied span, not ExcelJS's full formatting array.
         const width = occupiedColumnSpans[index] ?? 0;
         if (width) {
             const anchor = ws.getCell(1, width);
-            // Plain General maps to style 0, so ExcelJS drops a null cell with it.
-            // Default protection serializes a real style without changing appearance,
-            // enabling sheet protection, or restoring any cleared source value.
             if (anchor.value === null) anchor.protection = { locked: true, ...anchor.protection };
         }
     }

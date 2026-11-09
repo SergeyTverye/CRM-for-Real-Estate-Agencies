@@ -1,6 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
 export interface DecimalSpec { precision: number; scale: number }
-/** Exact base-10 conversion. Number fractions and excess precision are rejected. */
 export function toSqliteUnits(value: unknown, spec: DecimalSpec): bigint {
   if (typeof value === "number" && !Number.isSafeInteger(value)) throw new Error("SQLITE_DECIMAL_NUMBER_UNSAFE");
   const decimal = new Prisma.Decimal(String(value));

@@ -11,6 +11,5 @@ export function compareState(local: TransferState, incoming: BackupManifest): Co
   }
   if (local.dirtySinceBackup) return "conflict";
   if (incoming.parentBackupId === local.backupId && incoming.snapshotRevision > local.snapshotRevision) return "incoming";
-  // Conservative when a verified ancestor chain is unavailable. Never infer ancestry from a clock.
   return "conflict";
 }

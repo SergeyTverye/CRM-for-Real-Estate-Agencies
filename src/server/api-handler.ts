@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { getConfig } from "@/shared/config/env";
 import { desktopLoopbackAllowed } from "@/shared/auth/desktop-loopback";
 import { correlationIdFrom, runWithContext, setContextActor } from "@/shared/context";
@@ -18,19 +18,13 @@ import { resolveSession } from "@/modules/auth/application/session-service";
 import { SESSION_COOKIE } from "@/modules/auth/infrastructure/session-token";
 import type { Actor } from "@/modules/auth/domain/actor";
 
-/**
- * API-слой /api/v1: преобразование HTTP ↔ DTO, аутентификация, CSRF-защита,
- * standby-guard, единый формат ошибок и структурированный лог запроса.
- * Проверка прав на конкретные записи выполняется в application-слое модулей.
- */
 
 export type Access = "public" | "authenticated" | "manager";
 
 export interface ApiOptions {
   access?: Access;
-  /** Разрешить запрос пользователю, обязанному сменить временный пароль. */
+  /** Ð Ð°Ð·Ñ€ÐµÑˆÐ¸Ñ‚ÑŒ Ð·Ð°Ð¿Ñ€Ð¾Ñ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŽ, Ð¾Ð±ÑÐ·Ð°Ð½Ð½Ð¾Ð¼Ñƒ ÑÐ¼ÐµÐ½Ð¸Ñ‚ÑŒ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ð¹ Ð¿Ð°Ñ€Ð¾Ð»ÑŒ. */
   allowPasswordChange?: boolean;
-  /** Разрешить изменяющий запрос на standby-экземпляре (только технические auth-операции). */
   allowOnStandby?: boolean;
 }
 
@@ -60,23 +54,21 @@ export function json(data: unknown, status = 200, headers?: HeadersInit): NextRe
   });
 }
 
-/** Same-origin проверка для изменяющих запросов (защита от CSRF, ТЗ 12). */
 function assertSameOrigin(req: NextRequest): void {
   const origin = req.headers.get("origin");
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  if (!origin || !host) throw new ForbiddenError("Запрос отклонён: не подтверждён источник (Origin)");
+  if (!origin || !host) throw new ForbiddenError("Ð—Ð°Ð¿Ñ€Ð¾Ñ Ð¾Ñ‚ÐºÐ»Ð¾Ð½Ñ‘Ð½: Ð½Ðµ Ð¿Ð¾Ð´Ñ‚Ð²ÐµÑ€Ð¶Ð´Ñ‘Ð½ Ð¸ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº (Origin)");
   let originHost: string;
   try {
     originHost = new URL(origin).host;
   } catch {
-    throw new ForbiddenError("Запрос отклонён: некорректный Origin");
+    throw new ForbiddenError("Ð—Ð°Ð¿Ñ€Ð¾Ñ Ð¾Ñ‚ÐºÐ»Ð¾Ð½Ñ‘Ð½: Ð½ÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ð¹ Origin");
   }
-  if (originHost !== host) throw new ForbiddenError("Запрос отклонён: запрос с другого сайта");
+  if (originHost !== host) throw new ForbiddenError("Ð—Ð°Ð¿Ñ€Ð¾Ñ Ð¾Ñ‚ÐºÐ»Ð¾Ð½Ñ‘Ð½: Ð·Ð°Ð¿Ñ€Ð¾Ñ Ñ Ð´Ñ€ÑƒÐ³Ð¾Ð³Ð¾ ÑÐ°Ð¹Ñ‚Ð°");
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Параметры маршрута вида id/*Id должны быть UUID, иначе — 404 без обращения к БД. */
 function assertIdParams(params: unknown): void {
   if (!params || typeof params !== "object") return;
   for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
@@ -85,14 +77,13 @@ function assertIdParams(params: unknown): void {
 }
 
 function mapUnknownError(e: unknown): AppError | null {
-  // Ошибки Prisma мапятся без раскрытия деталей схемы.
   const code = (e as { code?: unknown })?.code;
   if (typeof code === "string") {
-    if (code === "P2002") return new ConflictError("UNIQUE_CONFLICT", "Запись с такими данными уже существует");
+    if (code === "P2002") return new ConflictError("UNIQUE_CONFLICT", "Ð—Ð°Ð¿Ð¸ÑÑŒ Ñ Ñ‚Ð°ÐºÐ¸Ð¼Ð¸ Ð´Ð°Ð½Ð½Ñ‹Ð¼Ð¸ ÑƒÐ¶Ðµ ÑÑƒÑ‰ÐµÑÑ‚Ð²ÑƒÐµÑ‚");
     if (code === "P2025") return new NotFoundError();
-    if (code === "P2003") return new DomainError("REFERENCE_INVALID", "Связанная запись не найдена или используется");
+    if (code === "P2003") return new DomainError("REFERENCE_INVALID", "Ð¡Ð²ÑÐ·Ð°Ð½Ð½Ð°Ñ Ð·Ð°Ð¿Ð¸ÑÑŒ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð° Ð¸Ð»Ð¸ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÑ‚ÑÑ");
     if (code === "23514" || /check constraint/i.test(String((e as Error).message)))
-      return new DomainError("CONSTRAINT_VIOLATION", "Данные нарушают бизнес-ограничение");
+      return new DomainError("CONSTRAINT_VIOLATION", "Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð½Ð°Ñ€ÑƒÑˆÐ°ÑŽÑ‚ Ð±Ð¸Ð·Ð½ÐµÑ-Ð¾Ð³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÐ½Ð¸Ðµ");
   }
   return null;
 }
@@ -105,7 +96,7 @@ export function errorResponse(e: unknown, correlationId: string): NextResponse {
   }
   logger.error({ err: e }, "unexpected error");
   return json(
-    { error: { code: "INTERNAL_ERROR", message: "Внутренняя ошибка. Сообщите администратору код запроса.", correlationId } },
+    { error: { code: "INTERNAL_ERROR", message: "Ð’Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½ÑÑ Ð¾ÑˆÐ¸Ð±ÐºÐ°. Ð¡Ð¾Ð¾Ð±Ñ‰Ð¸Ñ‚Ðµ Ð°Ð´Ð¼Ð¸Ð½Ð¸ÑÑ‚Ñ€Ð°Ñ‚Ð¾Ñ€Ñƒ ÐºÐ¾Ð´ Ð·Ð°Ð¿Ñ€Ð¾ÑÐ°.", correlationId } },
     500,
   );
 }
@@ -126,8 +117,7 @@ export function api<P>(options: ApiOptions, handler: (ctx: AuthedApiContext<P>) 
     return runWithContext({ correlationId }, async () => {
       let status = 500;
       try {
-        if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Источник запроса не разрешён");
-        if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Источник запроса не разрешён");
+        if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Ð˜ÑÑ‚Ð¾Ñ‡Ð½Ð¸Ðº Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° Ð½Ðµ Ñ€Ð°Ð·Ñ€ÐµÑˆÑ‘Ð½");
         const method = req.method.toUpperCase();
         if (MUTATING.has(method)) {
           assertSameOrigin(req);
@@ -162,14 +152,13 @@ export function api<P>(options: ApiOptions, handler: (ctx: AuthedApiContext<P>) 
   };
 }
 
-/** Тело JSON-запроса. Требует Content-Type: application/json (дополнительный барьер CSRF). */
 export async function readJson(req: NextRequest): Promise<unknown> {
   const ct = req.headers.get("content-type") ?? "";
-  if (!ct.toLowerCase().includes("application/json")) throw new ValidationError("Ожидается JSON (Content-Type: application/json)");
+  if (!ct.toLowerCase().includes("application/json")) throw new ValidationError("ÐžÐ¶Ð¸Ð´Ð°ÐµÑ‚ÑÑ JSON (Content-Type: application/json)");
   try {
     return await req.json();
   } catch {
-    throw new ValidationError("Некорректный JSON в теле запроса");
+    throw new ValidationError("ÐÐµÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½Ñ‹Ð¹ JSON Ð² Ñ‚ÐµÐ»Ðµ Ð·Ð°Ð¿Ñ€Ð¾ÑÐ°");
   }
 }
 

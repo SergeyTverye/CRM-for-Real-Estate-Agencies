@@ -11,7 +11,6 @@ type Planned = { recipientUserId: string; kind: string; sourceType: string; sour
 
 export const stopNotificationWorker = disconnectDb;
 
-/** One transaction/connection owns the advisory lock until delivery finishes. No browser required. */
 export async function generateNotifications(now = new Date()) {
   if (getConfig().isReadOnlyInstance) return { active: false, locked: false, delivered: 0 };
   return transaction(async tx => {
@@ -60,7 +59,6 @@ export async function generateNotifications(now = new Date()) {
 }
 
 async function reconcilePending(tx: Tx, planned: Planned[]) {
-  // A rescheduled/closed/deleted source must never deliver its old pending reminder.
   const desired = new Map(planned.map(p => [p.dedupKey, p]));
   const pending = await tx.notification.findMany({ where: { state: "pending" }, select: { id: true, dedupKey: true, snoozedUntil: true } });
   for (const p of pending) {
@@ -71,7 +69,6 @@ async function reconcilePending(tx: Tx, planned: Planned[]) {
       await tx.notification.update({ where: { id: p.id }, data: { triggerAt: next.triggerAt } });
     }
   }
-  // PostgreSQL ON CONFLICT DO NOTHING, including terminal notifications after a restart.
   for (let offset = 0; offset < planned.length; offset += 500)
     await tx.notification.createMany({ data: planned.slice(offset, offset + 500), skipDuplicates: true });
 }

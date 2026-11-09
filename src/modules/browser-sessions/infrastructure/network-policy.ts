@@ -10,7 +10,6 @@ const domains: Record<SessionSource, { sites: string[]; static: string[] }> = {
   youla: { sites: ["youla.ru"], static: ["youla.io"] },
 };
 const under = (host: string, root: string) => host === root || host.endsWith(`.${root}`);
-/** Network DNS/IP checking and pinning is performed by safeRequest AFTER this hostname/resource policy. */
 export function allowsRequest(source: SessionSource, raw: string, method: string, resource: string, navigation: boolean) {
   try {
     const url = new URL(raw);

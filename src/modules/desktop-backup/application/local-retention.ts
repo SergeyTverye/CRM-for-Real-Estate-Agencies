@@ -4,7 +4,6 @@ import { archiveRefSchema } from "../domain/contracts";
 import { planRetention, type RetentionPolicy, type RetainedBackup } from "../domain/retention";
 import { DatabaseReplicationJournal } from "../infrastructure/database-journal";
 import { hashFile, regularFile } from "../infrastructure/fs";
-/** Unknown/incomplete files and snapshots awaiting any destination are never swept. */
 export async function pruneLocalPortable(root: string, policy: RetentionPolicy) {
   const { rows } = await new DatabaseReplicationJournal().read();
   const catalog: RetainedBackup[] = [];

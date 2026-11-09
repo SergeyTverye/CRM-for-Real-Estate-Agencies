@@ -262,7 +262,7 @@ export function codesOf<N extends CodebookName>(name: N): [Code<N>, ...Code<N>[]
   return Object.keys(CODEBOOK[name]) as [Code<N>, ...Code<N>[]];
 }
 
-/** Русское название кода; для неизвестного кода возвращает сам код. */
+/** Русское название кода. для неизвестного кода возвращает сам код. */
 export function labelOf<N extends CodebookName>(name: N, code: string | null | undefined): string {
   if (!code) return "—";
   const book = CODEBOOK[name] as Record<string, string>;
@@ -389,7 +389,6 @@ export function checkConstraintSql(entry: (typeof CODEBOOK_COLUMNS)[number]): st
   return `ALTER TABLE "${entry.table}" ADD CONSTRAINT "${checkConstraintName(entry.table, entry.column)}" CHECK (${cond});`;
 }
 
-/** Display fallbacks for legacy and external codes; business dictionary labels take precedence. */
 export const DISPLAY_LABELS: Record<string, Record<string, string>> = {
   need_operation_type: { buy: "Купить", sale: "Продажа", sell: "Продать", rent: "Арендовать", lease_out: "Сдать в аренду" },
   property_operation_type: { sale: "Продажа", rent: "Аренда" },

@@ -8,7 +8,6 @@ import { FormErrorBanner } from "@/ui/form";
 
 type Evidence = {criterion:string;result:string;quote:string|null;reason:string};
 type Result = {ranking?:{listingId:string;reasons:string[]}[];cacheHit?:boolean;text?:string;warning?:string;pendingActionId?:string|null;items?:{listingId:string;cacheHit:boolean;evidence:Evidence[];unresolved:string[];url:string}[];tasks?:{listingId?:string;title?:string;description?:string}[];questions?:{listingId:string;questions:string[]}[];tradeoffs?:{listingId:string;points:{comparedListingId:string;area:string;price:string}[]}[]};
-/** Mount with key=selection+filters to discard old previews when the search changes. */
 export function ListingAnalysisPanel({listingIds,filters,needId,labels={},enabled=true,statusMessage,settingsUrl}:{listingIds:string[];filters:SearchFilters;needId?:string;labels?:Record<string,string>;enabled?:boolean;statusMessage?:string|null;settingsUrl?:string|null}) {
   const action = useApiAction();
   const [result,setResult] = useState<Result|null>(null);

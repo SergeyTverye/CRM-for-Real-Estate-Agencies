@@ -31,7 +31,6 @@ import { parseRecurrence } from "@/modules/calendar/domain/calendar-rules";
 import { getConfig } from "@/shared/config/env";
 
 /**
- * UC-06 CreateOrCompleteTask (FR-09, FR-10, FR-11, FR-26).
  * Task — единая сущность для задач, звонков, напоминаний, контрольных дат
  * и повторяемых действий. Связи с бизнес-контекстом — нормализованные join-таблицы.
  */
@@ -408,7 +407,6 @@ export async function countOpenTasksForNeed(needId: string): Promise<number> {
   return db.taskNeed.count({ where: { clientNeedId: needId, task: { status: { in: [...OPEN_TASK_STATUSES] } } } });
 }
 
-/** Status changes and closing the last return task are one atomic operation. */
 async function applyTaskNeedChanges(tx: Tx, actor: Actor, linked: string[], changes: { needId: string; change?: unknown }[]) {
   if (!changes.length) return;
   const { embeddedNeedChangeSchema, applyNeedStateChange } = await import("@/modules/needs/application/need-service");

@@ -10,7 +10,6 @@ import { resolveTaskResponsible } from "./task-service";
 import { writeAudit } from "@/modules/audit/application/audit";
 
 async function lockTask(tx: Tx, actor: Actor, taskId: string) {
-  // Serialize checklist edits with completion, including a concurrent new required item.
   await tx.$queryRaw(lockSql(Prisma.sql`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`));
   const task = await tx.task.findFirst({ where: { id: taskId, AND: [taskScope(actor), safeTaskTextScope(actor)] } });
   if (!task) throw new NotFoundError();

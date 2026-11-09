@@ -166,7 +166,6 @@ export async function archiveAgreement(actor: Actor, id: string): Promise<void> 
   });
 }
 
-// ───── Queries ─────
 
 export const agreementFiltersSchema = zPagination.extend({
   status: zCode("agreementStatus").optional(),

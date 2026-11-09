@@ -1,4 +1,3 @@
-/** Desktop never trusts reverse-proxy headers to define its origin. */
 export function desktopLoopbackAllowed(headers: Headers, method: string, env: Record<string, string | undefined> = process.env): boolean {
   if (env.CRM_DEPLOYMENT_MODE !== "desktop") return true;
   const port = env.CRM_DESKTOP_PORT;

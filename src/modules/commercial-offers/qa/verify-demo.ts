@@ -10,7 +10,6 @@ import { openDocumentForDownload } from "@/modules/documents/application/documen
 import { offerHtml } from "@/modules/export/presentation/offer-html";
 import type { Actor } from "@/modules/auth/domain/actor";
 
-/** Synthetic demo only. Run: DATABASE_URL=.../crm_demo npx tsx src/modules/commercial-offers/qa/verify-demo.ts */
 async function main() {
   config({ path: [".env.local", ".env"], quiet: true });
   if (new URL(process.env.DATABASE_URL!).pathname !== "/crm_demo") throw new Error("Only crm_demo is permitted");

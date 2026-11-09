@@ -12,7 +12,6 @@ export interface HandoffCoordinator {
   saveState(state: TransferState): Promise<void>;
   createVerified(): Promise<TransferArchive>;
   applyVerified(archive: TransferArchive): Promise<void>;
-  /** Decrypt, verify hashes/SQLite and return actual embedded manifest. */
   verifyIncoming(archive: TransferArchive): Promise<BackupManifest>;
 }
 export class StateTransfer {
@@ -26,7 +25,6 @@ export class StateTransfer {
     });
   }
   async compare(incoming: BackupManifest) { return compareState(await this.coordinator.loadState(), incoming); }
-  /** Validation is mandatory, even for USB or a previously uploaded archive. */
   async receive(incoming: TransferArchive, manualManagerConfirmation = false) {
     return this.coordinator.exclusive(async () => {
       await assertArchive(incoming.path, incoming.archive); archiveRefSchema.parse(incoming.archive);
@@ -42,7 +40,6 @@ export class StateTransfer {
       }
       await this.coordinator.applyVerified(incoming);
       const m = incoming.manifest;
-      // Preserve local device identity; a received snapshot does not clone the source installation.
       await this.coordinator.saveState({ ...local, deploymentId: m.deploymentId, snapshotRevision: m.snapshotRevision, parentBackupId: m.parentBackupId, backupId: m.backupId, manifestSha256: m.manifestSha256, dirtySinceBackup: false, readOnly: false });
       return { status: "received" as const };
     });

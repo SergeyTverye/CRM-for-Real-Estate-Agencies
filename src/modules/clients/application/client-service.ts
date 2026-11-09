@@ -70,7 +70,7 @@ export interface DuplicateCandidate {
 }
 
 export interface DuplicateCheck {
-  /** Кандидаты, которые actor вправе видеть (свои клиенты; руководителю — все). */
+  /** Кандидаты, которые actor вправе видеть (свои клиенты. руководителю — все). */
   visible: DuplicateCandidate[];
   /** Есть совпадение с клиентом, недоступным actor (только признак, без сведений). */
   foreignConflict: boolean;

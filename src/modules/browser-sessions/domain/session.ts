@@ -12,7 +12,6 @@ export interface InteractiveSession {
 }
 export const isLive = (s: InteractiveSession) => s.status === "pending" || s.status === "active";
 export interface SessionRepository {
-  /** Atomically claims (owner, source), including across processes. */
   claim(session: InteractiveSession, maximum?: number): Promise<boolean>;
   get(id: string): Promise<InteractiveSession | null>;
   active(ownerUserId: string, source: SessionSource): Promise<InteractiveSession | null>;
@@ -36,20 +35,14 @@ export interface BrowserFactory {
   open(startUrl: string, source: SessionSource, signal: AbortSignal, onViolation: () => void): Promise<BrowserHandle>;
 }
 export interface PreparedSearch {
-  /** Server-side adapter resolves this URL; it is never accepted from an HTTP request or returned to the UI. */
   startUrl: string;
   parameters: unknown;
 }
 export interface SearchContinuationPort {
-  /** Watchdog observes cancellation even when requested by a different process. */
   isCancelled?(runId: string): Promise<boolean>;
-  /** Must authorize run + linked need, require needs_user_action, and verify the source access agreement. */
   prepare(actor: Actor, runId: string, source: SessionSource): Promise<PreparedSearch>;
-  /** Positive detection of results by the source adapter, never a generic absence-of-CAPTCHA heuristic. */
   isReady(page: Page, source: SessionSource): Promise<boolean>;
-  /** Same context, no new browser. Must validate all candidates and check signal before committing results. */
   resume(input: { actor: Actor; runId: string; source: SessionSource; parameters: unknown; page: Page; context: BrowserContext; signal: AbortSignal }): Promise<"completed" | "blocked">;
-  /** Preserve prior snapshots. Store only a fixed reason code, no URL/cookies/exception text. */
   blocked(runId: string, source: SessionSource, reason: string): Promise<void>;
 }
 export type SessionAudit = (session: InteractiveSession, event: "created" | "opened" | "completed" | "cancelled" | "expired" | "failed") => Promise<void>;

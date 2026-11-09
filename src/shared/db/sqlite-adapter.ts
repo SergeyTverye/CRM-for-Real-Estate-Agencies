@@ -36,7 +36,6 @@ export function unicodeLike(pattern: string, value: string, escape = "\\"): numb
   }
   return previous[text.length]!;
 }
-/** Pinned 7.10.1 seam, guarded by runtime checks and integration tests. */
 export const DESKTOP_SQLITE_PRAGMAS = [
   // Порядок важен: сначала режим журнала, затем остальные.
   "foreign_keys = ON",
@@ -45,13 +44,13 @@ export const DESKTOP_SQLITE_PRAGMAS = [
   // Безопасно в WAL и совместимо с Online Backup API (бекап читает страницы
   // через sqlite3_backup, отдельные соединения эти настройки не затрагивают).
   // synchronous=NORMAL в WAL теряет не более последней транзакции только при
-  // сбое ОС/питания; локальный диск уже обязателен (sqlite-location).
+  // сбое ОС/питания. локальный диск уже обязателен (sqlite-location).
   "synchronous = NORMAL",
   // 64 МБ page cache: горячие страницы Сегодня/Задач/Календаря остаются в памяти.
   "cache_size = -64000",
   // Мелкие temp-B-tree сортировок (ORDER BY на страницах списков) — в память.
   "temp_store = MEMORY",
-  // До 256 МБ read-only mmap для файла БД; записи идут обычным путём.
+  // До 256 МБ read-only mmap для файла БД. записи идут обычным путём.
   "mmap_size = 268435456",
 ] as const;
 
@@ -72,7 +71,6 @@ export class DesktopSqliteAdapter extends PrismaBetterSqlite3 {
     const start = adapter.startTransaction.bind(adapter);
     adapter.startTransaction = async isolation => {
       const transaction = await start(isolation);
-      // No reads yet; keep the official adapter mutex while acquiring a file lock.
       try { native.exec("ROLLBACK; BEGIN IMMEDIATE"); return transaction; }
       catch (error) { await transaction.rollback(); throw error; }
     };

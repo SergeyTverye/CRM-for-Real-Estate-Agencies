@@ -23,7 +23,6 @@ export const timelineFiltersSchema = z.object({
   cursor: z.string().max(1000).optional(), eventId: zUuid.optional(), pageSize: z.coerce.number().int().min(1).max(100).default(30),
 });
 const cursorSchema = z.object({ at: z.iso.datetime(), kind: z.string().max(30), id: zUuid });
-/** Calendar boundaries are interpreted in the deployment timezone, not in UTC. */
 export function timelinePeriod(from?: Date, to?: Date) {
   if (from && to && from > to) throw new ValidationError("Начало периода позже окончания");
   const zone = getConfig().APP_TIMEZONE;
@@ -31,8 +30,6 @@ export function timelinePeriod(from?: Date, to?: Date) {
   return { ...(from ? { gte: midnight(from) } : {}), ...(to ? { lt: midnight(addDays(to, 1)) } : {}) };
 }
 
-/** Bounded UNION of primary sources. Every source applies its policy and keyset before LIMIT.
- * No materialized history, no offset pagination, no unbounded history reads. */
 export async function getClientTimelinePage(actor: Actor, clientId: string, raw: unknown = {}) {
   await loadAccessibleClient(db, actor, clientId);
   const f = parseInput(timelineFiltersSchema, raw);
@@ -48,7 +45,6 @@ export async function getClientTimelinePage(actor: Actor, clientId: string, raw:
   const ids = needIds.filter(n => !f.needId || n.id === f.needId).map(n => n.id);
   const employee = (key: string) => f.employeeId ? { [key]: f.employeeId } : {};
   const enabled = (kind: TimelineKind) => !f.kind || f.kind === kind;
-  // Merge order: timestamp DESC, kind DESC, UUID DESC. Source-specific cursor avoids tied timestamp loss.
   const window = (field: string, kind: string) => ({ AND: [
     { [field]: period },
     ...(f.eventId ? [{ id: f.eventId }] : []),
@@ -60,8 +56,6 @@ export async function getClientTimelinePage(actor: Actor, clientId: string, raw:
   const events: ClientTimelineEvent[] = [];
   const author = { select: { displayName: true } };
   const add = (e: ClientTimelineEvent) => events.push(e);
-  // Deal has no Need FK. Use explicit task links or the same client + a property
-  // proposed, shown or included in an offer for the selected need.
   const dealContext: Prisma.DealWhereInput = { AND: [
     { parties: { some: { clientId } } },
     ...(f.needId ? [{ OR: [

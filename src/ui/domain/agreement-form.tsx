@@ -16,7 +16,7 @@ import { uploadAgreementDocuments, type PendingAgreementDocument } from "./agree
 
 /**
  * Форма договора/соглашения (ТЗ 29.14, 37.11, 40.4): создание и изменение с optimistic concurrency.
- * Для signed от имени агентства обязателен выбор ИП/ООО; для no_agreement/declined — причина.
+ * Для signed от имени агентства обязателен выбор ИП/ООО. для no_agreement/declined — причина.
  */
 
 export type { AgreementFormValue };
@@ -56,7 +56,7 @@ function toPayload(v: AgreementFormValue) {
   };
 }
 
-/** Клиентская проверка для удобства; сервер повторяет те же правила. */
+/** Клиентская проверка для удобства. сервер повторяет те же правила. */
 function localErrors(v: AgreementFormValue): Record<string, string[]> {
   const e: Record<string, string[]> = {};
   if (v.status === "signed" && !v.signedAt) e.signedAt = ["Для подписанного договора укажите дату подписания"];
