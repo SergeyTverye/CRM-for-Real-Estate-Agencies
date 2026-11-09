@@ -323,13 +323,13 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     else if (bucket === "week") week.push(v);
   }
 
-  // Контрольные даты.
-  const controls: Record<TodayGroup, ControlItem[]> = empty();
+  // Контрольные даты: независимые запросы идут одним пакетом, а не водопадом.
+  const bounds = dayBounds(now);
   const responsibleFilter = scope === "all" ? {} : { responsibleUserId: userId };
-  const showings = await db.showing.findMany({
+  const showingsPromise = db.showing.findMany({
     where: {
       status: "planned",
-      scheduledAt: { lt: dayBounds(now).startToday },
+      scheduledAt: { lt: bounds.startToday },
       ...responsibleFilter,
       ...showingScope(actor),
     },
@@ -337,24 +337,11 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     orderBy: { scheduledAt: "asc" },
     take: 100,
   });
-  for (const s of showings)
-    controls.meetings.push({
-      kind: "showing",
-      id: s.id,
-      title: `Показ: ${s.property.addressText}`,
-      dateLabel: s.scheduledAt,
-      isDateOnly: false,
-      href: `/showings/${s.id}`,
-      overdue: s.scheduledAt < now,
-      responsibleName: s.responsible.displayName,
-    });
-
-  const todayShowings = await db.showing.findMany({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: dayBounds(now).startToday, lt: startTomorrow } },
+  const todayShowingsPromise = db.showing.findMany({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: bounds.startToday, lt: startTomorrow } },
     select: { id: true, scheduledAt: true, property: { select: { addressText: true } }, responsible: { select: { displayName: true } } }, orderBy: { scheduledAt: "asc" }, take: 200 });
-  const showingsToday: ControlItem[] = todayShowings.map(s => ({ kind: "showing", id: s.id, title: `Показ: ${s.property.addressText}`, dateLabel: s.scheduledAt, isDateOnly: false, href: `/showings/${s.id}`, overdue: s.scheduledAt < now, responsibleName: s.responsible.displayName }));
   const todayDate = todayAsDateOnly(now, cfg.APP_TIMEZONE);
   const agreementHorizon = addDays(todayDate, cfg.AGREEMENT_EXPIRY_WARNING_DAYS);
-  const agreements = await db.agreement.findMany({
+  const agreementsPromise = db.agreement.findMany({
     where: {
       status: "signed",
       archivedAt: null,
@@ -366,21 +353,9 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     orderBy: { validUntil: "asc" },
     take: 100,
   });
-  for (const a of agreements)
-    controls.documents.push({
-      kind: "agreement",
-      id: a.id,
-      title: `Срок договора${a.agreementNumber ? ` № ${a.agreementNumber}` : ""}${a.property ? `: ${a.property.addressText}` : ""}`,
-      dateLabel: a.validUntil!,
-      isDateOnly: true,
-      href: `/agreements/${a.id}`,
-      overdue: a.validUntil! < todayDate,
-      responsibleName: a.responsible.displayName,
-    });
-
   const checkBefore = addDays(now, -cfg.AD_CHECK_INTERVAL_DAYS);
   const adHorizon = addDays(todayDate, 7);
-  const ads = await db.advertisement.findMany({
+  const adsPromise = db.advertisement.findMany({
     where: {
       status: "active",
       AND: [
@@ -399,6 +374,55 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     orderBy: { expiresAt: "asc" },
     take: 100,
   });
+  const offersPromise = db.commercialOffer.findMany({
+    where: { status: "sent", expiresAt: { not: null, lte: addDays(todayDate, 3) }, ...responsibleFilter, ...offerScope(actor) },
+    select: { id: true, title: true, expiresAt: true, responsible: { select: { displayName: true } } },
+    take: 50,
+  });
+  const needsPromise = db.clientNeed.count({
+    where: {
+      ...(scope === "all" ? needScope(actor) : { responsibleUserId: userId }),
+      AND: [{ OR: [
+        { status: "active", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } },
+        { status: "paused", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] }, taskType: "pause_return" } } } },
+      ] }],
+    },
+  });
+  const countsPromise = (async () => {
+    const [taskCounts, showingsTodayCount] = await Promise.all([
+      countTodayTasks(actor, now, scope === "all" ? null : userId),
+      db.showing.count({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: bounds.startToday, lt: startTomorrow } } }),
+    ]);
+    return { taskCounts, showingsTodayCount };
+  })();
+  const [showings, todayShowings, agreements, ads, offers, needsWithoutNextAction, { taskCounts, showingsTodayCount }] =
+    await Promise.all([showingsPromise, todayShowingsPromise, agreementsPromise, adsPromise, offersPromise, needsPromise, countsPromise]);
+  const controls: Record<TodayGroup, ControlItem[]> = empty();
+  for (const s of showings)
+    controls.meetings.push({
+      kind: "showing",
+      id: s.id,
+      title: `Показ: ${s.property.addressText}`,
+      dateLabel: s.scheduledAt,
+      isDateOnly: false,
+      href: `/showings/${s.id}`,
+      overdue: s.scheduledAt < now,
+      responsibleName: s.responsible.displayName,
+    });
+
+  const showingsToday: ControlItem[] = todayShowings.map(s => ({ kind: "showing", id: s.id, title: `Показ: ${s.property.addressText}`, dateLabel: s.scheduledAt, isDateOnly: false, href: `/showings/${s.id}`, overdue: s.scheduledAt < now, responsibleName: s.responsible.displayName }));
+  for (const a of agreements)
+    controls.documents.push({
+      kind: "agreement",
+      id: a.id,
+      title: `Срок договора${a.agreementNumber ? ` № ${a.agreementNumber}` : ""}${a.property ? `: ${a.property.addressText}` : ""}`,
+      dateLabel: a.validUntil!,
+      isDateOnly: true,
+      href: `/agreements/${a.id}`,
+      overdue: a.validUntil! < todayDate,
+      responsibleName: a.responsible.displayName,
+    });
+
   for (const a of ads) {
     const expiring = a.expiresAt && a.expiresAt <= adHorizon;
     controls.advertising.push({
@@ -413,11 +437,6 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     });
   }
 
-  const offers = await db.commercialOffer.findMany({
-    where: { status: "sent", expiresAt: { not: null, lte: addDays(todayDate, 3) }, ...responsibleFilter, ...offerScope(actor) },
-    select: { id: true, title: true, expiresAt: true, responsible: { select: { displayName: true } } },
-    take: 50,
-  });
   for (const o of offers)
     controls.offers.push({
       kind: "offer",
@@ -430,20 +449,6 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
       responsibleName: o.responsible.displayName,
     });
 
-  const needsWithoutNextAction = await db.clientNeed.count({
-    where: {
-      ...(scope === "all" ? needScope(actor) : { responsibleUserId: userId }),
-      AND: [{ OR: [
-        { status: "active", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] } } } } },
-        { status: "paused", taskLinks: { none: { task: { status: { in: [...OPEN_TASK_STATUSES] }, taskType: "pause_return" } } } },
-      ] }],
-    },
-  });
-
-  const [taskCounts, showingsTodayCount] = await Promise.all([
-    countTodayTasks(actor, now, scope === "all" ? null : userId),
-    db.showing.count({ where: { AND: [showingScope(actor)], ...responsibleFilter, status: "planned", scheduledAt: { gte: dayBounds(now).startToday, lt: startTomorrow } } }),
-  ]);
   return {
     scope,
     counters: { overdue: taskCounts.overdue, today: taskCounts.today, week: taskCounts.upcoming, needsWithoutNextAction, showingsToday: showingsTodayCount },

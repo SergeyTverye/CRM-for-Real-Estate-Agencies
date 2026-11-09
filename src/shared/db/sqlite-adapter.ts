@@ -37,6 +37,24 @@ export function unicodeLike(pattern: string, value: string, escape = "\\"): numb
   return previous[text.length]!;
 }
 /** Pinned 7.10.1 seam, guarded by runtime checks and integration tests. */
+export const DESKTOP_SQLITE_PRAGMAS = [
+  // Порядок важен: сначала режим журнала, затем остальные.
+  "foreign_keys = ON",
+  "busy_timeout = 10000",
+  "journal_mode = WAL",
+  // Безопасно в WAL и совместимо с Online Backup API (бекап читает страницы
+  // через sqlite3_backup, отдельные соединения эти настройки не затрагивают).
+  // synchronous=NORMAL в WAL теряет не более последней транзакции только при
+  // сбое ОС/питания; локальный диск уже обязателен (sqlite-location).
+  "synchronous = NORMAL",
+  // 64 МБ page cache: горячие страницы Сегодня/Задач/Календаря остаются в памяти.
+  "cache_size = -64000",
+  // Мелкие temp-B-tree сортировок (ORDER BY на страницах списков) — в память.
+  "temp_store = MEMORY",
+  // До 256 МБ read-only mmap для файла БД; записи идут обычным путём.
+  "mmap_size = 268435456",
+] as const;
+
 export class DesktopSqliteAdapter extends PrismaBetterSqlite3 {
   connection?: Database.Database;
   override async connect(): Promise<SqlDriverAdapter> {
@@ -44,9 +62,7 @@ export class DesktopSqliteAdapter extends PrismaBetterSqlite3 {
     const native = (adapter as unknown as { client?: Database.Database }).client;
     if (!native || typeof native.function !== "function") { await adapter.dispose(); throw new Error("SQLITE_ADAPTER_CONNECTION_CONTRACT"); }
     this.connection = native;
-    native.pragma("foreign_keys = ON");
-    native.pragma("busy_timeout = 10000");
-    native.pragma("journal_mode = WAL");
+    for (const pragma of DESKTOP_SQLITE_PRAGMAS) native.pragma(pragma);
     native.function("lower", { deterministic: true }, v => v === null ? null : String(v).toLowerCase());
     native.function("like", { deterministic: true, varargs: true }, (pattern, value, escape) =>
       pattern === null || value === null ? null : unicodeLike(String(pattern), String(value), escape === undefined ? "\\" : String(escape)));

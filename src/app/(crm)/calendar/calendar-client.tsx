@@ -5,15 +5,15 @@ import { requestConfirmation } from "@/ui/confirm-dialog";
 import { recurrenceForm, recurrenceRule } from "@/modules/calendar/domain/recurrence-form";
 import { WEEK_DAYS } from "@/modules/calendar/domain/calendar-rules";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { EventSourceFunc } from "@fullcalendar/core";
-import FullCalendar from "@fullcalendar/react";
+import dynamic from "next/dynamic";
+import type { DateSelectArg, EventClickArg, EventDropArg, EventSourceFunc } from "@fullcalendar/core";
+import type FullCalendar from "@fullcalendar/react";
 import { CalendarQuickCreate } from "./quick-create";
 import type { NeedLabels } from "@/ui/domain/deal-pickers";
-import dayGrid from "@fullcalendar/daygrid";
-import timeGrid from "@fullcalendar/timegrid";
-import list from "@fullcalendar/list";
-import interaction from "@fullcalendar/interaction";
-import ru from "@fullcalendar/core/locales/ru";
+const CalendarView = dynamic(() => import("./calendar-view").then((m) => m.CalendarView), {
+  ssr: false,
+  loading: () => <p role="status">Загрузка календаря…</p>,
+});
 import type { CalendarItem } from "@/modules/calendar/domain/calendar-rules";
 import { apiCall } from "@/ui/api-client";
 import { useApiAction, useUnsavedChangesWarning } from "@/ui/hooks";
@@ -110,24 +110,20 @@ export function CalendarClient({ timeZone, userId, users, labels, isManager, set
     <p className="mb-2 text-sm" role="status">Событий в периоде: {counts.reduce((s,d) => s+d.total,0)}.</p>
     <details className="mb-2 text-sm"><summary>Нагрузка по дням</summary><p className="mt-2 text-slate-600">{counts.map(d => `${d.day.slice(8)}.${d.day.slice(5,7)} — ${d.total}`).join("; ") || "Нет событий"}</p></details>
     <details className="mb-3 text-sm"><summary>Нагрузка по неделям</summary>{Object.entries(counts.reduce<Record<string,number>>((result, day) => { const date = new Date(`${day.day}T00:00:00Z`); date.setUTCDate(date.getUTCDate()-(date.getUTCDay()+6)%7); const key = date.toISOString().slice(0,10); result[key] = (result[key] ?? 0)+day.total; return result; }, {})).map(([week,total]) => <p key={week}>Неделя с {week.split("-").reverse().join(".")}: {total}</p>)}</details>
-    <FullCalendar ref={calendar} plugins={[dayGrid, timeGrid, list, interaction]} locale={ru} timeZone="UTC" initialView="timeGridWeek"
-      views={{ dayGridQuarter: { type: "dayGrid", duration: { months: 3 }, dateIncrement: { months: 3 }, buttonText: "Три месяца" } }}
-      headerToolbar={{ left: "prev,next today", center: "title", right: "timeGridDay,timeGridWeek,dayGridMonth,dayGridQuarter" }}
-      height={680} firstDay={1} now={local(new Date().toISOString())} lazyFetching={false} selectable eventDurationEditable={false} forceEventDuration={false} displayEventEnd={false}
-      slotMinTime="00:00:00" slotMaxTime="24:00:00" scrollTime="08:00:00"
-      eventMaxStack={3} dayMaxEvents={3} moreLinkText={n => `+ещё ${n}`} moreLinkContent={({ num }) => `+ещё ${num}`}
-      eventDidMount={({ el, event }) => { const item = event.extendedProps.item as CalendarItem | undefined; el.title = `${event.title}${item?.tone ? ` · ${({ red: "Просрочено / критично", yellow: "Скоро", green: "Под контролем", gray: "Завершено / отменено" })[item.tone]}` : " · Выбрать день для подробностей"}`; }}
-      loading={setLoading}
+    <CalendarView
+      calendarRef={calendar}
       events={loadEvents}
-      select={r => { if (r.view.type === "dayGridQuarter") calendar.current?.getApi().changeView("timeGridDay", r.start); else openNew(utc(r.start)); calendar.current?.getApi().unselect(); }}
-      eventClick={e => {
+      loading={setLoading}
+      localNow={local(new Date().toISOString())}
+      onSelectRange={(r: DateSelectArg) => { if (r.view.type === "dayGridQuarter") calendar.current?.getApi().changeView("timeGridDay", r.start); else openNew(utc(r.start)); calendar.current?.getApi().unselect(); }}
+      onEventClick={(e: EventClickArg) => {
         if (e.event.extendedProps.aggregateDay) { calendar.current?.getApi().changeView("timeGridDay", e.event.extendedProps.aggregateDay); return; }
         const item = e.event.extendedProps.item as CalendarItem;
         if (item.type === "calendar_event" && item.editable && item.sourceId) {
           void action.run(async () => { setEditing(await apiCall<EventRecord>("GET", `/api/v1/calendar/events/${item.sourceId}`)); setDirty(false); return true; });
         } else if (item.url) window.location.assign(item.url);
       }}
-      eventDrop={e => {
+      onEventDrop={(e: EventDropArg) => {
         const item = e.event.extendedProps.item as CalendarItem;
         void action.run(async () => {
           try {
