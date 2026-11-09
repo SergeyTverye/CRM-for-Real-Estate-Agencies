@@ -58,7 +58,7 @@ describe("импорт: обнаружение секций по сигнату�
 describe("импорт: валидация строк", () => {
   it("историческая секция: 32 строки, ошибки и предупреждения диагностируются", () => {
     const all = rows.filter((r) => r.profileCode === "historical_deals_v1");
-    // служебный комментарий внутри секции не теряется молча, а помечается unrecognized
+    
     expect(all.filter((r) => r.validationStatus === "unrecognized").map((r) => r.warningCodes)).toEqual([["comment_or_separator"]]);
     const hist = all.filter((r) => r.validationStatus !== "unrecognized");
     expect(hist).toHaveLength(32);

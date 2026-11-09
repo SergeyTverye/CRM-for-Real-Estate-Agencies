@@ -40,7 +40,7 @@ export async function getSearchRun(actor: Actor, id: string) {
       include: { listing: { include: { verifications: { orderBy: { verifiedAt: "desc" }, take: 1,
         select: { availability: true, priceConfirmed: true, ownerConfirmed: true, verifiedAt: true, verifiedBy: true, nextCheckAt: true, note: true } } } } } }),
   ]);
-  // Show facts as they were received for THIS run, rather than today's mutable listing data.
+  
   const snapshots = await db.externalListingSnapshot.findMany({ where: { searchRunId: id }, orderBy: { fetchedAt: "desc" } });
   return { ...run, sources, results: results.map(row => ({ ...row, snapshot: snapshots.find(s => s.listingId === row.listingId)?.normalized ?? null })), demoMode: (await searchSettings()).config.SCRAPER_DEMO_FIXTURES };
 }
@@ -49,22 +49,22 @@ export async function persistListing(tx: Tx, runId: string, listing: NormalizedL
   const source = sourceOverride ?? listing.source;
   listing = { ...listing, sourceListingId: stableListingId(listing.sourceListingId, listing.url),
     identityNeedsReview: listing.identityNeedsReview || !listing.sourceListingId };
-  // The SQL partial unique index treats NULL unit as a single (non-grouped) unit.
-  // Advisory lock also serializes upserts when the Prisma schema cannot express that index.
+  
+  
   await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([source, listing.sourceListingId, listing.sourceUnitId])}, 0))`));
   const existing = listing.sourceListingId ? await tx.externalListing.findFirst({ where: { source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId } }) : null;
   const perM2 = pricePerM2(listing.price, listing.priceUnit, listing.area);
   const date = (value?: string | null) => value && Number.isFinite(Date.parse(value)) ? new Date(value) : null;
   const observations = { publishedAt: date(listing.publishedAt), sourceUpdatedAt: date(listing.sourceUpdatedAt),
-    // Adapter provenance remains verbatim in normalized JSON; SQL uses stable codebook values.
+    
     dateSource: ["site_published", "site_updated", "relative_label", "first_seen", "unknown"].includes(listing.dateSource ?? "") ? listing.dateSource! : listing.dateSource?.includes("html_label") ? "relative_label" : listing.publishedAt ? "site_published" : listing.sourceUpdatedAt ? "site_updated" : "unknown", datePrecision: listing.datePrecision ?? "unknown",
     sourceCategoryRaw: listing.sourceCategoryRaw ?? null, purposeEvidence: listing.purposeEvidence ? jsonValue(listing.purposeEvidence) : Prisma.JsonNull,
     pricePerM2Rub: perM2?.amount ?? null, pricePerM2Unit: perM2?.unit ?? null };
   const data = { ...observations, fetchedAt: new Date(listing.fetchedAt), source, sourceListingId: listing.sourceListingId, sourceUnitId: listing.sourceUnitId, url: listing.url, sourceMethod,
     operation: listing.operation ?? "sale", priceUnit: listing.priceUnit ? priceUnits[listing.priceUnit] : null, priceRub: listing.price,
-    // Normalized scraper areas are JS numbers, unlike money strings. Convert at
-    // this boundary to the schema's decimal(12,2), not in SQLite's exact-money
-    // adapter (which deliberately rejects fractional Number inputs).
+    
+    
+    
     areaM2: listing.area !== null && Number.isFinite(listing.area) && listing.area > 0 ? new Prisma.Decimal(String(listing.area)).toFixed(2) : null, floorRaw: listing.floor.raw, floorNumber: listing.floor.number, purposes: listing.purpose ? [listing.purpose] : [],
     address: listing.address, district: listing.district, city: listing.city ?? "", sellerType: listing.seller.type,
     description: listing.description, images: jsonValue(listing.images), lastSeenAt: new Date(listing.fetchedAt) };
@@ -72,11 +72,11 @@ export async function persistListing(tx: Tx, runId: string, listing: NormalizedL
   let previousResult = previousRunId ? await tx.searchRunResult.findUnique({ where: { runId_listingId: { runId: previousRunId, listingId: row.id } } }) : null;
   if (previousRunId && !previousResult) {
     const run = await tx.searchRun.findUniqueOrThrow({ where: { id: runId } });
-    // A blocked companion source in the latest partial run must not make an old listing new.
+    
     previousResult = await tx.searchRunResult.findFirst({ where: { listingId: row.id, run: { userId: run.userId, startedAt: { lt: run.startedAt }, ...(run.savedSearchId ? { savedSearchId: run.savedSearchId } : { savedSearchId: null, filters: { equals: run.filters as Prisma.InputJsonValue } }) } }, orderBy: [{ run: { startedAt: "desc" } }, { id: "desc" }] });
   }
   const prior = previousResult ? await tx.externalListingSnapshot.findFirst({ where: { searchRunId: previousResult.runId, listingId: row.id }, orderBy: [{ fetchedAt: "desc" }, { id: "asc" }] }) : null;
-  // Replayed work must not duplicate snapshots of the same observation.
+  
   const snapshot = await tx.externalListingSnapshot.findFirst({ where: { listingId: row.id, searchRunId: runId, fetchedAt: new Date(listing.fetchedAt) } });
   if (!snapshot) await tx.externalListingSnapshot.create({ data: { ...observations, firstSeenAt: row.firstSeenAt, lastSeenAt: row.lastSeenAt, areaM2: data.areaM2, lastCheckedAt: row.lastCheckedAt,
     listingId: row.id, searchRunId: runId, fetchedAt: new Date(listing.fetchedAt), priceRub: listing.price, normalized: jsonValue({ ...listing, firstSeenAt: row.firstSeenAt.toISOString(), source, sourceMethod, pricePerM2: perM2 }) } });
@@ -103,8 +103,8 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
   if (needId) await loadAccessibleNeed(db, actor, needId);
   const settings = await searchSettings();
   const composedAi = settings.aiEnabled ? dependencies?.ai ?? await getSearchAi() : null;
-  // An unavailable optional provider must not enter any AI path, including budget
-  // availability checks. Use this same server-composed port for the whole run.
+  
+  
   const ai = composedAi?.configured === false ? null : composedAi;
   if (ai && !input.confirmedPaid) throw new ConflictError("PAID_CONFIRMATION_REQUIRED", "Подтвердите условия и возможный платный анализ/резервный поиск");
   const run = await db.searchRun.create({ data: { userId: actor.userId, needId, savedSearchId: input.savedSearchId, city: filters.city, filters: jsonValue(filters), status: "running" } });
@@ -113,12 +113,12 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
     let timer: ReturnType<typeof setTimeout> | undefined;
     const result: SearchResult = await Promise.race([
       adapter.search(filters),
-      // The adapter's shared deadline stops new work. Allow its bounded cleanup
-      // to return successful sources rather than discarding them at the deadline.
+      
+      
       new Promise<SearchResult>(resolve => { timer = setTimeout(() => resolve({ listings: [], sources: filters.sources.map(source => ({ source, status: "timeout", resultCount: 0, reason: "Превышен срок выполнения задания" })) }), settings.config.SCRAPER_JOB_TIMEOUT_MS + 2000); }),
     ]).finally(() => { if (timer) clearTimeout(timer); });
     for (const item of result.listings) {
-      // Owner status is trusted only from a separately recorded employee verification.
+      
       delete item.listing.seller.ownerVerification;
       const existing = item.listing.sourceListingId ? await db.externalListing.findFirst({ where: { source: item.listing.source, sourceListingId: item.listing.sourceListingId, sourceUnitId: item.listing.sourceUnitId },
         include: { verifications: { orderBy: { verifiedAt: "desc" }, take: 1 } } }) : null;
@@ -129,7 +129,7 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
         try { item.evaluation = await analyzeUnresolved(item.listing, item.evaluation, { analyze: async ({ description, criteria }) => {
           const analyzed = await ai.analyzeDescriptions(aiContext(actor, run.id), { listings: [{ id: "listing", publicDescription: description }], unresolvedCriteria: criteria });
           return analyzed.evidence.map(e => ({ criterion: e.criterion, state: e.result, evidence: e.quote ?? "", source: "ai" as const }));
-        } }); } catch { /* Limits/failure keep unresolved evidence unknown. No provider bypass. */ }
+        } }); } catch {  }
       }
     }
     const availability = ai ? await ai.checkWebSearchAvailability(aiContext(actor, run.id), filters)
@@ -142,8 +142,8 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
       const healthy = result.sources.some(s => s.status === "success" || s.status === "partial");
       const status = healthy ? result.sources.every(s => s.status === "success" || s.status === "disabled") ? "success" : "partial" : "error";
       await tx.searchRun.update({ where: { id: run.id }, data: { status, finishedAt: new Date(), fallbackReason: fallback.reason } });
-      // A usable partial run is a successful baseline for the sources that
-      // answered. A blocked companion source must not mark every repeat "new".
+      
+      
       const comparable = status === "success" || status === "partial" && result.listings.length > 0;
       if (input.savedSearchId) await tx.savedSearch.update({ where: { id: input.savedSearchId }, data: { lastRunAt: run.startedAt, ...(comparable ? { lastSuccessfulRunId: run.id } : {}) } });
       await searchAudit(tx, actor, "run", "SearchRun", run.id, { status, count: result.listings.length });
@@ -160,7 +160,7 @@ export async function runSearch(actor: Actor, raw: unknown, dependencies?: { scr
 async function performWebSearch(actor: Actor, runId: string, ai: SearchAiPort, automatic: boolean) {
   const run = await accessibleRun(actor, runId);
   const filters = parseInput(SearchFilters, run.filters);
-  // Durable compare-and-set before contacting provider, including errors/timeouts.
+  
   const claimed = await db.searchRun.updateMany({ where: { id: runId, userId: actor.userId, webSearchUsed: false }, data: { webSearchUsed: true } });
   if (!claimed.count) throw new ConflictError("WEB_SEARCH_ALREADY_USED", "Веб-поиск для этого запуска уже выполнялся");
   try {
@@ -170,7 +170,7 @@ async function performWebSearch(actor: Actor, runId: string, ai: SearchAiPort, a
       for (const candidate of web.candidates) {
         if (!candidate.originalUrl) continue;
         try { await guardExternalUrl(candidate.originalUrl); } catch { continue; }
-        // A citation is not a verified listing: all unavailable structured facts remain unknown.
+        
         const listing: NormalizedListing = { source: "cian", sourceListingId: null, sourceUnitId: null, url: candidate.originalUrl,
           purpose: null, operation: null, price: null, priceUnit: null, area: null, floor: { kind: "unknown", number: null, raw: null },
           city: null, address: null, district: null, seller: { type: "unknown" }, description: candidate.title, images: [],
@@ -209,7 +209,7 @@ export async function parseQuery(actor: Actor, text: unknown, currentFilters: un
   await ai.assertConfigured?.();
   const jobId = randomUUID();
   const startedAt = new Date();
-  // Persist a job for ledger FK and permission ownership; never send need/client notes to AI.
+  
   await db.searchRun.create({ data: { id: jobId, userId: actor.userId, city: input.currentFilters.city, filters: jsonValue(input.currentFilters), status: "running", startedAt } });
   try {
     const result = await ai.parseSearchQuery(aiContext(actor, jobId), { query: input.text, currentFilters: input.currentFilters });

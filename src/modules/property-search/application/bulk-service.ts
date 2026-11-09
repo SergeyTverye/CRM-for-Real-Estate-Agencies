@@ -14,7 +14,7 @@ export async function addListingToCollection(actor: Actor, collectionId: string,
   return addItems(actor, collectionId, [{ externalListingId: listingId }]);
 }
 const bulkInput = z.object({ ids: z.array(zUuid).min(1).max(100).refine(ids => ids.length === new Set(ids).size), action: z.enum(["bookmark", "collection", "clarify", "catalog", "propose", "offer"]), data: z.record(z.string(), z.unknown()).default({}) }).strict();
-/** Individual outcomes are explicit; a failed item never hides successful writes. */
+
 export async function bulkSearchAction(actor: Actor, runId: string, raw: unknown) {
   const input = parseInput(bulkInput, raw);
   await accessibleRun(actor, runId);

@@ -30,7 +30,7 @@ try {
   const args = process.argv.slice(2);
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--root' && args[i + 1]) root = path.resolve(args[++i]);
-    else if (args[i] === '--staged') { /* Default mode; explicit flag supported by hooks. */ }
+    else if (args[i] === '--staged') {  }
     else if (args[i] === '--artifacts') artifacts = true;
     else if (args[i] === '--artifact' && args[i + 1]) targets.push(args[++i]);
     else { fail('CG_ARGS', 'scripts/security/confidential-guard.mjs'); process.exitCode = 1; throw new Error('ARGS'); }

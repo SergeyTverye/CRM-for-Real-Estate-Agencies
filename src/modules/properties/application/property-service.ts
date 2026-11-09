@@ -15,11 +15,7 @@ import {
   normalizeContacts,
 } from "@/modules/clients/application/client-service";
 
-/**
- * Объекты недвижимости (FR-05, FR-27, FR-30, ТЗ 17.2, 40.3).
- * Каталог доступен всем для чтения. изменять может руководитель или ответственный риелтор.
- * Контакты собственника выдаются отдельно от карточки объекта (ownerContactsScope).
- */
+
 
 const URL_RE = /^https?:\/\/[^\s]+$/i;
 
@@ -60,7 +56,7 @@ async function validatePropertyDictionaries(p: Partial<PropertyFields>, prev?: P
 }
 
 function assertNoPhoneInDescription(description: string | null | undefined) {
-  // ТЗ 37.7: общие поля объекта не должны случайно содержать телефон собственника.
+  
   if (description && PHONE_IN_TEXT_RE.test(description))
     throw new ValidationError(undefined, { description: ["Описание не должно содержать телефон — контакты собственника ведутся в блоке «Собственники»"] });
 }
@@ -87,7 +83,7 @@ export async function loadEditableProperty(tx: DbOrTx, actor: Actor, propertyId:
   return p;
 }
 
-// status объявлен явно: default из схемы создания не должен срабатывать при частичном обновлении.
+
 const updateSchema = propertyFieldsSchema
   .omit({ status: true })
   .partial()
@@ -101,7 +97,7 @@ export async function updateProperty(actor: Actor, propertyId: string, input: un
     if (data.description !== undefined) assertNoPhoneInDescription(data.description);
     const { expectedUpdatedAt, ...fields } = data;
     const clean: Record<string, unknown> = Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== undefined));
-    // Решение об архивировании и восстановлении принимает руководитель (ТЗ 3.1, 27.1).
+    
     if (clean.status && clean.status !== before.status && (clean.status === "archived" || before.status === "archived") && !isManager(actor))
       throw new ForbiddenError("Архивировать и восстанавливать объект может только руководитель");
     if (clean.status === "archived") clean.archivedAt = new Date();
@@ -145,7 +141,7 @@ const ownerSchema = z.object({
   comment: zOptText(1000),
 });
 
-/** Привязка собственника (существующий доступный Client или новый с проверкой дублей). */
+
 export async function addPropertyOwner(actor: Actor, propertyId: string, input: unknown): Promise<{ id: string }> {
   const data = parseInput(ownerSchema, input);
   if (!data.clientId && !data.newClient) throw new ValidationError("Выберите клиента или создайте нового собственника");
@@ -214,14 +210,14 @@ export async function revokeOwnerContactAccess(actor: Actor, propertyId: string,
   });
 }
 
-/** Риелтор просит доступ: задача руководителю (само разрешение выдаёт руководитель). */
+
 export async function requestOwnerContactAccess(actor: Actor, propertyId: string): Promise<{ taskId: string }> {
   return transaction(async (tx) => {
     const p = await tx.property.findUnique({ where: { id: propertyId }, select: { id: true, addressText: true } });
     if (!p) throw new NotFoundError();
     const allowed = await tx.property.count({ where: { id: propertyId, ...ownerContactsScope(actor) } });
     if (allowed) throw new ConflictError("ALREADY_GRANTED", "Доступ к контактам собственника уже есть");
-    // Повторный запрос не плодит задачи: открытый запрос этого риелтора по объекту переиспользуется.
+    
     const existing = await tx.task.findFirst({
       where: { createdBy: actor.userId, status: { in: ["planned", "in_progress"] }, title: { startsWith: "Запрос доступа к контактам собственника" }, propertyLinks: { some: { propertyId } } },
       select: { id: true },

@@ -7,12 +7,7 @@ import { ForbiddenError } from "@/shared/errors";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { writeAudit } from "@/modules/audit/application/audit";
 
-/**
- * UC-14 ExportData (FR-21, ТЗ 17.6): ZIP с CSV UTF-8 по согласованным сущностям + manifest.json.
- * UUID сохраняются. Доступно руководителю. Не включаются: хэши паролей, токены, storage key,
- * исторический архив (отдельный ограниченный контур) и содержимое файлов.
- * Экспорт не заменяет технический backup PostgreSQL и файлов.
- */
+
 
 type Row = Record<string, unknown>;
 
@@ -24,7 +19,7 @@ function csvValue(v: unknown): string {
   else if (Array.isArray(v)) s = v.join("|");
   else if (typeof v === "object") s = JSON.stringify(v);
   else s = String(v);
-  // Защита от CSV-инъекций в табличных редакторах.
+  
   if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return /[",\n\r;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }

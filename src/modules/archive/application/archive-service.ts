@@ -5,10 +5,7 @@ import { ForbiddenError, NotFoundError } from "@/shared/errors";
 import { assertRecordId, parseInput, skipTake, zDateOnly, zPagination } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 
-/**
- * HistoricalDealArchive (FR-18, ТЗ 19.5, 29.10): изолированный read-only архив прошлых сделок.
- * Доступ — только руководителю. паспортных и регистрационных полей в модели нет.
- */
+
 function requireManager(actor: Actor) {
   if (!isManager(actor)) throw new ForbiddenError("Исторический архив доступен только руководителю");
 }

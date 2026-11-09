@@ -1,8 +1,4 @@
-/**
- * Нормализация контактов для поиска вероятных дублей (ТЗ 19.2, 38.8, 40.2).
- * Телефон → E.164-подобная строка (+7XXXXXXXXXX для российских номеров), e-mail → lowercase.
- * Совпадение нормализованного значения — сильный признак дубля, но не основание для auto-merge.
- */
+
 
 export type ContactType = "phone" | "email" | "other";
 
@@ -28,14 +24,14 @@ export function normalizeContact(type: ContactType, raw: string): string | null 
   return null;
 }
 
-/** Определение типа по введённому значению (быстрая форма обращения). */
+
 export function guessContactType(raw: string): ContactType {
   if (normalizeEmail(raw)) return "email";
   if (normalizePhone(raw)) return "phone";
   return "other";
 }
 
-/** Маска телефона для отображения без полного раскрытия (журналы, нейтральные сообщения). */
+
 export function maskPhone(normalized: string): string {
   return normalized.length > 6 ? `${normalized.slice(0, 4)}***${normalized.slice(-2)}` : "***";
 }

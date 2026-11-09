@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { apiCall } from "@/ui/api-client";
 
-// Media metadata and thumbnails use the same server authorization as the catalog.
+
 export function CatalogPhoto({ propertyId, address }: { propertyId: string; address: string | null }) {
   const [photo, setPhoto] = useState<{ thumbnailUrl: string } | null>(null);
   useEffect(() => {

@@ -2,7 +2,7 @@ import { load } from "cheerio";
 import type RealEstateScraper from "real-estate-scrapper";
 import { resolveDistrict } from "../domain/geography";
 
-/** Read locality evidence from the card, never from the requested search scope. */
+
 export function attachGeographyParsers(client: RealEstateScraper): void {
   const parser = client.parsers.onrealt, parse = parser.parsePage.bind(parser);
   parser.parsePage = (payload, url, query) => {

@@ -23,11 +23,7 @@ import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { loadAccessibleClient, reactivateClientIfInactive } from "@/modules/clients/application/client-service";
 import { assertNeedInvariants } from "../domain/need-invariant";
 
-/**
- * UC-03 OpenOrUpdateNeed (FR-04, FR-23, FR-24, ТЗ 40.2.1).
- * ClientNeed — самостоятельная потребность с жизненным циклом active/paused/success/closed.
- * Каждая команда завершается проверкой инвариантов в той же транзакции.
- */
+
 
 export const needParamsSchema = z
   .object({
@@ -83,7 +79,7 @@ export const createNeedSchema = needParamsSchema.and(
   }),
 );
 
-/** Вставка потребности + StageHistory + следующее действие (внутри транзакции вызывающей команды). */
+
 export async function insertNeed(
   tx: Tx,
   actor: Actor,
@@ -102,10 +98,7 @@ export async function insertNeed(
   return { id: need.id, taskId: task.id };
 }
 
-/**
- * Ответственный за новую потребность: для существующего клиента — его текущий ответственный
- * (до явной передачи руководителем, ТЗ 40.1). руководитель может указать другого.
- */
+
 async function resolveNeedResponsible(tx: Tx, actor: Actor, clientResponsibleId: string, requested?: string): Promise<string> {
   if (!requested || requested === clientResponsibleId) return clientResponsibleId;
   if (!isManager(actor)) throw new ForbiddenError("Ответственным за потребность становится ответственный за клиента; изменить его может руководитель");
@@ -139,7 +132,7 @@ export async function loadAccessibleNeed(tx: Tx | typeof db, actor: Actor, needI
 
 const updateParamsSchema = needParamsSchema.and(z.object({ expectedUpdatedAt: zExpectedUpdatedAt, nextAction: nextActionSchema.optional() }));
 
-/** Изменение параметров потребности (без смены статуса/этапа), с optimistic concurrency. */
+
 export async function updateNeedParams(actor: Actor, needId: string, input: unknown): Promise<{ id: string }> {
   const data = parseInput(updateParamsSchema, input);
   return transaction(async (tx) => {
@@ -183,14 +176,10 @@ export const changeStateSchema = changeStateBase.superRefine(stateRules);
 
 export type ChangeNeedStateInput = z.input<typeof changeStateSchema>;
 
-/** Переход потребности внутри другой бизнес-команды (без собственной версии формы). */
+
 export const embeddedNeedChangeSchema = changeStateBase.omit({ expectedUpdatedAt: true }).superRefine(stateRules);
 
-/**
- * Смена этапа и/или статуса потребности вместе с требуемым продолжением:
- * next action для active, Task возврата для paused, причина для closed, фиксация success.
- * Используется также командой результата показа (UC-05) и быстрыми действиями после коммуникации.
- */
+
 export async function applyNeedStateChange(
   tx: Tx,
   actor: Actor,
@@ -199,8 +188,8 @@ export async function applyNeedStateChange(
   opts: { reasonCode?: string } = {},
 ) {
   const need = await loadAccessibleNeed(tx, actor, needId);
-  // Без expectedUpdatedAt — внутренний вызов из другой команды (например, результат показа),
-  // которая уже заблокировала свою запись. версия потребности проверяется по текущему значению.
+  
+  
   const expected = d.expectedUpdatedAt ?? need.updatedAt;
   const res = await tx.clientNeed.updateMany({ where: { id: needId, updatedAt: expected }, data: { updatedAt: new Date() } });
   if (res.count === 0) throw new StaleUpdateError();
@@ -220,7 +209,7 @@ export async function applyNeedStateChange(
     update.stopComment = null;
     update.closedAt = need.status === "success" && need.closedAt ? need.closedAt : now;
   } else if (need.status === "closed" || need.status === "success") {
-    // Повторное открытие: результат/причина сохраняются в StageHistory.
+    
     update.stopReasonCode = null;
     update.stopComment = null;
     update.closedAt = null;
@@ -242,7 +231,7 @@ export async function applyNeedStateChange(
     });
   }
 
-  // Завершённая работа не оставляет «висящих» задач (по выбору пользователя).
+  
   if ((toStatus === "closed" || toStatus === "success") && d.cancelOpenTasks) {
     const open = await tx.task.findMany({
       where: { status: { in: [...OPEN_TASK_STATUSES] }, needLinks: { some: { clientNeedId: needId } } },
@@ -275,7 +264,7 @@ export async function changeNeedState(actor: Actor, needId: string, input: unkno
   return transaction((tx) => applyNeedStateChange(tx, actor, needId, d));
 }
 
-/** Автоматическое продвижение этапа при подборе/показе (только вперёд по основной цепочке). */
+
 const STAGE_ORDER: Code<"needStage">[] = ["new", "qualification", "selection", "showing", "negotiation", "preliminary_agreement", "documents", "deal", "postdeal"];
 
 export async function advanceNeedStage(tx: Tx, actor: Actor, needId: string, target: Code<"needStage">, reasonCode: string): Promise<void> {

@@ -11,7 +11,7 @@ const listing = (input: Partial<NormalizedListing> = {}): NormalizedListing => (
 });
 
 describe("non-residential purpose requirement", () => {
-  // Public wording from saved LIVE Yandex results; no contacts or personal data.
+  
   it.each([
     "Квартира в квартале бизнес-класса…",
     "ЖК … жилой комплекс комфорт-класса…",

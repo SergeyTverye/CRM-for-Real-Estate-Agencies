@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# T08: фактическое восстановление backup в ОТДЕЛЬНЫЙ тестовый контур (non-interactive).
-# Поднимает compose project "<project>-restoretest" с собственными томом БД и каталогами
-# restore-test/, восстанавливает БД и файлы, запускает приложение в роли standby и проверяет:
-#   1) readiness /api/health. 2) вход пользователя. 3) контрольные счётчики записей (manifest).
-#   4) контрольный файл: SHA-256 восстановленного документа совпадает с documents.checksum
-#      (и при возможности — выдача через API с проверкой прав).
-# Учётные данные для проверки входа: RESTORE_TEST_LOGIN/RESTORE_TEST_PASSWORD
-# (по умолчанию SEED_MANAGER_LOGIN/SEED_MANAGER_PASSWORD из .env).
+
+
+
+
+
+
+
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env
@@ -75,10 +75,10 @@ MUST_CHANGE="$(rt exec -T app node -e 'let s="";process.stdin.on("data",x=>s+=x)
 rm -f "$LOGIN_RESPONSE"
 if [ "$HTTP" = 200 ]; then check "login" "PASS ($LOGIN)"; else check "login" "FAIL (HTTP $HTTP; задайте RESTORE_TEST_LOGIN/RESTORE_TEST_PASSWORD)"; fi
 
-# Контрольный файл: первый неархивный документ с checksum.
+
 DOC_LINE="$(rt --profile ops run --rm -T backup sh -c "psql -X -qtA -F '|' -c \"SELECT id, storage_key, checksum FROM documents WHERE checksum IS NOT NULL ORDER BY created_at LIMIT 1\"" 2>/dev/null | tail -1 || true)"
 if [ -n "$DOC_LINE" ]; then
-  DOC_ID="${DOC_LINE%%|*}"; REST="${DOC_LINE#*|}"; KEY="${REST%%|*}"; SUM="${REST#*|}"
+  DOC_ID="${DOC_LINE%%|*}"; REST="${DOC_LINE
   FILE_SUM="$(sha256sum "restore-test/data/files/$KEY" 2>/dev/null | cut -d' ' -f1 || true)"
   [ "$FILE_SUM" = "$SUM" ] && check "control_file_storage" "PASS" || check "control_file_storage" "FAIL"
   if [ "$HTTP" = 200 ] && [ "$MUST_CHANGE" != "true" ]; then

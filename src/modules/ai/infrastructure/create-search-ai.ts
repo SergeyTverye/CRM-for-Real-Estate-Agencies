@@ -7,7 +7,7 @@ import { SearchAi } from "./search-ai";
 import { YandexResponsesClient } from "./yandex-responses-client";
 import { verifyListingPage } from "./verify-listing-page";
 
-/** Only invoke from server application composition. Persistence adapters are mandatory. */
+
 export function createSearchAi(config: AppConfig, repositories: {
   ledger: AiLedgerRepository; settings: AiSettingsRepository; tariffs: TariffRepository;
 }, provider?: ResponsesProvider): SearchAi {

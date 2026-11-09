@@ -55,7 +55,7 @@ export class YandexS3 implements BackupDestination {
           await this.client.send(new CompleteMultipartUploadCommand({ Bucket, Key, UploadId, MultipartUpload: { Parts: parts }, IfNoneMatch: "*" }), { abortSignal: signal });
           await rm(journal, { force: true });
         } catch (e) {
-          try { await this.client.send(new AbortMultipartUploadCommand({ Bucket, Key, UploadId })); await rm(journal, { force: true }); } catch { /* Persist UploadId for next retry. */ }
+          try { await this.client.send(new AbortMultipartUploadCommand({ Bucket, Key, UploadId })); await rm(journal, { force: true }); } catch {  }
           throw e;
         }
       }

@@ -5,7 +5,7 @@ import { decodeParseResult, providerParseSchema, providerParseInstructions } fro
 
 const commonNames = "иван петр пётр александр алексей андрей антон артем артём борис вадим валентин василий виктор виталий владимир владислав вячеслав геннадий георгий григорий даниил денис дмитрий евгений егор игорь илья кирилл константин леонид максим михаил никита николай олег павел роман сергей станислав степан тимофей федор фёдор юрий ярослав алла александра алина анастасия анна валентина валерия вера виктория галина дарья екатерина елена елизавета жанна зинаида инна ирина ксения лариса лидия любовь людмила маргарита марина мария надежда наталья нина оксана ольга полина светлана софия татьяна юлия яна".split(" ");
 const escapeRe = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-/** A bounded stem handles Russian case endings without matching inside other words. */
+
 function namePattern(name: string): string {
   const normalized = name.normalize("NFKC").toLocaleLowerCase("ru").replace(/ё/g, "е");
   const irregular: Record<string, string> = { павел: "пав(?:ел|л)", лев: "л(?:ев|ьв)", петр: "п[её]тр", любовь: "люб(?:овь|ов|в)", илья: "иль", яна: "ян", юрий: "юри" };
@@ -13,7 +13,7 @@ function namePattern(name: string): string {
   const stem = normalized.replace(/(?:ский|ская|цкий|цкая|ова|ева|ина|ая|ий|ый|ой|ей|ья|ия|а|я|ь|й)$/u, "");
   return escapeRe(stem.length >= 3 ? stem : normalized).replace(/е/g, "[её]") + "[а-яё]{0,5}";
 }
-/** Public snapshot facts retain names/addresses; only contact details are removed. */
+
 export function sanitizeFactContacts(text: string): string {
   return text.replace(/[\p{L}\d._%+\-]+@[\p{L}\d.-]+\.[\p{L}]{2,}/giu, "[EMAIL]")
     .replace(/(?<![\p{L}\d])(?:\+(?:\d[\s().-]*){7,14}\d|(?:[78][\s().-]*)?(?:\d[\s().-]*){6,9}\d)(?:\s*(?:доб(?:авочный)?\.?|ext\.?|#)\s*:?\s*\d{1,6})?(?!\d)/giu, (value, offset: number, full: string) => {
@@ -21,11 +21,11 @@ export function sanitizeFactContacts(text: string): string {
       return "[PHONE]";
     });
 }
-/** Known identities remain server-side and are used only for redaction. */
+
 export function sanitizeCallNote(text: string, names: string[] = []): string {
-  // Redact contacts first: a name/initial inside an email must not split the address.
+  
   let safe = sanitizeFactContacts(text.normalize("NFC"));
-  // Introductions run first so an unknown surname beside a known first name is removed too.
+  
   safe = safe.replace(/(?<!\p{L})(?:ФИО|имя|зовут|клиент|контакт|собеседник|ЛПР|звонил[аи]?|позвонил[аи]?|говорил[аи]?\s+с)\s*[:—-]?\s*[а-яёa-z]+(?:\s+[а-яёa-z]+){0,1}/giu, "[PERSON]")
     .replace(/(?<!\p{L})[а-яёa-z]\.\s*(?:[а-яёa-z]\.\s*)?[а-яёa-z]+(?!\p{L})/giu, "[PERSON]")
     .replace(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2}\b/g, "[PERSON]")
@@ -37,14 +37,14 @@ export function sanitizeCallNote(text: string, names: string[] = []): string {
     .replace(/(?:телефон|тел\.?|мобильный)\s*[:—-]?\s*\+?(?:\d[\s().-]*){6,15}/giu, "[PHONE]")
     .replace(/(?:паспорт|регистраци[яи]|кем выдан|дата рождения)[^\n;]*/giu, "[REDACTED]");
 }
-/** Only bounded address constructions are exempt from personal-name redaction. */
+
 export function sanitizeFreeNote(text: string, names: string[] = []): string {
   const addresses: string[] = [];
   const marker = "(?:ул\\.?|улица|пр\\.?|пр-т|проспект|пер\\.?|переулок|ш\\.?|шоссе|пл\\.?|площадь|б-р|бульвар|наб\\.?|набережная|мкр\\.?|район|р-н)";
   const word = "(?:[А-ЯЁ][а-яё]+(?:-[А-ЯЁа-яё]+)*|[0-9]+-[а-яё]+)";
   const house = "(?:\\s*,?\\s+(?:д\\.?\\s*)?\\d{1,5}(?:[а-яё]|/\\d{1,4})?(?![\\p{L}\\d]))?";
-  // Prefix names require a street marker (Красный Проспект, 25). A personal
-  // name followed by a number alone is not sufficient evidence of an address.
+  
+  
   const addressPattern = new RegExp(`(?<![\\p{L}\\d])(?:${word}(?:\\s+${word}){0,2}\\s+(?:Проспект|Бульвар|Шоссе|Набережная|Площадь|проспект|бульвар|шоссе|набережная|площадь)|${marker}\\s+(?:${word}(?:\\s+(?:имени\\s+)?${word}){0,3}|[а-яё]+(?:-[а-яё]+)*))${house}`, "gu");
   const protectedText = text.normalize("NFC").replace(addressPattern, address => {
     const token = `\uE000${String.fromCodePoint(0xE100 + addresses.length)}\uE001`;
@@ -89,7 +89,7 @@ export function numericTokens(text: string): string[] {
 export function checkOfferNumbers(text: string, facts: unknown): void {
   const allowed = new Set(numericTokens(JSON.stringify(facts)));
   if (numericTokens(text).some(n => !allowed.has(n)) || /\d\s*(?:млн|тыс|миллион|тысяч)/iu.test(text)) throw new AiError("AI_UNSUPPORTED_NUMBERS");
-  // Source numbers alone do not prove an aggregate (e.g. a false area range).
-  // P2 deliberately forbids synthesized ranges; the employee can describe each item.
+  
+  
   if (/\d[\d\s.,]*(?:\s*(?:м²|м2|кв\.?\s*м|₽|руб\.?))?\s*[-–—]\s*\d|от\s+\d[\d\s.,]*(?:\s*(?:м²|м2|кв\.?\s*м|₽|руб\.?))?\s+до\s+\d/iu.test(text)) throw new AiError("AI_UNSUPPORTED_NUMBERS");
 }

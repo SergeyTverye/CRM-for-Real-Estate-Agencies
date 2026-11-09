@@ -18,7 +18,7 @@ const responseSchema = z.object({
 });
 export interface YandexClientConfig { apiKey: string; folder: string; baseUrl: string; timeoutMs: number }
 
-/** Server-side only. No SDK, retries, body logging, raw provider errors or response persistence. */
+
 export class YandexResponsesClient implements ResponsesProvider {
   readonly mode = "live" as const;
   constructor(private readonly config: YandexClientConfig, private readonly fetcher: typeof fetch = fetch) {
@@ -42,7 +42,7 @@ export class YandexResponsesClient implements ResponsesProvider {
         }),
       });
       if (!response.ok) throw new AiError(response.status === 429 ? "AI_PROVIDER_RATE_LIMIT" : "AI_PROVIDER_ERROR");
-      // Avoid unbounded error/output bodies. The timer covers body consumption too.
+      
       const reader = response.body?.getReader();
       if (!reader) throw new AiError("AI_INVALID_RESPONSE");
       const chunks: Uint8Array[] = [];
@@ -62,7 +62,7 @@ export class YandexResponsesClient implements ResponsesProvider {
       const data = parsed.data;
       const providerError = data.error as { code?: unknown; message?: unknown } | null | undefined;
       if (providerError?.code || providerError?.message || (data.status && data.status !== "completed")) {
-        // Never log error.message or arbitrary provider strings: they can echo input/credentials.
+        
         const codes = ["invalid_request_error", "invalid_json_schema", "invalid_schema", "unsupported_parameter", "unsupported_value", "model_not_found", "server_error", "rate_limit_exceeded", "content_filter", "invalid_prompt", "invalid_request", "internal_error"];
         const reasons = ["max_output_tokens", "content_filter", "max_tool_calls"];
         const details = data.incomplete_details as { reason?: unknown } | null | undefined;

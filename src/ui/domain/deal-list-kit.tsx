@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-/** Серверные элементы списков разделов «Показы», «Договоры», «Реклама», «Предложения», «Сделки». */
 
-/** URL списка с сохранением текущих фильтров и заменой/удалением отдельных параметров (страница сбрасывается). */
+
+
 export function listHref(basePath: string, params: Record<string, string>, overrides: Record<string, string | null>): string {
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) if (k !== "page" && v) sp.set(k, v);
@@ -14,7 +14,7 @@ export function listHref(basePath: string, params: Record<string, string>, overr
   return qs ? `${basePath}?${qs}` : basePath;
 }
 
-/** Вкладки-представления списка (?view=…) с сохранением остальных фильтров. */
+
 export function ViewTabs({
   basePath,
   params,
@@ -28,7 +28,7 @@ export function ViewTabs({
   current: string;
   views: { key: string; label: string; hint?: string }[];
   param?: string;
-  /** Представление по умолчанию — ему соответствует отсутствие параметра в URL. */
+  
   defaultKey?: string;
 }) {
   return (
@@ -51,7 +51,7 @@ export function ViewTabs({
   );
 }
 
-/** Активный «контекстный» фильтр (например, по потребности из карточки) с кнопкой снятия. */
+
 export function FilterChip({ label, removeHref }: { label: React.ReactNode; removeHref: string }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border border-brand-100 bg-brand-50 px-2.5 py-0.5 text-xs text-brand-700">
@@ -63,7 +63,7 @@ export function FilterChip({ label, removeHref }: { label: React.ReactNode; remo
   );
 }
 
-/** Сумма денежных строк numeric без float (копейки в BigInt). */
+
 export function sumMoney(values: ({ toString(): string } | null | undefined)[]): string {
   let cents = BigInt(0);
   for (const v of values) {

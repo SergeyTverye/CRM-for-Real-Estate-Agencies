@@ -20,7 +20,7 @@ export default async function EditAgreementPage({ params }: { params: Promise<{ 
   });
   const canEdit = actor.role === "manager" || a.responsibleUserId === actor.userId;
   const [dicts, legalEntities] = await Promise.all([loadDictionaries(), legalEntityOptions()]);
-  // Неактивное юрлицо, уже указанное в договоре, остаётся в списке.
+  
   if (a.legalEntity && !legalEntities.some((o) => o.value === a.legalEntity!.id)) legalEntities.push({ value: a.legalEntity.id, label: `${a.legalEntity.displayName} (неактивно)` });
   const initial: AgreementFormValue = {
     agreementType: a.agreementType,

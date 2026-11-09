@@ -51,10 +51,10 @@ describe("T03 / UC-03: жизненный цикл ClientNeed", () => {
     const closed = await db.clientNeed.findUniqueOrThrow({ where: { id } });
     expect(closed.stopReasonCode).toBe("budget");
     expect(closed.closedAt).not.toBeNull();
-    // Открытые задачи закрытой потребности отменены, факт сохранён.
+    
     expect(await db.task.count({ where: { needLinks: { some: { clientNeedId: id } }, status: "planned" } })).toBe(0);
 
-    // Повторное открытие требует следующего действия.
+    
     await expect(changeNeedState(u.realtor1, id, { expectedUpdatedAt: await needVersion(id), status: "active" })).rejects.toBeInstanceOf(DomainError);
     await changeNeedState(u.realtor1, id, { expectedUpdatedAt: await needVersion(id), status: "active", nextAction: nextAction() });
     await changeNeedState(u.realtor1, id, { expectedUpdatedAt: await needVersion(id), status: "success", stage: "deal" });
@@ -80,7 +80,7 @@ describe("T03 / UC-03: жизненный цикл ClientNeed", () => {
     const err = await completeTask(u.realtor1, taskId, { expectedUpdatedAt: t.updatedAt.toISOString(), resultComment: "Позвонил" }).catch((e) => e);
     expect(err).toBeInstanceOf(DomainError);
     expect(err.code).toBe("NEXT_ACTION_REQUIRED");
-    expect((await db.task.findUniqueOrThrow({ where: { id: taskId } })).status).toBe("planned"); // транзакция откатилась
+    expect((await db.task.findUniqueOrThrow({ where: { id: taskId } })).status).toBe("planned"); 
     const res = await completeTask(u.realtor1, taskId, {
       expectedUpdatedAt: t.updatedAt.toISOString(),
       resultComment: "Позвонил, договорились о показе",
@@ -89,7 +89,7 @@ describe("T03 / UC-03: жизненный цикл ClientNeed", () => {
     expect(res.nextTaskId).not.toBeNull();
     const links = await db.taskNeed.findMany({ where: { clientNeedId: needId }, include: { task: true } });
     expect(links.filter((l) => l.task.status === "planned")).toHaveLength(1);
-    // отмена последнего действия также требует продолжения
+    
     const next = await db.task.findUniqueOrThrow({ where: { id: res.nextTaskId! } });
     await expect(cancelTask(u.realtor1, next.id, { expectedUpdatedAt: next.updatedAt.toISOString() })).rejects.toBeInstanceOf(DomainError);
   });

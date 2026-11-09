@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import type { Cell } from "../domain/normalize";
 import type { SheetData } from "../domain/workbook-parser";
 
-/** Чтение XLSX в простые массивы значений (формулы → вычисленный результат, rich text → текст). */
+
 export async function readWorkbook(data: Buffer): Promise<SheetData[]> {
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(data as unknown as ArrayBuffer);

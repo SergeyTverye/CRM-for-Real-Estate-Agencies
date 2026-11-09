@@ -197,13 +197,7 @@ function writeOwnedFile(dir, fileName, buffer) {
   return fullPath;
 }
 
-/**
- * - Includes an intentionally unmapped column (`Внутренний шифр QA`) on sheet 1 so the UI
- * - Includes a supported numeric formula (`B2*1000`) on sheet 1 (`Цена, руб/мес`) and valid
- *   HTTPS hyperlinks on sheet 1 (`Описание`) and sheet 2 (`Ссылка на рекламу`) so receipt-tied
- * - Includes forbidden PII columns (`Паспорт`, `Кем выдан`, `Регистрация`, `Дата рождения`)
- * - Includes a `Черновик не для CRM` sheet that is mapped to `ignore` in the v2 profile and
- */
+
 export async function buildSyntheticEnterpriseWorkbook(runMarker) {
   if (typeof runMarker !== 'string' || !UUID_RE.test(runMarker)) {
     failWithCode('invalid_run_marker');
@@ -377,11 +371,7 @@ export function resolveProfileV2Draft(profileDraft) {
   return { profile: next, resolvedColumns, ignoredSections };
 }
 
-/**
- * - Expected synthetic sheets exist (`База объектов`, `Контроль договоров`, `Обращения и потребности`, `Черновик не для CRM`).
- * - The ignored sheet (`Черновик не для CRM`) has all cell values cleared on export while preserving worksheet geometry.
- * - Forbidden PII sentinel values (`0000 000000`, `9999 999999`, `ТЕСТОВЫЙ ОТДЕЛ QA`)
- */
+
 export async function inspectExportedWorkbook(buffer, runMarker) {
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(buffer);
@@ -710,7 +700,7 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     currentStep = 'wizard_locate';
     await wizardSection.waitFor({ state: 'visible', timeout: 15000 });
 
-    // selected option. getByLabel('Профиль') resolves to zero nodes.
+    
     const profileSelect = wizardSection.getByRole('combobox');
     if ((await profileSelect.count()) !== 1) {
       failWithCode('profile_select_not_unique');
@@ -853,7 +843,7 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.zeroDomainWritesBeforeCommit = true;
 
-    // 7. Check human confirmation checkboxes and click "Загрузить в CRM"
+    
     currentStep = 'commit';
     const commitButton = wizardSection.getByRole('button', { name: 'Загрузить в CRM' });
     if (await commitButton.isEnabled()) {
@@ -931,7 +921,7 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.domainRecordsCreatedAfterCommit = true;
 
-    // 9. Click "Отчёт совместимости" button and verify receipt-tied compatibility header & UI output
+    
     currentStep = 'export';
     const compatResponsePromise = page.waitForResponse(
       (res) =>
@@ -965,7 +955,7 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.compatibilityReportVerified = true;
 
-    // 10. Download receipt-tied XLSX export via UI link (`В формат рабочего Excel`)
+    
     const exportLink = wizardSection.getByRole('link', { name: 'В формат рабочего Excel' });
     await exportLink.waitFor({ state: 'visible', timeout: 10000 });
     const exportHref = await exportLink.getAttribute('href');

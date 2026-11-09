@@ -30,7 +30,7 @@ describe("local backend composition", () => {
   it("does not fail scraper composition or reserve/spend when optional credentials are missing", async () => {
     const ai = await getSearchAi(); expect(ai).not.toBeNull();
     expect(ai?.configured).toBe(false);
-    // Actual missing-provider methods fail with fixed metadata, not adapter errors.
+    
     await expect(ai!.assertConfigured!())
       .rejects.toMatchObject({ code: "AI_CREDENTIALS_MISSING", message: "Требуется подключение Яндекс AI", details: { settingsUrl: "/settings/ai" } });
     await expect(ai!.checkWebSearchAvailability({ user: { userId: "synthetic", active: true }, jobId: "synthetic", ownerUserId: "synthetic", requestId: "synthetic" }, {}))

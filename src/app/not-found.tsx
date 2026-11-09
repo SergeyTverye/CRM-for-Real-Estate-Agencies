@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export const metadata = { title: "Не найдено" };
 
-/** Запись не найдена или недоступна — формулировка не раскрывает существование чужих записей. */
+
 export default function NotFound() {
   return (
     <main className="mx-auto mt-24 max-w-md text-center">

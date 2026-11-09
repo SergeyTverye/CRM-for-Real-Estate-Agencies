@@ -9,12 +9,7 @@ import { assertDictionaryCode } from "@/modules/dictionaries/application/diction
 import { advanceNeedStage, loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { NEED_TO_PROPERTY_OPERATION, scoreMatch, type NeedCriteria, type PropertyFacts } from "../domain/match-score";
 
-/**
- * UC-04 ProposeProperty и рабочее место подбора (ТЗ 37.19).
- * Сначала детерминированные фильтры по структурированным параметрам. результат объясним.
- * История предложений сохраняется: повторное предложение создаёт новую запись NeedPropertyMatch.
- * Контакты собственника в выдачу подбора не попадают.
- */
+
 
 const num = (v: { toString(): string } | null | undefined): number | null => (v === null || v === undefined ? null : Number(v.toString()));
 

@@ -37,20 +37,20 @@ export function unicodeLike(pattern: string, value: string, escape = "\\"): numb
   return previous[text.length]!;
 }
 export const DESKTOP_SQLITE_PRAGMAS = [
-  // Порядок важен: сначала режим журнала, затем остальные.
+  
   "foreign_keys = ON",
   "busy_timeout = 10000",
   "journal_mode = WAL",
-  // Безопасно в WAL и совместимо с Online Backup API (бекап читает страницы
-  // через sqlite3_backup, отдельные соединения эти настройки не затрагивают).
-  // synchronous=NORMAL в WAL теряет не более последней транзакции только при
-  // сбое ОС/питания. локальный диск уже обязателен (sqlite-location).
+  
+  
+  
+  
   "synchronous = NORMAL",
-  // 64 МБ page cache: горячие страницы Сегодня/Задач/Календаря остаются в памяти.
+  
   "cache_size = -64000",
-  // Мелкие temp-B-tree сортировок (ORDER BY на страницах списков) — в память.
+  
   "temp_store = MEMORY",
-  // До 256 МБ read-only mmap для файла БД. записи идут обычным путём.
+  
   "mmap_size = 268435456",
 ] as const;
 

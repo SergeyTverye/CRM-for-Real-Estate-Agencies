@@ -11,7 +11,7 @@ export async function bootstrapAiTariffs(database: ReturnType<typeof getDb> = db
 
 export const missingTariffMessage = "Для выбранной модели ИИ нет действующего полного тарифа. Руководителю: добавьте тариф или выберите модель с действующим тарифом в настройках ИИ. Ручной поиск доступен.";
 
-/** Same repository/clock policy as paid calls; never reserves money or probes a provider. */
+
 export async function searchTariffsReady(model: string, webModel: string, at = new Date()) {
   const tariffs = new PrismaAiTariffs();
   for (const code of new Set([model, webModel || model])) {

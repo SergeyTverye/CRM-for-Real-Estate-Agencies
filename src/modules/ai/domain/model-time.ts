@@ -2,7 +2,7 @@ import { formatDate, formatDateTime } from "@/shared/time";
 
 export const modelTimeInstructions = "Все даты и время контекста уже представлены в часовом поясе приложения. В ответе используй только эти значения и переданное now (сейчас), не переводи их в UTC или иной пояс. Календарные даты не сдвигай. Для аргументов API dueAt преобразуй согласованный срок в ISO с явным смещением.";
 
-/** Only structured temporal values are converted; prose, IDs and URLs stay intact. */
+
 export function modelTimeData(value: unknown, timeZone = "Asia/Novosibirsk"): unknown {
   if (value instanceof Date) return `${formatDateTime(value, timeZone)} (${timeZone})`;
   if (typeof value === "string") {

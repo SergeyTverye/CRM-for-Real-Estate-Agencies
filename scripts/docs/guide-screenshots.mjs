@@ -162,7 +162,7 @@ try {
     }
     await step(`search-filters-${role.toLowerCase()}`, async () => {
       await go(page,'/property-search');
-      if (role === 'MANAGER') return; // realtor filter screens avoid duplicate filenames
+      if (role === 'MANAGER') return; 
       await capture(page,'search-expanded',[['collapse',page.getByRole('button',{name:'Свернуть фильтры',exact:true})]]);
       await clickVisible(page,'button','Расширенные фильтры');
       await capture(page,'search-advanced',[['advanced',page.getByRole('button',{name:'Скрыть расширенные фильтры',exact:true})]]);
@@ -188,7 +188,7 @@ try {
         }
       };
       for(const file of ['docs/vkr/live-search-v322-ai.json','docs/screenshots/vkr/v322-ux/after/manifest.json']) {
-        try { collectIds(JSON.parse(await readFile(resolve(file),'utf8'))); } catch { /* Optional evidence registry. */ }
+        try { collectIds(JSON.parse(await readFile(resolve(file),'utf8'))); } catch {  }
       }
       recorded.push(...moreRecorded);
       const candidates = [...new Set([explicitRun, ...saved.map(s=>s.lastSuccessfulRunId), ...recorded].filter(id=>id && uuid.test(id)))];

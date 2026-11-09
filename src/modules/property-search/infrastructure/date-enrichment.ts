@@ -4,7 +4,7 @@ import { detectAccessChallenge } from "./source-response";
 
 export interface DateDetailProgress { requested: number; cacheHits: number; enriched: number; failed: number; limit: number; }
 export interface DateDetailOptions { maxCards?: number; deadline?: number; now?: () => number; cache?: Map<string, { expires: number; dates: ListingDates }>; }
-// Only dates, never upstream HTML/contact data. Bounded, process-local TTL cache.
+
 const sharedCache: NonNullable<DateDetailOptions["cache"]> = new Map();
 export class DateEnrichment {
   readonly progress: DateDetailProgress;
@@ -33,7 +33,7 @@ export class DateEnrichment {
     try {
       const payload = await Promise.race([fetch(controller.signal), new Promise<never>((_, reject) => {
         controller.signal.addEventListener("abort", () => reject(Error("DATE_DETAIL_ABORTED")), { once: true });
-        // Optional date lookup must leave time to publish the already parsed SERP.
+        
         timer = setTimeout(abort, Math.max(1, Math.min(3000, this.deadline - this.now() - 1000)));
       })]);
       const response = payload && typeof payload === "object" && "data" in payload ? payload as { data: unknown; status?: number } : { data: payload, status: 200 };

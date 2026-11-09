@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Зашифрованный bootstrap/config bundle (ТЗ 39.9, 41.9): только несекретные параметры установки.
-# Не содержит паролей БД, crypt-паролей, rclone.conf и облачных credentials (NFR-26).
-#   ./scripts/export-config-bundle.sh [файл.enc]   — пароль bundle запрашивается интерактивно (openssl)
+
+
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_env

@@ -8,10 +8,7 @@ export interface HelpTooltipProps {
   defaultOpen?: boolean;
 }
 
-/**
- * Доступная контекстная подсказка (клавиатура focus/Escape, наведение мыши и нажатие на сенсорном экране).
- * Не полагается только на HTML-атрибут title.
- */
+
 export function HelpTooltip({ label, text, defaultOpen = false }: HelpTooltipProps) {
   const id = useId();
   const tooltipId = `help-tooltip-${id}`;

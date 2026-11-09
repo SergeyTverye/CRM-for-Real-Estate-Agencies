@@ -2,11 +2,11 @@ import "server-only";
 import { getConfig } from "@/shared/config/env";
 import { formatDate, formatDateTime } from "@/shared/time";
 
-/** Форматирование для server components в часовом поясе экземпляра (APP_TIMEZONE). */
+
 export const tz = () => getConfig().APP_TIMEZONE;
 export const fmtDateTime = (d: Date | string | null | undefined) => formatDateTime(d, tz());
 export const fmtDate = (d: Date | string | null | undefined) => formatDate(d, tz());
-/** Календарная дата (колонка PostgreSQL date хранится как UTC-полночь). */
+
 export const fmtDateOnly = (d: Date | null | undefined) => (d ? formatDate(d.toISOString().slice(0, 10), tz()) : "—");
 
 export function fmtMoney(v: { toString(): string } | number | string | null | undefined): string {

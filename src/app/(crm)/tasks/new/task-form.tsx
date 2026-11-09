@@ -31,7 +31,7 @@ const LINK_FIELD: Record<LinkKind, string> = {
   offer: "offerIds",
 };
 
-/** Тип задачи по умолчанию по контексту, из которого она создаётся. */
+
 const DEFAULT_TYPE: Partial<Record<LinkKind, string>> = {
   showing: "showing_or_meeting",
   agreement: "contract_check",
@@ -50,7 +50,7 @@ interface Template {
   hint: string;
 }
 
-/** Типовые регулярные контрольные действия (ТЗ 25.4). */
+
 const TEMPLATES: Template[] = [
   { label: "Проверить декларацию", title: "Проверить декларацию", taskType: "postdeal", taskSubtypeCode: "tax_declaration", recurrenceKind: "yearly", hint: "Ежегодный контроль декларации." },
   { label: "Индексация аренды", title: "Индексация аренды", taskType: "postdeal", taskSubtypeCode: "rent_indexation", recurrenceKind: "yearly", hint: "Ежегодная проверка условий аренды." },

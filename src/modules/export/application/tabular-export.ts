@@ -46,7 +46,7 @@ export async function tabularExport(format: "csv" | "xlsx", columns: readonly st
       }
       if ((type === "number" || type === "money") && numericValue(value) !== null) return numericValue(value);
       if (type === "url" && typeof value === "string") {
-        try { const url = new URL(value); if (["http:", "https:"].includes(url.protocol) && !url.username && !url.password) return { text: value, hyperlink: url.href }; } catch { /* Unsafe/non-URL stays literal. */ }
+        try { const url = new URL(value); if (["http:", "https:"].includes(url.protocol) && !url.username && !url.password) return { text: value, hyperlink: url.href }; } catch {  }
       }
       return escapeSpreadsheet(value);
     }));

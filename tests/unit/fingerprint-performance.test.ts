@@ -120,8 +120,8 @@ describe("fingerprint normalization equivalence (synthetic only)", () => {
     let digest = "";
     for (const form of optTextForms(big)) {
       count++;
-      digest = optSha256(form); // force full normalize + hash consume
-      if (hashes.has(digest) && count > 0) break; // early boolean path still consumed prefix
+      digest = optSha256(form); 
+      if (hashes.has(digest) && count > 0) break; 
     }
     let total = 0;
     for (const form of optTextForms(big)) total += form.length;

@@ -93,7 +93,7 @@ async function main() {
   await mkdir(output, { recursive: true });
   if (process.env.VKR_WEB_ONLY === "true") records.push(...JSON.parse(await readFile(`${output}/manifest.json`, "utf8")).filter((record: { file: string }) => record.file !== "07-web-fallback.png"));
   if (process.env.VKR_FROM_OFFER === "true") records.push(...JSON.parse(await readFile(`${output}/manifest.json`, "utf8")).filter((record: { file: string }) => /^(0[1-9])/.test(record.file)));
-  // Для синтетических демонстрационных учётных записей seed-пароль уже является постоянным.
+  
   await db.user.updateMany({ where: { login: { in: [process.env.SEED_MANAGER_LOGIN ?? "manager", process.env.SEED_REALTOR1_LOGIN ?? "realtor1"] } }, data: { mustChangePassword: false } });
   const client = await db.client.findFirstOrThrow({ where: { displayName: "ООО «Сибирь Коммерция 1»", notes: { contains: "[DEMO-V241]" } } });
   resolved.set("client:0", client.id);
@@ -190,10 +190,10 @@ async function main() {
     await shot(manager, "15-settings-ai", "Настройки и ограничения ИИ, доступные руководителю", "manager");
     await managerContext.close();
     }
-    // Отдельный процесс 3211: только записанный отказ и FakeResponsesProvider, без секрета.
+    
     const webContext = await browser.newContext({ baseURL: process.env.VKR_WEB_BASE_URL ?? "http://127.0.0.1:3211", locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 900 } });
-    // В seed уже есть синтетические AI-вызовы. Руководитель временно расширяет дневной
-    // лимит через настоящий UI и затем возвращает его. предохранители ENV сохраняются.
+    
+    
     const webAdmin = await browser.newContext({ baseURL: process.env.VKR_WEB_BASE_URL ?? "http://127.0.0.1:3211", locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 900 } });
     const settings = await webAdmin.newPage();
     settings.setDefaultTimeout(60000);

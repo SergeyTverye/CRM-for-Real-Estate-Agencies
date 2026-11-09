@@ -1,6 +1,6 @@
 import { normalizeEmail, normalizePhone } from "@/modules/clients/domain/contact-normalization";
 
-/** Нормализация значений ячеек исходного Excel (ТЗ 38.7: parse → normalize). */
+
 
 export type Cell = string | number | boolean | Date | null;
 
@@ -10,7 +10,7 @@ export function cellText(v: Cell | undefined): string {
   return String(v).replace(/ /g, " ").trim();
 }
 
-/** Число из «1 200 000», «1200000,50», «85 м²», «100 тыс.» → строка numeric или null. */
+
 export function parseNumber(v: Cell | undefined): string | null {
   if (v === null || v === undefined || v === "") return null;
   if (typeof v === "number") return Number.isFinite(v) ? String(v) : null;
@@ -29,7 +29,7 @@ export function parseInteger(v: Cell | undefined): number | null {
   return n !== null && Number.isInteger(Number(n)) ? Number(n) : null;
 }
 
-/** Дата из Date, «12.03.2019», «2019-03-12», Excel serial или компонентов (год/месяц/день). */
+
 export function parseDate(v: Cell | undefined): Date | null {
   if (v === null || v === undefined || v === "") return null;
   if (v instanceof Date) return Number.isNaN(v.getTime()) ? null : new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate()));

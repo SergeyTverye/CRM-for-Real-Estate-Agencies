@@ -2,7 +2,7 @@
 
 import { EntityPicker } from "../client-kit";
 
-/** Выбор клиента и объекта для форм обращения/потребности (API /clients/pick, /properties/pick). */
+
 
 export interface ClientPick {
   id: string;

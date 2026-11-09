@@ -7,7 +7,7 @@ import { legalEntityOptions, loadClientPick, loadNeedPrefill, loadPropertyPick, 
 
 export const metadata = { title: "Новая сделка" };
 
-/** Роль клиента в сделке по операции потребности. */
+
 const ROLE_BY_OPERATION: Record<string, string> = { buy: "buyer", rent: "tenant", sell: "seller", lease_out: "landlord" };
 
 export default async function NewDealPage({ searchParams }: { searchParams: Promise<{ propertyId?: string; needId?: string; clientId?: string }> }) {

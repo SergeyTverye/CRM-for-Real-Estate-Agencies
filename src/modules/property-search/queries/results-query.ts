@@ -22,7 +22,7 @@ export const resultQuerySchema = z.object({
 export type ResultQuery = z.input<typeof resultQuerySchema>;
 const fields = { publication: "s.published_at", first_seen: "l.first_seen_at", source_updated: "s.source_updated_at", price: "s.price_rub", price_per_m2: "s.price_per_m2_rub", area: "s.area_m2", match: "CASE r.verdict WHEN 'confirmed' THEN 2 WHEN 'needs_review' THEN 1 ELSE 0 END", last_checked: "l.last_checked_at", price_change: "r.price_changed" } as const;
 export function resultOrder(sort: typeof SORTS[number], direction: "asc" | "desc") {
-  // Units precede amounts: currencies/periods are never presented as comparable numbers.
+  
   const unit = sort === "price" ? "s.normalized->>'priceUnit' ASC NULLS LAST," : sort === "price_per_m2" ? "s.price_per_m2_unit ASC NULLS LAST," : "";
   return `${unit} ${fields[sort]} ${direction.toUpperCase()} NULLS LAST, ${sort === "match" ? `r.score ${direction.toUpperCase()} NULLS LAST,` : ""} r.id ASC`;
 }
@@ -30,8 +30,8 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
   await accessibleRun(actor, runId);
   return db.$transaction(async tx => {
   const run = await tx.searchRun.findUniqueOrThrow({ where: { id: runId } });
-  // Internal export batches avoid recomputing the full selection digest per 200 rows.
-  // HTTP callers always retain the public 200-row limit; this flag is never parsed from input.
+  
+  
   const schema = exportBatch ? resultQuerySchema.extend({ pageSize: z.coerce.number().int().min(1).max(2000).default(2000) }) : resultQuerySchema;
   const q = parseInput(schema, { ...(run.sortParams as Record<string, unknown>), ...(raw as Record<string, unknown>) });
   const base = Prisma.sql`FROM search_run_results r JOIN external_listings l ON l.id=r.listing_id
@@ -43,7 +43,7 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
   const freshness = q.freshness ?? (run.filters as Record<string, unknown>).freshness;
   const unknownDateCount = await tx.$queryRaw<{ count: bigint }[]>(searchSql(Prisma.sql`SELECT COUNT(*) AS count ${base} WHERE ${Prisma.join(conditions, " AND ")} AND s.published_at IS NULL`));
   if (freshness) {
-    // Freeze the relative window at job creation, so pages/exports use the same interval.
+    
     const f = parseInput(freshnessSchema, freshness), bounds = freshnessBounds(f, run.startedAt);
     const field = Prisma.raw(f.mode === "published" ? "s.published_at" : "l.first_seen_at");
     const interval = f.period === "24h" ? Prisma.sql`${field} >= ${bounds.from} AND ${field} <= ${bounds.to}` : Prisma.sql`${field} >= ${bounds.from} AND ${field} < ${bounds.to}`;
@@ -51,7 +51,7 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
   } else if (q.unknownDates) conditions.push(Prisma.sql`s.published_at IS NULL`);
   const where = Prisma.sql`WHERE ${Prisma.join(conditions, " AND ")}`;
   const counts = await tx.$queryRaw<{ verdict: string; count: bigint }[]>(searchSql(Prisma.sql`SELECT r.verdict,COUNT(*) AS count ${base} ${where} GROUP BY r.verdict`));
-  // Every row contributes: max(timestamp) alone misses changes below the maximum.
+  
   const state = isSqlite() ? await tx.$queryRaw(searchSql(Prisma.sql`SELECT r.id,r.verdict,r.score,r.criteria,r.is_new,r.price_changed,s.id AS snapshot_id,l.last_checked_at ${base} WHERE r.run_id=${runId} ORDER BY r.id`)) : await tx.$queryRaw<{ digest: string }[]>(searchSql(Prisma.sql`SELECT md5(COALESCE(string_agg(concat_ws('|',r.id,r.verdict,r.score,r.criteria::text,r.is_new,r.price_changed,s.id,l.last_checked_at),',' ORDER BY r.id),'')) AS digest ${base} WHERE r.run_id=${runId}::uuid`));
   const { page: _page, revision: _revision, ...selection } = q;
   void _page; void _revision;
@@ -71,7 +71,7 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
     for (const key of ["score", "pricePerM2Rub"]) if (row[key] != null) row[key] = new Prisma.Decimal(String(row[key])).div(100);
   }
   const sources = await tx.searchRunSource.findMany({ where: { runId } });
-  // Only enrich this page. Never expose another employee's private marks or need facts.
+  
   const accessibleNeed = { AND: [needScope(actor), { client: clientScope(actor) }] };
   const metadata = exportBatch ? [] : await tx.externalListing.findMany({
     where: { id: { in: rows.map(row => String(row.listingId)) } },
@@ -90,7 +90,7 @@ export async function querySearchResults(actor: Actor, runId: string, raw: unkno
     inCollection: row.collectionItems.length > 0 || row.selections.length > 0,
     proposed: !!row.property?.matches.length || row.selections.some(item => item.matchId !== null),
   }]));
-  // Export fetches private notes and duplicate links once after collecting its selection.
+  
   const duplicateGroups = exportBatch ? [] : await getGroupsForListings(actor, rows.map(row => String(row.listingId)));
   return { rows: rows.map(row => Object.assign({}, row, facts.get(String(row.listingId)))), total, page: q.page, pageSize: q.pageSize, revision,
     duplicateGroups, duplicateGroupingError: (run.progress as Record<string, unknown>)?.duplicateGroupingError ?? null,

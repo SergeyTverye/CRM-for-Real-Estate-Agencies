@@ -16,13 +16,7 @@ import { detectSections, parseSectionRows, sha256, withWarning, type DetectedSec
 import { normalizeAddress } from "../domain/normalize";
 import { readWorkbook } from "../infrastructure/xlsx-reader";
 
-/**
- * UC-09 ImportDataset (FR-20, FR-35, ТЗ 28, 29.15, 37.14, 38).
- * upload → dry-run (parse → normalize → policy filter → validate → duplicates → mapping) → commit по секциям.
- * Dry-run не изменяет операционные таблицы: пишутся только import_jobs/import_row_results.
- * Исходный файл хранится во временном каталоге IMPORT_STAGING_PATH (вне backup) до завершения задания.
- * Для каждой обработанной при commit строки фиксируется commit_result. rows_read = imported + skipped + error.
- */
+
 
 function requireManager(actor: Actor) {
   if (!isManager(actor)) throw new ForbiddenError("Импорт доступен только руководителю");
@@ -73,7 +67,7 @@ async function parseFile(data: Buffer, fileSha: string): Promise<Parsed> {
   return { sheets, sections, rows, profiles };
 }
 
-/** Поиск вероятных дублей без изменения данных (ТЗ 38.8). */
+
 async function markDuplicates(rows: ParsedRow[]): Promise<ParsedRow[]> {
   const phones = [...new Set(rows.flatMap((r) => [...r.dedupe.phones, ...r.dedupe.emails]))];
   const existingContacts = phones.length
@@ -148,7 +142,7 @@ function summarize(sections: DetectedSection[], rows: ParsedRow[], profiles: Imp
   });
 }
 
-/** Загрузка файла и dry-run. Операционные таблицы не изменяются. */
+
 export async function uploadImport(actor: Actor, file: File | null): Promise<{ id: string }> {
   requireManager(actor);
   if (!file || typeof file === "string") throw new ValidationError("Выберите файл", { file: ["Файл не передан"] });
@@ -215,7 +209,7 @@ export async function uploadImport(actor: Actor, file: File | null): Promise<{ i
   return job;
 }
 
-// ───── Просмотр ─────
+
 
 export async function listImportJobs(actor: Actor) {
   requireManager(actor);
@@ -229,7 +223,7 @@ const rowsFilterSchema = zPagination.extend({
   problemsOnly: z.enum(["yes"]).optional(),
 });
 
-/** Безопасные исходные признаки проблемных строк для отчёта (без исключённых политикой полей). */
+
 async function previewFor(jobId: string, sha: string, rowKeys: Set<string>): Promise<Map<string, Record<string, unknown>>> {
   const out = new Map<string, Record<string, unknown>>();
   let data: Buffer;
@@ -325,14 +319,14 @@ async function createPropertyFromRow(tx: Tx, rec: Record<string, unknown>, o: Co
   return p.id;
 }
 
-/** Создание сущностей по одной строке (в собственной транзакции). Возвращает целевую сущность. */
+
 export async function commitRow(tx: Tx, row: ParsedRow, o: CommitOptions): Promise<{ type: string; id: string } | { skipped: string }> {
   const rec = row.record;
   switch (row.target) {
     case "historical_deal_archive": {
       const key = row.dedupe.archiveKey!;
       if (await tx.historicalDealArchive.findUnique({ where: { sourceRowKey: key } })) return { skipped: "already_imported" };
-      // Надёжная связь с Client — только по единственному совпадению телефона (не по ФИО).
+      
       let clientId: string | null = null;
       if (rec.contactPhone) {
         const matches = await tx.clientContact.findMany({ where: { normalizedValue: String(rec.contactPhone) }, select: { clientId: true }, distinct: ["clientId"], take: 2 });
@@ -463,7 +457,7 @@ export async function commitRow(tx: Tx, row: ParsedRow, o: CommitOptions): Promi
             propertyId,
             responsibleUserId: o.responsibleUserId,
             agreementType: "information",
-            // Наличие договора без даты подписания: фиксируется черновиком с требуемым действием (signed требует signed_at).
+            
             status: rec.agreementPresent ? "draft" : "no_agreement",
             absenceReasonCode: rec.agreementPresent ? null : "other",
             actionRequired: (rec.fixNote as string | null) ?? (rec.agreementPresent ? "Уточнить дату подписания и реквизиты договора (импорт)" : null),
@@ -507,7 +501,7 @@ export async function commitImport(actor: Actor, id: string, input: unknown) {
   if (selected.some((s) => s.status !== "recognized")) throw new ValidationError("Нераспознанные секции не импортируются автоматически", { sections: ["Секция требует настройки mapping"] });
   if (selected.some((s) => s.committed)) throw new ValidationError(undefined, { sections: ["Секция уже загружена"] });
 
-  // Защита от параллельного запуска.
+  
   const lock = await db.importJob.updateMany({ where: { id, status: "dry_run_ready" }, data: { status: "committing" } });
   if (lock.count === 0) throw new ConflictError("IMPORT_RUNNING", "Импорт уже выполняется");
 
@@ -595,7 +589,7 @@ export async function commitImport(actor: Actor, id: string, input: unknown) {
     entityId: id,
     after: { sections: [...selectedKeys], rowsRead: toProcess.length, imported, skipped, errors },
   });
-  // Контрольное равенство commit-набора (ТЗ 28): rows_read = imported + skipped + error.
+  
   return { id, status: finalStatus, rowsRead: toProcess.length, rowsImported: imported, rowsSkipped: skipped, rowsError: errors };
 }
 

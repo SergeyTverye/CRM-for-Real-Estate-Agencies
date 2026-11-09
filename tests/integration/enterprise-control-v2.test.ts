@@ -60,7 +60,7 @@ describe('enterprise control v2 synthetic normalized workflow', () => {
         expect(await db.property.count()).toBe(1);
         expect(await db.property.findUniqueOrThrow({ where: { id: existing.id } })).toMatchObject({ status: 'paused', responsibleUserId: users.realtor1.userId });
         await db.property.create({ data });
-        f.ws.getCell('A2').value = 'SYNTHETIC_CONTROL_A '; // Same normalized address, different source key by sheet.
+        f.ws.getCell('A2').value = 'SYNTHETIC_CONTROL_A '; 
         const other = f.wb.addWorksheet('Ignored'); other.getCell('A1').value = 'synthetic';
         await db.importRowResult.deleteMany();
         const nextProfile = buildProfile(f.wb); nextProfile.sheets[1]!.target = 'ignore';

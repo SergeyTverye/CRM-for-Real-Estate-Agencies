@@ -23,15 +23,7 @@ const operationalCounts = async () => ({
   tasks: await db.task.count(),
 });
 
-/**
- * Детерминированная проверка отсутствия запрещённых ПДн (ТЗ 38.9).
- * Было: JSON.stringify(payload).not.toMatch(/...|1980/) — голый "1980" случайно
- * встречается в UUID/SHA (id, sourceSha256, sourceRecordKey...), тест флакал.
- * Теперь сканируются только пользовательские/бизнесовые строки. структурные
- * ID/хеши пропускаются по имени ключа и по форме UUID/SHA. DOB синтетической
- * фикстуры ("01.01.1980" в scripts/dev/import-sample-builder.ts) ловится полными
- * представлениями ("01.01.1980", "1980-01-01"), а не голым годом — без ослабления.
- */
+
 const FORBIDDEN_VALUE_NEEDLES = ["0000 000000", "УФМС", "Регистрационная", "01.01.1980", "1980-01-01", "01/01/1980", "1980/01/01", "19800101", "01011980"];
 const UUID_METADATA_KEYS = new Set([
   "id",
@@ -143,8 +135,8 @@ describe("T07 / UC-09: импорт dry-run и commit", () => {
     const statuses = new Set(rows.map((r) => r.validationStatus));
     for (const s of ["ready", "warning", "invalid", "unrecognized"]) expect(statuses).toContain(s);
     expect(rows.some((r) => r.warningCodes.includes("probable_duplicate"))).toBe(true);
-    // Паспорт/«выдан»/регистрация/DOB не попадают в import_row_results ни в каком виде.
-    // Детерминированно: только бизнесовые строки, без структурных ID/хешей.
+    
+    
     expect(findForbiddenPii(rows, "importRowResult")).toEqual([]);
     const report = await getImportJob(u.manager, id, { problemsOnly: "yes", pageSize: 200 });
     expect(findForbiddenPii(report, "importReport")).toEqual([]);
@@ -162,24 +154,24 @@ describe("T07 / UC-09: импорт dry-run и commit", () => {
 
     const r1 = await commitImport(u.manager, id, { sections: [histKey, incKey], options: { coordinatesAsPhone: true } });
     expect(r1.rowsRead).toBe(r1.rowsImported + r1.rowsSkipped + r1.rowsError);
-    expect(r1.status).toBe("dry_run_ready"); // остальные секции ещё не загружены
+    expect(r1.status).toBe("dry_run_ready"); 
     const archive = await db.historicalDealArchive.findMany();
-    expect(archive.length).toBe(31); // 32 строки − 1 без адреса и ФИО
+    expect(archive.length).toBe(31); 
     expect(findForbiddenPii(archive, "historicalDealArchive")).toEqual([]);
-    // обработанные строки получили commit_result, не обработанные секции — нет
+    
     const processed = await db.importRowResult.findMany({ where: { importJobId: id, sourceSection: { in: ["historical_deals_v1", "incoming_clients_v1"] } } });
     expect(processed.every((r) => r.commitResult !== null)).toBe(true);
     const untouched = await db.importRowResult.findMany({ where: { importJobId: id, sourceSection: "commercial_rent_objects_v1" } });
     expect(untouched.every((r) => r.commitResult === null)).toBe(true);
-    // Каждая импортированная активная потребность имеет следующее действие (инвариант)
+    
     const activeNeeds = await db.clientNeed.findMany({ where: { status: "active" }, include: { taskLinks: { include: { task: true } } } });
     expect(activeNeeds.length).toBeGreaterThan(0);
     expect(activeNeeds.every((n) => n.taskLinks.some((l) => l.task.status === "planned"))).toBe(true);
-    // Дубль телефона внутри файла не создал второго клиента
+    
     const dupRows = processed.filter((r) => r.warningCodes.includes("probable_duplicate"));
     expect(dupRows.every((r) => r.commitResult === "skipped")).toBe(true);
 
-    // Оставшиеся секции
+    
     const rest = sections.filter((s) => s.status === "recognized" && ![histKey, incKey].includes(s.sectionKey)).map((s) => s.sectionKey);
     const r2 = await commitImport(u.manager, id, { sections: rest, options: { createTasksFromFixNotes: true } });
     expect(r2.status).toMatch(/^completed/);
@@ -188,7 +180,7 @@ describe("T07 / UC-09: импорт dry-run и commit", () => {
     expect(await db.agreement.count({ where: { status: "no_agreement" } })).toBeGreaterThan(0);
     expect(await db.property.count({ where: { sourceType: "external_market" } })).toBeGreaterThan(0);
 
-    // Повторная загрузка того же файла не удваивает архив и клиентов
+    
     const counts = await operationalCounts();
     const { id: id2 } = await uploadImport(u.manager, new File([new Uint8Array(await buildSampleWorkbook())], "повтор.xlsx"));
     const s2 = (await getImportJob(u.manager, id2)).sections.filter((s) => s.status === "recognized").map((s) => s.sectionKey);

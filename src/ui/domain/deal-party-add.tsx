@@ -11,7 +11,7 @@ import { ClientPicker, type ClientPick } from "./need-pickers";
 
 const ROLES = optionsOf("dealPartyRole");
 
-/** Добавление участника сделки: клиент CRM или внешний участник (POST /api/v1/deals/[id]/parties). */
+
 export function DealPartyAddButton({ dealId }: { dealId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);

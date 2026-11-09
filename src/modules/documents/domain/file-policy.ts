@@ -1,7 +1,4 @@
-/**
- * Политика загрузки файлов (NFR-18, ТЗ 20.4.1): allowlist расширений и MIME, лимит размера,
- * исполняемые/опасные типы запрещены. Исходное имя очищается и используется только для отображения.
- */
+
 export const MIME_BY_EXTENSION: Record<string, string[]> = {
   pdf: ["application/pdf"],
   jpg: ["image/jpeg"],

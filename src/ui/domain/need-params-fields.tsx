@@ -5,11 +5,7 @@ import { DisclosureSection } from "../disclosure-section";
 import { SelectInput, type Option } from "../client-kit";
 import { optionsOf } from "@/shared/codebook";
 
-/**
- * Параметры потребности (ТЗ 6.2, 37.6): компактные смысловые группы — запрос, бюджет,
- * район/локация, площадь, финансирование (статус ипотеки — только для ипотеки/смешанного),
- * дополнительные требования по типу недвижимости. Используется в обращении, создании и редактировании.
- */
+
 
 export interface NeedParamsValue {
   operationType: string;
@@ -33,7 +29,7 @@ export interface NeedParamsValue {
   buildingAreaMin: string;
   buildingAreaMax: string;
   powerRequirement: string;
-  /** "" — не важно, "true"/"false" — требование. */
+  
   parkingRequirement: string;
   tenantRequirement: string;
   notes: string;
@@ -82,7 +78,7 @@ const GROUPS_BY_TYPE: Record<string, ExtraGroup[]> = {
   land: ["land"],
 };
 
-/** Группы дополнительных требований для типа недвижимости (для нового типа из справочника — все). */
+
 export function needExtraGroups(propertyType: string): ExtraGroup[] {
   if (!propertyType) return [];
   return GROUPS_BY_TYPE[propertyType] ?? ["rooms", "floor", "commercial", "land", "building"];
@@ -98,7 +94,7 @@ const KNOWN_SUBTYPES = new Set(Object.values(SUBTYPES_BY_TYPE).flat());
 
 export const isMortgageFinancing = (financingType: string) => financingType === "mortgage" || financingType === "mixed";
 
-/** Тело запроса для API: пустые строки → null, неприменимые к типу поля очищаются. */
+
 export function needParamsPayload(v: NeedParamsValue) {
   const g = new Set(needExtraGroups(v.propertyType));
   const s = (x: string) => (x.trim() === "" ? null : x.trim());
@@ -183,9 +179,9 @@ export function NeedParamsFields({
   onChange: (v: NeedParamsValue) => void;
   options: NeedParamsOptions;
   fieldError: (name: string) => string | undefined;
-  /** Префикс путей ошибок сервера, например "outcome.need." в форме обращения. */
+  
   prefix?: string;
-  /** Быстрая форма (обращение): только основные параметры. */
+  
   compact?: boolean;
 }) {
   const err = (n: string) => fieldError(`${prefix}${n}`);

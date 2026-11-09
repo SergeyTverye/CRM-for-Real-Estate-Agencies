@@ -9,12 +9,7 @@ import { Field, FormErrorBanner } from "../form";
 import { DateTimeInput, Modal, NextActionFields, SelectInput, defaultNextAction, type NextActionValue, type Option } from "../client-kit";
 import { NEED_TASK_TYPES } from "./need-state-actions";
 
-/**
- * «Зафиксировать результат» показа (UC-05, ТЗ 37.8): результат + переход потребности
- * и требуемое продолжение одной командой POST /api/v1/showings/[id]/result.
- * Если сервер сообщает, что у потребности не осталось действия (NEXT_ACTION_REQUIRED /
- * RETURN_TASK_REQUIRED), форма делает следующий шаг обязательным.
- */
+
 
 type ShowingOutcome = "completed" | "cancelled" | "no_show";
 type NeedMode = "active" | "paused" | "closed" | "success";
@@ -69,7 +64,7 @@ export function ShowingResultButton({
   updatedAt: string;
   scheduledAt: string;
   timeZone: string;
-  /** null — потребность уже закрыта, продолжение не требуется. */
+  
   need: ShowingNeedState | null;
   users?: Option[];
 }) {
@@ -126,7 +121,7 @@ export function ShowingResultForm({
     if (!nextEdited) setNext(suggestedNext(o, r));
   };
 
-  // Задача обязательна: смена статуса на active/paused или сервер сообщил, что продолжения нет.
+  
   const taskRequired = (mode === "active" && (need?.status !== "active" || forced === "NEXT_ACTION_REQUIRED")) || (mode === "paused" && (need?.status !== "paused" || forced === "RETURN_TASK_REQUIRED"));
   const showTask = withTask || taskRequired;
 

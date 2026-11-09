@@ -16,9 +16,9 @@ export interface CommitSectionInfo {
   recognized: boolean;
   committed: boolean;
   total: number;
-  /** Строки ready + warning — кандидаты на загрузку. */
+  
   candidates: number;
-  /** invalid + unrecognized + skipped_policy — будут пропущены. */
+  
   skipped: number;
   duplicates: number;
 }
@@ -35,10 +35,7 @@ interface CommitResult {
 const isIncoming = (s: CommitSectionInfo) => (s.profileCode ?? "").startsWith("incoming_clients");
 const isAgreementControl = (s: CommitSectionInfo) => (s.profileCode ?? "").startsWith("property_agreement_control");
 
-/**
- * Шаг 6 мастера (ТЗ 37.14, 38.7): commit по секциям только после успешного dry-run,
- * с явным подтверждением. Повторное нажатие во время выполнения заблокировано.
- */
+
 export function ImportCommitPanel({ jobId, jobStatus, sections, users }: { jobId: string; jobStatus: string; sections: CommitSectionInfo[]; users: Option[] }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);

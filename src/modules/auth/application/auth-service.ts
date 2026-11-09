@@ -29,10 +29,7 @@ export interface LoginResult {
   userId: string;
 }
 
-/**
- * UC: вход по логину/паролю. Ответ одинаков для несуществующего логина,
- * неверного пароля и деактивированного пользователя (не раскрывает существование логина).
- */
+
 export async function login(rawLogin: string, password: string, meta: SessionMeta, opts: { delay?: boolean } = {}): Promise<LoginResult> {
   const loginNorm = normalizeLogin(rawLogin ?? "");
   if (!loginNorm || !password) throw new ValidationError("Введите логин и пароль", { login: loginNorm ? [] : ["Обязательное поле"] });
@@ -64,7 +61,7 @@ export async function logout(actor: Actor): Promise<void> {
   logger.info({ event: "auth.logout", userId: actor.userId }, "logout");
 }
 
-/** Смена пароля пользователем (в т.ч. обязательная после выдачи временного). Остальные сессии отзываются. */
+
 export async function changeOwnPassword(actor: Actor, currentPassword: string, newPassword: string): Promise<void> {
   const user = await db.user.findUniqueOrThrow({ where: { id: actor.userId } });
   if (!(await verifyPassword(user.passwordHash, currentPassword ?? ""))) {

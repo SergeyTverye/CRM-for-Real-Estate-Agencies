@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 
-/** Криптографически случайный токен сессии. в БД хранится только SHA-256 (ТЗ 29.2). */
+
 export function generateSessionToken(): string {
   return randomBytes(32).toString("base64url");
 }

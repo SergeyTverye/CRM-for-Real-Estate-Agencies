@@ -12,7 +12,7 @@ import { cardQuality, listingQuality } from "./listing-quality";
 const detailProgress = new WeakMap<RealEstateScraper, Partial<Record<Source, DateDetailProgress>>>();
 export function dateEnrichmentProgress(client: object, source: Source) { return detailProgress.get(client as RealEstateScraper)?.[source]; }
 
-/** Extend the installed parsers in our adapter, without patching node_modules. */
+
 export function extendSourceParsers(client: RealEstateScraper, options: DateDetailOptions = {}): RealEstateScraper {
   attachResidentialParsers(client);
   attachGeographyParsers(client);
@@ -43,8 +43,8 @@ export function extendSourceParsers(client: RealEstateScraper, options: DateDeta
     };
     parser.searchPage = async query => documents.run([], async () => {
       const page = await searchPage(query);
-      // The package applies query.limit after this hook. Do not repeatedly parse
-      // the entire SERP for dozens of cards that it will immediately discard.
+      
+      
       const selectedCount = Math.min(page.results.length, query?.limit ?? page.results.length);
       page.results = page.results.map((raw, index) => {
         if (index >= selectedCount) return raw;
@@ -63,7 +63,7 @@ export function extendSourceParsers(client: RealEstateScraper, options: DateDeta
           ...(quality.rentalPeriod === "day" ? { priceText: "₽ за сутки" } : {}),
           ...(quality.apartments ? { isApartments: true } : {}) };
       });
-      // At most N detail GETs per source/job, shared deadline, date-only TTL cache.
+      
       for (let index = 0; index < selectedCount; index++) {
         const raw = page.results[index]!;
         if ((raw as typeof raw & { publishedAt?: string | null }).publishedAt) continue;
@@ -73,7 +73,7 @@ export function extendSourceParsers(client: RealEstateScraper, options: DateDeta
       return page;
     });
   }
-  // The package loses previous pages on abort. Accumulate at the page boundary.
+  
   client.searchSite = async (source, query = {}) => {
     const results: RealEstateScraper.Listing[] = [], pages: RealEstateScraper.PageMetadata[] = [], errors: RealEstateScraper.SearchError[] = [];
     try {

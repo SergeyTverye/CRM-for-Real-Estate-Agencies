@@ -21,7 +21,7 @@ export default async function NewAgreementPage({ searchParams }: { searchParams:
   ]);
   const users = actor.role === "manager" ? await userOptions() : [];
   const deal = dealData ? { id: dealData.deal.id, label: `${dealData.deal.property.addressText}` } : null;
-  // Из сделки: объект и юрлицо сделки подставляются по умолчанию.
+  
   const dealProperty = dealData && !property ? { id: dealData.deal.property.id, addressText: dealData.deal.property.addressText, price: dealData.deal.property.price?.toString() ?? null, responsible: null } : null;
   const initial = { ...emptyAgreement(), agreementType: dealData ? (dealData.deal.property.operationType === "rent" ? "lease_related" : "sale_related") : "exclusive", legalEntityId: dealData?.deal.legalEntity.id ?? "" };
   const unavailable = [clientId && !client ? "клиент" : null, propertyId && !property ? "объект" : null, dealId && !deal ? "сделка" : null].filter(Boolean);

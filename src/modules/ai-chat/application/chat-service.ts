@@ -55,7 +55,7 @@ export async function listChats(actor: Actor) {
             await checkContext(actor, sessionContext(s));
             visible.push({ ...s, title: displayText(s.title, await contextLinks(actor, sessionContext(s))) });
         }
-        catch { /* Access may have changed since creation. */ }
+        catch {  }
     }
     return { items: visible };
 }

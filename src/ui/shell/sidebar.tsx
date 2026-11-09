@@ -52,7 +52,7 @@ export function Sidebar({ isManager, collapsed = false, onNavigate }: { isManage
 export function CrmShell({ children, header, isManager, readOnly }: { children: React.ReactNode; header: React.ReactNode; isManager: boolean; readOnly: boolean }) {
   const collapsed = useSyncExternalStore(subscribe, snapshot, () => false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  // Если storage запрещён, состояние сохраняется в текущей вкладке.
+  
   const [localCollapsed, setLocalCollapsed] = useState<boolean | null>(null);
   const isCollapsed = localCollapsed ?? collapsed;
   function toggle() {

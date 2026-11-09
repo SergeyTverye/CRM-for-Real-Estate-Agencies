@@ -9,7 +9,7 @@ import { rubToMicros, type AiTariff, type TariffRepository } from "../domain/cos
 import type { AiLedgerRepository, AiLedgerTransaction, AiReservation, AiSettingsRepository, AiUsageSnapshot } from "../domain/gate";
 
 export const AI_SETTING_ID = "00000000-0000-4000-8000-000000000005";
-/** All writers, including settings/seed, share this transaction-scoped database lock. */
+
 export async function lockAi(tx: Tx) { await tx.$queryRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(241005::bigint)::text`)); }
 export async function singleton(tx: DbOrTx) {
   const rows = await tx.aiSetting.findMany({ take: 2 });
@@ -21,7 +21,7 @@ export function aiUsageLogId(requestId: string) {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
 }
 export function microsToRub(value: bigint): string { return `${value / 1000000n}.${(value % 1000000n).toString().padStart(6, "0")}`; }
-/** Legacy monetary columns have cents precision. Round UP; exact micro-RUB live in result JSONB. */
+
 function centsCeil(value: bigint): string { return microsToRub(((value + 9999n) / 10000n) * 10000n); }
 function encode(record: AiReservation): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify({ ledgerVersion: 1, ...record }, (_k, v) => typeof v === "bigint" ? v.toString() : v));
@@ -37,8 +37,8 @@ export function decodeReservation(value: Prisma.JsonValue | null): AiReservation
 
 export class PrismaAiLedger implements AiLedgerRepository {
   async atomic<T>(work: (tx: AiLedgerTransaction) => Promise<T>): Promise<T> {
-    // READ COMMITTED intentionally: each read AFTER lock sees the previous holder's commit.
-    // The shared advisory lock serializes the complete read/check/reserve/settle operation.
+    
+    
     return db.$transaction(async (tx) => { await lockAi(tx); await singleton(tx); return work(this.adapter(tx)); },
       { isolationLevel: "ReadCommitted", maxWait: 15000, timeout: 30000 });
   }
@@ -58,7 +58,7 @@ export class PrismaAiLedger implements AiLedgerRepository {
         for (const row of rows) {
           const r = decodeReservation(row.result);
           if (!r) {
-            // Legacy/unrecognized records must never silently disappear from the budget.
+            
             const keys = periodKeys(row.createdAt, getConfig().APP_TIMEZONE);
             if (keys.monthKey === q.monthKey) out.monthCommittedMicros += rubToMicros((row.actualCostRub ?? row.estimatedCostRub).toString());
             if (keys.dayKey === q.dayKey) { out.dayCalls++; if (row.userId === q.userId) out.userDayCalls++; }
@@ -104,7 +104,7 @@ export class PrismaAiLedger implements AiLedgerRepository {
       },
     };
   }
-  /** Only a verified pre-dispatch failure may release money; uncertain transport errors retain reserve. */
+  
   async release(requestId: string, reason: "not_dispatched") {
     if (reason !== "not_dispatched") throw new AiError("AI_RELEASE_UNSAFE");
     await this.atomic(async (tx) => {

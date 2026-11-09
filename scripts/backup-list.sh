@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Список копий: ./scripts/backup-list.sh [--remote <code>]
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

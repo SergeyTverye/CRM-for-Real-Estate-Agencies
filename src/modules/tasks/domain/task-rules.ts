@@ -25,10 +25,7 @@ function addMonthsClamped(date: Date, months: number): Date {
   return d;
 }
 
-/**
- * Срок следующего экземпляра повторяемой задачи (ТЗ 29.6, FR-26).
- * Возвращает null, если повторений нет или превышен recurrence_until.
- */
+
 export function nextRecurrenceDue(
   dueAt: Date,
   kind: Code<"recurrenceKind">,
@@ -54,14 +51,14 @@ export function nextRecurrenceDue(
       break;
   }
   if (until) {
-    // recurrence_until — календарная дата включительно (UTC-полночь).
+    
     const untilEnd = until.getTime() + 86_400_000;
     if (next.getTime() >= untilEnd) return null;
   }
   return next;
 }
 
-/** Группа экрана «Сегодня» по типу задачи (ТЗ 37.4, FR-25). */
+
 export type TodayGroup = "calls" | "meetings" | "offers" | "documents" | "advertising" | "other";
 
 export function todayGroupOf(taskType: string): TodayGroup {

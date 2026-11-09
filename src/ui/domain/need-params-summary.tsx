@@ -3,7 +3,7 @@ import { dictLabel, type Dictionaries } from "@/modules/dictionaries/application
 import { fmtMoney, fmtNum } from "@/server/format";
 import { Dl } from "../components";
 
-/** Серверное отображение параметров потребности (карточка, рабочее место подбора, списки). */
+
 
 type Num = { toString(): string } | number | null | undefined;
 
@@ -36,7 +36,7 @@ export interface NeedParamsLike {
 
 const present = (v: Num) => v !== null && v !== undefined && v.toString() !== "";
 
-/** «от a до b» / «от a» / «до b». null — параметр не задан. */
+
 export function fmtRange(min: Num, max: Num, fmt: (v: Num) => string): string | null {
   const a = present(min);
   const b = present(max);
@@ -49,14 +49,14 @@ export function fmtRange(min: Num, max: Num, fmt: (v: Num) => string): string | 
 const money = (v: Num) => fmtMoney(v ?? null);
 const area = (v: Num) => fmtNum(v ?? null, "м²");
 
-/** Заголовок потребности: «Купить · Коммерческая · Офис». */
+
 export function needTitle(dicts: Dictionaries, n: Pick<NeedParamsLike, "operationType" | "propertyType" | "propertySubtype">): string {
   return [dictLabel(dicts, "need_operation_type", n.operationType), dictLabel(dicts, "property_type", n.propertyType), n.propertySubtype ? dictLabel(dicts, "property_subtype", n.propertySubtype) : null]
     .filter(Boolean)
     .join(" · ");
 }
 
-/** Краткая строка запроса для списков: «район · бюджет · площадь». */
+
 export function needBriefLine(n: Pick<NeedParamsLike, "district" | "budgetMin" | "budgetMax" | "areaMin" | "areaMax">): string {
   return [n.district, fmtRange(n.budgetMin, n.budgetMax, money), fmtRange(n.areaMin, n.areaMax, area)].filter(Boolean).join(" · ");
 }

@@ -21,8 +21,8 @@ const roots: string[] = [];
 afterEach(async () => { vi.restoreAllMocks(); for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true }); });
 async function fixture() {
   const root = await mkdtemp(path.join(await realpath(os.tmpdir()), "synthetic-ai-store-")); roots.push(root);
-  // Real authenticated encryption behind a synthetic available desktop protector.
-  // No Windows process, DPAPI, production key or existing credential file is used.
+  
+  
   const aes = new ServerAesProtector(() => Buffer.alloc(32, 37).toString("base64"));
   const protector: SecretProtector = { available: true, protection: "windows-dpapi-current-user",
     seal: (bytes, context) => aes.seal(bytes, context), open: (bytes, context) => aes.open(bytes, context) };

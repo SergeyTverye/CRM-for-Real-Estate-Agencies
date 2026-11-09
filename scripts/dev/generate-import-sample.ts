@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { buildSampleWorkbook } from "./import-sample-builder";
 
-// Генерирует синтетический Excel для проверки импорта: data/import-samples/sample-workbook.xlsx
+
 const out = path.resolve("data/import-samples/sample-workbook.xlsx");
 mkdirSync(path.dirname(out), { recursive: true });
 buildSampleWorkbook().then((buf) => {

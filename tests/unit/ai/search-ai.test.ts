@@ -41,7 +41,7 @@ describe("AI-RANK-LIVE-01 REPLAY", () => {
     const request=f.provider.requests[0]!;
     expect(request.responseSchemaStrict).toBe(true);
     expect(request.maxOutputTokens).toBe(1088);
-    // The provider contract now rejects the exact recorded failure, before generation.
+    
     const schema=z.fromJSONSchema(request.responseSchema!);
     expect(schema.safeParse(recorded).success).toBe(false);
     expect(schema.safeParse(valid).success).toBe(true);
@@ -204,7 +204,7 @@ describe("SearchAi", () => {
   });
 });
 
-// Recorded provider replies: exercise decoding + preservation, no live AI calls.
+
 describe("REPLAY AI-01 explicit categories survive model post-processing", () => {
   it.each([
     ["Аренда офиса 50–100 м² в Новосибирске до 80 000 в месяц", {operation:"rent",priceUnit:"rub_month",priceTo:"80000",areaFrom:50,areaTo:100,purposes:["office"]}],

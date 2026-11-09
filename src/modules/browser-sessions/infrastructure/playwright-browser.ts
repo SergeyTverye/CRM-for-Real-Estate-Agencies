@@ -16,7 +16,7 @@ export async function reapExpiredSessionProfiles(now = Date.now()) {
     try {
       const stat = await lstat(target);
       if (!stat.isSymbolicLink() && now - (stat.birthtimeMs || stat.mtimeMs) > 20 * 60_000 + 60_000) await rm(target, { recursive: true, force: true, maxRetries: 3 });
-    } catch { /* A different shutdown may have already removed it. No paths/secrets are logged. */ }
+    } catch {  }
   }
 }
 export interface BrowserOptions {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Идентичность и роль экземпляра (ТЗ 41.4): deployment_id, instance_id, режим, active/standby.
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_env

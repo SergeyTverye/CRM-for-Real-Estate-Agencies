@@ -11,11 +11,7 @@ import { SelectInput, type Option } from "../client-kit";
 import { NeedPicker, PropertySelect, type NeedLabels, type NeedPick, type PropertyPick } from "./deal-pickers";
 import { itemFromPick, moneyText, type OfferFormValue, type OfferItemDraft, type OfferSuggestion } from "./deal-form-values";
 
-/**
- * Коммерческое предложение (UC-15, ТЗ 37.20): потребность, выбранные объекты и их порядок,
- * snapshot цены/условий (можно переопределить), ИП/ООО, вводный текст, срок действия.
- * Позиции меняются только в черновике.
- */
+
 
 export type { OfferFormValue, OfferItemDraft, OfferSuggestion };
 

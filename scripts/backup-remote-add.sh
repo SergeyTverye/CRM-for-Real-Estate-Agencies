@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Подключение off-site target (ТЗ 39.2, 39.4). Создаёт в secrets/rclone.conf транспорт <code>
-# и слой шифрования <code>-crypt со случайными паролем и солью. Облачные credentials берутся из
-# переменных окружения оператора на время команды и НЕ записываются в .env, БД или Git.
-#
-#   ./scripts/backup-remote-add.sh <code> filesystem             (каталог BACKUP_FILESYSTEM_TARGET_PATH, например NAS)
-#   SBER_WEBDAV_URL=… SBER_USER=… SBER_PASSWORD=… ./scripts/backup-remote-add.sh <code> sberdisk   (только после probe)
-#
-# После добавления: допишите <code> в BACKUP_TARGETS в .env и выполните ./scripts/backup-remote-probe.sh <code>.
-# Файл secrets/recovery/<code>.txt содержит crypt-пароль и соль — перенесите его на офлайн-носитель:
-# без него облачные копии невосстановимы (ТЗ 39.4).
+
+
+
+
+
+
+
+
+
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

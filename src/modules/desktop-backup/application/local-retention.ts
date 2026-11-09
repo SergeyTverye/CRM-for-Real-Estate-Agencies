@@ -18,7 +18,7 @@ export async function pruneLocalPortable(root: string, policy: RetentionPolicy) 
       const actual = await hashFile(archiveFile);
       if (actual.sha256 !== ref.sha256 || actual.size !== ref.size) continue;
       catalog.push({ ...ref, recoverable: true });
-    } catch { /* Invalid metadata requires manual diagnosis, never automatic deletion. */ }
+    } catch {  }
   }
   const plan = planRetention(catalog, { ...policy, minRecoverable: 2 });
   for (const id of plan.deleteIds) {

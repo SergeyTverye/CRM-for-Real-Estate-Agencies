@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Спокойный desktop-first интерфейс (ТЗ 37.1): нейтральная палитра, цвет — только как сигнал состояния. */
+
 @theme {
   --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
   --color-brand-50: #eef5ff;
@@ -106,7 +106,7 @@
   .toast-viewport { position: fixed; right: 24px; bottom: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; width: min(400px, calc(100vw - 32px)); pointer-events: none; }
   .toast { display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-popover); pointer-events: auto; overflow-wrap: anywhere; }
   .toast > svg { flex-shrink: 0; }
-  /* Существующие таблицы прокручиваются внутри карточек. */
+  
   .card > div:has(> .table), .card:has(> .table), .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
   .table th { white-space: nowrap; }
   .table tbody tr:focus-within td { background: var(--color-brand-50); }

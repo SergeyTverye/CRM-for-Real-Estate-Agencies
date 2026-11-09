@@ -1,5 +1,5 @@
-# Общая PowerShell-обёртка для Windows 11 (Docker Desktop + WSL2), ТЗ 41.8.
-# Запускает тот же shell-скрипт из scripts/, поэтому Linux и Windows используют один Compose-контракт.
+
+
 param(
   [Parameter(Mandatory = $true)][string]$Script,
   [Parameter(ValueFromRemainingArguments = $true)][string[]]$Rest

@@ -9,12 +9,12 @@ import { extractListingDates } from "./listing-dates";
 
 export interface FeedImportResult {
   listings: ReturnType<typeof manualListing>[];
-  /** Autoload Id is an agency's external ID, not the public Avito listing ID. */
+  
   pending: { source: Source; externalId: string | null; title: string; operation: "sale" | "rent"; propertyType: string | null; price: number | null; area: number | null; city: string | null; address: string | null; url: null; reason: "public_url_required" }[];
   errors: { row: number; code: "INVALID_FEED_ROW" }[];
   rowsRead: number; incomplete: boolean;
 }
-/** Official exports are preview candidates. No CRM persistence, contacts or external fetches. */
+
 export async function importOfficialFeed(bytes: Buffer, options: { format: "csv" | "xlsx" | "xml"; source: Source; fetchedAt?: string; maxRows?: number }): Promise<FeedImportResult> {
   if (bytes.length > 10_000_000) throw new Error("FEED_TOO_LARGE");
   const limit = Math.min(options.maxRows ?? 1000, 5000);
@@ -24,14 +24,14 @@ export async function importOfficialFeed(bytes: Buffer, options: { format: "csv"
   if (options.format === "xml") {
     const xml = bytes.toString("utf8");
     if (/<!DOCTYPE|<!ENTITY/iu.test(xml)) throw new Error("UNSAFE_FEED_XML");
-    // SAX pass before DOM construction: bound both stack depth and wide inputs.
+    
     let depth = 0, elements = 0;
     const guard = new Parser({ onopentag() { if (++depth > 32 || ++elements > 50000) throw new Error("FEED_XML_COMPLEXITY_LIMIT"); }, onclosetag() { depth--; } }, { xmlMode: true, decodeEntities: false });
     guard.end(xml);
     const $ = load(xml, { xmlMode: true });
     $("offer, Ad").slice(0, limit + 1).each((_, el) => {
       const row: Record<string, string> = {};
-      // Whitelist basic property fields; seller/phone/name sections are never retained.
+      
       for (const key of ["Id", "url", "Url", "AdUrl", "Title", "Description", "description", "type", "OperationType", "category", "commercial-type", "ObjectType", "CommercialType", "Area", "Square", "City", "Address", "Price", "creation-date", "last-update-date"]) row[key] = $(el).children(key).first().text().trim();
       row.externalId = $(el).attr("internal-id") ?? row.Id ?? "";
       row.price = $(el).children("price").children("value").text();
@@ -44,7 +44,7 @@ export async function importOfficialFeed(bytes: Buffer, options: { format: "csv"
     const workbook = new ExcelJS.Workbook();
     if (options.format === "xlsx") {
       let expanded = 0, entries = 0;
-      // Inspect central-directory sizes before ExcelJS inflates user-controlled ZIP entries.
+      
       unzipSync(bytes, { filter: entry => { expanded += entry.originalSize; if (++entries > 2000 || expanded > 40_000_000) throw new Error("FEED_EXPANDED_TOO_LARGE"); return false; } });
       await workbook.xlsx.load(bytes as never);
     }

@@ -26,7 +26,7 @@ export default async function AdvertisementsPage({ searchParams }: { searchParam
   const view = sp.view ?? "all";
   const checkDays = getConfig().AD_CHECK_INTERVAL_DAYS;
 
-  // Группировка вокруг объекта (ТЗ 37.12): список уже отсортирован по адресу.
+  
   const groups: { property: AdRow["property"]; items: AdRow[] }[] = [];
   for (const ad of res.data?.items ?? []) {
     const last = groups[groups.length - 1];

@@ -17,7 +17,7 @@ export interface DictionaryRow {
   sortOrder: number;
 }
 
-/** Новый порядок: если текущие sortOrder строго возрастают — меняются местами два значения, иначе категория перенумеровывается шагом 10. */
+
 function reorderPlan(items: DictionaryRow[], from: number, to: number): { id: string; sortOrder: number }[] {
   const next = [...items];
   const [moved] = next.splice(from, 1);
@@ -67,7 +67,7 @@ function RenameForm({ item, onDone, onCancel }: { item: DictionaryRow; onDone: (
   );
 }
 
-/** Значения одного бизнес-справочника (ТЗ 40.9): добавить, переименовать, упорядочить, (де)активировать. Удаления нет. */
+
 export function DictionaryEditor({ category, categoryLabel, items }: { category: string; categoryLabel: string; items: DictionaryRow[] }) {
   const router = useRouter();
   const nextOrder = (items.reduce((m, i) => Math.max(m, i.sortOrder), 0) || 0) + 10;
@@ -87,7 +87,7 @@ export function DictionaryEditor({ category, categoryLabel, items }: { category:
       return true;
     });
     setBusy(false);
-    // Даже при частичной ошибке показываем фактический порядок.
+    
     router.refresh();
   }
 

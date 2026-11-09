@@ -4,13 +4,13 @@ import { PURPOSES } from "@/modules/property-search/domain/types";
 import { parseResultSchema } from "./contracts";
 import { decodeAiJson } from "./decode-json";
 
-/** Provider instruction allowlist mirrors domain PURPOSES; residential is required even before/after B lands. */
+
 export const PROVIDER_PURPOSE_ALLOWLIST: readonly string[] = [...new Set([...PURPOSES, "residential"])];
 
 const nullableText = { type: ["string", "null"] };
 const nullableNumber = { type: ["number", "null"] };
 const strings = { type: "array", items: { type: "string" } };
-/** Provider dialect: flat, no refs/unions/defaults/formats/bounds. Business validation stays in Zod. */
+
 export const providerParseSchema = {
   type: "object", additionalProperties: false,
   properties: {
@@ -32,8 +32,7 @@ const flatSchema = z.object({
   requiredFeatures: z.array(z.string()).nullish(), preferredFeatures: z.array(z.string()).nullish(), sources: z.array(z.string()).nullish(),
   clarificationQuestion: z.string().nullish(),
 }).strict();
-/** Canonical UI choices: a specific commercial purpose already constrains non-residential kind.
- * Location IDs are authoritative; a provider's broad city label must not disagree with one selected place. */
+
 function canonicalParseResult(value: unknown) {
   const result = parseResultSchema.parse(value);
   if (!result.filters) return result;
@@ -44,15 +43,15 @@ function canonicalParseResult(value: unknown) {
 }
 export function decodeParseResult(text: string) {
   const object = decodeAiJson(z.record(z.string(), z.unknown()), text);
-  // Canonical shape remains supported for recorded fixtures and older text-only responses.
-  // It stays strict: recorded rejection tests rely on it.
+  
+  
   if ("filters" in object) return canonicalParseResult(object);
   const { clarificationQuestion, ...flat } = flatSchema.parse(object);
   if (clarificationQuestion != null) return parseResultSchema.parse({ filters: null, clarificationQuestion });
   const filters = Object.fromEntries(Object.entries(flat).filter(([key, value]) => value !== null && value !== undefined && (!(["locations", "propertyKinds", "rooms"].includes(key)) || !Array.isArray(value) || value.length > 0))) as Record<string, unknown>;
-  // LIVE repair before strict validation: a schema-valid model answer with a null
-  // operation or a rent/sale unit mismatch must become a clarification or a
-  // canonical unit, never an HTTP 422 without a paid-call trace.
+  
+  
+  
   if (filters.operation == null) return { filters: null, clarificationQuestion: "Уточните операцию: продажа или аренда?" };
   if (filters.operation === "rent" && filters.priceUnit == null) {
     if (filters.priceFrom !== undefined || filters.priceTo !== undefined) filters.priceUnit = "rub_month";

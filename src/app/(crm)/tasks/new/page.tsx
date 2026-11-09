@@ -51,7 +51,7 @@ export default async function NewTaskPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const dicts = await loadDictionaries();
 
-  // Контекст из параметров: подпись связи берётся только из доступной пользователю записи.
+  
   const links: ContextLink[] = [];
   const unavailable: string[] = [];
   for (const { param, kind } of PARAMS) {
@@ -77,7 +77,7 @@ export default async function NewTaskPage({ searchParams }: { searchParams: Prom
     else links.push({ kind, id, label, kindLabel: GENERIC[kind].label, href: GENERIC[kind].href(id) });
   }
 
-  // Риелтор назначает задачу себе или руководителю (эскалация). руководитель — любому активному сотруднику.
+  
   const all = await listActiveUsersBrief();
   const users = all
     .filter((u) => actor.role === "manager" || u.id === actor.userId || u.roleCode === "manager")

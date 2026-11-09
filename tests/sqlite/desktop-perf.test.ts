@@ -17,7 +17,7 @@ function filledDb(): { file: string; db: Database.Database } {
   const file = join(dir, "perf.db");
   const native = new Database(file);
   for (const name of readdirSync(migDir).sort()) {
-    try { native.exec(readFileSync(join(migDir, name, "migration.sql"), "utf8")); } catch { /* aux */ }
+    try { native.exec(readFileSync(join(migDir, name, "migration.sql"), "utf8")); } catch {  }
   }
   for (const p of DESKTOP_SQLITE_PRAGMAS) native.pragma(p);
   native.exec("PRAGMA foreign_keys=OFF");
@@ -54,11 +54,11 @@ describe("desktop perf v3.2.3", () => {
     const { file, db: native } = filledDb();
     try {
       expect(native.pragma("journal_mode", { simple: true })).toBe("wal");
-      expect(native.pragma("synchronous", { simple: true })).toBe(1); // NORMAL
+      expect(native.pragma("synchronous", { simple: true })).toBe(1); 
       expect(native.pragma("cache_size", { simple: true })).toBe(-64000);
-      expect(native.pragma("temp_store", { simple: true })).toBe(2); // MEMORY (0 default, 1 file, 2 memory)
+      expect(native.pragma("temp_store", { simple: true })).toBe(2); 
       expect(native.pragma("mmap_size", { simple: true })).toBe(268435456);
-      // Тот же механизм, что использует desktop-координатор: sqlite3_backup.
+      
       const dest = `${file}.backup.db`;
       await native.backup(dest);
       const copy = new Database(dest, { readonly: true });
@@ -142,6 +142,6 @@ describe("batched calendar access (N+1 fix)", () => {
     const own = await listCalendar(users.realtor1, range, { now: new Date() });
     expect(own.some((i) => i.title === "Чужая")).toBe(false);
     const mgr = await listCalendar(users.manager, range, { now: new Date() });
-    expect(mgr.some((i) => i.title === "Чужая")).toBe(false); // приватная — только занятость/проекция
+    expect(mgr.some((i) => i.title === "Чужая")).toBe(false); 
   });
 });

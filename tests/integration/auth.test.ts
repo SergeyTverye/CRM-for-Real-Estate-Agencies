@@ -45,7 +45,7 @@ describe("I1: аутентификация и сессии (T01)", () => {
     await updateUser(u.manager, u.realtor2.userId, { isActive: false });
     expect(await resolveSession(r.token)).toBeNull();
     await expect(login(u.realtor2.login, TEST_PASSWORD, meta, { delay: false })).rejects.toBeInstanceOf(InvalidCredentialsError);
-    // История не разрушена: пользователь существует, запись аудита есть.
+    
     expect(await db.user.findUnique({ where: { id: u.realtor2.userId } })).not.toBeNull();
     expect(await db.auditLog.count({ where: { action: "user.deactivated", entityId: u.realtor2.userId } })).toBe(1);
   });

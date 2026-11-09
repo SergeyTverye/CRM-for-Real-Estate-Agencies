@@ -24,7 +24,7 @@ describe("T02 / UC-02: дубли клиентов без утечки свед�
     expect(serialized).not.toContain("Секретный");
     expect(serialized).not.toContain(u.realtor1.userId);
     expect(serialized).not.toContain("Риелтор Один");
-    // auto-merge не выполняется, новый клиент не создан
+    
     expect(await db.client.count()).toBe(1);
   });
 
@@ -72,7 +72,7 @@ describe("T02 / UC-01: регистрация обращения", () => {
     expect([client.responsibleUserId, need.responsibleUserId, lr.responsibleUserId]).toEqual([u.realtor2.userId, u.realtor2.userId, u.realtor2.userId]);
     expect(lr.createdBy).toBe(u.realtor1.userId);
     expect(lr.statusCode).toBe("processed");
-    // Регистрирующий видит своё обращение, но не карточку чужого клиента.
+    
     const list = await listRequests(u.realtor1, {});
     expect(list.items.map((i) => i.id)).toContain(r.requestId);
     expect(list.items.find((i) => i.id === r.requestId)?.clientVisible).toBe(false);
@@ -118,7 +118,7 @@ describe("T02 / UC-01: регистрация обращения", () => {
     }).catch((e) => e);
     expect(err).toBeInstanceOf(DomainError);
     expect(err.code).toBe("CLIENT_ARCHIVED");
-    // факт обращения всё равно сохранён (первое обращение) — и транзакция второго откатилась целиком
+    
     expect(await db.leadRequest.count({ where: { clientId: c2 } })).toBe(1);
   });
 

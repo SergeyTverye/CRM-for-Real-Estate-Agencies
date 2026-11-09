@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Список локальных backup-наборов с краткими сведениями из manifest.
+
 set -euo pipefail
 . "$(dirname "$0")/common.sh"
 for d in "$BACKUP_DIR"/*/; do

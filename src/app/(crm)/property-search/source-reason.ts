@@ -1,4 +1,4 @@
-/** Presentation only: retain the unmodified diagnostic in the caller's tooltip. */
+
 export function sourceReason(reason: string | null, status: string): string {
   if (!reason) return status === "success" ? "Источник обработан" : status === "disabled" ? "Источник отключён в настройках" : status === "timeout" ? "Площадка не ответила вовремя" : "Площадка не сообщила причину";
   if (/NEEDS_USER_ACTION|SOURCE_CONTINUATION_NOT_ALLOWED/iu.test(reason)) return "Нужна ручная проверка площадки. Откройте её в обычном браузере и добавьте ссылку объявления или официальную выгрузку.";

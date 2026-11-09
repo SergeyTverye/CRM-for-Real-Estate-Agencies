@@ -96,7 +96,7 @@ export async function extractArchive(input: {
       } finally { await output.close(); }
       if (hash.digest("hex") !== file.sha256) throw new BackupError("FILE_CHECKSUM");
     }
-    await reader.finish(); // Authenticate final sentinel: prevents truncation at a chunk boundary.
+    await reader.finish(); 
     safeSettingsSchema.parse(JSON.parse(await readFile(path.join(stage, "settings.json"), "utf8")));
     await input.validator.validate(path.join(stage, manifest.components.includes("postgres") ? "database.dump" : "database.sqlite"));
     return { manifest, stage, dispose: () => rm(stage, { recursive: true, force: true }) };

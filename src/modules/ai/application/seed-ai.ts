@@ -1,7 +1,7 @@
 import type { DbOrTx } from "@/shared/db/client";
 import { writeAudit } from "@/modules/audit/application/audit";
 
-/** Official synchronous prices, RUB incl VAT, checked 2026-11-05. No zero placeholders. */
+
 export async function seedAiTariffs(tx: DbOrTx) {
   const effectiveFrom = new Date("2026-11-05T00:00:00Z");
   const source = "https://aistudio.yandex.ru/ru/docs/ai-studio/pricing";

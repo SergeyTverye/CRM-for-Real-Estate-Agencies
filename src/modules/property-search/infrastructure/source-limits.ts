@@ -26,13 +26,10 @@ export function resolveSourceDepth(source: Source, options: DepthOptions = {}, b
   return { maxPages, limit, estimatedRequests: maxPages * Math.max(1, branches) * safe.requestsPerPage + safe.setupRequests + dateDetails, dateSortSupported: false };
 }
 
-/** Package 2.1 variants() splits commercial OR types except on these native parsers.
- * maxPages is PER internal variant, not a source-wide page allowance. Setup and
- * date-detail allowances belong to the shared client, not to each searchSite call.
- */
+
 export function boundSourceQueries(source: Source, queries: RealEstateScraper.Query[], depth: ReturnType<typeof resolveSourceDepth>) {
   const nativeMultiType = ["cian", "yandex", "avito", "domclick", "youla"].includes(source);
-  // Expose package-internal OR branches to the bounded adapter scheduler.
+  
   const expanded = queries.flatMap(query => !nativeMultiType && (query.types?.length ?? 0) > 1 ? query.types!.map(type => ({ ...query, type, types: [type] })) : [query]);
   const variants = expanded.length;
   return {
@@ -40,9 +37,9 @@ export function boundSourceQueries(source: Source, queries: RealEstateScraper.Qu
       limit: Math.max(1, Math.floor(depth.limit / expanded.length) + (index < depth.limit % expanded.length ? 1 : 0)),
     })),
     maxPages: depth.maxPages * variants,
-    // Even limit=1 fans out to six one-row calls; the shared detail reader can
-    // therefore inspect three cards, not just one. This is a planned upper bound,
-    // not a claim that unsupported/empty categories actually fetch all pages.
+    
+    
+    
     estimatedRequests: depth.maxPages * variants * SOURCE_LIMITS[source].requestsPerPage + SOURCE_LIMITS[source].setupRequests +
       (["onrealt", "mirkvartir"].includes(source) ? Math.min(3, Math.max(depth.limit, queries.length)) : 0),
   };

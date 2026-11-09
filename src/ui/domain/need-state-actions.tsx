@@ -8,11 +8,7 @@ import { Field, FormErrorBanner } from "../form";
 import { Modal, NextActionFields, SelectInput, defaultNextAction, type NextActionValue, type Option } from "../client-kit";
 import { optionsOf } from "@/shared/codebook";
 
-/**
- * Команды жизненного цикла потребности (ТЗ 25.1, 40.2.1): смена этапа, пауза с задачей возврата,
- * закрытие с причиной, успешное завершение, возобновление со следующим действием.
- * Все переходы — POST /api/v1/needs/[id]/state с версией записи.
- */
+
 
 export const NEED_TASK_TYPES = optionsOf("taskType").filter((o) => o.value !== "postdeal");
 const STAGES = optionsOf("needStage");
@@ -62,7 +58,7 @@ export function NeedStateActions({
     setStopComment("");
     setCancelOpenTasks(true);
     setToStage(m === "success" ? (stage === "postdeal" ? "postdeal" : "deal") : "");
-    // При возобновлении из closed/success следующее действие обязательно (инвариант active).
+    
     setWithNext(m === "resume");
     setNext(defaultNextAction(m === "resume" ? "Связаться с клиентом" : "Следующий шаг"));
     setReturnTask(defaultNextAction("Вернуться к потребности", 24 * 7));

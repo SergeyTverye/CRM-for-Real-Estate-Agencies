@@ -6,10 +6,7 @@ import path from "node:path";
 import { db } from "@/shared/db/client";
 import { getConfig } from "@/shared/config/env";
 
-/**
- * Readiness (ТЗ 40.12): доступность PostgreSQL и локального файлового хранилища.
- * Не зависит от облачных backup targets.
- */
+
 export interface HealthReport {
   status: "ok" | "fail";
   checks: Record<string, { ok: boolean; detail?: string }>;

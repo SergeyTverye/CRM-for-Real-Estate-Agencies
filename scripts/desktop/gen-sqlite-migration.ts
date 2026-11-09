@@ -19,7 +19,7 @@ export function buildSqliteMigrationSql(diffSql: string, pgSqlList: string[], co
   const tableChecks = new Map<string,string[]>();
   for (const [key, check] of checks) {
     let expr = check.expression.replace(/\bjsonb_typeof\b/g,"json_type").replace(/\bbtrim\b/g,"trim");
-    if (key.endsWith(".tasks_reminder_offsets_check")) continue; // json_each requires trigger, not CHECK.
+    if (key.endsWith(".tasks_reminder_offsets_check")) continue; 
     if (key.endsWith(".interactive_browser_sessions_host_check")) expr = '(length("start_url_host") BETWEEN 1 AND 253 AND "start_url_host" NOT GLOB \'*[^A-Za-z0-9.-]*\' AND substr("start_url_host",1,1) GLOB \'[A-Za-z0-9]\' AND substr("start_url_host",-1,1) GLOB \'[A-Za-z0-9]\')';
     if (key.endsWith(".property_owners_share_check")) expr = expr.replace('"ownership_share" <= 1','"ownership_share" <= 10000');
     const values = tableChecks.get(check.table) ?? [];

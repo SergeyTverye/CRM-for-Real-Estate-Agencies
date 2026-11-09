@@ -1,6 +1,6 @@
-// Синтетический замер десктопного перфа (v3.2.3): PRAGMA, EXPLAIN QUERY PLAN,
-// микробенч записи/чтения, размер FullCalendar, разбор холодного старта.
-// Только синтетика, без персональных данных. Запуск: node scripts/desktop/perf-measure.mjs
+
+
+
 import Database from "better-sqlite3";
 import { readdirSync, readFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -23,7 +23,7 @@ export const PRAGMA_TUNED = [
 function openFilled(pragmas) {
   const db = new Database(mkdtempSync(join(tmpdir(), "crm-perf-")) + "/bench.db");
   for (const name of readdirSync(migDir).sort()) {
-    try { db.exec(readFileSync(join(migDir, name, "migration.sql"), "utf8")); } catch { /* aux migration without sql */ }
+    try { db.exec(readFileSync(join(migDir, name, "migration.sql"), "utf8")); } catch {  }
   }
   for (const p of pragmas) db.exec(`PRAGMA ${p}`);
   db.exec("PRAGMA foreign_keys=OFF");
@@ -83,7 +83,7 @@ console.log("== microbench: base vs tuned PRAGMA (file DB, 2000 inserts + 2000 i
 function bench(pragmas) {
   const d = new Database(mkdtempSync(join(tmpdir(), "crm-perf-")) + "/bench.db");
   for (const name of readdirSync(migDir).sort()) {
-    try { d.exec(readFileSync(join(migDir, name, "migration.sql"), "utf8")); } catch { /* noop */ }
+    try { d.exec(readFileSync(join(migDir, name, "migration.sql"), "utf8")); } catch {  }
   }
   for (const p of pragmas) d.exec(`PRAGMA ${p}`);
   d.exec("PRAGMA foreign_keys=OFF");

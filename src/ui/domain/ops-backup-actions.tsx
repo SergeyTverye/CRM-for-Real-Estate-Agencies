@@ -8,11 +8,7 @@ import { FormErrorBanner } from "../form";
 
 const WAIT_FOR_RUN_MS = 45_000;
 
-/**
- * «Создать backup сейчас» (ТЗ 37.15): POST запускает скрипт асинхронно (202), статус виден в списке BackupRun.
- * Пока запись запуска не появилась — страница опрашивается. если скрипт не смог стартовать
- * (например, нет pg_dump/psql в окружении), пользователь получает понятное объяснение, а не «вечное ожидание».
- */
+
 export function BackupNowButton({ latestRunId, running }: { latestRunId: string | null; running: boolean }) {
   const router = useRouter();
   const { pending, error, run } = useApiAction();
@@ -75,7 +71,7 @@ interface VerifyResult {
   output: string;
 }
 
-/** «Проверить копию»: checksums, manifest и читаемость dump/архива (скрипт verify.sh). */
+
 export function VerifyBackupButton({ backupId }: { backupId: string }) {
   const { pending, error, run } = useApiAction();
   const [result, setResult] = useState<VerifyResult | null>(null);

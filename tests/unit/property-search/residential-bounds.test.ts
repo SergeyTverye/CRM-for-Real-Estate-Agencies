@@ -50,7 +50,7 @@ describe("bounded residential fanout (synthetic, no network)", () => {
     expect(result.listings.map(item => item.listing.sourceListingId)).toEqual(["kept"]);
     expect(calls).toHaveLength(2);
     expect(close).toHaveBeenCalledOnce();
-    // A late non-cooperative client cannot resume the remaining fanout or mutate output.
+    
     tail.resolve(response("cian", hanging, [row("late")]));
     await Promise.resolve(); await Promise.resolve();
     expect(calls).toHaveLength(2);
@@ -84,7 +84,7 @@ describe("bounded residential fanout (synthetic, no network)", () => {
     const calls: RealEstateScraper.Query[] = [];
     const { adapter } = harness(async (source, query = {}) => {
       calls.push(query);
-      // Deliberately over-return and repeat across branches: enforce caps at the adapter too.
+      
       return response(source, query, [row("shared"), ...Array.from({ length: 20 }, (_, i) => row(`${query.type}-${i}`))]);
     }, limit);
     const result = await adapter.searchDetailed(input);

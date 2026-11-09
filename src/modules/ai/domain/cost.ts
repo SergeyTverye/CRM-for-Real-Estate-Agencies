@@ -1,6 +1,6 @@
 import { AiError, type TokenUsage } from "./contracts";
 
-/** All money is integer micro-RUB (1 RUB = 1,000,000); no floating-point accounting. */
+
 export function rubToMicros(rub: string): bigint {
   if (!/^\d+(?:\.\d{1,6})?$/.test(rub)) throw new AiError("AI_INVALID_MONEY");
   const [whole = "0", fraction = ""] = rub.split(".");
@@ -9,7 +9,7 @@ export function rubToMicros(rub: string): bigint {
 export interface AiTariff {
   id: string; model: string; effectiveFrom: Date; effectiveUntil?: Date;
   inputMicrosPerMillion: bigint; outputMicrosPerMillion: bigint; webSearchMicrosPerCall: bigint;
-  /** Conservative billed search-context bound per response; supplied with reviewed tariff. */
+  
   webInputTokenAllowance: number;
 }
 export interface TariffRepository { findEffective(model: string, at: Date): Promise<AiTariff | null> }

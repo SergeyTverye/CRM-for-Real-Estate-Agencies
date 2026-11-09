@@ -24,7 +24,7 @@ it("real desktop --initialize path seeds fresh and already initialized profiles 
   const client = createSqliteClient("file:" + fresh.file);
   try {
     expect(await client.aiTariff.count()).toBe(6);
-    expect(await client.aiSetting.count()).toBe(0); // No hidden AI opt-in.
+    expect(await client.aiSetting.count()).toBe(0); 
     expect(await client.aiUsageLog.count()).toBe(0);
     await client.user.create({ data: { login: "synthetic-initialized", displayName: "Synthetic", roleCode: "manager", passwordHash: "synthetic-not-a-login-hash" } });
     await client.aiTariff.deleteMany();

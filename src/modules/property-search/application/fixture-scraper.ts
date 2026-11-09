@@ -6,7 +6,7 @@ import { normalizeListing, deduplicateListings } from "../infrastructure/normali
 import { evaluateListing } from "../domain/evaluation";
 import type { ScraperAdapter, ScraperOptions } from "../infrastructure/scraper-adapter";
 
-/** No network requests; fixtures are synthetic, recorded parser outputs. */
+
 export class FixtureScraperAdapter implements ScraperAdapter {
   private firstSource?: string;
   constructor(private options: ScraperOptions, private scenario = "success", private fixtureDirectory = "tests/fixtures/scraper") {}

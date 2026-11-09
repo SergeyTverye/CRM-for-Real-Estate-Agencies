@@ -34,7 +34,7 @@ interface IssuedPassword {
   reason: "created" | "reset";
 }
 
-/** Временный пароль показывается один раз: после закрытия панели его нельзя получить повторно. */
+
 function TemporaryPasswordPanel({ issued, onDismiss }: { issued: IssuedPassword; onDismiss: () => void }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -156,7 +156,7 @@ function EditUserForm({ user, isSelf, onDone, onCancel }: { user: AdminUserRow; 
   );
 }
 
-/** Управление учётными записями (UC-13): создание, роль/имя, деактивация/восстановление, сброс пароля. */
+
 export function AdminUsersPanel({ users, currentUserId, timeZone }: { users: AdminUserRow[]; currentUserId: string; timeZone: string }) {
   const router = useRouter();
   const [issued, setIssued] = useState<IssuedPassword | null>(null);

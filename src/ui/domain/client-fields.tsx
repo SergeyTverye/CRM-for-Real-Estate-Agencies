@@ -92,10 +92,7 @@ interface DuplicateCandidate {
   responsible: { displayName: string };
 }
 
-/**
- * Предупреждение о дубле (ТЗ 40.2). Для собственных клиентов/руководителя — список кандидатов
- * и явное подтверждение. при совпадении с чужим клиентом — только нейтральное сообщение.
- */
+
 export function DuplicateNotice({
   error,
   onConfirm,

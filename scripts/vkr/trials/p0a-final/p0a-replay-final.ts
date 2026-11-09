@@ -29,7 +29,7 @@ async function main() {
       };
       $("script:not([src])").each((_, el) => {
         const text = $(el).text().trim().replace(/^window\.INITIAL_STATE\s*=\s*/u, "").replace(/;\s*$/u, "");
-        try { walk(JSON.parse(text)); } catch { /* Inert JSON only. */ }
+        try { walk(JSON.parse(text)); } catch {  }
       });
       if (own) await writeFile(`${dir}/${source}-${index}.html`, `<script>window.INITIAL_STATE = ${JSON.stringify({ card: { offerId: row.sourceListingId, creationDate: own.creationDate, updateDate: own.updateDate } })};</script>\n`);
     }

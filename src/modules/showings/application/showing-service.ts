@@ -11,12 +11,7 @@ import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 import { advanceNeedStage, applyNeedStateChange, embeddedNeedChangeSchema, loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { assertNeedInvariants } from "@/modules/needs/domain/need-invariant";
 
-/**
- * Показы (FR-08, UC-05 RecordShowingResult, ТЗ 37.8).
- * Назначение показа создаёт задачу-встречу (она же следующее действие потребности) и отмечает
- * объект в подборе. Фиксация результата + переход этапа/статуса + следующее действие выполняются
- * одной транзакцией. результат структурирован (status + result_code) и дополнен комментарием.
- */
+
 
 const createSchema = z.object({
   clientNeedId: zUuid,
@@ -60,7 +55,7 @@ export async function scheduleShowing(actor: Actor, input: unknown): Promise<{ i
       { title: `Показ: ${property.addressText}`, taskType: "showing_or_meeting", dueAt: d.scheduledAt, responsibleUserId },
       { needIds: [need.id], clientIds: [need.clientId], propertyIds: [property.id], showingIds: [showing.id] },
     );
-    // Объект в подборе получает статус «назначен показ» (новая запись, если ранее не предлагался/был закрыт).
+    
     const active = await tx.needPropertyMatch.findFirst({
       where: { clientNeedId: need.id, propertyId: property.id, status: { in: ["proposed", "interested", "showing_planned"] } },
       orderBy: { offeredAt: "desc" },
@@ -122,10 +117,7 @@ const resultSchema = z
 
 const MATCH_BY_RESULT: Record<string, string> = { interested: "interested", negotiation: "interested", thinking: "interested", rejected: "rejected" };
 
-/**
- * UC-05: результат показа, StageHistory и переход ClientNeed с требуемым продолжением — одной транзакцией.
- * Если потребность остаётся active и у неё не остаётся открытых действий, команда требует next action.
- */
+
 export async function recordShowingResult(actor: Actor, showingId: string, input: unknown): Promise<{ id: string; taskId: string | null }> {
   const d = parseInput(resultSchema, input);
   return transaction(async (tx) => {
@@ -143,7 +135,7 @@ export async function recordShowingResult(actor: Actor, showingId: string, input
     });
     if (res.count === 0) throw new StaleUpdateError();
 
-    // Задача-встреча по показу выполнена (или отменена).
+    
     await tx.task.updateMany({
       where: { showingLinks: { some: { showingId } }, status: { in: [...OPEN_TASK_STATUSES] }, taskType: "showing_or_meeting" },
       data: d.status === "completed" ? { status: "completed", completedAt: new Date(), resultComment: d.comment } : { status: "cancelled", resultComment: d.comment ?? "Показ не состоялся" },

@@ -35,7 +35,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
   const showResponsible = view.scope !== "mine";
   const selectedUser = view.scope === "user" ? users.find((u) => u.value === sp.userId) : undefined;
 
-  // Drill-down из счётчиков в список задач с тем же охватом.
+  
   const taskHref = (v: "overdue" | "today" | "week") =>
     view.scope === "all" ? `/today?scope=all#${v}` : view.scope === "user" ? `/tasks?view=${v}&responsibleUserId=${sp.userId}` : `/tasks?view=${v}`;
   const needsHref = `/needs?withoutNextAction=yes${view.scope === "user" ? `&responsibleUserId=${sp.userId}` : ""}`;

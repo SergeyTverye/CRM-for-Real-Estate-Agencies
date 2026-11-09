@@ -9,10 +9,7 @@ import { DateTimeInput, Modal, NextActionFields, SelectInput, defaultNextAction,
 import { optionsOf } from "@/shared/codebook";
 import { NEED_TASK_TYPES } from "./need-state-actions";
 
-/**
- * Быстрая запись коммуникации по потребности (FR-07, ТЗ 40.7): после звонка/встречи можно
- * в той же операции создать задачу, сменить этап, поставить паузу с задачей возврата или закрыть с причиной.
- */
+
 
 const TYPES = optionsOf("communicationType");
 const RESULTS = optionsOf("communicationResult");

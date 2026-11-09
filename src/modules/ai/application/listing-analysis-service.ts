@@ -32,8 +32,7 @@ async function available() {
   if (!value.aiEnabled) throw new DomainError("AI_DISABLED", "ИИ отключён. Ручной поиск, фильтры и экспорт доступны.");
   return value;
 }
-/** Legacy parse/description ledger requires an owned SearchRun FK. Create it only
- * on an actual cache miss, and never persist input descriptions or query text. */
+
 async function withListingAi<T>(actor: Actor, work:(ai:SearchAi,context:AiCallContext)=>Promise<T>, injected?:SearchAi, filters?:SearchFilters) {
   return withP2Ai(actor,"offer_text",async (ai,context)=>{
     await db.searchRun.create({data:{id:context.jobId,userId:actor.userId,filters:json(filters ?? SearchFilters.parse({operation:"sale"})),status:"running",startedAt:new Date()}});
@@ -50,7 +49,7 @@ async function withListingAi<T>(actor: Actor, work:(ai:SearchAi,context:AiCallCo
 async function selected(actor: Actor, input: Selection) {
   if (input.needId) await loadAccessibleNeed(db, actor, input.needId);
   if (new Set(input.listingIds).size !== input.listingIds.length) throw new DomainError("DUPLICATE_SELECTION", "Объявление выбрано несколько раз.");
-  // Public external market catalogue is shared, unlike personal runs, needs and collections.
+  
   const rows = await db.externalListing.findMany({where:{id:{in:input.listingIds}},include:{snapshots:{orderBy:{fetchedAt:"desc"},take:1},verifications:{orderBy:{verifiedAt:"desc"},take:1}}});
   if (rows.length !== input.listingIds.length) throw new NotFoundError();
   return input.listingIds.map(id => rows.find(r => r.id === id)!);
@@ -72,7 +71,7 @@ function normalized(row: Listing): NormalizedListing {
 function prepare(row: Listing, filters: SearchFilters) {
   const listing = normalized(row), evaluation = evaluateListing(listing, filters);
   const unknown = evaluation.criteria.filter(c => c.state === "unknown");
-  // Only required public descriptive features. Typed numeric ranges remain rule-based.
+  
   const criteria = [...new Set(unknown.filter(c => (filters.requiredFeatures.includes(c.criterion) || c.criterion.startsWith("features.") && filters.features?.[c.criterion.slice(9) as keyof NonNullable<SearchFilters["features"]>] === true) && !forbiddenAnalysisCriterion(analysisCriterionLabel(c.criterion))).map(c => analysisCriterionLabel(c.criterion)))].sort();
   return {row,listing,evaluation,unknown,criteria};
 }
@@ -82,7 +81,7 @@ export async function analyzeListingBatch(actor: Actor, raw: unknown, injected?:
   const limit = Math.min(20,config.perJobLimit);
   if (rows.length > limit) throw new DomainError("AI_ANALYSIS_LIMIT", `Для анализа выберите не более ${limit} объявлений (лимит руководителя).`);
   const prepared = rows.map(row=>prepare(row,input.filters));
-  // Cross-process serialization avoids two simultaneous paid analyses of the same data.
+  
   return independentCommitScope(async tx => {
     const keys = prepared.filter(p=>p.criteria.length).map(p=>analysisCacheKey(p.listing.description,p.criteria,config.model));
     for (const key of [...new Set(keys)].sort()) await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`));
@@ -96,7 +95,7 @@ export async function analyzeListingBatch(actor: Actor, raw: unknown, injected?:
       else if (cached) results.push({...base,cacheHit:true,evidence:cached.result,unresolved:p.unknown.map(c=>analysisCriterionLabel(c.criterion))});
       else pending.push({p,cacheKey,base});
     }
-    // Group equal unresolved sets; each call analyzes all candidates in that group.
+    
     const groups = new Map<string,typeof pending>();
     for (const item of pending) { const key = JSON.stringify(item.p.criteria); groups.set(key,[...(groups.get(key) ?? []),item]); }
     for (const group of groups.values()) {
@@ -109,8 +108,8 @@ export async function analyzeListingBatch(actor: Actor, raw: unknown, injected?:
           const result = suspicious ? "unknown" : e.result;
           return {criterion:e.criterion,result,quote:suspicious ? null : e.quote,source:"ai",reason:result === "unknown" ? "В описании нет точного подтверждения; уточните у продавца." : "Дословный фрагмент публичного описания; требуется проверка сотрудником."};
         });
-        // Commit each paid result independently while the outer advisory lock is
-        // still held. A failure in a later group must not erase an earlier paid cache.
+        
+        
         await db.aiAnalysisCache.upsert({where:{cacheKey},create:{cacheKey,listingId:p.row.id,result:json(evidence),aiUsageLogId:usage?.id},update:{}});
         results.push({...base,cacheHit:false,evidence,unresolved:p.unknown.map(c=>analysisCriterionLabel(c.criterion))});
       }
@@ -128,8 +127,8 @@ export async function previewAnalysisQuery(actor: Actor, raw: unknown, injected?
   await available();
   const parsed = await withListingAi(actor,(ai,c)=>ai.parseSearchQuery(c,{query:input.text,currentFilters:input.currentFilters}),injected,input.currentFilters);
   if (!parsed.filters || parsed.clarificationQuestion) return {...parsed,diff:[],confirmationRequired:false,pendingActionId:null};
-  // LIVE: spelled-out square metres must open the same preservation category
-  // as "м²"; otherwise a correctly parsed area silently disappears here.
+  
+  
   const preservationText = input.text.replace(/квадратн\p{L}*\s+метр\p{L}*/giu, "площадь");
   const filters = SearchFilters.parse(preserveSearchConditions(input.currentFilters,parsed.filters,preservationText));
   const diff = filterDiff(input.currentFilters,filters);
@@ -188,12 +187,12 @@ async function draftSelectionText(actor: Actor, raw: unknown, kind: "intro"|"com
   const rows = await selected(actor,input);
   const items = rows.map(row=>{
     const p = prepare(row,input.filters);
-    // Unverified text is never promoted to verified facts or fed into drafting.
+    
     return {address:safeListingText(row.address ?? "Адрес не указан"),area:row.areaM2?.toString() ?? null,price:row.priceRub?.toString() ?? null,priceUnit:p.listing.priceUnit,pricePeriodNotice:p.listing.priceUnit ? null : "Период цены неизвестен — цены несопоставимы до проверки",
       confirmedCharacteristics:p.evaluation.criteria.filter(c=>c.state==="matched" && c.source==="structured").map(c=>`${c.criterion}: ${c.evidence}`)};
   });
-  // Unknown criterion labels are intentionally NOT model facts: LIVE showed that
-  // a model can promote the word 'unknown' to an asserted characteristic.
+  
+  
   const facts = {items,requirements:"Объясни компромиссы только по полям каждого объекта. Укажи единицы площади и цены. Не подтверждай собственника или доступность. Отсутствующие характеристики не упоминай как существующие. Не придумывай характеристики и числа. Если период цены неизвестен — цены несопоставимы до проверки; не называй цену общей и не делай выводов о выгоде."};
   const draft = await withP2Ai(actor,"offer_text",(ai,c)=>ai.draftOfferText(c,facts,kind),injected);
   checkOfferNumbers(draft.text,facts);
@@ -210,7 +209,7 @@ async function draftSelectionText(actor: Actor, raw: unknown, kind: "intro"|"com
 export const compareAnalysisListings = (actor:Actor,raw:unknown,injected?:SearchAi)=>draftSelectionText(actor,raw,"comparison",injected);
 export const collectionAnalysisText = (actor:Actor,raw:unknown,injected?:SearchAi)=>draftSelectionText(actor,raw,"intro",injected);
 
-/** Shares the durable analysis cache, cross-process lock and existing budget gate. */
+
 export async function rankAnalysisListings(actor:Actor,raw:unknown,injected?:SearchAi) {
   const input=parseInput(selectionSchema,raw),config=await available();
   if(input.listingIds.length<2 || input.listingIds.length>10) throw new DomainError("AI_RANK_COUNT","Выберите от двух до десяти объявлений.");
@@ -220,9 +219,9 @@ export async function rankAnalysisListings(actor:Actor,raw:unknown,injected?:Sea
     const p=prepare(row,input.filters);
     return {listingId:row.id,criteria:[...p.evaluation.criteria,...p.evaluation.preferences].filter(c=>!forbiddenAnalysisCriterion(c.criterion)).map(c=>({criterion:c.criterion,state:c.state,evidence:safeListingText(c.evidence)})),pricePeriodNotice:p.listing.priceUnit ? null : "Период цены неизвестен — цены несопоставимы до проверки"};
   }).sort((a,b)=>a.listingId.localeCompare(b.listingId))};
-  // Personal recommendations are actor/need scoped; public description evidence
-  // may be shared, but never reuse another actor's ranking or an older shared key.
-  // selected() above checks current need access and every listing before cache lookup.
+  
+  
+  
   const cacheKey=createHash("sha256").update(JSON.stringify(["listing-ranking-v2",actor.userId,actor.role,input.needId ?? null,config.model,input.filters,facts])).digest("hex");
   return independentCommitScope(async tx=>{
     await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${cacheKey},0))`));

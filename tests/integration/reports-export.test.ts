@@ -22,7 +22,7 @@ const plusDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOStrin
 
 describe("T09: управленческий отчёт по контрольному набору событий", () => {
   it("агрегаты совпадают с ручным подсчётом исходных событий", async () => {
-    // Контрольный набор: 3 обращения (2 avito, 1 cian), 2 потребности, 2 показа (1 проведён: interested), 1 сделка, 1 просрочка.
+    
     const req = (sourceCode: string, need: boolean) =>
       registerRequest(u.realtor1, {
         occurredAt: new Date().toISOString(),
@@ -55,11 +55,11 @@ describe("T09: управленческий отчёт по контрольно
     expect(rep.funnel.requestsWithNeed).toBe(2);
     expect(rep.funnel.requestToShowing).toBe(2);
     expect(kpi.dealsOpened).toBe(1);
-    // просроченные: задачи «Позвонить» со сроком вчера (2 шт.)
+    
     expect(kpi.overdue).toBe(await db.task.count({ where: { status: { in: ["planned", "in_progress"] }, dueAt: { lt: new Date() } } }));
     expect(kpi.overdue).toBe(2);
     expect(rep.needs.nextActionShare).toBe(100);
-    // Детализация использует тот же период и ведёт к исходным обращениям.
+    
     const detailUrl = new URL(rep.kpis.find((k) => k.key === "newRequests")!.href!, "http://localhost");
     expect(detailUrl.pathname).toBe("/reports/detail");
     expect(Object.fromEntries(detailUrl.searchParams)).toEqual({ from: plusDays(-1), to: plusDays(2), metric: "newRequests" });
@@ -75,7 +75,7 @@ describe("T09: управленческий отчёт по контрольно
   it("повторная активация считается по событиям и паузе REACTIVATION_GAP_DAYS", async () => {
     const { id: oldClient } = await makeClient(u.realtor1);
     await db.client.update({ where: { id: oldClient }, data: { createdAt: new Date(Date.now() - 200 * 86_400_000), status: "inactive" } });
-    const { id: freshClient } = await makeClient(u.realtor1); // создан сегодня — не реактивация
+    const { id: freshClient } = await makeClient(u.realtor1); 
     await makeNeed(u.realtor1, oldClient);
     await makeNeed(u.realtor1, freshClient);
     const from = new Date(Date.now() - 86_400_000);
@@ -111,7 +111,7 @@ describe("UC-14: экспорт ZIP/CSV + manifest", () => {
     expect(manifest.files.find((f: { file: string }) => f.file === "clients.csv").rows).toBe(1);
     const clientsCsv = strFromU8(files["clients.csv"]!);
     expect(clientsCsv).toContain(clientId);
-    expect(clientsCsv).toContain("'=CMD"); // защита от CSV-инъекции
+    expect(clientsCsv).toContain("'=CMD"); 
     const all = Object.values(files).map((f) => strFromU8(f)).join("\n");
     expect(all).not.toMatch(/argon2|password_hash|passwordHash|token_hash|storage_key|storageKey/);
     expect(all).not.toContain("Архивный Участник");

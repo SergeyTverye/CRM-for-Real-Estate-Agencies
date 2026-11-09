@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Логи: ./scripts/logs.sh [app|db|migrate] [--follow]. Логи приложения не содержат паролей и токенов.
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

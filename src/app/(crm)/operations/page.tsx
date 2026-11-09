@@ -15,7 +15,7 @@ type Remote = Status["remotes"][number];
 const LOCAL_TONES: Record<string, Tone> = { pending: "gray", running: "blue", success: "green", failed: "red" };
 const UPLOAD_TONES: Record<string, Tone> = { pending: "gray", uploading: "blue", uploaded: "green", failed: "red", skipped: "gray" };
 const VERIFY_TONES: Record<string, Tone> = { not_verified: "gray", verifying: "blue", verified: "green", failed: "red" };
-/** Ежедневный backup: копия старше суток (+ запас) — сигнал. */
+
 const STALE_HOURS = 26;
 
 function fmtBytes(v: number | bigint | null | undefined): string {

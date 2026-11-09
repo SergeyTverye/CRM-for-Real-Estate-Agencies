@@ -30,10 +30,7 @@ import { isOpenTaskStatus, nextTaskDue, OPEN_TASK_STATUSES } from "../domain/tas
 import { parseRecurrence } from "@/modules/calendar/domain/calendar-rules";
 import { getConfig } from "@/shared/config/env";
 
-/**
- * Task — единая сущность для задач, звонков, напоминаний, контрольных дат
- * и повторяемых действий. Связи с бизнес-контекстом — нормализованные join-таблицы.
- */
+
 
 const ids = z.array(zUuid).max(20).default([]);
 
@@ -77,7 +74,7 @@ export const taskInputSchema = z
 
 export type TaskInput = z.infer<typeof taskInputSchema>;
 
-/** Короткая форма «следующего действия» для команд потребности/показа/коммуникации. */
+
 export const nextActionSchema = z.object({
   title: zRequiredText(300, "Опишите следующее действие"),
   description: zOptText(4000),
@@ -89,10 +86,7 @@ export const nextActionSchema = z.object({
 
 export type NextActionInput = z.infer<typeof nextActionSchema>;
 
-/**
- * Ответственный за задачу: руководитель может назначить любого активного сотрудника,
- * риелтор — себя или руководителя (эскалация). Сервер не доверяет user_id из формы без проверки.
- */
+
 export async function resolveTaskResponsible(tx: Tx | typeof db, actor: Actor, requested: string | undefined, fallback: string): Promise<string> {
   const userId = requested ?? fallback;
   const user = await tx.user.findUnique({ where: { id: userId }, select: { id: true, isActive: true, roleCode: true } });
@@ -107,7 +101,7 @@ async function assertAccessible(count: Promise<number>, expected: number, field:
   if ((await count) !== expected) throw new ValidationError("Связанная запись не найдена или недоступна", { [field]: ["Недоступная запись"] });
 }
 
-/** Пользователь не может связать задачу с недоступной ему сущностью (UC-06). */
+
 export async function assertTaskLinksAccessible(tx: Tx | typeof db, actor: Actor, links: TaskLinks): Promise<void> {
   const u = (a?: string[]) => [...new Set(a ?? [])];
   const l = {
@@ -120,7 +114,7 @@ export async function assertTaskLinksAccessible(tx: Tx | typeof db, actor: Actor
     agreementIds: u(links.agreementIds),
     offerIds: u(links.offerIds),
   };
-  // Последовательно: внутри интерактивной транзакции одно соединение, параллельные запросы недопустимы.
+  
   if (l.clientIds.length) await assertAccessible(tx.client.count({ where: { id: { in: l.clientIds }, ...clientScope(actor) } }), l.clientIds.length, "links.clientIds");
   if (l.needIds.length) await assertAccessible(tx.clientNeed.count({ where: { id: { in: l.needIds }, ...needScope(actor) } }), l.needIds.length, "links.needIds");
   if (l.propertyIds.length) await assertAccessible(tx.property.count({ where: { id: { in: l.propertyIds } } }), l.propertyIds.length, "links.propertyIds");
@@ -148,7 +142,7 @@ export interface InsertTaskData {
   reminderOffsets?: number[];
 }
 
-/** Низкоуровневая вставка задачи и её связей (вызывающая команда уже проверила права). */
+
 export async function insertTask(tx: Tx, createdBy: string, data: InsertTaskData, links: TaskLinks = {}): Promise<{ id: string }> {
   const task = await tx.task.create({
     data: {
@@ -210,7 +204,7 @@ async function loadTaskLinks(tx: Tx, taskId: string): Promise<Required<TaskLinks
   };
 }
 
-/** Клиент, к которому относятся потребности (для автоматической связи задачи с клиентом). */
+
 async function clientIdsOfNeeds(tx: Tx | typeof db, needIds: string[]): Promise<string[]> {
   if (!needIds.length) return [];
   const needs = await tx.clientNeed.findMany({ where: { id: { in: needIds } }, select: { clientId: true } });
@@ -240,7 +234,7 @@ async function loadOwnTask(tx: Tx, actor: Actor, taskId: string) {
 }
 
 async function lockVersion(tx: Tx, taskId: string, expected: Date) {
-  // Optimistic concurrency по updated_at (ТЗ 40.10): обновляем, только если версия совпадает.
+  
   const res = await tx.task.updateMany({ where: { id: taskId, updatedAt: expected }, data: { updatedAt: new Date() } });
   if (res.count === 0) throw new StaleUpdateError();
 }
@@ -259,11 +253,7 @@ export interface CompleteTaskResult {
   nextTaskId: string | null;
 }
 
-/**
- * Завершение задачи. Если задача — последнее открытое действие активной/приостановленной
- * потребности, команда требует следующий шаг (nextTask) — иначе инвариант нарушится (FR-23).
- * Для повторяемой задачи создаётся следующий экземпляр.
- */
+
 export async function completeTask(actor: Actor, taskId: string, input: unknown): Promise<CompleteTaskResult> {
   parseInput(zUuid, taskId);
   const data = parseInput(completeSchema, input);
@@ -362,7 +352,7 @@ const updateSchema = z.object({
   responsibleUserId: zUuid.optional(),
 });
 
-/** Перенос срока, изменение приоритета/ответственного/описания открытой задачи. */
+
 export async function updateTask(actor: Actor, taskId: string, input: unknown): Promise<{ id: string }> {
   const data = parseInput(updateSchema, input);
   return transaction(async (tx) => {
@@ -402,7 +392,7 @@ export async function updateTask(actor: Actor, taskId: string, input: unknown): 
   });
 }
 
-/** Число открытых задач по потребности (для подсказок UI). */
+
 export async function countOpenTasksForNeed(needId: string): Promise<number> {
   return db.taskNeed.count({ where: { clientNeedId: needId, task: { status: { in: [...OPEN_TASK_STATUSES] } } } });
 }

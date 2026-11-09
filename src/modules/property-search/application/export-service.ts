@@ -16,7 +16,7 @@ export const exportInput = z.object({ format: z.enum(["csv", "xlsx"]).default("c
   columns: z.array(z.enum(Object.keys(EXPORT_COLUMNS) as [Column, ...Column[]])).min(1).max(22).refine(v => new Set(v).size === v.length).default(Object.keys(EXPORT_COLUMNS) as Column[]), query: resultQuerySchema.partial().optional() }).strict();
 export async function exportSearch(actor: Actor, runId: string, raw: unknown) {
   const input = parseInput(exportInput, raw), ids = input.ids ? [...new Set(input.ids)] : undefined;
-  // The table's page/revision belongs to its own page size; export starts a fresh stable selection.
+  
   const { revision: _revision, ...selection } = input.query ?? {};
   void _revision;
   const query = { ...selection, page: 1, pageSize: 2000 };
@@ -30,7 +30,7 @@ export async function exportSearch(actor: Actor, runId: string, raw: unknown) {
   }
   if (ids && rows.length !== ids.length) throw new NotFoundError();
   const listingIds = rows.map(r => String(r.listingId));
-  // Bound parameters on both backends, including SQLite's Prisma query limit.
+  
   const batches = Array.from({length:Math.ceil(listingIds.length/500)},(_,i)=>listingIds.slice(i*500,(i+1)*500));
   const [bookmarkBatches, verificationBatches, duplicates] = await Promise.all([
     Promise.all(batches.map(ids => db.searchBookmark.findMany({ where: { userId: actor.userId, listingId: { in: ids } } }))),

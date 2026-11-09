@@ -9,11 +9,7 @@ import { loadAccessibleClient } from "@/modules/clients/application/client-servi
 import { applyNeedStateChange, embeddedNeedChangeSchema, loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { insertTask, nextActionSchema, resolveTaskResponsible } from "@/modules/tasks/application/task-service";
 
-/**
- * Коммуникации (FR-07, ТЗ 40.7): append-oriented факты истории клиента.
- * После записи можно сразу создать Task либо изменить этап/статус потребности
- * в той же транзакции (paused с Task возврата, closed с причиной).
- */
+
 export const communicationSchema = z.object({
   clientId: zUuid,
   clientNeedId: zUuid.optional(),

@@ -1,7 +1,4 @@
-/**
- * Детерминированный и объяснимый match score (ТЗ 37.19, FR-42): доля выполненных
- * применимых критериев потребности. Операция и тип недвижимости — обязательные фильтры.
- */
+
 
 export const NEED_TO_PROPERTY_OPERATION: Record<string, string> = { buy: "sale", rent: "rent" };
 
@@ -48,7 +45,7 @@ export interface PropertyFacts {
 export interface CriterionResult {
   key: string;
   label: string;
-  ok: boolean | null; // null — у объекта нет данных
+  ok: boolean | null; 
 }
 
 function inRange(value: number | null, min: number | null, max: number | null): boolean | null {

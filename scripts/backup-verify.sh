@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Проверка backup: ./scripts/backup-verify.sh <backup_id> [--targets all|<code>]
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

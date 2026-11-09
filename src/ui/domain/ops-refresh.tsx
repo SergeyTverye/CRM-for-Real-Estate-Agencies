@@ -3,7 +3,7 @@
 import { useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-/** Периодическое обновление серверной страницы, пока идёт долгая операция (backup, импорт). */
+
 export function AutoRefresh({ active, intervalMs = 4000, label }: { active: boolean; intervalMs?: number; label?: string }) {
   const router = useRouter();
   useEffect(() => {
@@ -20,7 +20,7 @@ export function AutoRefresh({ active, intervalMs = 4000, label }: { active: bool
   );
 }
 
-/** Ручное обновление данных страницы без перезагрузки. */
+
 export function RefreshButton({ label = "Обновить", className }: { label?: string; className?: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();

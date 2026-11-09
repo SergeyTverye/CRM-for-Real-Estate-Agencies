@@ -8,7 +8,7 @@ import { dictLabel, loadDictionaries } from "@/modules/dictionaries/application/
 import { prefillSearch } from "../application/listing-service";
 
 const inputSchema = z.object({ q: z.string().trim().max(120).default(""), clientId: zUuid.optional(), needId: zUuid.optional() });
-/** Minimal picker DTO: a visible need never grants access to its client's identity. */
+
 export async function pickSearchNeeds(actor: Actor, input: unknown) {
   const data = parseInput(inputSchema, input);
   const dictionaries = await loadDictionaries();

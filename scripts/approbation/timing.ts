@@ -24,8 +24,8 @@ import pg from "pg";
 
 loadEnv({ path: [".env.local", ".env"], quiet: true });
 
-// localhost, а не 127.0.0.1: в dev-режиме Next блокирует dev-ресурсы для «чужого» источника,
-// из-за чего клиентский бандл не гидратируется и формы уходят нативным POST на /login.
+
+
 const BASE = process.env.APPROB_BASE_URL ?? "http://localhost:3424";
 const OUT_FILE = process.env.APPROB_OUT_FILE ?? "docs/acceptance/v31/approbation/dry-run.md";
 const SHOT_DIR = process.env.APPROB_SHOT_DIR ?? "data/approbation-dry-run";
@@ -77,7 +77,7 @@ async function scenario(role: RoleCode, id: string, title: string, fn: (page: Pa
   }
 }
 
-/** Не зависим от внутренних __reactProps: события Playwright запускают selective hydration. */
+
 const hydrated = (page: Page) =>
   page.waitForLoadState("domcontentloaded");
 
@@ -85,7 +85,7 @@ async function login(context: BrowserContext, role: (typeof ROLES)[number]) {
   const page = await context.newPage();
   page.setDefaultTimeout(60_000);
   page.setDefaultNavigationTimeout(120_000);
-  // Переход между независимыми сценариями может покидать заполненный DEMO-фильтр.
+  
   page.on("dialog", dialog => { void (dialog.type() === "beforeunload" ? dialog.accept() : dialog.dismiss()); });
   page.on("response", response => { if (response.status() >= 500) pageErrors.push(`${role.code}: HTTP ${response.status()} ${new URL(response.url()).pathname}`); });
   page.on("pageerror", error => pageErrors.push(`${role.code}: ${error.message.slice(0, 200)}`));
@@ -108,7 +108,7 @@ async function openCallDialog(page: Page) {
   return dialog;
 }
 
-/** Запускает поиск и ждёт, пока источник перестанет быть «в очереди/выполняется». */
+
 async function runSearch(page: Page, options: { scenario?: string } = {}) {
   await page.getByLabel("Профиль поиска").selectOption("");
   if (options.scenario) await page.getByLabel("Записанный сценарий").selectOption(options.scenario);
@@ -169,7 +169,7 @@ async function main() {
   await db.connect();
   await cleanup(db);
   if (leftovers.length) throw new Error("Не удалось очистить остатки предыдущего прогона");
-  // Демо-учётки требуют смены пароля при первом входе. для прогона флаг снимается и восстанавливается.
+  
   const logins = ROLES.map(role => role.login);
   const priorFlags = await db.query<{ login: string; must_change_password: boolean }>("SELECT login, must_change_password FROM users WHERE login = ANY($1::text[])", [logins]);
   const priorActions = await db.query<{ id: string; payload: Record<string, unknown>; status: string; decided_by: string | null; decided_at: Date | null }>("SELECT a.id, a.payload, a.status, a.decided_by, a.decided_at FROM ai_pending_actions a JOIN ai_chat_sessions s ON s.id=a.session_id JOIN users u ON u.id=s.owner_user_id WHERE s.title LIKE 'DEMO%' AND u.login=$1", [ROLES[1]!.login]);
@@ -218,7 +218,7 @@ async function main() {
             await dialog.getByLabel("Операция").selectOption({ label: "Купить" });
             await dialog.getByLabel("Тип недвижимости").selectOption("commercial");
             await dialog.getByLabel(/Кратко/).fill(`${MARKER} перспективный звонок ${role.code}`);
-            // Следующее действие получает собственный маркер для проверяемой очистки.
+            
             await dialog.getByLabel("Что сделать").fill(`${MARKER} связаться ${role.code}`);
             const submit = dialog.getByRole("button", { name: "Зарегистрировать обращение", exact: true });
             await submit.scrollIntoViewIfNeeded();

@@ -187,7 +187,7 @@ export async function importNativeArchive(id: string, actorUserId: string, crede
         ownsPending = true;
         await writeFile(target + ".import.json", JSON.stringify({ archive: { backupId, createdAtUtc: checked.manifest.createdAtUtc, ...hash } }), { flag: "wx", mode: 0o600 });
         ownsRef = true;
-        await link(pending, target); // atomic no-clobber publication, even on ID collision
+        await link(pending, target); 
         ownsTarget = true;
       }
       catch (e) {

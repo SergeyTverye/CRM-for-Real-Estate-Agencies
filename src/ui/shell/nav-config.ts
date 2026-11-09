@@ -4,7 +4,7 @@ export interface NavItem {
   managerOnly?: boolean;
 }
 
-/** Постоянная навигация App Shell (ТЗ 37.2). «Обращения» — сразу после «Сегодня». */
+
 export const NAV_ITEMS: NavItem[] = [
   { href: "/today", label: "Сегодня" },
   { href: "/requests", label: "Обращения" },
@@ -32,7 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/settings/ai", label: "Настройки ИИ", managerOnly: true },
 ];
 
-/** Быстрые действия кнопки «Создать» (ТЗ 37.2). */
+
 export const CREATE_ITEMS: { href: string; label: string }[] = [
   { href: "/requests/new", label: "Обращение" },
   { href: "/clients/new", label: "Клиент" },

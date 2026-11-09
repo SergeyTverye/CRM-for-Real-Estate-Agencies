@@ -15,11 +15,7 @@ const TASK_TYPES = optionsOf("taskType").filter((o) => o.value !== "postdeal");
 const PRIORITIES = optionsOf("taskPriority");
 const NEXT_STEP_CODES = ["NEXT_ACTION_REQUIRED", "RETURN_TASK_REQUIRED"];
 
-/**
- * Завершение или отмена задачи с итогом и необязательным следующим шагом.
- * Если сервер сообщает, что это последнее действие активной/приостановленной потребности
- * (NEXT_ACTION_REQUIRED / RETURN_TASK_REQUIRED), форма делает следующий шаг обязательным.
- */
+
 function CloseTaskForm({
   taskId,
   updatedAt,
@@ -140,10 +136,7 @@ function RescheduleForm({ taskId, updatedAt, dueAt, timeZone, onClose }: { taskI
   );
 }
 
-/**
- * Быстрые команды строки задачи (ТЗ 37.4): «выполнить» (с итогом и следующим шагом),
- * «перенести», при необходимости — «открыть».
- */
+
 export function TaskQuickActions({ taskId, updatedAt, dueAt, timeZone, openHref }: { taskId: string; updatedAt: string; dueAt: string; timeZone: string; openHref?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<null | "complete" | "reschedule">(null);
@@ -263,7 +256,7 @@ function TaskEditForm({
   );
 }
 
-/** Команды карточки задачи: выполнить, изменить/перенести (в т.ч. передать), отменить. */
+
 export function TaskCardActions({
   taskId,
   updatedAt,
@@ -275,7 +268,7 @@ export function TaskCardActions({
   updatedAt: string;
   initial: TaskEditValue;
   timeZone: string;
-  /** Список для смены ответственного. null — передавать задачу нельзя. */
+  
   users: Option[] | null;
 }) {
   const router = useRouter();

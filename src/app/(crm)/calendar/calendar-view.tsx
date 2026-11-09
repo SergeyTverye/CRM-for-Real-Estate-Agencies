@@ -8,11 +8,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGrid from "@fullcalendar/timegrid";
 import type { RefObject } from "react";
 
-/**
- * Тяжёлая (~1.8 МБ исходников) вьюха планировщика в отдельном чанке.
- * Подключается через next/dynamic ssr:false из calendar-client, чтобы не
- * раздувать общий клиентский бандл страниц /calendar.
- */
+
 export function CalendarView({
   calendarRef,
   events,

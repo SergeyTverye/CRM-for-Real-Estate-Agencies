@@ -5,7 +5,7 @@ export const freshnessSchema = z.object({ mode: z.enum(["published", "first_seen
 });
 export type Freshness = z.infer<typeof freshnessSchema>;
 const DAY = 86400000;
-/** Asia/Novosibirsk is UTC+07:00; calendar bounds are half-open. */
+
 export function freshnessBounds(filter: Freshness, now = new Date()): { from: Date; to: Date } {
   if (filter.period === "24h") return { from: new Date(+now - DAY), to: now };
   const today = new Date(+now + 7 * 3600000).toISOString().slice(0, 10);

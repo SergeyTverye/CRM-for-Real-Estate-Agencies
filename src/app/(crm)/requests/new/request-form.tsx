@@ -13,11 +13,7 @@ import { ClientPicker, PropertyPicker, type ClientPick, type PropertyPick } from
 import { NEED_TASK_TYPES } from "@/ui/domain/need-state-actions";
 import { labelOf, optionsOf } from "@/shared/codebook";
 
-/**
- * Быстрая регистрация обращения (UC-01, ТЗ 37.4.1): канал/источник, объект (с расчётом ответственного
- * по правилу «чей объект, того и клиент»), клиент (найденный/новый/без клиента), краткий итог и решение
- * о продолжении. Дубли: свои — выбор/подтверждение. чужие — нейтральный конфликт и передача руководителю.
- */
+
 
 export interface ResponsiblePreview {
   responsible: { id: string; displayName: string };
@@ -173,7 +169,7 @@ function RequestFormInner({
   const dirty = Boolean(summary || rawContact || sourceCode || property || advertisement || external || responsibleUserId || newClient.displayName || newClient.contacts.some((c) => c.value) || client);
   useUnsavedChangesWarning(dirty && !pending);
 
-  // Ошибки нормализации контактов приходят без префикса client.client.
+  
   const clientFieldError = (n: string) => fieldError(n) ?? (n.startsWith("client.client.") ? fieldError(n.slice("client.client.".length)) : undefined);
 
   async function changeProperty(p: PropertyPick | null) {

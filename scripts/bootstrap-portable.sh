@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Bootstrap переносимого автономного узла (ТЗ 41.5, FR-38, UC-17).
-#   ./scripts/bootstrap-portable.sh --config-bundle deployment-config.enc --rclone-conf <путь> --source <remote-code> --backup <backup_id>
-#   ./scripts/bootstrap-portable.sh --config-bundle deployment-config.enc --source local --backup <backup_id>   (копия уже в ./backups)
-# Узел всегда стартует в роли standby (только чтение). Перевод в active — ./scripts/promote-instance.sh.
-# На узле с существующими рабочими данными скрипт не запускается: автоматической перезаписи
-# локальной БД «самой новой» облачной копией нет.
+
+
+
+
+
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker
 
 BUNDLE=""; RCONF=""; SOURCE="local"; ID=""
-while [ $# -gt 0 ]; do
+while [ $
   case "$1" in
     --config-bundle) BUNDLE="$2"; shift 2 ;;
     --rclone-conf) RCONF="$2"; shift 2 ;;

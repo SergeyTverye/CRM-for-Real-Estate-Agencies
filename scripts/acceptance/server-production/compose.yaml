@@ -1,7 +1,7 @@
-# Изолированный production-like контур приёмки v3.2.1 (только synthetic данные).
-# Запускается ТОЛЬКО скриптом scripts/acceptance/server-production.mjs с явным --env-file
-# из data/qa-v32-prod/<контур>/qa.env и собственным project name (crm-v32-qa / crm-v32-qa-restore).
-# Образ приложения не собирается: используется готовый crm-app:v32-acceptance.
+
+
+
+
 name: ${COMPOSE_PROJECT_NAME:?}
 
 x-app-env: &app-env
@@ -138,8 +138,8 @@ services:
       start_period: 20s
     networks: [internal, public]
 
-  # Публичные ops/backup/scripts/*.sh запускаются из того же образа приложения
-  # (в нём есть pg client 18, zstd, tar, jq, flock) — отдельный backup-образ не нужен.
+  
+  
   backup:
     <<: *app
     profiles: ["ops"]

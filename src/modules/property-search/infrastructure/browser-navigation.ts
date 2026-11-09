@@ -35,14 +35,10 @@ export function allowsNavigationRequest(source: NavigationSource, raw: string, m
 export interface NavigationOptions {
   source: NavigationSource; deadline: number; executablePath?: string; profileRoot?: string;
   settleMs?: number; intervalMs?: number;
-  /** Internal seam for REPLAY, never exposed through settings/API. */
+  
   open?: (profile: string, headed: boolean) => Promise<BrowserContext>;
 }
-/** Native Chromium networking + JS. No safeRequest fulfilment, stealth or challenge interaction.
- * Fixed source hosts, public-DNS preflight and Chromium local-network permission apply;
- * unlike safeRequest, Chromium owns TLS/DNS and this is not IP-pinned HTTP.
- * One profile per source, locked by Chromium, retained between worker jobs/restarts.
- */
+
 export async function createBrowserNavigation(options: NavigationOptions) {
   if (options.source === "cian" && !headedBrowserAvailable() && !options.open)
     throw Object.assign(new Error("Для Циана нужен дисплей; пройдите проверку в браузере CRM"), { code: "BROWSER_DISPLAY_UNAVAILABLE" });
@@ -62,8 +58,8 @@ export async function createBrowserNavigation(options: NavigationOptions) {
     context.on("page", other => { if (other !== page) void other.close().catch(() => undefined); });
     page.on("download", d => { void d.cancel().catch(() => undefined); });
     page.on("dialog", d => { void d.dismiss().catch(() => undefined); });
-    // CDP pauses every redirect hop; Playwright route() alone only sees the first
-    // request in a redirected chain. Continue uses native Chromium TLS/networking.
+    
+    
     const network = await context.newCDPSession(page);
     network.on("Fetch.requestPaused", async event => {
       const r = event.request;
@@ -97,7 +93,7 @@ export async function createBrowserNavigation(options: NavigationOptions) {
             let html = "";
             do {
               if (request.signal?.aborted) throw Object.assign(new Error("ABORTED"), { code: "ABORTED" });
-              try { html = await page.content(); } catch { /* JS check may replace the document. */ }
+              try { html = await page.content(); } catch {  }
               const state = navigationPageState(options.source, page.url(), html);
               if (state === "results" || state === "empty") break;
               if (Date.now() >= until) break;

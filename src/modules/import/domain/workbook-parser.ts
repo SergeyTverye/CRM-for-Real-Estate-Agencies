@@ -3,16 +3,11 @@ import type { ImportProfile } from "./profiles";
 import { normalizeHeader } from "./profiles";
 import { cellText, contactKind, dateFromParts, normalizeAddress, parseDate, parseInteger, parseNumber, type Cell } from "./normalize";
 
-/**
- * Разбор листа с несколькими логическими реестрами (ТЗ 38.1–38.7).
- * Секции определяются по сигнатуре «marker + ожидаемые заголовки», а не по номерам строк.
- * Конвейер строки: parse → normalize → policy filter → validate → (дубли — в application) → candidate mapping.
- * Значения исключённых политикой колонок отбрасываются на этапе parse и дальше не передаются.
- */
+
 
 export interface SheetData {
   name: string;
-  rows: Cell[][]; // rows[i] — строка i+1 листа
+  rows: Cell[][]; 
 }
 
 export interface ColumnRef {
@@ -49,9 +44,9 @@ export interface ParsedRow {
   validationStatus: ValidationStatus;
   errorCodes: string[];
   warningCodes: string[];
-  /** Нормализованная запись для commit. без исключённых политикой полей. */
+  
   record: Record<string, unknown>;
-  /** Признаки для поиска дублей. */
+  
   dedupe: { phones: string[]; emails: string[]; addressKey: string | null; archiveKey: string | null };
 }
 
@@ -153,10 +148,7 @@ function mapText(text: string, table: [RegExp, string][]): string | null {
 
 const URL_RE = /^https?:\/\/\S+$/i;
 
-/**
- * Обработка строк секции. Вызывающий код получает ParsedRow без значений исключённых колонок.
- * fileSha участвует в ключе исходной записи (идемпотентность повторного commit того же файла).
- */
+
 export function parseSectionRows(sheet: SheetData, section: DetectedSection, profile: ImportProfile | null, fileSha: string): ParsedRow[] {
   const out: ParsedRow[] = [];
   for (let r = section.firstDataRow; r <= section.lastRow; r++) {
@@ -180,7 +172,7 @@ export function parseSectionRows(sheet: SheetData, section: DetectedSection, pro
       out.push({ ...base, validationStatus: "unrecognized", warningCodes: ["section_needs_mapping"] });
       continue;
     }
-    // parse + policy filter: исключённые колонки не читаются в запись, отмечается только факт.
+    
     const raw: Record<string, Cell> = {};
     for (const c of section.columns) raw[c.field] = row[c.index] ?? null;
     const excludedHadValues = section.excludedColumns.some((c) => cellText(row[c.index]) !== "");
@@ -257,7 +249,7 @@ export function parseSectionRows(sheet: SheetData, section: DetectedSection, pro
           sourceType: profile.defaults.sourceType ?? "agency_listing",
           sourceUrl: null as string | null,
           owner: null as null | { name: string; phone: string },
-          // Поля без однозначного структурного аналога сохраняются в attributes_jsonb, а не теряются молча.
+          
           extraAttributes: Object.fromEntries(
             ([["purposeText", "commercialPurpose"], ["realtorText", "realtorText"], ["listedDate", "listedDate"]] as const)
               .map(([k, f]) => [k, t(f)])
@@ -268,7 +260,7 @@ export function parseSectionRows(sheet: SheetData, section: DetectedSection, pro
         if (!propertyType || !operationType) base.errorCodes.push("unknown_type_or_operation");
         if (t("adUrl")) {
           if (URL_RE.test(t("adUrl"))) {
-            // Внешний рыночный объект: ссылка — источник, а не реклама агентства (ТЗ 40.3).
+            
             if (rec.sourceType === "external_market") rec.sourceUrl = t("adUrl");
             else rec.adUrl = t("adUrl");
           } else base.warningCodes.push("invalid_url");
@@ -353,7 +345,7 @@ export function parseSectionRows(sheet: SheetData, section: DetectedSection, pro
   return out;
 }
 
-/** Финальный статус с учётом дублей (probable_duplicate не заменяет основной статус, ТЗ 38.7). */
+
 export function withWarning(row: ParsedRow, code: string): ParsedRow {
   if (row.warningCodes.includes(code)) return row;
   const warningCodes = [...row.warningCodes, code];

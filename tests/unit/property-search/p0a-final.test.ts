@@ -106,7 +106,7 @@ describe("Seven saved source responses: scope of REPLAY evidence", () => {
       await expect(transport(request)).rejects.toMatchObject({ code: "ACCESS_BLOCKED", status });
       await expect(transport(request)).rejects.toMatchObject({ code: "ACCESS_BLOCKED" }); expect(base).toHaveBeenCalledOnce();
     }
-    // Common fallback works even when the source offers zero or blocked results.
+    
     const host = { cian: "cian.ru", avito: "avito.ru", domclick: "domclick.ru", yandex: "realty.yandex.ru", mirkvartir: "cre.mirkvartir.ru", onrealt: "onrealt.ru", youla: "youla.ru" }[source];
     const url = saved.normalized[0]?.url ?? `https://${host}/synthetic-acceptance`;
     expect(manualListing({ url, title: "Тестовый офис", operation: "sale", propertyType: "office" }).source).toBe(source);

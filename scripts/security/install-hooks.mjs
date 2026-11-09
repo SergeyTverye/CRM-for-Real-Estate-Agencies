@@ -7,7 +7,7 @@ try {
   const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   const root = git('rev-parse', '--show-toplevel');
   let customHooks = '';
-  try { customHooks = git('config', '--get', 'core.hooksPath'); } catch { /* Unset is normal. */ }
+  try { customHooks = git('config', '--get', 'core.hooksPath'); } catch {  }
   if (customHooks) throw new Error('HOOKS_PATH');
   const hooks = path.resolve(root, git('rev-parse', '--git-path', 'hooks'));
   const hook = path.join(hooks, 'pre-commit');

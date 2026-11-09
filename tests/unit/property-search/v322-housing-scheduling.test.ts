@@ -17,7 +17,7 @@ describe("residential branch scheduling (offline replay)", () => {
       datePublished: url.endsWith("flat") ? "2026-11-01T00:00:00Z" : "2026-11-02T00:00:00Z" });
     parser.searchPage = async (query = {}) => {
       await parser.fetch(`https://onrealt.ru/replay/${query.type}`);
-      // Let both branches fetch before either finishes its page.
+      
       await new Promise(resolve => setTimeout(resolve, query.type === "flat" ? 10 : 20));
       return { ...fixture.pages[0]!, results: [fixture.results[0]!, { ...fixture.results[0]!, id: "discarded" }] };
     };
@@ -42,7 +42,7 @@ describe("residential branch scheduling (offline replay)", () => {
       return { close: async () => {}, searchSite: async (_: RealEstateScraper.Source, query: RealEstateScraper.Query = {}) => {
         const kind = String(query.type);
         calls.push(kind); peak = Math.max(peak, ++active);
-        // Studio returns first, output must still prioritize flat before studio.
+        
         await new Promise(resolve => setTimeout(resolve, kind === "flat" ? 200 : 100));
         active--;
         return { ...fixture, source, errors: [], partial: false,

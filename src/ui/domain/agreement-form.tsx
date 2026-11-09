@@ -14,10 +14,7 @@ import { FilePicker } from "../file-picker";
 import { requestConfirmation } from "../confirm-dialog";
 import { uploadAgreementDocuments, type PendingAgreementDocument } from "./agreement-document-uploads";
 
-/**
- * Форма договора/соглашения (ТЗ 29.14, 37.11, 40.4): создание и изменение с optimistic concurrency.
- * Для signed от имени агентства обязателен выбор ИП/ООО. для no_agreement/declined — причина.
- */
+
 
 export type { AgreementFormValue };
 
@@ -56,7 +53,7 @@ function toPayload(v: AgreementFormValue) {
   };
 }
 
-/** Клиентская проверка для удобства. сервер повторяет те же правила. */
+
 function localErrors(v: AgreementFormValue): Record<string, string[]> {
   const e: Record<string, string[]> = {};
   if (v.status === "signed" && !v.signedAt) e.signedAt = ["Для подписанного договора укажите дату подписания"];
@@ -144,7 +141,7 @@ export function AgreementForm({
       } else submitting.current = false;
       return;
     }
-    // Изменение: отправляются только изменённые поля (критичные изменения попадают в аудит).
+    
     const before = toPayload(initial) as Record<string, unknown>;
     const changed = Object.fromEntries(Object.entries(payload).filter(([k, val]) => JSON.stringify(val) !== JSON.stringify(before[k])));
     const res = await run(() => apiCall("PATCH", `/api/v1/agreements/${agreementId}`, { ...changed, expectedUpdatedAt: updatedAt, onBehalfOfCompany: v.onBehalfOfCompany }));

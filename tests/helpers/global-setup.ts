@@ -2,10 +2,7 @@ import { execSync } from "node:child_process";
 import pg from "pg";
 import { TEST_DATABASE_URL } from "./test-env";
 
-/**
- * Готовит отдельную тестовую БД: пересоздаёт схему и применяет все миграции с нуля
- * (заодно проверяет критерий «миграции применяются к чистой БД»).
- */
+
 export default async function setup() {
   const url = TEST_DATABASE_URL;
   if (!/crm_test|_test\b|test/.test(url)) throw new Error(`Отказ: DATABASE_URL не похож на тестовую БД: ${url}`);

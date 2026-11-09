@@ -29,7 +29,7 @@ export default async function NewRequestPage({ searchParams }: { searchParams: P
   if (propertyId) {
     try {
       const { property: p } = await getPropertyCard(actor, propertyId);
-      // В форму передаются только общие поля объекта — без сведений о собственниках.
+      
       property = { id: p.id, addressText: p.addressText, price: p.price?.toString() ?? null, responsible: p.responsible ? { id: p.responsible.id, displayName: p.responsible.displayName } : null };
     } catch (e) {
       if (!(e instanceof NotFoundError)) throw e;

@@ -15,7 +15,7 @@ function fmtSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
 }
 
-/** Документы связанной сущности: список (только доступные), загрузка, выдача через проверку прав. */
+
 export async function DocumentsPanel({ actor, link, canUpload = true }: { actor: Actor; link: { kind: DocumentLinkKind; id: string }; canUpload?: boolean }) {
   const docs = await listDocumentsFor(actor, link);
   const cfg = getConfig();

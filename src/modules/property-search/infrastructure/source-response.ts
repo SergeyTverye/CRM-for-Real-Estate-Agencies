@@ -15,12 +15,12 @@ export function detectAccessChallenge(url: string, payload: unknown): boolean {
   if ((host === "cian.ru" || host.endsWith(".cian.ru")) && payload.length < 20000 &&
     /<script[^>]+src=["'][^"']*\/captcha\.js(?:[?"'])/iu.test(payload) &&
     !/legacy-commercial-serp-frontend|OfferCard/u.test(payload)) return true;
-  // Servicepipe's JS check has no title/form and is returned as HTTP 200.
-  // Require its dedicated check script, not a generic analytics/captcha mention.
+  
+  
   if (/(?:^|\.)cian\.ru$/u.test(host) &&
     /<script\b[^>]*src=["']https:\/\/servicepipe\.tech\/static\/checkjs\/[^"']+["']/iu.test(payload) &&
     !/legacy-commercial-serp-frontend|OfferCard/u.test(payload)) return true;
-  // Inspect challenge UI, not arbitrary mentions of captcha in script bundles.
+  
   return /<(?:title|h1)[^>]*>[^<]*(?:captcha|проверка|подтвердите|доступ ограничен|just a moment|access denied)/iu.test(payload) ||
     /<(?:form|div|iframe)[^>]*(?:action=["'][^"']*captcha|id=["'](?:captcha|challenge-running)|class=["'][^"']*(?:SmartCaptcha|g-recaptcha|h-captcha))/iu.test(payload) ||
     payload.length < 20000 && /(?:подтвердите.{0,40}человек|проверка браузера|CIAN_ACCESS_CHALLENGE)/iu.test(payload);

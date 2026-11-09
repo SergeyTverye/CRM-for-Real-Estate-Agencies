@@ -28,7 +28,7 @@ describe("T05: риелтор не получает чужого клиента 
     expect(patch.status).toBe(404);
     const list = await readBody<{ items: { id: string }[]; total: number }>(await listClientsRoute(apiRequest("GET", "/api/v1/clients?q=Риелтора", { cookie }), routeParams({})));
     expect(list.total).toBe(0);
-    // Владелец и руководитель — видят.
+    
     expect((await getClient(apiRequest("GET", `/api/v1/clients/${id}`, { cookie: await sessionCookieFor(u.realtor1) }), routeParams({ id }))).status).toBe(200);
     expect((await getClient(apiRequest("GET", `/api/v1/clients/${id}`, { cookie: await sessionCookieFor(u.manager) }), routeParams({ id }))).status).toBe(200);
   });
@@ -68,7 +68,7 @@ describe("T05 / FR-27, FR-30: каталог объектов и контакт�
     const id = await propertyWithOwner();
     const managerCookie = await sessionCookieFor(u.manager);
     const realtorCookie = await sessionCookieFor(u.realtor2);
-    // Риелтор не может выдать доступ себе сам.
+    
     const self = await grantRoute(apiRequest("POST", `/api/v1/properties/${id}/grants`, { cookie: realtorCookie, body: { userId: u.realtor2.userId } }), routeParams({ id }));
     expect(self.status).toBe(403);
 

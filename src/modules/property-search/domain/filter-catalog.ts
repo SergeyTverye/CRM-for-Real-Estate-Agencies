@@ -3,7 +3,7 @@ import { z } from "zod";
 export const numericCondition = z.object({ min: z.number().finite().nonnegative().optional(), max: z.number().finite().nonnegative().optional() }).strict()
   .refine(v => v.min !== undefined || v.max !== undefined, "Укажите порог или диапазон")
   .refine(v => v.min === undefined || v.max === undefined || v.min <= v.max, "Неверный диапазон");
-/** One registry drives validation and the generic form. New features need no form changes. */
+
 export const FEATURE_DEFINITIONS = {
   separate_entrance: { label: "Отдельный вход", kind: "boolean", purposes: ["office", "retail", "psn_universal", "production", "warehouse", "free_purpose"] },
   shop_window: { label: "Витрина", kind: "boolean", purposes: ["retail", "psn_universal", "free_purpose"] },

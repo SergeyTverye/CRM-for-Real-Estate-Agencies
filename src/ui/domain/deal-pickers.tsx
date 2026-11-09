@@ -6,10 +6,7 @@ import { EntityPicker } from "../client-kit";
 import type { PropertyPick } from "./need-pickers";
 import { moneyText, needTitle, type NeedLabels, type NeedPick } from "./deal-form-values";
 
-/**
- * Выбор потребности и объекта для форм показов, КП, сделок, договоров и рекламы.
- * Потребности ищутся через GET /api/v1/needs (серверные права: needScope), объекты — /api/v1/properties/pick.
- */
+
 
 export type { PropertyPick };
 export type { NeedLabels, NeedPick };
@@ -65,7 +62,7 @@ export function PropertySelect({ value, onChange, invalid, placeholder }: { valu
   );
 }
 
-/** Выбор объекта внутри GET-формы фильтров: значение уходит скрытым полем. */
+
 export function PropertyFilterPicker({ name = "propertyId", initial }: { name?: string; initial: PropertyPick | null }) {
   const [value, setValue] = useState<PropertyPick | null>(initial);
   return (

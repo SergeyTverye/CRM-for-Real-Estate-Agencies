@@ -18,19 +18,15 @@ import { resolveSession } from "@/modules/auth/application/session-service";
 import { SESSION_COOKIE } from "@/modules/auth/infrastructure/session-token";
 import type { Actor } from "@/modules/auth/domain/actor";
 
-/**
- * API-слой /api/v1: преобразование HTTP ↔ DTO, аутентификация, CSRF-защита,
- * standby-guard, единый формат ошибок и структурированный лог запроса.
- * Проверка прав на конкретные записи выполняется в application-слое модулей.
- */
+
 
 export type Access = "public" | "authenticated" | "manager";
 
 export interface ApiOptions {
   access?: Access;
-  /** Разрешить запрос пользователю, обязанному сменить временный пароль. */
+  
   allowPasswordChange?: boolean;
-  /** Разрешить изменяющий запрос на standby-экземпляре (только технические auth-операции). */
+  
   allowOnStandby?: boolean;
 }
 
@@ -60,7 +56,7 @@ export function json(data: unknown, status = 200, headers?: HeadersInit): NextRe
   });
 }
 
-/** Same-origin проверка для изменяющих запросов (защита от CSRF, ТЗ 12). */
+
 function assertSameOrigin(req: NextRequest): void {
   const origin = req.headers.get("origin");
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
@@ -76,7 +72,7 @@ function assertSameOrigin(req: NextRequest): void {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Параметры маршрута вида id/*Id должны быть UUID, иначе — 404 без обращения к БД. */
+
 function assertIdParams(params: unknown): void {
   if (!params || typeof params !== "object") return;
   for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
@@ -85,7 +81,7 @@ function assertIdParams(params: unknown): void {
 }
 
 function mapUnknownError(e: unknown): AppError | null {
-  // Ошибки Prisma мапятся без раскрытия деталей схемы.
+  
   const code = (e as { code?: unknown })?.code;
   if (typeof code === "string") {
     if (code === "P2002") return new ConflictError("UNIQUE_CONFLICT", "Запись с такими данными уже существует");
@@ -161,7 +157,7 @@ export function api<P>(options: ApiOptions, handler: (ctx: AuthedApiContext<P>) 
   };
 }
 
-/** Тело JSON-запроса. Требует Content-Type: application/json (дополнительный барьер CSRF). */
+
 export async function readJson(req: NextRequest): Promise<unknown> {
   const ct = req.headers.get("content-type") ?? "";
   if (!ct.toLowerCase().includes("application/json")) throw new ValidationError("Ожидается JSON (Content-Type: application/json)");

@@ -1,19 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 
-/**
- * Policy layer (ТЗ 3, 17.2, 25.3, 27): серверные правила видимости записей.
- * Каждая выборка и каждая команда модулей строит where из этих функций,
- * поэтому прямой API-запрос, поиск, экспорт и выдача файла подчиняются одним правилам.
- *
- * Руководитель видит всё. Риелтор:
- *  - Client — только свои (responsible_user_id = риелтор).
- *  - ClientNeed / LeadRequest — свои по ответственному либо принадлежащие его клиенту.
- *  - Property — весь каталог для чтения. изменение — только закреплённых за ним.
- *  - контакты собственника — закреплённый объект либо действующий grant руководителя.
- *  - Deal — свои по ответственному либо где участник — его клиент.
- *  - HistoricalDealArchive, импорт, отчёты, эксплуатация, администрирование — недоступны.
- */
+
 
 export function clientScope(actor: Actor): Prisma.ClientWhereInput {
   return isManager(actor) ? {} : { responsibleUserId: actor.userId };
@@ -23,7 +11,7 @@ export function needScope(actor: Actor): Prisma.ClientNeedWhereInput {
   return isManager(actor) ? {} : { OR: [{ responsibleUserId: actor.userId }, { client: { responsibleUserId: actor.userId } }] };
 }
 
-/** Обращение видно ответственному, ответственному за клиента и сотруднику, который его зарегистрировал. */
+
 export function leadRequestScope(actor: Actor): Prisma.LeadRequestWhereInput {
   return isManager(actor)
     ? {}
@@ -68,7 +56,7 @@ export function agreementScope(actor: Actor): Prisma.AgreementWhereInput {
       };
 }
 
-/** Каталог объектов доступен всем для чтения. */
+
 export function propertyReadScope(_actor: Actor): Prisma.PropertyWhereInput {
   return {};
 }
@@ -77,7 +65,7 @@ export function propertyWriteScope(actor: Actor): Prisma.PropertyWhereInput {
   return isManager(actor) ? {} : { responsibleUserId: actor.userId };
 }
 
-/** Объекты, контакты собственников которых доступны пользователю (ТЗ 17.2, FR-27, FR-30). */
+
 export function ownerContactsScope(actor: Actor): Prisma.PropertyWhereInput {
   if (isManager(actor)) return {};
   return {
@@ -139,7 +127,7 @@ export function canManage(actor: Actor): boolean {
   return isManager(actor);
 }
 
-// ───── Предикаты для уже загруженных записей (подписи связей, карточки) ─────
+
 
 export function canSeeClient(actor: Actor, client: { responsibleUserId: string }): boolean {
   return isManager(actor) || client.responsibleUserId === actor.userId;

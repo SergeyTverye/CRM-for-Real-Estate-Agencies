@@ -30,7 +30,7 @@ export interface ClientListItem {
   updatedAt: Date;
 }
 
-/** Поиск по имени, нормализованному телефону/e-mail (FR-02). */
+
 export function clientSearchWhere(q: string): Prisma.ClientWhereInput {
   const digits = q.replace(/\D/g, "");
   const or: Prisma.ClientWhereInput[] = [
@@ -102,7 +102,7 @@ export async function listClients(actor: Actor, raw: unknown): Promise<Page<Clie
   };
 }
 
-/** Клиенты для выбора в формах (только доступные. короткий список). */
+
 export async function pickClients(actor: Actor, q: string | undefined, take = 20) {
   const query = parseInput(z.string().trim().max(120).default(""), q);
   const limit = parseInput(z.number().int().min(1).max(20), take);

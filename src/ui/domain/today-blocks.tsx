@@ -10,7 +10,7 @@ const KIND_LABEL: Record<ControlItem["kind"], string> = {
   offer: "КП",
 };
 
-/** Счётчик верхней зоны «Сегодня»: число + подпись, ведёт в отфильтрованный список (drill-down). */
+
 export function TodayCounter({ label, value, href, tone, hint }: { label: string; value: number; href: string; tone: "red" | "blue" | "gray" | "yellow"; hint?: string }) {
   const color = value === 0 ? "text-slate-400" : tone === "red" ? "text-red-600" : tone === "yellow" ? "text-amber-600" : tone === "blue" ? "text-brand-700" : "text-slate-800";
   return (
@@ -21,9 +21,9 @@ export function TodayCounter({ label, value, href, tone, hint }: { label: string
   );
 }
 
-/** Контрольные даты (показы, договоры, реклама, КП) — вычисляются из первичных записей, не из Task. */
+
 export function ControlRows({ items, showResponsible }: { items: ControlItem[]; showResponsible?: boolean }) {
-  // Для рекламы без проверки сервер подставляет текущий момент вместо даты последней проверки.
+  
   const recent = new Date().getTime() - 60_000;
   return (
     <ul className="divide-y divide-slate-100">

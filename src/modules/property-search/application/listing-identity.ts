@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-/** Keep identity query parameters; discard tracking and presentation-only fragments. */
+
 export function canonicalListingUrl(value: string): string | null {
   try {
     const url = new URL(value);

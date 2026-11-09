@@ -10,7 +10,7 @@ import { getLoginRateLimiter } from "@/modules/auth/application/auth-service";
 
 export const db = getDb();
 
-/** Очищает все таблицы тестовой БД (кроме истории миграций). */
+
 export async function resetDatabase(): Promise<void> {
   if (process.env.CRM_DEPLOYMENT_MODE === "desktop") {
     const tables = await db.$queryRawUnsafe<{ name: string }[]>("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name <> '_prisma_migrations'");
@@ -47,7 +47,7 @@ async function makeUser(login: string, displayName: string, roleCode: "manager" 
   return { userId: u.id, login, displayName, role: roleCode, mustChangePassword: false, sessionId: randomUUID() };
 }
 
-/** Базовый синтетический набор: справочники, ИП/ООО, руководитель и два риелтора. */
+
 export async function seedBase(): Promise<TestUsers> {
   for (const [category, items] of Object.entries(DICTIONARY_SEED)) {
     await db.dictionaryItem.createMany({ data: items.map(([code, displayName], i) => ({ category, code, displayName, sortOrder: i })) });
@@ -63,7 +63,7 @@ export async function seedBase(): Promise<TestUsers> {
   };
 }
 
-/** Реальная сессия для API-тестов: возвращает значение cookie. */
+
 export async function sessionCookieFor(actor: Actor): Promise<string> {
   const { token } = await createSession(db, actor.userId, { ip: "127.0.0.1", userAgent: "vitest" });
   return `${SESSION_COOKIE}=${token}`;
@@ -71,7 +71,7 @@ export async function sessionCookieFor(actor: Actor): Promise<string> {
 
 export const ORIGIN = process.env.CRM_DEPLOYMENT_MODE === "desktop" ? "http://127.0.0.1:3511" : "http://crm.test";
 
-/** Запрос к route handler так, как его отправил бы браузер с того же origin. */
+
 export function apiRequest(method: string, pathAndQuery: string, opts: { cookie?: string; body?: unknown; origin?: string | null } = {}): NextRequest {
   const headers: Record<string, string> = { host: new URL(ORIGIN).host };
   if (opts.cookie) headers.cookie = opts.cookie;
@@ -92,7 +92,7 @@ export async function readBody<T = Record<string, unknown>>(res: Response): Prom
   return (await res.json()) as T;
 }
 
-// ───── Фабрики доменных данных через application-сервисы (соблюдают инварианты) ─────
+
 
 import { createClient } from "@/modules/clients/application/client-service";
 import { createNeed } from "@/modules/needs/application/need-service";

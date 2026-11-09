@@ -9,7 +9,7 @@ export interface ListingDates {
 }
 const unknown: ListingDates = { publishedAt: null, sourceUpdatedAt: null, dateSource: "unknown", datePrecision: "unknown" };
 const DAY = 86_400_000;
-/** Calendar labels are source-local days, never the host's local timezone. */
+
 export function parseSourceDate(value: unknown, fetchedAt: string): { at: string; precision: "exact" | "day" } | null {
   if (typeof value === "number") {
     const ms = value < 1e12 ? value * 1000 : value;
@@ -43,7 +43,7 @@ export function parseSourceDate(value: unknown, fetchedAt: string): { at: string
   const [, y, m, d, suffix] = absolute;
   const check = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
   if (check.getUTCMonth() !== Number(m) - 1 || check.getUTCDate() !== Number(d)) return null;
-  // An unspecified source clock is interpreted in the mandated source timezone.
+  
   const iso = !suffix ? `${text}T00:00:00+07:00` : /(?:z|[+-]\d\d:\d\d)$/iu.test(text) ? text : `${text}+07:00`;
   const ms = Date.parse(iso);
   return Number.isFinite(ms) && ms <= Date.parse(fetchedAt) + DAY ? { at: new Date(ms).toISOString(), precision: suffix ? "exact" : "day" } : null;
@@ -51,7 +51,7 @@ export function parseSourceDate(value: unknown, fetchedAt: string): { at: string
 
 const publishedKeys = ["datePublished", "publishedAt", "published_at", "publicationDate", "creation-date", "creationDate", "createdAt", "created_at"];
 const updatedKeys = ["dateModified", "sourceUpdatedAt", "updatedAt", "updated_at", "last-update-date", "updateDate", "modificationDate"];
-/** Read inert JSON assigned in SSR scripts, including bare undefined outside strings. */
+
 function embeddedJson(text: string): unknown[] {
   const results: unknown[] = [];
   const starts = /(?:=|\(|^)\s*([\[{])/gu;
@@ -65,13 +65,13 @@ function embeddedJson(text: string): unknown[] {
       if (quoted) { if (escaped) escaped = false; else if (ch === "\\") escaped = true; else if (ch === '"') quoted = false; }
       else if (ch === '"') quoted = true;
       else if (ch === "[" || ch === "{") depth++;
-      else if (ch === "]" || ch === "}") { if (--depth === 0) { try { results.push(JSON.parse(json)); } catch { /* Not JSON, never execute it. */ } break; } }
+      else if (ch === "]" || ch === "}") { if (--depth === 0) { try { results.push(JSON.parse(json)); } catch {  } break; } }
     }
     if (results.length >= 20) break;
   }
   return results;
 }
-/** Only a node bound to this listing's ID/URL may supply a date. No page-wide date guessing. */
+
 export function extractListingDates(source: Source, payload: unknown, identity: { id?: string | null; url: string }, fetchedAt: string): ListingDates {
   const result = { ...unknown };
   let visits = 0;
@@ -96,19 +96,19 @@ export function extractListingDates(source: Source, payload: unknown, identity: 
     const text = $(el).text().trim();
     try { walk(JSON.parse(text)); } catch { embeddedJson(text).forEach(value => walk(value)); }
   });
-  $("[data-state],[data-bem]").each((_, el) => { for (const attr of ["data-state", "data-bem"]) { try { walk(JSON.parse($(el).attr(attr) ?? "")); } catch { /* Not JSON. */ } } });
-  // A detail page is bound by its canonical URL, never by the document's arbitrary dates.
+  $("[data-state],[data-bem]").each((_, el) => { for (const attr of ["data-state", "data-bem"]) { try { walk(JSON.parse($(el).attr(attr) ?? "")); } catch {  } } });
+  
   const canonical = $("link[rel='canonical']").attr("href");
   let ownDetail = false;
-  try { ownDetail = !!canonical && new URL(canonical, identity.url).pathname.replace(/\/$/u, "") === new URL(identity.url).pathname.replace(/\/$/u, ""); } catch { /* Not a detail page. */ }
+  try { ownDetail = !!canonical && new URL(canonical, identity.url).pathname.replace(/\/$/u, "") === new URL(identity.url).pathname.replace(/\/$/u, ""); } catch {  }
   const ownOnRealt = source === "onrealt" && !!identity.id && $("[role-element='ad'][id-element]").toArray().some(el => $(el).attr("id-element") === identity.id);
   if (source === "onrealt" && (ownDetail || ownOnRealt)) {
     const label = $(".add-time").first().text().trim();
     if (/^добавлено\s/iu.test(label)) assign({ datePublished: label.replace(/^добавлено\s+/iu, "") }, "html_label");
   }
   if (source === "mirkvartir" && ownDetail) {
-    // The detail's information block distinguishes placement from refresh.
-    // Recommendation <time> elements and generic page dates are not evidence.
+    
+    
     $("h4,h3,h2").filter((_, el) => $(el).text().trim() === "Информация об объявлении").each((_, heading) => {
       $(heading).parent().find("p").each((_, el) => {
         const label = $(el).text().replace(/\s+/gu, " ").trim();
@@ -124,14 +124,14 @@ export function extractListingDates(source: Source, payload: unknown, identity: 
     if (!matches) return;
     const card = $(el).closest("article,[data-id],[data-name='CardComponent'],[data-testid='offer-card'],.ad-item-container,.offer-card,.card");
     if (!card.length) return;
-    // MIR's public card shows its source date beside the listing ID. It is not
-    // labelled publication vs refresh: preserve it as sourceUpdatedAt only.
+    
+    
     if (source === "mirkvartir") card.find("time[datetime]").each((_, el) => assign({ dateModified: $(el).attr("datetime") }, "html_label"));
     card.find("[itemprop='datePublished'],[itemprop='dateModified'],time,[data-testid*='date'],[data-marker*='date'],[class*='date'],[class*='Date'],[class*='publish'],[class*='update']").each((_, date) => {
       const element = $(date), label = element.text().trim();
       const update = element.attr("itemprop") === "dateModified" || /обновлен|обновлён|update/iu.test(label + " " + element.attr("class"));
       const explicitPublication = element.attr("itemprop") === "datePublished" || /опубликован|размещен|размещён/iu.test(label);
-      if (!update && !explicitPublication) return; // Unlabelled date may be a promotion.
+      if (!update && !explicitPublication) return; 
       assign({ [update ? "dateModified" : "datePublished"]: element.attr("datetime") || element.attr("content") || label.replace(/^.*?(?:опубликован[оа]?|размещ[её]н[оа]?|обновл[её]н[оа]?)\s*:?\s*/iu, "") }, "html_label");
     });
   });

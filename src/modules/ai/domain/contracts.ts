@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { SearchFilters } from "@/modules/property-search/domain/types";
 
-/** Canonical schema published by the property-search agent (currently in domain/types.ts). */
+
 export const searchFiltersSchema = SearchFilters;
 export type AiSearchFilters = z.infer<typeof searchFiltersSchema>;
 export const parseResultSchema = z.object({
@@ -44,18 +44,18 @@ export class AiError extends Error {
   constructor(public readonly code: string) { super(code); this.name = "AiError"; }
 }
 
-/** Removes contact data, including spaced Russian phone numbers; never accepts a Client DTO. */
+
 export function redactContacts(text: string): string {
   return text.replace(/[\w.+%-]+@[\p{L}\d.-]+\.[\p{L}]{2,}/gu, "[EMAIL]")
     .replace(/(?<!\d)(?:\+?\d[\s().-]*){6,14}\d(?!\d)/g, (value, offset: number, full: string) => {
-      // Preserve explicit public prices/areas and short bare numbers (e.g. 10000000 RUB).
+      
       if (/^\s*(?:₽|руб|м²|м2|кв\.?\s*м)/iu.test(full.slice(offset + value.length))) return value;
       const digits = value.replace(/\D/g, "");
       return digits.length >= 10 || (digits.length === 7 && /[()-]/.test(value)) ? "[PHONE]" : value;
     });
 }
 
-/** This validates provenance syntax only. A downstream SSRF-safe fetch must verify the listing. */
+
 export function publicSourceUrl(raw: string): string | null {
   try {
     const u = new URL(raw);

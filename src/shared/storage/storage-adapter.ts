@@ -5,11 +5,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { getConfig } from "../config/env";
 
-/**
- * StorageAdapter (ТЗ 17.3, 20.4): доменная логика не зависит от физического пути.
- * Ключ хранения — непрозрачный идентификатор без исходного имени файла. путь наружу не выдаётся.
- * Замена на S3-совместимое хранилище — новая реализация интерфейса без изменения бизнес-сущностей.
- */
+
 export interface StoredObject {
   storageKey: string;
   size: number;
@@ -65,7 +61,7 @@ export function getStorage(): StorageAdapter {
   return adapter;
 }
 
-/** Только для тестов. */
+
 export function resetStorage(): void {
   adapter = null;
 }
