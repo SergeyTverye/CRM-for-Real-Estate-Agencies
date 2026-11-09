@@ -1,4 +1,4 @@
-﻿# Source and synthetic fixtures ONLY. No installed EXE, profile or processes used.
+# Source and synthetic fixtures ONLY. No installed EXE, profile or processes used.
 $ErrorActionPreference = 'Stop'
 $helper = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../src-tauri/windows/upgrade-resource-cleanup.ps1'))
 $tempBase = if ($env:GITHUB_ACTIONS -eq 'true') { $env:RUNNER_TEMP } else { $env:TEMP }

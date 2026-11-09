@@ -1,4 +1,4 @@
-﻿import { createCipheriv, createDecipheriv, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { createCipheriv, createDecipheriv, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { BackupError, encryptionSchema } from "../domain/contracts";
 import type { ArchiveLimits } from "../domain/contracts";
@@ -54,5 +54,3 @@ export function cryptChunk(header: Header, key: Buffer, index: number, data: Buf
 export function maxChunks(limits: ArchiveLimits): number {
   return Math.ceil(limits.totalBytes / CHUNK_BYTES) + 2;
 }
-export const maxChunksForLimits = maxChunks;
-export const computeMaxChunks = maxChunks;

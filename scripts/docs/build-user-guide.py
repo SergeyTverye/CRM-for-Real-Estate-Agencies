@@ -1,4 +1,4 @@
-﻿"""Build the editable Markdown guide as a bookmarked, linked A4 PDF.
+"""Build the editable Markdown guide as a bookmarked, linked A4 PDF.
 
 Python 3.12.14 + reportlab 4.4.9 + Pillow 13.0.0 (bundled Python runtime).
 Usage: python scripts/docs/build-user-guide.py [--render]
@@ -126,6 +126,7 @@ def prepare_images():
     ]
     for name,relative,crop,boxes in extra_specs:
         source=(images/relative).resolve()
+        # Historical source paths are repository-relative, not image-relative.
         if relative.startswith('../../../../'):
             source=ROOT/'docs'/relative.removeprefix('../../../../')
         if not source.exists() and (images/f'{name}.png').exists():
@@ -165,7 +166,7 @@ def para(c, text, y, size=10.8, leading=15.2, color='#25364B', width=495, bold=F
 def footer(c, page, chapter=''):
     c.setStrokeColor(HexColor('#D6E2EF')); c.line(50,47,545,47)
     c.setFont('Arial',8); c.setFillColor(HexColor('#62758B'))
-    c.drawString(50,32,f'CRM {VERSION} Â· Ð ÑƒÐºÐ¾Ð²Ð¾Ð´ÑÑ‚Ð²Ð¾ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ')
+    c.drawString(50,32,f'CRM {VERSION} · Руководство пользователя')
     c.drawRightString(545,32,str(page))
     if chapter:
         c.setFont('Arial',8); c.drawString(50,809,chapter)
@@ -176,22 +177,25 @@ def build():
     source=(DEST/'guide.md').read_text(encoding='utf-8-sig')
     chunks=re.split(r'^## (.+)$',source,flags=re.M)
     chapters=list(zip(chunks[1::2],chunks[2::2]))
-    output=DEST/f'CRM-Ñ€ÑƒÐºÐ¾Ð²Ð¾Ð´ÑÑ‚Ð²Ð¾-Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ-{VERSION}.pdf'
+    # Fixed one-topic pages keep steps and their figure together. Fail if edited
+    # content exceeds the page rather than silently clipping or inserting blanks.
+    output=DEST/f'CRM-руководство-пользователя-{VERSION}.pdf'
     c=canvas.Canvas(str(output),pagesize=(595.276,841.89),pageCompression=1)
-    c.setTitle(f'CRM {VERSION} â€” Ð ÑƒÐºÐ¾Ð²Ð¾Ð´ÑÑ‚Ð²Ð¾ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ')
-    c.setAuthor('CRM Â· Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð°Ñ†Ð¸Ñ Ð´Ð»Ñ ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð² Ð°Ð³ÐµÐ½Ñ‚ÑÑ‚Ð²Ð°')
-    c.setSubject('Ð Ð°Ð±Ð¾Ñ‚Ð° Ñ ÐºÐ»Ð¸ÐµÐ½Ñ‚Ð°Ð¼Ð¸, Ð½ÐµÐ´Ð²Ð¸Ð¶Ð¸Ð¼Ð¾ÑÑ‚ÑŒÑŽ, Ð´Ð¾Ð³Ð¾Ð²Ð¾Ñ€Ð°Ð¼Ð¸ Ð¸ Ñ€ÐµÐ·ÐµÑ€Ð²Ð½Ñ‹Ð¼Ð¸ ÐºÐ¾Ð¿Ð¸ÑÐ¼Ð¸')
+    c.setTitle(f'CRM {VERSION} — Руководство пользователя')
+    c.setAuthor('CRM · Документация для сотрудников агентства')
+    c.setSubject('Работа с клиентами, недвижимостью, договорами и резервными копиями')
     c.setFillColor(HexColor('#102D4F')); c.rect(0,0,596,842,fill=1,stroke=0)
     c.setFillColor(HexColor('#57C9D4')); c.rect(50,690,68,6,fill=1,stroke=0)
     para(c,f'CRM {VERSION}',658,36,43,'#FFFFFF',bold=True)
-    para(c,'Ð ÑƒÐºÐ¾Ð²Ð¾Ð´ÑÑ‚Ð²Ð¾\nÐ¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ'.replace('\n',' '),592,29,36,'#FFFFFF',bold=True)
-    para(c,'Ð”Ð»Ñ ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð² Ð°Ð³ÐµÐ½Ñ‚ÑÑ‚Ð²Ð° Ð½ÐµÐ´Ð²Ð¸Ð¶Ð¸Ð¼Ð¾ÑÑ‚Ð¸',489,16,23,'#B9D8F0')
-    para(c,'ÐšÐ»Ð¸ÐµÐ½Ñ‚Ñ‹ Â· ÐžÐ±Ñ€Ð°Ñ‰ÐµÐ½Ð¸Ñ Â· ÐŸÐ¾Ð¸ÑÐº Ð¾Ð±ÑŠÐµÐºÑ‚Ð¾Ð²',429,12,20,'#FFFFFF')
-    para(c,'ÐŸÑ€ÐµÐ´Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ Â· Ð—Ð°Ð´Ð°Ñ‡Ð¸ Â· Ð”Ð¾Ð³Ð¾Ð²Ð¾Ñ€Ñ‹',405,12,20,'#FFFFFF')
-    para(c,'ÐžÑ‚ Ð¿ÐµÑ€Ð²Ð¾Ð³Ð¾ Ð·Ð²Ð¾Ð½ÐºÐ° Ð´Ð¾ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð° â€” Ñ Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ¾Ð¹ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐ³Ð¾ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ Ð¸ ÑÐ¾Ñ…Ñ€Ð°Ð½Ð½Ð¾ÑÑ‚Ð¸ Ð´Ð°Ð½Ð½Ñ‹Ñ….',321,15,23,'#FFFFFF',width=430)
-    para(c,'Windows / ÑÐµÑ€Ð²ÐµÑ€Ð½Ñ‹Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼\nÐ ÐµÐ´Ð°ÐºÑ†Ð¸Ñ 08.11.2026 Â· Ð”ÐµÐ¼Ð¾Ð½ÑÑ‚Ñ€Ð°Ñ†Ð¸Ð¾Ð½Ð½Ñ‹Ðµ Ð¸ LIVE-Ð¸Ð»Ð»ÑŽÑÑ‚Ñ€Ð°Ñ†Ð¸Ð¸'.replace('\n',' Â· '),122,10,16,'#B9D8F0')
+    para(c,'Руководство\nпользователя'.replace('\n',' '),592,29,36,'#FFFFFF',bold=True)
+    para(c,'Для сотрудников агентства недвижимости',489,16,23,'#B9D8F0')
+    para(c,'Клиенты · Обращения · Поиск объектов',429,12,20,'#FFFFFF')
+    para(c,'Предложения · Задачи · Договоры',405,12,20,'#FFFFFF')
+    para(c,'От первого звонка до результата — с проверкой следующего действия и сохранности данных.',321,15,23,'#FFFFFF',width=430)
+    para(c,'Windows / серверный режим\nРедакция 08.11.2026 · Демонстрационные и LIVE-иллюстрации'.replace('\n',' · '),122,10,16,'#B9D8F0')
     c.showPage()
-    para(c,'ÐžÐ³Ð»Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ',781,26,31,BLUE,bold=True)
+    # 28 entries on one page, with destinations and final physical page numbers.
+    para(c,'Оглавление',781,26,31,BLUE,bold=True)
     y=723
     for i,(title,_) in enumerate(chapters):
         page=i+3
@@ -204,7 +208,7 @@ def build():
     for i,(title,body) in enumerate(chapters):
         page=i+3
         c.bookmarkPage(f'chapter-{i}');c.addOutlineEntry(title,f'chapter-{i}',level=0)
-        footer(c,page,'ÐŸÐ ÐÐšÐ¢Ð˜Ð§Ð•Ð¡ÐšÐžÐ• Ð Ð£ÐšÐžÐ’ÐžÐ”Ð¡Ð¢Ð’Ðž / '+title.split('. ',1)[0])
+        footer(c,page,'ПРАКТИЧЕСКОЕ РУКОВОДСТВО / '+title.split('. ',1)[0])
         y=para(c,title,780,21,26,BLUE,bold=True)-19
         blocks=re.split(r'\n\s*\n',body.strip())
         figure_count=sum(1 for b in blocks if b.strip().startswith('!['))
@@ -237,6 +241,7 @@ def build():
     if ARGS.render:
         subprocess.run(['pdftoppm','-r','110','-png',str(output),str(TMP/'page')],check=True)
         pages=sorted(TMP.glob('page-*.png'))
+        # Contact sheets are only for orientation; also inspect full-page renders.
         for start in range(0,len(pages),6):
             sheet=PILImage.new('RGB',(1120,1224),'#DDE4EC')
             d=ImageDraw.Draw(sheet)
