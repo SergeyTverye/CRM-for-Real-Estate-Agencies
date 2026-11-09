@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Локальный логический backup (ТЗ 36.4, 39.5): один backup_id = каталог
-#   database.dump      — pg_dump custom format
 #   files.tar.zst      — архив пользовательских файлов StorageAdapter
 #   manifest.json      — backup_id, deployment_id, версия приложения/схемы, PostgreSQL major,
 #                        компоненты с размерами и SHA-256, контрольные счётчики строк
@@ -19,7 +18,7 @@ while [ $# -gt 0 ]; do
     --trigger) TRIGGER="$2"; shift 2 ;;
     --initiated-by) INITIATOR="$2"; shift 2 ;;
     -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
-    *) die "неизвестный аргумент: $1" ;;
+    *) die "неизвестный аргумент: $1" ..
   esac
 done
 case "$TRIGGER" in scheduled|manual|pre_update|pre_migration|shutdown) ;; *) die "некорректный trigger: $TRIGGER" ;; esac
@@ -48,7 +47,6 @@ record_run_start "$ID" "$TRIGGER" "$INITIATOR"
 log "начат backup $ID (trigger=$TRIGGER)"
 
 db_available || cleanup_failed "PostgreSQL недоступна"
-# Keep the exported snapshot alive until dump and all control counts are captured.
 coproc SNAPSHOT_DB { psql -X -qtA -v ON_ERROR_STOP=1; }
 SNAPSHOT_PID=$SNAPSHOT_DB_PID
 trap 'kill "$SNAPSHOT_PID" 2>/dev/null || true' EXIT
@@ -70,7 +68,6 @@ SCHEMA_VERSION="$(psql_q -c "SELECT migration_name FROM _prisma_migrations WHERE
 PG_MAJOR="$(psql_q -c "SHOW server_version_num" | cut -c1-2)"
 FILES_COUNT="$(find "$FILES_DIR" -type f | wc -l | tr -d ' ')"
 # Контрольные счётчики строк для проверки восстановления (не содержат ПДн).
-# COUNTS_JSON includes calendar, notifications, gallery links, search and AI tables.
 
 DUMP_SIZE="$(file_size "$STAGING/database.dump")"
 FILES_SIZE="$(file_size "$STAGING/files.tar.zst")"
@@ -106,7 +103,7 @@ record_run_finish "$ID" success "$DUMP_SIZE" "$FILES_SIZE" "$MANIFEST_SHA" "$SCH
 log "backup $ID создан: dump=${DUMP_SIZE}B files=${FILES_SIZE}B"
 
 # Ротация локальных копий: храним BACKUP_RETENTION_DAILY последних scheduled/manual копий.
-# Копии pre_update/pre_migration не удаляются автоматически; текущая копия не удаляется никогда.
+# Копии pre_update/pre_migration не удаляются автоматически. текущая копия не удаляется никогда.
 KEEP="${BACKUP_RETENTION_DAILY:-14}"
 if [[ "$KEEP" =~ ^[0-9]+$ ]] && [ "$KEEP" -ge 1 ]; then
   mapfile -t ROTATABLE < <(

@@ -1,5 +1,3 @@
-// Explicit Docker/API smoke: no fixtures, external requests or paid providers.
-// Reads local seed credentials in memory; never prints credentials/cookies/log bodies.
 import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
@@ -53,7 +51,6 @@ function fixture(action) {
 }
 async function main() {
   if (fixtureSession) {
-    // Local operator-only fixture; does not modify accounts/passwords or add an HTTP endpoint.
     const token = randomBytes(32).toString('base64url');
     fixtureHash = createHash('sha256').update(token).digest('hex');
     fixture('create');
@@ -76,7 +73,6 @@ async function main() {
     assert.equal(result.status, 'completed', 'Disabled run did not complete');
     assert.ok(result.sources.length && result.sources.every(s => s.status === 'disabled'));
     console.log('Docker API: completed / disabled PASS');
-    // A stopped worker makes queued cancellation deterministic, without adapter fixtures.
     compose('stop', 'search-worker');
     try {
       const cancelled = await enqueue();

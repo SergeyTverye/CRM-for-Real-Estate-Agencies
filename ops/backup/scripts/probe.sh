@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Compatibility probe BackupRemote (ТЗ 39.2): list → write → read → delete временного объекта через crypt-слой.
 # Обязательна перед включением профиля СберДиск и при подключении нового target.
-#   probe.sh <code>
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
 CODE="${1-}"
