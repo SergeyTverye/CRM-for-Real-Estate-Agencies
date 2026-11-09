@@ -231,6 +231,34 @@ describe("REPLAY AI-01 explicit categories survive model post-processing", () =>
     const before=searchFiltersSchema.parse({operation:"sale",priceTo:"9000000",priceUnit:"rub_total"});
     expect(preserveSearchConditions(before,searchFiltersSchema.parse({operation:"sale"}),query)).toMatchObject({priceTo:"9000000",priceUnit:"rub_total"});
   });
+  it.each([
+    ["Двушка в Бердске до 5 млн", { city: "Бердск", operation: "sale", priceTo: "5000000", locations: ["berdsk"], propertyKinds: ["flat"], rooms: ["2"] }, { operation: "sale", city: "Бердск", locations: ["berdsk"], propertyKinds: ["flat"], rooms: ["2"], priceTo: "5000000" }],
+    ["Однушка в Академгородке в аренду до 30 тысяч", { city: "Новосибирск", operation: "rent", priceUnit: null, priceTo: "30000", locations: ["akademgorodok"], propertyKinds: ["flat"], rooms: ["1"] }, { operation: "rent", priceUnit: "rub_month", locations: ["akademgorodok"], propertyKinds: ["flat"], rooms: ["1"], priceTo: "30000" }],
+    ["Склад от 300 метров у Оби в аренду", { city: "Обь", operation: "rent", priceUnit: "rub_month", areaFrom: 300, locations: ["ob"], purposes: ["warehouse"] }, { operation: "rent", priceUnit: "rub_month", city: "Обь", locations: ["ob"], areaFrom: 300 }],
+    ["Апартаменты в Новосибирске на продажу", { city: "Новосибирск", operation: "sale", priceUnit: "rub_month", locations: ["novosibirsk"], propertyKinds: ["apartments"] }, { operation: "sale", city: "Новосибирск", locations: ["novosibirsk"], propertyKinds: ["apartments"] }],
+    ["Любое нежилое до 50 тысяч в месяц в Новосибирске и пригородах", { city: "Новосибирск", operation: "rent", priceUnit: null, priceTo: "50000", locations: ["suburbs"], propertyKinds: ["non_residential"] }, { operation: "rent", priceUnit: "rub_month", city: "Новосибирск", locations: ["suburbs"], propertyKinds: ["non_residential"], priceTo: "50000" }],
+    ["Трёшка в Кольцово", { city: "Кольцово", operation: "sale", locations: ["koltsovo"], propertyKinds: ["flat"], rooms: ["3"] }, { operation: "sale", city: "Кольцово", locations: ["koltsovo"], propertyKinds: ["flat"], rooms: ["3"] }],
+  ] as [string, Record<string, unknown>, Record<string, unknown>][])("flat model reply validates without 422: %s", async (query, model, expected) => {
+    const sources = ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"];
+    const flat = { priceUnit: null, priceFrom: null, priceTo: null, areaFrom: null, areaTo: null, floorMode: null, seller: null, locations: [], propertyKinds: [], rooms: [], purposes: [], districts: [], requiredFeatures: [], preferredFeatures: [], sources, clarificationQuestion: null, ...model };
+    const f = fixture(() => ({ text: JSON.stringify(flat) }));
+    const parsed = await f.ai.parseSearchQuery(context, { query });
+    expect(parsed.clarificationQuestion).toBeNull();
+    const after = searchFiltersSchema.parse(preserveSearchConditions(searchFiltersSchema.parse({ operation: "sale" }), parsed.filters!, query));
+    expect(after).toMatchObject(expected);
+    expect(f.provider.requests).toHaveLength(1);
+  });
+  it.each([
+    ["Склад от 300 метров у Оби", { city: "Обь", operation: null, locations: ["ob"], purposes: ["warehouse"] }, "Уточните операцию"],
+    ["Склад в аренду у Оби", { city: "Обь", operation: "rent", locations: ["ob"], purposes: ["warehouse"] }, "единицу цены аренды"],
+  ] as [string, Record<string, unknown>, string][])("unclear flat model reply becomes a clarification, not a 422: %s", async (query, model, hint) => {
+    const sources = ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"];
+    const flat = { priceUnit: null, priceFrom: null, priceTo: null, areaFrom: null, areaTo: null, floorMode: null, seller: null, locations: [], propertyKinds: [], rooms: [], purposes: [], districts: [], requiredFeatures: [], preferredFeatures: [], sources, clarificationQuestion: null, ...model };
+    const f = fixture(() => ({ text: JSON.stringify(flat) }));
+    const parsed = await f.ai.parseSearchQuery(context, { query });
+    expect(parsed.filters).toBeNull();
+    expect(parsed.clarificationQuestion).toContain(hint);
+  });
 });
 
 it("supplies local now to search parsing and description analysis", async () => {

@@ -43,9 +43,12 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
     if (mentions[key]?.test(query)) Object.assign(next, { [key]: proposed[key] });
   }
   if (mentions.locations!.test(query)) {
+    // A location word alone must not erase districts: only an explicit district
+    // clause or an actual move to another place clears the previous selection.
+    const locChanged = JSON.stringify(previous.locations ?? null) !== JSON.stringify(proposed.locations ?? null) || previous.city !== proposed.city;
     next.city = proposed.city;
     next.locations = proposed.locations;
-    next.districts = proposed.districts;
+    if (mentions.districts!.test(query) || locChanged) next.districts = proposed.districts;
   }
   if ((mentions.operation!.test(query) || /месяц|мес\b|год|за\s*м[²2]|за\s+объект|полная\s+цена/iu.test(query)) && proposed.priceUnit) next.priceUnit = proposed.priceUnit;
   if (priceMentioned) {
