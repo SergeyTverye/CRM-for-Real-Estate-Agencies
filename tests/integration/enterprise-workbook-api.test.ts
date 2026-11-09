@@ -16,3 +16,9 @@ it('v2 API session, role, Origin and mapping version gate',async()=>{
  expect((await POST(apiRequest('POST',`/api/v1/import/enterprise/${job.id}`,{cookie,origin:'https://example.invalid',body:{}}),params)).status).toBe(403);
  expect((await POST(apiRequest('POST',`/api/v1/import/enterprise/${job.id}`,{cookie,body:{confirmed:true,acceptWarnings:true,expectedMappingVersion:'stale'}}),params)).status).toBe(409);expect(await db.property.count()).toBe(0);
 });
+it('upload preserves the actual workbook filename (QA v3.2.3)',async()=>{
+ const data=await readFile('tests/fixtures/synthetic/enterprise-workbook.xlsx');const p=buildProfile(await loadEnterprise(data));
+ const name=`qa-real-name-${Date.now()}.xlsx`;
+ const job=await uploadEnterprise(u.manager,new File([new Uint8Array(data)],name),p);
+ expect((await db.importJob.findUniqueOrThrow({where:{id:job.id}})).sourceFilename).toBe(name);
+});

@@ -99,7 +99,7 @@ export async function uploadEnterprise(actor: Actor, file: File, rawProfile?: un
         return await transaction(async (tx) => {
             const rows = await duplicates(tx, parsed.rows);
             const summary: Summary = { profile, unresolved: parsed.unresolved, counts: countRows(rows), checksumRepeated };
-            const job = await tx.importJob.create({ data: { sourceFilename: 'enterprise-workbook.xlsx', sourceSha256: checksum, sourceFormat: 'xlsx', profileCode: profile.code, status: 'dry_run_ready', startedBy: actor.userId, mappingVersion: sha256(JSON.stringify(profile)), sourceStorageKey: stored.storageKey, summaryJsonb: json(summary), probableDuplicates: rows.filter(r => r.warningCodes.includes('probable_duplicate')).length } });
+            const job = await tx.importJob.create({ data: { sourceFilename: file.name.slice(0, 200), sourceSha256: checksum, sourceFormat: 'xlsx', profileCode: profile.code, status: 'dry_run_ready', startedBy: actor.userId, mappingVersion: sha256(JSON.stringify(profile)), sourceStorageKey: stored.storageKey, summaryJsonb: json(summary), probableDuplicates: rows.filter(r => r.warningCodes.includes('probable_duplicate')).length } });
             await tx.importRowResult.createMany({ data: rows.map(r => ({ importJobId: job.id, sheetName: r.sheetName, sourceSection: r.sectionKey, sourceRowNumber: r.rowNumber, sourceRecordKey: r.recordKey, targetEntityType: r.target, validationStatus: r.validationStatus, errorCodes: r.errorCodes, warningCodes: r.warningCodes })) });
             return { id: job.id, ...summary };
         });
@@ -194,7 +194,7 @@ async function commitEnterpriseInternal(actor: Actor, id: string, input: unknown
                 const links = r.target === 'property_agreement_control' ? await commitEnterpriseControl(tx, r, responsible, actor.userId) : null;
                 if (links) controlLinks[`${r.sheetIndex}:${r.rowNumber}`] = links;
                 if (links) controlPropertyBaselines[`${r.sheetIndex}:${r.rowNumber}`] = controlPropertyBaseline(await tx.property.findUniqueOrThrow({ where: { id: links.propertyId } }));
-                const result = links ? { type: 'Property', id: links.propertyId } : await commitRow(tx, r, { coordinatesAsPhone: true, createTasksFromFixNotes: false, responsibleUserId: responsible, jobId: id, sourceFilename: 'enterprise-workbook.xlsx', actorId: actor.userId });
+                const result = links ? { type: 'Property', id: links.propertyId } : await commitRow(tx, r, { coordinatesAsPhone: true, createTasksFromFixNotes: false, responsibleUserId: responsible, jobId: id, sourceFilename: job.sourceFilename, actorId: actor.userId });
                 if (!('skipped' in result)) {
                     target = result;
                     imported++;
