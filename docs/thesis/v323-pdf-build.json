@@ -1,0 +1,31 @@
+{
+  "album": {
+    "file": "CRM-screenshots-v3.2.3.pdf",
+    "pages": 109,
+    "bytes": 22255721,
+    "sha256": "8503f13d2e05b5592d6dac73f8810769322bd1e6bac750709b844fb93b4c8272",
+    "outline_sections": 5,
+    "contents_links": 5
+  },
+  "report": {
+    "file": "CRM-v3.2.3-отчёт-о-тестировании.pdf",
+    "pages": 19,
+    "bytes": 170951,
+    "sha256": "1e1b221043c3677321d09d2b350b73b82897c860fa63dc174d4feed0f5a14087",
+    "outline_sections": 14,
+    "contents_links": 28
+  },
+  "figures": 107,
+  "report_figures": 1,
+  "report_source_sha256": "eac6a6842f2af0b7bf5b45218782a3eb9888a8399f119e4857835d6bff6f8ed2",
+  "checks": [
+    "no_blank_pages",
+    "no_missing_glyphs",
+    "text_within_pages",
+    "one_image_per_album_page",
+    "embedded_truetype_fonts",
+    "required_regression_text",
+    "contents_destinations",
+    "figure_numbers"
+  ]
+}
