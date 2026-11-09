@@ -1,0 +1,965 @@
+[
+  {
+    "figure": 1,
+    "page": 3,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/01-login-form.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Сегодня» после входа руководителя, исходный файл назван login-form, но формы входа в кадре нет",
+    "source_sha256": "aa3a17e28f34a5a36cf325172d475c1aa45980f809b649bb29040fea53783895"
+  },
+  {
+    "figure": 2,
+    "page": 4,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/02-today-manager.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Сегодня» руководителя: просрочки, задачи и ближайшие события",
+    "source_sha256": "31d4e6c8499d7d0bc0b1cfd94d434176d4cb44703bf1dcac811066e555116514"
+  },
+  {
+    "figure": 3,
+    "page": 5,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/03-today-realtor.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "«Сегодня» риелтора: просрочки, задачи на день и ближайшие события",
+    "source_sha256": "18668a5428fa0430032c61e96d46d15ce834fafc68b366e47bc158288a5bafb0"
+  },
+  {
+    "figure": 4,
+    "page": 6,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/04-requests-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Карточка клиента после регистрации обращения: потребность, следующее действие и контакт, список обращений в кадре не показан",
+    "source_sha256": "9e0627f72608b0e37740452a1de5649080d825d36f3ea6ad75d1e50621da043d"
+  },
+  {
+    "figure": 5,
+    "page": 7,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/05-client-card.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Карточка клиента: контакты, потребности, история обращений и коммуникаций",
+    "source_sha256": "9e0627f72608b0e37740452a1de5649080d825d36f3ea6ad75d1e50621da043d"
+  },
+  {
+    "figure": 6,
+    "page": 8,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/06-need-card.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Карточка потребности: параметры, подбор, стадии и следующие действия",
+    "source_sha256": "02d8190137da136bddc958a831d1ddd70ae2e87238d04d77929d6966bee3dc30"
+  },
+  {
+    "figure": 7,
+    "page": 9,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/07-need-matching.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Подбор по потребности: открыта вкладка предложенных объектов, список пока пуст",
+    "source_sha256": "cb2dbadca5447083bb2b00fa95e78a2579f577a26a5934da5f7ab11f89ee55b4"
+  },
+  {
+    "figure": 8,
+    "page": 10,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/08-property-card.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Карточка объекта: адрес, параметры, фото, документы и собственники",
+    "source_sha256": "b2be59fcf542843b6902fd3b294e4c04a09c53635edb90f72766adf55d05e40b"
+  },
+  {
+    "figure": 9,
+    "page": 11,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/09-properties-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Объекты»: таблица с фильтрами по типу, операции и району",
+    "source_sha256": "40aed751a75470aac71517ba1e23b85b708c1cf6dd3c71d0866cc1c3a4765f59"
+  },
+  {
+    "figure": 10,
+    "page": 12,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/10-showings-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Показы»: запланированные и завершённые с результатами",
+    "source_sha256": "5f30e371f1808217f11c5aecb331aa74260b05dde3dd907145b572acca27f669"
+  },
+  {
+    "figure": 11,
+    "page": 13,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/11-calendar.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Календарь: встречи, показы и повторяющиеся серии",
+    "source_sha256": "5ef360d320a8b83c9111418203b683741f70da106449625201f44f1e7a8f87af"
+  },
+  {
+    "figure": 12,
+    "page": 14,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/12-notifications.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Уведомления: напоминания о задачах и событиях",
+    "source_sha256": "8e1138a7573855d53e3b97099defcfc1dbf6078af33200149dc56db9b35bbeb1"
+  },
+  {
+    "figure": 13,
+    "page": 15,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/13-offer-card.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Коммерческое предложение: позиции со снапшотами цен и адресов, статусы",
+    "source_sha256": "e0460c95c5adee5ad4330b6b9e1ddebec805e50d3e0e4feb7eee7e1c4a15cab5"
+  },
+  {
+    "figure": 14,
+    "page": 16,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/14-offer-print.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Печатная форма КП (A4): позиции, цены, условия",
+    "source_sha256": "78b9bf78aabe5c9f887a278eea508aacea07f06b1397405701485865e545e889"
+  },
+  {
+    "figure": 15,
+    "page": 17,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/15-offers-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Коммерческие предложения»: черновики, отправленные, архив",
+    "source_sha256": "8127bbcf1a3dffd0910c413788385a8a2b33c00bdbadcd19328bf89ce8166a07"
+  },
+  {
+    "figure": 16,
+    "page": 18,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/16-deal-card.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Карточка сделки: стороны, две комиссионные записи, чек-лист и задачи",
+    "source_sha256": "b269828e16263f03ed0b1f8e579c0711a6ca332f93add9b8f6efe82066396b4c"
+  },
+  {
+    "figure": 17,
+    "page": 19,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/17-deals-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Сделки»: табличный список с фильтрами, статусами, суммами и датами",
+    "source_sha256": "2d031f98eb4aaa18f91dc1eba28f6824656c7857e1940495fd59c2a9a4f299ec"
+  },
+  {
+    "figure": 18,
+    "page": 20,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/18-agreement-card.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Карточка договора: сроки, юрлицо, приложенные документы",
+    "source_sha256": "77871c46af0744f11a79d20e411d183762e2c07fef68f75e1dbd3a64005589c2"
+  },
+  {
+    "figure": 19,
+    "page": 21,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/19-agreements-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Договоры»: действующие, истекающие и архив",
+    "source_sha256": "c8a1823182db29780e2951c32cf45b2d7e0720f803943fe328706fd2d1814a23"
+  },
+  {
+    "figure": 20,
+    "page": 22,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/20-ads-list.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Реклама»: площадки, сроки публикации и истекающие объявления",
+    "source_sha256": "ff45e591f3f7f254362023ca95cbbc370583e3089ad14c9201e14447b8691f58"
+  },
+  {
+    "figure": 21,
+    "page": 23,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/21-reports.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Экран «Отчёты»: обращения, этапы, показы, просрочки, сделки, активность",
+    "source_sha256": "eb92cba07890c846aaee49502ede151490c03afefdbafe352922a227cca86fd2"
+  },
+  {
+    "figure": 22,
+    "page": 24,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/22-reports-sources.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Отчёт по источникам обращений с переходом к первичным записям",
+    "source_sha256": "99973baf46205d21064d257c655100cc4121e0a4fe5076b96382476b232ca673"
+  },
+  {
+    "figure": 23,
+    "page": 25,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/23-reports-detail.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Детализация отчёта: drill-down до первичных записей",
+    "source_sha256": "a57f19630cfc847eb88183a16f251ac23192d84f8c6142752c08434eeb8f1894"
+  },
+  {
+    "figure": 24,
+    "page": 26,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/24-import-dryrun-empty.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Импорт книги без распознанных секций: корректный пустой dry-run без утечек",
+    "source_sha256": "82ac749e1f47eca12981726f9e3a311c687d1873b24f5e835cfafe0e51aa9e64"
+  },
+  {
+    "figure": 25,
+    "page": 27,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/25-import-dryrun.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Импорт: результат dry-run по синтетической книге, статусы строк",
+    "source_sha256": "9d08317d6b3047edb7257633b9f8dd45ff1086a82c6994bae269e1b992ff100d"
+  },
+  {
+    "figure": 26,
+    "page": 28,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/26-import-commit.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Импорт завершён: счётчики загруженных, пропущенных и ошибок",
+    "source_sha256": "5390e35d84292e6474a6a8ca45361386e74d770841aef85e3a35d336ab893c67"
+  },
+  {
+    "figure": 27,
+    "page": 29,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/27-search-filters.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Поиск объектов: локации, операция, тип, цены и площади",
+    "source_sha256": "e824b78a30fb68e0bf242afa5fd56f71b2a82317533b1f1541e432616f3505e9"
+  },
+  {
+    "figure": 28,
+    "page": 30,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/28-ai-today.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "AI-помощник на экране «Сегодня»: контекст дня и следующие действия",
+    "source_sha256": "fbbe4b3db55b33fb98b63fec3100c18fd6e2e7bb6613901f077d1daf1c31df38"
+  },
+  {
+    "figure": 29,
+    "page": 31,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/29-ai-search.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "AI-помощник поверх экрана поиска объектов: общий диалог и уточнение контекста, не отдельная форма AI-разбора условий",
+    "source_sha256": "8eabca518031f054a06e838b3b277fa0d8182901468dda26902178437d4e6f3e"
+  },
+  {
+    "figure": 30,
+    "page": 32,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/30-admin-users.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Администрирование: пользователи, роли, блокировка",
+    "source_sha256": "8620b0bd480174d0cb4a9918a5b87f8f9fb20c2856531379343219cbd000c128"
+  },
+  {
+    "figure": 31,
+    "page": 33,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/31-rbac-forbidden.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "RBAC: чужой клиент по прямой ссылке недоступен, данные не раскрыты",
+    "source_sha256": "1af0a2535e0fac270311c4edfa43ba1afd3a749f742c70cb2eca6ee5bbc146c1"
+  },
+  {
+    "figure": 32,
+    "page": 34,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/32-rbac-search.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Отказ доступа «Запись не найдена или недоступна», исходное имя rbac-search, глобальная поисковая выдача в кадре отсутствует",
+    "source_sha256": "1af0a2535e0fac270311c4edfa43ba1afd3a749f742c70cb2eca6ee5bbc146c1"
+  },
+  {
+    "figure": 33,
+    "page": 35,
+    "section": "Серверная версия",
+    "source": "docs/thesis/screenshots/server/33-archive.png",
+    "mode": "QA / PostgreSQL / синтетические данные",
+    "caption": "Исторический архив: экран «Нет доступа» для пользователя без разрешения",
+    "source_sha256": "b71e0794c695ea76849ccc40c83e9af1b39d8d5de179f96dd2e1509a78a5b935"
+  },
+  {
+    "figure": 34,
+    "page": 36,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/01-today-manager.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Сегодня»: задачи, просрочки и ближайшие события руководителя",
+    "source_sha256": "38d65efe603c0232375a5320089694efb59205ba116162c75e723e43da01e719"
+  },
+  {
+    "figure": 35,
+    "page": 37,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/02-client-card.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Карточка клиента: контакты, потребности, история обращений и коммуникаций",
+    "source_sha256": "78bbb7e050d35c17e4398031f64cb19e186f1db364a684f7204eb52cddc3d79d"
+  },
+  {
+    "figure": 36,
+    "page": 38,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/03-requests-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Обращения»: входящие звонки и заявки с фильтрами по источникам",
+    "source_sha256": "1c4142664ac3e8633e24f985a5bed328144d372e4f71c0942aee9630ac22470a"
+  },
+  {
+    "figure": 37,
+    "page": 39,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/04-need-matching.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Подбор по потребности: совпадения объектов и статусы предложений",
+    "source_sha256": "b068b6f21266388ef0d3f9f9f6b460a23fb9ea31fab8f4f3440721ef5b571641"
+  },
+  {
+    "figure": 38,
+    "page": 40,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/05-need-card.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Карточка потребности: параметры, подбор, стадии и следующие действия",
+    "source_sha256": "80f36082461606c0fc15822653de05d63df153246ab16648bb6b075a82c17918"
+  },
+  {
+    "figure": 39,
+    "page": 41,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/06-property-card.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Карточка объекта: адрес, параметры, фото, документы и собственники",
+    "source_sha256": "eba830da1d79ba667b4c8d0096497d33d8f1c340cdc873e930457f5bfc323248"
+  },
+  {
+    "figure": 40,
+    "page": 42,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/07-properties-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Объекты»: таблица с фильтрами по типу, операции и району",
+    "source_sha256": "38731d9f7e6100c3e7be64f6d6aba8476eb90468dce68f6a9c56fb6c1b877f25"
+  },
+  {
+    "figure": 41,
+    "page": 43,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/08-showings-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Показы»: запланированные и завершённые с результатами",
+    "source_sha256": "197329a07a57bcceb31561ae3e9fe9e922499fa94cd0ce66625884d5a0994e7a"
+  },
+  {
+    "figure": 42,
+    "page": 44,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/09-today-realtor.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "«Сегодня» риелтора: просрочки, задачи на день и ближайшие события",
+    "source_sha256": "4db8e08852b995bd12913a2a649fe7709c9f494b3c530023d5d9fe2ffd8a0673"
+  },
+  {
+    "figure": 43,
+    "page": 45,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/10-calendar.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Календарь: встречи, показы и повторяющиеся серии",
+    "source_sha256": "6b01cf5caf1106c93613efde4e7a8f625101bc3a8fb4c00b9280a38f99fd302d"
+  },
+  {
+    "figure": 44,
+    "page": 46,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/11-notifications.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Уведомления: напоминания воркера о задачах и событиях",
+    "source_sha256": "dff0a13eb41adc27eea832d7b3369cd7627446801c759f99836bc462ff59303c"
+  },
+  {
+    "figure": 45,
+    "page": 47,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/12-offer-card.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Коммерческое предложение: позиции со снапшотами цен и адресов, статусы",
+    "source_sha256": "b945d9261d8449a0f23911884f68ba48e9777a6cf6e4637ecc61cfd08f336813"
+  },
+  {
+    "figure": 46,
+    "page": 48,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/13-offer-print.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Печатная форма КП (A4): позиции, цены, условия",
+    "source_sha256": "9ae557d81e7e7e56f6bc9d3db37088a1ccdb4d388dc3d77f0d1cc6039a251420"
+  },
+  {
+    "figure": 47,
+    "page": 49,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/14-offers-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Коммерческие предложения»: черновики, отправленные, архив",
+    "source_sha256": "7c115f3d3054f18cb2a1154a94ece053bb692d5ddc67b2b6f9a8dfefb484da3b"
+  },
+  {
+    "figure": 48,
+    "page": 50,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/15-deal-card.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Карточка сделки: стороны, две комиссионные записи, чек-лист и задачи",
+    "source_sha256": "b19d7aca2e6c36eb9e2d558962e4a7558fea0a88cea677b313b0550860b0cfff"
+  },
+  {
+    "figure": 49,
+    "page": 51,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/16-deals-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Сделки»: табличный список с фильтрами, статусами, суммами и датами",
+    "source_sha256": "aa8e9a576cf6828e789923c0182bb475ab20fb8dacd755811c0a292eb91ae62a"
+  },
+  {
+    "figure": 50,
+    "page": 52,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/17-agreement-card.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Карточка договора: сроки, юрлицо, приложенные документы",
+    "source_sha256": "c628027dac4285a15adfbd5cbfcaf420cec7c3372167aa2ac1a6bbae531da17e"
+  },
+  {
+    "figure": 51,
+    "page": 53,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/18-agreements-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Договоры»: действующие, истекающие и архив",
+    "source_sha256": "1fbbf96463d51192d7b51e3a3626b034fb10d389ee0c7aaca882a798d5940464"
+  },
+  {
+    "figure": 52,
+    "page": 54,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/19-ads-list.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Реклама»: площадки, сроки публикации и истекающие объявления",
+    "source_sha256": "51767bca1c73f568b2ad45a9e55c566814b1f181901b724f3300981a637eb1d5"
+  },
+  {
+    "figure": 53,
+    "page": 55,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/20-reports.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Экран «Отчёты»: обращения, этапы, показы, просрочки, сделки, активность",
+    "source_sha256": "02e7bb1ff694c1f355bec3ba79e4a3b8c897599ba2feb620612e6fef7d482ba9"
+  },
+  {
+    "figure": 54,
+    "page": 56,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/21-reports-sources.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Отчёт по источникам обращений с переходом к первичным записям",
+    "source_sha256": "85a3f58aecc2cc84f81342112a791516d1ac3aa12211c3101db2d867b26b2936"
+  },
+  {
+    "figure": 55,
+    "page": 57,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/22-reports-detail.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Детализация отчёта: drill-down до первичных записей",
+    "source_sha256": "b9eeea2ee82f726044176354dcc333570733f873ad8c40a26ac010bfcc1ca357"
+  },
+  {
+    "figure": 56,
+    "page": 58,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/23-import-dryrun-empty.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Импорт workbook-like: корректный dry-run без распознанных строк, без утечек",
+    "source_sha256": "8cb94a5a6bdde58289c4beb8968bfd41579df3ba8a1f5f6848547c97ee1ffe7a"
+  },
+  {
+    "figure": 57,
+    "page": 59,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/24-import-dryrun.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Импорт: результат dry-run по синтетической книге, статусы строк",
+    "source_sha256": "8c23f5ec7aa421f64846f802faa45e6c9703e5a323502497ac08001b0269c93d"
+  },
+  {
+    "figure": 58,
+    "page": 60,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/25-import-commit.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Импорт завершён: счётчики загруженных, пропущенных и ошибок",
+    "source_sha256": "fa182274457921022238bb302f688694e9698a9411da7c605c9264de894f8b17"
+  },
+  {
+    "figure": 59,
+    "page": 61,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/26-search-filters.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Поиск объектов: локации, операция, тип, цены и площади",
+    "source_sha256": "53bd12ba0114d1dc8f783e25d1bc08eaf5cf03f4f07386c54b40d195fb9308ab"
+  },
+  {
+    "figure": 60,
+    "page": 62,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/27-backup-settings.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Настройки резервных копий: локальное назначение, расписание, каталог архивов",
+    "source_sha256": "2099e01115d00bf14f11f9651bb344da7d3d71d7895e06314bbfcd4ca3dfeff7"
+  },
+  {
+    "figure": 61,
+    "page": 63,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/28-rbac-forbidden.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "RBAC: чужой клиент по прямой ссылке недоступен, данные не раскрыты",
+    "source_sha256": "9b7c102eaba8db159e2d6cb6121cc45875fde1cb88fbff6bbd184b94540d908a"
+  },
+  {
+    "figure": 62,
+    "page": 64,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/29-rbac-search.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Глобальный поиск риелтора: чужие записи отсутствуют в выдаче",
+    "source_sha256": "a097bd5a3975c963e7c7ce2614fc3ff7ae58ffa0b6a8f9accf019225409e0b19"
+  },
+  {
+    "figure": 63,
+    "page": 65,
+    "section": "Десктопная версия",
+    "source": "docs/thesis/screenshots/desktop/30-archive.png",
+    "mode": "QA / SQLite / supervisor без окна Tauri",
+    "caption": "Исторический архив: экран «Нет доступа» для пользователя без разрешения",
+    "source_sha256": "a14b90d8c26987ad82617288f8611c66ea1e035e09ba8946401007782e5feb11"
+  },
+  {
+    "figure": 64,
+    "page": 66,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-ai-locations.png",
+    "mode": "LIVE AI / синтетический CRM-контекст",
+    "caption": "AI-разбор склада у Оби: черновик локации и параметров перед подтверждением, исходный e2e-срез",
+    "source_sha256": "4254329d9d2cb100f951e9a3544800af434828e593f92221ed1b4fe3e208eb99"
+  },
+  {
+    "figure": 65,
+    "page": 67,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-ai-multiple-locations.png",
+    "mode": "LIVE AI / синтетический CRM-контекст",
+    "caption": "AI-разбор нескольких локаций: склад от 300 м², Обь и Новосибирск, подтверждение пользователя",
+    "source_sha256": "0edab896468803cb20c14f4f2bf647bcae0f916165368943c4b5692058169c5d"
+  },
+  {
+    "figure": 66,
+    "page": 68,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-card-cian.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Карточки с данными Циана и других площадок: исключения по локации, цена и причина вердикта",
+    "source_sha256": "317e69338d245406987ab35e0db6a45a33a3555c84bcc62f072509e05d2b3b57"
+  },
+  {
+    "figure": 67,
+    "page": 69,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-card-onrealt.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Карточка OnRealt: офис, известная площадь и адрес, неизвестный период цены, требуется проверка",
+    "source_sha256": "e910a6f92e5f0d21f31917b448045860ec907d286c25295cf383935a21ed39fd"
+  },
+  {
+    "figure": 68,
+    "page": 70,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-card-yandex.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Карточка Яндекса без адреса: неизвестные поля явно показаны, соответствие не подтверждено",
+    "source_sha256": "e910a6f92e5f0d21f31917b448045860ec907d286c25295cf383935a21ed39fd"
+  },
+  {
+    "figure": 69,
+    "page": 71,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-filter-locations.png",
+    "mode": "Форма / проверка интерфейса",
+    "caption": "Ручная форма поиска: выбор населённых пунктов, типов объектов и площадок",
+    "source_sha256": "0655b15539e7c5940dce4e0b14329b70c71a568c71098ddb59aefb3b7f07454c"
+  },
+  {
+    "figure": 70,
+    "page": 72,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-manual-avito-domclick.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Состояния площадок: Авито требует действия, Домклик заблокирован, доступны ручные пути",
+    "source_sha256": "68fea01ee4db3541261850c3392a8aaa7fcd211bde84fc3d14fb352fb8b5c0ac"
+  },
+  {
+    "figure": 71,
+    "page": 73,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-manual-avito.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Авито: открыт диалог добавления по ссылке, объявление не добавлялось, блокировка не обходилась",
+    "source_sha256": "603ce74af8c6caaea2bb0fec3509575e05756023bb825782dabebc8a5acc55c5"
+  },
+  {
+    "figure": 72,
+    "page": 74,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-manual-domclick.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Домклик: диалог ручного добавления по ссылке поверх частичной выдачи CRM",
+    "source_sha256": "5e9a17c11c0d8d09f38ce189c5557a3281fb5f082c65404cb7cc45e84d6e93a0"
+  },
+  {
+    "figure": 73,
+    "page": 75,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-ranking.png",
+    "mode": "LIVE AI / синтетический CRM-контекст",
+    "caption": "LIVE-ранжирование двух выбранных объявлений: рекомендация отделена от фактов и требует проверки",
+    "source_sha256": "baa39a5d2a265ab7d6f0cb28aa554b5d9d5a2fd0aa8d53a7c5cf753ac3fc5fff"
+  },
+  {
+    "figure": 74,
+    "page": 76,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-a-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий a: аренда офиса 50–100 м² в Академгородке, неизвестный период цены требует проверки",
+    "source_sha256": "e910a6f92e5f0d21f31917b448045860ec907d286c25295cf383935a21ed39fd"
+  },
+  {
+    "figure": 75,
+    "page": 77,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-b-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий b до фильтра комнат: квартиры в Бердске до 5 млн, в выборке также студии и однокомнатные",
+    "source_sha256": "1c76b3b9dabe2a536d043fe2c3b5d376925590ad1ce69c623c17cf164d86b0b4"
+  },
+  {
+    "figure": 76,
+    "page": 78,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-c-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий c: склады от 300 м² в Оби и Новосибирске, адреса и периоды цены известны не у всех",
+    "source_sha256": "b2479b20bb21f5a63e008bae716021b02d41fa64f7fb5bc8d7acb73370446624"
+  },
+  {
+    "figure": 77,
+    "page": 79,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-d-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий d: квартиры в аренду в Кольцово, неизвестный период не подтверждает месячную ставку",
+    "source_sha256": "6782839e2c00b4ac45e9452ba0f678a97042dd9e4603a9549eee1267b1b495bf"
+  },
+  {
+    "figure": 78,
+    "page": 80,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-e-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий e: продажа домов и коттеджей в области, в карточках видны адреса, цены и вердикты",
+    "source_sha256": "90a609def9a86e3edd0799d8a25a41abc699b852ef813a56e8936a6674185368"
+  },
+  {
+    "figure": 79,
+    "page": 81,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-f-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий f исходного e2e-среза: поиск апартаментов, неизвестный тип требует проверки",
+    "source_sha256": "ec1705317a85c8f721d874cbc76d860a7859b4c63c3198cd6ea401241172de40"
+  },
+  {
+    "figure": 80,
+    "page": 82,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-scenario-g-cards.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сценарий g: нежилые помещения в городе и пригородах, неизвестный период цены требует проверки бюджета",
+    "source_sha256": "a875852d898c588893cb96b9c6bddfd1f38f087b714b921d6d99cb70712b00dd"
+  },
+  {
+    "figure": 81,
+    "page": 83,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/e2e-sources-results.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Панель семи источников: результаты успешных площадок сохранены рядом с blocked и needs_user_action",
+    "source_sha256": "1d4dbabe465eb1fe2a96f23e4ec36c4a35557e12463c9de6f7327f9dc4524325"
+  },
+  {
+    "figure": 82,
+    "page": 84,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/flat-berdsk-results.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сохранённый LIVE-запуск Бердска в режиме REPLAY: пять карточек, отдельные вердикты результата",
+    "source_sha256": "7b3161c7248561d0cc612a11f645600850d7615e99adb2178ce8084f98a16616"
+  },
+  {
+    "figure": 83,
+    "page": 85,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/flat-berdsk.png",
+    "mode": "Форма / проверка интерфейса",
+    "caption": "Ранняя географическая проверка: форма продажи квартиры в Бердске, заданные условия поиска",
+    "source_sha256": "07c6a959393fc9b4b7bf2b49bebb9ad40b399ce1a17518a2160e9f43c1b277da"
+  },
+  {
+    "figure": 84,
+    "page": 86,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/office-akademgorodok-results.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сохранённая выдача Академгородка: статус источника не означает совпадение по району и площади",
+    "source_sha256": "8d5b9493124ed1bf2b571da8054531298068292fd644e7116f67c507a1e292d1"
+  },
+  {
+    "figure": 85,
+    "page": 87,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/office-akademgorodok.png",
+    "mode": "Форма / проверка интерфейса",
+    "caption": "Ранняя географическая проверка: офис 50–100 м², Академгородок обозначен Советским районом",
+    "source_sha256": "457e10983a4e8a39974ba1ffcd02773a1e495914237da28bdb4a55f98010df0a"
+  },
+  {
+    "figure": 86,
+    "page": 88,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/quality-filter-locations.png",
+    "mode": "Форма / проверка интерфейса",
+    "caption": "После quality-изменений: явный выбор локаций и фильтров без скрытого расширения города",
+    "source_sha256": "0655b15539e7c5940dce4e0b14329b70c71a568c71098ddb59aefb3b7f07454c"
+  },
+  {
+    "figure": 87,
+    "page": 89,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/quality-room-filter.png",
+    "mode": "Форма / проверка интерфейса",
+    "caption": "После исправления: выбран фильтр двух комнат для продажи квартиры в Бердске до 5 млн",
+    "source_sha256": "1a315c56095e73859fc6a65d93a12db6c6f9fcee2dd614cbf8774399b0c334c3"
+  },
+  {
+    "figure": 88,
+    "page": 90,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/quality-room-results.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Результаты с фильтром комнат: подтверждённые и требующие проверки карточки разделены",
+    "source_sha256": "450852bccc0bc79338c590cc954ab16716d9f374a3ca080d65a8805e1e2cc72e"
+  },
+  {
+    "figure": 89,
+    "page": 91,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/warehouse-ob-results.png",
+    "mode": "Сохранённые LIVE-результаты / повторное открытие",
+    "caption": "Сохранённый LIVE-запуск склада у Оби: частичный результат после тайм-аута, не доказательство пустого рынка",
+    "source_sha256": "7fa1e3ad2e47dcd8f671194ec742e8449124ed39e7fad3da453a567653ff4b4f"
+  },
+  {
+    "figure": 90,
+    "page": 92,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-search/warehouse-ob.png",
+    "mode": "Форма / проверка интерфейса",
+    "caption": "Ранняя форма поиска: аренда склада в городе Обь, выбран отдельный населённый пункт",
+    "source_sha256": "3c9444d0ad1036e4b2450902c0af0c654f74547cb5e3e0d36eaf0f1caa4e12a8"
+  },
+  {
+    "figure": 91,
+    "page": 93,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-captcha/avito-blocked.png",
+    "mode": "LIVE / зафиксированная блокировка",
+    "caption": "Авито: страница отказа HTTP 403 в обычном Chromium, выдача не получена",
+    "source_sha256": "d72c0da6ab0f1f85f3977949e99eff5adadd8977f95532e44179e8c802e6854b"
+  },
+  {
+    "figure": 92,
+    "page": 94,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-captcha/cian-blocked.png",
+    "mode": "LIVE / зафиксированная блокировка",
+    "caption": "Циан: подозрительный трафик и отказ headless-пробы, исторический кадр до успеха native headed",
+    "source_sha256": "7af518f143320f8833c284f4691eed2b3789b5f585992d5b685f621f7ee01c62"
+  },
+  {
+    "figure": 93,
+    "page": 95,
+    "section": "Поиск недвижимости",
+    "source": "docs/screenshots/vkr/v323-captcha/domclick-blocked.png",
+    "mode": "LIVE / зафиксированная блокировка",
+    "caption": "Домклик: страница отказа, запрос заблокирован HTTP 401, ручной путь сохраняется",
+    "source_sha256": "7f3642c8a7ad65c09d03223e9d93a0c8b5848b1e57735e527b5a0c0a08e378a6"
+  },
+  {
+    "figure": 94,
+    "page": 96,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/01-client-demo.png",
+    "mode": "DEMO / fake provider",
+    "caption": "Контекстный помощник в карточке клиента: демонстрационный ответ fake-провайдера, не результат внешней модели",
+    "source_sha256": "0851c6e1e53c44c654bdbdfecc407356b2cd76114caf818fad8f77fc41025a38"
+  },
+  {
+    "figure": 95,
+    "page": 97,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/01-client-live.png",
+    "mode": "LIVE AI / v1",
+    "caption": "Контекстный помощник в карточке клиента: реальный ответ на обезличенный контекст, действия требуют подтверждения",
+    "source_sha256": "2d606ff5382a407a6aa2ec0d9db3c0ec0cc18cfbde08f614b68d981e087c7689"
+  },
+  {
+    "figure": 96,
+    "page": 98,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/02-need-demo.png",
+    "mode": "DEMO / fake provider",
+    "caption": "Контекстный помощник в карточке потребности: демонстрационный ответ fake-провайдера, не результат внешней модели",
+    "source_sha256": "a56b0d57ab9f358216cecdbb0f04368eec1da3100edfb0dba6f70b45a7020850"
+  },
+  {
+    "figure": 97,
+    "page": 99,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/02-need-live.png",
+    "mode": "LIVE AI / v2",
+    "caption": "Контекстный помощник в карточке потребности: реальный ответ на обезличенный контекст, действия требуют подтверждения",
+    "source_sha256": "7076371d9467880c11b197302066edf225732c4120124a86018ff5707e7458f7"
+  },
+  {
+    "figure": 98,
+    "page": 100,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/03-task-demo.png",
+    "mode": "DEMO / fake provider",
+    "caption": "Контекстный помощник в карточке задачи: демонстрационный ответ fake-провайдера, не результат внешней модели",
+    "source_sha256": "706a06d445cfd6588b8873eac5105d5fa7177284dc134868506c280f5621fa55"
+  },
+  {
+    "figure": 99,
+    "page": 101,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/03-task-live.png",
+    "mode": "LIVE AI / v2",
+    "caption": "Контекстный помощник в карточке задачи: реальный ответ на обезличенный контекст, действия требуют подтверждения",
+    "source_sha256": "6e4704ce4fe489e13f926e0c07a075f7a74001d335fd298625f22730fd611f5e"
+  },
+  {
+    "figure": 100,
+    "page": 102,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/04-deal-demo.png",
+    "mode": "DEMO / fake provider",
+    "caption": "Контекстный помощник в карточке сделки: демонстрационный ответ fake-провайдера, не результат внешней модели",
+    "source_sha256": "5d5f1daa04690732a7a29bed6370e1599f88698db89ffef3d67fb73ab6531585"
+  },
+  {
+    "figure": 101,
+    "page": 103,
+    "section": "AI-помощник",
+    "source": "docs/screenshots/vkr/v323-assistant/04-deal-live.png",
+    "mode": "LIVE AI / v2",
+    "caption": "Контекстный помощник в карточке сделки: реальный ответ на обезличенный контекст, действия требуют подтверждения",
+    "source_sha256": "d96a25699b7f6eedd78e0c712084800e87324ec5708a736434057c6074427420"
+  },
+  {
+    "figure": 102,
+    "page": 104,
+    "section": "UX до/после",
+    "source": "docs/screenshots/vkr/v322-ux/before/manager-task-new-1366x768.png",
+    "mode": "Историческая пара v3.2.2 / ДО / 6ee543c",
+    "caption": "Новая задача: шаблоны, повторения и связи занимают основной экран",
+    "source_sha256": "8cc481581af5701cc2c75560a5bfba0c03da9129691391ff3ee230d61cd99149"
+  },
+  {
+    "figure": 103,
+    "page": 105,
+    "section": "UX до/после",
+    "source": "docs/screenshots/vkr/v322-ux/after/manager-task-new-1366x768.png",
+    "mode": "Историческая пара v3.2.2 / ПОСЛЕ / d881253",
+    "caption": "Новая задача: редкие параметры свёрнуты, кнопка создания доступна в первом экране",
+    "source_sha256": "dde6ae23240877f116819fcbaf78c51219c8e6d0cd446c164c68f577a7c04c4c"
+  },
+  {
+    "figure": 104,
+    "page": 106,
+    "section": "UX до/после",
+    "source": "docs/screenshots/vkr/v322-ux/before/manager-clients-1366x768.png",
+    "mode": "Историческая пара v3.2.2 / ДО / 6ee543c",
+    "caption": "Список клиентов: переход к истории через карточку клиента",
+    "source_sha256": "82f147aa91d7db20ec932c87c4f090a152873a76566c071e3ee8fc7ab6e5201c"
+  },
+  {
+    "figure": 105,
+    "page": 107,
+    "section": "UX до/после",
+    "source": "docs/screenshots/vkr/v322-ux/after/manager-clients-1366x768.png",
+    "mode": "Историческая пара v3.2.2 / ПОСЛЕ / d881253",
+    "caption": "Список клиентов: история и потребности доступны из строки, до отдельной правки переноса телефона",
+    "source_sha256": "856049be6a297ecbe875dea7422f9258eef40de99c25c980d6b16a038844cd79"
+  },
+  {
+    "figure": 106,
+    "page": 108,
+    "section": "UX до/после",
+    "source": "docs/screenshots/vkr/v322-ux/before/realtor1-need-edit-1920x1080.png",
+    "mode": "Историческая пара v3.2.2 / ДО / 6ee543c",
+    "caption": "Изменение потребности: финансирование и дополнительные требования раскрыты",
+    "source_sha256": "124a84dc95150e79ac1fe74f7c4a8f8306e54c40874404291e89d4490d5885c7"
+  },
+  {
+    "figure": 107,
+    "page": 109,
+    "section": "UX до/после",
+    "source": "docs/screenshots/vkr/v322-ux/after/realtor1-need-edit-1920x1080.png",
+    "mode": "Историческая пара v3.2.2 / ПОСЛЕ / d881253",
+    "caption": "Изменение потребности: редкие параметры выделены в раскрываемые разделы, основные поля компактнее",
+    "source_sha256": "541edcf99c628963f32a7f51a79c81a671e87e430d0fd0a2176946f9c59ff714"
+  }
+]
