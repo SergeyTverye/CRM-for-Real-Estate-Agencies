@@ -21,7 +21,9 @@ it.each([
  const after=SearchFilters.parse(preserveSearchConditions(before,proposed,text));
  expect(after.locations).toEqual(fields.locations);
  expect(after.propertyKinds).toEqual(fields.propertyKinds.length?fields.propertyKinds:undefined);
- expect(after.districts).toEqual([]);
+ // A move to another place clears districts; the same place keeps them.
+ const moved=JSON.stringify(fields.locations)!==JSON.stringify(["novosibirsk"]);
+ expect(after.districts).toEqual(moved?[]:["Центральный"]);
  if("areaFrom" in fields)expect(after.areaFrom).toBe(fields.areaFrom);
  if("priceTo" in fields)expect(after.priceTo).toBe(fields.priceTo);
 });

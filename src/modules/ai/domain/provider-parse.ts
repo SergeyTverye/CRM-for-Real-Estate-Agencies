@@ -24,12 +24,13 @@ export const providerParseSchema = {
     "locations", "propertyKinds", "rooms", "purposes", "districts", "requiredFeatures", "preferredFeatures", "sources", "clarificationQuestion"],
 };
 const flatSchema = z.object({
-  locations: z.array(z.string()).optional(), propertyKinds: z.array(z.string()).optional(), rooms: z.array(z.string()).optional(),
-  city: z.string().nullable(), operation: z.string().nullable(), priceUnit: z.string().nullable(),
-  priceFrom: z.string().nullable(), priceTo: z.string().nullable(), areaFrom: z.number().nullable(), areaTo: z.number().nullable(),
-  floorMode: z.string().nullable(), seller: z.string().nullable(), purposes: z.array(z.string()), districts: z.array(z.string()),
-  requiredFeatures: z.array(z.string()), preferredFeatures: z.array(z.string()), sources: z.array(z.string()),
-  clarificationQuestion: z.string().nullable(),
+  locations: z.array(z.string()).nullish(), propertyKinds: z.array(z.string()).nullish(), rooms: z.array(z.string()).nullish(),
+  city: z.string().nullish(), operation: z.string().nullish(), priceUnit: z.string().nullish(),
+  priceFrom: z.string().nullish(), priceTo: z.string().nullish(), areaFrom: z.number().nullish(), areaTo: z.number().nullish(),
+  floorMode: z.string().nullish(), seller: z.string().nullish(),
+  purposes: z.array(z.string()).nullish(), districts: z.array(z.string()).nullish(),
+  requiredFeatures: z.array(z.string()).nullish(), preferredFeatures: z.array(z.string()).nullish(), sources: z.array(z.string()).nullish(),
+  clarificationQuestion: z.string().nullish(),
 }).strict();
 /** Canonical UI choices: a specific commercial purpose already constrains non-residential kind.
  * Location IDs are authoritative; a provider's broad city label must not disagree with one selected place. */
@@ -44,10 +45,20 @@ function canonicalParseResult(value: unknown) {
 export function decodeParseResult(text: string) {
   const object = decodeAiJson(z.record(z.string(), z.unknown()), text);
   // Canonical shape remains supported for recorded fixtures and older text-only responses.
+  // It stays strict: recorded rejection tests rely on it.
   if ("filters" in object) return canonicalParseResult(object);
   const { clarificationQuestion, ...flat } = flatSchema.parse(object);
-  if (clarificationQuestion !== null) return parseResultSchema.parse({ filters: null, clarificationQuestion });
-  const filters = Object.fromEntries(Object.entries(flat).filter(([key, value]) => value !== null && (!(["locations", "propertyKinds", "rooms"].includes(key)) || !Array.isArray(value) || value.length > 0)));
+  if (clarificationQuestion != null) return parseResultSchema.parse({ filters: null, clarificationQuestion });
+  const filters = Object.fromEntries(Object.entries(flat).filter(([key, value]) => value !== null && value !== undefined && (!(["locations", "propertyKinds", "rooms"].includes(key)) || !Array.isArray(value) || value.length > 0))) as Record<string, unknown>;
+  // LIVE repair before strict validation: a schema-valid model answer with a null
+  // operation or a rent/sale unit mismatch must become a clarification or a
+  // canonical unit, never an HTTP 422 without a paid-call trace.
+  if (filters.operation == null) return { filters: null, clarificationQuestion: "Уточните операцию: продажа или аренда?" };
+  if (filters.operation === "rent" && filters.priceUnit == null) {
+    if (filters.priceFrom !== undefined || filters.priceTo !== undefined) filters.priceUnit = "rub_month";
+    else return { filters: null, clarificationQuestion: "Уточните единицу цены аренды: в месяц, в год или за м²?" };
+  }
+  if (filters.operation === "sale" && filters.priceUnit != null && filters.priceUnit !== "rub_total") filters.priceUnit = "rub_total";
   return canonicalParseResult({ filters, clarificationQuestion: null });
 }
 export const providerParseInstructions = `Верни ПЛОСКИЙ JSON по переданной text.format schema, без поля filters.

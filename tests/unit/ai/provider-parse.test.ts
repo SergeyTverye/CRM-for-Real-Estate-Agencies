@@ -16,8 +16,12 @@ describe("flat provider parse contract", () => {
   it("keeps clarification separate from operational filters", () => {
     expect(decodeParseResult(JSON.stringify({ ...flat, operation: null, clarificationQuestion: "Единица цены?" }))).toEqual({ filters: null, clarificationQuestion: "Единица цены?" });
   });
+  it("defaults a rent unit from an explicit price, still rejecting other invalid input", () => {
+    const normalized = decodeParseResult(JSON.stringify({ ...flat, operation: "rent", priceUnit: null }));
+    expect(normalized.filters).toMatchObject({ operation: "rent", priceUnit: "rub_month", priceTo: "10000000" });
+  });
   it.each([
-    { ...flat, operation: "unknown" }, { ...flat, priceTo: 100 }, { ...flat, operation: "rent", priceUnit: null },
+    { ...flat, operation: "unknown" }, { ...flat, priceTo: 100 },
     { ...flat, areaFrom: -1 }, { ...flat, purposes: ["invented"] }, { ...flat, secret: "injection" },
   ])("does not weaken full canonical validation", (data) => {
     expect(() => decodeParseResult(JSON.stringify(data))).toThrow();
