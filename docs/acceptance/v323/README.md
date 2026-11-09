@@ -4,6 +4,15 @@
 
 Подробный отчёт для диссертации: [v323-comprehensive-report.md](../../thesis/v323-comprehensive-report.md), PDF [отчёта](../../thesis/CRM-v3.2.3-отчёт-о-тестировании.pdf) и [альбом скриншотов](../../thesis/CRM-screenshots-v3.2.3.pdf) (109 страниц, 107 рисунков с подписями).
 
+## Windows-установщик
+
+[GitHub Actions run 42581822602](https://github.com/SergeyTverye/CRM-for-Real-Estate-Agencies/actions/runs/42581822602) для `a07b9d3` (код совпадает с `3d10a17`, после него изменены только документы и CI): build SUCCESS (unit, SQLite integration, Rust, проверка состава ресурсов), install SUCCESS на Windows Server 2022 и 2025 (установка, готовность, создание данных, удаление, переустановка, полное удаление). Артефакт `CRM-Windows-x64` (id 13659215749).
+
+`CRM-Setup-Windows-x64.exe`: 800 176 536 байт, SHA-256 `94ecca4cd69b89b6c5d2968f75102940aaedb678aeda390f6f2e3d6100393034`. Локальная копия: `releases/v3.2.3-rc1/` (не в Git).
+
+Предыдущие две сборки этого кода падали на загрузке инструментов NSIS с GitHub (HTTP 504). В CI добавлены кеш инструментов NSIS и повтор шага упаковки.
+
+
 ## Поиск недвижимости
 
 | Площадка | Итог | Протокол |
