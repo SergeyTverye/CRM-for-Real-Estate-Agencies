@@ -1,0 +1,167 @@
+[
+  {
+    "file": "01-login-form.png",
+    "caption": "Форма входа: логин и пароль, учётные записи создаёт руководитель",
+    "scenario": "auth"
+  },
+  {
+    "file": "02-today-manager.png",
+    "caption": "Экран «Сегодня» руководителя: просрочки, задачи и ближайшие события",
+    "scenario": "today"
+  },
+  {
+    "file": "03-today-realtor.png",
+    "caption": "«Сегодня» риелтора: просрочки, задачи на день и ближайшие события",
+    "scenario": "today"
+  },
+  {
+    "file": "04-requests-list.png",
+    "caption": "Экран «Обращения»: входящие звонки и заявки с фильтрами по источникам",
+    "scenario": "requests"
+  },
+  {
+    "file": "05-client-card.png",
+    "caption": "Карточка клиента: контакты, потребности, история обращений и коммуникаций",
+    "scenario": "client"
+  },
+  {
+    "file": "06-need-card.png",
+    "caption": "Карточка потребности: параметры, подбор, стадии и следующие действия",
+    "scenario": "need"
+  },
+  {
+    "file": "07-need-matching.png",
+    "caption": "Подбор по потребности: совпадения объектов и статусы предложений",
+    "scenario": "need"
+  },
+  {
+    "file": "08-property-card.png",
+    "caption": "Карточка объекта: адрес, параметры, фото, документы и собственники",
+    "scenario": "property"
+  },
+  {
+    "file": "09-properties-list.png",
+    "caption": "Экран «Объекты»: таблица с фильтрами по типу, операции и району",
+    "scenario": "property"
+  },
+  {
+    "file": "10-showings-list.png",
+    "caption": "Экран «Показы»: запланированные и завершённые с результатами",
+    "scenario": "showing"
+  },
+  {
+    "file": "11-calendar.png",
+    "caption": "Календарь: встречи, показы и повторяющиеся серии",
+    "scenario": "tasks"
+  },
+  {
+    "file": "12-notifications.png",
+    "caption": "Уведомления: напоминания о задачах и событиях",
+    "scenario": "tasks"
+  },
+  {
+    "file": "13-offer-card.png",
+    "caption": "Коммерческое предложение: позиции со снапшотами цен и адресов, статусы",
+    "scenario": "offer"
+  },
+  {
+    "file": "14-offer-print.png",
+    "caption": "Печатная форма КП (A4): позиции, цены, условия",
+    "scenario": "offer"
+  },
+  {
+    "file": "15-offers-list.png",
+    "caption": "Экран «Коммерческие предложения»: черновики, отправленные, архив",
+    "scenario": "offer"
+  },
+  {
+    "file": "16-deal-card.png",
+    "caption": "Карточка сделки: стороны, две комиссионные записи, чек-лист и задачи",
+    "scenario": "deal"
+  },
+  {
+    "file": "17-deals-list.png",
+    "caption": "Экран «Сделки»: воронка по статусам и суммам",
+    "scenario": "deal"
+  },
+  {
+    "file": "18-agreement-card.png",
+    "caption": "Карточка договора: сроки, юрлицо, приложенные документы",
+    "scenario": "agreement"
+  },
+  {
+    "file": "19-agreements-list.png",
+    "caption": "Экран «Договоры»: действующие, истекающие и архив",
+    "scenario": "agreement"
+  },
+  {
+    "file": "20-ads-list.png",
+    "caption": "Экран «Реклама»: площадки, сроки публикации и истекающие объявления",
+    "scenario": "ads"
+  },
+  {
+    "file": "21-reports.png",
+    "caption": "Экран «Отчёты»: обращения, этапы, показы, просрочки, сделки, активность",
+    "scenario": "reports"
+  },
+  {
+    "file": "22-reports-sources.png",
+    "caption": "Отчёт по источникам обращений с переходом к первичным записям",
+    "scenario": "reports"
+  },
+  {
+    "file": "23-reports-detail.png",
+    "caption": "Детализация отчёта: drill-down до первичных записей",
+    "scenario": "reports"
+  },
+  {
+    "file": "24-import-dryrun-empty.png",
+    "caption": "Импорт книги без распознанных секций: корректный пустой dry-run без утечек",
+    "scenario": "import"
+  },
+  {
+    "file": "25-import-dryrun.png",
+    "caption": "Импорт: результат dry-run по синтетической книге, статусы строк",
+    "scenario": "import"
+  },
+  {
+    "file": "26-import-commit.png",
+    "caption": "Импорт завершён: счётчики загруженных, пропущенных и ошибок",
+    "scenario": "import"
+  },
+  {
+    "file": "27-search-filters.png",
+    "caption": "Поиск объектов: локации, операция, тип, цены и площади",
+    "scenario": "search"
+  },
+  {
+    "file": "28-ai-today.png",
+    "caption": "AI-помощник на экране «Сегодня»: контекст дня и следующие действия",
+    "scenario": "ai"
+  },
+  {
+    "file": "29-ai-search.png",
+    "caption": "AI-помощник на экране поиска объектов: разбор запроса и уточнения",
+    "scenario": "ai"
+  },
+  {
+    "file": "30-admin-users.png",
+    "caption": "Администрирование: пользователи, роли, блокировка",
+    "scenario": "admin"
+  },
+  {
+    "file": "31-rbac-forbidden.png",
+    "caption": "RBAC: чужой клиент по прямой ссылке недоступен, данные не раскрыты",
+    "scenario": "rbac"
+  },
+  {
+    "file": "32-rbac-search.png",
+    "caption": "Глобальный поиск риелтора: чужие записи отсутствуют в выдаче",
+    "scenario": "rbac"
+  },
+  {
+    "file": "33-archive.png",
+    "caption": "Исторический архив: отделён от операционного CRM, доступ по ролям",
+    "scenario": "rbac"
+  }
+]
