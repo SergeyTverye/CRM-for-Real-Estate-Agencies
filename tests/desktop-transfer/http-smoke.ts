@@ -33,7 +33,6 @@ try {
     if(process.platform==="win32") execFileSync("taskkill",["/PID",String(child.pid),"/T","/F"],{stdio:"ignore"});else child.kill("SIGTERM");
   }
   log.end();
-  // Preserve concurrent edits; remove only auto-includes introduced by this Next run.
   const text=await readFile("tsconfig.json","utf8"), current=JSON.parse(text);
   const added=(current.include as string[]).filter(v=>v.startsWith(".next-3511/") && !originalConfig.include.includes(v));
   let cleaned=text;

@@ -101,7 +101,6 @@ describe("UC-14: экспорт ZIP/CSV + manifest", () => {
     const files = unzipSync(data);
     const manifest = JSON.parse(strFromU8(files["manifest.json"]!));
     expect(manifest).toMatchObject({ format: "crm-export", formatVersion: 1 });
-    // Directly applied PostgreSQL migrations need not have a Prisma ledger.
     if (!isSqlite()) {
       const ledger = await db.$queryRaw<{ present: boolean }[]>`SELECT to_regclass('_prisma_migrations') IS NOT NULL AS present`;
       const versions = ledger[0]?.present

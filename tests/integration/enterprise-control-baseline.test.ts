@@ -27,8 +27,6 @@ describe('synthetic control source-row property baseline', () => {
             ws.getCell(rn, 12).value = 'active';
             ws.getCell(rn, 13).value = 'rub_month';
         }
-        // Row keys intentionally identify address/area within a sheet. Distinct
-        // control sheets allow several approved controls of the same property.
         for (let rn = 3; rn <= 4; rn++) {
             const other = wb.addWorksheet(`Контроль договоров ${rn}`);
             other.addRow(ws.getRow(1).values);
@@ -58,13 +56,11 @@ describe('synthetic control source-row property baseline', () => {
         expect(await db.property.count()).toBe(1);
         expect(await db.agreement.count()).toBe(3);
         expect(await db.advertisement.count()).toBe(3);
-        // Unrelated edits must not replace per-row source differences.
         await db.property.update({ where: { id: property.id }, data: { description: 'Synthetic edited description', addressText: 'Synthetic  Nebula   Lane 17' } });
         const partial = parseEnterprise(await loadEnterprise((await exportEnterprise(users.manager, job.id)).buffer), profile);
         expect(partial.rows.map(r => r.record.price)).toEqual([null, '12345678901234.56', '0']);
         expect(partial.rows.map(r => r.recordKey)).toEqual(original.rows.map(r => r.recordKey));
         expect(partial.rows.map(r => r.record.addressText)).toEqual(original.rows.map(r => r.record.addressText));
-        // All actual edited fields, including explicit zero and NULL, are authoritative.
         await db.property.update({ where: { id: property.id }, data: { addressText: 'Synthetic Quasar Road 91', area: area === null ? '0' : null,
             price: '0', district: 'Synthetic edited district', operationType: 'sale', status: 'closed', attributesJsonb: { priceUnit: 'rub_total' } } });
         const edited = parseEnterprise(await loadEnterprise((await exportEnterprise(users.manager, job.id)).buffer), profile);

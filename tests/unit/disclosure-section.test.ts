@@ -2,7 +2,6 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chromium, type Browser, type Page } from "@playwright/test";
 import { build } from "esbuild";
 
-// Actual React component + Chromium: no DOM emulation or source-string assertions.
 let browser: Browser;
 let page: Page;
 let javascript: string;

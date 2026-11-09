@@ -17,7 +17,6 @@ it.skipIf(process.env.CRM_DEPLOYMENT_MODE==="desktop")("PG period migration pres
   const indexes=()=>db.$queryRawUnsafe("SELECT indexname,indexdef FROM pg_indexes WHERE schemaname='public' AND tablename='external_listings' ORDER BY indexname");
   const before=await indexes();
   await db.$transaction(async tx=>{
-    // Recreate the pre-migration contract with populated referencing tables.
     await tx.$executeRawUnsafe('ALTER TABLE external_listings ALTER COLUMN price_unit SET NOT NULL');
     const sql=readFileSync("prisma/migrations/20261108210000_unknown_listing_price_period/migration.sql","utf8");
     for(const statement of sql.split(";").map(s=>s.trim()).filter(Boolean)) await tx.$executeRawUnsafe(statement);

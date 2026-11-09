@@ -281,7 +281,6 @@ describe("confidential guard (synthetic only)", () => {
     put(root, "private-data/do-not-read.json", secret);
     stage(root, "private-data/do-not-read.json");
     expect(await generate(root, [publicPhrase, untrackedPhrase, secret], "--exclude-public", root)).toBe("3 / 1 / 2");
-    // Remove only the synthetic test index entry; the guard must still block private paths normally.
     execFileSync("git", ["-C", root, "rm", "--cached", "--", "private-data/do-not-read.json"], { stdio: "pipe" });
     expect(run(root, "--staged").status).toBe(0);
     put(root, "leak.txt", untrackedPhrase);

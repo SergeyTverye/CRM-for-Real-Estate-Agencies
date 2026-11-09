@@ -9,8 +9,6 @@ vi.mock("@/shared/db/client", () => ({ disconnectDb: async () => {}, db: { backu
   upsert: async () => ({ revision: 0, payload: { version: 1, rows: [] } }), updateMany: async () => ({ count: 1 }),
 } } }));
 vi.mock("@/modules/operations/application/operations-service", () => ({ startManualBackup: vi.fn() }));
-// Keep archive, SQLite, generation publication and credential-file encryption real.
-// Only the OS-specific DPAPI envelope and CRM migrations are replaced.
 vi.mock("../../scripts/desktop/database-lifecycle", () => ({ applySqliteMigrations: () => {} }));
 import { WindowsDpapiProtector, ServerAesProtector } from "@/modules/desktop-backup/infrastructure/credential-store";
 import { executeDesktopBackupRequest } from "@/modules/desktop-backup/application/desktop-coordinator";
@@ -32,8 +30,6 @@ afterEach(async () => { vi.restoreAllMocks(); vi.unstubAllEnvs(); for (const roo
 async function select(installation: Installation) {
   const { root, identity } = installation;
   for (const [key, value] of Object.entries({ DESKTOP_DATA_DIR: root, DATABASE_URL: "file:" + path.join(root, "crm.db"), FILE_STORAGE_PATH: path.join(root, "files"), BACKUP_PATH: path.join(root, "backups"), BACKUP_SETTINGS_DIR: path.join(root, "backup-settings"), CRM_DEPLOYMENT_MODE: "desktop", CRM_BACKUP_WRITERS_STOPPED: "1", INSTANCE_ROLE: "active", DEPLOYMENT_ID: identity.deploymentId, INSTANCE_ID: identity.instanceId })) vi.stubEnv(key, value);
-  // Explicit restart simulation: use the real supervisor's generation/role configuration,
-  // not a fabricated database path. No launcher, server or worker is started.
   const supervisor = await import("../../scripts/desktop/runtime/supervisor.mjs");
   await supervisor.configureActiveGeneration(root);
   await supervisor.configureHandoff(root);
@@ -114,10 +110,7 @@ it("preserves logical deployment through distinct A→B→A encrypted give/recei
   expect(returned.prepare("SELECT label FROM sample").pluck().get()).toBe("B successor work"); returned.close();
   expect(await readFile(path.join(process.env.FILE_STORAGE_PATH!, "control.txt"), "utf8")).toBe("B successor attachment");
   expect((await new GenerationStore(path.join(a.root, "runtime-generations")).current())?.backupId).toBe(child.manifest.backupId);
-  // Both installations now know the same child. Two actual gives produce siblings.
   const siblingA = await give(); await select(b);
-  // Synthetic split-brain fixture only: deliberately model an independently
-  // authorized branch. Ordinary give on B's real standby state is now denied.
   const bStateFile = path.join(b.root, "handoff-state.json");
   const bState = JSON.parse(await readFile(bStateFile, "utf8"));
   await atomicJson(bStateFile, { ...bState, readOnly: false });
@@ -125,7 +118,6 @@ it("preserves logical deployment through distinct A→B→A encrypted give/recei
   expect(siblingA.manifest.parentBackupId).toBe(child.manifest.backupId);
   expect(siblingB.manifest.parentBackupId).toBe(child.manifest.backupId);
   await deliver(siblingA, b); await unchangedReceive(siblingA.manifest.backupId, "conflict");
-  // Separate fresh foreign dataset generates its own real encrypted archive.
   const foreign = await fresh(false); await select(foreign); const unrelated = await give();
   await deliver(unrelated, a); await unchangedReceive(unrelated.manifest.backupId, "conflict");
   expect(await readFile(settingsFile)).toEqual(settingsBefore); expect(await readFile(credentialFile)).toEqual(credentialsBefore);

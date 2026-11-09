@@ -15,7 +15,6 @@ it("refreshes incomplete hashed traces only from packaged production dependencie
     expect(await refreshRuntimeAliases(root)).toBe(1);
     for (const file of ["dist/index.mjs", "dist/index.js", "LICENSE", "README.md"]) expect(await readFile(path.join(root, alias, file), "utf8")).toBe("public-runtime");
     await expect(readFile(path.join(root, alias, ".env.synthetic"))).rejects.toMatchObject({ code: "ENOENT" });
-    // Assert the destination boundary independently of the source install.
     await rm(path.join(root, pkg, ".env.synthetic"));
     await assertRuntimeResources(root);
     await rm(path.join(root, pkg), { recursive: true });

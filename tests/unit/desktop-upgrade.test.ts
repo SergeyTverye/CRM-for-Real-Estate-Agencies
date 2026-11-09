@@ -16,8 +16,6 @@ describe("desktop migration safety snapshot", () => {
     await writeFile(path.join(root,"files","control.txt"),"SYNTHETIC");
     await writeFile(path.join(data,"desktop-version.json"),JSON.stringify({version:"3.2.0"}));
     await writeFile(path.join(data,"identity.json"),JSON.stringify({deploymentId:randomUUID(),instanceId:randomUUID(),deviceId:randomUUID()}));
-    // DPAPI is platform-specific. Only its envelope is replaced; archive encryption,
-    // native SQLite backup, verification, failing process and rollback all run.
     vi.spyOn(WindowsDpapiProtector.prototype,"seal").mockImplementation(async bytes=>Buffer.from(bytes));
     vi.spyOn(WindowsDpapiProtector.prototype,"open").mockImplementation(async bytes=>Buffer.from(bytes));
     vi.spyOn(process,"cwd").mockReturnValue(root);

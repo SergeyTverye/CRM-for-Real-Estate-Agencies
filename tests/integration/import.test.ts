@@ -27,7 +27,7 @@ const operationalCounts = async () => ({
  * Детерминированная проверка отсутствия запрещённых ПДн (ТЗ 38.9).
  * Было: JSON.stringify(payload).not.toMatch(/...|1980/) — голый "1980" случайно
  * встречается в UUID/SHA (id, sourceSha256, sourceRecordKey...), тест флакал.
- * Теперь сканируются только пользовательские/бизнесовые строки; структурные
+ * Теперь сканируются только пользовательские/бизнесовые строки. структурные
  * ID/хеши пропускаются по имени ключа и по форме UUID/SHA. DOB синтетической
  * фикстуры ("01.01.1980" в scripts/dev/import-sample-builder.ts) ловится полными
  * представлениями ("01.01.1980", "1980-01-01"), а не голым годом — без ослабления.
@@ -77,7 +77,6 @@ function findForbiddenPii(value: unknown, path = "root"): string[] {
     if (v && typeof v === "object") {
       for (const [k, child] of Object.entries(v as Record<string, unknown>)) {
         if (FORBIDDEN_KEY_RE.test(k)) hits.push(`${p}.${k}: запрещённое имя поля`);
-        // Only validated scalar metadata is exempt, never a whole subtree.
         if (typeof child === "string" && ((UUID_METADATA_KEYS.has(k) && UUID_RE.test(child)) || (SHA_METADATA_KEYS.has(k) && SHA256_RE.test(child)))) continue;
         walk(child, `${p}.${k}`);
       }
@@ -93,7 +92,6 @@ describe("synthetic import privacy scanner regressions", () => {
     expect(sourceRecordKey).toMatch(SHA256_RE);
     expect(sourceRecordKey).toContain("1980");
     expect(findForbiddenPii({ rows: [{ sourceRecordKey, preview: { comment: "Без ПДн" } }] })).toEqual([]);
-    // A full compact DOB inside a hash is metadata only under a hash key.
     const hashWithDobDigits = `19800101${"a".repeat(56)}`;
     expect(findForbiddenPii({ sourceRecordKey: hashWithDobDigits })).toEqual([]);
     expect(findForbiddenPii({ comments: hashWithDobDigits })).not.toEqual([]);
@@ -121,7 +119,6 @@ describe("synthetic import privacy scanner regressions", () => {
         expect(findForbiddenPii({ [key]: [text] })).not.toEqual([]);
       }
     }
-    // SHA is not a valid UUID; arbitrary hex/business text is not exempt.
     expect(findForbiddenPii({ id: `19800101${"a".repeat(56)}` })).not.toEqual([]);
     expect(findForbiddenPii({ sourceRecordKey: `19800101${"a".repeat(24)}` })).not.toEqual([]);
     expect(findForbiddenPii({ sourceStorageKey: "01.01.1980.xlsx" })).not.toEqual([]);

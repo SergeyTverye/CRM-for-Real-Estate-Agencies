@@ -124,7 +124,6 @@ describe("P1A workflow", () => {
   const offer = await createOffer(u.realtor1, { clientNeedId: n.id, legalEntityId: u.llcId, items: [{ propertyId: property.id }] });
   const offerRow = await db.commercialOffer.findUniqueOrThrow({ where: { id: offer.id } });
   await changeOfferStatus(u.realtor1, offer.id, { expectedUpdatedAt: offerRow.updatedAt.toISOString(), status: "sent" });
-  // Old creation dates with current primary-event dates must remain in this report.
   await db.commercialOffer.update({ where: { id: offer.id }, data: { createdAt: new Date(inDays(-100)) } });
   const deal = await createDeal(u.realtor1, { propertyId: property.id, legalEntityId: u.llcId, parties: [{ clientId: c.id, partyRole: "tenant" }], commissions: [{ amount: "200.25", status: "received" }, { amount: "100.10", status: "received" }] });
   const dealRow = await db.deal.findUniqueOrThrow({ where: { id: deal.id } });

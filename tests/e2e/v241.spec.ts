@@ -64,8 +64,6 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   await expect(page.getByRole("button", { name: "Искать", exact: true })).toBeEnabled();
   expect((await (await page.request.get("/api/v1/ai/limits")).json()).aiEnabled).not.toBe(true);
   await searchManually(page);
-  // Earlier gallery tests may have transferred the first result. Keep this whole
-  // flow on one untransferred listing, identified by its public source URL.
   const untransferred = page.locator("[data-listing-id]").filter({ has: page.locator("button").filter({ hasText: /^В каталог CRM$/ }) }).first();
   const listingUrl = await untransferred.locator('a[target="_blank"]').first().getAttribute("href");
   expect(listingUrl).toBeTruthy();
@@ -138,7 +136,6 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   await page.goto("/calendar");
   await expect(page.locator(".fc-event").first()).toBeVisible();
   const repeatEvent = page.locator(".fc-event-title").filter({ hasText: repeatTitle }).first();
-  // Dense slots intentionally collapse; open the real event stack before asserting its content.
   if (!await repeatEvent.isVisible()) await page.locator(".fc-timegrid-more-link").first().click();
   await expect(repeatEvent).toBeVisible();
   // Один реальный такт фонового исполнителя, без вставки искусственного Notification.
@@ -166,8 +163,6 @@ test("v2.4.1: чужой клиент недоступен по прямому U
     await other.goto(href!);
     await expect(other).toHaveURL(new RegExp(`${href}$`));
     expect((await other.request.get(`/api/v1${href}`)).status()).toBe(404);
-    // Next streams the loading boundary with HTTP 200 before notFound resolves.
-    // The API must still deny access with an exact 404; the UI must render no data.
     await expect(other.locator('meta[name="robots"][content="noindex"]').first()).toBeAttached();
     await expect(other.getByRole("heading", { name: "Запись не найдена или недоступна", exact: true })).toBeVisible();
     await expect(other.locator("body")).toContainText(/не найден|нет доступа|404/i);

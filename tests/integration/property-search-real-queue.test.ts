@@ -11,9 +11,6 @@ import { extendSourceParsers } from "@/modules/property-search/infrastructure/pa
 import { resetConfigCache } from "@/shared/config/env";
 import { configureSearchAi } from "@/modules/property-search/application/dependencies";
 
-// Collected unchanged by integration (PG) and integration-sqlite. Only the
-// transport is fake: package HTML parser, normalization, queue, evaluator,
-// transactions, snapshots, results and grouping all remain real.
 function offlineOnRealt(purpose: "office" | "residential") {
   const title = purpose === "office" ? "Офис" : "Квартира";
   const slug = purpose === "office" ? "kypit-ofis" : "kypit-kvartiru";
@@ -33,8 +30,6 @@ function offlineOnRealt(purpose: "office" | "residential") {
     const client = extendSourceParsers(new RealEstateScraper({ transport, delay: 0, maxRetries: 0 }), { maxCards: 0 });
     return { searchSite: client.searchSite.bind(client), close };
   });
-  // Housing fans out to six variants; allow >=12 rows per branch. The same
-  // identities across branches deliberately exercise adapter deduplication.
   return { scraper: new RealEstateScraperAdapter({ enabled: true, browserEnabled: false, depth: { maxPages: 1, limit: 120 }, factory }), factory, transport, close };
 }
 
@@ -78,8 +73,6 @@ describe("non-empty installed queue persistence contract (both databases)", () =
     expect(aiFactory).not.toHaveBeenCalled();
     expect(await db.aiUsageLog.count()).toBe(0); expect(await db.aiBudgetReservation.count()).toBe(0);
     await expect(getSearchRun(users.realtor2, run.id)).rejects.toMatchObject({ code: "NOT_FOUND" });
-    // Recover the same durable job after a simulated lost final lease. Sources
-    // already committed must not be fetched or snapshotted for a second time.
     await db.searchRun.update({ where: { id: run.id }, data: { status: "running", lockedBy: "dead", heartbeatAt: new Date(0) } });
     expect(await recoverSearchQueue()).toBe(1);
     const resumed = offlineOnRealt(purpose);
@@ -93,8 +86,6 @@ describe("non-empty installed queue persistence contract (both databases)", () =
   it("rolls back a failed non-empty source batch and exposes only finite PERSIST diagnostics", async () => {
     const filters = SearchFilters.parse({ operation: "sale", purposes: ["office"] });
     const run = await enqueueSearch(users.realtor1, { filters, sources: ["onrealt"], idempotencyKey: "persist-failure-safe" });
-    // Invalid observation arrives through normalization, not a mocked persistence
-    // success: numeric area exceeds decimal(12,2) in BOTH backends.
     const offline = offlineOnRealt("office");
     const original = offline.scraper.searchDetailed.bind(offline.scraper);
     vi.spyOn(offline.scraper, "searchDetailed").mockImplementation(async (...args) => {
@@ -135,7 +126,6 @@ describe("non-empty installed queue persistence contract (both databases)", () =
     const offline = offlineOnRealt("office"), original = offline.scraper.searchDetailed.bind(offline.scraper);
     vi.spyOn(offline.scraper, "searchDetailed").mockImplementation(async (...args) => {
       const batch = await original(...args);
-      // A lookup failure happens AFTER the real adapter has returned data.
       vi.spyOn(db.externalListing, "findFirst").mockRejectedValueOnce(Object.assign(new Error("SYNTHETIC_PRIVATE_MESSAGE"), { code: "SYNTHETIC_PRIVATE_CODE", sql: "SYNTHETIC_PRIVATE_SQL", stack: "SYNTHETIC_PRIVATE_STACK" }));
       return batch;
     });

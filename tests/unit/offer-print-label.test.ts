@@ -5,7 +5,6 @@ const fixtures = vi.hoisted(() => ({
   property: vi.fn(), dictionary: vi.fn(), offer: vi.fn(), issuer: vi.fn(), media: vi.fn(), source: vi.fn(),
 }));
 
-// Keep this print-data regression synthetic: no DB client, media or environment initialization.
 vi.mock("@/shared/db/client", () => ({ db: { property: { findUniqueOrThrow: fixtures.property }, dictionaryItem: { findUnique: fixtures.dictionary } } }));
 vi.mock("sharp", () => ({ default: vi.fn() }));
 vi.mock("@/modules/export/application/print-data", () => ({ getPrintIssuer: fixtures.issuer, getPropertySourceUrl: fixtures.source }));

@@ -1,6 +1,5 @@
 import { writeFileSync } from 'node:fs';
 
-// Never serialize messages, actual/expected, logs, payloads, or raw stacks.
 function safeError(error) {
   const locations = [...String(error.stack ?? '').replaceAll('\\', '/').matchAll(/(?:src|tests|scripts)\/[\w./-]+\.(?:ts|tsx|mjs):(\d+):(\d+)/g)].map(m => m[0]);
   const kind = ['AssertionError', 'Error', 'TypeError', 'ConfigError'].includes(error.name) ? error.name : 'TEST_ERROR';

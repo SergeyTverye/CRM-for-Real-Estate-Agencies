@@ -54,7 +54,6 @@ it("retains compiled Next runtime API routes under .next-desktop while denying r
 
 it("rejects hashed-alias junction whose captured name resolves expected root outside node_modules", async () => {
   const { root, source, put } = await fixture("desktop-boundary-dotdot-");
-  // Minimal legitimate package so trace shape is realistic; the malicious alias must not copy trace root.
   await put("node_modules/real-pkg/index.js", "real");
   await put("AGENTS.md", "synthetic internal instructions");
   await mkdir(path.join(source, ".next-desktop", "server"), { recursive: true });
@@ -62,8 +61,6 @@ it("rejects hashed-alias junction whose captured name resolves expected root out
 
   const alias = ".next-desktop/node_modules/..-aaaaaaaaaaaaaaaa";
   await mkdir(path.dirname(path.join(source, alias)), { recursive: true });
-  // Junction/link target is the trace root itself: if accepted, expected=trace/node_modules/.. resolves to trace root
-  // and safeCopyTrace would copy app source as a dependency.
   await symlink(source, path.join(source, alias), "junction");
 
   const rejected = path.join(root, "rejected-dotdot");
@@ -86,7 +83,6 @@ it("materializes legitimate scoped package aliases and rejects invalid package s
   expect(await readFile(path.join(output, legit, "runtime/client.js"), "utf8")).toBe("pkg");
   expect(await readFile(path.join(output, legit, "data/runtime.json"), "utf8")).toBe("runtime data");
 
-  // Invalid npm scope must be refused before attempting filesystem resolution.
   const { root: root2, source: source2, put: put2 } = await fixture("desktop-boundary-scope-escape-");
   await put2("node_modules/@scope/pkg/index.js", "pkg");
   const outside = path.join(root2, "outside-target");

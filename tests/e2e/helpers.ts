@@ -4,7 +4,6 @@ export const PASSWORDS: Record<string, string> = { manager: "E2eRukovod2026", re
 
 export async function login(page: Page, loginName: "manager" | "realtor1" | "realtor2") {
   await page.goto("/login");
-  // The SSR form is interactive only after React attaches its submit handler.
   await page.waitForFunction(() => Object.keys(document.querySelector("form") ?? {}).some(key => key.startsWith("__reactProps")));
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await page.getByLabel("Логин").fill(loginName);

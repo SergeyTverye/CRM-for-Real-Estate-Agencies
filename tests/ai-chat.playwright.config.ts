@@ -1,6 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
 
-/** Existing crm_demo only; no database reset, server spawn, traces or AI calls. */
 export default defineConfig({
     testDir: "./e2e", testMatch: "ai-chat.ui.spec.ts", workers: 1, retries: 0,
     timeout: 90_000, expect: { timeout: 15_000 }, reporter: "list",

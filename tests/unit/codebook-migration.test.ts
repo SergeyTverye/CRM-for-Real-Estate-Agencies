@@ -12,7 +12,6 @@ const allSql = readdirSync(migrationsDir)
 
 describe("системный codebook и миграции", () => {
   it.each(CODEBOOK_COLUMNS.map((c) => [`${c.table}.${c.column}`, c] as const))("CHECK для %s совпадает с codebook", (_name, entry) => {
-    // CHECK IN is a set; use the last definition after incremental codebook migrations.
     const name = `"${entry.table}_${entry.column}_check"`;
     const definitions = allSql.split(";").filter(sql => sql.includes(`ADD CONSTRAINT ${name}`));
     const actual = definitions.at(-1) ?? "";

@@ -24,7 +24,6 @@ describe.each([true, false])("populated SQLite context migration (transaction=%s
       const before = history(), beforeSchema = schema();
       expect(beforeSchema.filter(row => (row as { type: string }).type === "trigger")).toEqual([]);
       expect(db.pragma("foreign_keys", { simple: true })).toBe(1);
-      // The new migration also upgrades the original four-context table directly.
       if (wrapped) db.transaction(() => db.exec(sql(target)))(); else db.exec(sql(target));
       expect(history()).toEqual(before);
       expect(schema()).toEqual(beforeSchema);

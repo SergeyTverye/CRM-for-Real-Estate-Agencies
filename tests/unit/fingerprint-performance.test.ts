@@ -8,7 +8,6 @@ import {
   matchesText as optMatchesText,
 } from "../../scripts/security/fingerprint-core.mjs";
 
-// Reference copy of the pre-optimization algorithm (exact original logic).
 const refNormalize = (value: unknown) =>
   String(value).normalize("NFKC").toLocaleLowerCase("ru-RU").replace(/\s+/gu, " ").trim();
 const refSha256 = (value: string) => createHash("sha256").update(value, "utf8").digest("hex");
@@ -55,7 +54,6 @@ function refMatchesText(text: unknown, hashes: Set<string>): boolean {
   return false;
 }
 
-// Synthetic-only fixtures (no private values, no files).
 const SECRET = "Синтетический объект Альфа 92387";
 const FIXTURES: Array<[string, string]> = [
   ["crlf", "type,value\r\nsynthetic,\"" + SECRET + "\"\r\nsecond\tline"],
@@ -103,7 +101,6 @@ describe("fingerprint normalization equivalence (synthetic only)", () => {
       expect(new Set(actual)).toEqual(new Set(expected)); // set
       expect(optMatchesText(text, optHashes)).toBe(refMatchesText(text, hashes)); // boolean
     }
-    // Negative control: ordinary words must not match.
     expect(optMatchesText("Недвижимость и продажа: объект готов.", optHashes)).toBe(false);
     expect(refMatchesText("Недвижимость и продажа: объект готов.", hashes)).toBe(false);
   });
@@ -126,7 +123,6 @@ describe("fingerprint normalization equivalence (synthetic only)", () => {
       digest = optSha256(form); // force full normalize + hash consume
       if (hashes.has(digest) && count > 0) break; // early boolean path still consumed prefix
     }
-    // Full-sequence consume for timing bound.
     let total = 0;
     for (const form of optTextForms(big)) total += form.length;
     const elapsed = Date.now() - started;

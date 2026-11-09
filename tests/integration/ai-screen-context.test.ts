@@ -76,7 +76,6 @@ it.each(["deal", "agreement", "task"] as const)("persists and reopens an assista
 it("foreign tasks, deals, linked agreements and report context are refused before a provider call", async () => {
   const c = await makeClient(users.realtor2); const n = await makeNeed(users.realtor2, c.id); const p = await makeProperty(users.realtor2);
   const task = await db.task.findFirstOrThrow({ where: { needLinks: { some: { clientNeedId: n.id } } } });
-  // Even an own deal/contract cannot leak its foreign client through the assistant.
   const deal = await db.deal.create({ data: { propertyId: p.id, legalEntityId: users.llcId, responsibleUserId: users.realtor1.userId, createdBy: users.realtor1.userId, status: "draft", parties: { create: { clientId: c.id, partyRole: "seller" } } } });
   const agreement = await db.agreement.create({ data: { clientId: c.id, dealId: deal.id, responsibleUserId: users.realtor1.userId, agreementType: "information", status: "draft" } });
   for (const context of [{ kind: "task", id: task.id }, { kind: "deal", id: deal.id }, { kind: "agreement", id: agreement.id }, { kind: "reports" }]) {

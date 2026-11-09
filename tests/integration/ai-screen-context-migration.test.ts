@@ -7,7 +7,6 @@ it("PostgreSQL context CHECK upgrade preserves populated sessions/messages/actio
  const s=await db.aiChatSession.create({data:{ownerUserId:users.manager.userId,title:"Synthetic",contextType:"none"}});
  const m=await db.aiChatMessage.create({data:{sessionId:s.id,role:"user",content:"synthetic"}});
  const a=await db.aiPendingAction.create({data:{sessionId:s.id,actionType:"task",payload:{}}});
- // sqlite upgrade is separately verified through both supported runners in unit tests.
  if(process.env.CRM_DEPLOYMENT_MODE!=="desktop") await db.$transaction(async tx=>{
   await tx.$executeRawUnsafe(`ALTER TABLE ai_chat_sessions DROP CONSTRAINT ai_chat_sessions_context_type_check, DROP CONSTRAINT ai_chat_sessions_context_check`);
   await tx.$executeRawUnsafe(`ALTER TABLE ai_chat_sessions ADD CONSTRAINT ai_chat_sessions_context_type_check CHECK(context_type IN ('client','need','collection','none')), ADD CONSTRAINT ai_chat_sessions_context_check CHECK((context_type='none' AND context_id IS NULL) OR (context_type<>'none' AND context_id IS NOT NULL))`);

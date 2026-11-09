@@ -39,7 +39,6 @@ describe('synthetic persisted scalar commission and closed advertising codes', (
         const repeat = await uploadEnterprise(users.manager, file(output.buffer), f.profile);
         expect(await confirm(repeat.id)).toMatchObject({ imported: 0 });
         expect(await db.agreement.count()).toBe(1);
-        // New source identity exercises a real reimport rather than only receipt/idempotency.
         wb.worksheets[0]!.getCell('A2').value = 'SYNTHETIC_REIMPORT';
         const next = await uploadEnterprise(users.manager, file(Buffer.from(await wb.xlsx.writeBuffer())), f.profile);
         expect(await confirm(next.id)).toMatchObject({ imported: 1 });
@@ -75,12 +74,10 @@ describe('synthetic persisted scalar commission and closed advertising codes', (
     it('requires explicit source-value mapping and exports stable codes through the same profile', async () => {
         const f = await synthetic(0, 'SYNTHETIC_STATUS_LABEL');
         f.ws.getCell('E2').value = 'SYNTHETIC_PLATFORM_LABEL';
-        // A generic legacy advertising column can explicitly represent platform, not URL.
         f.ws.getCell('E1').value = 'Реклама';
         const profile = buildProfile(f.wb), sheet = profile.sheets[0]!;
         sheet.columns['реклама'] = 'adPlatform';
         sheet.columns['статус рекламы'] = 'adStatus';
-        // Both headers initially classify as status, so resolve the duplicate slots too.
         sheet.columns['@1:5'] = 'adPlatform'; sheet.columns['@1:6'] = 'adStatus';
         const bytes = Buffer.from(await f.wb.xlsx.writeBuffer());
         const invalid = await uploadEnterprise(users.manager, file(bytes), profile);

@@ -196,7 +196,6 @@ describe("bounded native archive publication (synthetic files only)", () => {
     const ready = new Promise<void>(resolve => { started = resolve; });
     const claim = () => withNativeArchiveBudget(output, async () => { entered++; started(); await held; });
     const first = claim(); const second = claim();
-    // Attach rejection handlers immediately; keep the winner live until both contend.
     const outcomes = [first, second].map(p => p.then(() => "won", () => "denied"));
     await ready;
     expect(await Promise.race(outcomes)).toBe("denied");

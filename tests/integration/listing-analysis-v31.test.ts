@@ -178,7 +178,6 @@ it("AI-01 REPLAY exact request keeps price through preview and confirmation",asy
 it.each([null,"total"])("AI-02 unknown snapshot period overrides legacy SQL period %s",async priceUnit=>{
   const a=await listing(),b=await listing();
   await db.externalListing.updateMany({data:{priceUnit}});
-  // Old rows may still contain total from the former fallback. The source snapshot wins.
   const run=await db.searchRun.create({data:{userId:users.realtor1.userId,filters,status:"success"}});
   for(const row of [a,b]) await db.externalListingSnapshot.create({data:{listingId:row.id,searchRunId:run.id,fetchedAt:new Date(),priceRub:row.priceRub,normalized:{priceUnit:null}}});
   const f=fake('{"text":"Уточните период цены перед сравнением."}');
@@ -230,7 +229,6 @@ it("ranking checks current need access before returning an existing paid cache",
   const input={listingIds:[a.id,b.id],filters,needId:need.id};
   await rankAnalysisListings(users.realtor1,input,f.ai);
   await expect(rankAnalysisListings(users.realtor2,input,f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});
-  // Revocation must invalidate access even for the actor who populated the cache.
   await db.client.update({where:{id:client.id},data:{responsibleUserId:users.realtor2.userId}});
   await db.clientNeed.update({where:{id:need.id},data:{responsibleUserId:users.realtor2.userId}});
   await expect(rankAnalysisListings(users.realtor1,input,f.ai)).rejects.toMatchObject({code:"NOT_FOUND"});

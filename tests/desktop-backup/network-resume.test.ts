@@ -1,6 +1,3 @@
-// TEST scope only: controlled loopback HTTP socket fault, not physical OS network/real provider/cloud.
-// Two independent 127.0.0.1 WebDAV targets, production MailruWebDav + durable ReplicationQueue,
-// real fixture() encryption/hash path, real download + restore control file. No PD credentials.
 import { afterEach, describe, expect, it } from "vitest";
 import { createServer, request, type Server } from "node:http";
 import type { Socket } from "node:net";
@@ -154,7 +151,6 @@ async function startFaultProxy(upstreamEndpoint: string): Promise<FaultProxy> {
     if (isUpload) counters.uploadRequests += 1;
     if (state.disrupted && isUpload) {
       counters.socketCuts += 1;
-      // Real transport fault: destroy loopback sockets mid-body, never a rejected promise.
       req.once("data", () => {
         try {
           req.socket.destroy();
@@ -203,14 +199,12 @@ async function startFaultProxy(upstreamEndpoint: string): Promise<FaultProxy> {
 }
 
 const queueOpts = { baseBackoffMs: 10, maxBackoffMs: 50, maxAttempts: 5 } as const;
-// 2 MiB random payload is incompressible, so encrypted archive stays multi-part at 256 KiB.
 const INCOMPRESSIBLE_BYTES = 2 * 1024 * 1024;
 
 describe("controlled socket interruption resume (two loopback WebDAV targets)", () => {
   it("cuts sockets mid-body, makes no HTTP during backoff, and counts hard cuts", async () => {
     const endpointA = await startDav();
     const endpointB = await startDav();
-    // Few-MB bound, incompressible payload guarantees several real 256 KiB upload bodies.
     const a = await fixture(INCOMPRESSIBLE_BYTES);
     roots.push(a.root);
     const sourceHashBefore = await hashFile(a.path);
@@ -236,7 +230,6 @@ describe("controlled socket interruption resume (two loopback WebDAV targets)", 
     expect(JSON.stringify(first)).not.toContain(SECRET);
     expect(await hashFile(a.path)).toEqual(sourceHashBefore);
 
-    // Backoff window: same durable queue must not issue HTTP to the disrupted victim endpoint.
     const cutsBefore = proxy.counters.socketCuts;
     const reqsBefore = proxy.counters.proxyRequests;
     const uploadsBefore = proxy.counters.uploadRequests;
@@ -247,8 +240,6 @@ describe("controlled socket interruption resume (two loopback WebDAV targets)", 
     expect(proxy.counters.proxyRequests).toBe(reqsBefore);
     expect(proxy.counters.uploadRequests).toBe(uploadsBefore);
 
-    // directA is read-only remote inspection of the same storage namespace.
-    // Finite local diagnostics: endpoints bound, servers still listening, no secret echoed.
     expect(endpointA).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
     expect(proxy.endpoint).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
     expect(servers.length).toBeGreaterThanOrEqual(3);
@@ -266,7 +257,6 @@ describe("controlled socket interruption resume (two loopback WebDAV targets)", 
     const sourceHashBefore = await hashFile(a.path);
     const proxy = await startFaultProxy(endpointA);
 
-    // Victim is configured with proxyEndpoint; recovery clears the fault on that same endpoint.
     const victim = dav({ endpoint: proxy.endpoint, prefix: "synthetic/victim", workRoot: path.join(a.root, "victim-work") });
     const healthy = healthyDav(endpointB, path.join(a.root, "healthy-work"));
     const directA = dav({ endpoint: endpointA, prefix: "synthetic/victim", workRoot: path.join(a.root, "victim-direct") });
@@ -278,8 +268,6 @@ describe("controlled socket interruption resume (two loopback WebDAV targets)", 
     expect(first.map((r) => r.status)).toEqual(["failed", "verified"]);
     expect(proxy.counters.socketCuts).toBeGreaterThanOrEqual(1);
 
-    // Interrupted upload never publishes a complete marker; source archive unchanged.
-    // Finite local diagnostics before inspection: same bound endpoints, servers listening.
     expect(endpointA).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
     expect(proxy.endpoint).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/);
     expect(servers.length).toBeGreaterThanOrEqual(3);
@@ -290,7 +278,6 @@ describe("controlled socket interruption resume (two loopback WebDAV targets)", 
     expect(await hashFile(a.path)).toEqual(sourceHashBefore);
     await restoredFromId(healthy, a.archive.backupId, sourceHashBefore, a.root, "healthy-unaffected", a);
 
-    // Actual network recovery: same proxy endpoint, fault removed. No endpoint reconfiguration.
     proxy.state.disrupted = false;
     const resumed = new ReplicationQueue(queueDir, [victim, healthy], queueOpts);
     const final = await resumed.pump(t0 + 1000);
@@ -301,7 +288,6 @@ describe("controlled socket interruption resume (two loopback WebDAV targets)", 
     expect(JSON.stringify(final)).not.toContain(SECRET);
     expect(await hashFile(a.path)).toEqual(sourceHashBefore);
 
-    // directA remains read-only inspection; final verification/restore go through recovered victim.
     await victim.verify(a.archive);
     await restoredFromId(victim, a.archive.backupId, sourceHashBefore, a.root, "victim-resumed", a);
     await restoredFromId(healthy, a.archive.backupId, sourceHashBefore, a.root, "healthy-final", a);

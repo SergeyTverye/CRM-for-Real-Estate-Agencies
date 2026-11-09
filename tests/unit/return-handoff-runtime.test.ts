@@ -20,7 +20,6 @@ vi.mock("@/modules/desktop-backup/infrastructure/destinations-runtime", () => ({
   }),
   withBackupDestinations: async (work: (destinations: never[]) => Promise<unknown>) => work([]),
 }));
-// This tiny, newly-created DB tests archive/lineage/generation behavior, not CRM migrations.
 vi.mock("../../scripts/desktop/database-lifecycle", () => ({ applySqliteMigrations: () => {} }));
 import { executeDesktopBackupRequest, businessFingerprint } from "@/modules/desktop-backup/application/desktop-coordinator";
 import { archiveRoot, commandRoot } from "@/modules/desktop-backup/application/backup-control";

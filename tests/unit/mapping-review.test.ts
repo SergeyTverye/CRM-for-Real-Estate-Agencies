@@ -17,7 +17,6 @@ const maliciousHeader = '</script><img src="https://example.invalid/private" one
 let directory: string;
 let browser: Browser;
 let browserServer: BrowserServer;
-// Browser coverage is explicit so ordinary unit runs need no installed browser.
 const browserTest = it.runIf(process.env.MAPPING_REVIEW_BROWSER_TEST === '1');
 
 function synthetic() {
@@ -58,7 +57,6 @@ beforeAll(async () => {
     }
 }, 30000);
 afterAll(async () => {
-    // Stop only the process launched for this synthetic suite, including Edge background children.
     if (browserServer) {
         const child = browserServer.process();
         if (child.exitCode === null && child.pid) {

@@ -11,8 +11,6 @@ let users: TestUsers;
 const INITIAL_DEPLOYMENT_MODE = process.env.CRM_DEPLOYMENT_MODE ?? "server";
 beforeEach(async () => {
   for (const key of ["AI_ENABLED", "SCRAPER_ENABLED", "YANDEX_WEB_SEARCH_ENABLED", "YANDEX_WEB_SEARCH_AUTO_FALLBACK"]) vi.stubEnv(key, "true");
-  // Preserve actual backend mode: db proxy and ORIGIN fixture bind at import time.
-  // Forcing "server" here would falsely switch a SQLite run to PG (TRUNCATE path).
   vi.stubEnv("CRM_DEPLOYMENT_MODE", INITIAL_DEPLOYMENT_MODE); vi.stubEnv("YANDEX_CLOUD_API_KEY", ""); vi.stubEnv("SCRAPER_DEMO_FIXTURES", "false");
   resetConfigCache(); await resetDatabase(); users = await seedBase();
   await db.aiSetting.create({ data: { aiEnabled: true, scraperEnabled: true, enabledSources: ["cian", "mirkvartir", "onrealt", "domclick", "yandex", "youla", "avito"], monthlyBudgetRub: "1" } });

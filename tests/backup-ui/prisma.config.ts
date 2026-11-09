@@ -1,6 +1,5 @@
 import { defineConfig } from "prisma/config";
 
-// Deliberately does not load dotenv or accept a production URL.
 export default defineConfig({
   schema: "../../prisma/schema.prisma",
   migrations: { path: "../../prisma/migrations" },

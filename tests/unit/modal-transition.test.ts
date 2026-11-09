@@ -3,8 +3,6 @@ import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { expect, it, vi } from "vitest";
 
-// Exercise the actual Modal source without importing Next/API modules or adding
-// a DOM dependency. This models queued dialog close events, not a browser DOM.
 const source = readFileSync(new URL("../../src/ui/client-kit.tsx", import.meta.url), "utf8");
 const ast = ts.createSourceFile("client-kit.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const modal = ast.statements.find((node): node is ts.FunctionDeclaration =>
