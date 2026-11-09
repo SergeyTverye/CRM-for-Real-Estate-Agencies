@@ -80,7 +80,6 @@ export async function updateAdvertisement(actor: Actor, id: string, input: unkno
   });
 }
 
-// ───── Queries ─────
 
 export const adFiltersSchema = zPagination.extend({
   status: zCode("advertisementStatus").optional(),

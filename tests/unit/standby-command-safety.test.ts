@@ -51,8 +51,6 @@ async function queue(action: string, backupId?: string, confirmed = true) {
   return { id, ref };
 }
 async function run(action: string, backupId?: string, confirmed = true) { return executeDesktopBackupRequest((await queue(action, backupId, confirmed)).id); }
-// Include all persistent state, archives, generation pointers, settings and sealed credentials.
-// Only one-shot mailbox/result files and their consumed credential are allowed to differ.
 async function snapshot(skipRef?: string) {
   const files: Record<string, string> = {};
   async function walk(dir: string) {
@@ -84,7 +82,6 @@ it("real active create works; an already queued create/give/restore cannot clear
   expect(await run("create")).toMatchObject({ status: "verified", readOnly: false });
   const stale = await queue("create"), give = await queue("give"), restore = await queue("restore", randomUUID());
   expect(await run("give")).toMatchObject({ status: "verified", readOnly: true });
-  // Deliberately keep the old active environment: disk state must win even before restart.
   expect(process.env.INSTANCE_ROLE).toBe("active");
   await denied(stale, "INSTANCE_READ_ONLY"); await denied(give, "INSTANCE_READ_ONLY"); await denied(restore, "INSTANCE_READ_ONLY");
   const supervisor = await import("../../scripts/desktop/runtime/supervisor.mjs");
@@ -167,7 +164,6 @@ it("standby permits verify/compare, byte-preserving same/local_changed receive a
   }
   const db = new Database(path.join(root, "crm.db")); db.exec("UPDATE sample SET label='local changed'"); db.close();
   const changed = await snapshot(); expect(await run("receive", own.backupId)).toEqual({ status: "local_changed" }); expect(await snapshot()).toEqual(changed);
-  // Restore original bytes only within this newly created synthetic test fixture.
   const local = new Database(path.join(root, "crm.db")); local.exec("UPDATE sample SET label='local work'"); local.close();
   const source = path.join(root, "child.sqlite"), childDb = new Database(source);
   childDb.exec("CREATE TABLE sample(id TEXT PRIMARY KEY, label TEXT); INSERT INTO sample VALUES ('synthetic', 'returned work')"); childDb.close();

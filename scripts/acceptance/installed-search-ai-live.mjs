@@ -1,6 +1,3 @@
-// Strictly opt-in single real AI parse proof (1 RUB cap). No env/path access.
-// Coordinator executes runInstalledSearchAiLive with isolated QA profile/page.
-// Helper never reads process.env/files; credentials arrive only via loadCredentials callback.
 const RESULT_SCHEMA = "installed-search-ai-live/v1";
 const CODE_RE = /^[a-z0-9_.:]{1,80}$/i;
 const SYNTHETIC_TEXT = "Купить квартиру в Новосибирске до 7000000 рублей, от 40 м2";

@@ -4,7 +4,6 @@ import { ConflictError } from "@/shared/errors";
 import { db, transaction } from "@/shared/db/client";
 import type { InteractiveSession, SessionRepository } from "../domain/session";
 
-/** Structural delegate keeps compilation independent of parallel Prisma generation. */
 interface SessionDelegate {
   findUnique(args: { where: { id: string } }): Promise<InteractiveSession | null>;
   findFirst(args: { where: { ownerUserId: string; source: string; status: { in: string[] } } }): Promise<InteractiveSession | null>;
@@ -30,6 +29,5 @@ export class PrismaSessionRepository implements SessionRepository {
   }
   get(id: string) { return delegate(db).findUnique({ where: { id } }); }
   active(ownerUserId: string, source: InteractiveSession["source"]) { return delegate(db).findFirst({ where: { ownerUserId, source, status: { in: ["pending", "active"] } } }); }
-  // A delayed activity/open write cannot resurrect a session already closed by cancellation/watchdog.
   async save(session: InteractiveSession) { await delegate(db).updateMany({ where: { id: session.id, status: { in: ["pending", "active"] } }, data: session }); }
 }

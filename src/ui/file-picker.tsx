@@ -2,7 +2,6 @@
 
 import { useId, useImperativeHandle, useRef, useState, type Ref } from "react";
 
-/** Native input remains labelled and keyboard-accessible; drop and picker share one path. */
 export function FilePicker({ label, accept, multiple, disabled, name, inputRef, onFiles, selectedCount }: {
   label: string; accept?: string; multiple?: boolean; disabled?: boolean; name?: string;
   inputRef?: Ref<HTMLInputElement>; onFiles?: (files: FileList | null) => void; selectedCount?: number;

@@ -6,7 +6,6 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 function AbsolutePath([string]$value) {
-  # No relative, UNC/device, ADS, wildcard, dot-segment or ambiguous Win32 paths.
   if ($value -notmatch '^[A-Za-z]:\\' -or $value.Substring(2).Contains(':') -or
       $value -match '[/*?"<>|]' -or $value -match '\\(?:\.{1,2})(?:\\|$)' -or
       $value -match '[. ](?:\\|$)') { throw 'UPGRADE_PATH_INVALID' }
@@ -42,8 +41,6 @@ function InApp([string]$path) {
   if (-not $full.StartsWith("$app\",[StringComparison]::OrdinalIgnoreCase)) { throw 'UPGRADE_SCOPE_INVALID' }
   return $full
 }
-# Enumerate one level at a time, rejecting links BEFORE traversing them. Do not
-# read candidate data/secret contents, even when refusing a legacy installation.
 function CheckedAttributes([string]$path) {
   $attributes = [IO.File]::GetAttributes($path)
   if ($attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'UPGRADE_REPARSE_POINT' }
@@ -72,10 +69,6 @@ function Inventory([string]$directory) {
       }
       if (-not $known) { throw 'UPGRADE_POSSIBLE_USER_DATA' }
     }
-    # Source policy has no public assets. Sole exception is the exact zero-byte
-    # developer placeholder public\.gitkeep left by legacy scaffolding (length 0,
-    # regular file, metadata size only). Nonempty .gitkeep and any other public
-    # entry remain user-data suspects. Reparse/scope checks above stay first.
     if ($rootName -eq 'public' -and $relative -ne 'public') {
       $isLegacyPlaceholder = ((-not $isDirectory) -and ($relative -eq 'public\.gitkeep'))
       if ($isLegacyPlaceholder) {
@@ -106,7 +99,6 @@ function Inventory([string]$directory) {
 }
 NoLink $app
 $items = @(Inventory $app)
-# Existing launcher AND fixed runtime markers identify this exact app tree.
 foreach ($marker in @('RealEstateCRM.exe','app\desktop-manifest.json','app\supervisor.mjs','app\node\node.exe')) {
   $target = "$installation\$marker"
   NoLink $target
@@ -118,8 +110,6 @@ $manifest = Get-Content -LiteralPath "$app\desktop-manifest.json" -Raw | Convert
 if (-not $manifest.version -or -not $manifest.node -or $manifest.initEntry -ne 'scripts/desktop/init-db.ts' -or
     $manifest.backupEntry -ne 'scripts/desktop/runtime/backup-worker.ts') { throw 'UPGRADE_OWNERSHIP_UNPROVEN' }
 
-# Only this installation's launcher is invoked. Never stop unrelated processes,
-# force-kill, purge a profile, or invoke an old uninstaller here.
 function OwnedProcesses {
   $all = @(Get-CimInstance Win32_Process)
   $owned = @{}
@@ -145,13 +135,9 @@ while (@(OwnedProcesses).Count -gt 0) {
   if ((Get-Date) -ge $deadline) { throw 'UPGRADE_PROCESSES_REMAIN' }
   Start-Sleep -Milliseconds 250
 }
-# Revalidate the complete inventory before the first deletion. Individual,
-# literal, nonrecursive removals also fail closed if a directory gains children.
 $items = @(Inventory $app)
 function DeleteCheckedChildren([string]$directory, $children) {
   foreach ($item in $children) {
-    # Recheck active parent and target, not cached FileInfo attrs. Parents were
-    # checked top-down; this is not fencing against hostile same-user races.
     $parentAttributes = CheckedAttributes $directory
     if (-not ($parentAttributes -band [IO.FileAttributes]::Directory)) { throw 'UPGRADE_SCOPE_INVALID' }
     $target = InApp $item.FullName

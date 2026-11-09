@@ -1,9 +1,3 @@
-#requires -Version 7.2
-<#
-Opt-in installed API acceptance, not GUI/picker/UAT proof. No build or host Node.
-Only new workspace synthetic profiles. Never invoke the shared shutdown event.
-Do not run under a transcript, HTTP tracing, debugger or PowerShell step tracing.
-#>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$InstallDirectory,
@@ -97,7 +91,6 @@ function Ready {
     } catch { return $false }
 }
 function Request([string]$Path,[string]$Method='GET',$Body=$null) {
-    # Revalidate process ancestry for every request; never attach to a discovered arbitrary port.
     $null=ServerIdentity
     $options=@{Uri=$script:base+$Path;Method=$Method;Headers=@{Origin=$script:base};WebSession=$script:session;
         TimeoutSec=20;MaximumRedirection=0;SkipHttpErrorCheck=$true;ErrorAction='Stop'}
@@ -159,8 +152,6 @@ function StartProfile([string]$Name,[bool]$New) {
 }
 function StopProfile {
     if ($script:app) {
-        # Explicit synthetic test teardown through the retained Process handle only.
-        # No PID reopen, process-name termination, shared event, or unrelated tree.
         if (-not $script:app.HasExited) { $script:app.Kill($true) }
         if (-not $script:app.WaitForExit(20000)) { throw 'OWNED_TEARDOWN_TIMEOUT' }
         $script:checks.Add(@{code='owned-launcher-tree-teardown';passed=$true})
@@ -281,7 +272,6 @@ try {
         $script:gates.Add('RETURN_RECEIVE_BLOCKED_BY_STANDBY_GUARD')
         Check ((Api "/api/v1/clients/$script:clientId").displayName -eq 'QA HANDOFF BASELINE') 'blocked-return-leaves-source-unchanged'
     } else {
-        # Do not enqueue twice if a future installed version fixes the standby route.
         Check ($r.status -eq 200 -and $r.data.queued -eq $true) 'return-receive-queued'
         $requestId=Id $r.data.requestId
         $file=Join-Path $script:dataRoot "data\backup-settings\commands\$requestId.result.json"
@@ -310,7 +300,6 @@ try {
     $script:stage='COMPLETE'
     $script:outcome=if ($script:gates.Count) { 'BLOCKED' } else { 'PASS' }
 } catch {
-    # Intentionally never print exception details/HTTP bodies/credentials.
     $script:gates.Add('GATE_'+$script:stage)
     if ($script:stage -ne 'PREFLIGHT') { $script:outcome='FAIL' }
 } finally {

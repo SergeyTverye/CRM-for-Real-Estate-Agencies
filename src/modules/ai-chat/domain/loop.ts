@@ -15,7 +15,6 @@ export async function runChatLoop(input: ResponseInput[], call: (request: AiRequ
             return { text: response.text.slice(0, 8000), links };
         if (calls.length > 4)
             throw new AiError("AI_TOOL_LIMIT");
-        // The last iteration cannot generate further side effects, including proposals.
         if (step === MAX_STEPS - 1)
             throw new AiError("AI_STEP_LIMIT");
         for (const c of calls) {

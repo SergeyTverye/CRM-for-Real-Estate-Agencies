@@ -6,7 +6,6 @@ export interface PendingAgreementDocument {
   error?: string;
 }
 
-/** Each successful file leaves the queue; retries never create another agreement. */
 export async function uploadAgreementDocuments(agreementId: string, files: PendingAgreementDocument[]): Promise<PendingAgreementDocument[]> {
   const failed: PendingAgreementDocument[] = [];
   for (const item of files) {

@@ -1,7 +1,5 @@
 import type { BackupSettingsState } from "./settings";
 
-/** A persisted local-calendar slot coalesces every missed interval into one run.
- * DST repeated hours share a slot; nonexistent hours run on the next tick. */
 export function dueBackupSlot(schedule: BackupSettingsState["schedule"], now: Date, lastSlot: string | null): string | null {
   if (!schedule.enabled) return null;
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: schedule.timeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);

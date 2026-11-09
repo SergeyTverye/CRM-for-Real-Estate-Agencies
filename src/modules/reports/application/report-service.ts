@@ -17,7 +17,6 @@ export interface Metric { key: string; label: string; value: number; hint?: stri
 export interface DetailRow { id: string; label: string; href: string; amount?: string }
 export function percent(n: number, total: number) { return total ? Math.round(n / total * 1000) / 10 : 100; }
 
-/** The aggregate and every drill-down use these exact cohorts and timezone boundaries. */
 export async function getManagerReport(actor: Actor, raw: unknown = {}) {
   if (!isManager(actor)) throw new ForbiddenError("Отчёты доступны руководителю");
   const f = parseInput(reportFiltersSchema, raw);

@@ -10,7 +10,6 @@ try {
  const faults=[];page.on("pageerror",e=>faults.push(e.message));
  await page.goto(`${origin}/login`,{waitUntil:"domcontentloaded"});
  await page.waitForFunction(()=>Object.keys(document.querySelector("form")??{}).some(k=>k.startsWith("__reactProps")));
- // Credentials remain in process memory; no trace, video, screenshot, or network dump.
  await page.getByLabel("Логин").fill(process.env.SEED_REALTOR1_LOGIN ?? "realtor1");
  await page.getByLabel("Пароль").fill(process.env.SEED_REALTOR1_PASSWORD);
  await page.getByRole("button",{name:"Войти",exact:true}).click();

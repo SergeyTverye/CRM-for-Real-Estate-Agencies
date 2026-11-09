@@ -1,4 +1,3 @@
-/** Read-only final audit; no paid/provider/source requests. */
 import { config } from "dotenv";
 import { readFile, writeFile } from "node:fs/promises";
 import { db, disconnectDb } from "../../../../src/shared/db/client";

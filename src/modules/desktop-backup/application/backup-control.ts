@@ -77,7 +77,6 @@ export async function backupControlStatus(actor: Actor) {
     })],
     nativeDialog: desktop && process.env.CRM_DESKTOP_SUPERVISED_UPGRADE === "1", restoreSupported: desktop && process.env.CRM_DESKTOP_SUPERVISED_UPGRADE === "1" };
 }
-/** HTTP boundary never exposes provider exceptions or entered values. */
 export async function backupControlCommand(actor: Actor, raw: unknown) {
   return backupControlCommandInternal(actor, raw);
 }
@@ -86,9 +85,6 @@ async function backupControlCommandInternal(actor: Actor, raw: unknown, budgetHe
   const parsed = backupCommandSchema.safeParse(raw);
   if (!parsed.success) throw new ValidationError("Проверьте поля операции резервирования");
     const input = parsed.data;
-    // Technical archive inspection/transport is not a business write or promotion.
-    // Import uses the same one-shot native capability and budget as rollback;
-    // receive still goes through coordinator lineage/conflict checks.
     if (getConfig().isReadOnlyInstance && !(
       process.env.CRM_DEPLOYMENT_MODE === "desktop" &&
       process.env.CRM_DESKTOP_SUPERVISED_UPGRADE === "1" &&
@@ -161,7 +157,6 @@ async function backupControlCommandInternal(actor: Actor, raw: unknown, budgetHe
     else if (!cmd.passphrase && !cmd.recoveryKey) throw new ValidationError("Введите кодовую фразу или ключ восстановления");
      const publish = async () => {
      const id = randomUUID(); const ref = randomUUID();
-    // Only encrypted immutable blobs contain credentials. No secret in DB/mailbox/response.
     const { passphrase, recoveryKey, ...safe } = cmd;
     await runtimeCredentialStore().put(ref, { ...(passphrase ? { passphrase } : {}), ...(recoveryKey ? { recoveryKey } : {}) });
     const request = { id, secretRef: ref, command: safe, actorUserId: actor.userId, createdAt: new Date().toISOString() };

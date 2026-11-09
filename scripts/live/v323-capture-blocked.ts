@@ -18,11 +18,9 @@ void (async()=>{
     const page=await ctx.newPage();
     try { await page.goto(url,{waitUntil:"domcontentloaded",timeout:30000}); } catch {}
     await new Promise(r=>setTimeout(r,5000));
-    // Screenshots of block/error pages only: no listing bodies, no contacts.
     await page.screenshot({path:`docs/screenshots/vkr/v323-captcha/${source}-blocked.png`, fullPage:false});
     await browser.close();
     await new Promise(r=>setTimeout(r,2000));
   }
-  // Headed Cian success is NOT screenshotted to avoid seller contacts (recorded as metadata only).
   process.stdout.write("screenshots saved\n");
 })();

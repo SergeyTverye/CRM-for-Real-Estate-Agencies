@@ -33,7 +33,7 @@ export default async function TaskCardPage({ params }: { params: Promise<{ id: s
   const checklist = await listChecklist(actor, id).catch(e => { if (e instanceof NotFoundError) return null; throw e; });
   const creator = allUsers.find((u) => u.id === task.createdBy);
   const isResponsible = task.responsible.id === actor.userId;
-  // Передать задачу может руководитель или её ответственный; риелтор — себе или руководителю.
+  // Передать задачу может руководитель или её ответственный. риелтор — себе или руководителю.
   const reassignUsers =
     isManager || isResponsible
       ? allUsers

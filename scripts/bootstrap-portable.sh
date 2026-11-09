@@ -16,7 +16,7 @@ while [ $# -gt 0 ]; do
     --rclone-conf) RCONF="$2"; shift 2 ;;
     --source) SOURCE="$2"; shift 2 ;;
     --backup) ID="$2"; shift 2 ;;
-    *) fail "неизвестный аргумент: $1" ;;
+    *) fail "неизвестный аргумент: $1" ..
   esac
 done
 [ -n "$BUNDLE" ] && [ -f "$BUNDLE" ] || fail "укажите --config-bundle <файл>"

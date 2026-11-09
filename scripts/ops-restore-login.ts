@@ -1,4 +1,3 @@
-// Disposable synthetic account for an isolated restore login test. Secrets only via ENV.
 import { db, disconnectDb } from "@/shared/db/client";
 import { hashPassword } from "@/modules/auth/infrastructure/password-hasher";
 const displayName = "[ops synthetic] disposable restore login";

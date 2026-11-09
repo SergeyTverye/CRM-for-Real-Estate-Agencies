@@ -1,4 +1,3 @@
-// Private stdin control channel. It is never exposed to WebView or HTTP.
 process.stdin.setEncoding('utf8');
 let input = '';
 process.stdin.on('data', chunk => {

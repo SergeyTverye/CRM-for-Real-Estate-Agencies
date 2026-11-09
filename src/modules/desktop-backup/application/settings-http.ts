@@ -1,6 +1,5 @@
 import { ForbiddenError, InfrastructureError, StaleUpdateError, ValidationError } from "@/shared/errors";
 import { BackupError } from "../domain/contracts";
-/** Only safe fixed errors cross HTTP/log boundaries; credentials and Zod values never do. */
 export async function settingsHttp<T>(work: () => Promise<T>): Promise<T> {
   try { return await work(); }
   catch (e) {

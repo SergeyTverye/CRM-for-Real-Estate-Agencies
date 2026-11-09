@@ -11,8 +11,6 @@ fn open(app: &tauri::AppHandle) {
     }
 }
 fn main() {
-    // --smoke performs exactly the same startup/migration/ready path without WebView.
-    // Hold for a bounded API/installer test, then stop all processes.
     let args: Vec<String> = std::env::args().collect();
     if args.iter().any(|s| s == "--shutdown") { std::process::exit(if control::request_stop().is_ok() {0} else {1}); }
     if args.iter().any(|s| s == "--smoke") {
@@ -27,7 +25,6 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(|app, _, _| open(app)))
         .plugin(tauri_plugin_dialog::init())
         .manage(shared.clone())
-        // No invoke_handler and no remote capabilities: web content has zero native IPC.
         .setup(move |app| {
             let control = Arc::new(control::Control::acquire()?);
             let stop_app = app.handle().clone();
@@ -51,8 +48,6 @@ fn main() {
             let fail = app.handle().clone();
             let notice = app.handle().clone();
             let resources = app.path().resource_dir()?.join("app");
-            // Keep cookies/WebView cache inside the same protected, purgeable
-            // profile as SQLite; never leave a second identifier-based profile.
             let webview_data = supervisor::data_root()?.join("data/webview");
             let result = supervisor::Supervisor::start(&resources, move |url| {
                 supervisor::startup_event("SERVER_READY");
@@ -101,7 +96,6 @@ fn main() {
                             let result = root.join("data/backup-settings/native-dialogs").join(format!("{}.path",id));
                             let callback = move |selected: Option<tauri_plugin_dialog::FilePath>| {
                                 let text = selected.and_then(|p| p.into_path().ok()).map(|p| p.to_string_lossy().into_owned()).unwrap_or_default();
-                                // Native replies only to a manager-authorized mailbox request; no WebView IPC.
                                 if let Ok(mut file) = std::fs::OpenOptions::new().write(true).create_new(true).open(result) { use std::io::Write; let _ = file.write_all(text.as_bytes()); }
                             };
                             if kind == "NATIVE_FOLDER" { notice.dialog().file().pick_folder(callback); }

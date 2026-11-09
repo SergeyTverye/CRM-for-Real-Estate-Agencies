@@ -5,7 +5,6 @@ import { normalizeHeader } from './profiles';
 import { cellText, contactKind, normalizeAddress, parseDate } from './normalize';
 import { sha256, type ParsedRow } from './workbook-parser';
 export const fields = ['addressText', 'district', 'area', 'floor', 'propertyTypeText', 'operationText', 'price', 'priceUnit', 'description', 'stateMark', 'ownerName', 'ownerPhone', 'receivedDate', 'name', 'phone', 'email', 'request', 'source', 'responsible', 'comment', 'sourceRowId', 'contractRef', 'commissionAmount', 'agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'adPlatform', 'adStatus', 'taskText'] as const;
-// Stable codes are deliberately separate from display labels and source-value mappings.
 export const controlAdPlatforms = ['avito', 'cian', 'domclick', 'yandex_realty', 'own_site', 'other'] as const;
 export const controlAdStatuses = ['draft', 'active', 'paused', 'expired', 'removed'] as const;
 export const controlAdPlatformLabels: Record<typeof controlAdPlatforms[number], string> = {
@@ -17,7 +16,6 @@ export const controlAdStatusLabels: Record<typeof controlAdStatuses[number], str
 function closedAdCode<T extends string>(value: string | undefined, codes: readonly T[], labels: Record<T, string>, mapping: Record<string, T> | undefined): T | null {
     const key = normalizeHeader(value);
     if (!key) return null;
-    // Exported stable codes must reimport even if the source profile remaps labels.
     if (codes.includes(key as T)) return key as T;
     return mapping?.[key] ?? codes.find(code => normalizeHeader(labels[code]) === key) ?? null;
 }
@@ -34,11 +32,9 @@ export const enterpriseProfileSchema = z.object({ version: z.literal(2), code: z
     })).min(1).max(30) });
 export type EnterpriseProfile = z.infer<typeof enterpriseProfileSchema>;
 export const dictionary: Record<string, typeof fields[number]> = { 'адрес': 'addressText', 'район': 'district', 'площадь': 'area', 'этаж': 'floor', 'назначение': 'propertyTypeText', 'операция': 'operationText', 'цена': 'price', 'ставка': 'price', 'единица': 'priceUnit', 'описание': 'description', 'статус': 'stateMark', 'метка': 'stateMark', 'собственник': 'ownerName', 'контакт собственника': 'ownerPhone', 'дата': 'receivedDate', 'клиент': 'name', 'контрагент': 'name', 'телефон': 'phone', 'e-mail': 'email', 'email': 'email', 'запрос': 'request', 'источник': 'source', 'ответственный': 'responsible', 'комментарий': 'comment', '№': 'sourceRowId', 'договор': 'contractRef', 'комиссия': 'commissionAmount' };
-/** Decimal arithmetic uses integer digits: money never passes through binary multiplication. */
 export function parseWorkbookNumber(value: unknown): string | null {
     if (value === null || value === undefined || value === '')
         return null;
-    // Match one complete quantity, not fragments stripped from a composite/range.
     const quantity = /^(\d+(?:[ \u00a0\u202f]\d{3})*(?:[.,]\d+)?)\s*(?:(млн|тыс)\.?\s*)?(?:(?:руб\.?|р\.|₽)(?:\s*\/\s*(?:м²|м2|кв\.?\s*м))?(?:\s*\/\s*(?:мес\.?|месяц|год))?|(?:м²|м2|кв\.?\s*м))?$/u.exec(String(value).toLowerCase().trim());
     if (!quantity) return null;
     const zeros = quantity[2] === 'млн' ? 6 : quantity[2] === 'тыс' ? 3 : 0;
@@ -92,7 +88,6 @@ type Target = Exclude<EnterpriseProfile['sheets'][number]['target'], 'ignore'>;
 type HeaderCell = { column: number; header: string; field: Field | null };
 export type EnterpriseHeader = { row: number; endRow: number; target: Target; cells: HeaderCell[] };
 
-/** Closed header vocabulary only. Never infer a column's meaning from its data. */
 const headerKey = (s: string) => normalizeHeader(s.replace(/ф\s*\.\s*и\s*\.\s*о\.?/giu, 'фио ')).replace(/²/g, '2').replace(/[ё]/g, 'е')
     .replace(/[\s.,:;()\[\]«»"_\-/]+/g, ' ').trim();
 const aliases: Partial<Record<Field, string[]>> = {
@@ -128,7 +123,6 @@ export function classifyEnterpriseHeader(label: string): Field | null {
     const key = headerKey(label);
     const direct = headerAliases.get(key);
     if (direct) return direct;
-    // Only explicitly supported measurement suffixes; unknown units remain unresolved.
     const withoutUnit = key.replace(/ (?:м2|кв м|кв метр(?:ов|а)?|m2|sqm|руб|рублей|р|₽)(?: (?:за|в))?(?: (?:м2|кв м|месяц|мес|год|m2|month))*$/, '');
     const measured = headerAliases.get(withoutUnit);
     return measured === 'area' || measured === 'price' || measured === 'commissionAmount' || measured === 'commissionFrom' || measured === 'commissionTo' ? measured : null;
@@ -146,7 +140,6 @@ function targetFor(cells: HeaderCell[], indicator: Target = null): Target {
     const historical = f.has('addressText') && f.has('contractRef') && f.has('commissionAmount');
     const client = f.has('name') && (f.has('phone') || f.has('email')) && (f.has('request') || f.has('receivedDate'));
     const property = f.has('addressText') && f.has('area');
-    // Control tables are recognised only by the explicit agreement-presence header, never by data.
     if (f.has('addressText') && f.has('agreementPresence'))
         return client || historical || (indicator && indicator !== 'property_agreement_control') ? null : 'property_agreement_control';
     if (client && (property || historical)) return null;
@@ -167,7 +160,6 @@ function headerPriceUnit(label: string): string | undefined {
     if (month && year) return;
     return perArea ? month ? 'rub_m2_month' : year ? 'rub_m2_year' : 'rub_m2' : month ? 'rub_month' : year ? 'rub_year' : 'rub_total';
 }
-/** Same structural detector drives both suggestions and parsing, including merged two-level headers. */
 export function detectEnterpriseHeaders(ws: ExcelJS.Worksheet, config?: EnterpriseProfile['sheets'][number]): EnterpriseHeader[] {
     const result: EnterpriseHeader[] = [];
     let indicator = indicatorTarget(ws.name);
@@ -190,7 +182,6 @@ export function detectEnterpriseHeaders(ws: ExcelJS.Worksheet, config?: Enterpri
             }
             cells.push({ column: cn, header, field: excludedHeader(header) ? null : mapped(header) });
         });
-        // Vertically merged headers belong to the lower header row too.
         if (child) ws.getRow(rn).eachCell((c, cn) => {
             if (c.isMerged && Number(c.master.row) < rn && Number(c.master.col) === cn && !cells.some(x => x.column === cn)) {
                 const header = text(c.value).trim();
@@ -214,8 +205,6 @@ export function detectEnterpriseHeaders(ws: ExcelJS.Worksheet, config?: Enterpri
         const configuredBlock = !!config?.blockTargets && Object.hasOwn(config.blockTargets, String(rn));
         const explicit = explicitRow === rn || configuredBlock;
         if (explicitRow !== undefined && !explicit) {
-            // A few label-like data values must not replace a confirmed mapping.
-            // Repeats require the entire original label layout, not just field aliases.
             const original = result.find(h => h.row === explicitRow);
             const repeated = original && rn > original.endRow && score(cells) >= 2
                 && cells.length === original.cells.length && cells.every((c, i) => {
@@ -227,12 +216,9 @@ export function detectEnterpriseHeaders(ws: ExcelJS.Worksheet, config?: Enterpri
         const boundary = rn === 1 || !ws.getRow(rn - 1).actualCellCount;
         const styledUnknown = boundary && cells.length >= 2 && cells.every(c => row.getCell(c.column).font?.bold && c.header.length <= 80);
         if (!explicit && score(cells) < 2 && !styledUnknown) return;
-        // Two generic labels (date/status etc.) alone aren't a confident header.
         if (!explicit && !paired && !styledUnknown && !boundary && !targetFor(cells, indicator) && score(cells) < 3) return;
         result.push({ row: rn, endRow: paired ? rn + 1 : rn, target: targetFor(cells, indicator), cells });
     });
-    // Occupied columns without labels are never silently dropped. Coordinate keys
-    // can be explicitly mapped/ignored; only occupancy is inspected here.
     let bi = -1;
     ws.eachRow((row, rn) => {
         while (bi + 1 < result.length && result[bi + 1]!.row <= rn) bi++;
@@ -270,9 +256,7 @@ export type EnterpriseRow = ParsedRow & {
         field: string;
     }[];
 };
-/** Fields only meaningful for the control table; other targets must not silently drop them. */
 const controlOnlyFields = new Set<string>(['agreementPresence', 'absenceReason', 'commissionFrom', 'commissionTo', 'fixNote', 'adText', 'adUrl', 'adPlatform', 'adStatus', 'taskText']);
-// commissionAmount is shared with the historical archive, not control-only.
 const controlFields = new Set<string>([...controlOnlyFields, 'commissionAmount', 'addressText', 'district', 'area', 'price', 'priceUnit', 'operationText', 'stateMark', 'sourceRowId', 'responsible']);
 const maskContacts = (s?: string) => s?.replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g, '[контакт скрыт]') || null;
 export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
@@ -342,7 +326,6 @@ export function parseEnterprise(wb: ExcelJS.Workbook, p: EnterpriseProfile) {
                     else if (field) columns.push({ column: c.column, field });
                     else unresolved.push({ sheet: si + 1, row: header.endRow, column: c.column });
                 }
-                // Multiple single-valued fields require coordinate-level confirmation.
                 for (const c of columns) if (!['phone', 'email'].includes(c.field) && columns.filter(other => other.field === c.field).length > 1)
                     unresolved.push({ sheet: si + 1, row: header.endRow, column: c.column });
                 blocks.push({ sheet: si + 1, row: rn, endRow: header.endRow, columns: [...columns] });

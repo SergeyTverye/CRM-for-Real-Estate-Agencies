@@ -10,7 +10,6 @@ import { newRecoveryKey } from "@/modules/desktop-backup/infrastructure/encrypti
 import { GenerationStore, restoreArchive } from "@/modules/desktop-backup/application/restore";
 import { importNativeArchive, nativeIncomingRoot, readNativeDialog, requestNativeDialog } from "@/modules/desktop-backup/application/native-dialog";
 
-// No application database or credentials; all fixtures are synthetic and local.
 vi.mock("@/shared/db/client", () => ({ db: { backupQueueJournal: { create: vi.fn() } } }));
 vi.mock("@/modules/operations/application/operations-service", () => ({ startManualBackup: vi.fn() }));
 const credentials = vi.hoisted(() => ({ put: vi.fn(async () => undefined) }));

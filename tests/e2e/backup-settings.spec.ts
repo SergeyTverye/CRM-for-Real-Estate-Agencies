@@ -1,8 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { PASSWORDS } from "./helpers";
 
-// Exercise the real session API, then test the settings UI. Login-page hydration
-// is covered by the auth suite and may restart during shared-checkout Next HMR.
 async function login(page: Page, loginName: "manager" | "realtor1") {
   const origin = new URL(test.info().project.use.baseURL!).origin;
   const response = await page.request.post("/api/v1/auth/login", { headers: { origin }, data: { login: loginName, password: PASSWORDS[loginName] } });

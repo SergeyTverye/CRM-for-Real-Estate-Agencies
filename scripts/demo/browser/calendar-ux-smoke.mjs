@@ -1,4 +1,3 @@
-// Manual, focused visual smoke. Does not run as part of the full Playwright suite.
 import { chromium, expect } from "@playwright/test";
 import { parse } from "dotenv";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
@@ -35,7 +34,6 @@ try {
   const value = Number((await overdue.locator("div").first().innerText()).trim());
   if (value) await expect(page.locator("#overdue")).toHaveText(`Просрочено · ${value}`);
   const header = page.getByRole("link").filter({ hasText: /Просрочено/ }).filter({ hasNot: page.locator("div.text-2xl") });
-  // Header and page share the same task predicate; scoped views have a separate caption.
   if (await header.count()) expect(await header.first().innerText()).toContain(String(value));
   await page.screenshot({ path: `${output}/01-today.png`, fullPage: true, caret: "initial" });
   stage = "client overview";

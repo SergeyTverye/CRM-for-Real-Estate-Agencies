@@ -1,11 +1,3 @@
-#Requires -Version 5.0
-# Synthetic-only read-only native Excel recalculation proof (hidden Excel COM).
-# Fixture shape inferred from PUBLIC source only:
-#   scripts/acceptance/installed-import-cycle.mjs :: buildSyntheticEnterpriseWorkbook
-# Technical shape: exactly 1 formula cell (arith/cell-ref, cached result); no macros/links.
-# No workbook authoring/export; in-memory recalc only; file must stay immutable.
-# No GetActiveObject / Stop-Process / taskkill; only owned COM instance may Quit.
-# Lifecycle: Stop-Proof aborts flow (sentinel); exactly ONE report/exit AFTER finally teardown.
 param(
   [switch]$RunSyntheticExcelProof,
   [string]$Workbook,
@@ -39,7 +31,6 @@ try {
   if ([IO.Path]::GetFullPath($Workbook) -ine $Workbook) { $code = 'not_canonical'; $status = 'BLOCKED'; Stop-Proof }
   if ([IO.Path]::GetFullPath($EvidenceDirectory) -ine $EvidenceDirectory) { $code = 'not_canonical'; $status = 'BLOCKED'; Stop-Proof }
   if ($ExpectedSha256 -notmatch '^[0-9a-fA-F]{64}$') { $code = 'bad_hash_arg'; $status = 'BLOCKED'; Stop-Proof }
-  # Strict synthetic path: .../data/qa-v32-installed-browser/<uuid>/import-cycle/exported-enterprise-roundtrip.xlsx
   if ([IO.Path]::GetFileName($Workbook) -cne 'exported-enterprise-roundtrip.xlsx') { $code = 'refuse_not_synthetic'; $status = 'BLOCKED'; Stop-Proof }
   $wbDir = Split-Path $Workbook -Parent
   if ((Split-Path $wbDir -Leaf) -cne 'import-cycle') { $code = 'refuse_not_synthetic'; $status = 'BLOCKED'; Stop-Proof }
@@ -53,7 +44,6 @@ try {
   $wantEv = Join-Path $wbDir 'excel-recalc'
   if ($EvidenceDirectory -ine $wantEv) { $code = 'bad_evidence_dir'; $status = 'BLOCKED'; Stop-Proof }
   if (Test-Path $EvidenceDirectory) { $code = 'evidence_exists'; $status = 'BLOCKED'; Stop-Proof }
-  # Ancestor reparse check (file + evidence ancestors up to data dir).
   $toCheck = @($wbDir, $runDir, $qaDir)
   $ancestor = Split-Path $qaDir -Parent
   while ($ancestor) { $toCheck += $ancestor; $ancestor = Split-Path $ancestor -Parent }
@@ -65,7 +55,6 @@ try {
   if (($fi.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { $code = 'reparse_ancestor'; $status = 'BLOCKED'; Stop-Proof }
   $shaBefore = Get-ProofSha256 $Workbook
   if ($shaBefore -ne $ExpectedSha256.ToLower()) { $code = 'hash_mismatch'; $status = 'BLOCKED'; Stop-Proof }
-  # Read-only zip XML scan: counts/booleans only, never emit values/formulas/text.
   $zr = [IO.Compression.ZipFile]::OpenRead($Workbook)
   try {
     foreach ($e in $zr.Entries) {
@@ -100,7 +89,6 @@ try {
   if (-not $supported) { $code = 'unexpected_formula_shape'; $status = 'BLOCKED'; Stop-Proof }
   New-Item -ItemType Directory -Path $EvidenceDirectory -ErrorAction Stop | Out-Null
   $evidenceOwned = $true; $status = 'RUNNING'; $code = 'RUNNING'
-  # Ownership: snapshot existing EXCEL PIDs first (metadata only, never attach).
   $beforeIds = @(Get-Process -Name EXCEL -ErrorAction SilentlyContinue | ForEach-Object { $_.Id })
   try { $excel = New-Object -ComObject Excel.Application }
   catch { $code = 'com_blocked'; $status = 'NOTRUN'; Stop-Proof }
@@ -120,16 +108,13 @@ public static class W32 { [DllImport("user32.dll")] public static extern uint Ge
     $ownedStart = $pr.StartTime.ToUniversalTime().ToString('o')
   } catch { $code = 'ownership_unproven'; $status = 'BLOCKED'; Stop-Proof }
   $isOwned = $true
-  # Early owner-proof marker BEFORE Workbook.Open/calc can hang; never rewritten later.
   "$ownedPid|$ownedStart" | Out-File (Join-Path $EvidenceDirectory 'owner.marker') -Encoding ascii
-  # Hidden, silent, no links/addins.
   $excel.Visible = $false; $excel.DisplayAlerts = $false; $excel.AskToUpdateLinks = $false; $excel.EnableEvents = $false; $excel.AutomationSecurity = 3
   $wb = $excel.Workbooks.Open($Workbook, 0, $true)
   if ($wb -eq $null) { $code = 'open_failed'; $status = 'FAIL'; Stop-Proof }
   if ($wb.HasVBProject) { $code = 'refuse_links_or_macro'; $status = 'BLOCKED'; Stop-Proof }
   try { $ls = $wb.LinkSources(1); if (($null -ne $ls) -and (@($ls).Count -gt 0)) { $code = 'refuse_links_or_macro'; $status = 'BLOCKED'; Stop-Proof } } catch { if ($_.Exception.Message -eq $StopSentinel) { throw } }
   $excel.CalculateFull()
-  # Exact synthetic fixture only (zip-verified single formula): first sheet C2 = B2*1000. No UsedRange/Cells enumeration (RCW leak).
   $sheets = $wb.Worksheets; $tws = $sheets.Item(1); $fc = $tws.Range('C2')
   if (-not $fc.HasFormula) { $code = 'formula_not_found'; $status = 'FAIL'; Stop-Proof }
   $origF = [string]$fc.Formula; $origV = $fc.Value2
@@ -159,13 +144,10 @@ public static class W32 { [DllImport("user32.dll")] public static extern uint Ge
   $origF = ''; $origV = $null; $newV = $null; $restV = $null; $restF = ''; $origIn = $null; $canonF = ''; $restCanon = ''
   if (-not ($fullOk -and $chgOk -and $restOk -and $fSame)) { $code = 'recalc_mismatch'; $status = 'FAIL'; Stop-Proof }
   $proofOk = $true
-  # PASS is decided ONLY after finally teardown + re-hash below; never here.
 } catch {
   $failureLine = [int]$_.InvocationInfo.ScriptLineNumber
   if ($_.Exception.Message -eq $StopSentinel) {
-    # Assigned code/status preserved; no emit here.
   } else {
-    # Unexpected: fixed code only; explicit preflight BLOCKED preserved.
     if ($status -eq 'BLOCKED') { if ($code -eq 'NOTRUN') { $code = 'failed' } }
     else { $status = 'FAIL'; $code = 'failed' }
   }
@@ -192,7 +174,6 @@ public static class W32 { [DllImport("user32.dll")] public static extern uint Ge
   } catch {}
   $excel = $null
 }
-# Post-cleanup: re-hash original (immutability) AFTER Close; then decide PASS.
 try { $shaAfter = Get-ProofSha256 $Workbook } catch {}
 if ($shaBefore -ne '' -and $shaAfter -ceq $shaBefore) { $shaUnchanged = $true }
 if ($status -eq 'BLOCKED' -or $status -eq 'NOTRUN') {
@@ -204,7 +185,6 @@ if ($status -eq 'BLOCKED' -or $status -eq 'NOTRUN') {
   if ($code -eq 'NOTRUN' -or $code -eq 'RUNNING' -or $code -eq 'PASS') { $code = 'failed' }
   $exit = 1
 }
-# Exactly ONE final report/exit, after teardown, with truthful flags; marker never rewritten here.
 $o = [ordered]@{ status = $status; code = $code; workbookSha256 = $shaBefore; shaUnchanged = $shaUnchanged; formulaCellCount = $fCount
   supportedFormulaFound = $supported; externalLinksFound = $extLinks; macrosFound = $macros; excelVersion = $xlVer
   ownedPid = $ownedPid; ownedStartTime = $ownedStart; isNewOwnedInstance = $isOwned; fullCalcOk = $fullOk

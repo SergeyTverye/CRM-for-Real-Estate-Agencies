@@ -1,4 +1,3 @@
-/** Read-only REPLAY of the exact seven persisted LIVE runs; exports aggregates only. */
 import { readFile, writeFile } from "node:fs/promises";
 import { Client } from "pg";
 import { SearchFilters, type NormalizedListing } from "../../src/modules/property-search/domain/types";

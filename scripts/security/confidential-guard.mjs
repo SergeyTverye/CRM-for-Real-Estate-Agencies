@@ -45,7 +45,6 @@ try {
     if (forbidden(name)) { blocked.add(name); fail('CG_PATH', name); }
   }
 
-  // Reject parent symlinks/junctions before opening explicit filesystem paths.
   const safePath = async (absolute) => {
     const relative = path.relative(root, absolute);
     if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('SCOPE');
@@ -83,14 +82,12 @@ try {
         const entries = unzipSync(bytes, { filter: (entry) => {
           total += entry.originalSize;
           if (++count > 10000 || total > MAX_EXPANDED || entry.originalSize > MAX_ENTRY) throw new Error('LIMIT');
-          // Reject prohibited names before decompression.
           if (forbidden(entry.name)) { fail('CG_PATH', outer); return false; }
           if (entry.name.split(/[\\/]/u).includes('..') || path.posix.isAbsolute(entry.name)) throw new Error('PATH');
           return true;
         } });
         for (const [entry, content] of Object.entries(entries)) {
           if (entry.endsWith('/')) continue;
-          // Archive member names might contain confidential values; report only outer path.
           scan(content, 'member' + path.extname(entry), depth + 1, outer);
         }
       } catch { fail('CG_ARCHIVE_INVALID', outer); }
@@ -104,8 +101,6 @@ try {
       try {
         if (/<!DOCTYPE/iu.test(text)) throw new Error('XML_DTD');
         const document = new DOMParser({ onError: () => { throw new Error('XML'); } }).parseFromString(text, 'text/xml');
-        // A shared-string item (including rich-text runs) is one cell, not the
-        // concatenated text of every cell in the workbook or each partial run.
         for (const tag of ['si', 'is', 'v']) {
           for (const node of Array.from(document.getElementsByTagName(tag))) hit ||= matchesText(node.textContent ?? '', hashes);
         }

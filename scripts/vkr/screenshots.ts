@@ -34,7 +34,6 @@ async function navigate(page: Page, url: string) {
   try { await page.goto(url); }
   catch (error) {
     if (!(error instanceof Error) || !error.message.includes("ERR_ABORTED")) throw error;
-    // A dev Fast Refresh may interrupt a navigation after editing a shared component.
     await page.goto(url);
   }
 }
@@ -56,7 +55,6 @@ async function shot(page: Page, file: string, scenario: string, role = "realtor1
     await Promise.all(Array.from(document.images).filter(i => i.loading !== "lazy" || i.getBoundingClientRect().top < innerHeight).map(i => i.complete ? Promise.resolve() : new Promise<void>(r => { i.onload = () => r(); i.onerror = () => r(); })));
   });
   const closeToasts = page.locator('[data-sonner-toast] button[aria-label="Close toast"], [role="status"] button[aria-label="Закрыть уведомление"]');
-  // Removing a toast shifts indexes; always close the current first item.
   for (let attempt = 0; attempt < 10 && await closeToasts.count(); attempt++) await closeToasts.first().click({ timeout: 1000 }).catch(() => undefined);
   await expect(page.locator('[data-sonner-toast], .toast')).toHaveCount(0, { timeout: 15000 });
   if (file === "08-selection") {
@@ -195,7 +193,7 @@ async function main() {
     // Отдельный процесс 3211: только записанный отказ и FakeResponsesProvider, без секрета.
     const webContext = await browser.newContext({ baseURL: process.env.VKR_WEB_BASE_URL ?? "http://127.0.0.1:3211", locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 900 } });
     // В seed уже есть синтетические AI-вызовы. Руководитель временно расширяет дневной
-    // лимит через настоящий UI и затем возвращает его; предохранители ENV сохраняются.
+    // лимит через настоящий UI и затем возвращает его. предохранители ENV сохраняются.
     const webAdmin = await browser.newContext({ baseURL: process.env.VKR_WEB_BASE_URL ?? "http://127.0.0.1:3211", locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 900 } });
     const settings = await webAdmin.newPage();
     settings.setDefaultTimeout(60000);

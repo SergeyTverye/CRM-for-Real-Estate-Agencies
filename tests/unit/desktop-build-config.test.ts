@@ -22,7 +22,6 @@ it("matches internal desktop trace inputs without excluding dynamic runtime file
   const { default: config } = await import("../../next.config");
   const patterns = config.outputFileTracingExcludes?.["/*"];
   expect(patterns?.length).toBeGreaterThan(4);
-  // Next resolves project-relative exclusion globs before matching traced files.
   const absolute = (file: string) => path.resolve(file).replaceAll("\\", "/");
   const excluded = picomatch(patterns!.map(absolute), { dot: true });
   const denied = [

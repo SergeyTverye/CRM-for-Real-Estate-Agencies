@@ -1,4 +1,3 @@
-// Bounded synthetic acceptance. No dotenv, installation, build, Git mutation or private inputs.
 import { spawnSync } from 'node:child_process';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { mkdir, writeFile, readFile, cp } from 'node:fs/promises';
@@ -59,7 +58,6 @@ async function helper() {
     barrier:{run: work => work()}, validator,
     metadata:{deploymentId:process.env.DEPLOYMENT_ID,instanceId:randomUUID(),deviceId:randomUUID(),snapshotRevision:1,parentBackupId:null,crmVersion:COMMIT,schemaVersion:1000},
     passphrase,recoveryKey,recoveryKeySaved:true,settings:{timeZone:'Asia/Novosibirsk',locale:'ru-RU'},storage:{documents:'/qa/files'} });
-  // Caller has stopped the only app writer: the barrier covers DB and files.
   const backup=await make();
   const restored=await restoreArchive({archivePath:backup.path,credential:{passphrase},schemaVersion:1000,validator,store:new GenerationStore('/qa/restore-store'),confirmed:true,
     hooks:{withStoppedRuntime:work=>work(),prepareStage:async()=>{},protectCurrent:async()=>{const p=await make();return {path:p.path,archive:p.archive,credential:{passphrase}};}}});

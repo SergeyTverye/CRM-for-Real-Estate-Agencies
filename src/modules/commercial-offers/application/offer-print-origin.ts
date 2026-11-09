@@ -1,7 +1,6 @@
 import { desktopLoopbackAllowed } from "@/shared/auth/desktop-loopback";
 import { ForbiddenError } from "@/shared/errors";
 
-/** Next may normalize nextUrl to an internal origin; desktop links use only its trusted binding. */
 export function offerPrintOrigin(
   request: { nextUrl: { origin: string }; headers: Headers; method: string },
   env: Record<string, string | undefined> = process.env,

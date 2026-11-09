@@ -31,7 +31,6 @@ export function NotificationBrowserDelivery() {
         let seen: string[] = [];
         try { seen = JSON.parse(localStorage.getItem(seenKey) ?? "[]") as string[]; } catch { /* no stored IDs */ }
         const fresh = result.items.filter(n => !n.readAt && !seen.includes(`${n.id}:${n.snoozedUntil ?? n.triggerAt}`));
-        // IDs only; neither notification text nor client data is persisted in browser storage.
         for (const n of fresh.slice(0,5)) {
           if (preference === "system" && "Notification" in window && Notification.permission === "granted") {
             const notification = new Notification(n.title, { body: n.detail, tag: n.id });

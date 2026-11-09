@@ -127,7 +127,6 @@ export function api<P>(options: ApiOptions, handler: (ctx: AuthedApiContext<P>) 
       let status = 500;
       try {
         if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Источник запроса не разрешён");
-        if (!desktopLoopbackAllowed(req.headers, req.method)) throw new ForbiddenError("Источник запроса не разрешён");
         const method = req.method.toUpperCase();
         if (MUTATING.has(method)) {
           assertSameOrigin(req);

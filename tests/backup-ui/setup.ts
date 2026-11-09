@@ -7,7 +7,6 @@ export default async function setup(config: FullConfig) {
   process.env.CRM_DEPLOYMENT_MODE = mode;
   Object.assign(process.env, { NODE_ENV: "test" });
   process.env.LOG_LEVEL = "silent";
-  // This setup module is loaded only in the dedicated target config; no production database is used.
   if (mode !== "desktop") {
     if (databaseUrl !== testDatabaseUrl) throw new Error("BACKUP_TEST_DATABASE_REQUIRED");
     await setupDatabase();

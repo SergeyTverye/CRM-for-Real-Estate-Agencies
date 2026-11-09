@@ -1,4 +1,3 @@
-/** Explicit HTTP LIVE acceptance on crm_demo: 8 model calls maximum, web disabled. */
 import { config } from "dotenv";
 import { readFile, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
@@ -65,7 +64,6 @@ async function main() {
     operations.push({ kind: "russian-query", result: parse });
     const residential = normalizeListing({ id: randomUUID(), source: "yandex", url: "https://realty.yandex.ru/offer/7567068812130613984/", title: "ЖК, квартира", description: "Продается однокомнатная квартира в жилом комплексе", deal: "sale", price: 1000000, area: 50, images: [], address: null, rooms: null, floor: null, phone: null, city: "Новосибирск", district: null, timestamp: new Date().toISOString() });
     operations.push({ kind: "residential-rule", mode: "DEMO negative control, not a LIVE scraped residential card", verdict: evaluateListing(residential, filters).verdict });
-    // Save fallback through real HTTP API using actual public URLs and CRM source fields.
     for (const source of ["onrealt", "mirkvartir", "yandex"] as const) {
       const row = source === "onrealt" ? rows[0]! : await db.externalListing.findFirst({ where: { source, operation: "sale", sourceListingId: { not: "synthetic-101" } }, orderBy: { firstSeenAt: "desc" } });
       const url = source === "mirkvartir" ? "https://cre.mirkvartir.ru/369638218/" : row?.url;

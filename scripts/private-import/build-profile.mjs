@@ -1,11 +1,8 @@
-// TRUSTED LOCAL ONLY. Agents/CI must use synthetic input exclusively.
-// --diagnostic is read-only: fixed semantic codes, coordinates and counts only.
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { resolve, dirname, relative, isAbsolute } from 'node:path';
 import { tsImport } from 'tsx/esm/api';
 const output = process.stdout.write.bind(process.stdout);
 const errorOutput = process.stderr.write.bind(process.stderr);
-// Dependencies must not print workbook names, paths or error messages.
 process.stdout.write = () => true;
 process.stderr.write = () => true;
 try {
@@ -16,7 +13,6 @@ try {
     const out = resolve(args[2] ?? 'private-data/enterprise-profile.json');
     const rel = relative(root, out);
     if (!diagnostic && (!rel || rel.startsWith('..') || isAbsolute(rel) || !out.endsWith('.json') || resolve(args[0]) === out)) throw new Error();
-    // file: URL is required by the ESM loader on Windows (a native D: path fails).
     const modulePath = new URL('../../src/modules/import/domain/enterprise-workbook.ts', import.meta.url).href;
     const { loadEnterprise, buildProfile, parseEnterprise, detectEnterpriseHeaders, fields, excludedHeader } = await tsImport(modulePath, import.meta.url);
     const wb = await loadEnterprise(await readFile(args[0]));

@@ -1,4 +1,3 @@
-/** Four explicitly authorized parse calls, no web/scraper calls. Never retry a paid request. */
 import { chromium, expect } from "@playwright/test";
 import { config } from "dotenv";
 import { readFile, writeFile, appendFile } from "node:fs/promises";
@@ -22,7 +21,6 @@ async function main() {
   const context = await browser.newContext({ baseURL, locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage(); page.setDefaultTimeout(60000);
   page.on("dialog", dialog => dialog.type() === "beforeunload" ? dialog.accept() : dialog.dismiss());
-  // All search invocations are forbidden, including manual fallback.
   await context.route(/\/api\/v1\/property-search\/runs/, route => route.request().method() === "GET" ? route.continue() : route.abort("blockedbyclient"));
   async function login(ctx: typeof context, role: "MANAGER" | "REALTOR1") {
     const r = await ctx.request.post("/api/v1/auth/login", { headers: { Origin: baseURL }, data: {

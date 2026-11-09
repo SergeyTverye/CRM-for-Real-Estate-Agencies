@@ -32,7 +32,6 @@ export class ServerAesProtector implements SecretProtector {
     catch { throw new BackupError("SECRET_STORE_INVALID"); } finally { key.fill(0); }
   }
 }
-/** DPAPI CurrentUser. Secret goes via stdin, never command line/environment/temp plaintext. */
 export class WindowsDpapiProtector implements SecretProtector {
   readonly protection = "windows-dpapi-current-user" as const;
   get available() { return process.platform === "win32"; }
@@ -57,7 +56,6 @@ export class WindowsDpapiProtector implements SecretProtector {
   open(data: Buffer, context: string) { return this.transform(data, context, true); }
 }
 const encryptedSchema = z.object({ version: z.literal(1), protection: z.enum(["server-aes-256-gcm", "windows-dpapi-current-user"]), data: z.string().max(65536) }).strict();
-/** Fixed internal signal; never retain filesystem errors, paths or causes. */
 export class CredentialNotFoundError extends BackupError {
   constructor() { super("SECRET_STORE_NOT_FOUND"); }
 }

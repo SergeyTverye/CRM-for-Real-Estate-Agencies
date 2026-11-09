@@ -14,8 +14,6 @@ const app = path.join(root,'src-tauri/resources/app');
 const versions = JSON.parse(await readFile('scripts/desktop/desktop-versions.json','utf8'));
 const dist = '.next-desktop';
 function run(exe,args,options={}) {
-  // Windows PowerShell 5.1 inherits PowerShell 7 module paths from a pwsh runner and then fails to load its own
-  // Microsoft.PowerShell.Utility/Archive modules (Get-FileHash, Expand-Archive). Give it a clean module path.
   const env = { ...process.env };
   if (/^powershell(\.exe)?$/i.test(path.basename(exe))) delete env.PSModulePath;
   const r = spawnSync(exe,args,{cwd:root,env,stdio:'inherit',windowsHide:true,...options});
@@ -31,30 +29,21 @@ Object.assign(process.env,{CRM_BUILD_TARGET:'desktop',CRM_DEPLOYMENT_MODE:'deskt
 npm(['run','build']);
 await safeCopyTrace(path.join(root,dist,'standalone'),app,{dist});
 await safeCopyTrace(path.join(root,dist,'static'),path.join(app,dist,'static'),{prefix:dist+'/static',dist});
-// Standalone trace omits lazily required server chunks. Supplement the exact
-// compiled server tree from this build, then verify before later guards.
 await supplementCompiledServer(path.join(root,dist,'server'),path.join(app,dist,'server'),{dist});
 if (existsSync('public')) await safeCopyTrace('public',path.join(app,'public'),{prefix:'public',dist});
 await safeCopyTrace('import-profiles',path.join(app,'import-profiles'),{prefix:'import-profiles',dist});
 await safeCopyTrace('prisma/sqlite',path.join(app,'prisma/sqlite'),{prefix:'prisma/sqlite',dist});
-// Runtime DB lifecycle reads SQL migrations; the generated client is bundled
-// below. Neither source TypeScript nor the build-time Prisma config is needed.
-// Production install only; no workspace, env or dev packages are copied.
-// Explicit vendor tarball is an existing public dependency, never a root glob.
 await cp('package.json',path.join(app,'package.json'));
 await cp('package-lock.json',path.join(app,'package-lock.json'));
 await mkdir(path.join(app,'vendor'),{recursive:true});
 await cp('vendor/real-estate-scrapper-2.1.0.tgz',path.join(app,'vendor/real-estate-scrapper-2.1.0.tgz'));
 npm(['ci','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],app);
 npm(['rebuild','better-sqlite3'],app);
-// Turbopack hashed aliases must include runtime entry files/native bindings from
-// this bundle's pinned production install, not just the partial standalone trace.
 await refreshRuntimeAliases(app,dist);
 await rm(path.join(app,'vendor'),{recursive:true,force:true});
 const entries = runtimeEntries;
 for (const [out,input] of Object.entries(entries)) await build({...runtimeBuildOptions,entryPoints:[input],outfile:path.join(app,out)});
 for (const file of ['supervisor.mjs','graceful.cjs']) await cp(path.join('scripts/desktop/runtime',file),path.join(app,file));
-// Download only the official, fixed-version Node zip and verify both release manifest and pinned digest.
 const zipName = 'node-v' + versions.node + '-win-x64.zip';
 const url = 'https://nodejs.org/dist/v' + versions.node + '/';
 const response = await fetch(url+'SHASUMS256.txt'); if (!response.ok) throw Error('NODE_SHASUMS_DOWNLOAD');
@@ -84,10 +73,6 @@ async function measure(dir){for(const item of await readdir(dir,{withFileTypes:t
 await measure(app);
 const version = JSON.parse(await readFile('src-tauri/tauri.conf.json','utf8')).version;
 await writeFile(path.join(app,'desktop-manifest.json'),JSON.stringify({version,resourceBytes,node:versions.node,chromium:path.relative(app,executable),initEntry:entries['init-db.cjs'],backupEntry:entries['workers/backup.cjs']},null,2));
-// Generate from the exact lock used by npm ci. The standalone trace and native
-// rebuilds are not a complete Arborist install tree; npm sbom otherwise rejects
-// absent development/platform packages. The lock inventory includes production
-// optional variants for other platforms, which is declared in RUNTIMES.md.
 const sbom = spawnSync(process.env.ComSpec ?? 'cmd.exe',['/d','/s','/c','npm sbom --omit=dev --sbom-format=cyclonedx --package-lock-only'],{cwd:app,encoding:'utf8',maxBuffer:32*1024*1024,windowsHide:true});
 if (sbom.error || sbom.status !== 0) {
   const code = sbom.stderr?.match(/npm (?:ERR!|error) code ([A-Z0-9_]+)/)?.[1] ?? 'UNKNOWN';
@@ -101,7 +86,6 @@ for (const name of ['next','better-sqlite3','@node-rs/argon2','@prisma/client'])
   if (!inventory.components.some(c => (c.name === name || c.name === name.slice(slash + 1) && (slash < 0 || c.group === name.slice(0,slash))) && c.version === installed.version)) throw Error('SBOM_COMPONENT_MISSING');
 }
 await writeFile(path.join(app,'sbom.cdx.json'),JSON.stringify(inventory,null,2));
-// The lock is required for npm ci/SBOM generation, not installed execution.
 await rm(path.join(app,'package-lock.json'));
 await writeFile(path.join(app,'RUNTIMES.md'),`Node.js ${versions.node} x64 (node/LICENSE); Chromium (chromium/*/LICENSE*); WebView2 Evergreen Offline Installer (Microsoft); Tauri 2 (MIT/Apache-2.0); app-local MSVC CRT (Microsoft Visual Studio Distributable Code, node/MSVC-RUNTIME.json).\nProduction npm dependency/license inventory: sbom.cdx.json, generated from the exact npm ci lockfile with dev dependencies omitted. Optional platform variants listed by the lock may not all be installed on Windows. Next, SQLite, Argon2 and Prisma versions are checked against the installed bundle. No host Node/npm required.\n`);
 await assertRuntimeResources(app,dist);

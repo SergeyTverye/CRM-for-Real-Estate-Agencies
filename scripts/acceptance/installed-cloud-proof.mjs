@@ -1,4 +1,3 @@
-// Opt-in library only: importing this module performs no I/O, secret reads, network calls, or installed execution.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -69,7 +68,6 @@ const fail = code => {
   throw Object.assign(new Error(safe), { safeCode: safe });
 };
 const need = (condition, code) => { if (!condition) fail(code); };
-// Inspect only in memory. Never retain the original error, message, stack or cause.
 function diagnosticCode(error, stage) {
   if (typeof error?.safeCode === 'string' && SAFE_CODE_RE.test(error.safeCode)) return error.safeCode;
   const closedStage = DIAGNOSTIC_STAGES.has(stage) ? stage : 'PREFLIGHT';
@@ -319,22 +317,6 @@ export async function probeS3Anonymous(
   return { getStatus, listStatus };
 }
 
-/**
- * Bounded installed-runtime cloud GUI configuration, replication, independent provider
- * restore and anonymous S3 denial check. Synthetic remote evidence is retained;
- * no automatic remote deletion or historical S3 version audit is performed.
- *
- * Never reads secrets at module load. Requires explicit `executeInstalledCloudProof: true`,
- * strict loopback origin, and a fresh synthetic profile directory under
- * `<workspace>/data/qa-v32-installed-browser/run-<runId>`.
- *
- * Parent MUST disable Playwright trace/HAR/video/debug capture and request/response
- * body listeners before invoking this helper (`parentCaptureDisabledAttested: true`).
- * `createVerifiedBackup`, `restoreFromDestination`, and `cleanupRemoteArchive` overrides are rejected so
- * fresh archive creation, catalog ownership reconciliation, and destination-specific
- * cloud restores remain under helper verification; only `afterCommand` handles parent
- * supervisor lifecycle restarts.
- */
 export async function runInstalledCloudProof({
   executeInstalledCloudProof = false,
   parentCaptureDisabledAttested = true,
@@ -449,8 +431,6 @@ export async function runInstalledCloudProof({
     }
 
     async function runSupervisedCommand(body, expectedTerminalStatus, meta = {}) {
-      // Navigate away from /settings/backups before supervisor stops server.js so
-      // backup-panel's 10s status polling timer never triggers page requestfailed.
       await page.goto('about:blank');
       const queued = await postControl(body);
       need(queued?.queued === true, 'CL_COMMAND_NOT_QUEUED');
@@ -556,7 +536,6 @@ export async function runInstalledCloudProof({
       await page.getByLabel(secretLabel, { exact: true }).fill(secretValue);
       await page.getByRole('button', { name: 'Сохранить направление', exact: true }).click();
       await page.getByRole('status').filter({ hasText: 'Настройки сохранены. Пароли удалены из полей формы.' }).waitFor({ state: 'visible', timeout: 30000 });
-      // Never take screenshots of backup settings or modal inputs.
       need((await page.locator('input[type="password"]').count()) === 0, 'CL_PASSWORD_INPUT_STILL_OPEN');
     };
 
@@ -607,7 +586,6 @@ export async function runInstalledCloudProof({
     const yandexId = yandexDest.id;
     const mailruId = mailruDest.id;
 
-    // Verify empty remote catalog under the newly allocated unique prefix for both providers.
     for (const [providerCode, destId, label] of [
       ['YANDEX', yandexId, 'Яндекс Облако'],
       ['MAILRU', mailruId, 'Облако Mail.ru'],
@@ -752,14 +730,11 @@ export async function runInstalledCloudProof({
       stage = `CAT_${providerCode}_IDENTITY`;
       need(match && match.sha256 === archive.sha256 && match.bytes === archive.bytes, `CL_${providerCode}_REMOTE_CATALOG_MISMATCH`);
 
-      // Verify remote catalog selection and restore modal in the real GUI before queuing supervised restore.
       stage = `CAT_${providerCode}_OPEN`;
       await region.getByRole('button', { name: 'Список копий / получить', exact: true }).click();
       const listDialog = page.getByRole('dialog', { name: 'Список копий', exact: true });
       stage = `CAT_${providerCode}_DIALOG`;
       await listDialog.waitFor({ state: 'visible', timeout: 30000 });
-      // backup-panel.tsx wraps this sole select AND its options in the label.
-      // Exact label text can include option text; keep strict single-control lookup.
       const select = listDialog.getByRole('combobox');
       stage = `CAT_${providerCode}_SELECT_VISIBLE`;
       await select.waitFor({ state: 'visible', timeout: 30000 });
@@ -927,7 +902,6 @@ export async function runInstalledCloudProof({
 }
 
 async function selfTest() {
-  // Pure deterministic diagnostics checks: no browser, filesystem or cloud calls.
   for (const stage of DIAGNOSTIC_STAGES) {
     for (const kind of DIAGNOSTIC_KINDS) {
       const code = `CL_${kind}_${stage}`;
@@ -1056,7 +1030,6 @@ async function selfTest() {
     err => err?.safeCode === 'CL_UNSUPPORTED_CALLBACK_OVERRIDE_REJECTED',
   );
 
-  // Early rejection only: neither the removed callback nor secret loading may run.
   let cleanupCalled = false;
   let secretsLoaded = false;
   for (const unsupportedCleanup of [() => { cleanupCalled = true; }, null, undefined]) {

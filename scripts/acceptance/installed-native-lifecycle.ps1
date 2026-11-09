@@ -1,22 +1,3 @@
-#requires -Version 7.2
-<#
-SOURCE-ONLY delivery; coordinator runs explicitly, from a clean PowerShell -NoProfile.
-Salvaged from the synthetic installed-native-lifecycle draft: fresh ACL profile,
-normal native launch, second-launch runtime invariant, API reminder and persistence.
-Example parameters (no environment/dotenv discovery): -ExecuteInstalledNative
- -Launcher <installed RealEstateCRM.exe> -InstalledShortcut <exact installed .lnk>
- -InstalledShortcutSha256 <coordinator verified .lnk hash> [-WaitForController]
- -SystemDirectory C:\Windows
-The controller MUST first independently exit the working/default CRM safely.
-Never click the default shortcut during this run: it cannot inherit this profile.
-When PAUSED, use computer-use on ONLY this run's visible native setup window;
-do not submit setup, close, minimize, or navigate another CRM. Write the exact
-ack described in coordinator-request.json before its deadline. No ack means
-NOTRUN, not GUI success. No automatic focus, UIAutomation, user32 or debug flags.
-GUI login/picker, actual installed shortcut activation, tray/offline/reboot are
-NOTRUN. API login/delivered notification do not prove GUI login or OS toast.
-Finally terminates only retained spawn handles (never a PID/tree/global stop).
-#>
 [CmdletBinding()]
 param(
     [switch]$ExecuteInstalledNative, [string]$Launcher,
@@ -31,8 +12,6 @@ $officialHash = '60bf5292982535763c2954bd84f9edb26437ad009d1250ad3bc49547a6b8852
 $script:publicScript = $PSCommandPath
 
 function Get-SafeFailure([Management.Automation.ErrorRecord]$Record) {
-    # Exact allowlist only. Never serialize Message, ErrorDetails, target, stack,
-    # PositionMessage or InvocationInfo itself (API errors can contain bodies).
     $known = @(
         'PATH_REJECTED','REPARSE_REJECTED','RESOURCE_MISSING','OTHER_CRM_REFUSED',
         'OTHER_WRITER_REFUSED','WRITE_SCOPE_REJECTED','READ_SCOPE_REJECTED','METADATA_REJECTED',
@@ -58,7 +37,6 @@ function Get-SafeFailure([Management.Automation.ErrorRecord]$Record) {
     return @{failureCode=$code;exceptionType=$Record.Exception.GetType().FullName;publicScriptLine=$line}
 }
 function Write-SafeProgress([string]$Phase) {
-    # Information stream must not contaminate Start-Owned/condition return values.
     Write-Information -InformationAction Continue -MessageData (@{status='PROGRESS';phase=$Phase} | ConvertTo-Json -Compress)
 }
 
@@ -132,7 +110,6 @@ function Start-Owned([switch]$AllowEarlyExit) {
     Assert-Bound
     if ((Get-FileHash -LiteralPath (Assert-Leaf $script:exe) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $officialHash) { throw 'LAUNCHER_HASH_REJECTED' }
     $p = [Diagnostics.Process]::new(); $p.StartInfo = New-CleanStartInfo
-    # Retain object/OS handle before any observation can fail. No GetProcessById.
     $o = @{Process=$p; Stamp=$null; Started=$false}; $script:spawns.Add($o)
     if (-not $p.Start()) { throw 'SPAWN_FAILED' }
     $o.Started = $true
@@ -148,9 +125,6 @@ function Start-Owned([switch]$AllowEarlyExit) {
         $o.Stamp = Get-ProcessStamp $meta
         Assert-Spawn $o
     } catch {
-        # CIM/StartTime/revalidation can race the secondary's exit. Only the
-        # retained Start() object/handle may prove that exit, never a PID lookup.
-        # SECOND_LAUNCH still requires exit 0 and the unchanged verified runtime.
         if ($AllowEarlyExit -and $p.HasExited) { return $o }
         throw
     }
@@ -193,15 +167,10 @@ function Assert-OwnedRuntime {
         $script:runtimeImages[$key] = [string]$p.ExecutablePath
     }
     if ($script:supervisorPid -and $script:supervisorPid -ne $info.pid) { throw 'RUNTIME_IDENTITY_CHANGED' }
-    # NetTCPIP CIM may omit a real listener for a non-elevated caller; netstat
-    # reports the OS socket owner without requiring administrator privileges.
     $socketLines = @(& (Join-Path $script:system 'System32\netstat.exe') -ano -p tcp)
     if ($LASTEXITCODE -ne 0) { throw 'LOOPBACK_OWNER_REJECTED' }
     $listeners = @($socketLines | Where-Object { $_ -match ('^\s*TCP\s+\S+:' + $portNumber + '\s+\S+:0\s+\S+\s+\d+\s*$') })
     $script:runtimeProof.listenerPresent=($listeners.Count -gt 0)
-    # Socket tables are supplementary: on this host a known healthy own
-    # listener can be omitted. Runtime ancestry remains mandatory, and the
-    # fresh setup API below must attest this exact fixture's data directory.
     $socketOwnerMatches=$false
     if ($listeners.Count -eq 1) {
         $socketFields=([string]$listeners[0]).Trim() -split '\s+'
@@ -248,12 +217,9 @@ function Stop-Owned {
     $teardown = [Diagnostics.Stopwatch]::StartNew()
     foreach ($o in $script:spawns) {
         try {
-            # Start() can throw before a process exists; HasExited then throws too.
             if (-not $o.Started) { continue }
             if (-not $o.Process.HasExited) {
                 Assert-Spawn $o
-                # Capture exact direct Node descendants even if startup never published
-                # runtime.json. Observation only; Job Object must remove them itself.
                 $parents = @(@{Id=$o.Process.Id;Start=$o.Process.StartTime.ToUniversalTime()})
                 for ($depth=0; $depth -lt 3 -and $parents.Count; $depth++) {
                     $next = @()
@@ -269,8 +235,6 @@ function Stop-Owned {
                     }
                     $parents=$next
                 }
-                # Network readiness is not ownership. Revalidate the retained launcher
-                # after observation; its Job Object, not PID/tree killing, owns children.
                 Assert-Spawn $o
                 $o.Process.Kill() # retained handle ONLY; no Kill(true), PID, shutdown command or UI control
                 $remainingMs = [Math]::Max(0,20000 - [int]$teardown.ElapsedMilliseconds)
@@ -320,7 +284,6 @@ try {
                 (Assert-LocalPath $sc.WorkingDirectory) -ine $script:installDir) { throw 'SHORTCUT_TARGET_REJECTED' }
         } finally { $null = [Runtime.InteropServices.Marshal]::FinalReleaseComObject($sc) }
     } finally { $null = [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) }
-    # Only a new UUID directory is created/ACL-modified, no existing data parent is read.
     $runId = [Guid]::NewGuid().ToString()
     $evidenceRoot = Join-Path $workspace 'data\qa-v32-installed-native-lifecycle'
     [IO.Directory]::CreateDirectory((Assert-LocalPath $evidenceRoot)) | Out-Null

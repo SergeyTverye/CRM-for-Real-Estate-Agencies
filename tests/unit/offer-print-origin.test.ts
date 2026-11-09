@@ -42,7 +42,6 @@ describe("offer print origin", () => {
   });
 });
 
-// Exercise both route handoffs without auth/session/DB, PDF browser or file storage.
 const generators = vi.hoisted(() => ({ pdf: vi.fn(async () => Buffer.from("synthetic")), document: vi.fn(async () => ({ id: "synthetic" })) }));
 vi.mock("@/modules/commercial-offers/application/offer-pdf", () => ({ generateOfferPdf: generators.pdf }));
 vi.mock("@/modules/commercial-offers/application/offer-document", () => ({ generateOfferDocument: generators.document }));

@@ -1,4 +1,3 @@
-/** Two authorized LIVE runs, no AI, no retry, and read-only snapshot comparison. */
 import "dotenv/config";
 import assert from "node:assert/strict";
 import { randomBytes, createHash } from "node:crypto";
@@ -57,7 +56,6 @@ async function main() {
       evidence.runs=runs;console.log(`${operation}: ${rows.length} results, retail accepted ${rows.filter(r=>r.purpose==="retail"&&r.verdict!=="rejected").length}`);
     }
     evidence.aiUsage=await db.aiUsageLog.count({where:{userId:user.id}});assert.equal(evidence.aiUsage,0);
-    // Only recorded previousRunId pairs: comparable units, latest snapshot per run/listing.
     const pairs=await db.$queryRaw<{runId:string;previousRunId:string;listingId:string;url:string;oldPrice:string;newPrice:string;unit:string;priceChanged:boolean}[]>`
       SELECT r.run_id AS "runId",p.run_id AS "previousRunId",r.listing_id AS "listingId",l.url,
       old.price_rub::text AS "oldPrice",cur.price_rub::text AS "newPrice",cur.normalized->>'priceUnit' AS unit,r.price_changed AS "priceChanged"
@@ -68,7 +66,6 @@ async function main() {
       WHERE cur.price_rub IS NOT NULL AND old.price_rub IS NOT NULL AND cur.normalized->>'priceUnit'=old.normalized->>'priceUnit'
       AND l.source_listing_id NOT LIKE 'synthetic-%'`;
     evidence.snapshotComparison={mode:"REPLAY / read-only historical LIVE records",comparablePairs:pairs.length,changed:pairs.filter(p=>p.oldPrice!==p.newPrice),unchanged:pairs.filter(p=>p.oldPrice===p.newPrice).length};
-    // Copy one real snapshot's public numeric facts for an isolated REPLAY test; no seller text/contact data.
     const sample=await db.externalListingSnapshot.findFirstOrThrow({where:{searchRunId:{in:(runs as {runId:string}[]).map(r=>r.runId)},priceRub:{not:null}},orderBy:{fetchedAt:"desc"}});
     const normalized=sample.normalized as unknown as NormalizedListing;
     const fixture={mode:"REPLAY",provenance:{sourceMode:"LIVE",snapshotId:sample.id,runId:sample.searchRunId,sourceUrl:normalized.url,sha256:createHash("sha256").update(JSON.stringify(sample.normalized)).digest("hex"),note:"Public numeric fields copied; description/seller/images removed. Changed price is synthetic."},listing:{...normalized,description:"",seller:{type:"unknown"},images:[],structuredFeatures:{},possibleDuplicateKeys:[]}};

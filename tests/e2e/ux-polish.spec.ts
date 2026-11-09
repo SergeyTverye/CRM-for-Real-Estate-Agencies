@@ -26,7 +26,6 @@ test("календарь: рабочие часы и полные названи
   await page.goto("/calendar");
   await expect(page.locator('.fc-timegrid-slot[data-time="07:00:00"]').first()).toBeVisible();
   await expect(page.locator('.fc-timegrid-slot[data-time="21:30:00"]').first()).toBeVisible();
-  // v3.1 displays the full day so early/late deadlines are not hidden.
   await expect(page.locator('.fc-timegrid-slot[data-time="00:00:00"]').first()).toBeAttached();
   await expect(page.locator('.fc-timegrid-slot[data-time="23:30:00"]').first()).toBeAttached();
   const event = page.locator(".fc-event[title]").first();

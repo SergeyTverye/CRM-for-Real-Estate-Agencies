@@ -3,7 +3,6 @@ import type { Actor } from "@/modules/auth/domain/actor";
 
 const mocks = vi.hoisted(() => ({ task: { findMany: vi.fn(), count: vi.fn() } }));
 vi.mock("@/shared/db/client", () => ({ db: { task: mocks.task } }));
-// Emulate React's request-local cache; outside a render the real cache is a no-op.
 vi.mock("react", () => ({ cache: (fn: () => unknown) => {
   let result: unknown;
   return () => result ??= fn();

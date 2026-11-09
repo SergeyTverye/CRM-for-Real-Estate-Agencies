@@ -4,7 +4,6 @@ import { win32 } from "node:path";
 const { execFileSync, statfsSync } = vi.hoisted(() => ({ execFileSync: vi.fn(), statfsSync: vi.fn() }));
 vi.mock("node:child_process", () => ({ execFileSync }));
 vi.mock("node:fs", () => ({ statfsSync }));
-// Exercise Windows path semantics on every test host, not just Windows runners.
 vi.mock("node:path", async () => {
   const { win32 } = await vi.importActual<typeof import("node:path")>("node:path");
   return { ...win32, win32 };

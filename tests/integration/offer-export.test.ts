@@ -36,7 +36,6 @@ it("exports A4 PDF and DOCX with authorized gallery, requisites, comparison and 
   const html = offerHtml(print);
   expect(html).toContain("Введение &lt;без HTML&gt;"); expect(html).toContain("Сравнение объектов"); expect(html).not.toContain("999999");
   expect(html).not.toMatch(/<img[^>]+src="https?:/);
-  // Comparison and contact details belong to the cover, before the object pages.
   expect(html.indexOf("<h2>Сравнение объектов")).toBeLessThan(html.indexOf('<section class="object">'));
   expect(html.indexOf("Ваш ответственный специалист")).toBeLessThan(html.indexOf('<section class="object">'));
   expect(html).toContain('class="thumbnail"');
@@ -57,9 +56,7 @@ it("exports A4 PDF and DOCX with authorized gallery, requisites, comparison and 
   expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
   const mediaBox = pdf.toString("latin1").match(/\/MediaBox\s*\[0 0 ([\d.]+) ([\d.]+)/);
   expect(Number(mediaBox?.[1])).toBeCloseTo(595, 0); expect(Number(mediaBox?.[2])).toBeCloseTo(842, 0);
-  // Poppler is optional in CI; when installed, verify the actual PDF text as well as its source HTML.
   const extracted = spawnSync("pdftotext", ["-", "-"], { input: pdf, encoding: "utf8" });
-  // Optional: some Windows runners ship a pdftotext without stdin support (usage error 99).
   if (!extracted.error && extracted.status !== 99) {
     expect(extracted.status).toBe(0);
     for (const value of ["Снимок адреса", "Сравнение объектов", "123 456", "Центральный", "Примечание для клиента"]) expect(extracted.stdout.replace(/\u00a0/g, " ")).toContain(value);

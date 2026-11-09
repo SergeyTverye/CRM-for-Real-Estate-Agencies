@@ -28,9 +28,7 @@ describe('enterprise v2 PG/Prisma', () => {
         const job0 = await uploadEnterprise(users.manager, file(Buffer.from(await prior.wb.xlsx.writeBuffer())), prior.p);
         expect((await confirm(job0.id)).imported).toBe(1);
         const existing = await db.property.findFirstOrThrow();
-        // Verify the review hypothesis against the actual backend before changing Decimal logic.
         expect(existing.area!.toString()).toBe('500');
-        // Isolate the existing-property check from receipt-based idempotency.
         await db.importRowResult.deleteMany({ where: { importJobId: job0.id } });
         await db.dictionaryItem.create({ data: { category: 'commercial_purpose', code: 'synthetic_inactive', displayName: 'Synthetic inactive', isActive: false } });
         await db.user.update({ where: { id: users.realtor2.userId }, data: { isActive: false } });

@@ -20,7 +20,6 @@ if (!process.argv.includes("--reviewed")) {
     panels.push({ input: await sharp(input).resize(950, 500, { fit: "contain", background: "white" }).png().toBuffer(), left: 20 + index % 2 * 990, top: 20 + Math.floor(index / 2) * 540 });
   }
   await sharp({ create: { width: 1980, height: 1080, channels: 3, background: "#e2e8f0" } }).composite(panels).png().toFile(target);
-  // Overview of all native pages for QA only, never an alternative business export.
   const pages = [];
   for (let page = 1; page <= 8; page++) pages.push({ input: await sharp(`${folder}/page-${page}.png`).trim({ background: "#ffffff", threshold: 12 }).resize(950, 500, { fit: "contain", background: "white" }).png().toBuffer(), left: 20 + (page - 1) % 2 * 990, top: 20 + Math.floor((page - 1) / 2) * 540 });
   await sharp({ create: { width: 1980, height: 2160, channels: 3, background: "#e2e8f0" } }).composite(pages).png().toFile(`${folder}/all-pages.png`);

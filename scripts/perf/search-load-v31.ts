@@ -1,4 +1,3 @@
-/** Isolated synthetic load only. Never resets a schema. Run prepare, then measure against next start. */
 import "dotenv/config";
 import assert from "node:assert/strict";
 import { randomBytes, createHash } from "node:crypto";
@@ -36,7 +35,6 @@ async function prepare() {
     await db.searchRunResult.createMany({ data: numbers.map(n => ({ runId: run.id, listingId: id(n), verdict: verdicts[n%3]!, score: n%10, priceChanged: n%19===0, isNew: n%4===0, criteria: [{ criterion: "separateEntrance", state: n%3===1 ? "unknown" : "matched", source: "structured", evidence: "synthetic" }] })) });
   }
   await db.searchRunSource.createMany({ data: sources.map((source,i) => ({ runId: run.id, source, status: "success", resultCount: Math.floor((count+6-i)/7), depthReached: 10, reason: "Синтетическая нагрузка, неполный охват рынка" })) });
-  // Cross-source likely duplicates with explicit membership; no auto-confirmation.
   for (let n=0;n<40;n++) {
     const group = await db.listingDuplicateGroup.create({ data: { status: "probable", evidence: { synthetic: true } } });
     await db.listingDuplicateMember.createMany({ data: [n*2,n*2+1].map(index => ({ groupId: group.id, listingId: id(index) })) });

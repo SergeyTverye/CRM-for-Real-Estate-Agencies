@@ -26,7 +26,6 @@ async function main() {
     const owner = ctx.agents[i % 2]!;
     const person = `${last[i]} ${first[i]}`;
     const displayName = i % 3 === 0 ? `ООО «Сибирь Коммерция ${i + 1}»` : i % 3 === 1 ? `ИП ${person}` : person;
-    // Adopt records from the preceding partial seed instead of creating parallel clients.
     const client = await db.client.findFirst({ where: { displayName, notes: { contains: marker } } }) ?? await db.client.create({ data: {
       id: demoId(`client:${i}`), displayName, clientKind: i % 3 === 0 ? "organization" : "person", responsibleUserId: owner.userId,
       createdBy: owner.userId, status: "active", notes: `${marker} Синтетическая демонстрационная запись`,
@@ -83,7 +82,6 @@ async function main() {
       resultCode: ["new_need", "linked_existing_need", "one_off_service", "no_followup"][i % 4]!, statusCode: i % 6 === 0 ? "open" : "processed", summary,
     } });
   }
-  // Deliberate legacy exceptions: prospective intake has no next action, without breaking active-need invariants.
   for (const i of [2, 6]) await db.leadRequest.upsert({ where: { id: demoId(`missing-next:${i}`) }, update: {}, create: {
     id: demoId(`missing-next:${i}`), clientId: ctx.clients[i]!.id, responsibleUserId: ctx.clients[i]!.responsibleUserId, createdBy: ctx.manager.userId,
     occurredAt: day(origin, -3), channelCode: "phone", sourceCode: "website", resultCode: "new_need", statusCode: "open", summary: `${marker} Перспективное обращение без следующего действия (контроль исключений)`,
@@ -101,7 +99,6 @@ async function main() {
       id: demoId(`event:${i}`), ownerUserId, title, description: "Синтетическое событие для демонстрации календаря", startAt: day(origin, i - 1, 11 + i * 2), endAt: new Date(+day(origin, i - 1, 11 + i * 2) + 3600000), visibility: i === 2 ? "private" : "public", clientId: i === 2 ? null : ctx.clients[i]!.id,
     } });
   }
-  // Prospective requests with a genuine future next action, plus measured completion examples.
   for (const i of [0, 4, 8]) {
     const client = ctx.clients[i]!, need = ctx.needs[i]!;
     await db.task.updateMany({ where: { needLinks: { some: { clientNeedId: ctx.needs[i]!.id } }, status: { in: ["planned", "in_progress"] }, taskType: { in: ["call_or_contact", "pause_return"] } }, data: { dueAt: day(origin, 1, 10 + i % 8) } });
@@ -116,7 +113,6 @@ async function main() {
       completedAt: new Date(+dueAt + (i % 2 ? 90 : -15) * 60000), description: `${marker} Контроль фактического срока контакта` };
     await db.task.upsert({ where: { id: demoId(`completed-contact:${i}`) }, update: data, create: { id: demoId(`completed-contact:${i}`), ...data, clientLinks: { create: { clientId: client.id } } } });
   }
-  // Repair timestamps of the original demo set without creating duplicate business records.
   for (let i = 0; i < ctx.needs.length; i++) {
     if ([0, 4, 8].includes(i)) continue;
     await db.task.updateMany({ where: { needLinks: { some: { clientNeedId: ctx.needs[i]!.id } }, status: { in: ["planned", "in_progress"] }, taskType: { in: ["call_or_contact", "pause_return"] } }, data: { dueAt: day(origin, ctx.needs[i]!.status === "paused" ? 4 : i % 3 === 0 ? -2 : 0, 9 + i % 10) } });

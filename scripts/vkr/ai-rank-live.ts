@@ -1,6 +1,3 @@
-/** One explicitly requested paid call per invocation; synthetic input, no database or retries.
- * node --env-file=.env --import tsx scripts/vkr/ai-rank-live.ts
- */
 import { writeFileSync } from "node:fs";
 import { SearchAi } from "../../src/modules/ai/infrastructure/search-ai";
 import { YandexResponsesClient } from "../../src/modules/ai/infrastructure/yandex-responses-client";
@@ -31,7 +28,6 @@ async function main() {
     if (++calls > 1) throw new Error("One paid call only; no retry");
     const response: AiResponse = await client.respond(request);
     console.log(JSON.stringify({ maxOutputTokens: request.maxOutputTokens, usage: response.usage, rawSyntheticText: response.text.slice(0, 6000) }));
-    // Only the synthetic model text, never credentials, request headers or provider envelope.
     if (process.argv.includes("--record-replay")) writeFileSync("tests/unit/ai/fixtures/ranking-live-synthetic.txt", response.text);
     return response;
   } };
@@ -39,7 +35,6 @@ async function main() {
   const gate = new AiGate(ledger, { enabled: true, webEnabled: false, autoFallback: false,
     requestsPerUserHour: 1, requestsPerUserDay: 1, callsPerJob: 1, webCallsPerJob: 0, webJobsPerUserDay: 0,
     monthlyBudgetMicros: 2000000n }, { getLimits: async () => ({}) });
-  // Reviewed seed rates, used only for this process-local diagnostic budget (not a CRM journal).
   const ai = new SearchAi(provider, gate, { findEffective: async () => ({ id: "diagnostic", model,
     effectiveFrom: new Date("2026-01-01Z"), inputMicrosPerMillion: 100000000n, outputMicrosPerMillion: 200000000n,
     webSearchMicrosPerCall: 0n, webInputTokenAllowance: 0 }) }, { model, webModel: "", maxOutputTokens: Number(process.env.YANDEX_AI_MAX_OUTPUT_TOKENS ?? 1800),

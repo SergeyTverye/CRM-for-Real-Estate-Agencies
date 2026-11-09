@@ -21,7 +21,7 @@ import { readWorkbook } from "../infrastructure/xlsx-reader";
  * upload → dry-run (parse → normalize → policy filter → validate → duplicates → mapping) → commit по секциям.
  * Dry-run не изменяет операционные таблицы: пишутся только import_jobs/import_row_results.
  * Исходный файл хранится во временном каталоге IMPORT_STAGING_PATH (вне backup) до завершения задания.
- * Для каждой обработанной при commit строки фиксируется commit_result; rows_read = imported + skipped + error.
+ * Для каждой обработанной при commit строки фиксируется commit_result. rows_read = imported + skipped + error.
  */
 
 function requireManager(actor: Actor) {
@@ -272,7 +272,6 @@ export async function getImportJob(actor: Actor, id: string, raw: unknown = {}) 
   };
 }
 
-// ───── Commit ─────
 
 const commitSchema = z.object({
   sections: z.array(z.string().min(1)).min(1, "Выберите секции для загрузки"),

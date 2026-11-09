@@ -1,4 +1,3 @@
-/** Deterministic candidate detection. No rule constitutes proof of identity. */
 export interface DuplicateCandidate {
   id: string; source: string; sourceListingId?: string | null; sourceUnitId?: string | null;
   city: string | null; address: string | null; area: number | null;
@@ -61,9 +60,7 @@ export function compareListings(a: DuplicateCandidate, b: DuplicateCandidate): P
   add("Цена", price ? "matched" : "unknown", "Цена — вспомогательный признак, не доказательство идентичности");
   for (const key of ["separate_entrance", "ceiling_height", "power_kw", "gates", "wet_point", "first_line"])
     eq(`Признак: ${key}`, a.features?.[key], b.features?.[key]);
-  // A missing house number is acceptable only with several independent structured corroborations.
   const incompleteAddress = !house && (!aa.house || !bb.house) && floor && purpose && price && a.area === b.area;
-  // Floor/unit stated in only one listing is weak evidence: group only when the price corroborates (±5%, same unit).
   const missing = (x: unknown) => x === null || x === undefined || x === "";
   const asymmetric = missing(a.floor) !== missing(b.floor) || missing(aa.unit) !== missing(bb.unit);
   const pa = Number(a.price), pb = Number(b.price);
@@ -77,7 +74,6 @@ export function compareListings(a: DuplicateCandidate, b: DuplicateCandidate): P
   add("Вывод", probable ? "matched" : "contradicted", probable ? "Вероятное совпадение; требуется решение сотрудника" : "Недостаточно оснований для общей группы");
   return { a: a.id, b: b.id, probable, score, features };
 }
-/** Complete-link grouping prevents A~B~C chains from swallowing contradictory A/C units. */
 export function groupCandidates(input: DuplicateCandidate[], blocked: (a: string, b: string) => boolean = () => false) {
   const groups: DuplicateCandidate[][] = [];
   const buckets = new Map<string, DuplicateCandidate[][]>();

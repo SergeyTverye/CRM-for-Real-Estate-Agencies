@@ -45,7 +45,6 @@ describe("SQLite migration LF determinism (history checksums stay strict)", () =
     expect(fromCrlf).toBe(fromLf);
     expect(fromCrlf).not.toContain("\r");
     expect(sha256(fromCrlf)).toBe(sha256(fromLf));
-    // Strict raw checksums correctly catch the pre-fix difference.
     expect(sha256(lfDiff.replaceAll("\n", "\r\n"))).not.toBe(sha256(lfDiff));
   });
 });

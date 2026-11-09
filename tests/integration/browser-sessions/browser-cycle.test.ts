@@ -17,7 +17,6 @@ const cleanup: (() => Promise<unknown>)[] = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
 async function scenario(options: { tickMs?: number; idleMs?: number; totalMs?: number } = {}) {
   const stand = await captchaStand(); cleanup.push(stand.close);
-  // The adapter owns detection; the browser-session module receives a needs_user_action job.
   const probe = await stand.network.transport(`${stand.origin}/check`);
   const adapterStatus = probe.data.includes("data-needs-user-action") ? "needs_user_action" : "success";
   let handle: BrowserHandle | undefined;
@@ -29,7 +28,6 @@ async function scenario(options: { tickMs?: number; idleMs?: number; totalMs?: n
     isReady: async page => await page.locator("[data-listing]").count() > 0,
     resume: vi.fn<SearchContinuationPort["resume"]>(async ({ page, context, signal, parameters }) => {
       expect(page).toBe(handle?.page); expect(context).toBe(handle?.context); expect(parameters).toEqual({ purpose: "office" });
-      // Revalidation occurs in the trusted continuation, immediately before persistence.
       const data = await page.locator("[data-listing]").evaluateAll(rows => rows.map(row => ({ id: row.getAttribute("data-listing")!, area: Number(row.getAttribute("data-area")), price: row.getAttribute("data-price")! })));
       for (const row of data) { if (!row.id || row.area <= 0 || !/^\d+$/u.test(row.price)) throw new Error("INVALID_CANDIDATE"); }
       signal.throwIfAborted(); snapshots.push(...data); return "completed";
@@ -61,8 +59,6 @@ describe("AT-05 controlled Chromium cycle", () => {
     await vi.waitFor(async () => expect(await t.handle.page.locator("input[name=proof]").inputValue()).toBe("человек"), { timeout: 5000 });
     await screen.click({ position: { x: 200, y: 255 } });
     await vi.waitFor(async () => expect(await t.handle.page.locator("[data-listing]").count()).toBe(1), { timeout: 5000 });
-    // Completion includes real Chromium shutdown/profile removal, not just a React render.
-    // Await its actual response before starting the unchanged UI-feedback budget.
     const [completion] = await Promise.all([
       page.waitForResponse(response => response.url() === `${harness.origin}/api/v1/browser-sessions/${t.session.id}/complete` && response.request().method() === "POST"),
       page.getByRole("button", { name: "Готово", exact: true }).click(),
@@ -105,15 +101,12 @@ describe("AT-05 controlled Chromium cycle", () => {
     const requestsBefore = t.stand.requests();
     t.handle.context.on("request", request => { if (new URL(request.url()).hostname === "example.org") externalRequests++; });
     await t.service.input(actor, t.session.id, { type: "click", x: 150, y: 410 });
-    // get() awaits durable closure, including real Chromium shutdown and profile removal.
-    // Vitest's default 1s wait is shorter than that cleanup on portable Windows Chromium.
     await vi.waitFor(async () => expect((await t.service.get(actor, t.session.id)).status).toBe("failed"), { timeout: 10_000 });
     expect(t.blocked).toHaveBeenCalledWith(job.searchRunId, "cian", "navigation_blocked");
     expect((await t.service.get(actor, t.session.id)).closeReason).toBe("navigation_blocked");
     expect(t.transport.mock.calls.every(([raw]) => new URL(raw).origin === t.stand.origin)).toBe(true);
     expect(t.stand.requests()).toBe(requestsBefore);
     expect(t.snapshots).toEqual([]);
-    // Chromium can emit a request event for an aborted route; fixture transport rejects every foreign origin.
     expect(externalRequests).toBeLessThanOrEqual(1); expect(t.handle.page.isClosed()).toBe(true);
   });
   it("never lets Chromium follow an HTTP redirect outside the guarded transport", async () => {

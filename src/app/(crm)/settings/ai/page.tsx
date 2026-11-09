@@ -37,7 +37,6 @@ export default async function AiSettingsPage({
       ? usage
       : await getAiUsage(actor, { month: currentMonth });
   const todayRows = [...current.items];
-  // Use the existing authorized ledger query; include every page, not just the visible 50 calls.
   for (let page = 2; page <= Math.ceil(current.total / current.pageSize); page++) {
     todayRows.push(...(await getAiUsage(actor, { month: currentMonth, page })).items);
   }

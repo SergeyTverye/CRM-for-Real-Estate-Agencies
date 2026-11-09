@@ -18,7 +18,6 @@ export interface ReplicationJournal {
 export type ReplicationRow = z.infer<typeof rowSchema>;
 export interface QueueOptions { maxPendingArchives: number; maxPendingBytes: number; maxAttempts: number; baseBackoffMs: number; maxBackoffMs: number }
 const defaults: QueueOptions = { maxPendingArchives: 50, maxPendingBytes: 20 * 1024 ** 3, maxAttempts: 5, baseBackoffMs: 2000, maxBackoffMs: 300000 };
-/** One queue owner in desktop supervisor; all mutations serialized, crash-safe journal. */
 export class ReplicationQueue {
   private rows: ReplicationRow[] = []; private loaded = false; private tail: Promise<unknown> = Promise.resolve();
   private readonly options: QueueOptions;
@@ -65,7 +64,6 @@ export class ReplicationQueue {
     });
   }
   async snapshot() { return this.serial(async () => { await this.load(); return structuredClone(this.rows); }); }
-  /** Run on startup/network recovery/timer; does not sleep or start unbounded retry loops. */
   async pump(now = Date.now(), signal?: AbortSignal) {
     return this.serial(async () => {
       await this.load();

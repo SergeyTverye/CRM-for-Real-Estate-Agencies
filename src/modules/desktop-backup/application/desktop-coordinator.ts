@@ -29,7 +29,6 @@ const localStateSchema = identitySchema.extend({
   backupId: z.uuid(), manifestSha256: z.string().regex(/^[a-f0-9]{64}$/),
   dirtySinceBackup: z.boolean(), readOnly: z.boolean(), fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
 }).passthrough();
-/** Only called by the supervisor after every writer process has exited. */
 function stopped() { if (process.env.CRM_DEPLOYMENT_MODE !== "desktop" || process.env.CRM_BACKUP_WRITERS_STOPPED !== "1") throw new BackupError("WRITERS_NOT_STOPPED"); }
 export function businessFingerprint(file: string) {
   const native = new Database(file, { readonly: true }); const hash = createHash("sha256");
@@ -44,9 +43,6 @@ export function businessFingerprint(file: string) {
     return hash.digest("hex");
   } finally { native.close(); }
 }
-// Only installation/configuration rows may be replaced on the first receive.
-// Everything else, including unknown future tables and business audit history,
-// is treated as local work even when clients/properties/deals are still absent.
 const emptyWorkspaceBaselineTables = new Set([
   "users", "user_sessions", "dictionary_items", "legal_entities",
   "ai_settings", "ai_tariffs", "planner_settings", "notification_preferences",
@@ -62,8 +58,6 @@ function isEmptyWorkspace(file: string): boolean {
       for (const { name } of tables) {
         if (name.startsWith("sqlite_") || emptyWorkspaceBaselineTables.has(name)) continue;
         const table = '"' + name.replaceAll('"', '""') + '"';
-        // These exact initialization events accompany an otherwise empty setup.
-        // Never ignore the whole audit table or an arbitrary setup/settings action.
         const where = name === "audit_log" ? ` WHERE NOT COALESCE(
           (action = 'desktop.setup_completed' AND entity_type = 'User' AND json_extract(after_jsonb, '$.initialData') = 'empty')
           OR (action = 'ai.tariff.seed' AND entity_type = 'AiTariff'), 0)` : "";
@@ -72,7 +66,6 @@ function isEmptyWorkspace(file: string): boolean {
       return true;
     })();
   } catch {
-    // Fail closed: an unreadable or ambiguous workspace is treated as containing local business data.
     return false;
   } finally { native?.close(); }
 }
@@ -96,7 +89,6 @@ async function createPortable(secret: Record<string, string>) {
     outputDir: archiveRoot(), stagingRoot: path.join(root(), "portable-staging"), validator,
     barrier: { run: async work => { stopped(); await disconnectDb(); return work(); } },
     source: { async createConsistentSnapshot(dest) { const native = new Database(database()); try { await native.backup(dest); } finally { native.close(); } } },
-    // Handoff state owns the logical dataset; identity.json owns this installation.
     metadata: { ...identity, deploymentId: previous?.deploymentId ?? identity.deploymentId, snapshotRevision: (previous?.snapshotRevision ?? 0) + 1, parentBackupId: previous?.backupId ?? null, crmVersion: process.env.APP_VERSION ?? "desktop", schemaVersion: 1 },
     passphrase: secret.passphrase!, recoveryKey: secret.recoveryKey!, recoveryKeySaved: true,
     settings: { timeZone: settings.schedule.timeZone, locale: "ru-RU" }, storage: { documents: process.env.FILE_STORAGE_PATH! },
@@ -119,8 +111,6 @@ export async function executeDesktopBackupRequest(id: string) {
   const cmd = request.command;
   let result: Record<string, unknown>;
   try {
-    // Authorization at publication is not a durable authorization to write:
-    // a preceding give may have transferred ownership while this request waited.
     const own = await localState();
     if ((own?.readOnly || process.env.INSTANCE_ROLE === "standby") &&
         (cmd.action === "create" || cmd.action === "give" || cmd.action === "restore")) throw new BackupError("INSTANCE_READ_ONLY");
@@ -157,10 +147,8 @@ export async function executeDesktopBackupRequest(id: string) {
         else if (cmd.action === "compare") result = { status: comparison, backupId: manifest.backupId };
         else {
           if (cmd.confirmed !== true) throw new BackupError("RESTORE_CONFIRMATION_REQUIRED");
-          // Receiving the known snapshot is not a rollback or a return of ownership.
           if (cmd.action === "receive" && (comparison === "same" || comparison === "local_changed")) result = { status: comparison };
           else {
-          // Receive never silently overrides a divergent workspace. Ordinary restore is an explicit rollback.
           if (cmd.action === "receive" && comparison === "conflict") throw new BackupError("TRANSFER_REVISION_CONFLICT");
           const safetySecret = { passphrase: randomBytes(48).toString("base64"), recoveryKey: newRecoveryKey() };
           const safetyRef = randomUUID(); await runtimeCredentialStore().put(safetyRef, safetySecret);
@@ -174,8 +162,6 @@ export async function executeDesktopBackupRequest(id: string) {
               async prepareStage(stage) { const { applySqliteMigrations } = await import("../../../../scripts/desktop/database-lifecycle"); applySqliteMigrations(path.join(stage, "database.sqlite")); },
             },
           });
-          // The supervisor reads this single generation pointer before starting any process.
-          // Retain this installation's identity; source cloud credentials are never restored.
           process.env.DATABASE_URL = "file:" + path.join(restored.activePath, "database.sqlite");
           await saveLocalState(manifest, false);
           result = { status: "restored", backupId: manifest.backupId, protectiveBackupId: protective.archive.backupId };
@@ -203,7 +189,6 @@ export async function scheduledCredential() {
   const { secretRef } = JSON.parse(await readFile(path.join(root(), "portable-credential.json"), "utf8"));
   return runtimeCredentialStore().get(secretRef);
 }
-// Keep the tested generic handoff coordinator public without instantiating a second writer.
 export type DesktopHandoffCoordinator = ConstructorParameters<typeof StateTransfer>[0];
 export type DesktopTransferArchive = TransferArchive;
 

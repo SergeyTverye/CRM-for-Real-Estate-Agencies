@@ -1,4 +1,3 @@
-/** Read saved crm_demo states only. Never runs a scraper or any AI endpoint. */
 import { chromium, expect, type Locator } from "@playwright/test";
 import { config } from "dotenv";
 import { readFile, writeFile, mkdir, copyFile } from "node:fs/promises";
@@ -17,7 +16,6 @@ const records: Record<string, unknown>[] = JSON.parse(await readFile("data/polis
 const sha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const browser = await chromium.launch();
 const context = await browser.newContext({ baseURL, locale: "ru-RU", timezoneId: "Asia/Novosibirsk", viewport: { width: 1440, height: 1000 } });
-// A guard makes accidental billable calls impossible even if UI changes.
 await context.route(/\/api\/v1\/(ai\/|property-search\/)/, route =>
   route.request().method() === "GET" ? route.continue() : route.abort("blockedbyclient"));
 const page = await context.newPage();
@@ -50,7 +48,6 @@ async function shot(file: string, scenario: string, runId?: string, fullPage = f
   const run = evidence.runs.find((r: { id: string }) => r.id === runId);
   const sourceTime = run?.time ?? evidence.exportedAt;
   if (live) {
-    // Visible provenance caption belongs to the screenshot harness, not the CRM data.
     await page.evaluate(label => {
       document.querySelector("#capture-provenance")?.remove();
       const el = document.createElement("div"); el.id = "capture-provenance"; el.textContent = label;
@@ -178,7 +175,6 @@ try {
     await navigate(`/offers/${state.offerId}`); await shot("live-ai/10-offer", "КП из сохранённой LIVE подборки", ids[0]);
     await navigate(`/offers/${state.offerId}/print`); await expect(page.frameLocator("iframe").locator("h1")).toBeVisible();
     await shot("live-ai/11-offer-print", "Печатный A4 сохранённого LIVE КП", ids[0]);
-    // A new browser context proves the server reads persisted runs; the dev server is restarted separately.
     await run(ids[7]); await page.getByRole("tab", { name: "Требуют проверки", exact: true }).click();
     await expect(page.getByLabel("Сравнить объявление", { exact: true }).first()).toBeVisible();
     await focus(page.getByRole("tablist", { name: "Результаты поиска" }));

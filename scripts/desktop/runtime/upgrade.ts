@@ -9,12 +9,8 @@ import { SqliteSnapshotValidator } from "../../../src/modules/desktop-backup/inf
 import { WindowsDpapiProtector } from "../../../src/modules/desktop-backup/infrastructure/credential-store";
 import { newRecoveryKey } from "../../../src/modules/desktop-backup/infrastructure/encryption";
 import { z } from "zod";
-// Only consume adoption after checking its safety-critical identity and role.
-// Extra fields remain compatible with existing persisted handoff versions.
 const adoptedStateSchema = z.object({ deploymentId: z.uuid(), readOnly: z.boolean() });
 const root = () => process.env.DESKTOP_DATA_DIR!;
-// Server-mode tooling may supply a PostgreSQL URL. Only an explicit SQLite
-// path can override the desktop default (including a restored generation).
 const database = () => process.env.DATABASE_URL?.startsWith("file:") ? process.env.DATABASE_URL.slice(5) : path.join(root(),"crm.db");
 const marker = () => path.join(root(),"desktop-version.json");
 const journal = () => path.join(root(),"pending-upgrade.json");
@@ -29,8 +25,6 @@ async function credentials() {
   }
   return protector.open(await readFile(file),"desktop-upgrade");
 }
-/** Native supervisor has stopped ALL writers before entering this function.
- * These local safety copies use a DPAPI recovery key; portable user backups have their own workflow. */
 export async function createDesktopSafetySnapshot() {
   const previous = existsSync(marker()) ? await readFile(marker(),"utf8") : null;
   const identity = JSON.parse(await readFile(path.join(root(),"identity.json"),"utf8"));
@@ -95,7 +89,6 @@ export async function rollbackDesktopUpgrade() {
       const temp = database()+".restore";
       await copyFile(path.join(extracted.stage,"database.sqlite"),temp);
       await rename(temp,database());
-      // Migrations never write storage; encrypted snapshot retains all attachments too.
       if (pending.previous) await writeFile(marker(),pending.previous,{mode:0o600});
       else await rm(marker(),{force:true});
       await rm(journal(),{force:true});

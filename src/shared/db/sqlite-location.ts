@@ -2,7 +2,6 @@ import { execFileSync } from "node:child_process";
 import { statfsSync } from "node:fs";
 import { parse, resolve, relative, win32 } from "node:path";
 const localRoots = new Set<string>();
-/** Real drive check, including mapped Windows network drives, before WAL. */
 export function assertLocalSqliteLocation(directory: string) {
   const cloudRoots = [process.env.OneDrive,process.env.OneDriveConsumer,process.env.OneDriveCommercial].filter((s):s is string=>Boolean(s));
   for(const cloud of cloudRoots) {
@@ -13,8 +12,6 @@ export function assertLocalSqliteLocation(directory: string) {
   if(process.platform==="win32" && !/^[A-Z]:[\\/]$/.test(root))throw new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
   if(localRoots.has(root))return;
   if(process.platform==="win32"){
-     // Only a validated drive root enters PowerShell, never the supplied directory.
-     // DriveInfo uses the local platform drive-type API, without WMI/CIM or module loading.
      const script="$ErrorActionPreference='Stop'; $PSModuleAutoLoadingPreference='None'; [Console]::Write([int]([System.IO.DriveInfo]::new('"+root+"').DriveType))";
      const systemRoot=process.env.SystemRoot??"C:\\Windows";
      if(!/^[a-z]:[\\/]/i.test(systemRoot) || systemRoot.includes("\0"))throw new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
@@ -25,7 +22,6 @@ export function assertLocalSqliteLocation(directory: string) {
          cwd:systemRoot,env:{SystemRoot:systemRoot,WINDIR:systemRoot,PSModulePath:"",NODE_ENV:process.env.NODE_ENV??"production"},stdio:["ignore","pipe","pipe"],
        }).trim();
      } catch(error) {
-       // Child-process errors contain command/stderr/paths. Expose only finite safe codes.
        const safe=new Error("SQLITE_LOCAL_VOLUME_REQUIRED");
        if(error && typeof error==="object" && "code" in error && error.code==="ETIMEDOUT")Object.assign(safe,{code:"ETIMEDOUT"});
        throw safe;

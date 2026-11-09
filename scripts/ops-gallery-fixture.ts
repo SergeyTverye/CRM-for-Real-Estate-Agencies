@@ -1,4 +1,3 @@
-// Explicit synthetic fixture for the Docker backup/restore smoke. Never resets existing data.
 import sharp from "sharp";
 import { db, disconnectDb } from "@/shared/db/client";
 import { uploadPropertyMedia } from "@/modules/properties/application/property-media-service";

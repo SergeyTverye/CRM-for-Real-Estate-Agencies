@@ -3,7 +3,6 @@ import { BackupError } from "../domain/contracts";
 import { BackupSettingsService } from "../application/settings-service";
 import { JsonSettingsRepository } from "./settings-repository";
 import { EncryptedFileCredentialStore, ServerAesProtector, WindowsDpapiProtector } from "./credential-store";
-/** Shared settings facade only: does not import archive/SQLite or PostgreSQL clients. */
 let singleton: BackupSettingsService | undefined;
 export function getBackupSettingsService() {
   if (singleton) return singleton;

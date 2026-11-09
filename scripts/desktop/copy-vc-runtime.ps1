@@ -10,7 +10,6 @@ $crt=Get-ChildItem -LiteralPath (Join-Path $version.FullName 'x64') -Directory -
 if (-not $crt) { throw 'MSVC_CRT_NOT_FOUND' }
 New-Item -ItemType Directory -Path $Destination -Force | Out-Null
 $manifest=@()
-# Windows PowerShell started from pwsh may not load Microsoft.PowerShell.Utility (no Get-FileHash): use .NET directly.
 function Get-Sha256Hex([string]$Path) {
   $sha=[System.Security.Cryptography.SHA256]::Create(); $stream=[System.IO.File]::OpenRead($Path)
   try { return ([System.BitConverter]::ToString($sha.ComputeHash($stream)) -replace '-','').ToLowerInvariant() } finally { $stream.Dispose(); $sha.Dispose() }

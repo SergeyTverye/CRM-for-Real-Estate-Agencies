@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-/** Native disclosure keeps inputs mounted, including uncontrolled values and picker state. */
 export function DisclosureSection({ title, hint, children, defaultOpen = false, error }: {
   title: string;
   hint?: string;

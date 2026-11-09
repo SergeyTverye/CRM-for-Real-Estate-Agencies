@@ -55,7 +55,6 @@ describe("MODULE_TRANSFER_RESTORE synthetic exercise", () => {
         if (++puts === 2) throw new BackupError("IMMUTABLE_CONFLICT");
         await put(...args);
       };
-      // The module must preserve SECOND_QUEUE/IMMUTABLE_CONFLICT over cleanup errors.
       yandex.delete = async () => { throw new BackupError("S3_CLEANUP_FAILED"); };
       return { destinations: [yandex, memoryDestination("mailru", root)], async probeS3Anonymous() { return { getStatus: 403, listStatus: 403 }; }, dispose() {} };
     }).catch(error => moduleFailureDiagnostic(error));

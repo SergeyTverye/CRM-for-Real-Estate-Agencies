@@ -11,7 +11,6 @@ export function syntheticConfig(backend: 'pg' | 'sqlite') {
     resolve: { alias: { '@': resolve('src') } },
     test: {
       include: ['tests/integration/**/*.test.ts', 'tests/authorization/**/*.test.ts', ...(backend === 'sqlite' ? ['tests/sqlite/**/*.test.ts'] : [])],
-      // Exactly two cases in this file write private-data/verify-tmp. Never collect it.
       exclude: ['tests/integration/private-workbook-verifier.test.ts'],
       environment: 'node' as const, fileParallelism: false, maxWorkers: 1,
       testTimeout: backend === 'pg' ? 45000 : 30000, hookTimeout: 60000,

@@ -11,7 +11,6 @@
  * поиск асинхронный, без воркера выдача остаётся в статусе «В очереди».
  *
  * Запуск:
- *   npx tsx scripts/approbation/timing.ts
  *
  * Секреты берутся из .env и не выводятся. Сценарии, требующие живого человека (CAPTCHA, живые
  * площадки, платный AI), не выполняются: им соответствует сценарий запасного пути.
@@ -170,7 +169,7 @@ async function main() {
   await db.connect();
   await cleanup(db);
   if (leftovers.length) throw new Error("Не удалось очистить остатки предыдущего прогона");
-  // Демо-учётки требуют смены пароля при первом входе; для прогона флаг снимается и восстанавливается.
+  // Демо-учётки требуют смены пароля при первом входе. для прогона флаг снимается и восстанавливается.
   const logins = ROLES.map(role => role.login);
   const priorFlags = await db.query<{ login: string; must_change_password: boolean }>("SELECT login, must_change_password FROM users WHERE login = ANY($1::text[])", [logins]);
   const priorActions = await db.query<{ id: string; payload: Record<string, unknown>; status: string; decided_by: string | null; decided_at: Date | null }>("SELECT a.id, a.payload, a.status, a.decided_by, a.decided_at FROM ai_pending_actions a JOIN ai_chat_sessions s ON s.id=a.session_id JOIN users u ON u.id=s.owner_user_id WHERE s.title LIKE 'DEMO%' AND u.login=$1", [ROLES[1]!.login]);

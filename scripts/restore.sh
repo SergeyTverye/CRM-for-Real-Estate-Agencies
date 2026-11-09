@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 # Восстановление рабочей среды из локального backup (ТЗ 36.4, 39.10):
-#   ./scripts/restore.sh <backup_id|backups/<id>> [--yes]
-#   ./scripts/restore.sh --source local --backup <backup_id> --verify-only
 #   ./scripts/restore.sh --source <remote-code> --backup <backup_id> [--yes]   (off-site: загрузка через crypt)
 # Порядок: проверка manifest/checksums → явное подтверждение → защитный snapshot текущих данных →
 # остановка app → pg_restore + файлы → запуск app → healthcheck.
@@ -17,7 +15,7 @@ while [ $# -gt 0 ]; do
     --yes) YES=1; shift ;;
     --verify-only) VERIFY_ONLY=1; shift ;;
     -h|--help) sed -n '2,8p' "$0"; exit 0 ;;
-    *) ID="$(basename "$1")"; shift ;;
+    *) ID="$(basename "$1")". shift ..
   esac
 done
 [ -n "$ID" ] || fail "укажите backup_id"

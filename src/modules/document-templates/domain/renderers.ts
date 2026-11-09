@@ -28,7 +28,6 @@ export async function markdownDocx(body: string, context: Context, m: Manifest, 
 type XmlNode = ReturnType<typeof parseXml>["documentElement"];
 const textNodes = (node: NonNullable<XmlNode>) => Array.from(node.getElementsByTagName("w:t"));
 const plain = (node: NonNullable<XmlNode>) => textNodes(node).map(n => n.textContent ?? "").join("");
-/** Replace across split runs without flattening paragraphs or changing surrounding run styles. */
 function replaceText(node: NonNullable<XmlNode>, transform: (value: string) => string) {
   const nodes = textNodes(node), text = nodes.map(n => n.textContent ?? "").join("");
   const spans = nodes.map(n => n.textContent ?? "");
@@ -61,7 +60,6 @@ export function fillDocx(data: Buffer, context: Context, m: Manifest, role: stri
           while (close) { const t = close.nodeType === 1 ? plain(close as NonNullable<XmlNode>).trim() : ""; if (t.startsWith(`{{#${block[1]} `)) depth++; if (t === `{{/${block[1]}}}` && --depth === 0) break; close = close.nextSibling; }
           if (!close) fail("Незакрытый блок DOCX");
           const originals = []; for (let n = next; n && n !== close; n = n.nextSibling) originals.push(n);
-          // Validate block paths with the same engine before expanding XML.
           render(`{{#${block[1]} ${block[2]}}}{{/${block[1]}}}`, row);
           const values = block[1] === "each" ? context.properties as Context[] : safeGet(context, block[2]!) ? [row] : [];
           expandedChars += originals.reduce((size, n) => size + serializeXml(n).length, 0) * values.length;
@@ -95,7 +93,6 @@ function assertFormula(formula: string) {
   for (const match of code.matchAll(/\b([A-Za-z_][A-Za-z0-9_.]*)\s*\(/g)) if (!allowed.has(match[1]!.toUpperCase())) fail("Функция Excel не входит в поддерживаемый безопасный список");
 }
 function fillCell(cell: ExcelJS.Cell, text: string, context: Context, m: Manifest, role: string, item?: Context) {
-  // ExcelJS duplicateRow shares style objects; isolate before applying per-field formats.
   cell.style = structuredClone(cell.style);
   const output = item ? renderText(`{{#each properties}}${text}{{/each}}`, { ...context, properties: [item] }, m, role) : renderText(text, context, m, role);
   const exact = /^{{\s*([\w.]+)\s*}}$/.exec(text);
@@ -114,7 +111,6 @@ function fillCell(cell: ExcelJS.Cell, text: string, context: Context, m: Manifes
   }
   cell.value = escapeSpreadsheet(output);
 }
-/** Supported relative A1 references in repeated rows; quoted literals and $rows stay fixed. */
 export function shiftFormula(formula: string, delta: number): string {
   return formula.split(/("(?:[^"]|"")*")/g).map((piece, i) => i % 2 ? piece : piece.replace(/(?<![A-Za-z0-9_])\$?[A-Z]{1,3}(\$?)(\d+)(?![A-Za-z0-9_])/g, (ref, fixed: string, row: string) => fixed ? ref : ref.slice(0, -row.length) + (Number(row) + delta))).join("");
 }
@@ -130,7 +126,6 @@ export async function fillXlsx(data: Buffer, context: Context, m: Manifest, role
   for (const sheet of book.worksheets) {
     const filled = new Set<string>();
     if (sheet.rowCount > 5000 || sheet.columnCount > 100) fail("Слишком большой лист");
-    // Same-row markers repeat the entire styled row. Formulas are translated by duplicateRow.
     for (let r = sheet.rowCount; r >= 1; r--) {
       const row = sheet.getRow(r), joined = row.values.toString();
       if (joined.includes("{{#each properties}}")) {

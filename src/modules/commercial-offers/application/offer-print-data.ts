@@ -20,12 +20,10 @@ async function image(actor: Actor, id: string, caption: string): Promise<PrintIm
   return { dataUrl: `data:image/png;base64,${data.toString("base64")}`, width: meta.width!, height: meta.height!, caption };
 }
 
-/** Saved values win. Only missing legacy purpose may fall back to the catalogue. */
 export function offerCharacteristics(item: { addressSnapshot: string | null; areaSnapshot: { toString(): string } | null; priceSnapshot: { toString(): string } | null; termsSnapshot: string | null }, fallbackPurpose?: string | null) {
   const terms = item.termsSnapshot ?? "";
   const field = (label: string) => terms.split("\n").find(line => line.startsWith(`${label}: `))?.slice(label.length + 2);
   const unit = field("Единица цены");
-  // Older snapshots contain the operation but have no structured unit. Do not invent one.
   const priceUnit = unit ?? (/^продажа(?:,|$)/.test(terms) ? "₽" : "₽ (единица не зафиксирована)");
   const price = item.priceSnapshot === null ? "По запросу" : `${num.format(Number(item.priceSnapshot.toString()))} ${priceUnit}`;
   const area = item.areaSnapshot === null ? missing : `${num.format(Number(item.areaSnapshot.toString()))} м²`;
@@ -38,12 +36,10 @@ export function offerCharacteristics(item: { addressSnapshot: string | null; are
 }
 
 export async function getOfferPrintData(actor: Actor, offerId: string, baseUrl = "") {
-  // getOffer applies offerScope before any image, issuer or property lookups.
   const { offer } = await getOffer(actor, offerId);
   const issuer = await getPrintIssuer(actor, offer.legalEntityId);
   const logo = issuer?.logoDocumentId ? await image(actor, issuer.logoDocumentId, "Логотип") : null;
   const items = [];
-  // Sequential bounded image decoding: at most four catalogue photos per property, no external fetch.
   for (const item of offer.items) {
     const photos = (await listPropertyMedia(actor, item.propertyId)).filter(m => m.kind === "photo")
       .sort((a, b) => Number(b.isCover) - Number(a.isCover)).slice(0, 4);

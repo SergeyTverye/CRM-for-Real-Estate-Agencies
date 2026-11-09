@@ -132,7 +132,7 @@ export async function updateUser(actor: Actor, userId: string, input: unknown): 
   });
 }
 
-/** Сброс пароля руководителем: временный пароль + обязательная смена; все сессии отзываются. */
+/** Сброс пароля руководителем: временный пароль + обязательная смена. все сессии отзываются. */
 export async function resetUserPassword(actor: Actor, userId: string): Promise<{ temporaryPassword: string }> {
   requireManager(actor);
   const user = await db.user.findUnique({ where: { id: userId } });

@@ -1,6 +1,6 @@
 """Build the editable Markdown guide as a bookmarked, linked A4 PDF.
 
-Python 3.12.14 + reportlab 4.4.9 + Pillow 13.0.0 (bundled Codex runtime).
+Python 3.12.14 + reportlab 4.4.9 + Pillow 13.0.0 (bundled Python runtime).
 Usage: python scripts/docs/build-user-guide.py [--render]
 Fonts: Windows Arial, or --font-dir containing arial.ttf/arialbd.ttf/ariali.ttf.
 The parser deliberately supports only headings, paragraphs, numbered steps,

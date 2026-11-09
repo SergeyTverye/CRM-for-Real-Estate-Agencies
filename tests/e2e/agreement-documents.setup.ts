@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import pg from "pg";
 import setup from "./global-setup";
 
-/** The shared setup copies crm_demo's schema, which may predate this branch. */
 export default async function prepareAgreementDocuments() {
   await setup();
   const url = process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";

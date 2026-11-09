@@ -60,7 +60,6 @@ export function CalendarClient({ timeZone, userId, users, labels, isManager, set
   useUnsavedChangesWarning(dirty);
   const refresh = () => calendar.current?.getApi().refetchEvents();
   const local = (iso: string) => iso.length === 10 ? iso : toDateTimeLocalValue(iso, timeZone);
-  // Without a premium timezone plugin, UTC is a display coordinate. Convert at both boundaries.
   const utc = (date: Date) => fromDateTimeLocalValue(date.toISOString().slice(0,16), timeZone);
   const loadEvents = useCallback<EventSourceFunc>((range, success, failure) => {
     const toUtc = (date: Date) => fromDateTimeLocalValue(date.toISOString().slice(0,16), timeZone);

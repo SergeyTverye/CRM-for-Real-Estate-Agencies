@@ -3,7 +3,6 @@ import path from "node:path";
 import { BackupError } from "../domain/contracts";
 import { defaultSettings, settingsStateSchema, type BackupSettingsState, type SettingsRepository } from "../domain/settings";
 import { atomicJson, protectedDir, regularFile } from "./fs";
-/** One owner in web/supervisor process, no DB dependency. Workers only read settings. */
 export class JsonSettingsRepository implements SettingsRepository {
   private tail: Promise<unknown> = Promise.resolve();
   constructor(private readonly root: string) {}

@@ -22,9 +22,7 @@ it.each(["empty", "no-photo", "long"])("exports %s offer to HTML, PDF and DOCX w
   const pdf = await htmlToPdf(html);
   expect(pdf.subarray(0,5).toString()).toBe("%PDF-");
   expect(pdf.length).toBeGreaterThan(1000);
-  // Same optional Poppler verification as offer-export.test.ts; Chromium is mandatory.
   const extracted = spawnSync("pdftotext", ["-", "-"], { input:pdf, encoding:"utf8" });
-  // Optional: some Windows runners ship a pdftotext without stdin support (usage error 99).
   if (!extracted.error && extracted.status !== 99) {
     expect(extracted.status).toBe(0);
     expect(extracted.stdout).toContain(`Объектов в предложении: ${data.items.length}`);

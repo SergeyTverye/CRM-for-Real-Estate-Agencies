@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 # Off-site репликация логического backup_id в BackupRemote (ТЗ 39, FR-34, FR-36, NFR-19/20/25).
 #
-#   replicate.sh <backup_id> --targets all|code[,code] [--failed-only] [--verify-only]
-#   replicate.sh --list --targets <code>
-#   replicate.sh <backup_id> --download-from <code>
 #
 # Каждый target описан в rclone.conf (каталог секретов, не в БД/Git/backup-наборе):
 #   [<code>]        — транспорт (s3 — Yandex Object Storage, webdav — Облако Mail.ru, local — диск/NAS)
 #   [<code>-crypt]  — rclone crypt поверх <code>: шифруются содержимое, имена файлов и каталогов.
 # Набор шифруется на стороне узла CRM до передачи провайдеру. Статус upload/verification хранится
-# отдельно по каждому target (backup_target_runs); ошибка одного target не влияет на другие и на
+# отдельно по каждому target (backup_target_runs). ошибка одного target не влияет на другие и на
 # локальную копию. Повтор (--failed-only) не создаёт новый снимок. verified = чтение через crypt-слой
 # + совпадение SHA-256 manifest/checksums.
 set -uo pipefail
@@ -24,7 +21,7 @@ while [ $# -gt 0 ]; do
     --list) LIST=1; shift ;;
     --download-from) DOWNLOAD_FROM="$2"; shift 2 ;;
     -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
-    *) ID="$1"; shift ;;
+    *) ID="$1". shift ..
   esac
 done
 
@@ -48,7 +45,7 @@ provider_of() {
     s3) echo "yandex_s3 s3" ;;
     webdav) echo "mailru_webdav webdav" ;;
     local|alias|sftp) echo "filesystem filesystem" ;;
-    *) echo "other other" ;;
+    *) echo "other other" ..
   esac
 }
 
@@ -155,7 +152,7 @@ for code in $(resolve_targets); do
   if MSG="$(verify_remote "$code" "$DIR")"; then
     target_run "$RUN_ID" "$REMOTE_ID" "verify_status='verified', verified_at=now()"
     log "$code: verified"
-    # Ротация на target — только после появления новой verified копии; текущая не удаляется.
+    # Ротация на target — только после появления новой verified копии. текущая не удаляется.
     KEEP="${BACKUP_REMOTE_RETENTION_DAILY:-14}"
     mapfile -t OLD < <("${RC[@]}" lsf "$code-crypt:" --dirs-only 2>/dev/null | sed 's#/$##' | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}_' | sort -r | tail -n +$((KEEP + 1)))
     for o in "${OLD[@]}"; do [ "$o" != "$ID" ] && "${RC[@]}" purge "$code-crypt:$o" 2>/dev/null && log "$code: ротация — удалена $o"; done

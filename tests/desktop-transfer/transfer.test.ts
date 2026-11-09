@@ -24,7 +24,6 @@ it("DT-06 read-only PG snapshot → all SQLite entities, IDs, money, cyclic vers
   await resetDatabase(); const users=await seedBase();
   const client=await makeClient(users.realtor1), need=await makeNeed(users.realtor1,client.id), property=await makeProperty(users.realtor1,{price:"99999999999999.99"});
   const deal=await createDeal(users.realtor1,{propertyId:property.id,legalEntityId:users.llcId,dealPrice:"120000.25",parties:[{clientId:client.id,partyRole:"tenant"}],commissions:[{payerPartyIndex:0,amount:"0.10",status:"planned"}]});
-  // Source file storage is isolated by Vitest. All content generated here is synthetic.
   const template=await saveTemplate(users.manager,{code:"transfer_synthetic",name:"Синтетический шаблон",format:"markdown_docx",manifestYaml:clientYaml,markdownBody:"# {{client.displayName}}"},null);
   const document=await generateFromTemplate(users.realtor1,template.id,{entityKind:"client",entityId:client.id});
   await seedAiTariffs(db);
@@ -44,7 +43,6 @@ it("DT-06 read-only PG snapshot → all SQLite entities, IDs, money, cyclic vers
   expect(report.financial["Property.price"]).toEqual({source:"99999999999999.99",target:"99999999999999.99"});expect(report.files).toBeGreaterThan(0);
   expect(await db.client.count()).toBe(sourceCounts);
   const native=new Database(opts.targetFile,{readonly:true});expect(native.pragma("foreign_key_check")).toEqual([]);expect(native.prepare("SELECT id FROM client_needs WHERE client_id=?").get(client.id)).toEqual({id:need.id});expect(native.prepare("SELECT id FROM deals WHERE id=?").get(deal.id)).toEqual({id:deal.id});native.close();
-  // Checksum failure rolls back the NEW target; source rows and bytes remain unchanged.
   const badKey="documents/synthetic-bad-file", bytes=Buffer.from("synthetic checksum failure");
   await mkdir(path.join(sourceStorage,"documents"),{recursive:true});await writeFile(path.join(sourceStorage,badKey),bytes);
   const bad=await db.document.create({data:{originalName:"synthetic.txt",documentTypeCode:"other",mimeType:"text/plain",fileSize:bytes.length,storageKey:badKey,checksum:"0".repeat(64),uploadedBy:users.manager.userId}});

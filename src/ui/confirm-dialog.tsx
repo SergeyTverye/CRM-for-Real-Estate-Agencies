@@ -3,7 +3,6 @@
 import { useEffect, useId, useRef } from "react";
 import { createRoot } from "react-dom/client";
 
-/** Accessible confirmation; Cancel and Escape never execute the action. */
 export function ConfirmDialog({ open, message, title = "Подтверждение действия", confirmLabel = "Подтвердить", onConfirm, onCancel }: {
   open: boolean; message: string; title?: string; confirmLabel?: string; onConfirm: () => void; onCancel: () => void;
 }) {
@@ -27,7 +26,6 @@ export function ConfirmDialog({ open, message, title = "Подтверждени
 }
 
 let active = false;
-/** Promise API for existing async commands, also works above an already open Modal. */
 export function requestConfirmation(message: string): Promise<boolean> {
   if (active) return Promise.resolve(false);
   active = true;

@@ -16,7 +16,6 @@ const ORIGINAL_DATABASE_URL = process.env.DATABASE_URL!;
 const variables = ["DESKTOP_DATA_DIR", "BACKUP_SETTINGS_DIR", "BACKUP_PATH", "FILE_STORAGE_PATH", "CRM_DESKTOP_SUPERVISED_UPGRADE", "CRM_BACKUP_WRITERS_STOPPED", "DATABASE_URL"] as const;
 const previous = Object.fromEntries(variables.map(k => [k, process.env[k]]));
 beforeAll(async () => {
-  // Match the no-symlink production contract even when Windows TEMP is an alias.
   root = await mkdtemp(path.join(await realpath(os.tmpdir()), "crm-runtime-backup-"));
   process.env.DESKTOP_DATA_DIR = root; process.env.BACKUP_SETTINGS_DIR = path.join(root, "backup-settings"); process.env.BACKUP_PATH = path.join(root, "backups"); process.env.FILE_STORAGE_PATH = path.join(root, "files");
   process.env.CRM_DESKTOP_SUPERVISED_UPGRADE = "1"; process.env.CRM_BACKUP_WRITERS_STOPPED = "1";

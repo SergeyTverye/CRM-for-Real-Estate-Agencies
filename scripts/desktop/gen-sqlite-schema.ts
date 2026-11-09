@@ -28,7 +28,6 @@ export function generateSqliteSchema(source: string) {
         const scale = Number(native[2]);
         metadata[model]!.decimals[name!] = { precision: Number(native[1]), scale, column };
         line = line.replace(/\bDecimal/, "BigInt").replace(/@default\(([-\d.]+)\)/, (_s, n: string) => {
-          // Defaults in the authoritative schema are integers.
           if (!/^-?\d+$/.test(n)) throw new Error("Non-integral decimal default needs explicit conversion");
           return "@default(" + BigInt(n) * 10n ** BigInt(scale) + ")";
         });

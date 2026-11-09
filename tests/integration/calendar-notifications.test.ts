@@ -12,7 +12,6 @@ import { listCalendar, saveCalendarEvent, archiveCalendarEvent } from "@/modules
 describe("calendar / notifications database integration (existing v2.4.1 schema required)", () => {
   let users: TestUsers;
   beforeEach(async () => {
-    // Fail explicitly rather than silently marking missing schema tests passed/skipped.
     await db.calendarEvent.count(); await db.notification.count();
     await resetDatabase(); users = await seedBase();
   });

@@ -2,7 +2,6 @@ import { config } from 'dotenv';
 import { chromium, expect } from '@playwright/test';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 config({path:'.env',quiet:true});
-// Run only against the coordinator's synthetic demo servers. Creates one request, task and offer per server.
 const output='docs/ux/v322-click-measurements.json';
 const manifests={before:JSON.parse(await readFile('docs/screenshots/vkr/v322-ux/before/manifest.json','utf8')),after:JSON.parse(await readFile('docs/screenshots/vkr/v322-ux/after/manifest.json','utf8'))};
 const results=[];

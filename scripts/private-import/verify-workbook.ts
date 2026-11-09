@@ -1,11 +1,8 @@
-/** Trusted LOCAL runner. Never run with a confidential input from an agent/CI. */
 import { createHash, randomUUID } from 'node:crypto';
 import { readFile, mkdir, mkdtemp, rm, realpath, writeFile } from 'node:fs/promises';
 import { resolve, join, sep, relative } from 'node:path';
 import type { Actor } from '../../src/modules/auth/domain/actor';
 
-// Deny diagnostic output at the process boundary, including dependency errors.
-// Only the final allowlisted numeric report uses the saved writer.
 const output = process.stdout.write.bind(process.stdout);
 process.stdout.write = (() => true) as typeof process.stdout.write;
 process.stderr.write = (() => true) as typeof process.stderr.write;
@@ -39,7 +36,6 @@ async function main() {
     const root = resolve('private-data/verify-tmp');
     if (input.startsWith(root + sep)) throw new Error();
     await mkdir(root, { recursive: true, mode: 0o700 });
-    // Refuse a redirected private workspace. Cleanup must never traverse outside it.
     if ((await realpath(root)).toLowerCase() !== root.toLowerCase()) throw new Error();
     directory = await mkdtemp(join(root, `run-${process.pid}-`));
     const bytes = await readFile(input);
@@ -64,8 +60,6 @@ async function main() {
       const lock = await admin.query('SELECT pg_try_advisory_lock(3221223) AS acquired');
       if (!lock.rows[0]?.acquired) throw new Error();
       locked = true;
-      // Only this invocation's new DB is eligible for cleanup. Do not load
-      // dotenv/Prisma CLI configuration or replace any pre-existing database.
       await admin.query(`CREATE DATABASE "${verificationDatabase}"`);
       databaseCreated = true;
       const migrationClient = new Client({ connectionString: url.toString() });
@@ -117,7 +111,6 @@ async function main() {
     assert('dry_run_no_business_writes', (await counts()).every(n => n === 0));
     assert('resolved', job.unresolved.length === 0);
     stage = 'ROLLBACK_FAILED';
-    // Fail after at least one successful business write, inside the real commit transaction.
     const eligible = inspected.rows.filter(r => !['invalid', 'unrecognized', 'skipped_policy'].includes(r.validationStatus)
       && !r.warningCodes.some(c => ['already_imported', 'probable_duplicate'].includes(c)));
     assert('fault_sample', eligible.length >= 2);
@@ -158,7 +151,6 @@ async function main() {
     let exportedWorkbook: Awaited<ReturnType<typeof loadEnterprise>>;
     try { exportedWorkbook = await loadEnterprise(exported.buffer); }
     catch {
-      // Local aggregate diagnostics only, never dependency text or source values.
       const { unzipSync } = await import('fflate');
       let expanded = 0, unsafe = 0, maxEntry = 0;
       unzipSync(exported.buffer, { filter: e => { expanded += e.originalSize; maxEntry = Math.max(maxEntry, e.originalSize); unsafe += Number(/vbaProject|externalLinks/i.test(e.name)); return false; } });
@@ -206,7 +198,6 @@ async function main() {
     assert('rbac_foreign_closed_client', await denied(() => getClientCard(realtor, closed.id)));
   } catch (error) {
     report.errors[stage] = (report.errors[stage] ?? 0) + 1;
-    // Source coordinates only; dependency messages and workbook values stay private.
     if (stage === 'EXPORT_COMPARE_FAILED' && error instanceof Error) {
       const line = error.stack?.match(/compare-workbook\.ts:(\d+):\d+/)?.[1];
       if (line) report.errors.COMPARE_SOURCE_LINE = Number(line);

@@ -16,7 +16,6 @@ const recordSchema = z.object({
 });
 export type ControlLinks = { propertyId: string; agreementId: string; advertisementId: string | null; taskId: string | null };
 
-/** v2 deliberately does not use v1's first-address-match heuristic. */
 export async function commitEnterpriseControl(tx: Tx, row: EnterpriseRow, responsibleUserId: string, actorId: string): Promise<ControlLinks> {
     const r = recordSchema.parse(row.record);
     const candidates = (await tx.property.findMany({ where: { operationType: r.operationType }, select: { id: true, addressText: true, area: true } }))
@@ -36,7 +35,6 @@ export async function commitEnterpriseControl(tx: Tx, row: EnterpriseRow, respon
         commissionNotes: r.commissionFrom !== null || r.commissionTo !== null ? `Комиссия: от ${r.commissionFrom ?? '—'} до ${r.commissionTo ?? '—'}` : null,
         notes: r.agreementPresent ? 'Импорт: договор отмечен как имеющийся' : `Причина отсутствия: ${r.absenceReason ?? 'не указана'}`,
     } });
-    // Missing metadata is visible in dry-run as AD_DETAILS_REQUIRED, never evidence of publication.
     const ad = r.adUrl || r.adText || r.adPlatform || r.adStatus ? await tx.advertisement.create({ data: {
         propertyId, responsibleUserId, platformCode: r.adPlatform ?? 'other', url: r.adUrl, adText: r.adText, status: r.adStatus ?? 'draft',
     } }) : null;

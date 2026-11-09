@@ -13,7 +13,6 @@ function OwnedProcesses {
       $owned[[int]$process.ProcessId] = $true
     }
   }
-  # WebView uses a shared executable, but only descendants of this installation belong to CRM.
   do {
     $added = $false
     foreach ($process in $all) {
@@ -35,7 +34,6 @@ if ($Phase -eq 'Stop') {
   exit 0
 }
 $root = [IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'RealEstateCRM')).TrimEnd('\')
-# Never follow junctions, even when a descendant is inside an allowed directory by name.
 function AssertNoReparse([string]$target) {
   $current = Get-Item -LiteralPath $target -Force -ErrorAction SilentlyContinue
   while ($current) {
@@ -56,7 +54,6 @@ foreach ($leaf in @('data','files','backups','logs')) {
   try { if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force } }
   catch { $failed += $leaf }
 }
-# Enumerate only generic credentials bearing the application's exact prefix.
 Add-Type @'
 using System;
 using System.Runtime.InteropServices;
@@ -80,6 +77,5 @@ if ([CrmCredentials]::Enumerate('RealEstateCRM:*',0,[ref]$count,[ref]$pointer)) 
     }
   } finally { [CrmCredentials]::CredFree($pointer) }
 } elseif ([Runtime.InteropServices.Marshal]::GetLastWin32Error() -ne 1168) { $failed += 'credentials' }
-# No shared WebView/runtime uninstall, no cloud operations, no arbitrary profile cleanup.
 if ($failed.Count) { Write-Output ('PURGE_REMAINS: '+($failed -join ',')); exit 1 }
 Write-Output 'PURGE_COMPLETE'

@@ -2,9 +2,6 @@ use std::{fs::{self, OpenOptions}, io::{self, BufRead, BufReader, Write}, path::
 use std::os::windows::process::CommandExt;
 pub struct Supervisor { child: Child, input: ChildStdin }
 pub type Shared = Arc<Mutex<Option<Supervisor>>>;
-// Tauri's resource_dir may be a canonical Windows verbatim path. Node 24
-// cannot resolve its JS entrypoint (or cwd) with that prefix: EISDIR lstat C:.
-// Do not canonicalize this result again before passing it to Node.
 fn node_resource_path(path: &Path) -> io::Result<PathBuf> {
     use std::os::windows::ffi::{OsStrExt, OsStringExt};
     let units: Vec<u16> = path.as_os_str().encode_wide().collect();
@@ -24,7 +21,6 @@ fn node_resource_path(path: &Path) -> io::Result<PathBuf> {
     };
     Ok(PathBuf::from(std::ffi::OsString::from_wide(&normal)))
 }
-// Only fixed stage codes, never URLs, arbitrary errors or user data.
 pub fn startup_event(code: &'static str) {
     if let Ok(root) = data_root() {
         if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(root.join("logs/native-startup.log")) {
@@ -36,7 +32,6 @@ pub fn data_root() -> io::Result<PathBuf> {
     Ok(PathBuf::from(std::env::var_os("LOCALAPPDATA").ok_or_else(|| io::Error::other("LOCALAPPDATA_MISSING"))?).join("RealEstateCRM"))
 }
 pub fn protect_data(root: &Path) -> io::Result<()> {
-    // Reject junctions/reparse points in every existing ancestor before changing ACLs.
     use std::os::windows::fs::MetadataExt;
     for part in root.ancestors() {
         if let Ok(meta) = fs::symlink_metadata(part) {

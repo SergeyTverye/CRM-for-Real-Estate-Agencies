@@ -10,15 +10,12 @@ import { protectedDir } from "../infrastructure/fs";
 import { ReplicationQueue } from "./replication-queue";
 import { commandRoot } from "./backup-control";
 
-/** One supervised worker per installation; all durable updates use CAS. */
 export async function tickBackupWorker(now = new Date(), signal?: AbortSignal) {
   if (process.env.CRM_DEPLOYMENT_MODE !== "desktop") { const { packageServerBackups } = await import("./server-archives"); await packageServerBackups(); }
   const state = await new JsonSettingsRepository(backupRuntimeRoot()).read();
   await withBackupDestinations(async destinations => {
     const journal = new DatabaseReplicationJournal();
     const pending = await journal.read();
-    // Exhausted offline transfers resume when this provider itself answers again.
-    // Never use navigator.onLine or a request to an unrelated public host.
     let changed = false;
     for (const d of destinations) {
       if (!pending.rows.some(r => r.destinationId === d.id && r.status === "failed" && r.attempts >= 5 && r.nextAttemptAt <= now.getTime())) continue;
@@ -58,7 +55,6 @@ export async function tickBackupWorker(now = new Date(), signal?: AbortSignal) {
     await runtimeCredentialStore().put(ref, await runtimeCredentialStore().get(credentialRef));
     await writeFile(path.join(commandRoot(), id + ".json"), JSON.stringify({ id, secretRef: ref, command: { action: "create", recoveryKeySaved: true }, createdAt: now.toISOString(), trigger: "scheduled" }), { flag: "wx", mode: 0o600 });
   } catch {
-    // A failed publication is eligible for one retry; there is still no historical catch-up loop.
     await db.backupQueueJournal.updateMany({ where: { id: scheduler.id, revision: scheduler.revision + 1 }, data: { revision: { increment: 1 }, payload: { lastSlot: previous.lastSlot } } });
     throw new Error("BACKUP_SCHEDULE_PUBLICATION_FAILED");
   }

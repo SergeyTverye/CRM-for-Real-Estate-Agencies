@@ -1,4 +1,3 @@
-// Offline evidence formatter. Does not load .env, access DB, or call AI.
 const fs=require('node:fs');
 const path=require('node:path');
 const file=path.resolve('docs/vkr/live-search-v322-ai.json');

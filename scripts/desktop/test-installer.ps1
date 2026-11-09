@@ -23,7 +23,6 @@ function Install {
   Check (@(Get-ChildItem -LiteralPath "$install\app" -Force | Where-Object Name -notin $runtimeRoots).Count -eq 0) 'installed-runtime-root-allowlist'
 }
 function StartSmoke {
-  # A crash can leave the previous ready marker. Never accept its port/PID.
   if (Test-Path -LiteralPath $runtime) { Remove-Item -LiteralPath $runtime -Force }
   $script:app=Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList @('--smoke','--smoke-seconds=180') -WindowStyle Hidden -PassThru
   WaitFor {
@@ -60,8 +59,6 @@ function StartDesktop {
   WaitFor {
     if ($script:app.HasExited) { throw 'DESKTOP_EXIT_BEFORE_WEBVIEW' }
     $script:app.Refresh()
-    # Require the actual native window, not merely a Chromium child process.
-    # Chromium helpers need not all be direct children of the Tauri process.
     $created=(Test-Path -LiteralPath $nativeLog) -and (@(Get-Content -LiteralPath $nativeLog) -contains 'WINDOW_CREATED')
     $created -and $script:app.MainWindowHandle -ne [IntPtr]::Zero
   }
@@ -101,7 +98,6 @@ function Uninstall([bool]$purge) {
   foreach ($leaf in @('data','files','backups')) { Check ((Test-Path -LiteralPath (Join-Path $data $leaf)) -eq (-not $purge)) "retention-$leaf-purge-$purge" }
 }
 try {
-  # This destructive lifecycle harness is only for a disposable, empty profile.
   Check (-not (Test-Path -LiteralPath $data)) 'empty-synthetic-data-profile-required'
   Check (-not (Test-Path -LiteralPath $install)) 'empty-install-directory-required'
   Install; StartSmoke; Registration
@@ -117,7 +113,6 @@ try {
   $cardPage=Invoke-WebRequest -Uri "$script:base/clients/$id" -WebSession $script:session -TimeoutSec 30
   Check ($cardPage.StatusCode -eq 200 -and $cardPage.Content -match '<html') 'synthetic-client-page-200'
   Set-Content -LiteralPath (Join-Path $data 'files\ci-control.txt') -Value 'SYNTHETIC-CONTROL'
-  # Uninstall while the application is running exercises stop/Job Object cleanup.
   Uninstall $false
   Check ((Get-Content -Raw -LiteralPath (Join-Path $data 'files\ci-control.txt')).Trim() -eq 'SYNTHETIC-CONTROL') 'file-retained'
   Install; StartSmoke; Registration
@@ -126,11 +121,9 @@ try {
   $restored=Api "/api/v1/clients/$id"
   Check ($restored.id -eq $id -and $restored.displayName -eq 'CI synthetic client') 'client-retained-after-reinstall'
   Check ((Api '/api/v1/desktop/setup').available -eq $false) 'setup-closed-after-reinstall'
-  # Check upgrade over an existing install, including protective backup.
   Start-Process -FilePath "$install\RealEstateCRM.exe" -ArgumentList '--shutdown' -WindowStyle Hidden -Wait | Out-Null
   WaitFor { $script:app.HasExited -and -not (Test-Path -LiteralPath $runtime) } 210
   Set-Content -LiteralPath (Join-Path $data 'data\desktop-version.json') -Value '{"version":"3.2.0-synthetic"}'
-  # Simulate resources shipped by an older bundle, absent from the new policy.
   Set-Content -LiteralPath "$install\app\package-lock.json" -Value '{"syntheticObsolete":true}'
   New-Item -ItemType Directory -Path "$install\app\templates" -Force | Out-Null
   Set-Content -LiteralPath "$install\app\templates\obsolete-ci-example.txt" -Value 'SYNTHETIC-OBSOLETE'
@@ -145,9 +138,7 @@ try {
   $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
   Api '/api/v1/auth/login' 'POST' @{login='director';password=$password} | Out-Null
   Check ([bool](Api "/api/v1/clients/$id")) 'client-retained-after-overinstall'
-  # --smoke bypasses WebView. Exercise the actual Tauri window and singleton too.
   StartDesktop
-  # Only allowlisted, secret-free codes leave the runner; server/HTTP bodies never exported.
   if (Test-Path -LiteralPath (Join-Path $data 'logs\supervisor.log')) {
     Get-Content -LiteralPath (Join-Path $data 'logs\supervisor.log') |
       Where-Object { $_ -match '^(READY http://127\.0\.0\.1:[0-9]+|STOPPED|DESKTOP_START_FAILED|CHILD_EXIT:[a-z-]+:[0-9]+)$' } |

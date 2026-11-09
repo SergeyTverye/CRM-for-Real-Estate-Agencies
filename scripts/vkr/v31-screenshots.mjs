@@ -13,7 +13,6 @@ const browser=await chromium.launch({headless:true});
 const context=await browser.newContext({baseURL,viewport:{width:1440,height:900},locale:"ru-RU",timezoneId:"Asia/Novosibirsk"});
 await context.routeWebSocket("**/_next/webpack-hmr*", ()=>{});
 const page=await context.newPage();page.setDefaultTimeout(60000);page.setDefaultNavigationTimeout(120000);
-// History/preview only: prevent accidental paid AI, web-search or scraper calls.
 await context.route("**/api/v1/**",async route=>{
  const request=route.request(), path=new URL(request.url()).pathname;
  if(request.method()!=="GET" && /\/(?:ai|ai-chat|property-search)\//.test(path)) return route.abort("blockedbyclient");
@@ -99,5 +98,4 @@ try{
   role="REALTOR1";await login(role);await go(`/clients/${id("client:0")}`);await click("Открыть AI-помощника");await page.getByLabel("История диалогов").selectOption(id("v31:chat"));await expect(page.getByText(/DEMO-провайдер \(/)).toBeVisible();await shot("ai-chat-panel","Личная история DEMO-провайдера, без внешнего вызова");await page.getByRole("button",{name:"Подтвердить",exact:true}).scrollIntoViewIfNeeded();await page.getByRole("button",{name:"Подтвердить",exact:true}).focus();await shot("ai-chat-draft-confirm","Предпросмотр черновика перед явным подтверждением; задача не создана");
  }
  expect(errors).toEqual([]);console.log("Browser errors: "+errors.length);await writeFile(`data/v31-shots/${mode}-browser-errors.json`,JSON.stringify(errors));
- // Manifest/checksums are finalized separately, preserving the search agent entries.
 }catch(error){await page.screenshot({path:`data/v31-shots/${process.argv[2]}-failure.png`}).catch(()=>{});await writeFile(`data/v31-shots/${process.argv[2]}-failure.txt`,await page.locator("body").innerText()).catch(()=>{});throw error;}finally{await context.request.post("/api/v1/auth/logout",{headers:{origin:baseURL}}).catch(()=>{});await browser.close();}

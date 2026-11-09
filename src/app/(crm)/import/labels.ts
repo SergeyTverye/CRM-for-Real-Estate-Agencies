@@ -28,7 +28,6 @@ export const ROW_CODE_LABELS: Record<string, string> = {
   // дубли и повторный импорт
   probable_duplicate: "Вероятный дубль",
   already_imported: "Уже загружено ранее",
-  // commit
   unrecognized: "Не распознано",
   commit_failed: "Ошибка записи в CRM",
   VALIDATION_ERROR: "Ошибка проверки данных при записи",

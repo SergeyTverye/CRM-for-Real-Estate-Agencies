@@ -2,7 +2,6 @@ import type { Prisma } from "@/generated/prisma/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { clientScope } from "@/modules/access/domain/scopes";
 
-/** All links must be safe, including indirect client references. */
 export function safeTaskTextScope(actor: Actor): Prisma.TaskWhereInput {
   if (actor.role === "manager") return {};
   const foreign = { NOT: clientScope(actor) };

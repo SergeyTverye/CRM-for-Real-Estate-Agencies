@@ -14,8 +14,6 @@ afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
-// Directory junctions need no privilege on Windows; plain file symlinks
-// may require admin and flake with EPERM on CI.
 const junctionKind = process.platform === "win32" ? "junction" : "dir";
 
 async function fixture() {
@@ -37,7 +35,6 @@ it("restores a referenced chunk missing from the standalone entry", async () => 
   const chunk = "chunks/ssr/synthetic-chunk-001.js";
   await put(compiled, page, "require('../" + chunk + "');");
   await put(compiled, chunk, "synthetic chunk");
-  // Standalone entry without the lazily required chunk.
   await put(dest, page, "require('../" + chunk + "');");
   await expect(assertCompiledServerComplete(compiled, dest)).rejects.toThrow("COMPILED_SERVER_INCOMPLETE");
   await supplementCompiledServer(compiled, dest);
@@ -104,7 +101,6 @@ it("refuses a destination ancestor junction for a missing destination", async ()
   await mkdir(path.join(root, "app"), { recursive: true });
   await rm(ancestor, { recursive: true, force: true });
   await symlink(outside, ancestor, junctionKind);
-  // dest is missing; its nearest existing ancestor is the junction.
   await expect(supplementCompiledServer(compiled, dest)).rejects.toThrow("RESOURCE_SYMLINK");
   await expect(assertCompiledServerComplete(compiled, dest)).rejects.toThrow("RESOURCE_SYMLINK");
   expect(await readFile(control, "utf8")).toBe("CONTROL");

@@ -1,8 +1,6 @@
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
-// One list for the installer and its lightweight CI preflight. Required entries
-// must never silently fall back to a different implementation.
 export const runtimeEntries = Object.freeze({
   'workers/notifications.cjs': 'src/worker/notifications-worker.ts',
   'workers/search.cjs': 'src/worker/property-search-worker.ts',
@@ -24,7 +22,6 @@ export const runtimeBuildOptions = {
 export function assertRuntimeEntries({ tracked = false } = {}) {
   for (const entry of Object.values(runtimeEntries)) {
     if (!existsSync(entry)) throw Error('RUNTIME_ENTRY_MISSING:' + entry);
-    // Generated Prisma code is intentionally absent from Git.
     if (tracked && !entry.startsWith('src/generated/')) {
       const result = spawnSync('git', ['ls-files', '--error-unmatch', '--', entry], { stdio: 'ignore', windowsHide: true });
       if (result.error || result.status !== 0) throw Error('RUNTIME_ENTRY_NOT_TRACKED:' + entry);

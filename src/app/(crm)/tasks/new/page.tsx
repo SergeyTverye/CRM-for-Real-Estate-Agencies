@@ -77,7 +77,7 @@ export default async function NewTaskPage({ searchParams }: { searchParams: Prom
     else links.push({ kind, id, label, kindLabel: GENERIC[kind].label, href: GENERIC[kind].href(id) });
   }
 
-  // Риелтор назначает задачу себе или руководителю (эскалация); руководитель — любому активному сотруднику.
+  // Риелтор назначает задачу себе или руководителю (эскалация). руководитель — любому активному сотруднику.
   const all = await listActiveUsersBrief();
   const users = all
     .filter((u) => actor.role === "manager" || u.id === actor.userId || u.roleCode === "manager")

@@ -24,7 +24,6 @@ let users: TestUsers;
 const url = "/api/v1/settings/ai/credentials";
 const filters = SearchFilters.parse({ city: "Новосибирск", operation: "rent", priceUnit: "rub_month", purposes: ["office"] });
 beforeEach(async () => {
-  // Preserve the runner's selected database mode: this file runs on PG and SQLite.
   vi.stubEnv("AI_ENABLED", "true"); vi.stubEnv("YANDEX_CLOUD_API_KEY", "");
   vi.stubEnv("SCRAPER_DEMO_FIXTURES", "false"); vi.stubEnv("INSTANCE_ROLE", "active");
   resetConfigCache(); await resetDatabase(); users = await seedBase();
@@ -33,7 +32,6 @@ beforeEach(async () => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); resetConfigCache(); });
 describe("credential readiness persistence and route guards (both backends)", () => {
   it("rejects missing-key parse before creating any run or paid reservation", async () => {
-    // No real desktop store is composed, even on a Windows SQLite runner.
     vi.spyOn(credentials, "aiCredentialsService").mockReturnValue(new AiCredentialsService(getConfig()));
     const before = { runs: await db.searchRun.count(), reservations: await db.aiBudgetReservation.count(), usage: await db.aiUsageLog.count() };
     expect((await searchAvailability()).ai).toMatchObject({ enabled: true, configured: false, available: false, reason: "credentials_missing" });
@@ -71,7 +69,6 @@ describe("credential readiness persistence and route guards (both backends)", ()
       put: vi.fn(async () => {}), delete: vi.fn(async () => {}) };
     vi.spyOn(credentials, "aiCredentialsService").mockReturnValue(new AiCredentialsService(getConfig(), store));
     const provider = new FakeResponsesProvider(() => ({ text: '{"candidates":[]}', webSearchCalls: 1 }));
-    // Keep the real persistent gate/ledger/tariffs; replace only provider transport.
     const createSearchAi = aiComposition.createSearchAi;
     vi.spyOn(aiComposition, "createSearchAi").mockImplementation((config, repositories) => createSearchAi(config, repositories, provider));
     const scraper = { search: vi.fn(async () => ({ listings: [], sources: [{ source: "cian" as const, status: "blocked" as const, resultCount: 0, reason: "synthetic failure" }] })) };
@@ -94,7 +91,6 @@ describe("credential readiness persistence and route guards (both backends)", ()
     for (const [method, handler] of [["PUT", PUT], ["DELETE", DELETE]] as const) {
       for (const origin of [null, "https://cross-site.invalid"]) {
         const request = apiRequest(method, url, { cookie, body: {} });
-        // Explicit deletion avoids relying on helper null-origin behavior.
         if (origin === null) request.headers.delete("origin"); else request.headers.set("origin", origin);
         const response = await handler(request, routeParams({}));
         expect(response.status).toBe(403);
@@ -128,7 +124,6 @@ it.each(["reject","timeout"])("AI-03 official Yandex transport %s leaves manual 
   const ai=aiComposition.createSearchAi(getConfig(),{ledger:new PrismaAiLedger(),settings:new PrismaAiSettings(),tariffs:new PrismaAiTariffs()},provider);
   await expect(previewAnalysisQuery(users.realtor1,{text:"Аренда офиса",currentFilters:filters},ai)).rejects.toMatchObject({code:"AI_CALL_FAILED",message:expect.stringContaining("Ручной поиск доступен")});
   expect(fetcher).toHaveBeenCalledOnce();expect(fetcher.mock.calls[0]![0]).toBe("https://ai.api.cloud.yandex.net/v1/responses");
-  // Explicitly turn off optional AI: the same process must still accept manual search.
   vi.stubEnv("AI_ENABLED","false");resetConfigCache();
   const listing={...publicFixture.listing,operation:"rent",priceUnit:null} as NormalizedListing;
   const scraper={search:vi.fn(async()=>({listings:[{listing,evaluation:evaluateListing(listing,filters)}],sources:[{source:"onrealt" as const,status:"success" as const,resultCount:1,reason:null}]}))};

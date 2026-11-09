@@ -1,4 +1,3 @@
-/** Re-index existing LIVE evidence, never issue network requests or invent missing bodies. */
 import { readFile, writeFile } from "node:fs/promises";
 import type { Source } from "../../../../src/modules/property-search/domain/types";
 async function main() {

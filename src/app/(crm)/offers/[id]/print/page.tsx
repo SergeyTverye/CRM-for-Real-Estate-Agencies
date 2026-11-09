@@ -10,7 +10,6 @@ export default async function OfferPrintPage({ params }: { params: Promise<{ id:
   const actor = await requirePageActor();
   const { id } = await params;
   const h = await headers();
-  // APP origin is only a hyperlink in exports; it is never requested by the renderer.
   const host = h.get("host") ?? "localhost";
   const baseUrl = `${h.get("x-forwarded-proto") === "https" ? "https" : "http"}://${host}`;
   const data = await getOfferPrintData(actor, id, baseUrl).catch(e => { if (e instanceof NotFoundError) notFound(); throw e; });

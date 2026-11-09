@@ -47,7 +47,6 @@ export async function disconnectDb(): Promise<void> {
 
 export { Prisma };
 
-// Async module boundary keeps native SQLite code out of server startup.
 function lazyDesktopClient(url: string): PrismaClient {
   let pending: Promise<PrismaClient> | undefined;
   const load = () => pending ??= import("./sqlite-client").then(m => m.createSqliteClient(url));
@@ -89,7 +88,6 @@ function lazyDesktopClient(url: string): PrismaClient {
   }) as unknown as PrismaClient;
 }
 
-/** Lock scope for work that deliberately commits paid results independently. */
 export async function independentCommitScope<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   if (getConfig().CRM_DEPLOYMENT_MODE === "desktop") {
     const { serializeSqliteWork } = await import("./sqlite-client");

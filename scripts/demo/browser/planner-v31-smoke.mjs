@@ -1,4 +1,3 @@
-// Focused DEMO browser check; screenshots deliberately stay outside the repository.
 import { chromium, expect } from "@playwright/test";
 import { parse } from "dotenv";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
@@ -83,7 +82,6 @@ try {
   if (page) await page.screenshot({ path:`${output}/failure.png`,fullPage:true }).catch(() => {});
   console.error(`planner DEMO browser failed at ${stage}`); throw error;
 } finally {
-  // Only synthetic rows created by this script; no operational/demo seed rows are touched.
   await database.query("DELETE FROM task_checklist_items WHERE task_id=ANY($1::uuid[])",[taskIds]);
   await database.query("DELETE FROM task_clients WHERE task_id=ANY($1::uuid[])",[taskIds]);
   await database.query("DELETE FROM tasks WHERE id=ANY($1::uuid[])",[taskIds]);

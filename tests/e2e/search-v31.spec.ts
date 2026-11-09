@@ -70,7 +70,6 @@ test.describe("Поиск v3.1: реальные API и браузер без п
     const download=await exported;expect(download.suggestedFilename()).toBe("property-search.xlsx");const filePath=testInfo.outputPath("search-all.xlsx");await download.saveAs(filePath);
     const workbook=new ExcelJS.Workbook();await workbook.xlsx.readFile(filePath);expect(workbook.worksheets[0]!.rowCount).toBe(32);
     let escaped=false;workbook.worksheets[0]!.eachRow(row=>row.eachCell(cell=>{expect(cell.type).not.toBe(ExcelJS.ValueType.Formula);if(cell.text.startsWith("'=HYPERLINK"))escaped=true;}));expect(escaped).toBeTruthy();
-    // Selected export must contain the page, not all 31 records.
     await page.getByRole("button",{name:"Экспорт XLSX / CSV",exact:true}).click();await page.getByLabel("Область",{exact:true}).selectOption("selected");
     const selectedDownload=page.waitForEvent("download");await page.getByRole("button",{name:"Скачать файл",exact:true}).click();const selectedPath=testInfo.outputPath("search-selected.xlsx");await(await selectedDownload).saveAs(selectedPath);const selectedBook=new ExcelJS.Workbook();await selectedBook.xlsx.readFile(selectedPath);expect(selectedBook.worksheets[0]!.rowCount).toBe(26);
     await page.getByRole("button",{name:"Экспорт XLSX / CSV",exact:true}).click();
@@ -103,9 +102,6 @@ test.describe("Поиск v3.1: реальные API и браузер без п
     const summarize=(p:{status?:string;cancelRequested?:boolean;sources?:{source:string;status:string}[]})=>({status:p.status,cancelRequested:p.cancelRequested,sources:p.sources?.map(s=>({source:s.source,status:s.status}))});
     await queueLock.connect();
     try{
-      // Reserve the real worker's durable claim slot until cancellation. An instant
-      // fixture must not complete between observing an active UI and POST /cancel.
-      // This lock changes no records and is released on every exit/connection close.
       await queueLock.query("SELECT pg_advisory_lock(310105)");
       const body={filters,sources:["cian"],idempotencyKey:`ui-cancel-${Date.now()}`,deadlineMs:600000};
       const origin=new URL(page.url()).origin;

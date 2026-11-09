@@ -4,7 +4,6 @@ import { getDb } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 
 config({ path: [".env.local", ".env"], quiet: true });
-// This seed must never target an operational database, even accidentally.
 if (!process.env.DATABASE_URL || new URL(process.env.DATABASE_URL).pathname !== "/crm_demo") {
   throw new Error("Demo seed requires an explicit DATABASE_URL ending in /crm_demo");
 }
@@ -25,7 +24,6 @@ export type DemoContext = {
   needs: Awaited<ReturnType<typeof db.clientNeed.create>>[];
   properties: Awaited<ReturnType<typeof db.property.create>>[];
 };
-// Calendar day in Novosibirsk; deterministic working-hour slot, independent of seed launch time.
 export const day = (origin: Date, days: number, hour = 9 + ((days % 11) + 11) % 11) => {
   const local = new Date(+origin + 7 * 3600000 + days * 86400000);
   return new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(), hour - 7));
@@ -44,7 +42,6 @@ export async function printCounts() {
     need_property_matches: db.needPropertyMatch, notifications: db.notification, ai_usage_logs: db.aiUsageLog,
   };
   const counts: Record<string, number> = {};
-  // Calling union delegate count() is not type-safe: bind each count as a zero-argument closure.
   for (const [name, delegate] of Object.entries(delegates)) counts[name] = await (delegate.count as () => Promise<number>)();
   console.log(JSON.stringify(counts));
 }

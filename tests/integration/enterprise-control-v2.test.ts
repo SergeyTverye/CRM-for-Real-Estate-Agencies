@@ -62,7 +62,6 @@ describe('enterprise control v2 synthetic normalized workflow', () => {
         await db.property.create({ data });
         f.ws.getCell('A2').value = 'SYNTHETIC_CONTROL_A '; // Same normalized address, different source key by sheet.
         const other = f.wb.addWorksheet('Ignored'); other.getCell('A1').value = 'synthetic';
-        // Remove previous receipt only in this disposable synthetic DB to isolate ambiguity.
         await db.importRowResult.deleteMany();
         const nextProfile = buildProfile(f.wb); nextProfile.sheets[1]!.target = 'ignore';
         const next = await uploadEnterprise(users.manager, file(Buffer.from(await f.wb.xlsx.writeBuffer())), nextProfile);

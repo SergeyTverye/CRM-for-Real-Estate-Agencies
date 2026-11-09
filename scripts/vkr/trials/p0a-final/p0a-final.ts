@@ -1,4 +1,3 @@
-/** Explicit bounded LIVE diagnostic; never imported by Vitest. */
 import { config } from "dotenv";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -28,7 +27,6 @@ async function main() {
   }
   if (mode !== "cards") throw Error("Unsupported diagnostic mode");
   await mkdir(dir, { recursive: true });
-  // Persist the physical-attempt counter BEFORE the request, including redirects.
   const ledgerPath = `${dir}/ledger.json`;
   let ledger: { attempts: { source: Source; url: string; at: string }[]; responses: unknown[] };
   try { ledger = JSON.parse(await readFile(ledgerPath, "utf8")); } catch { ledger = { attempts: [], responses: [] }; }
@@ -51,7 +49,6 @@ async function main() {
           const text = $(el).text().trim();
           if (/date|publish|добавлен|размещ|опублик|обновл|\d{4}-\d{2}-\d{2}/iu.test(JSON.stringify(attrs) + text) && text.length < 400) candidates.push({ tag: el.tagName, attrs, text });
         });
-        // Keep only date labels/identity: no contacts, seller, address, scripts or tokens.
         const safe = candidates.filter(c => /date|publish|добавлен|размещ|опублик|обновл/iu.test(JSON.stringify(c))).map(c => ({ ...c, text: c.text.replace(/\+?\d[\d ()-]{9,}\d/gu, "[redacted]") }));
         const structured = [...html.matchAll(/.{0,45}(?:datePublished|dateModified|publishedAt|creationDate|createdAt).{0,100}/giu)].map(m => m[0].replace(/\+?\d[\d ()-]{9,}\d/gu, "[redacted]"));
         const canonical = $("link[rel='canonical']").attr("href") ?? row.url;
@@ -59,7 +56,6 @@ async function main() {
         const file = `${dir}/${source}-${index + 1}.html`;
         await writeFile(file, snippet);
         ledger.responses.push({ source, url: row.url, sourceListingId: row.sourceListingId, status: response.status, fetchedAt: start, file, rawSha256: createHash("sha256").update(response.data).digest("hex"), dates, candidates: safe, structured, titleDateLabels: $("body").text().match(/.{0,40}(?:опубликован|размещ[её]н|добавлен|обновл[её]н).{0,90}/giu)?.slice(0, 15) ?? [] });
-        // Store raw bytes locally only for parser diagnosis, never in Git/evidence.
         await mkdir("data/p0a-final", { recursive: true });
         await writeFile(`data/p0a-final/${source}-${index + 1}.html`, html);
       } catch (error) { ledger.responses.push({ source, url: row.url, fetchedAt: start, failure: error instanceof Error ? error.message.replace(/https?:\/\/\S+/gu, "[url]") : "FETCH_FAILED" }); }

@@ -42,7 +42,6 @@ beforeEach(() => {
   mocks.db.task.findMany.mockResolvedValue([]);
 });
 
-// Deliberately return unfiltered raw DB relations: assertions exercise the server DTO boundary.
 it.each([
   ["need card", async () => (await getNeedCard(actor, ID)).need.client],
   ["need list", async () => (await listNeeds(actor, {})).items[0]?.client],

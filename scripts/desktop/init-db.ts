@@ -11,7 +11,6 @@ export interface DesktopInitOptions { directory?: string; account?: {login:strin
 type InitStage = "DIRECTORY" | "LOCATION" | "SECRETS" | "MIGRATIONS" | "AI_DEFAULTS" | "ACCOUNT" | "PROBE";
 const failureStages = new WeakMap<object, InitStage>();
 const initCodes = ["ENOENT", "EACCES", "EPERM", "EINVAL", "ETIMEDOUT", "ENOBUFS", "ERR_DLOPEN_FAILED", "SQLITE_LOCAL_VOLUME_REQUIRED", "SQLITE_CLOUD_PATH_FORBIDDEN", "SQLITE_LOCAL_PATH_REQUIRED", "SQLITE_MIGRATION_HISTORY_MISMATCH", "SQLITE_INTEGRITY_FAILED", "DESKTOP_SECRETS_INVALID"];
-/** Exact finite vocabulary only: never serialize errors, paths, SQL or secrets. */
 export function desktopInitFailureCode(error: unknown): string {
   if (!error || typeof error !== "object") return "INIT_DATABASE_FAILED";
   const stage = failureStages.get(error);
@@ -21,7 +20,6 @@ export function desktopInitFailureCode(error: unknown): string {
   const safe = initCodes.find(value => value === code || value === message) ?? "OTHER";
   return `INIT_DATABASE_FAILED_STAGE_${stage}_CODE_${safe}`;
 }
-/** --initialize migrates/seeds public defaults; the UI explicitly creates the manager. */
 export async function initializeDesktopDatabase(options: DesktopInitOptions = {}) {
   let stage: InitStage = "DIRECTORY";
   try {
@@ -34,15 +32,11 @@ export async function initializeDesktopDatabase(options: DesktopInitOptions = {}
   const existed=existsSync(file);
   const secretFile=path.join(directory,"local-secrets.json");
   if(!existsSync(secretFile)) await writeFile(secretFile,JSON.stringify({deploymentId:process.env.DEPLOYMENT_ID??randomUUID(),instanceId:process.env.INSTANCE_ID??randomUUID(),localSecret:randomBytes(32).toString("base64url")}),{flag:"wx",mode:0o600});
-  // Validate without printing secrets. Windows owner ACL is applied by the supervisor.
   const secrets=JSON.parse(await readFile(secretFile,"utf8"));
   if(!/^[A-Za-z0-9_-]{43}$/.test(secrets.localSecret)) throw new Error("DESKTOP_SECRETS_INVALID");
-  // Native launcher already made a verified encrypted snapshot before starting migrations.
   stage = "MIGRATIONS";
   const upgrade=existed && process.env.CRM_DESKTOP_SUPERVISED_UPGRADE !== "1" ? await upgradeSqlite(file) : (applySqliteMigrations(file),null);
   stage = "AI_DEFAULTS";
-  // prepareDesktopUpgrade invokes --initialize on EVERY launch, not only upgrades.
-  // Use the resolved file directly; never load .env or touch the credential store.
   const {createSqliteClient}=await import("../../src/shared/db/sqlite-client");
   const {bootstrapAiTariffs}=await import("../../src/modules/ai/application/tariff-bootstrap");
   const defaultsDb=createSqliteClient("file:"+file);
@@ -74,7 +68,6 @@ export async function initializeDesktopDatabase(options: DesktopInitOptions = {}
 }
 if(process.argv.includes("--initialize")) initializeDesktopDatabase().catch(error=>{console.error(desktopInitFailureCode(error));process.exitCode=1;});
 if(process.argv.includes("--setup-stdin")) {
-  // Passwords are never command arguments, stdout or .env.
   (async()=>{let body="";for await(const chunk of process.stdin) {body+=chunk;if(body.length>16384)throw new Error("INPUT_LIMIT");}
     await initializeDesktopDatabase(JSON.parse(body));console.log("DESKTOP_INITIALIZED");})().catch(()=>{console.error("INIT_DATABASE_FAILED");process.exitCode=1;});
 }

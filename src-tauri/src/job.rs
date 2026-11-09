@@ -5,8 +5,6 @@ use windows_sys::Win32::System::JobObjects::{
     SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION, JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
 };
 use windows_sys::Win32::System::Threading::GetCurrentProcess;
-// Assign the parent BEFORE spawning anything. Every child inherits the job,
-// including Node, workers, Chromium and WebView. No spawn/assignment race.
 pub struct ProcessJob(HANDLE);
 unsafe impl Send for ProcessJob {}
 unsafe impl Sync for ProcessJob {}

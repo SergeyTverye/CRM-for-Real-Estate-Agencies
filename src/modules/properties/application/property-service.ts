@@ -17,7 +17,7 @@ import {
 
 /**
  * Объекты недвижимости (FR-05, FR-27, FR-30, ТЗ 17.2, 40.3).
- * Каталог доступен всем для чтения; изменять может руководитель или ответственный риелтор.
+ * Каталог доступен всем для чтения. изменять может руководитель или ответственный риелтор.
  * Контакты собственника выдаются отдельно от карточки объекта (ownerContactsScope).
  */
 
@@ -182,7 +182,6 @@ export async function removePropertyOwner(actor: Actor, propertyId: string, owne
   });
 }
 
-// ───── UC-12 ManageOwnerContactAccess ─────
 
 const grantSchema = z.object({ userId: zUuid, comment: zOptText(1000) });
 

@@ -148,7 +148,6 @@ it("runs final-resource preflight from the package with fresh profiles and detec
     if(!inside(process.env.LOCALAPPDATA) || !inside(process.env.APPDATA)) process.exit(3);
     fs.writeFileSync(p.join(process.env.DESKTOP_DATA_DIR,'crm.db'),'synthetic');`);
   await put("server.js", `const http=require('node:http'),fs=require('node:fs'),p=require('node:path');
-    // Deliberately resolve dynamic filesystem dependency at runtime.
     require('./.next-desktop/server/probe.cjs');
     const s=http.createServer((q,r)=>{
       if(q.url==='/api/v1/desktop/setup') {r.setHeader('content-type','application/json');r.end(JSON.stringify({available:true}));}
@@ -172,12 +171,8 @@ it("runs final-resource preflight from the package with fresh profiles and detec
   const before = (await readdir(root)).sort();
   await checkFinalRuntime(output, { temporaryRoot: root });
   expect((await readdir(root)).sort()).toEqual(before);
-  // Windows CI temp roots can have junction/short-path spellings. The gate
-  // canonicalizes them; validate filesystem identity, not lexical prefixes.
   await checkFinalRuntime(output, { temporaryRoot: alias });
   expect((await readdir(root)).sort()).toEqual(before);
-  // Exercise Node 24's Windows entry/cwd boundary too: the gate must pass
-  // canonical paths to both the initializer and the long-running server.
   await checkFinalRuntime(path.toNamespacedPath(path.join(alias, "app")), { temporaryRoot: path.toNamespacedPath(alias) });
   expect((await readdir(root)).sort()).toEqual(before);
   const cli = () => spawnSync(process.execPath, [fileURLToPath(new URL("../../scripts/desktop/check-final-runtime.mjs", import.meta.url)), path.join(alias, "app")], {

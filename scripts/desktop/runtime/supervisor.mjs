@@ -51,10 +51,7 @@ async function stopChild(p) {
 async function shutdown(code = 0) {
   if (stopping) return;
   stopping = true; ready = false;
-  // Do not kill a restore/backup halfway through its generation switch. No
-  // operation may restart writers after shutdown has begun.
   await activeOperation;
-  // Workers finish before the server; Job Object is the final containment boundary.
   await Promise.all([...children].reverse().map(stopChild));
   if (!children.size && code === 0) { process.env.CRM_BACKUP_WRITERS_STOPPED='1'; try { await runOnce(path.join(app,'backup-command.cjs'),'backup-close',['--on-close']); } catch { log('CLOSING_BACKUP_FAILED'); } finally { delete process.env.CRM_BACKUP_WRITERS_STOPPED; } }
   await rm(path.join(dirs.logs, 'runtime.json'), { force: true });
@@ -96,7 +93,6 @@ async function existingLocalPath(target) {
     if ((await lstat(current)).isSymbolicLink()) throw Error('IMPORT_REPARSE_POINT');
   }
 }
-/** Only the native mailbox supplies selectedPath. It is never an HTTP input. */
 export async function stageNativeImport(selectedPath, incomingRoot, id, actorUserId, maxBytes = NATIVE_IMPORT_MAX_BYTES) {
   if (!uuid.test(id) || typeof actorUserId !== 'string' || !actorUserId) throw Error('IMPORT_ID');
   if (path.extname(selectedPath).toLowerCase() !== '.crmbackup') throw Error('IMPORT_EXTENSION');
@@ -108,7 +104,6 @@ export async function stageNativeImport(selectedPath, incomingRoot, id, actorUse
     const before = await source.stat();
     if (!before.isFile() || before.size < 32 || before.size > maxBytes) throw Error('IMPORT_SIZE');
     await assertLocalDirectory(incomingRoot);
-    // Bound abandoned imports as well as each individual file.
     if ((await readdir(incomingRoot)).length >= 4) throw Error('IMPORT_CAPACITY');
     const disk = await statfs(incomingRoot, { bigint: true });
     if (disk.bavail * disk.bsize < BigInt(before.size) + 1024n * 1024n) throw Error('IMPORT_SPACE');
@@ -148,7 +143,6 @@ export async function cleanupNativeIncoming(incomingRoot, now = Date.now()) {
     const dir = path.join(incomingRoot, name);
     const info = await lstat(dir);
     if (info.isSymbolicLink() || !info.isDirectory()) continue;
-    // Never follow imported metadata paths; remove only this application's UUID staging.
     if (now - info.mtimeMs > NATIVE_IMPORT_TTL) await rm(dir, { recursive: true, force: true });
   }
 }
@@ -208,7 +202,6 @@ export async function configureHandoff(dataRoot = dirs.data) {
   try {
     const state = JSON.parse(await readFile(path.join(dataRoot, 'handoff-state.json'), 'utf8'));
     if (!state || typeof state !== 'object' || Array.isArray(state) || typeof state.deploymentId !== 'string' || !uuid.test(state.deploymentId) || typeof state.readOnly !== 'boolean') throw Error('HANDOFF_STATE_INVALID');
-    // Adoption changes the dataset, never this machine's instance/device identity.
     process.env.DEPLOYMENT_ID = state.deploymentId;
     process.env.INSTANCE_ROLE = state.readOnly ? 'standby' : 'active';
   }
@@ -222,7 +215,6 @@ export function configureSearchRuntime(env = process.env) {
 async function main() {
   if (process.platform !== 'win32' || process.arch !== 'x64') throw Error('WINDOWS_X64_REQUIRED');
   for (const dir of [root, ...Object.values(dirs)]) await assertLocalDirectory(dir);
-  // ACL applied by native launcher before any secrets or database are created.
   const identityPath = path.join(dirs.data, 'identity.json');
   let identity;
   try { identity = JSON.parse(await readFile(identityPath,'utf8')); }
@@ -242,8 +234,6 @@ async function main() {
     INSTANCE_ID:identity.instanceId, APP_TIMEZONE:'Asia/Novosibirsk', CRM_DESKTOP_SUPERVISED_UPGRADE:'1',
     PLAYWRIGHT_BROWSERS_PATH:path.join(app,'chromium'),
   });
-  // These are ceilings, not opt-ins: persisted manager settings still decide.
-  // Preserve an explicit operator kill-switch; never alter spending ceilings.
   configureSearchRuntime();
   const bundle = JSON.parse(await readFile(path.join(app,'desktop-manifest.json'),'utf8'));
   process.env.SCRAPER_CHROME_PATH = path.join(app,bundle.chromium);
@@ -261,7 +251,6 @@ async function main() {
   const info = { url:'http://127.0.0.1:' + port, pid:process.pid, version:bundle.version };
   await writeFile(path.join(dirs.logs,'runtime.json'),JSON.stringify(info),{ mode:0o600 });
   log('READY ' + info.url);
-  // The authenticated manager API only publishes fixed command IDs, never executable paths.
   const commandsDir = path.join(dirs.data, 'backup-settings', 'commands');
   const nativeTimer = setInterval(() => { void nativeDialogs().catch(() => log('NATIVE_DIALOG_FAILED')); },500);
   nativeTimer.unref();

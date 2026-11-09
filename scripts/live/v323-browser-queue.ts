@@ -1,7 +1,3 @@
-/** LIVE: real CRM HTTP queue + production worker, ordinary Chromium, <=60 page navigations.
- * Stores aggregate evidence only. No page HTML, contacts, tokens or listing URLs in report.
- * Run after next build with NEXT_DIST_DIR=.next-v323-captcha and crm_demo migration.
- */
 import "dotenv/config";
 import { spawn, type ChildProcess } from "node:child_process";
 import { createWriteStream } from "node:fs";

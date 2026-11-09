@@ -33,8 +33,6 @@ export class MailruWebDav implements BackupDestination {
         response = await fetch(this.url(key), { method, body: body as BodyInit | undefined, redirect: "error", headers: { Authorization: "Basic " + Buffer.from(this.options.email + ":" + this.options.applicationPassword).toString("base64"), ...headers }, signal: signal ? AbortSignal.any([signal, timeout]) : timeout });
       } catch (error) {
         if (signal?.aborted) throw new BackupError("UPLOAD_CANCELLED");
-        // Do not retry TLS, redirect, authentication or timeout failures. Each
-        // replay is bounded and conditional PUT can never overwrite an object.
         const cause = error instanceof Error ? error.cause : undefined;
         const code = cause && typeof cause === "object" && "code" in cause ? cause.code : undefined;
         if (!replayable || timeout.aborted || attempt >= 2 || !["ECONNRESET", "ECONNREFUSED", "EPIPE", "EAI_AGAIN", "UND_ERR_SOCKET", "UND_ERR_CONNECT_TIMEOUT"].includes(String(code))) throw new BackupError("WEBDAV_NETWORK");
@@ -43,7 +41,6 @@ export class MailruWebDav implements BackupDestination {
         catch { throw new BackupError("UPLOAD_CANCELLED"); }
         continue;
       }
-      // Callers never inspect error bodies (which may contain provider secrets).
       if (!response.ok) await response.body?.cancel();
       if (response.status === 412 && uncertainPut && body !== undefined) {
         if (await this.matches(key, body, signal)) return new Response(null, { status: 204 });
@@ -124,7 +121,6 @@ export class MailruWebDav implements BackupDestination {
       }
       const latest = await this.index(archive.backupId, signal);
       if (latest && latest.archive.sha256 !== archive.sha256) throw new BackupError("IMMUTABLE_CONFLICT");
-      // Publication point. No LOCK, no assumption that MOVE is atomic.
       const r = await this.request("PUT", this.indexKey(archive.backupId), canonical({ status: "complete", archive, parts }), { "Content-Type": "application/json", "If-None-Match": "*" }, signal);
       if (r.status === 412) { await r.body?.cancel(); await this.verify(archive, signal); } else { this.check(r); await r.body?.cancel(); }
     } finally { await h.close(); await rm(temp, { recursive: true, force: true }); }

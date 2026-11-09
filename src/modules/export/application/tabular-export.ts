@@ -32,7 +32,6 @@ function csvValue(value: unknown, type?: ExportColumnType): unknown {
   }
   return value;
 }
-/** Typing is explicit: untrusted text is never inferred as a formula, number or link. */
 export async function tabularExport(format: "csv" | "xlsx", columns: readonly string[], rows: readonly (readonly unknown[])[], sheetName = "Экспорт", types: readonly ExportColumnType[] = []) {
   if (rows.length > TABULAR_EXPORT_LIMIT) throw new ConflictError("EXPORT_LIMIT", "Не более 10000 строк. Уточните фильтры.");
   if (format === "csv") return new TextEncoder().encode("\uFEFF" + [columns.map(csvCell).join(";"), ...rows.map(row => row.map((value, index) => csvCell(csvValue(value, types[index]))).join(";"))].join("\r\n"));
@@ -42,7 +41,6 @@ export async function tabularExport(format: "csv" | "xlsx", columns: readonly st
     const added = sheet.addRow(row.map((value, index) => {
       const type = types[index];
       if (type === "date") {
-        // Excel has no timezone; display the CRM's Asia/Novosibirsk wall clock.
         const date = exportDate(value);
         return date ? new Date(date.getTime() + 7 * 3600000) : "Дата неизвестна";
       }

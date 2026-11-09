@@ -43,8 +43,6 @@ describe('enterprise export synthetic roundtrip', () => {
         expect(r.result.imported).toBe(1);
         const before = r.before.worksheets[1]!, after = r.after.worksheets[1]!;
         expect(before.columnCount).toBe(6);
-        // columnCount only counts rows with values; geometry must survive even
-        // though every value on this sheet has deliberately been removed.
         expect(after.columns.length).toBe(before.columns.length);
         expect(after.getRow(1).cellCount).toBe(6);
         expect(Array.from({ length: 6 }, (_, i) => after.getColumn(i + 1).width))

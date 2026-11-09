@@ -64,7 +64,6 @@ describe("initial tariff bootstrap (real persistence on PostgreSQL AND SQLite)",
 
   it("permits a fake-provider parse through the real tariff/gate/ledger after local key configuration", async () => {
     const provider = fakeTransport();
-    // Server lifecycle is intentionally unchanged; desktop composition heals itself.
     if (getConfig().CRM_DEPLOYMENT_MODE !== "desktop") await bootstrapAiTariffs();
     const result = await parseQuery(users.realtor1, "Найти офис в аренду", filters);
     expect(result.testingMode).toBe(true); expect(provider.requests).toHaveLength(1);

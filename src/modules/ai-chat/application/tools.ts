@@ -93,9 +93,6 @@ export async function executeTool(actor: Actor, sessionId: string, name: string,
     return { data: await redactToolData(actor, data, links), links };
 }
 
-/** Match candidate identities in PostgreSQL against output tokens, without a client-count cap.
- * Links stay server-side for the authorized UI; only data is sent to the model.
- */
 export async function redactToolData(actor: Actor, data: unknown, links: RecordLink[] = []) {
     const texts: string[] = [];
     function collect(value: unknown) {
@@ -128,9 +125,6 @@ export async function redactToolData(actor: Actor, data: unknown, links: RecordL
     return redact(data);
 }
 
-/** Structural whitelist facts (money, dates, stable codes) are not free text.
- * Only the explicitly isolated text channel is redacted; treating money as a phone loses facts.
- */
 export async function redactScreenData(actor: Actor, value: unknown): Promise<unknown> {
     if (Array.isArray(value)) return Promise.all(value.map(v => redactScreenData(actor, v)));
     if (value instanceof Date || !value || typeof value !== "object") return value;

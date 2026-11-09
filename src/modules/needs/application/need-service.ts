@@ -104,7 +104,7 @@ export async function insertNeed(
 
 /**
  * Ответственный за новую потребность: для существующего клиента — его текущий ответственный
- * (до явной передачи руководителем, ТЗ 40.1); руководитель может указать другого.
+ * (до явной передачи руководителем, ТЗ 40.1). руководитель может указать другого.
  */
 async function resolveNeedResponsible(tx: Tx, actor: Actor, clientResponsibleId: string, requested?: string): Promise<string> {
   if (!requested || requested === clientResponsibleId) return clientResponsibleId;
@@ -200,7 +200,7 @@ export async function applyNeedStateChange(
 ) {
   const need = await loadAccessibleNeed(tx, actor, needId);
   // Без expectedUpdatedAt — внутренний вызов из другой команды (например, результат показа),
-  // которая уже заблокировала свою запись; версия потребности проверяется по текущему значению.
+  // которая уже заблокировала свою запись. версия потребности проверяется по текущему значению.
   const expected = d.expectedUpdatedAt ?? need.updatedAt;
   const res = await tx.clientNeed.updateMany({ where: { id: needId, updatedAt: expected }, data: { updatedAt: new Date() } });
   if (res.count === 0) throw new StaleUpdateError();

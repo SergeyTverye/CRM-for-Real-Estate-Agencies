@@ -13,7 +13,6 @@ export type NamedLink = { id: string; label: string; href: string };
 export interface ReportRecord { label: string; client?: NamedLink; property?: NamedLink; employee?: string; sourceCode?: string; status?: string; at?: Date | string | null }
 const clientLink = (c: { id: string; displayName: string } | null): NamedLink | undefined => c ? { id: c.id, label: c.displayName, href: `/clients/${c.id}` } : undefined;
 const propertyLink = (p: { id: string; addressText: string } | null): NamedLink | undefined => p ? { id: p.id, label: p.addressText, href: `/properties/${p.id}` } : undefined;
-/** Display enrichment only: the report service owns all metric cohorts and filters. */
 export async function reportRecord(actor: Actor, row: DetailRow): Promise<ReportRecord> {
   const [, kind, id] = row.href.split("/");
   if (!id) return { label: "Запись CRM" };

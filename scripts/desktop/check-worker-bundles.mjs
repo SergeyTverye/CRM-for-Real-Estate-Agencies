@@ -20,8 +20,6 @@ const load=spawnSync(process.execPath,['-e',"require("+JSON.stringify(path.join(
 if(load.status!==0)throw Error('BUNDLED_MODULE_LOAD_FAILED');
 console.log('WORKER_BUNDLES_AND_INIT_PASS');
 } finally {
-  // Synthetic SQLite must never remain in an installer artifact scan. Resolve
-  // and verify our exact UUID directory before removing only this invocation.
   const metadata=await lstat(stage);
   const actual=await realpath(stage);
   const expected=path.join(await realpath(parent),path.basename(stage));

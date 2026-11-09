@@ -5,7 +5,7 @@ import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
 import { BackupError, DEFAULT_LIMITS, manifestSchema, safeSettingsSchema, type ArchiveLimits, type ArchiveRef, type BackupManifest, type BackupMetadata, type SafeSettings, type SnapshotBarrier, type SnapshotSource, type SnapshotValidator } from "../domain/contracts";
 import { assertNoSymlinks, canonical, ensureSpace, hashFile, protectedDir, regularFile, safeRelative, sha256, syncDir } from "./fs";
-import { CHUNK_BYTES, createHeader, cryptChunk, headerSchema, openHeader, type Header } from "./encryption";
+import { CHUNK_BYTES, createHeader, cryptChunk, headerSchema, maxChunks, openHeader, type Header } from "./encryption";
 const MAGIC = Buffer.from("CRMBKP1\n");
 const u32 = (n: number) => { const b = Buffer.alloc(4); b.writeUInt32BE(n); return b; };
 export type Credential = { passphrase: string } | { recoveryKey: string };
@@ -16,7 +16,9 @@ async function exact(h: FileHandle, size: number) {
 }
 async function* decrypted(h: FileHandle, header: Header, key: Buffer, limits: ArchiveLimits) {
   let total = 0;
+  const chunkLimit = maxChunks(limits);
   for (let index = 0; ; index++) {
+    if (index >= chunkLimit) throw new BackupError("TOO_MANY_CHUNKS");
     const length = (await exact(h, 4)).readUInt32BE();
     if (length > CHUNK_BYTES) throw new BackupError("CHUNK_LIMIT");
     total += length; if (total > limits.totalBytes + limits.manifestBytes + 4) throw new BackupError("TOTAL_SIZE_LIMIT");

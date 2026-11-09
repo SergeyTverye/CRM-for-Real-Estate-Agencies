@@ -1,4 +1,3 @@
-// Preparation only: import has no I/O. No launcher, environment, credentials or DB access.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,8 +30,6 @@ export function validateDirectory(value) {
   return normalized;
 }
 
-// Parent MUST already have run its native ReparsePoint ancestor check and private run ACL.
-// lstat/realpath are additional checks, not a replacement for that Windows-native preflight.
 async function canonicalDirectory(directory) {
   let cursor = directory;
   while (true) {
@@ -47,7 +44,6 @@ async function canonicalDirectory(directory) {
 
 function zipContents(bytes, unzipSync) {
   requireThat(bytes.length > 4 && bytes.readUInt32LE(0) === 0x04034b50, 'BC_ZIP_REJECTED');
-  // Bound expansion using central-directory sizes before decompression.
   let total = 0, count = 0;
   const entries = unzipSync(bytes, { filter(entry) {
     count++;
@@ -62,7 +58,6 @@ function zipContents(bytes, unzipSync) {
 }
 const text = bytes => new TextDecoder('utf-8', { fatal: true }).decode(bytes);
 
-// Export service uses RFC-style quoted CSV with comma separator and a UTF-8 BOM.
 function csvRows(bytes) {
   const source = text(bytes).replace(/^\uFEFF/, '');
   const rows = []; let row = [], cell = '', quoted = false;
@@ -87,10 +82,6 @@ function csvRows(bytes) {
   });
 }
 
-/** Uses only the caller's authenticated page request context. No business request retries.
- * Caller guarantees base belongs to its live installed Node24+SQLite process and profile is NEW/synthetic.
- * directory must be the absent business-cycle child of its native-checked, privately ACL'd run directory.
- */
 export async function runInstalledBusinessCycle({ page, base, clientId, directory }) {
   let stage = 'BC_PREFLIGHT_FAILED';
   const checks = [], files = [];
@@ -102,7 +93,6 @@ export async function runInstalledBusinessCycle({ page, base, clientId, director
     requireThat(new URL(page.url()).origin === base && page.request === page.context().request &&
       !page.isClosed(), 'BC_SESSION_CONTEXT_REJECTED');
     await canonicalDirectory(path.dirname(directory));
-    // Fail before any mutation if artifact directory exists, including links and empty directories.
     await fs.mkdir(directory, { recursive: false });
     await canonicalDirectory(directory);
     const { unzipSync } = await import('fflate');
@@ -241,7 +231,6 @@ export async function runInstalledBusinessCycle({ page, base, clientId, director
     pass('BC_DOCX_PROTECTED_DOCUMENT');
 
     stage = 'BC_DOCUMENT_DENIAL_FAILED';
-    // A fresh empty browser context, never clearing or copying the authenticated context's cookies.
     const anonymous = await browser.newContext({ serviceWorkers: 'block', acceptDownloads: false });
     try {
       await http(`/api/v1/documents/${document.id}/download`, { context: anonymous.request, status: 401 });
@@ -302,12 +291,10 @@ export async function runInstalledBusinessCycle({ page, base, clientId, director
     pass('BC_ORIGINAL_CLIENT_INTACT');
     return { checks, counts: { passed: checks.length, failed: 0, total: checks.length, artifacts: files.length }, files };
   } catch {
-    // No raw bodies, paths, stack causes, cookie values or dependency errors cross this boundary.
     fail(stage);
   }
 }
 
-// Explicit pure checks only; never enters the installed business cycle.
 export async function selfTest() {
   const { default: assert } = await import('node:assert/strict');
   assert.equal(validateBase('http://127.0.0.1:12345'), 'http://127.0.0.1:12345');

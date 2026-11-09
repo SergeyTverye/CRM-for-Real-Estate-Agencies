@@ -36,8 +36,6 @@ export async function withBackupDestinations<T>(work: (destinations: BackupDesti
       }
       } catch {
         if (onlyId) throw new BackupError("DESTINATION_UNAVAILABLE");
-        // Keep this enabled target in the queue with its own failed status.
-        // A missing/corrupt credential must never block healthy destinations.
         destinations.push(unavailableDestination(c.id));
       }
     }

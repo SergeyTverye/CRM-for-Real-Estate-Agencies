@@ -102,7 +102,7 @@ export async function listClients(actor: Actor, raw: unknown): Promise<Page<Clie
   };
 }
 
-/** Клиенты для выбора в формах (только доступные; короткий список). */
+/** Клиенты для выбора в формах (только доступные. короткий список). */
 export async function pickClients(actor: Actor, q: string | undefined, take = 20) {
   const query = parseInput(z.string().trim().max(120).default(""), q);
   const limit = parseInput(z.number().int().min(1).max(20), take);
@@ -164,7 +164,6 @@ export interface TimelineEvent {
   author?: string | null;
 }
 
-/** Last five interactions, bounded per source before a stable merge. */
 export async function getClientRecentInteractions(actor: Actor, clientId: string): Promise<TimelineEvent[]> {
   await loadAccessibleClient(db, actor, clientId);
   const [comms, showings, offers, tasks] = await Promise.all([
@@ -192,7 +191,6 @@ export function clientTaskContext(clientId: string): Prisma.TaskWhereInput {
   ] };
 }
 
-/** Compatibility wrapper; full filtered cursor contract is getClientTimelinePage. */
 export async function getClientTimeline(actor: Actor, clientId: string, take = 100) {
   const { getClientTimelinePage } = await import("./timeline-service");
   return (await getClientTimelinePage(actor, clientId, { pageSize: Math.min(100, Math.max(1, take)) })).items;

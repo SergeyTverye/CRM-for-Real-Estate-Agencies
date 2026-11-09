@@ -15,7 +15,7 @@ import { assertNeedInvariants } from "@/modules/needs/domain/need-invariant";
  * Показы (FR-08, UC-05 RecordShowingResult, ТЗ 37.8).
  * Назначение показа создаёт задачу-встречу (она же следующее действие потребности) и отмечает
  * объект в подборе. Фиксация результата + переход этапа/статуса + следующее действие выполняются
- * одной транзакцией; результат структурирован (status + result_code) и дополнен комментарием.
+ * одной транзакцией. результат структурирован (status + result_code) и дополнен комментарием.
  */
 
 const createSchema = z.object({
@@ -173,7 +173,6 @@ export async function recordShowingResult(actor: Actor, showingId: string, input
   });
 }
 
-// ───── Queries ─────
 
 export const showingFiltersSchema = zPagination.extend({
   status: zCode("showingStatus").optional(),

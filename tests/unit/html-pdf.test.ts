@@ -19,7 +19,6 @@ it("closes Chromium on timeout and observes a delayed render rejection", async (
   expect(close).toHaveBeenCalledTimes(1);
   failRender(new Error("Target closed after timeout"));
   await vi.advanceTimersByTimeAsync(1);
-  // The concurrency slot was released despite the interrupted renderer.
   const pdf = vi.fn().mockResolvedValue(Buffer.from("%PDF-"));
   mocks.launch.mockResolvedValue({ close, newContext: async () => ({ route: vi.fn(), newPage: async () => ({ setDefaultTimeout: vi.fn(), emulateMedia: vi.fn(), setContent: vi.fn(), pdf }) }) });
   await expect(htmlToPdf("<p>next</p>")).resolves.toEqual(Buffer.from("%PDF-"));

@@ -26,7 +26,7 @@ import { PHOTO_MIMES, preparePropertyImage } from "../domain/property-image";
 /**
  * UC-08 UploadOrDownloadDocument (FR-14, ТЗ 20.4, 29.8, 40.8).
  * Файл хранится через StorageAdapter, в БД — метаданные и связь через join-таблицы.
- * Выдача — только после проверки доступа к связанной сущности; storage key/путь наружу не выдаётся.
+ * Выдача — только после проверки доступа к связанной сущности. storage key/путь наружу не выдаётся.
  * Для исходящих документов из Deal/Agreement/CommercialOffer legal_entity_id наследуется.
  */
 

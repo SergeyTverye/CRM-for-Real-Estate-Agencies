@@ -50,7 +50,6 @@ export async function listPropertyMedia(actor: Actor, propertyId: string, includ
 }
 export type PropertyMediaItem = Awaited<ReturnType<typeof listPropertyMedia>>[number];
 
-/** Each request is one file: a failed queue item cannot roll back successful uploads. */
 export async function uploadPropertyMedia(actor: Actor, propertyId: string, file: File | null, input: unknown) {
   const meta = parseInput(uploadSchema, input);
   await loadEditableProperty(db, actor, propertyId);
@@ -64,7 +63,6 @@ export async function uploadPropertyMedia(actor: Actor, propertyId: string, file
   if (file.type && file.type !== "application/octet-stream" && !MIME_BY_EXTENSION[check.ext]?.includes(file.type)) throw new ValidationError("MIME файла не соответствует содержимому");
   if (meta.kind === "document" && meta.documentTypeCode === "photo") throw new ValidationError("Выберите раздел фотографий");
   let thumbnail: Buffer | undefined;
-  // Also strip metadata from closed image scans; their type remains a protected document.
   if (PHOTO_MIMES.has(check.mime)) {
     const prepared = await preparePropertyImage(data, check.mime);
     data = Buffer.from(prepared.data);
@@ -80,7 +78,6 @@ export async function uploadPropertyMedia(actor: Actor, propertyId: string, file
     let reused = false;
     const result = await transaction(async (tx) => {
       await lockProperty(tx, actor, propertyId);
-      // Retrying after a lost response returns the already linked upload.
       const existing = await tx.document.findFirst({ where: {
         checksum: stored.sha256, originalName, archivedAt: null,
         documentTypeCode: meta.kind === "photo" ? "photo" : meta.documentTypeCode ?? "other",
@@ -146,7 +143,6 @@ export async function openPropertyMedia(actor: Actor, propertyId: string, docume
   const link = await db.documentProperty.findFirst({ where: { propertyId, documentId, document: documentScope(actor) }, include: { document: true } });
   if (!link) throw new NotFoundError();
   const d = link.document;
-  // Legacy photos are decoded safely and stripped on read without mutating a standby instance.
   if (d.documentTypeCode === "photo" && PHOTO_MIMES.has(d.mimeType) && !d.thumbnailStorageKey) {
     const source = await getStorage().read(d.storageKey);
     if (source.size > getConfig().maxUploadBytes) { source.stream.destroy(); throw new ValidationError("Файл превышает допустимый размер"); }
@@ -161,7 +157,6 @@ export async function openPropertyMedia(actor: Actor, propertyId: string, docume
   return { ...result, mimeType: useThumbnail ? "image/webp" : d.mimeType, fileName: d.originalName, inline: PHOTO_MIMES.has(d.mimeType) && d.documentTypeCode === "photo" };
 }
 
-/** Batch selection avoids N+1 catalogue queries and never emits storage references. */
 export async function propertyCoverUrls(actor: Actor, propertyIds: string[]) {
   const rows = await db.documentProperty.findMany({ where: { propertyId: { in: propertyIds }, archivedAt: null, document: { AND: [documentScope(actor), { archivedAt: null, documentTypeCode: "photo", mimeType: { in: [...PHOTO_MIMES] } }] } }, orderBy: [{ isCover: "desc" }, { sortOrder: "asc" }, { documentId: "asc" }], select: { propertyId: true, documentId: true } });
   const urls: Record<string, string> = {};

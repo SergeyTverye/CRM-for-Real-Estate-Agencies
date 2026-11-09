@@ -29,7 +29,6 @@ export class YandexS3 implements BackupDestination {
     if (archive.size > DEFAULT_LIMITS.archiveBytes || Math.ceil(archive.size / this.partBytes) > 10000) throw new BackupError("S3_SIZE_LIMIT");
     const Bucket = this.options.bucket, Key = this.key(archive.backupId);
     const journal = path.join(this.options.workRoot, "s3-" + sha256(this.options.bucket + "/" + this.prefix).slice(0, 16) + "-" + archive.backupId + ".json");
-    // Crash recovery: abort this archive's previously persisted multipart upload before retry.
     try {
       const prior = JSON.parse(await readFile(journal, "utf8")) as { uploadId: string; key: string; bucket: string };
       if (prior.key === Key && prior.bucket === Bucket && typeof prior.uploadId === "string") await this.client.send(new AbortMultipartUploadCommand({ Bucket, Key, UploadId: prior.uploadId }));
@@ -73,7 +72,6 @@ export class YandexS3 implements BackupDestination {
         const suffix = item.Key?.slice(this.prefix.length + 1);
         if (!suffix?.endsWith(".crmbackup")) continue;
         const id = suffix.slice(0, -10); if (!archiveRefSchema.shape.backupId.safeParse(id).success) continue;
-        // GET metadata without trusting ETag as a digest; verify() downloads complete data.
         const { HeadObjectCommand } = await import("@aws-sdk/client-s3");
         const head = await this.client.send(new HeadObjectCommand({ Bucket: this.options.bucket, Key: item.Key }));
         const ref = archiveRefSchema.safeParse({ backupId: id, size: head.ContentLength, sha256: head.Metadata?.sha256, createdAtUtc: head.Metadata?.created });

@@ -1,4 +1,3 @@
-// Opt-in only. Controller uses existing playwright-core; the CRM uses installed resources only.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,9 +23,6 @@ export function contained(root, target) {
   const rel = path.win32.relative(localPath(root), localPath(target));
   return Boolean(rel) && !rel.startsWith('..') && !path.win32.isAbsolute(rel);
 }
-// Pure terminal aggregation: any recorded FAIL blocks PASS; PARTIAL
-// otherwise blocks PASS. Helper FAIL (importCycle returning FAIL without
-// throwing) is recorded as a FAIL check, so it can never yield PASS.
 export function aggregateTerminalStatus(statuses) {
   const list = Array.isArray(statuses) ? statuses.filter((s) => typeof s === 'string') : [];
   if (list.includes('FAIL')) return 'FAIL';
@@ -89,11 +85,9 @@ async function main() {
       { env, windowsHide: true, timeout: 15000, maxBuffer: 1024 * 1024 })).stdout.trim();
     } catch { fail('SYSTEM_INSPECTION_FAILED'); }
   }
-  // Node lstat alone does not expose all Windows reparse tags. Inspect every ancestor in Windows.
   async function canonical(value) {
     const p = localPath(value);
     await powershell(`$p=$env:QA_CHECK_PATH;while($p){if(Test-Path -LiteralPath $p){$i=Get-Item -Force -LiteralPath $p;if($i.Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'REPARSE'}};$q=[IO.Directory]::GetParent($p);if(!$q){break};$p=$q.FullName}`, { ...baseEnv, QA_CHECK_PATH: p });
-    // Also reject aliases, short names and unexpected canonical resolution for existing paths.
     try { if ((await fs.realpath(p)).toLowerCase() !== p.replace(/[\\/]$/, '').toLowerCase()) fail('CANONICAL_MISMATCH'); }
     catch (e) { if (e.code !== 'ENOENT') throw e; }
     return p;
@@ -138,7 +132,6 @@ async function main() {
   const id = randomUUID();
   const run = path.join(qa, `run-${id}`);
   await fs.mkdir(run); await canonical(run);
-  // Protect only our newly created run; never adjust parent or installed-resource ACLs.
   await powershell(`$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User.Value;& "$env:SystemRoot\\System32\\icacls.exe" $env:QA_RUN /inheritance:r /grant:r "*$($sid):(OI)(CI)F" '*S-1-5-18:(OI)(CI)F' | Out-Null;if($LASTEXITCODE){throw 'ACL'}`, { ...baseEnv, QA_RUN: run });
   const dirs = {};
   for (const name of ['localappdata', 'roaming', 'temp', 'home']) {
@@ -245,7 +238,6 @@ async function main() {
   }
   async function stopOwned() {
     if (!child) return;
-    // ChildProcess retains the Windows process handle. Never reopen PID, kill by name or signal global stop.
     if (child.exitCode === null && child.signalCode === null) {
       const exited = new Promise(resolve => child.once('exit', resolve));
       if (!child.kill()) fail('OWNED_STOP_FAILED');
@@ -254,7 +246,6 @@ async function main() {
     child = undefined;
     if (ownedNodes.size) {
       const ids = [...ownedNodes].join(',');
-      // Observation only. Never reopen or terminate a PID discovered here.
       const gone = await powershell(`$ids=@(${ids});$end=[DateTime]::UtcNow.AddSeconds(10);do{$p=@(Get-CimInstance Win32_Process | Where-Object { $ids -contains $_.ProcessId -and $_.ExecutablePath -ieq $env:QA_NODE });if(!$p.Count){'GONE';break};[Threading.Thread]::Sleep(100)}while([DateTime]::UtcNow -lt $end);if($p.Count){'REMAINING'}`, { ...baseEnv, QA_NODE: node });
       if (gone !== 'GONE') fail('OWNED_NODE_REMAINS');
       ownedNodes.clear();
@@ -262,7 +253,6 @@ async function main() {
     await untilNoWriter();
   }
   async function untilNoWriter() {
-    // Deliberately fail rather than retry/terminate any process found after teardown.
     await noOtherLauncher();
   }
   async function visible(locator) { await locator.waitFor({ state: 'visible', timeout: 30000 }); }
@@ -272,8 +262,6 @@ async function main() {
     if (pageFailed) fail('BROWSER_OR_LAUNCHER_ERROR');
     const loading = page.getByRole('status').filter({ hasText: /Загрузка|Загружаем/ });
     await loading.first().waitFor({ state: 'hidden', timeout: timeoutMs });
-    // Next's clipped live-region announces route titles with role=alert; it is
-    // navigation accessibility, not an application error banner.
     if (await page.locator('[role="alert"]:not(#__next-route-announcer__)').filter({ visible: true }).count()) fail('VISIBLE_UI_ALERT');
     if (await page.getByText(/Сервер недоступен|Не удалось загрузить|Internal Server Error|Application error/).first().isVisible()) fail('VISIBLE_SERVER_ERROR');
   }
@@ -300,8 +288,6 @@ async function main() {
   async function hydrated() {
     await page.waitForFunction(() => Object.keys(document.querySelector('form') ?? {}).some(k => k.startsWith('__reactProps')), undefined, { timeout: 30000 });
   }
-  // Only the retained launcher ChildProcess handle owns lifecycle. A command may
-  // replace its server child, never the launcher/supervisor or our private run.
   function callbackBound(timeoutMs, signal, maximum) {
     if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > maximum || !signal) fail('CALLBACK_BOUND_REJECTED');
     const deadline = Date.now() + timeoutMs;
@@ -329,8 +315,6 @@ async function main() {
     const supervisor = supervisorPid;
     const expected = action === 'restore' ? 'restored' : 'verified';
     maintenance = { requestId, action, deadline: Date.now() + timeoutMs };
-    // Only requests already in flight at this explicit navigation can qualify
-    // as maintenance cancellations; no blanket API error suppression.
     for (const request of inFlightRequests) maintenanceRequests.set(request, maintenance);
     try {
       bound.remaining();
@@ -358,8 +342,6 @@ async function main() {
             headers: { Origin: base }, timeout: Math.min(5000, bound.remaining()), maxRedirects: 0,
           });
           if (response.status() === 401) {
-            // Restore can revoke the old session. Authenticate through the real
-            // form using the original closure only; never set cookies ourselves.
             bound.remaining();
             await page.goto(base + '/login', { waitUntil: 'domcontentloaded', timeout: Math.min(15000, bound.remaining()) });
             bound.remaining();
@@ -388,7 +370,6 @@ async function main() {
         if (job?.status === expected) {
           if (!await identity(true)) { await bound.pause(); continue; }
           bound.remaining();
-          // Return a same-origin authenticated business page, never settings.
           const document = await page.goto(base + '/clients', { waitUntil: 'networkidle', timeout: Math.min(15000, bound.remaining()) });
           if (!document?.ok() || new URL(page.url()).pathname !== '/clients') fail('COMMAND_RESUME_NOT_AUTHENTICATED');
           bound.remaining(); await healthy(Math.min(10000, bound.remaining())); bound.remaining();
@@ -435,7 +416,6 @@ async function main() {
     const v = await exec(node, ['--version'], { env, windowsHide: true, timeout: 10000 });
     if (!/^v24\.\d+\.\d+\s*$/.test(v.stdout)) fail('BUNDLED_NODE_VERSION_REJECTED');
     result.runtime.bundledNode = v.stdout.trim();
-    // Read runtime version using a new in-memory SQLite connection, never a profile DB.
     const sqlite = await exec(node, ['-e', "const D=require('better-sqlite3');const d=new D(':memory:');process.stdout.write(d.prepare('select sqlite_version() as v').get().v);d.close()"],
       { cwd: path.join(install, 'app'), env, windowsHide: true, timeout: 10000 });
     if (!/^\d+\.\d+\.\d+$/.test(sqlite.stdout)) fail('SQLITE_VERSION_REJECTED');
@@ -445,7 +425,6 @@ async function main() {
     browser = await chromium.launch({ executablePath: chromiumPath, headless: true, env,
       args: ['--disable-background-networking', '--disable-component-update', '--no-first-run'] });
     result.runtime.chromium = browser.version();
-    // BROWSER_NETWORK_ISOLATION is browser-request isolation only (not physical/offline/OS network proof).
     context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block', acceptDownloads: false });
     await context.route('**/*', async route => {
       const request = route.request();
@@ -479,8 +458,6 @@ async function main() {
           (url.pathname === '/api/v1/settings/backups/control' || !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_next/'))) {
         noteNetwork('EXPECTED_MAINTENANCE_CANCELLATION', request); return;
       }
-      // Next cancels document/RSC prefetch GETs when a router transition wins.
-      // Business API failures and every non-abort/static/server failure remain errors.
       if (aborted && request.method() === 'GET' && url.origin === base && !url.pathname.startsWith('/api/') && !url.pathname.startsWith('/_next/')) return;
       if (blockExternalBrowserNetwork && failure === 'net::ERR_BLOCKED_BY_CLIENT' && (url.protocol === 'http:' || url.protocol === 'https:') && url.origin !== base) {
         networkFailed = networkFailed || 'BROWSER_NETWORK_ISOLATION_VIOLATION';
@@ -494,15 +471,12 @@ async function main() {
       const boundedAiRejection = o['search-ai-live-proof'] && stage === 'INSTALLED_SINGLE_AI_LIVE' &&
         r.status() === 409 && r.request().method() === 'POST' && url.origin === base &&
         url.pathname === '/api/v1/property-search/parse';
-      // Optional provider rejection remains an explicit PARTIAL probe result.
-      // Other failures still block the following persistence check.
       if (!boundedAiRejection) networkFailed = true;
       noteNetwork('HTTP', r.request(), r.status());
     });
     await check('FIRST_SETUP_FORM', async () => {
       await goto('/setup'); await visible(page.getByRole('heading', { name: 'Первый запуск CRM', exact: true }));
       await hydrated(); await visible(page.getByLabel('Начальные данные'));
-      // Setup contains a password input: deliberately no screenshot of the form.
     });
     await check('SETUP_DEMO_AND_UI_LOGIN', async () => {
       await page.getByLabel('Имя руководителя').fill('QA Synthetic Manager');
@@ -532,7 +506,6 @@ async function main() {
     for (const [code, route, heading, extra] of o['focus-business'] || focusBackup || focusImport || focusSearch ? [] : screens) await check(code, async () => {
       await goto(route); await visible(page.getByRole('heading', { name: heading, exact: true }));
       await extra();
-      // Never capture backup settings/cloud-config values, even on a fresh profile.
       if (code !== 'LOCAL_BACKUP_SETTINGS') await shot(code.toLowerCase());
     });
     let cardRoute;
@@ -603,8 +576,6 @@ async function main() {
     if (o['native-backup-proof'] || o['cloud-proof']) {
       helperActive = true;
       try {
-        // Cloud helper owns fresh create/destination-specific restore commands;
-        // no proof callbacks or credential-bearing objects are supplied here.
         if (o['native-backup-proof']) {
           stage = 'INSTALLED_NATIVE_BACKUP_PROOF';
           result.nativeBackupProof = { status: 'RUNNING' };
@@ -616,8 +587,6 @@ async function main() {
           await goto(cardRoute); await healthy();
           checks.push({ code: stage, status: result.nativeBackupProof.status === 'PASS' ? 'PASS' : 'PARTIAL' });
         }
-        // Native first: never create another automatically replicated archive
-        // after cloud helper has configured its destination-specific prefixes.
         if (o['cloud-proof']) {
           stage = 'INSTALLED_CLOUD_PROOF';
           result.cloudProof = { status: 'RUNNING' };
@@ -625,7 +594,6 @@ async function main() {
           result.cloudProof = await runInstalledCloudProof({ executeInstalledCloudProof: true,
             parentCaptureDisabledAttested: true, page, base, runId: id,
             profileDirectory: dirs.localappdata, clientId: cardRoute.slice('/clients/'.length),
-            // Synthetic credential fault only; not a physical network cut.
             injectFaultMode: o['cloud-failure-proof'] ? 'S3_INVALID_KEY_ID_ONCE' : 'NONE', afterCommand });
           await goto(cardRoute); await healthy();
           checks.push({ code: stage, status: result.cloudProof.status === 'PASS' ? 'PASS' : 'PARTIAL' });
@@ -694,7 +662,6 @@ function selfTest() {
   assert.throws(() => options(['--focus-backup']));
   assert.throws(() => options(['--focus-backup', '--focus-business']));
   assert.throws(() => options(['--focus-business', '--focus-backup']));
-  // supervisor-only: background/no-WebView mode re-usable for default, focus-business, focus-backup (with proof).
   assert.equal(options(['--supervisor-only'])['supervisor-only'], true);
   assert.equal(options(['--supervisor-only', '--focus-business'])['supervisor-only'], true);
   assert.equal(options(['--supervisor-only', '--cloud-proof'])['supervisor-only'], true);
@@ -704,7 +671,6 @@ function selfTest() {
   assert.throws(() => options(['--supervisor-only', '--focus-backup', '--native-backup-proof']));
   assert.throws(() => options(['--supervisor-only', '--focus-backup', '--cloud-proof', '--native-backup-proof']));
   assert.throws(() => options(['--supervisor-only', '--native-backup-proof']));
-  // block-external-browser-network: BROWSER_NETWORK_ISOLATION only (not physical/offline/OS proof).
   assert.equal(options([])['block-external-browser-network'], undefined);
   assert.equal(options(['--supervisor-only', '--block-external-browser-network'])['block-external-browser-network'], true);
   assert.equal(options(['--supervisor-only', '--focus-business', '--block-external-browser-network'])['block-external-browser-network'], true);
@@ -712,11 +678,9 @@ function selfTest() {
   assert.throws(() => options(['--supervisor-only', '--cloud-proof', '--block-external-browser-network']));
   assert.throws(() => options(['--supervisor-only', '--focus-backup', '--cloud-proof', '--block-external-browser-network']));
   assert.throws(() => options(['--block-external-browser-network', '--block-external-browser-network']));
-  // cloud-failure-proof: opt-in synthetic credential fault; requires cloud-proof, default unchanged.
   assert.equal(options([])['cloud-failure-proof'], undefined);
   assert.equal(options(['--cloud-proof', '--cloud-failure-proof'])['cloud-failure-proof'], true);
   assert.throws(() => options(['--cloud-failure-proof']));
-  // focus-import: opt-in synthetic import UI proof; no native/cloud proof, requires supervisor+browser isolation.
   assert.equal(options([])['focus-import'], undefined);
   assert.equal(options(['--focus-import', '--supervisor-only', '--block-external-browser-network'])['focus-import'], true);
   assert.throws(() => options(['--focus-import']));
@@ -727,7 +691,6 @@ function selfTest() {
   assert.throws(() => options(['--focus-import', '--supervisor-only', '--block-external-browser-network', '--native-backup-proof']));
   assert.throws(() => options(['--focus-import', '--supervisor-only', '--block-external-browser-network', '--cloud-proof']));
   assert.throws(() => options(['--focus-import', '--supervisor-only', '--block-external-browser-network', '--cloud-failure-proof']));
-  // focus-search: opt-in synthetic search UI proof; requires supervisor+browser isolation; no native/cloud/import proof.
   assert.equal(options([])['focus-search'], undefined);
   assert.equal(options(['--focus-search', '--supervisor-only', '--block-external-browser-network'])['focus-search'], true);
   assert.throws(() => options(['--focus-search']));

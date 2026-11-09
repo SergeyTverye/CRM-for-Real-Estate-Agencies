@@ -275,7 +275,7 @@ export function TaskCardActions({
   updatedAt: string;
   initial: TaskEditValue;
   timeZone: string;
-  /** Список для смены ответственного; null — передавать задачу нельзя. */
+  /** Список для смены ответственного. null — передавать задачу нельзя. */
   users: Option[] | null;
 }) {
   const router = useRouter();

@@ -294,7 +294,7 @@ async function defaultManagerId(tx: Tx): Promise<string> {
 
 /**
  * Закрытие сделки: статус/дата + выбранные постсделочные задачи (task_type=postdeal, task_subtype_code).
- * Ответственный по умолчанию — руководитель; руководитель может явно выбрать другого сотрудника.
+ * Ответственный по умолчанию — руководитель. руководитель может явно выбрать другого сотрудника.
  */
 export async function closeDeal(actor: Actor, dealId: string, input: unknown): Promise<{ id: string; taskIds: string[] }> {
   const d = parseInput(closeSchema, input);
@@ -334,7 +334,6 @@ export async function closeDeal(actor: Actor, dealId: string, input: unknown): P
   });
 }
 
-// ───── Queries ─────
 
 export const dealFiltersSchema = zPagination.extend({
   status: zCode("dealStatus").optional(),

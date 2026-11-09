@@ -17,7 +17,6 @@ test("договор с файлом, допсоглашение, защищён
   await expect(documents.getByRole("link", { name: "договор.pdf", exact: true })).toBeVisible();
   await documents.getByRole("button", { name: "+ Загрузить" }).click();
   const modal = page.getByRole("dialog");
-  // SelectInput uses a native select in the existing UI kit.
   await modal.getByLabel("Тип документа").selectOption("agreement_addendum");
   await modal.getByLabel("Выбрать документы").setInputFiles(pdf("допсоглашение.pdf"));
   await modal.getByRole("button", { name: "Загрузить", exact: true }).click();

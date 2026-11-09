@@ -1,4 +1,3 @@
-// Read-only evidence audit. Writes only aggregate reports, never CRM records.
 const fs = require('node:fs/promises');
 const { Client } = require('pg');
 const net = require('node:net');

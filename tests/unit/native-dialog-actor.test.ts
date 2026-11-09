@@ -34,7 +34,6 @@ describe("native dialog actor ownership", () => {
       const status = kind === "export" ? "exported" : "selected";
       await writeFile(path.join(nativeDialogRoot(), requestId + ".result.json"), JSON.stringify({ status, directory,
         ...(kind === "import" ? { kind, actorUserId: owner.userId, expiresAt: Date.now() + 60000 } : {}) }), "utf8");
-      // Real supervisor consumes the original request on completion.
       await rm(path.join(nativeDialogRoot(), requestId + ".request.json"));
       await expect(backupControlCommand(other, { action: "native-result", requestId })).rejects.toThrow("Системный диалог недоступен");
       expect(await backupControlCommand(owner, { action: "native-result", requestId })).toEqual({ status, directory: kind === "folder" ? directory : undefined });
@@ -92,8 +91,6 @@ describe("native dialog actor ownership", () => {
   });
 });
 
-// Execute the actual nested UI handler in isolation; no browser, runtime or
-// customer configuration is loaded. AST extraction avoids a copied test handler.
 describe("native import post-picker role refresh", () => {
   it.each([false, true, "failure", "missing"] as const)("uses authoritative status, not stale role: %s", async standby => {
     const source = await readFile("src/app/(crm)/settings/backups/backup-panel.tsx", "utf8");

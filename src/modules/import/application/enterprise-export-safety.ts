@@ -1,11 +1,6 @@
 import type ExcelJS from 'exceljs';
 
-/** Closed grammar, not an Excel evaluator: same-sheet A1 refs, SUM, + - * / and parentheses.
- * No coercion, names, cross-sheet refs, strings, powers, dynamic/structured references or UDFs.
- * Bounds apply before parsing and range expansion. Never reads source cached results.
- */
 export function evaluateExportFormula(expression: string, cells: ReadonlyMap<string, number>): number {
-    // Do not normalize Unicode lookalikes into a different Excel expression.
     if (expression.length > 512 || /[^\x20-\x7e]/.test(expression)) throw new Error('UNSUPPORTED');
     const tokens = expression.toUpperCase().match(/\$?[A-Z]{1,3}\$?[1-9]\d{0,6}|SUM|\d+(?:\.\d+)?|[()+\-*/,:]|\S/g) ?? [];
     if (tokens.length > 128) throw new Error('UNSUPPORTED');
@@ -31,7 +26,6 @@ export function evaluateExportFormula(expression: string, cells: ReadonlyMap<str
                 if (ref(tokens[pos] ?? '') && tokens[pos + 1] === ':') {
                     const start = tokens[pos++]!.replaceAll('$', ''); pos++;
                     const end = tokens[pos++]?.replaceAll('$', '') ?? '';
-                    // Bounded one-column ranges only; rectangles intentionally unsupported.
                     const a = /^([A-Z]+)(\d+)$/.exec(start), b = /^([A-Z]+)(\d+)$/.exec(end);
                     if (!a || !b || a[1] !== b[1] || +b[2]! < +a[2]! || +b[2]! - +a[2]! > 255) throw new Error('UNSUPPORTED');
                     for (let n = +a[2]!; n <= +b[2]!; n++) value += read(`${a[1]}${n}`);
@@ -78,11 +72,9 @@ export function restoreExportFormulas(candidates: FormulaCandidate[], allowed: R
         const expected = allowed.get(cell);
         if (shared) { count('FORMULA_SHARED_UNSUPPORTED'); continue; }
         if (expected === undefined) { count('FORMULA_CELL_NOT_ALLOWED'); continue; }
-        // A self reference is never allowed, even though its authoritative literal exists.
         const dependencies = sheets.get(cell.worksheet) ?? new Map<string, number>();
         try {
             const result = evaluateExportFormula(expression ?? '', dependencies);
-            // Strict equality is conservative: floating rounding differences fall back to literals.
             if (result !== expected) { count('FORMULA_VALUE_MISMATCH'); continue; }
             cell.value = { formula: expression!, result: expected };
             count('FORMULA_PRESERVED'); report.FORMULA_CLEARED!--;

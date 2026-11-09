@@ -1,6 +1,5 @@
 import { z } from "zod";
 export interface SnapshotSource { createConsistentSnapshot(destPath: string): Promise<void> }
-/** Excludes DB writes and awaits in-flight storage writes throughout work. */
 export interface SnapshotBarrier { run<T>(work: () => Promise<T>): Promise<T> }
 export interface SnapshotValidator { validate(path: string): Promise<void> }
 export const identitySchema = z.object({

@@ -13,7 +13,6 @@ const availability: Record<string, string> = { available: "Доступно", un
 const date = (iso: string) => new Date(iso).toLocaleString("ru-RU", { timeZone: "Asia/Novosibirsk" });
 const money = (amount: string | null, unit: string | null) => amount === null ? "Цена неизвестна" : `${Number(amount).toLocaleString("ru-RU")} ${units[unit ?? ""] ?? "₽ (единица не уточнена)"}`;
 
-/** Parent search screen supplies DTOs from getGroupsForListings and refreshes via onChanged. */
 export function ListingDuplicateGroupCard({ group: initial, onChanged }: { group: DuplicateGroupDto; onChanged?: (group: DuplicateGroupDto) => void }) {
   const [replacement, setReplacement] = useState<DuplicateGroupDto | null>(null);
   const group = replacement && replacement.updatedAt > initial.updatedAt ? replacement : initial;

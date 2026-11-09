@@ -29,10 +29,6 @@ export async function setPlannerSetting(actor: Actor, input: unknown) {
   });
 }
 
-/** SQL returns at most 100 daily counters, never primary task/showing rows.
- * Predicates mirror taskScope/showingScope/agreementScope; parity is integration-tested.
- * Recurring definitions alone are expanded on the server, using the shared privacy projection.
- */
 export async function aggregatePlanner(actor: Actor, input: unknown, now = new Date()) {
   const f = parseInput(rangeSchema, input);
   if (f.clientId && !await db.client.count({ where: { id: f.clientId, ...clientScope(actor) } })) throw new NotFoundError();

@@ -7,7 +7,6 @@ import type { InteractiveSession } from "@/modules/browser-sessions/domain/sessi
 const ownerId = randomUUID(), runId = randomUUID();
 beforeAll(async () => {
   expect(await db.interactiveBrowserSession.count()).toBeGreaterThanOrEqual(0);
-  // Only this test's synthetic rows; no truncate/migrate/generate.
   await db.user.create({ data: { id: ownerId, login: `hitl-${ownerId}`, displayName: "Синтетический HITL-тест", roleCode: "realtor", passwordHash: "disabled-synthetic-account", isActive: false } });
   await db.searchRun.create({ data: { id: runId, userId: ownerId, filters: {}, status: "pending" } });
 });
@@ -30,6 +29,5 @@ it("PostgreSQL advisory lock serializes independent repositories and preserves s
   await repositories[1]!.save({ ...winner, status: "active", lastActivityAt: new Date() });
   expect((await repositories[1]!.get(winner.id))?.status).toBe("cancelled");
   expect(await repositories[1]!.claim(make())).toBe(true);
-  // Different source/claim key still shares the durable global Chromium budget.
   await expect(repositories[2]!.claim({ ...make(), source: "avito" }, 1)).rejects.toMatchObject({ code: "BROWSER_CAPACITY" });
 });

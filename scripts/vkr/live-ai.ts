@@ -26,8 +26,6 @@ async function login(page: Page, role: "MANAGER" | "REALTOR1") {
   const password = process.env[`SEED_${role}_PASSWORD`];
   if (!password) throw new Error(`Missing seed password for ${role}`);
   await page.goto(`${baseURL}/login`, { waitUntil: "domcontentloaded", timeout: 60000 });
-  // Login via same-origin browser fetch avoids compiling the concurrently edited
-  // /today route; credentials remain inside the local browser request.
   await api(page, "POST", "/api/v1/auth/login", { login: process.env[`SEED_${role}_LOGIN`] ?? role.toLowerCase(), password });
 }
 async function readySearch(page: Page) {
@@ -95,8 +93,6 @@ async function main() {
         SCRAPER_ENABLED: "true", SCRAPER_DEMO_FIXTURES: "false", SCRAPER_BROWSER_ENABLED: process.env.SCRAPER_BROWSER_ENABLED ?? "true", SCRAPER_JOB_TIMEOUT_MS: process.env.SCRAPER_JOB_TIMEOUT_MS ?? "60000",
         SCRAPER_BROWSER_EXECUTABLE_PATH: "D:/chrome-win64/chrome.exe",
         YANDEX_WEB_SEARCH_ALLOWED_DOMAINS: "cian.ru,mirkvartir.ru,onrealt.ru,realty.yandex.ru,domclick.ru",
-        // crm_demo already contains five synthetic web jobs for realtor1. Keep
-        // those records; reserve at most five new LIVE jobs in this session.
         YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY: "10",
         COOKIE_SECURE: "false", LOG_LEVEL: "warn", INSTANCE_ID: "vkr-live-ai-3310" },
     });
@@ -140,7 +136,6 @@ async function main() {
     await shot(manager, `00-budget-${mode}`);
     const page = await browser.newPage({ baseURL, viewport: { width: 1440, height: 1000 }, locale: "ru-RU", timezoneId: "Asia/Novosibirsk" });
     page.setDefaultTimeout(30000);
-    // The legacy UI uses native dialogs; no dialogs are introduced by this harness.
     page.on("dialog", d => d.accept());
     await login(page, "REALTOR1");
     const user = await db.user.findFirstOrThrow({ where: { login: process.env.SEED_REALTOR1_LOGIN ?? "realtor1" } });
@@ -152,8 +147,6 @@ async function main() {
     if (mode === "trial1" || mode === "resume1") {
       if (state.parses === 0) await parse(page, "Продажа офиса в Новосибирске, площадь от 30 до 500 м², цена от 1000000 до 50000000 рублей, любой этаж, любые районы, все продавцы", "01-query", "02-ai-parsed-filters");
       else {
-        // Resume with the already paid parse by filling actual visible controls;
-        // no provider call is repeated after a harness/UI selector change.
         await page.getByLabel(/^Операция/).selectOption("sale");
         await page.getByLabel(/^Этаж/).selectOption("any");
         await page.getByLabel("Цена от", { exact: true }).fill("1000000");
@@ -164,7 +157,6 @@ async function main() {
         await page.getByLabel("Офис", { exact: true }).check();
       }
       for (const button of await page.getByRole("button", { name: /^Убрать район / }).all()) await button.click();
-      // A broad first search avoids silently interpreting an empty subset as unavailable sources.
       await page.getByLabel("Обязательные признаки", { exact: true }).fill("");
       await page.getByLabel("Желательные признаки", { exact: true }).fill("");
       const result = mode === "resume1" ? await api<Record<string, unknown> & { id: string; filters: { sources: string[] }; results: { listingId: string; verdict: string; listing: { address: string | null; sourceMethod: string } }[] }>(page, "GET", "/api/v1/property-search/runs/33f90440-7a66-4d5f-bc8a-dadb0c271906") : await run(page, "03-confirm", "04-live-results");
@@ -309,7 +301,6 @@ async function main() {
   } finally {
     if (applied && original) {
       const current = await api<Settings>(manager, "GET", "/api/v1/settings/ai");
-      // Do not overwrite a concurrent manager edit.
       if (current.setting.updatedAt !== applied.setting.updatedAt) throw new Error("Settings changed concurrently; manual reconciliation required; original saved in data");
       const restored = await api<Settings>(manager, "PUT", "/api/v1/settings/ai", { ...settingInput(original.setting), expectedUpdatedAt: current.setting.updatedAt });
       expect(settingInput(restored.setting)).toEqual({ ...settingInput(original.setting), expectedUpdatedAt: restored.setting.updatedAt });
@@ -355,7 +346,6 @@ async function apiRun(page: Page, body: unknown) {
   if (state.runs >= 10) throw new Error("Run cap reached");
   state.runs++; await save();
   const data = await api<Record<string, unknown> & { id: string; results: { isNew: boolean; priceChanged: boolean; verdict: string }[] }>(page, "POST", "/api/v1/property-search/runs", body);
-  // Store only query, source status and public address/price/area/URL, never seller DTOs.
   state.events.push({ time: new Date().toISOString(), type: "scraper run", id: data.id, filters: data.filters, sources: data.sources }); await save();
   console.log(`Run ${data.id} sources=${JSON.stringify(data.sources)} results=${data.results.length}`);
   return data;

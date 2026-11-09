@@ -3,7 +3,6 @@ import { getConfig } from "@/shared/config/env";
 import { InfrastructureError, RateLimitError } from "@/shared/errors";
 
 let active = 0;
-/** Standalone HTML and data URLs only: no navigation, cookies, scripts, fonts or remote image fetches. */
 export async function htmlToPdf(html: string): Promise<Buffer> {
   if (active >= 2) throw new RateLimitError("Формируются другие PDF. Повторите через несколько секунд.");
   active++;
@@ -25,7 +24,6 @@ export async function htmlToPdf(html: string): Promise<Buffer> {
       return page.pdf({ format: "A4", preferCSSPageSize: true, printBackground: true });
     };
     const rendering = render();
-    // Closing Chromium interrupts pending protocol calls; observe their late rejection too.
     void rendering.catch(() => undefined);
     return await Promise.race([rendering, new Promise<never>((_, reject) => {
       timer = setTimeout(() => {

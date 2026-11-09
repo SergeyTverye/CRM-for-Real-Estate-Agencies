@@ -8,27 +8,19 @@ const rootFiles = new Set(['package.json', 'desktop-manifest.json', 'sbom.cdx.js
 const privateName = /^(?:\.env(?:\..*)?|clouds\.env|\.git|private-data|private-imports|customerdata)$/i;
 const privateFile = /\.(?:db|sqlite|crmbackup|dump)(?:-(?:wal|shm|journal))?$/i;
 const developmentFile = /^(?:AGENTS|CLAUDE)(?:\..*)?$|^(?:tz|ТЗ)(?:[_. -].*)?\.md$|\.(?:md|mdx|ts|tsx|mts|cts)$/i;
-// No current runtime code reads repository templates (examples are demo inputs),
-// and public/ is empty. Add exact reviewed paths here when runtime usage is added;
-// an extension allowlist would also admit unrelated logs, workbooks or secrets.
 const runtimeAssets = new Set([]);
 
-/** Destination-relative policy: never use repository-wide glob exclusions as a boundary. */
 export function isRuntimeResource(relative, directory = false, dist = '.next-desktop') {
   if (!relative) return directory;
   if (path.posix.isAbsolute(relative) || path.win32.isAbsolute(relative)) return false;
   const parts = relative.replaceAll('\\', '/').split('/');
   if (parts.some(p => !p || p === '.' || p === '..' || p.includes(':') || privateName.test(p) || privateFile.test(p))) return false;
   const normalized = parts.join('/');
-  // Dependencies own their package layouts, source assets and legal notices.
-  // In particular, do NOT strip *.md / LICENSE / README from npm runtime packages.
   if (parts[0] === 'node_modules') return directory || parts.length > 1;
   if (parts[0] === dist && parts[1] === 'node_modules') return directory || parts.length > 2;
-  // These are compiled routes/static assets, not user data directories.
   const compiledNext = parts[0] === dist && ['server', 'static'].includes(parts[1]);
   if (!compiledNext && parts.some(p => /^(?:data|backups)$/i.test(p))) return false;
   if (parts.some(p => /^(?:AGENTS|CLAUDE)(?:\..*)?$/i.test(p))) return false;
-  // Node/Chromium distributions also carry upstream notices, not app docs.
   if (['node', 'chromium'].includes(parts[0])) return directory || parts.length > 1;
   if (['public', 'templates'].includes(parts[0])) {
     return directory
@@ -50,12 +42,10 @@ export function isRuntimeResource(relative, directory = false, dist = '.next-des
     if (parts[2] === 'migrations') return directory || /\.(?:sql|toml)$/.test(parts.at(-1));
     return !directory && parts.length === 3 && ['schema.prisma', 'constraints.sql', 'compatibility.json'].includes(parts[2]);
   }
-  // Only the bundled client, not generated TypeScript or application sources.
   if (directory && ['workers', 'generated', 'generated/sqlite'].includes(normalized)) return true;
   return false;
 }
 
-/** Reject links before cp can dereference them. Denied directories are never traversed. */
 export async function safeCopyTrace(from, to, { prefix = '', dist = '.next-desktop' } = {}) {
   await cp(from, to, { recursive: true, dereference: false, filter: async source => {
     const relative = path.relative(from, source).split(path.sep).join('/');
@@ -63,9 +53,6 @@ export async function safeCopyTrace(from, to, { prefix = '', dist = '.next-deskt
     const info = await lstat(source);
     if (!isRuntimeResource(target, info.isDirectory(), dist)) return false;
     if (info.isSymbolicLink()) {
-      // Next standalone uses junctions for hashed package aliases on Windows.
-      // Materialize ONLY an alias to its exact package in this trace's own
-      // node_modules. Arbitrary links and links outside the trace remain fatal.
       const alias = target.match(new RegExp('^' + dist.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '/node_modules/((?:@[^/]+/)?[^/]+)-[a-f0-9]{16}$'));
       if (!prefix && alias) {
         if (!/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i.test(alias[1])) throw Error('RESOURCE_SYMLINK');
@@ -100,8 +87,6 @@ export async function assertRuntimeResources(root, dist = '.next-desktop') {
   await walk(root);
 }
 
-/** Next's trace may contain only package metadata. Refresh only existing hashed
- * aliases from the exact production install, never from the host/source tree. */
 export async function refreshRuntimeAliases(root, dist = '.next-desktop') {
   if ((await lstat(root)).isSymbolicLink()) throw Error('RESOURCE_SYMLINK');
   const rootPath = await realpath(root);
@@ -136,10 +121,6 @@ export async function refreshRuntimeAliases(root, dist = '.next-desktop') {
   return count;
 }
 
-// Compiled server inventory covers only files accepted by the destination
-// policy. Links, escapes and policy-rejected names fail closed.
-// Pre-copy safety is once per root: destination/source ancestors and roots
-// are checked before any inventory or copy. Per-entry lstat below remains.
 function toAbsoluteNormalized(input) {
   if (typeof input !== 'string' || !input || input.includes('\0')) throw Error('RESOURCE_SYMLINK');
   if (!path.isAbsolute(input)) throw Error('RESOURCE_SYMLINK');
@@ -226,8 +207,6 @@ async function inventoryCompiledServer(directory, dist) {
   return entries;
 }
 
-// Fail-closed completeness check: every file from this build's compiled
-// server output must exist in the bundle destination with identical bytes.
 export async function assertCompiledServerComplete(compiledDir, resourcesDir, { dist = '.next-desktop' } = {}) {
   await assertSupplementRootsSafe(compiledDir, resourcesDir);
   let sourceStat;
@@ -252,9 +231,6 @@ export async function assertCompiledServerComplete(compiledDir, resourcesDir, { 
   }
 }
 
-// Merge this build's compiled server tree into the bundle destination,
-// then verify completeness. Uses the same prefix/policy/link handling as
-// other resource copies and reads only the given build output directory.
 export async function supplementCompiledServer(compiledDir, resourcesDir, { dist = '.next-desktop' } = {}) {
   await assertSupplementRootsSafe(compiledDir, resourcesDir);
   let sourceStat;

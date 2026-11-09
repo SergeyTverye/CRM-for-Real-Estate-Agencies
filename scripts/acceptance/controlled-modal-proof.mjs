@@ -1,21 +1,4 @@
 #!/usr/bin/env node
-/**
- * Bounded actual-browser modal regression script.
- *
- * Extracts the exact exported Modal declaration from a supplied client-kit.tsx
- * (TypeScript AST), compiles it with a synthetic React harness via esbuild
- * (in-memory, write:false), and runs required scenarios in real Chromium via
- * playwright-core against actual HTMLDialogElement behavior.
- *
- * CLI (opt-in execution only):
- *   --execute                 required to run browser scenarios
- *   --source <path>           exact actual source file (required with --execute)
- *   --chromium <abs path>     absolute Chromium executable (required with --execute)
- *   --self-test               pure argument/parse checks only, no browser
- *
- * Default: no side effects. No secrets/env/debug/HAR/video/screenshot.
- * No browser installation/download. Synthetic fixtures only.
- */
 
 import fs from "node:fs";
 import path from "node:path";
@@ -82,8 +65,6 @@ function validateExecuteArgs(args) {
 }
 
 export function extractModalSource(tsSource) {
-  // Dynamic import so --self-test of arg parsing can work without loading heavy deps in odd contexts;
-  // but deps are present. Keep it simple.
   return import("typescript").then((tsMod) => {
     const ts = tsMod.default ?? tsMod;
     const sf = ts.createSourceFile(
@@ -93,7 +74,6 @@ export function extractModalSource(tsSource) {
       true,
       ts.ScriptKind.TSX,
     );
-    /** @type {string|null} */
     let modalText = null;
     const visit = (node) => {
       if (
@@ -119,8 +99,6 @@ export function extractModalSource(tsSource) {
 }
 
 export function buildHarnessBundle(modalText) {
-  // The extracted Modal uses useRef, useEffect, useId from React.
-  // We wrap it in a module that also exports a synthetic harness app.
   const harness = `
 import React, { useEffect, useId, useRef, useState, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -130,7 +108,6 @@ ${modalText}
 
 const ARCHIVE_UUID = "00000000-0000-4000-8000-000000000001";
 
-// Wrappers locate the real dialogs without modifying the extracted declaration.
 function WrappedHarness() {
   const [phase, setPhase] = useState("idle");
   const [selectedArchive] = useState(ARCHIVE_UUID);
@@ -154,7 +131,6 @@ function WrappedHarness() {
     }),
     closeRapidControlled: () => setRapidOpen(false),
     reopenRapidControlled: () => {
-      // Commit both prop edges in one task, before the queued native close.
       flushSync(() => setRapidOpen(false));
       flushSync(() => setRapidOpen(true));
     },
@@ -233,8 +209,6 @@ function htmlDoc(scriptText) {
 
 async function settle(page, turns = 4) {
   for (let i = 0; i < turns; i++) {
-    // Close events are queued by native dialog algorithms, not microtasks.
-    // Cross a rendering opportunity AND a subsequent task for React effects.
     await page.evaluate(() => new Promise((resolve) => {
       requestAnimationFrame(() => setTimeout(resolve, 0));
     }));
@@ -243,8 +217,6 @@ async function settle(page, turns = 4) {
 
 async function runScenarios(page) {
   const results = {};
-  // Only errors created by our assertions can supply output codes. Never inspect
-  // arbitrary exception messages (including Playwright's paths and call logs).
   const assertionCodes = new WeakMap();
   const check = (condition, code) => {
     if (!condition) {
@@ -267,9 +239,6 @@ async function runScenarios(page) {
     return active === 0 && !st.listOpen && !st.restoreOpen && !st.nativeOpen && !st.rapidOpen;
   };
   const cleanup = async () => {
-    // Real native dismissal honors parent callbacks. Restore dismissal may open
-    // list, so drain that legitimate transition too; never remove open/inert,
-    // mutate React state, unmount, reload, or force a click to hide a failure.
     for (let i = 0; i < 8; i++) {
       await settle(page);
       if (await noActiveModal()) return;
@@ -289,8 +258,6 @@ async function runScenarios(page) {
     } catch (e) {
       errorCode = assertionCodes.get(e) ?? "SCENARIO_ACTION_FAILED";
     }
-    // Snapshot evidence before cleanup so cleanup callbacks cannot masquerade
-    // as scenario callbacks. Only bounded synthetic counts leave the page.
     let accounting;
     try {
       accounting = await page.evaluate(() => {
@@ -426,8 +393,6 @@ async function runScenarios(page) {
   });
 
   await run("LISTENER_EVENT_ORDERING", async () => {
-    // Controlled close must emit the real native event without a callback;
-    // a subsequent native dismissal must still reach the current listener.
     await page.getByTestId("open-rapid").click();
     await settle(page);
     const before = (await state()).rapidCloseCount;

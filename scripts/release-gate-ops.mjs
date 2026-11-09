@@ -1,4 +1,3 @@
-// Synthetic release-gate harness. Never prints credentials or persists cookies.
 import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -17,7 +16,6 @@ const dc = (...args) => {
   try {
     return execFileSync("docker", ["compose", "-p", project, "--project-directory", root, "--env-file", `${root}/.env`, "-f", `${root}/compose.yaml`, ...args], { cwd: root, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
   } catch {
-    // Child-process errors include argv; never expose ENV credentials in argv.
     throw new Error("Docker Compose QA operation failed; inspect container health locally");
   }
 };
@@ -42,7 +40,6 @@ try {
     const newPassword = randomBytes(28).toString("base64url") + "Aa9";
     await request("/api/v1/auth/change-password", { currentPassword: password, newPassword });
     password = newPassword;
-    // Password change revokes sessions; authenticate again.
     const fresh = await request("/api/v1/auth/login", { login, password });
     cookie = fresh.headers.get("set-cookie").split(";")[0];
     assert((await fresh.json()).mustChangePassword === false, "password change persisted");
@@ -82,7 +79,6 @@ try {
 } finally {
   if (cookie) await fetch(url + "/api/v1/auth/logout", { method: "POST", headers: { origin: url, cookie } }).catch(() => {});
   if (temporary) {
-    // Keep authored business history while revoking this disposable login.
     dc("exec", "-T", "db", "psql", "-U", env.POSTGRES_USER, "-d", env.POSTGRES_DB, "-v", "ON_ERROR_STOP=1", "-c", `UPDATE users SET is_active=false WHERE login='${login}'; DELETE FROM user_sessions WHERE user_id IN (SELECT id FROM users WHERE login='${login}');`);
   }
 }

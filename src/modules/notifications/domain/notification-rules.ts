@@ -13,7 +13,6 @@ export function notificationKey(recipient: string, sourceType: string, sourceId:
   return `${recipient}:${sourceType}:${sourceId}:${kind}:${occurrence.toISOString()}`;
 }
 
-/** Context is supplied only after checking every linked client at read time. */
 export const NOTIFICATION_TITLES: Record<string, string> = {
   task: "Срок задачи", assignment: "Вам назначена задача", showing: "Запланирован показ",
   agreement: "Контроль срока договора", pause_return: "Вернуться к потребности из паузы",
@@ -27,7 +26,6 @@ export function notificationText(kind: string, context: { title?: string | null;
   return { title, detail };
 }
 
-/** Presentation grouping never merges source records or changes unread counts. */
 export function groupNotifications<T extends { id: string; kind: string; triggerAt: string }>(items: T[], timeZone: string) {
   const groups = new Map<string, { key: string; day: string; label: string; items: T[] }>();
   for (const item of items) {

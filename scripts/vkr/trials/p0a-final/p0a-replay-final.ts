@@ -1,4 +1,3 @@
-/** Produce contact-free REPLAY projections from already captured bytes; zero network. */
 import { readFile, writeFile } from "node:fs/promises";
 import { load } from "cheerio";
 import RealEstateScraper from "real-estate-scrapper";
@@ -20,7 +19,6 @@ async function main() {
     const safe = `<html><head><link rel="canonical" href="${row.url}"></head><body>${source === "mirkvartir" ? `<section><h4>Информация об объявлении</h4>${fragment}</section>` : fragment}</body></html>`;
     if (source !== "yandex") await writeFile(`${dir}/${source}-${index}.html`, safe + "\n");
     else {
-      // Reconstruct only the date-bearing card node identified by offerId.
       let own: Record<string, unknown> | undefined;
       const walk = (node: unknown, depth = 0) => {
         if (!node || typeof node !== "object" || depth > 35) return;
@@ -35,7 +33,6 @@ async function main() {
       });
       if (own) await writeFile(`${dir}/${source}-${index}.html`, `<script>window.INITIAL_STATE = ${JSON.stringify({ card: { offerId: row.sourceListingId, creationDate: own.creationDate, updateDate: own.updateDate } })};</script>\n`);
     }
-    // Retain only key names/count, never adjacent state values/agent tokens.
     row.structuredDateKeys = [...new Set((html.match(/datePublished|dateModified|publishedAt|creationDate|createdAt/gu) ?? []))];
     delete row.structured; delete row.titleDateLabels; delete row.candidates;
     row.datesAfter = extractListingDates(source, html, { id: row.sourceListingId, url: row.url }, row.fetchedAt);
