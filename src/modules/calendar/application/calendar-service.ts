@@ -75,10 +75,16 @@ export async function listCalendar(actor: Actor, input: unknown, options: { recu
       ...(options.recurringOnly ? { recurrenceRule: { not: null } } : {}),
       ...(f.employee ? { ownerUserId: f.employee } : {}), OR: [{ endAt: { gt: f.from } }, { recurrenceRule: { not: null } }] }, take: 1001 });
     if (events.length > 1000) throw new ValidationError("Слишком много встреч. Уточните период или сотрудника.");
-    for (const e of events) {
-      const canRead = (e.visibility !== "private" || e.ownerUserId === actor.userId) && await linksAccessible(db, actor, e);
+    // Один батч вместо до 4 запросов на событие (linksAccessible в цикле — N+1).
+    const [access, needClient] = await Promise.all([
+      batchLinksAccessible(db, actor, events),
+      client ? needClientMap(db, events) : Promise.resolve(new Map<string, string | null>()),
+    ]);
+    for (let i = 0; i < events.length; i++) {
+      const e = events[i]!;
+      const canRead = (e.visibility !== "private" || e.ownerUserId === actor.userId) && access[i]!;
       // Client filtering must not reveal who attends another employee's personal meeting.
-      if (client && (!canRead || (e.clientId !== client && (!e.needId || !await db.clientNeed.count({ where: { id: e.needId, clientId: client } }))))) continue;
+      if (client && (!canRead || (e.clientId !== client && needClient.get(e.id) !== client))) continue;
       for (const occurrence of occurrences({ start: e.startAt.toISOString(), end: e.endAt.toISOString(), recurrenceRule: e.recurrenceRule }, f.from, f.to, timeZone)) {
         const item: CalendarItem = { id: `calendar_event:${e.id}:${occurrence.start}`, sourceId: e.id,
           type: "calendar_event", title: e.title, description: e.description, ...occurrence, status: "scheduled",
@@ -105,6 +111,37 @@ async function linksAccessible(tx: DbOrTx, actor: Actor, data: Links): Promise<b
     { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] } })) return false;
   if (data.propertyId && !await tx.property.count({ where: { id: data.propertyId } })) return false;
   return true;
+}
+
+/**
+ * Тот же предикат, что linksAccessible, но для списка событий: ≤4 запроса
+ * вместо до 4 на каждое событие. Семантика проверок идентична поштучной.
+ */
+export async function batchLinksAccessible(tx: DbOrTx, actor: Actor, items: Links[]): Promise<boolean[]> {
+  const pick = (key: keyof Links) => [...new Set(items.map(e => e[key]).filter((v): v is string => !!v))];
+  const clientIds = pick("clientId"), needIds = pick("needId"), dealIds = pick("dealId"), propertyIds = pick("propertyId");
+  const [clients, needs, deals, props] = await Promise.all([
+    clientIds.length ? tx.client.findMany({ where: { id: { in: clientIds }, ...clientScope(actor) }, select: { id: true } }) : [],
+    needIds.length ? tx.clientNeed.findMany({ where: { AND: [{ id: { in: needIds } }, needScope(actor), { client: clientScope(actor) }] }, select: { id: true } }) : [],
+    dealIds.length ? tx.deal.findMany({ where: { AND: [{ id: { in: dealIds } }, dealScope(actor),
+      { parties: { every: { OR: [{ clientId: null }, { client: clientScope(actor) }] } } }] }, select: { id: true } }) : [],
+    propertyIds.length ? tx.property.findMany({ where: { id: { in: propertyIds } }, select: { id: true } }) : [],
+  ]);
+  const has = (rows: { id: string }[]) => new Set(rows.map(r => r.id));
+  const okClient = has(clients), okNeed = has(needs), okDeal = has(deals), okProp = has(props);
+  return items.map(e =>
+    (!e.clientId || okClient.has(e.clientId)) &&
+    (!e.needId || okNeed.has(e.needId)) &&
+    (!e.dealId || okDeal.has(e.dealId)) &&
+    (!e.propertyId || okProp.has(e.propertyId)));
+}
+
+/** needId события → clientId потребности (для фильтра по клиенту без N+1). */
+export async function needClientMap(tx: DbOrTx, events: { id: string; needId?: string | null }[]): Promise<Map<string, string | null>> {
+  const ids = [...new Set(events.map(e => e.needId).filter((v): v is string => !!v))];
+  const rows = ids.length ? await tx.clientNeed.findMany({ where: { id: { in: ids } }, select: { id: true, clientId: true } }) : [];
+  const byNeed = new Map(rows.map(r => [r.id, r.clientId]));
+  return new Map(events.map(e => [e.id, e.needId ? byNeed.get(e.needId) ?? null : null]));
 }
 
 const eventFields = z.object({

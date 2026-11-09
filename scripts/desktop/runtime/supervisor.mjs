@@ -72,7 +72,7 @@ async function waitReady(server) {
   while (Date.now() < deadline && !stopping) {
     if (server.exitCode !== null) throw Error('SERVER_EXIT_BEFORE_READY');
     try { if ((await fetch('http://127.0.0.1:' + port + '/api/health/ready', { signal: AbortSignal.timeout(2000) })).ok) return; } catch {}
-    await new Promise(r => setTimeout(r,300));
+    await new Promise(r => setTimeout(r,200));
   }
   throw Error('READY_TIMEOUT');
 }
