@@ -214,3 +214,15 @@
 | Апартаменты, квартира, дом, любое нежилое | SearchFilters.propertyKinds, evaluation.ts, search-workspace.tsx | geography-v323.test.ts, residential.test.ts, LIVE type sweep | PASS реализации; фактический юридический статус проверяется человеком |
 | Сохранение условий PG/SQLite | существующая SavedSearch.filters | property-search.test.ts round-trip locations/propertyKinds | PASS: PG/SQLite round-trip и 3 browser save/read проверки; live-search-v323-geo.md |
 | UX, 1366×768, 3 сценария | location-picker, подсказка пустой выдачи, summary типа | v323-geo-ui.cjs | PASS интерфейса: 3 сценария, 6 PNG; подбор PARTIAL из-за внешних ограничений, live-search-v323-geo.md |
+
+## Поиск v3.2.3 — улучшения качества (09.11.2026)
+
+| Требование задачи | Реализация | Проверка | Статус |
+|---|---|---|---|
+| Комнаты studio/1/2/3/4+, ИЛИ, native URL и локальная проверка | SearchFilters.rooms, housing, source-filters, форма | quality-v323, rooms-v323, PG/SQLite snapshot + AI confirmation | PASS реализации; LIVE-ограничения в отчёте |
+| Только явный период, отдельный посуточный признак | listing-quality, parser-extension, Cian/Youla fields, rentalPeriod | explicit period/card isolation unit, PG/SQLite persistence; REPLAY 129 старых снимков | PASS правил; PARTIAL полноты источников |
+| Апартаменты из явного слова/флага; отсутствие не доказывает обратное | listingQuality, evaluation.propertyKind | quality-v323, geography-v323 | PASS правил; юридические документы проверяет сотрудник |
+| Замена только неявного города, сохранённые/повторные условия | LocationPicker implicitDefault, chooseLocations, resetAdvancedSearchFilters | unit; PG/SQLite JSON round-trip и повторный результат | PASS |
+| Много типов: две ветви, частота ≥1 с, deadline/partial | boundSourceQueries + scraper-adapter, fair source deadline, UI progress | v322-housing-scheduling, residential-bounds, real queue PG/SQLite | PASS реализации; фактическое время LIVE в отчёте |
+
+Доказательства LIVE/REPLAY и остаточные ограничения: [После улучшений качества](vkr/live-search-v323-e2e.md#после-улучшений-качества).

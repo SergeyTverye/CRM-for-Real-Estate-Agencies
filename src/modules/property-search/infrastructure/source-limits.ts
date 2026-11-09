@@ -32,10 +32,12 @@ export function resolveSourceDepth(source: Source, options: DepthOptions = {}, b
  */
 export function boundSourceQueries(source: Source, queries: RealEstateScraper.Query[], depth: ReturnType<typeof resolveSourceDepth>) {
   const nativeMultiType = ["cian", "yandex", "avito", "domclick", "youla"].includes(source);
-  const variants = queries.reduce((count, query) => count + (nativeMultiType ? 1 : Math.max(1, query.types?.length ?? 0)), 0);
+  // Expose package-internal OR branches to the bounded adapter scheduler.
+  const expanded = queries.flatMap(query => !nativeMultiType && (query.types?.length ?? 0) > 1 ? query.types!.map(type => ({ ...query, type, types: [type] })) : [query]);
+  const variants = expanded.length;
   return {
-    queries: queries.map((query, index) => ({ ...query,
-      limit: Math.max(1, Math.floor(depth.limit / queries.length) + (index < depth.limit % queries.length ? 1 : 0)),
+    queries: expanded.map((query, index) => ({ ...query,
+      limit: Math.max(1, Math.floor(depth.limit / expanded.length) + (index < depth.limit % expanded.length ? 1 : 0)),
     })),
     maxPages: depth.maxPages * variants,
     // Even limit=1 fans out to six one-row calls; the shared detail reader can

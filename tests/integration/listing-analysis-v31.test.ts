@@ -310,3 +310,16 @@ it("v323 REPLAY preview and confirmation retain multiple locations and non-resid
  expect(confirmed.filters).toMatchObject(proposed);
  expect(f.provider.requests).toHaveLength(1);
 });
+
+it("v323 room-count AI draft persists only after owner confirmation and retains rooms on refinement",async()=>{
+ const current=SearchFilters.parse({operation:"sale",hasPhotos:true});
+ const proposed=SearchFilters.parse({operation:"sale",locations:["berdsk"],propertyKinds:["flat"],rooms:["2"],priceTo:"5000000"});
+ const f=fake(JSON.stringify({filters:proposed,clarificationQuestion:null}));
+ const preview=await previewAnalysisQuery(users.realtor1,{text:"Двушка в Бердске до 5 млн",currentFilters:current},f.ai);
+ expect(preview.filters).toMatchObject({rooms:["2"],locations:["berdsk"],hasPhotos:true});
+ const input={pendingActionId:preview.pendingActionId,confirmed:true,currentFilters:current};
+ await expect(confirmAnalysisQuery(users.realtor2,input)).rejects.toMatchObject({code:"NOT_FOUND"});
+ const confirmed=await confirmAnalysisQuery(users.realtor1,input);
+ expect(confirmed.filters).toMatchObject({rooms:["2"],locations:["berdsk"],hasPhotos:true});
+ expect(SearchFilters.parse(JSON.parse(JSON.stringify(confirmed.filters))).rooms).toEqual(["2"]);
+});

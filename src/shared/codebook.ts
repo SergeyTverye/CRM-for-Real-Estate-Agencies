@@ -396,7 +396,7 @@ export const DISPLAY_LABELS: Record<string, Record<string, string>> = {
   property_type: { retail: "Торговое помещение", commercial_premises: "Нежилое помещение", office: "Офис", warehouse: "Склад", production: "Производство", psn_universal: "ПСН / универсальное", free_purpose: "Свободное назначение", residential: "Жилая" },
   criterion_state: { matched: "Совпадает", contradicted: "Не соответствует", unknown: "Нет сведений" },
   criterion_source: { structured: "Характеристики", rule: "Проверка описания", ai: "Анализ ИИ", manual: "Ручная проверка" },
-  criterion: { city: "Локация", propertyKind: "Тип объекта", operation: "Операция", purpose: "Назначение", priceUnit: "Единица цены", price: "Цена", area: "Площадь", floor: "Этаж", district: "Район", owner: "Собственник" },
+  criterion: { rooms: "Комнаты", rentalPeriod: "Период аренды", city: "Локация", propertyKind: "Тип объекта", operation: "Операция", purpose: "Назначение", priceUnit: "Единица цены", price: "Цена", area: "Площадь", floor: "Этаж", district: "Район", owner: "Собственник" },
   price_unit: { rub_total: "за объект", rub_month: "в месяц", rub_m2: "за м²", rub_m2_month: "за м² в месяц", rub_year: "в год", rub_m2_year: "за м² в год", total: "за объект", per_month: "в месяц", per_m2: "за м²", per_m2_month: "за м² в месяц", per_year: "в год", per_m2_year: "за м² в год" },
   external_source: { ...CODEBOOK.externalSource, import: "Импорт выгрузки", feed: "Импорт выгрузки", CRM: "CRM" },
   lead_source: { referral: "Рекомендация", website: "Сайт агентства" },

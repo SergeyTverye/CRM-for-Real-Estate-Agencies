@@ -5,6 +5,7 @@ import { convertPrice } from "./prices";
 import { freshnessState } from "./freshness";
 import { FEATURE_DEFINITIONS, type FeatureKey } from "./filter-catalog";
 import { describedUndergroundFloor } from "./floor";
+import { parseRooms, residentialRooms, roomChoice } from "./housing";
 
 const featureRules = [
   { key: "separate_entrance", request: /отдельн\S*\s+вход/iu, fact: /отдельн\S*\s+вход\S*/iu },
@@ -84,12 +85,19 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   const kinds = filters.propertyKinds ?? [];
   if (kinds.length) {
     const text = [listing.title, listing.sourceCategoryRaw].filter(Boolean).join(" ");
-    const apartments = /апартамент/iu.test(text);
+    const apartments = listing.structuredFeatures.apartments === true || /апартамент/iu.test(text + " " + listing.description);
     const flat = /квартир|студи/iu.test(text) && !apartments;
     const house = /(?<![\p{L}])дом(?![\p{L}])|коттедж|таунхаус/iu.test(text);
     const nonResidential = apartments || !flat && !house && (!!listing.purpose && listing.purpose !== "residential" || /нежил|коммерческ/iu.test(text));
     const matches = kinds.some(k => k === "apartments" ? apartments : k === "flat" ? flat : k === "house" ? house : nonResidential);
-    criteria.push({ criterion: "propertyKind", state: matches ? "matched" : apartments || flat || house || nonResidential ? "contradicted" : "unknown", source: "rule", evidence: text || "Тип объекта не подтверждён" });
+    criteria.push({ criterion: "propertyKind", state: matches ? "matched" : kinds.length === 1 && kinds[0] === "apartments" ? "unknown" : apartments || flat || house || nonResidential ? "contradicted" : "unknown", source: "rule", evidence: apartments ? "Источник явно указывает апартаменты" : text || "Тип объекта не подтверждён" });
+  }
+  if (residentialRooms(filters)) {
+    const rooms = parseRooms(listing.rooms, listing.title ?? "");
+    add("rooms", rooms !== null, rooms !== null && filters.rooms!.includes(roomChoice(rooms)), rooms === null ? "Число комнат не указано" : rooms === 0 ? "Студия" : `${rooms} комн.`);
+  }
+  if (filters.operation === "rent" && listing.structuredFeatures.rentalPeriod === "day") {
+    criteria.push({ criterion: "rentalPeriod", state: "contradicted", source: "structured", evidence: "Посуточная аренда: источник явно указал оплату за сутки; поиск рассчитан на длительную аренду" });
   }
   const wantsResidential = (filters.purposes as string[]).includes("residential");
   const commercialPurposes = filters.purposes.filter(p => p !== "residential");
@@ -167,7 +175,7 @@ export function redactPublicDescription(description: string): string {
 }
 export async function analyzeUnresolved(listing: NormalizedListing, evaluation: ListingEvaluation, analyzer: DescriptionAnalyzer, signal?: AbortSignal): Promise<ListingEvaluation> {
   // Typed ranges/negated boolean conditions already carry precise rules; AI cannot invent measurements.
-  const permitted = new Set([...evaluation.criteria, ...evaluation.preferences].filter(c => c.source === "rule" && !c.criterion.startsWith("features.") && !["owner", "purpose", "freshness", "city", "district", "propertyKind"].includes(c.criterion)).map(c => c.criterion));
+  const permitted = new Set([...evaluation.criteria, ...evaluation.preferences].filter(c => c.source === "rule" && !c.criterion.startsWith("features.") && !["owner", "purpose", "freshness", "city", "district", "propertyKind", "rooms", "rentalPeriod"].includes(c.criterion)).map(c => c.criterion));
   evaluation = { ...evaluation, aiPending: evaluation.aiPending.filter(c => permitted.has(c)) };
   if (!evaluation.aiPending.length) return evaluation;
   const description = redactPublicDescription(listing.description);

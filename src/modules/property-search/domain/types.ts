@@ -14,6 +14,7 @@ export const SearchFilters = z.object({
   city: z.string().trim().min(1).max(120).default("Новосибирск"),
   locations: z.array(z.enum(LOCATION_IDS)).min(1).max(9).optional(),
   propertyKinds: z.array(z.enum(["flat", "house", "apartments", "non_residential"])).min(1).max(4).optional(),
+  rooms: z.array(z.enum(["studio", "1", "2", "3", "4+"])).min(1).max(5).optional(),
   operation: z.enum(["sale", "rent"]),
   priceUnit: z.enum(PRICE_UNITS).optional(),
   purposes: z.array(z.enum(PURPOSES)).max(7).default([]),
@@ -52,6 +53,7 @@ export interface NormalizedListing {
   firstSeenAt?: string; lastSeenAt?: string; lastCheckedAt?: string | null;
   sourceCategoryRaw?: string | null; purposeEvidence?: unknown;
   title?: string | null;
+  rooms?: number | null;
   purposeSource?: "structured" | "rule";
   source: Source; sourceListingId: string | null; sourceUnitId: string | null; url: string;
   purpose: Purpose | null; operation: "sale" | "rent" | null;

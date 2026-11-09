@@ -198,6 +198,9 @@ export function summarizeActiveAdvancedFilters(
 export function resetAdvancedSearchFilters(filters: SearchFilters): SearchFilters {
   const next: SearchFilters = {
     city: filters.city,
+    ...(filters.locations ? { locations: [...filters.locations] } : {}),
+    ...(filters.propertyKinds ? { propertyKinds: [...filters.propertyKinds] } : {}),
+    ...(filters.rooms ? { rooms: [...filters.rooms] } : {}),
     operation: filters.operation,
     ...(filters.priceUnit ? { priceUnit: filters.priceUnit } : {}),
     purposes: [...filters.purposes],

@@ -145,8 +145,8 @@ describe("bounded residential fanout (synthetic, no network)", () => {
       const { adapter } = harness(async (s, query = {}) => { calls.push(query); return response(s, query); }, 14);
       await adapter.searchDetailed({ ...input, purposes, sources: [source] });
       expect(calls.map(({ limit: omitted, signal: ignored, ...query }) => { void omitted; void ignored; return query; }))
-        .toEqual(queries.map(({ limit: omitted, signal: ignored, ...query }) => { void omitted; void ignored; return query; }));
-      if (!purposes.includes("residential")) expect(calls[0]?.limit).toBe(14);
+        .toEqual(bounded.queries.map(({ limit: omitted, signal: ignored, ...query }) => { void omitted; void ignored; return query; }));
+      expect(calls.every(q => (q.limit ?? 0) >= 1 && (q.limit ?? 0) <= 14)).toBe(true);
     }
   });
 });

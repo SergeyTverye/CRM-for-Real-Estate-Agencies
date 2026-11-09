@@ -13,6 +13,7 @@ export function resultTitle(snapshot: unknown, listing: { description?: string |
 export function resultPriceUnit(snapshot: { operation?: string | null; priceUnit?: string | null } | null | undefined, listing: { operation?: string | null; priceUnit?: string | null }, requestedOperation?: string): string {
   const operation = snapshot?.operation ?? requestedOperation ?? listing.operation;
   const unit = snapshot ? snapshot.priceUnit : listing.priceUnit;
+  if ((snapshot as { structuredFeatures?: { rentalPeriod?: string } })?.structuredFeatures?.rentalPeriod === "day") return "за сутки · посуточная аренда";
   if (!unit || operation === "rent" && ["total", "rub_total"].includes(unit)) return "период не указан";
   return displayLabel("price_unit", unit);
 }

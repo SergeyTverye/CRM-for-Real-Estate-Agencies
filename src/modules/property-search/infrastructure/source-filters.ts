@@ -2,6 +2,7 @@ import type RealEstateScraper from "real-estate-scrapper";
 import type { SearchFilters, Source } from "../domain/types";
 import { selectedLocations } from "../domain/geography";
 import { resolveSourceDepth, type DepthOptions } from "./source-limits";
+import { residentialRooms } from "../domain/housing";
 
 const purposeMap = { retail: "retail", psn_universal: "freePurpose", free_purpose: "freePurpose", office: "office", production: "industrial", warehouse: "warehouse" } as const;
 const cities = {
@@ -52,8 +53,10 @@ export function buildScraperQueries(filters: SearchFilters, source: Source, sign
         if (location.kind !== "district") return query;
         if (source === "mirkvartir") {
           const geo = query.sourceOptions?.mirkvartir ?? {};
+          const lastSegment = geo.url ? decodeURIComponent(new URL(geo.url).pathname).split("/").filter(Boolean).at(-1) : undefined;
+          const roomSuffix = lastSegment && ["Студии", "Однокомнатные", "Двухкомнатные", "Трехкомнатные"].includes(lastSegment) ? `${encodeURIComponent(lastSegment)}/` : "";
           const host = query.category === "commercial" ? filters.operation === "rent" ? "arendacre" : "cre" : ["house", "cottage"].includes(query.type ?? "") ? filters.operation === "rent" ? "arendadoma" : "dom" : filters.operation === "rent" ? "arenda" : "www";
-          return { ...query, sourceOptions: { ...query.sourceOptions, mirkvartir: { ...geo, url: `https://${host}.mirkvartir.ru/${mirLocationPath("Новосибирск")}${encodeURIComponent("Советский")}/${query.type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : ""}` } } };
+          return { ...query, sourceOptions: { ...query.sourceOptions, mirkvartir: { ...geo, url: `https://${host}.mirkvartir.ru/${mirLocationPath("Новосибирск")}${encodeURIComponent("Советский")}/${roomSuffix || (query.type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : "")}` } } };
         }
         // LIVE public autocomplete: type_region=1 + selected city 14898 returns
         // group 3, district 112. The package incorrectly uses group 4.
@@ -84,9 +87,15 @@ export function buildScraperQueries(filters: SearchFilters, source: Source, sign
     // Один запрос на жилой тип: пакет не принимает types:["residential"] и не
     // выражает несколько жилых типов одним URL (nativeMultiType — только коммерция).
     const types = kinds.length ? [...new Set(kinds.flatMap(k => k === "flat" || k === "apartments" || k === "non_residential" ? ["flat" as const] : k === "house" ? source === "youla" ? ["house" as const] : ["house" as const, "cottage" as const] : []))] : RESIDENTIAL_TYPES;
-    return types.map(type => ({ city: filters.city, category: "residential" as const, type, deal: filters.operation,
+    return types.flatMap(type => {
+      const counts = residentialRooms(filters) && ["flat", "studio"].includes(type) && !filters.rooms!.includes("4+") ? filters.rooms!.map(r => r === "studio" ? 0 : Number(r)) : undefined;
+      // OnRealt/Mir support a single native count. 4+ stays broad and is checked locally.
+      const branches = counts && ["mirkvartir", "onrealt"].includes(source) ? counts.map(n => [n]) : [counts];
+      return branches.map(rooms => ({ city: filters.city, category: "residential" as const, type, deal: filters.operation,
+      ...(rooms && ["cian", "yandex", "youla", "onrealt"].includes(source) ? { rooms } : {}),
       sources: [source], maxPages, limit, signal,
-      sourceOptions: { ...sourceOptions, [source]: source === "mirkvartir" && geography.url ? { ...geography, url: `https://${["house", "cottage"].includes(type) ? filters.operation === "rent" ? "arendadoma" : "dom" : filters.operation === "rent" ? "arenda" : "www"}.mirkvartir.ru/${mirLocationPath(filters.city)}${type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : ""}` } : geography } }));
+      sourceOptions: { ...sourceOptions, [source]: source === "mirkvartir" && (geography.url || rooms) ? { ...geography, url: `https://${["house", "cottage"].includes(type) ? filters.operation === "rent" ? "arendadoma" : "dom" : filters.operation === "rent" ? "arenda" : "www"}.mirkvartir.ru/${mirLocationPath(filters.city)}${rooms ? `${encodeURIComponent(({ 0: "Студии", 1: "Однокомнатные", 2: "Двухкомнатные", 3: "Трехкомнатные" } as Record<number, string>)[rooms[0]!]!)}/` : type === "cottage" ? `${encodeURIComponent("Коттеджи")}/` : ""}` } : geography } }));
+    });
   };
   if (residential && !wantsCommercial) return residentialQueries();
   if (!residential) return [commercialQuery()];

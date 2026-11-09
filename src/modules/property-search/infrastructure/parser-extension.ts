@@ -7,6 +7,7 @@ import { extractListingDates } from "./listing-dates";
 import { detectAccessChallenge } from "./source-response";
 import { DateEnrichment, type DateDetailOptions, type DateDetailProgress } from "./date-enrichment";
 import type { Source } from "../domain/types";
+import { cardQuality, listingQuality } from "./listing-quality";
 
 const detailProgress = new WeakMap<RealEstateScraper, Partial<Record<Source, DateDetailProgress>>>();
 export function dateEnrichmentProgress(client: object, source: Source) { return detailProgress.get(client as RealEstateScraper)?.[source]; }
@@ -52,7 +53,15 @@ export function extendSourceParsers(client: RealEstateScraper, options: DateDeta
           const dates = extractListingDates(raw.source, document.payload, { id: raw.parentId ?? raw.id, url: raw.url }, document.fetchedAt);
           if (dates.publishedAt || dates.sourceUpdatedAt) fields = { ...dates, publishedAt: dates.publishedAt ?? fields.publishedAt, sourceUpdatedAt: dates.sourceUpdatedAt ?? fields.sourceUpdatedAt };
         }
-        return { ...raw, ...fields };
+        let quality = listingQuality(raw);
+        for (const document of documents.getStore() ?? []) {
+          const card = cardQuality(document.payload, raw, (parser as unknown as { selectors?: { card?: string } }).selectors?.card);
+          quality = { ...quality, ...Object.fromEntries(Object.entries(card).filter(([, value]) => value !== null)) };
+        }
+        return { ...raw, ...fields, rooms: quality.rooms ?? raw.rooms,
+          ...(quality.priceUnit ? { priceText: quality.priceUnit === "rub_m2_year" ? "₽/м² в год" : quality.priceUnit === "rub_m2_month" ? "₽/м² в месяц" : quality.priceUnit === "rub_year" ? "₽ в год" : "₽ в месяц" } : {}),
+          ...(quality.rentalPeriod === "day" ? { priceText: "₽ за сутки" } : {}),
+          ...(quality.apartments ? { isApartments: true } : {}) };
       });
       // At most N detail GETs per source/job, shared deadline, date-only TTL cache.
       for (let index = 0; index < selectedCount; index++) {

@@ -4,6 +4,7 @@ import { CatalogPhoto } from "./catalog-photo";
 
 import { useEffect, useRef, useState } from "react";
 import { SearchResultsV31 } from "./search-results-v31";
+import { ROOM_LABELS, type RoomChoice } from "@/modules/property-search/domain/housing";
 import { LocationPicker } from "./location-picker";
 import { locationSummary } from "@/modules/property-search/domain/geography";
 import { CatalogFilters } from "./catalog-filters";
@@ -114,6 +115,7 @@ export function SearchWorkspace({
   defaultAdvancedOpen?: boolean;
 }) {
   const [filters, setFilters] = useState(initialFilters);
+  const [implicitLocation, setImplicitLocation] = useState(!initialRun && !initialNeedId && !initialFilters.locations && initialFilters.city === "Новосибирск");
   const [advancedOpen, setAdvancedOpen] = useState(defaultAdvancedOpen);
   const [primaryOpen, setPrimaryOpen] = useState(true);
   const [availability, setAvailability] = useState<SearchRuntimeAvailability | undefined>(initialAvailability);
@@ -206,6 +208,7 @@ export function SearchWorkspace({
       return;
     }
     setFilters(profile.filters);
+    setImplicitLocation(false);
     setSavedId(id);
     setSavedName(profile.name);
     setNeedId(profile.needId ?? "");
@@ -516,7 +519,7 @@ export function SearchWorkspace({
         >
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <LocationPicker filters={filters} onChange={next => { setFilters(next); setDirty(true); }} />
+          <LocationPicker filters={filters} implicitDefault={implicitLocation} onChange={next => { setFilters(next); setImplicitLocation(false); setDirty(true); }} />
           <label>Тип объекта
             <select aria-label="Тип объекта" className="input mt-1 w-full" value={filters.propertyKinds?.[0] ?? ""} onChange={e => { setFilters(f => ({ ...f, propertyKinds: e.target.value ? [e.target.value as NonNullable<SearchFilters["propertyKinds"]>[number]] : undefined, purposes: [] })); setDirty(true); }}>
               <option value="">По назначениям ниже</option><option value="flat">Квартира (жилая)</option><option value="house">Дом / коттедж</option><option value="apartments">Апартаменты (нежилое)</option><option value="non_residential">Любое нежилое</option>
@@ -599,6 +602,8 @@ export function SearchWorkspace({
           ))}
         </div>
 
+        {(filters.propertyKinds?.some(k => k !== "non_residential") || filters.purposes.includes("residential")) && <fieldset className="mt-4"><legend className="text-sm font-medium">Комнаты · любое из выбранных</legend><div className="mt-2 flex flex-wrap gap-4">{(Object.keys(ROOM_LABELS) as RoomChoice[]).map(room => <label className="flex items-center gap-2" key={room}><input type="checkbox" checked={filters.rooms?.includes(room) ?? false} onChange={e => { const rooms = e.target.checked ? [...(filters.rooms ?? []), room] : (filters.rooms ?? []).filter(v => v !== room); edit("rooms", rooms.length ? rooms : undefined); }} />{ROOM_LABELS[room]}</label>)}</div><p className="mt-1 text-xs text-slate-600">Если комнаты не указаны площадкой, объявление требует проверки. 4+ проверяется по карточке.</p></fieldset>}
+
         <fieldset className="mt-4">
           <legend className="flex items-center gap-1 text-sm font-medium">
             Назначения · ИЛИ
@@ -623,6 +628,7 @@ export function SearchWorkspace({
             ))}
           </div>
         </fieldset>
+
 
         <fieldset className="mt-4">
           <legend className="flex flex-wrap items-center gap-2 text-sm font-medium">
@@ -846,7 +852,7 @@ export function SearchWorkspace({
               }
               settingsUrl={aiPresentation.settingsUrl}
               onConfirmed={(value) => {
-                setFilters(value);
+                setFilters(value); setImplicitLocation(false);
                 setDirty(true);
                 setFeedback("Условия подтверждены. Проверьте форму перед поиском.");
               }}
@@ -857,7 +863,7 @@ export function SearchWorkspace({
             filters={filters}
             collapsed={!advancedOpen}
             onChange={(value) => {
-              setFilters(value);
+              setFilters(value); setImplicitLocation(false);
               setDirty(true);
             }}
           />
@@ -1027,7 +1033,7 @@ export function SearchWorkspace({
                 <button
                   className="btn btn-secondary"
                   onClick={() => {
-                    setFilters(s.filters);
+                    setFilters(s.filters); setImplicitLocation(false);
                     setSavedId(s.id);
                     setNeedId(s.needId ?? "");
                     setNeed(null);

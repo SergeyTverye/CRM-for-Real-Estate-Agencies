@@ -83,7 +83,7 @@ export function parseYoulaProduct(value: unknown, cityName: string | null = null
     floor, floorType: floor === null ? null : floor > 0 ? "aboveGround" : "basement",
     city: str(location.cityName) || cityName, address, district,
     images: Array.isArray(p.images) ? p.images.map(i => str(row(i).url)).filter(u => /^https:\/\//u.test(u)) : [],
-    description: null, phone: null, sellerType: attrId(p, "sobstvennik_ili_agent") === "10705" ? "owner" : attrId(p, "sobstvennik_ili_agent") === "10706" ? "agent" : null,
+    description: str(p.description) || str(p.text) || null, phone: null, sellerType: attrId(p, "sobstvennik_ili_agent") === "10705" ? "owner" : attrId(p, "sobstvennik_ili_agent") === "10706" ? "agent" : null,
     publishedAt: date(p.datePublished), sourceUpdatedAt: date(p.dateUpdated), timestamp: fetchedAt };
 }
 

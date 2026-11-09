@@ -1,3 +1,4 @@
+import { enrichListingQuality } from "@/modules/property-search/infrastructure/listing-quality";
 import { beforeEach, expect, it } from "vitest";
 import fixture from "../fixtures/search-quality/price-change-v31-live.json";
 import { db, resetDatabase, seedBase } from "../helpers/fixtures";
@@ -69,4 +70,20 @@ it("AI-02 persists a genuinely unknown period and never signals comparable price
     expect((await db.searchRunResult.findFirstOrThrow({where:{runId:run.id}})).priceChanged).toBe(false);
     previous=run.id;
   }
+});
+
+it("v323 JSON conditions and daily/room snapshot survive persistence and repeat on both backends",async()=>{
+ const users=await seedBase();
+ const filters=SearchFilters.parse({operation:"rent",priceUnit:"rub_month",propertyKinds:["flat"],rooms:["2"],locations:["berdsk"]});
+ const saved=await db.savedSearch.create({data:{ownerUserId:users.realtor1.userId,name:"Синтетический поиск комнат",filters,sources:["onrealt"]}});
+ expect(SearchFilters.parse((await db.savedSearch.findUniqueOrThrow({where:{id:saved.id}})).filters).rooms).toEqual(["2"]);
+ const daily=enrichListingQuality({...structuredClone(fixture.listing),operation:"rent",priceUnit:null,rooms:2,title:"2-к. квартира",city:"Бердск",description:"Сдаётся посуточно за сутки",structuredFeatures:{}} as NormalizedListing);
+ for(let index=0;index<2;index++) {
+  const run=await db.searchRun.create({data:{userId:users.realtor1.userId,savedSearchId:saved.id,filters,status:"completed"}});
+  await db.$transaction(tx=>persistListing(tx,run.id,daily,evaluateListing(daily,filters),null));
+  const result=await querySearchResults(users.realtor1,run.id,{verdict:"rejected"});
+  expect(result.total).toBe(1);expect(result.rows[0]?.snapshot).toMatchObject({rooms:2,priceUnit:null,structuredFeatures:{rentalPeriod:"day"}});
+  expect(result.rows[0]?.criteria).toEqual(expect.arrayContaining([expect.objectContaining({criterion:"rentalPeriod",state:"contradicted"})]));
+  await expect(querySearchResults(users.realtor2,run.id)).rejects.toMatchObject({status:404});
+ }
 });
