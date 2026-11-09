@@ -1,4 +1,3 @@
-// Bounded LIVE operator harness. Secrets stay in process memory; never persist auth state.
 const fs = require('node:fs/promises');
 const cp = require('node:child_process');
 const { chromium } = require('playwright');

@@ -7,8 +7,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertRuntimeResources } from './resource-policy.mjs';
 
-// Run only final compiled resources, with cwd=app, not the repository. Source
-// imports and native-module load tests cannot exercise Next's dynamic fs reads.
 export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir() } = {}) {
   const app = await realpath(resources);
   await assertRuntimeResources(app);
@@ -25,8 +23,6 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
     await new Promise((resolve, reject) => { socket.once('error', reject); socket.listen(0, '127.0.0.1', resolve); });
     const port = socket.address().port;
     await new Promise(resolve => socket.close(resolve));
-    // Deliberate environment allowlist: no inherited DB URL, NODE_OPTIONS,
-    // NODE_PATH, cloud credentials, user secrets or dotenv configuration.
     const env = Object.fromEntries(['SystemRoot', 'WINDIR', 'ComSpec', 'PATHEXT', 'PATH'].filter(key => process.env[key]).map(key => [key, process.env[key]]));
     Object.assign(env, {
       NODE_ENV: 'production', CRM_DEPLOYMENT_MODE: 'desktop', CRM_DESKTOP_WORKER: '0',
@@ -46,12 +42,8 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
       cwd: app, env, windowsHide: true, stdio: 'pipe', timeout: 60000,
     });
     if (init.error || init.status !== 0) {
-      // Only fixed OS codes / numeric exit status: never expose output, paths,
-      // arguments or environment from a failed runtime initializer.
       const spawnCode = ['ENOENT', 'EACCES', 'EPERM', 'EINVAL', 'ETIMEDOUT', 'ENOBUFS'].includes(init.error?.code) ? init.error.code : 'OTHER';
       const detail = init.error ? 'SPAWN_' + spawnCode : Number.isInteger(init.status) ? 'EXIT_' + (init.status >>> 0) : 'SIGNAL';
-      // Read only an exact finite initializer diagnostic, never forward child
-      // output. Older bundles still produce the original exit-only failure.
       const diagnostic = String(init.stderr ?? '').split(/\r?\n/).find(line => /^INIT_DATABASE_FAILED_STAGE_(?:DIRECTORY|LOCATION|SECRETS|MIGRATIONS|ACCOUNT|PROBE)_CODE_(?:ENOENT|EACCES|EPERM|EINVAL|ETIMEDOUT|ENOBUFS|ERR_DLOPEN_FAILED|SQLITE_LOCAL_VOLUME_REQUIRED|SQLITE_CLOUD_PATH_FORBIDDEN|SQLITE_LOCAL_PATH_REQUIRED|SQLITE_MIGRATION_HISTORY_MISMATCH|SQLITE_INTEGRITY_FAILED|DESKTOP_SECRETS_INVALID|OTHER)$/.test(line));
       if (diagnostic) code(diagnostic);
       throw Error('FINAL_RUNTIME_INIT_FAILED_' + detail);
@@ -86,8 +78,6 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
       await new Promise(resolve => setTimeout(resolve, 300));
     }
     if (!ready) {
-      // Read-only Prisma endpoint can expose a missing dynamic module to the
-      // server's own diagnostic stream even when readiness intentionally hides it.
       try { await fetch(base + '/api/v1/desktop/setup', { signal: AbortSignal.timeout(5000) }); } catch {}
       code('READY_' + readyDiagnostic);
       if (/\b(?:MODULE_NOT_FOUND|ERR_MODULE_NOT_FOUND)\b/.test(serverErrors)) code('SERVER_MODULE_NOT_FOUND');
@@ -96,8 +86,6 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
       throw Error('FINAL_RUNTIME_READY_FAILED');
     }
     code('READY_PASS');
-    // This endpoint performs a real Prisma user.count(), exercising the
-    // generated SQLite client and query-compiler WASM, not just SELECT 1.
     const setup = await fetch(base + '/api/v1/desktop/setup', { signal: AbortSignal.timeout(10000) });
     if (!setup.ok || (await setup.json()).available !== true) throw Error('FINAL_RUNTIME_SETUP_FAILED');
     code('PRISMA_PASS');
@@ -114,7 +102,6 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
     const assets = [...new Set([...html.matchAll(/(?:src|href)="([^"?#]+\/_next\/static\/[^"?#]+|\/_next\/static\/[^"?#]+)(?:[?][^"]*)?"/g)].map(match => match[1]))];
     if (!assets.length) throw Error('FINAL_RUNTIME_ASSETS_MISSING');
     for (const asset of assets) {
-      // Never follow absolute URLs supplied by a page to a non-loopback host.
       const url = new URL(asset, base);
       if (url.origin !== base) throw Error('FINAL_RUNTIME_ASSET_ORIGIN');
       const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
@@ -128,8 +115,6 @@ export async function checkFinalRuntime(resources, { temporaryRoot = os.tmpdir()
       if (!closed) { server.kill(); await Promise.race([exit, new Promise(resolve => setTimeout(resolve, 5000).unref())]); }
       if (!closed) throw Error('FINAL_RUNTIME_STOP_FAILED');
     }
-    // Only remove this invocation's newly-created synthetic directory. Never
-    // clean the caller's resources, user profile, shared temp root or secrets.
     const info = await lstat(stage);
     const actual = await realpath(stage);
     if (info.isSymbolicLink() || !info.isDirectory() || path.dirname(actual) !== parent || !path.basename(actual).startsWith('crm-final-runtime-')) throw Error('FINAL_RUNTIME_CLEANUP_SCOPE');

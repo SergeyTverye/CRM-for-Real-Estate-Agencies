@@ -1,4 +1,3 @@
-// Offline: no report/search/page navigation and no external requests.
 import Scraper from 'real-estate-scrapper';
 import sharp from 'sharp';
 async function main() {

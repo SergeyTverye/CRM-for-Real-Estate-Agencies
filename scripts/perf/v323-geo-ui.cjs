@@ -7,7 +7,6 @@ async function main(){
  start(['node_modules/tsx/dist/cli.mjs','src/worker/property-search-worker.ts'],'worker');
  browser=await chromium.launch({headless:true,executablePath:'C:/Users/tvery/AppData/Local/ms-playwright/chromium_headless_shell-1248/chrome-headless-shell-win64/chrome-headless-shell.exe'});
  const context=await browser.newContext({viewport:{width:1366,height:768},locale:'ru-RU'});page=await context.newPage();
- // No browser traffic leaves loopback; only bounded worker requests reach the sources.
  await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
  for(let i=0;i<60;i++){try{if((await context.request.get(origin+'/api/health/ready',{timeout:1000})).ok())break;}catch{}await sleep(1000);}
  const login=await context.request.post(origin+'/api/v1/auth/login',{headers:{Origin:origin},data:{login:env.SEED_MANAGER_LOGIN,password:env.SEED_MANAGER_PASSWORD}});evidence.loginStatus=login.status();if(!login.ok())throw new Error('LOGIN_FAILED');
@@ -18,7 +17,6 @@ async function main(){
   await page.locator('label').filter({hasText:/^\s*Операция/}).locator('select').selectOption(scenario.kind?'sale':'rent');
   if(scenario.kind)await page.getByLabel('Тип объекта',{exact:true}).selectOption(scenario.kind);else await page.getByLabel(scenario.purpose,{exact:true}).check();
   if(scenario.area){await page.getByLabel('Площадь от, м²',{exact:true}).fill('50');await page.getByLabel('Площадь до, м²',{exact:true}).fill('100');}
-  // Restrict UI searches to Mir Kvartir, one page/five cards, 20s deadline; matrix already probes all sources.
   const sources=['Циан','OnRealt','Домклик','Яндекс Недвижимость','Юла','Авито'];
   for(const label of sources){const box=page.getByLabel(label,{exact:true});if(await box.count()&&await box.isChecked())await box.uncheck();}
   await page.getByLabel('Найти локацию',{exact:true}).scrollIntoViewIfNeeded();

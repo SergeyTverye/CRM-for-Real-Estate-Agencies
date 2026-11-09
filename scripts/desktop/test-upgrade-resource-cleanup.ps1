@@ -1,7 +1,7 @@
-# Source and synthetic fixtures ONLY. No installed EXE, profile or processes used.
+﻿# Source and synthetic fixtures ONLY. No installed EXE, profile or processes used.
 $ErrorActionPreference = 'Stop'
 $helper = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../src-tauri/windows/upgrade-resource-cleanup.ps1'))
-$tempBase = if ($env:GITHUB_ACTIONS -eq 'true') { $env:RUNNER_TEMP } else { 'D:\TEMP\UserTEMP\opencode' }
+$tempBase = if ($env:GITHUB_ACTIONS -eq 'true') { $env:RUNNER_TEMP } else { $env:TEMP }
 $root = Join-Path $tempBase ('crm-resource-cleanup-synthetic-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root | Out-Null
 $global:CrmSyntheticCleanupTestState = @{ shutdownCalls = 0; running = $false; shutdownCode = 0; spawnFails = $false; processes = @(); sleeps = 0; afterShutdown = $null }
@@ -56,7 +56,6 @@ try {
   Check ((Get-Content -LiteralPath "$root\external\files\control.txt") -eq 'SYNTHETIC-CONTROL') 'outside-files-unchanged'
   & $helper -InstallDirectory $dir -InstallerPath "$root\setup.exe"
   Check ($global:CrmSyntheticCleanupTestState.shutdownCalls -eq 1) 'fresh-or-already-uninstalled-no-double-cleanup'
-  # Reinstall replenishes the same tree; a second overinstall must work too.
   $dir = Fixture 'upgrade'
   & $helper -InstallDirectory $dir -InstallerPath "$root\setup.exe"
   Check (-not (Test-Path -LiteralPath "$dir\app")) 'reinstall-overinstall'
@@ -74,8 +73,6 @@ try {
       (Test-Path -LiteralPath "$dir\app\package-lock.json") -and
       $global:CrmSyntheticCleanupTestState.shutdownCalls -eq $calls) "retain-before-shutdown:$relative"
   }
-  # Exact zero-byte developer placeholder public\.gitkeep (legacy41 residue)
-  # is ordinary program residue: cleanup succeeds. Size via metadata only.
   $dir = Fixture ('placeholder-zero-' + [guid]::NewGuid().ToString('N'))
   [IO.Directory]::CreateDirectory("$dir\app\public") | Out-Null
   [IO.File]::WriteAllBytes("$dir\app\public\.gitkeep", [byte[]]@())
@@ -83,8 +80,6 @@ try {
   Check (-not (Test-Path -LiteralPath "$dir\app")) 'placeholder-zero-byte-cleaned'
   Check ((Test-Path -LiteralPath "$dir\RealEstateCRM.exe") -and
     ((Get-Content -LiteralPath "$root\external\files\control.txt") -eq 'SYNTHETIC-CONTROL')) 'placeholder-zero-byte-side-effects-none'
-  # Nonempty .gitkeep stays suspect: refuse, remove nothing (sibling program
-  # file, placeholder and install root intact, shutdown not reached).
   $dir = Fixture ('placeholder-nonempty-' + [guid]::NewGuid().ToString('N'))
   [IO.Directory]::CreateDirectory("$dir\app\public") | Out-Null
   [IO.File]::WriteAllText("$dir\app\public\.gitkeep", 'SYNTHETIC-RETAIN')
@@ -94,8 +89,6 @@ try {
     (Test-Path -LiteralPath "$dir\app\package-lock.json") -and
     (Test-Path -LiteralPath "$dir\RealEstateCRM.exe") -and
     $global:CrmSyntheticCleanupTestState.shutdownCalls -eq $calls) 'placeholder-nonempty-refuses-intact'
-  # Placeholder path behind a reparse point is never trusted, even with the
-  # zero-byte allowance (reparse check precedes size check).
   $dir = Fixture ('placeholder-link-' + [guid]::NewGuid().ToString('N'))
   [IO.Directory]::CreateDirectory("$dir\app\public") | Out-Null
   [IO.File]::WriteAllBytes("$dir\app\public\.gitkeep", [byte[]]@())
@@ -158,13 +151,11 @@ try {
   $global:CrmSyntheticCleanupTestState.spawnFails = $false
   Check (Test-Path -LiteralPath "$dir\app\package-lock.json") 'spawn-fails-closed'
   $dir = Fixture 'process-descendants'
-  # Reverse order forces transitive closure; shared executable alone is not owned.
   $global:CrmSyntheticCleanupTestState.processes = @(
     [pscustomobject]@{ ProcessId = 103; ParentProcessId = 102; ExecutablePath = 'C:\Shared\WebView.exe' },
     [pscustomobject]@{ ProcessId = 102; ParentProcessId = 101; ExecutablePath = 'C:\Shared\WebView.exe' },
     [pscustomobject]@{ ProcessId = 101; ParentProcessId = 1; ExecutablePath = "$dir\RealEstateCRM.exe" },
     [pscustomobject]@{ ProcessId = 200; ParentProcessId = 1; ExecutablePath = 'C:\Shared\WebView.exe' })
-  # Observe OwnedProcesses inside helper scope without touching real processes.
   $global:CrmSyntheticCleanupTestState.afterShutdown = {
     $ids = @(OwnedProcesses | ForEach-Object { $_.ProcessId })
     Check (($ids.Count -eq 3) -and (103 -in $ids) -and (200 -notin $ids)) 'direct-ancestry-transitive-only'
@@ -184,7 +175,6 @@ try {
   $link = "$dir\app\linked"
   New-Item -ItemType Junction -Path $link -Target "$root\external" | Out-Null
   Reject $dir 'UPGRADE_REPARSE_POINT'
-  # Remove the junction itself, never recurse through its target.
   [IO.Directory]::Delete($link)
   $ancestor = Join-Path $root 'ancestor-link'
   New-Item -ItemType Junction -Path $ancestor -Target $dir | Out-Null
@@ -207,9 +197,6 @@ try {
   $global:CrmSyntheticCleanupTestState.afterShutdown = $null
   [IO.Directory]::Delete("$dir\app\node_modules")
   Check (Test-Path -LiteralPath "$dir\app\package-lock.json") 'late-junction-before-delete'
-  # Full-helper timings include both inventories, native deletes and fake shutdown.
-  # 1200 depth-11 files: 15s is deliberately generous for loaded CI hosts, while
-  # the reviewed old algorithm extrapolates to ~58s on the same file count.
   foreach ($run in 1..2) {
     $dir = Fixture "performance-$run"
     $deep = "$dir\app\node_modules\a\b\c\d\e\f\g\h\i\j"
@@ -223,7 +210,6 @@ try {
   }
   Write-Output 'PASS synthetic-upgrade-resource-cleanup-complete'
 } finally {
-  # This UUID tree was created exclusively by this test. Reject links before cleanup.
   $links = @(Get-ChildItem -LiteralPath $root -Force -Recurse | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint })
   foreach ($link in $links) { [IO.Directory]::Delete($link.FullName) }
   Remove-Item -LiteralPath $root -Recurse -Force

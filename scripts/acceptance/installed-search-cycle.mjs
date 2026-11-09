@@ -24,9 +24,7 @@ const COV = new Set([
   'credential_metadata_only',
 ]);
 
-// Actual UI labels from public source contracts (codebook/externalSource + ai-settings-form).
 const SOURCE_LABELS = ['Циан', 'Мир Квартир', 'OnRealt', 'Домклик', 'Яндекс Недвижимость', 'Юла', 'Авито'];
-// Labels append a visible availability suffix; match the fixed human name.
 function checkboxByName(host, label) {
   return host.getByRole('checkbox', { name: new RegExp('^' + label + '(?:\\s|\\(|$)') });
 }
@@ -126,7 +124,6 @@ async function waitForSave(page, successText, timeout = 12000) {
   } catch {
     fail('save_confirmation_not_observed');
   }
-  // Do not treat an error alert as success.
   const alertCount = await page.locator('[role="alert"]').filter({ hasText: /ошиб|недоступ|конфликт|проверь/i }).count().catch(() => 0);
   if (alertCount > 0) fail('save_reported_error_alert');
 }
@@ -220,7 +217,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     if (!page.url().startsWith(`${normalizedBase}/property-search`)) fail('search_page_navigation_rejected');
     state.checks.searchPageLoaded = true;
 
-    // /api/v1/auth/me returns a flat object {id,login,displayName,role,mustChangePassword}.
     const me = await fetchJson(page, '/api/v1/auth/me');
     if (!me.ok || me?.body?.role !== 'manager') fail('actor_not_manager');
     state.checks.actorAuthorizedManager = true;
@@ -230,7 +226,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     if (await residential.count() === 0) fail('residential_purpose_ui_missing');
     const residentialRole = await residential.getAttribute('type').catch(() => null);
     if (residentialRole !== 'checkbox') fail('residential_purpose_not_checkbox');
-    // Assert actual check state is readable (default unchecked unless persisted otherwise).
     await residential.isChecked();
     state.checks.residentialPurposeAvailable = true;
     state.coverage.push('residential_purpose');
@@ -241,7 +236,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     const scraperSwitch = checkboxByName(page, 'Скрапер');
     if (await scraperSwitch.count() === 0) fail('source_settings_ui_missing');
 
-    // Ensure scraper enabled and all 7 source switches are enabled; save and verify persistence + API agreement.
     await openAndSaveSources(page, normalizedBase, async (p) => {
       const sw = checkboxByName(p, 'Скрапер');
       if (!(await sw.isChecked())) await sw.check();
@@ -282,7 +276,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     state.checks.sourceTogglePersisted = true;
     state.coverage.push('source_toggle_persist', 'availability_agreement', 'enabled_not_server_disabled');
 
-    // Disabling honored: disable every source switch and verify API reports disabled_by_settings.
     await openAndSaveSources(page, normalizedBase, async (p) => {
       for (const label of SOURCE_LABELS) {
         const cb = await needSourceCheckbox(p, label);
@@ -297,7 +290,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     state.checks.disablingHonored = true;
     state.coverage.push('disabling_honored');
 
-    // Restore sources for a clean state.
     await openAndSaveSources(page, normalizedBase, async (p) => {
       for (const label of SOURCE_LABELS) {
         const cb = await needSourceCheckbox(p, label);
@@ -305,7 +297,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
       }
     });
 
-    // Deterministic sources screenshot after all 7 enabled + persisted, before AI page (no password inputs here).
     await page.goto(`${normalizedBase}/settings/sources`, { waitUntil: 'networkidle' });
     await page.reload({ waitUntil: 'networkidle' });
     for (const label of SOURCE_LABELS) {
@@ -316,7 +307,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     await mustScreenshot(page, path.join(cycleDir, 'source-settings.png'), 'source_settings_screenshot_failed');
 
     step = 'credentials';
-    // Opt in AI through /settings/ai UI without entering a key (fresh profile), then assert strict no-key state.
     await page.goto(`${normalizedBase}/settings/ai`, { waitUntil: 'networkidle' });
     if (!page.url().startsWith(`${normalizedBase}/settings/ai`)) fail('ai_settings_page_navigation_rejected');
     const aiEnable = checkboxByName(page, 'ИИ');
@@ -339,7 +329,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     const aiAvailability = await fetchJson(page, '/api/v1/property-search/availability');
     if (!aiAvailability.ok || !isObj(aiAvailability.body?.ai)) fail('availability_fetch_failed');
     const ai = aiAvailability.body.ai;
-    // Fresh DPAPI/no-key state after AI opt-in must be strict and distinct.
     state.checks.missingAiKeyDistinct = (
       ai.reason === 'credentials_missing' &&
       ai.configured === false &&
@@ -350,9 +339,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     if (!state.checks.missingAiKeyDistinct) fail('missing_ai_key_not_distinct');
     state.coverage.push('missing_ai_key_distinct');
 
-    // Synthetic DPAPI credential UI roundtrip via the actual backend (no provider call).
-    // Fake key/folder strings are generated locally with process crypto only.
-    // Fresh profile only: starts from the strict missing-key state asserted above.
     const keyInput = page.getByLabel('Ключ API Яндекс AI (запись без чтения)', { exact: true }).first();
     const folderInput = page.getByLabel('Каталог Яндекс Cloud (Folder ID)', { exact: true }).first();
     if (await keyInput.count() === 0 || await folderInput.count() === 0) fail('credential_ui_missing');
@@ -379,7 +365,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     const readyAvail = await fetchJson(page, '/api/v1/property-search/availability');
     if (!readyAvail.ok || !isObj(readyAvail.body?.ai)) fail('availability_fetch_failed_after_save');
     if (readyAvail.body.ai.configured !== true || readyAvail.body.ai.available !== true) fail('credential_availability_not_ready');
-    // Reload: password and folder inputs must be empty; no stored secret may appear in the DOM.
     await page.reload({ waitUntil: 'networkidle' });
     const keyAfterSave = page.getByLabel('Ключ API Яндекс AI (запись без чтения)', { exact: true }).first();
     const folderAfterSave = page.getByLabel('Каталог Яндекс Cloud (Folder ID)', { exact: true }).first();
@@ -390,7 +375,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
       const dom = await page.content().catch(() => '');
       if (dom.includes(synthKey1) || dom.includes(synthFolder)) fail('credential_secret_exposed_in_dom');
     }
-    // Replace with a different generated key; metadata must stay configured/local.
     const synthKey2 = `AQVN-synth-${crypto.randomBytes(16).toString('hex')}`;
     if (synthKey2 === synthKey1) fail('synthetic_key_collision');
     await keyAfterSave.fill(synthKey2);
@@ -407,7 +391,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
       const dom = await page.content().catch(() => '');
       if (dom.includes(synthKey2)) fail('credential_secret_exposed_in_dom');
     }
-    // Remove via the actual UI; end state must return to the strict missing-key check.
     const removeBtn = page.getByRole('button', { name: 'Удалить локальные ключи' }).first();
     if (await removeBtn.count() === 0) fail('credential_remove_ui_missing');
     await removeBtn.click();
@@ -428,8 +411,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     step = 'collapse';
     await page.goto(`${normalizedBase}/property-search`, { waitUntil: 'networkidle' });
     if (!page.url().startsWith(`${normalizedBase}/property-search`)) fail('search_page_navigation_rejected');
-    // Deterministic primary screenshot: compact filters (advanced collapsed by default),
-    // actually check residential purpose and assert state; no query/provider call.
     {
       const primaryCollapse = page.locator('button[aria-expanded]').filter({ hasText: /Расширенные фильтры/i }).first();
       if (await primaryCollapse.count() === 0) fail('advanced_collapse_ui_missing');
@@ -466,7 +447,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     state.counts.activeFilterCount = 1;
     state.coverage.push('collapse_retains_filters', 'active_count_retained');
 
-    // Whole-filter collapse must preserve the already-selected advanced value/state.
     {
       const primaryToggle = page.locator('button[aria-controls="search-primary-filters-panel"]');
       const primaryPanel = page.locator('#search-primary-filters-panel');
@@ -530,7 +510,6 @@ export async function runInstalledSearchCycle({ page, base, directory } = {}) {
     await page.waitForTimeout(150);
     const expandedAfterEsc = await tooltipBtn.getAttribute('aria-expanded');
     if (expandedAfterEsc === 'true') fail('tooltip_keyboard_dismiss_failed');
-    // Touch/click toggle contract.
     await tooltipBtn.click();
     if ((await tooltipBtn.getAttribute('aria-expanded')) !== 'true') fail('tooltip_touch_open_failed');
     await page.keyboard.press('Escape');

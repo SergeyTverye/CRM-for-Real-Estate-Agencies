@@ -1,4 +1,3 @@
-/** Opt-in manual runner. Never invoke without --execute-cloud-live. */
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { parse } from "dotenv";
@@ -49,7 +48,6 @@ async function main() {
     validateDisposableBaseUrl(baseUrl);
   }
 
-  // This is the only code path permitted to read the external credentials file.
   const secrets = parse(await readFile(ENV_FILE, "utf8"));
   const yandex = {
     bucket: readSecretAlias(secrets, ["YANDEX_S3_BUCKET", "YC_S3_BUCKET"]),
@@ -97,7 +95,6 @@ async function main() {
     await page.goto(new URL("/settings/backups", baseUrl).toString());
     await page.getByRole("heading", { name: "Локальная установка и резервные копии" }).waitFor();
 
-    // Credentials are entered directly into password fields and are never logged or persisted by this runner.
     for (const provider of [
       { label: "Яндекс Облако", secret: yandex.secretAccessKey, id: yandex.accessKeyId, bucket: yandex.bucket },
       { label: "Облако Mail.ru", secret: mailru.applicationPassword, email: mailru.email },
@@ -115,7 +112,6 @@ async function main() {
       await page.getByRole("status").filter({ hasText: "Чтение доступно" }).waitFor({ timeout: 60_000 });
     }
 
-    // Deliberately stop at verifiable UI setup/probes. Backup and restore require an isolated backend/runtime contract (see cloud-test-plan.md); never point production at fixture data.
     console.log(JSON.stringify([
       safeResult("UI_CONFIG_PROBE", "COMPLETED", { providers: 2, successfulProbes: 2 }),
       safeResult("RUN_PREFIX", "ALLOCATED", { characters: prefix.length }),
@@ -123,7 +119,6 @@ async function main() {
     await context.close();
   } finally {
     await browser.close();
-    // Do not print or persist secrets, provider responses, browser artifacts or the remote prefix.
   }
 }
 

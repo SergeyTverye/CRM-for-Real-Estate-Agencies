@@ -1,5 +1,4 @@
 import type { PrismaClient } from "../../src/generated/prisma/client";
-/** Synthetic demo subset, all records owned by the explicitly created manager. */
 export async function seedDesktopDemo(db: PrismaClient, managerId: string) {
   for(let i=1;i<=5;i++) {
     await db.$transaction(async tx=>{

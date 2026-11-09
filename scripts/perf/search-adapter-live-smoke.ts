@@ -1,23 +1,3 @@
-/**
- * LIVE adapter smoke harness (coordinator-run only, trusted network).
- *
- * Runs the actual current RealEstateScraperAdapter/defaultScraperFactory —
- * never a direct library client or mock transport — one adapter job per
- * source, bundled Chrome executable provided explicitly via --chrome.
- *
- * NOT RUN here: this file only authors the harness. The coordinator runs e.g.
- *   tsx scripts/perf/search-adapter-live-smoke.ts --chrome="C:\...\chrome.exe" > smoke.jsonl
- * and redirects stdout (coordinator redirect/addrs are ignored data).
- *
- * Safety/bounds: no dotenv, no DB/auth/user-profile reads, no AI, no cookies/
- * CDP/user-Chrome. Plain-HTTP factory transport is wrapped to count requests
- * and enforce a fixed max; browser page/subresource requests travel through
- * the default factory's internal context.route -> safeRequest seam and cannot
- * be counted from here without changing product, so browser-requested sources
- * report requestCount null and rely on the per-job deadline bound instead.
- * stdout is sanitized counts/codes only (no URLs, listings, bodies, raw
- * errors, keys, config, stacks).
- */
 import path from "node:path";
 import type RealEstateScraper from "real-estate-scrapper";
 import {
@@ -30,8 +10,6 @@ import { SOURCES, type Source } from "../../src/modules/property-search/domain/t
 
 const PER_SOURCE_TIMEOUT_MS = 30_000;
 const SEARCH_DEPTH = { maxPages: 1, limit: 12 } as const;
-/** Fixed plain-HTTP budget/job: maxPages1/limit12 fans out to <=6 residential
- *  branches + setup + date details; 20 caps runaway without false-tripping. */
 const HTTP_TRANSPORT_BUDGET = 20;
 const BROWSER_SOURCES: readonly Source[] = ["cian", "avito"];
 
@@ -90,8 +68,6 @@ function parseArgs(argv: string[]): ParsedArgs {
   return { chrome: chrome!, sources, purpose: purposeRaw as ParsedArgs["purpose"] };
 }
 
-/** Count + bound plain-HTTP attempts only; browser SSRF path inside the
- *  default factory is untouched, so browser sources report requestCount null. */
 function countingTransport(
   inner: RealEstateScraper.Transport | undefined,
   counter: { count: number },
@@ -115,8 +91,6 @@ async function smokeSource(
   const counter = { count: 0 };
   const factory: ScraperFactory = config =>
     defaultScraperFactory({ ...config, transport: countingTransport(config.transport, counter) ?? config.transport });
-  // Explicit provided browser only: executablePath + headless; no user data,
-  // CDP endpoint, cookies, or profile. Close stays owned by the adapter.
   const adapter = new RealEstateScraperAdapter({
     enabled: true,
     browserEnabled: true,
@@ -186,7 +160,6 @@ async function main(): Promise<void> {
   for (const source of args.sources) await smokeSource(source, args, limiter);
 }
 
-// No network on import: entry runs only under coordinator CLI invocation.
 const invokedAsMain = (process.argv[1] ?? "").replace(/\\/g, "/").includes("search-adapter-live-smoke");
 if (invokedAsMain) {
   main().catch(() => {

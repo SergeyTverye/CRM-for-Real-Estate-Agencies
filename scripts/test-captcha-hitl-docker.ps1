@@ -19,7 +19,6 @@ try {
   $common = @('run','--rm','--user','1000:1000','--security-opt','seccomp=ops/chrome/seccomp.json','--memory','2g','--pids-limit','256','--shm-size','256m','--tmpfs','/tmp:rw,nosuid,nodev,size=512m,mode=1777','-e','NODE_ENV=production','-e','DEPLOYMENT_ID=00000000-0000-4000-8000-000000000099','-e','INSTANCE_ID=hitl-proof','-e','DATABASE_URL=postgresql://crm:crm_test_password@host.docker.internal:55432/crm_test_hitl_docker','-e','AI_ENABLED=false','-e','LOG_LEVEL=silent')
   & docker @common $image node_modules/.bin/prisma migrate deploy
   if ($LASTEXITCODE -ne 0) { throw 'Миграции HITL test DB не прошли' }
-  # Only the synthetic runner is mounted. Production src/node_modules come from the built image.
   $mounts = @('--mount',"type=bind,source=$taskRoot\tests\fixtures\captcha-stand,target=/app/tests/fixtures/captcha-stand,readonly",'--mount',"type=bind,source=$taskRoot\scripts\captcha-hitl-smoke.ts,target=/app/scripts/captcha-hitl-smoke.ts,readonly")
   & docker @common @mounts $image node_modules/.bin/tsx scripts/captcha-hitl-smoke.ts
   if ($LASTEXITCODE -ne 0) { throw 'Контейнерная проверка HITL не прошла' }

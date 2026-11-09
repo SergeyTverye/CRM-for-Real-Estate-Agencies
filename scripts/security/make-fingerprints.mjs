@@ -1,4 +1,3 @@
-// TRUSTED LOCAL TOOL. Never invoke on enterprise data from an agent or CI.
 import ExcelJS from 'exceljs';
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile, lstat, rename, readFile, realpath } from 'node:fs/promises';
@@ -38,14 +37,12 @@ try {
   const total = hashes.size;
   if (publicDirectory) {
     failureCode = 'PUBLIC_GIT';
-    // Windows TEMP may use an 8.3 alias while Git returns the long directory name.
     publicDirectory = await realpath(publicDirectory);
     const git = (...arguments_) => execFileSync('git', ['-C', publicDirectory, ...arguments_], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
     const root = await realpath(resolve(git('rev-parse', '--show-toplevel').trim()));
     const names = git('ls-files', '--full-name', '-z', '--', '*.md', '*.ts', '*.tsx', '*.json', '*.mjs', '*.yaml').split('\0').filter(Boolean);
     failureCode = 'PUBLIC_READ';
     for (const name of names) {
-      // Even accidentally tracked private files must never become a public dictionary.
       const normalized = name.replaceAll('\\', '/').normalize('NFKC').toLowerCase();
       if (/(?:^|\/)(?:private-data|crm-secrets|private-imports|\.git|\.aws)(?:\/|$)/u.test(normalized)) continue;
       if (!/\.(?:md|ts|tsx|json|mjs|yaml)$/u.test(normalized)) continue;
@@ -59,7 +56,6 @@ try {
       }
       const stat = await lstat(absolute);
       if (!stat.isFile() || stat.size > 32 * 1024 * 1024) throw new Error('PUBLIC_FILE');
-      // Retain only source hashes; do not store plaintext or a repository-sized dictionary.
       for (const form of textForms(await readFile(absolute, 'utf8'))) hashes.delete(sha256(form));
     }
   }
@@ -71,7 +67,6 @@ try {
   await rename(temporary, 'private-data/fingerprints.json');
   console.log(total + ' / ' + (total - hashes.size) + ' / ' + hashes.size);
 } catch (error) {
-  // No library exceptions, paths or cell values in output.
   const safeCodes = new Set(['ARGS', 'LOCAL_ONLY', 'PUBLIC_SCOPE', 'PUBLIC_SYMLINK', 'PUBLIC_FILE', 'OUTPUT_PATH']);
   const code = error instanceof Error && safeCodes.has(error.message) ? error.message : failureCode;
   console.error('CG_GENERATE_' + code);

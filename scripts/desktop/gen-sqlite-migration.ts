@@ -2,16 +2,6 @@ import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 
 import { execFileSync } from "node:child_process";
 import metadata from "../../prisma/sqlite/compatibility.json";
 
-/**
- * Deterministic LF normalization for SQLite migration generation.
- *
- * Raw migration bytes are checksummed strictly (see applySqliteMigrations in
- * scripts/desktop/database-lifecycle.ts), so CRLF from Windows checkouts,
- * child-process stdout, or imported SQL seeds break history matching across
- * hosts without changing any SQL semantics. Every raw SQL boundary of this
- * generator is normalized to LF; SQL content is otherwise untouched and history
- * validation is never bypassed or rewritten.
- */
 export function normalizeSqlToLf(input: string): string {
   return input.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }
@@ -57,7 +47,6 @@ export type BaselineWriteAction = "create" | "identical" | "normalize-line-endin
 
 export interface BaselineWriteDecision {
   action: BaselineWriteAction;
-  /** Canonical bytes to write; null when no write is needed. */
   sqlToWrite: string | null;
 }
 
@@ -66,15 +55,6 @@ const BASELINE_DRIFT_MESSAGE =
   "(normalized LF comparison). Schema drift must go to a new incremental migration, " +
   "never to a baseline rewrite.";
 
-/**
- * Fail-closed guard for the already-applied immutable baseline.
- *
- * - Baseline absent -> caller may initialize it with the generated SQL.
- * - Baseline present and semantically identical after LF normalization:
- *   identical bytes -> no write; LF/CRLF-only difference -> canonical LF rewrite allowed.
- * - Baseline present and semantically different -> throw before any write, leaving
- *   the applied baseline untouched.
- */
 export function resolveBaselineWrite(
   existingRaw: string | null | undefined,
   generatedSql: string,
@@ -91,10 +71,6 @@ export function resolveBaselineWrite(
   throw new Error(BASELINE_DRIFT_MESSAGE);
 }
 
-/**
- * Bounded writer applying {@link resolveBaselineWrite} to a baseline file.
- * Never overwrites a semantically different applied baseline.
- */
 export function writeBaselineSql(baselinePath: string, generatedSql: string): BaselineWriteAction {
   if (!existsSync(baselinePath)) {
     writeFileSync(baselinePath, generatedSql);

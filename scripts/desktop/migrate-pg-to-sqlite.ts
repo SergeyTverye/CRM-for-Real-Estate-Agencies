@@ -58,7 +58,6 @@ function conversion(model: typeof models[number], row: Record<string,unknown>) {
     throw new Error("SOURCE_TYPE_UNSUPPORTED");
   });
 }
-/** Dependency ordering; cycles (template currentVersion, recurring parents) use deferred FK checks. */
 function orderedModels() {
   const pending=new Set(models), ordered:typeof models[number][]=[];
   while(pending.size) {
@@ -95,7 +94,6 @@ export async function migratePgToSqlite(options: TransferOptions): Promise<Trans
       rows.set(model.name,result.rows); report.entities[model.name]={source:result.rowCount??0,target:0};
       const values:ReturnType<typeof conversion>[]=[];
       for(const row of result.rows) {
-        // Metadata only; refuse confidential payloads before touching any storage object.
         if ([row.original_name,row.original_filename,row.file_name].some(v=>typeof v==="string"&&confidential.test(v))) report.incompatibilities.push({entity:model.name,code:"CONFIDENTIAL_FILE_REFUSED"});
         try {values.push(conversion(model,row));} catch {report.incompatibilities.push({entity:model.name,code:"VALUE_NOT_REPRESENTABLE"});}
       }
@@ -127,7 +125,6 @@ export async function migratePgToSqlite(options: TransferOptions): Promise<Trans
     if((dest.pragma("foreign_key_check") as unknown[]).length) throw new Error("RELATION_MISMATCH");
     phase="storage"; currentEntity="files";
     await mkdir(targetRoot,{recursive:false}); filesCreated=true;
-    // Copy the complete storage, including thumbnails, never follow symlinks/reparse paths.
     const copyTree=async (relative="") => {
       for(const entry of await readdir(path.join(sourceRoot,relative),{withFileTypes:true})) {
         if(confidential.test(entry.name) || entry.isSymbolicLink()) throw new Error("STORAGE_ENTRY_REFUSED");

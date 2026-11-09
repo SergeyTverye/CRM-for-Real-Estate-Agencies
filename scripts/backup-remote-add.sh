@@ -4,8 +4,6 @@
 # переменных окружения оператора на время команды и НЕ записываются в .env, БД или Git.
 #
 #   ./scripts/backup-remote-add.sh <code> filesystem             (каталог BACKUP_FILESYSTEM_TARGET_PATH, например NAS)
-#   YC_ACCESS_KEY_ID=… YC_SECRET_ACCESS_KEY=… YC_BUCKET=… ./scripts/backup-remote-add.sh <code> yandex
-#   MAILRU_USER=… MAILRU_APP_PASSWORD=… ./scripts/backup-remote-add.sh <code> mailru
 #   SBER_WEBDAV_URL=… SBER_USER=… SBER_PASSWORD=… ./scripts/backup-remote-add.sh <code> sberdisk   (только после probe)
 #
 # После добавления: допишите <code> в BACKUP_TARGETS в .env и выполните ./scripts/backup-remote-probe.sh <code>.
@@ -42,7 +40,7 @@ case "$KIND" in
     rc config create "$CODE" webdav url="$SBER_WEBDAV_URL" vendor=other user="$SBER_USER" pass="$SBER_PASSWORD" --obscure >/dev/null
     BASE="$CODE:$PREFIX"
     warn "СберДиск — compatibility profile: включайте в BACKUP_TARGETS только после успешного probe и тестового restore" ;;
-  *) fail "тип: filesystem | yandex | mailru | sberdisk" ;;
+  *) fail "тип: filesystem | yandex | mailru | sberdisk" ..
 esac
 
 CRYPT_PASS="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 40 || true)"

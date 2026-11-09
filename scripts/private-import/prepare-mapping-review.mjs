@@ -1,5 +1,3 @@
-// TRUSTED LOCAL ONLY. Agents and CI must supply synthetic workbooks exclusively.
-// The generated private HTML contains headers/structure only and runs offline on file:.
 import { readFile, mkdir, open, realpath, unlink, lstat } from 'node:fs/promises';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { resolve, join, extname } from 'node:path';
@@ -45,13 +43,11 @@ export async function createMappingReview(workbook) {
     return { profile, fields: fields.map(code => ({ code, label: fieldLabels[code] })), sheets };
 }
 
-// Mirrors the profile key normalization, without importing server code in the HTML.
 function normalizeHeader(value) {
     return String(value ?? '').toLowerCase().replace(/ё/g, 'е').replace(/[\s ]+/g, ' ')
         .replace(/\s*([/,.:()-])\s*/g, '$1').replace(/:$/, '').trim();
 }
 
-/** This function is serialized as a static nonced script. All source text uses textContent. */
 function mappingReviewBrowser() {
     'use strict';
     const model = JSON.parse(document.getElementById('review-data').textContent);
@@ -161,7 +157,6 @@ function mappingReviewBrowser() {
                     const field = column.control.value || null;
                     if (!allowedFields.has(field)) fail('COLUMN_UNRESOLVED', sheet.index, row, column.column);
                     config.columns[`@${row}:${column.column}`] = field;
-                    // Labels help the existing detector recognize manually mapped headers.
                     if (column.header && column.key !== '__proto__' && column.key !== 'constructor' && column.key !== 'prototype') {
                         const values = headerValues.get(column.key) ?? new Set(); values.add(field); headerValues.set(column.key, values);
                     }
@@ -233,11 +228,8 @@ export function renderMappingReview(review) {
 <script nonce="${nonce}">(${mappingReviewBrowser.toString()})();</script></body></html>\n`;
 }
 
-/** Output is restricted to a private subdirectory of the chosen workspace. */
 export async function prepareMappingReview(input, { workspaceRoot = process.cwd() } = {}) {
     if (typeof input !== 'string' || extname(input).toLowerCase() !== '.xlsx') throw new Error('INVALID_INPUT');
-    // Windows CI TEMP may use its 8.3 alias (RUNNER~1). Canonicalize the
-    // workspace before containment checks; still reject a redirected private root.
     const workspace = await realpath(resolve(workspaceRoot));
     const root = join(workspace, 'private-data');
     await mkdir(root, { recursive: true, mode: 0o700 });
@@ -247,7 +239,6 @@ export async function prepareMappingReview(input, { workspaceRoot = process.cwd(
     const handles = [];
     const created = [];
     try {
-        // Exclusive creation also refuses symlinks and existing files; never replace a review.
         const html = await open(htmlPath, 'wx', 0o600); handles.push(html); created.push(htmlPath);
         const candidate = await open(candidatePath, 'wx', 0o600); handles.push(candidate); created.push(candidatePath);
         const { loadEnterprise } = await domain();
@@ -263,7 +254,6 @@ export async function prepareMappingReview(input, { workspaceRoot = process.cwd(
             excludedColumns: review.sheets.reduce((n, s) => n + s.blocks.reduce((sum, b) => sum + b.columns.filter(c => c.excluded).length, 0), 0) };
     } catch (error) {
         await Promise.allSettled(handles.map(handle => handle.close()));
-        // Only exact newly-created files are removed, within the verified private root.
         await Promise.allSettled(created.map(path => unlink(path)));
         throw error;
     }

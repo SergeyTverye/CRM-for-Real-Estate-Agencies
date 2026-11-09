@@ -55,7 +55,6 @@ export interface ModuleFailureDiagnostic {
 class ModuleFailure extends Error {
   constructor(readonly diagnostic: ModuleFailureDiagnostic) { super("CLOUD_MODULE_FAILED"); }
 }
-/** Only our typed BackupError.code is eligible; never inspect provider message, name, body or cause. */
 export function safeModuleErrorCode(error: unknown): string {
   return error instanceof BackupError && typeof error.code === "string" && error.code.length <= 80
     && /^[A-Z]/.test(error.code) && !/[^A-Z0-9_]/.test(error.code)
@@ -73,7 +72,6 @@ export function moduleFailureDiagnostic(error: unknown): ModuleFailureDiagnostic
   };
 }
 
-/** Inject fetch only in synthetic tests. No credentials, redirects, response bodies or URLs are logged. */
 export async function probeS3Anonymous(
   input: { bucket: string; prefix: string; archive: ArchiveRef }, request: typeof fetch = fetch,
 ): Promise<{ getStatus: number; listStatus: number }> {
@@ -134,7 +132,6 @@ const providerFor = (id: string): ModuleProvider => id === "yandex" ? "YANDEX" :
 class DestinationFailure extends BackupError {
   constructor(code: string, readonly provider: ModuleProvider) { super(code); }
 }
-/** The production queue catches provider exceptions. Preserve only a safe code before that boundary. */
 function observeTransfers(destination: BackupDestination, failures: Map<string, string>): BackupDestination {
   const observe = async (work: () => Promise<void>) => {
     try { await work(); }
@@ -196,14 +193,12 @@ export async function runModuleTransferRestore(secrets: CloudLiveSecrets, makeDe
     const yandex = observeTransfers(made.destinations[0], transferFailures);
     const mailru = observeTransfers(made.destinations[1], transferFailures);
 
-    // Controlled first-put fault on Yandex; Mail.ru performs a real provider transfer.
     const firstQueuePath = path.join(root, "queue-first-put");
     const firstQueue = new ReplicationQueue(firstQueuePath, [failOnce(yandex, "SYNTHETIC_FIRST_PUT_FAILURE"), mailru]);
     await firstQueue.enqueue(created.archive, created.path);
     let rows = await firstQueue.pump();
     assertQueue(rows, created.archive.backupId, "yandex", "failed", transferFailures);
     assertQueue(rows, created.archive.backupId, "mailru", "verified", transferFailures);
-    // New queue instance reloads durable state, explicitly retries only the failed destination.
     stage = "RESUME_FIRST";
     transferFailures.clear();
     const resumedQueue = new ReplicationQueue(firstQueuePath, [yandex, mailru]);
@@ -214,8 +209,6 @@ export async function runModuleTransferRestore(secrets: CloudLiveSecrets, makeDe
     assertQueue(rows, created.archive.backupId, "yandex", "verified", transferFailures);
     assertQueue(rows, created.archive.backupId, "mailru", "verified", transferFailures);
 
-    // Separate controlled network-interruption simulation: Mail.ru throws a stable synthetic error;
-    // Yandex still verifies via the actual provider. This is not a physical network disconnect.
     stage = "SECOND_QUEUE";
     transferFailures.clear();
     const networkQueuePath = path.join(root, "queue-network-fault");
@@ -278,7 +271,6 @@ export async function runModuleTransferRestore(secrets: CloudLiveSecrets, makeDe
       cleanupStatus: "COMPLETED", cleanupCode: "NONE", cleanupProvider: "NONE",
     };
   } finally {
-    // Exact archive ID beneath this run's unique prefix only. Never enumerate-delete a bucket/prefix.
     let cleanupFailure: { code: string; provider: ModuleProvider } | undefined;
     const cleanup = async (cleanupProvider: ModuleProvider, work: () => void | Promise<void>) => {
       try { await work(); }

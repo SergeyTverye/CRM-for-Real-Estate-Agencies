@@ -1,5 +1,3 @@
-// Opt-in DT15 installed upgrade-failure/rollback proof. Coordinator executes locally.
-// Import performs no I/O. Synthetic data only. No secrets/PII in output.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -93,7 +91,6 @@ async function main() {
    const absent = async p => { await canonical(p); try { await fs.lstat(p); return false; } catch (e) { if (e.code === 'ENOENT') return true; throw e; } };
    const scope = async p => { if (!contained(run, p)) fail('OWN_SCOPE_REJECTED'); return canonical(p); };
    const installedNode = async script => {
-     // No password or key in argv; only synthetic SQL/owned paths. Resolve native ABI in installed app.
      try { return (await exec(nodeExe, ['-e', script], { cwd: path.join(install, 'app'), env,
        windowsHide: true, timeout: 30000, maxBuffer: 1048576 })).stdout.trim(); }
      catch { fail('INSTALLED_NODE_FAILED'); }
@@ -104,8 +101,6 @@ async function main() {
    };
    async function identity() {
      alive(); await scope(runtime);
-     // Faults can exit before runtime.json is published. Observe the owned Node
-     // descendants even then so cleanup does not depend on reaching READY.
      const descendants = JSON.parse(await powershell(`$all=@(Get-CimInstance Win32_Process);$parents=@(${child.pid});$owned=@();for($i=0;$i -lt 4;$i++){$next=@($all | Where-Object {$parents -contains $_.ParentProcessId -and $_.ExecutablePath -ieq $env:QA_NODE});foreach($p in $next){$owned+= [int]$p.ProcessId};$parents=@($next | ForEach-Object {[int]$_.ProcessId})};ConvertTo-Json -Compress -InputObject @($owned)`, { ...baseEnv, QA_NODE: nodeExe }));
      if (!Array.isArray(descendants) || descendants.some(p => !Number.isSafeInteger(p) || p < 1)) fail('DESCENDANT_IDENTITY_REJECTED');
      for (const pid of descendants) ownedNodes.add(pid);
@@ -125,13 +120,11 @@ async function main() {
      return true;
    }
    let bundle;
-   // bundle validated in guarded preflight below
    async function start() {
      await noOther();
      if (!await absent(runtime)) {
        const old = JSON.parse(await fs.readFile(await file(runtime), 'utf8'));
        previousPid = old.pid;
-       // Remove only our stopped run's stale metadata; never accept it on the next launch.
        await fs.unlink(await scope(runtime));
      }
      launchedAt = Date.now(); launchError = false; base = undefined; cookie = undefined;
@@ -160,7 +153,6 @@ async function main() {
      }
      previousPid = supervisorPid ?? previousPid; supervisorPid = undefined;
      child = undefined;
-     // Observe only; never reopen discovered PIDs for termination. Launcher Job owns descendants.
      if (ownedNodes.size) {
        const gone = await powershell(`$ids=@(${[...ownedNodes].join(',')});$end=[DateTime]::UtcNow.AddSeconds(10);do{$p=@(Get-CimInstance Win32_Process | Where-Object {$ids -contains $_.ProcessId -and $_.ExecutablePath -ieq $env:QA_NODE});if(!$p.Count){'GONE';break};[Threading.Thread]::Sleep(100)}while([DateTime]::UtcNow -lt $end);if($p.Count){'REMAINING'}`, { ...baseEnv, QA_NODE: nodeExe });
        if (gone !== 'GONE') fail('OWNED_NODE_REMAINS');
@@ -176,7 +168,6 @@ async function main() {
      const r = await fetch(base + route, { method, headers, redirect: 'manual', signal: AbortSignal.timeout(30000),
        body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body) });
      if (!r.ok) fail('INSTALLED_API_HTTP_FAILED');
-     // Actual session Set-Cookie only, in memory. Never serialize headers/body on failure.
      const sessions = r.headers.getSetCookie().filter(v => v.startsWith('crm_session='));
      if (sessions.length > 1) fail('SESSION_COOKIE_AMBIGUOUS');
      if (sessions.length) {
@@ -244,7 +235,6 @@ async function main() {
      docId = uuid((await request('/api/v1/documents', 'POST', fd)).id);
      if (sha(await request(`/api/v1/documents/${docId}/download`)) !== fileHash) fail('UPLOAD_DOWNLOAD_HASH_MISMATCH');
      await stopOwn();
-     // Resolve exactly the generation contract consumed by configureActiveGeneration, after setup.
      const pointer = path.join(dataRoot, 'runtime-generations/current.json');
      if (await absent(pointer)) { dbPath = path.join(dataRoot, 'crm.db'); storage = path.join(lad, 'files'); }
      else {
@@ -265,8 +255,6 @@ async function main() {
      if (queueLedger.length !== 1 || !queueLedger[0].finished_at || queueLedger[0].rolled_back_at !== null || !pristine.tables.backup_queue_journals) fail('QUEUE_BASELINE_REQUIRED');
      note('synthetic-client-document-pristine-baseline');
      stage = 'INJECT_FAULT';
-     // Keep the REAL queue table, schema, and every queue row. Its existing CREATE TABLE
-     // is the conflict when this ONE owned ledger entry becomes pending. No resource edits.
      await sql(`db.transaction(()=>{if(db.prepare('DELETE FROM _prisma_migrations WHERE migration_name=?').run(${q(migration)}).changes!==1)throw Error('LEDGER')}).immediate();db.pragma('wal_checkpoint(TRUNCATE)');process.stdout.write('{}')`, true);
      const injectedMarker = JSON.stringify({ version: '0.0.0-synthetic-upgrade-fault' });
      await fs.writeFile(await scope(markerPath), injectedMarker, { mode: 0o600 });
@@ -285,13 +273,10 @@ async function main() {
      note('pending-ledger-existing-queue-conflict-zero-business-change');
      stage = 'FAULT_START';
      await start();
-     // Do not kill the fault process before it has had the opportunity to roll back.
      const deadline = Date.now() + 150000;
      while (!launchError && child.exitCode === null && child.signalCode === null && Date.now() < deadline) {
        try { if (await identity()) fail('FAULTY_UPGRADE_UNEXPECTEDLY_READY'); }
        catch (e) {
-         // Natural failure can race an ownership observation. Only an observed
-         // nonzero natural exit qualifies; never suppress metadata/ancestry errors.
          if (e.safeCode !== 'OWN_LAUNCHER_EXITED' || launchError || child.exitCode === null || child.exitCode === 0 || child.signalCode !== null) throw e;
          break;
        }
@@ -313,9 +298,6 @@ async function main() {
      const enc = header.encryption;
      if (header.formatVersion !== 1 || enc?.alg !== 'AES-256-GCM-chunked' || enc.kdf !== 'scrypt' || enc.params?.N !== 32768 || enc.params.r !== 8 || enc.params.p !== 1 || !/^[a-f0-9]{32}$/.test(enc.params.salt) || !/^[a-f0-9]{16}$/.test(header.noncePrefix) || !wrapOk(header.phraseWrap) || !wrapOk(header.recoveryWrap)) fail('ARCHIVE_HEADER_REJECTED');
      result.archive = { size: bytes.length, sha256: sha(bytes), header: 'CRMBKP1_AES256GCM_SCRYPT' };
-     // These checks jointly distinguish restore from "nothing changed": rollback's
-     // copy+rename replaces the DB file ID, and removes its own journal ONLY AFTER
-     // extractArchive authenticates all chunks/manifest/files and validates SQLite.
      if (!await absent(journal)) fail('PRODUCT_ROLLBACK_JOURNAL_NOT_REMOVED');
      if ((await fs.stat(await file(dbPath), { bigint: true })).ino === beforeIdentity) fail('PRODUCT_ROLLBACK_DB_NOT_REPLACED');
      const after = await projection();
@@ -326,12 +308,9 @@ async function main() {
        databaseSha256: await shaFile(dbPath), markerSha256: sha(injectedMarker), documentSha256: fileHash };
      note('compiled-rollback-replaced-db-removed-journal-restored-injected-baseline');
      stage = 'RECOVER';
-     // The conflict is the missing ledger row, NOT the table. Restore only that row;
-     // never drop the genuine queue or replace the database from a controller copy.
      const row = queueLedger[0], columns = Object.keys(row);
      await sql(`db.transaction(()=>{if(db.prepare('SELECT count(*) n FROM _prisma_migrations WHERE migration_name=?').get(${q(migration)}).n)throw Error('LEDGER');db.prepare(${q('INSERT INTO _prisma_migrations (' + columns.map(c => '"' + c + '"').join(',') + ') VALUES (' + columns.map(() => '?').join(',') + ')')}).run(...${q(Object.values(row))})}).immediate();process.stdout.write('{}')`, true);
      if (q(await projection()) !== q(pristine)) fail('RECOVERY_CHANGED_BASELINE');
-     // Leave the old synthetic version: this launch must perform a real healthy upgrade.
      await start(); await ready(); await login();
      const recoveredClient = await request(`/api/v1/clients/${clientId}`);
      if (recoveredClient.id !== clientId || recoveredClient.displayName !== clientName) fail('RECOVERY_CLIENT_MISMATCH');
@@ -351,8 +330,6 @@ async function main() {
      password = undefined; cookie = undefined;
      try { await stopOwn(); note('strict-owned-job-teardown'); }
      catch { result.status = 'FAIL'; result.cleanupError = 'OWNED_TEARDOWN_FAILED'; }
-     // Retain only this ACL-private synthetic profile/archive/baselines for coordinator evidence.
-     // No raw logs, keys, cookies, password, database rows, or storage keys in result.
      await fs.writeFile(await scope(path.join(run, 'result.json')), JSON.stringify(result, null, 2), { flag: 'wx', mode: 0o600 });
    }
    if (result.status !== 'PASS') process.exitCode = 1;

@@ -39,7 +39,6 @@ export async function seedMediaAndOffers(ctx: DemoContext) {
   await seedGallery(ctx);
   const legalEntity = await db.legalEntity.findFirstOrThrow({ where: { isActive: true }, orderBy: { id: "asc" } });
   for (const [i, title] of [`${marker} Подборка — черновик`, `${marker} Подборка — отправлено`].entries()) {
-    // Revisions intentionally inherit the title; they must never become the source on rerun.
     let offer = await db.commercialOffer.findFirst({ where: { title, clientNeedId: ctx.needs[i * 4]!.id, promptTemplateVersion: null } });
     if (!offer) {
       const created = await createOffer(ctx.agents[0]!, { clientNeedId: ctx.needs[i * 4]!.id, title, legalEntityId: legalEntity.id, notes: marker,
@@ -61,7 +60,6 @@ export async function seedMediaAndOffers(ctx: DemoContext) {
 
 export async function seedDeals(ctx: DemoContext) {
   const legalEntity = await db.legalEntity.findFirstOrThrow({ where: { isActive: true }, orderBy: { id: "asc" } });
-  // A single transaction per synthetic deal makes participants/commissions/history atomic.
   for (let i = 0; i < 4; i++) {
     const id = demoId(`deal:${i}`), property = ctx.properties[i]!, client = ctx.clients[i]!;
     const completed = i >= 2, rent = property.operationType === "rent";

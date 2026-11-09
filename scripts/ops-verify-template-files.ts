@@ -1,4 +1,3 @@
-// Offline restore verification: original template bytes + manifest, and generated files.
 import { createHash } from "node:crypto";
 import { db, disconnectDb } from "@/shared/db/client";
 import { getStorage } from "@/shared/storage/storage-adapter";

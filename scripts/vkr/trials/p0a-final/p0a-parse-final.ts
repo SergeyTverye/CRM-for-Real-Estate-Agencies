@@ -1,4 +1,3 @@
-/** Single authorized LIVE regression of spelled-out area; no network to listing sites. */
 import { config } from "dotenv";
 import { hash } from "@node-rs/argon2";
 import { randomUUID } from "node:crypto";

@@ -1,9 +1,3 @@
-#requires -Version 7.2
-<#!
-Opt-in synthetic installed supervisor acceptance. Never installs/uninstalls/builds.
-No transcript, HTTP tracing or debugger: generated credentials exist only in memory.
-Native mailbox replay is NOT evidence of an actual Windows file picker.
-!#>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$InstallDirectory,
@@ -77,7 +71,6 @@ function Api([string]$Path,[string]$Method='GET',$Body=$null) {
     $options=@{ Uri=$script:base+$Path; Method=$Method; Headers=@{Origin=$script:base};
         WebSession=$script:session; TimeoutSec=15; MaximumRedirection=0; ErrorAction='Stop' }
     if ($null -ne $Body) { $options.ContentType='application/json'; $options.Body=($Body | ConvertTo-Json -Depth 8 -Compress) }
-    # Never emit an HTTP error body or invocation arguments to reports/stdout.
     try { return Invoke-RestMethod @options } catch { throw 'API_FAILED' }
 }
 function Control($Body) { return Api '/api/v1/settings/backups/control' 'POST' $Body }
@@ -114,7 +107,6 @@ function Command($Body,[string]$Expected) {
     Check ($result.id -eq $id -and $result.action -eq $Body.action -and $result.status -eq $Expected) 'command-result'
     WaitFor { Ready }
     Check ((ServerIdentity) -ne $oldServer) 'supervisor-restarted-server'
-    # Restore can replace sessions. Always reauthenticate with memory-only credentials.
     $script:session=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
     $null=Api '/api/v1/auth/login' 'POST' @{login='qa-installed-manager';password=$password}
     return $result
@@ -145,7 +137,6 @@ try {
     if (-not $IsWindows -or -not [Environment]::Is64BitProcess) { throw 'WINDOWS_X64_REQUIRED' }
     if ([bool]$UsbDirectory -ne [bool]$AllowUsbExport -or ($AllowUsbExport -and -not $ReplayNativeMailbox)) { throw 'USB_OPT_IN_REQUIRED' }
     $workspace=FullLocal ([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..')))
-    # Resolve script root without accepting parent traversal in user-provided paths.
     $InstallDirectory=FullLocal $InstallDirectory
     $expectedInstall=FullLocal (Join-Path $env:LOCALAPPDATA 'Programs\RealEstateCRM')
     if (-not (SamePath $InstallDirectory $expectedInstall)) { throw 'INSTALL_ROOT_REJECTED' }
@@ -158,7 +149,6 @@ try {
     $exe=Join-Path $InstallDirectory 'RealEstateCRM.exe'
     $script:node=Join-Path $InstallDirectory 'app\node\node.exe'
     foreach ($file in @($exe,$script:node)) { if (-not (Test-Path -LiteralPath (FullLocal $file) -PathType Leaf)) { throw 'INSTALLED_BINARY_MISSING' } }
-    # Fail closed on any other app; never stop it or invoke the global stop event.
     if (@(Get-Process -Name RealEstateCRM -ErrorAction SilentlyContinue).Count) { throw 'OTHER_APP_RUNNING' }
     try { $mutex=[Threading.Mutex]::OpenExisting('Local\RealEstateCRM.Desktop.Writer'); $mutex.Dispose(); throw 'OTHER_WRITER_RUNNING' }
     catch [Threading.WaitHandleCannotBeOpenedException] { }
@@ -168,7 +158,6 @@ try {
         if (-not (Test-Path -LiteralPath $usbRoot -PathType Container)) { throw 'USB_DIRECTORY_REQUIRED' }
     }
     FreshDirectory $script:runRoot
-    # Owner + SYSTEM only, inherited by synthetic files. Do not change parent ACLs.
     $acl=[Security.AccessControl.DirectorySecurity]::new()
     $acl.SetAccessRuleProtection($true,$false)
     foreach ($sid in @([Security.Principal.WindowsIdentity]::GetCurrent().User,[Security.Principal.SecurityIdentifier]::new('S-1-5-18'))) {
@@ -184,7 +173,6 @@ try {
     $start=[Diagnostics.ProcessStartInfo]::new($exe)
     $start.UseShellExecute=$false; $start.CreateNoWindow=$true; $start.WorkingDirectory=$InstallDirectory
     $start.ArgumentList.Add('--smoke'); $start.ArgumentList.Add('--smoke-seconds=1800')
-    # Do not inherit DB/storage/backup credentials or path overrides from the caller.
     $start.Environment.Clear()
     foreach ($key in @('SystemRoot','WINDIR','USERPROFILE','USERNAME','USERDOMAIN','COMSPEC','ProgramFiles','ProgramFiles(x86)','ProgramData','SystemDrive')) {
         $value=[Environment]::GetEnvironmentVariable($key)
@@ -198,7 +186,6 @@ try {
     $script:app=[Diagnostics.Process]::Start($start)
     WaitFor { (Test-Path -LiteralPath $script:runtime) -and (Ready) } 150
     Check ($script:base -match '^http://127\.0\.0\.1:') 'owned-loopback-ready'
-    # Bundled native runtime only, never host Node/npm.
     $versionStart=[Diagnostics.ProcessStartInfo]::new($script:node)
     $versionStart.UseShellExecute=$false; $versionStart.CreateNoWindow=$true; $versionStart.RedirectStandardOutput=$true
     $versionStart.ArgumentList.Add('--version'); $versionStart.Environment.Clear()
@@ -255,14 +242,11 @@ try {
     $script:stage='COMPLETE'
 } catch {
     $failed=$true
-    # No exception text, HTTP response, entered values, paths, tokens or credentials.
     $script:checks.Add(@{code=('FAILED_'+$script:stage);passed=$false})
 } finally {
     $password=$phrase=$recovery=$null
     $script:session=$null
     if ($script:app) {
-        # No --shutdown: its stop event is shared with other profiles.
-        # Let the bounded smoke finish naturally; force only this process handle/tree.
         if (-not $script:app.HasExited -and -not $script:app.WaitForExit(360000)) {
             try { $script:app.Kill($true); $script:app.WaitForExit(); $script:checks.Add(@{code='owned-tree-forced-stop';passed=$false}); $failed=$true }
             catch { $script:checks.Add(@{code='OWNED_CLEANUP_FAILED';passed=$false}); $failed=$true }

@@ -12,7 +12,6 @@ const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", ...(de
   stdio: "inherit",
   env: { ...process.env, NODE_ENV: dev ? "development" : "production", DATABASE_URL: databaseURL,
     SCRAPER_DEMO_FIXTURES: "true", SCRAPER_ENABLED: "true", APP_TIMEZONE: "Asia/Novosibirsk", COOKIE_SECURE: "false", LOG_LEVEL: "warn",
-    // Repeated screenshot rehearsals use only FakeResponsesProvider; keep the real ledger intact.
     YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY: ai ? "30" : (process.env.YANDEX_WEB_SEARCH_MAX_JOBS_PER_USER_DAY ?? "3"),
     AI_ENABLED: String(ai), YANDEX_WEB_SEARCH_ENABLED: String(ai), YANDEX_WEB_SEARCH_AUTO_FALLBACK: String(ai),
     // Секрет провайдера в демо-процесс не передаётся.

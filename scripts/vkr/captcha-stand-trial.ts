@@ -1,4 +1,3 @@
-/** Explicit REPLAY visual trial. This script never visits a third-party source. */
 import { chromium } from "playwright-core";
 import { writeFile } from "node:fs/promises";
 import { captchaStand } from "../../tests/fixtures/captcha-stand/server";

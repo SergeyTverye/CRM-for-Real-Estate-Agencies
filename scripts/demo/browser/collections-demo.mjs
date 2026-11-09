@@ -32,7 +32,6 @@ try {
   await expect.poll(async () => (await (await context.request.get(`/api/v1/collections/${collectionId}`)).json()).items[0].id).toBe(original.items[1].id); checks.push("reorder arrows");
   const picker = page.getByPlaceholder("Найти потребность по названию"); await picker.focus();
   const needs = await (await context.request.get("/api/v1/property-search/pick-needs")).json(); expect(needs.items.length).toBeGreaterThan(0);
-  // The API returns only scoped names; choose the visible first option in the real picker.
   await page.getByRole("button").filter({ hasText: needs.items[0].label }).first().click();
   await page.getByRole("button", { name: "Привязать", exact: true }).click();
   await expect(page.getByRole("button", { name: "Отвязать", exact: true })).toBeVisible(); checks.push("named need picker / link");
@@ -51,7 +50,6 @@ try {
   expect(errors).toEqual([]); writeFileSync(`${output}/result.json`, JSON.stringify({ checks, errors, mode: "crm_demo", date: new Date().toISOString() }, null, 2));
   console.log(`Collections browser PASS: ${checks.join(", ")}`);
 } finally {
-  // Remove only this run's synthetic rows; existing demo data remains intact.
   if (offerId) { await database.query("DELETE FROM commercial_offer_items WHERE commercial_offer_id=$1", [offerId]); await database.query("DELETE FROM commercial_offers WHERE id=$1", [offerId]); }
   if (collectionId) { await database.query("DELETE FROM property_collection_needs WHERE collection_id=$1", [collectionId]); await database.query("DELETE FROM property_collection_items WHERE collection_id=$1", [collectionId]); await database.query("DELETE FROM property_collections WHERE id=$1", [collectionId]); }
   await database.end(); await browser.close();

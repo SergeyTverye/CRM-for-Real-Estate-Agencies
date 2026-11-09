@@ -59,7 +59,7 @@ export function loadDataset() {
     const [, trueType, purposes, operation, expected, reason] = row;
     const fact = facts[snapshot.id];
     const groups = duplicatePairs.filter(p => (p.a === snapshot.id || p.b === snapshot.id) && p.expected === "suspected").map(p => p.group);
-    // Web Search used its own source code in v2.4.1. Keep it in provenance;
+    // Web Search used its own source code in v2.4.1. Keep it in provenance.
     // the pure domain type only accepts platform codes (evaluation never uses this field).
     const source = snapshot.input.source === "web_search" ? new URL(snapshot.input.url).hostname.includes("cian") ? "cian" : new URL(snapshot.input.url).hostname.includes("avito") ? "avito" : "onrealt" : snapshot.input.source;
     return {

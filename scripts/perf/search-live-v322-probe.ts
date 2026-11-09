@@ -1,17 +1,3 @@
-/**
- * BOUNDED LIVE probe for v3.2.2 (coordinator/trusted network only).
- *
- * No AI, no DB, no browser, no dotenv. One adapter job per (query x source),
- * depth maxPages=1/limit=5, per-job deadline 25s. Plain-HTTP factory transport
- * is wrapped to count requests (hard cap 40/source for the whole probe).
- * --after-fixes: Cian x4 + two residential cells, append matrix.afterFixes.
- * --residential-only: only two residential cells, append afterSchedulingOptimization.
- * Both follow-ups count HTTP redirect hops (caps Cian 12, others 24).
- * stdout: sanitized counts/codes only (no URLs, texts, contacts, bodies).
- * Combo duplicate stats are computed in-memory and reported as counts only.
- *
- *   npx tsx scripts/perf/search-live-v322-probe.ts > docs/vkr/live-search-v322-matrix.json
- */
 import { readFileSync, writeFileSync } from "node:fs";
 import { scraperHttpRequest } from "../../src/modules/property-search/infrastructure/scraper-http";
 import { resilientTransport } from "../../src/modules/property-search/infrastructure/source-response";
@@ -87,7 +73,6 @@ async function probe(queryId: string, filters: unknown, source: Source): Promise
   });
   const factory: ScraperFactory = config => {
     if (!afterFixes) return defaultScraperFactory({ ...config, transport: countingTransport(config.transport, source) ?? config.transport });
-    // Count every HTTP redirect hop, not just calls into the package transport.
     const measured: RealEstateScraper.Transport = async request => {
       counters.set(source, (counters.get(source) ?? 0) + 1);
       const response = await scraperHttpRequest(request.url, {

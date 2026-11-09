@@ -3,7 +3,6 @@ import { db, demoId, day, type DemoContext } from "./context";
 import { saveTemplate, generateFromTemplate } from "@/modules/document-templates/application/template-service";
 import { taskProposal } from "@/modules/ai-chat/domain/policy";
 
-/** Synthetic, deterministic fixtures only. Never calls a cloud provider. */
 export async function seedV31(ctx: DemoContext) {
   const anchor = new Date("2026-11-06T05:00:00Z");
   for (let i = 0; i < 96; i++) {
@@ -24,7 +23,6 @@ export async function seedV31(ctx: DemoContext) {
     status: i === 0 ? "done" : "open", dueAt: day(anchor, i - 2, 10), responsibleUserId: ctx.agents[1]!.userId,
     ...(i === 0 ? { completedAt: day(anchor, -1), completedBy: ctx.agents[1]!.userId, result: "Бюджет и пожелания подтверждены" } : {}),
   } });
-  // Checklist examples also live in December and January, not only on the first day.
   for (const taskIndex of [33, 63]) for (let i = 0; i < 3; i++) {
     const id = demoId(`v31:check:${taskIndex}:${i}`);
     await db.taskChecklistItem.upsert({ where: { id }, update: { dueAt: day(anchor, taskIndex === 63 ? 56 : taskIndex - 8, 10 + i) }, create: {
@@ -39,7 +37,6 @@ export async function seedV31(ctx: DemoContext) {
     responsibleUserId: ctx.agents[Math.floor(i / 4) % 2]!.userId, createdBy: ctx.agents[Math.floor(i / 4) % 2]!.userId,
     clientId: i % 4 === 3 ? ctx.clients[0]!.id : null, clientNeedId: i % 4 === 3 ? ctx.needs[0]!.id : null,
   };
-    // Cross every outcome with every source rather than making source imply outcome.
     data.sourceCode = ["cian", "avito", "referral", "website"][Math.floor(i / 4)]!;
     await db.leadRequest.upsert({ where: { id: data.id }, update: data, create: data });
   }
@@ -65,7 +62,6 @@ export async function seedV31(ctx: DemoContext) {
   }
   const sessionId = demoId("v31:chat"), actionId = demoId("v31:chat:action");
   await db.aiChatSession.upsert({ where: { id: sessionId }, update: {}, create: { id: sessionId, ownerUserId: ctx.agents[0]!.userId, title: "DEMO · Следующий контакт", contextType: "client", contextId: ctx.clients[0]!.id } });
-  // Recorded response of the deterministic DEMO provider; no Yandex request or usage claim.
   const payload = taskProposal.parse({ clientId: ctx.clients[0]!.id, title: "Уточнить обратную связь по подборке", dueAt: day(anchor, 1, 11).toISOString(), description: "DEMO · Согласовать варианты и время показа. Задача появится только после подтверждения." });
   await db.aiPendingAction.upsert({ where: { id: actionId }, update: {}, create: { id: actionId, sessionId, actionType: "task", payload } });
   for (const [index, role, content] of [[0, "user", "Подготовь черновик задачи: завтра в 11:00 уточнить обратную связь по подборке."], [1, "assistant", "DEMO-провайдер (локальная синтетическая запись, без обращения к Yandex AI). Подготовлен черновик задачи. Проверьте срок и описание; сохранение произойдёт только после нажатия «Подтвердить»."]] as const)

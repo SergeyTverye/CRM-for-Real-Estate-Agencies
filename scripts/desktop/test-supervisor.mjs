@@ -4,8 +4,6 @@ import { mkdtemp, mkdir, copyFile, writeFile, readFile, access, rm, realpath, ls
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 
-// Synthetic process-contract test: no application DB, account, real profile,
-// cloud credentials, Next build or Prisma generation is involved.
 if (process.platform !== 'win32') throw Error('WINDOWS_TEST_REQUIRED');
 const base = path.resolve('src-tauri/target/supervisor-check');
 await mkdir(base, { recursive: true });
@@ -72,8 +70,6 @@ process.exit(7);
   const failedChild = spawn(process.execPath, [path.join(failApp, 'supervisor.mjs')], {
     env: { ...process.env, LOCALAPPDATA: failProfile }, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'],
   });
-  // Subscribe before checking the child-created marker: a fast failure can exit
-  // between the filesystem poll and a late event subscription.
   const failedCompletion = new Promise((resolve, reject) => {
     failedChild.once('exit', resolve); failedChild.once('error', reject);
   });
@@ -139,8 +135,6 @@ try {
   await runFailingCommandSmoke();
 } finally {
   if (child.exitCode === null) {
-    // No native Job Object surrounds this JS-only harness. Restrict failure
-    // cleanup to the exact process tree launched above, never all node.exe.
     spawnSync(path.join(process.env.SystemRoot, 'System32/taskkill.exe'), ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
   }
   const resolvedStage = path.resolve(stage);

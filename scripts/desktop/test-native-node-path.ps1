@@ -1,6 +1,5 @@
 param([Parameter(Mandatory)][string]$Node)
 $ErrorActionPreference='Stop'
-# No application launch, profile lookup or user data. Syntax-check only our own file.
 $root=Join-Path ([IO.Path]::GetTempPath()) ('crm-native-path-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root | Out-Null
 $entry=Join-Path $root 'synthetic.mjs'

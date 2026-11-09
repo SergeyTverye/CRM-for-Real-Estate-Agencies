@@ -13,7 +13,6 @@ assert.equal(new URL(process.env.DATABASE_URL ?? "http://invalid").pathname, "/c
 Object.assign(process.env, { AI_ENABLED: "false", SCRAPER_ENABLED: "false", YANDEX_WEB_SEARCH_ENABLED: "false", LOG_LEVEL: "silent" });
 
 async function actorFor(userId: string): Promise<Actor> {
-  // Maintenance export of saved evidence; no login/session or user-state changes.
   const user = await db.user.findUniqueOrThrow({ where: { id: userId } });
   return { userId, login: user.login, displayName: user.displayName, role: user.roleCode as Actor["role"], mustChangePassword: false, sessionId: "maintenance-export" };
 }
@@ -47,7 +46,6 @@ async function main() {
       } else {
         const text = Buffer.from(result.bytes).toString("utf8");
         assert.ok(text.startsWith("\uFEFF"));
-        // CSV may contain quoted newlines in duplicate links.
         rows = (text.slice(1).match(/(?:^|\r\n)"(?:[^"\r\n]|"")*";/gu) ?? []).length - 1;
       }
       assert.equal(rows, name === "search-all" ? 70 : name === "search-selected" ? 4 : 24);

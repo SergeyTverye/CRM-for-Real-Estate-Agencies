@@ -1,6 +1,3 @@
-// Opt-in DT-06 installed PG->SQLite transfer proof. Coordinator executes locally.
-// This file performs no transfer by itself and runs no tests on import.
-// Synthetic data only. No cloud, no workbooks, no customer data, no secrets in output.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,9 +10,7 @@ const exec = promisify(execFile);
 const workspace = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PG_HOST = '127.0.0.1';
 const PG_PORT = 55432;
-// Already-public synthetic TEST credential, same as tests/regression-synthetic/pg-setup.ts.
 const PG_ADMIN_URL = 'postgresql://crm:crm_test_password@127.0.0.1:55432/postgres';
-// Already-public synthetic TEST constant, see tests/helpers/fixtures.ts TEST_PASSWORD. Never real data.
 const SYNTHETIC_TEST_PASSWORD = 'TestPassw0rd!';
 const DB_PREFIX = 'transfer_proof_test_';
 const fail = code => { throw Object.assign(new Error(code), { safeCode: code }); };
@@ -62,7 +57,6 @@ async function main() {
     if (process.env[key]) fail('UNSAFE_CONTROLLER_ENVIRONMENT');
   }
   if (process.execArgv.some(a => /inspect|debug/.test(a))) fail('UNSAFE_CONTROLLER_ENVIRONMENT');
-  // Never inherit operational storage or database configuration into a synthetic proof.
   for (const key of ['DATABASE_URL', 'TEST_DATABASE_URL', 'FILE_STORAGE_PATH', 'SQLITE_DATABASE_URL']) {
     if (process.env[key]) fail('INHERITED_DATA_ENVIRONMENT');
   }
@@ -194,8 +188,6 @@ async function main() {
   try {
     stage = 'FIXTURE_AND_TRANSFER';
     await canonical(run);
-    // Generated-client readiness gate: fixture imports generated Prisma clients
-    // and tsconfig aliases. Fail closed before any reset when generation is stale.
     for (const gen of ['src/generated/prisma', 'src/generated/prisma-sqlite']) {
       try { if (!(await fs.stat(path.join(workspace, gen))).isDirectory()) fail('GENERATED_CLIENT_MISSING'); }
       catch (e) { if (e.safeCode) throw e; fail('GENERATED_CLIENT_MISSING'); }
@@ -207,8 +199,6 @@ async function main() {
       TRANSFER_SOURCE_STORAGE: sourceStorage, TRANSFER_TARGET_FILE: targetFile,
       TRANSFER_TARGET_STORAGE: targetStorage, TRANSFER_DISPLAY_NAME: 'QA TRANSFER ' + id.slice(0, 8) };
     await new Promise((resolve, reject) => {
-      // .mts forces the ESM boundary under the CJS package (top-level await/import);
-      // tsx/esm preserves TS/CJS interop and tsconfig path aliases (@/...). No install, no rebuild.
       const p = spawn(process.execPath, ['--import', 'tsx', path.join(run, 'fixture.transfer.mts')],
         { cwd: workspace, env: fixtureEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], timeout: 300000 });
       let out = '', errTail = '';
@@ -217,8 +207,6 @@ async function main() {
       p.once('error', reject);
       p.once('exit', code => {
         if (code === 0 && /TRANSFER_OK/.test(out)) return resolve();
-        // Fixture prints closed codes only; surface its code without raw logs.
-        // Bounded closed diagnostics for loader/transform/PG failures; never emit raw stderr/URL.
         const m = /"code":"([A-Z][A-Z0-9_]{0,90})"/.exec(errTail);
         if (m) return reject(Object.assign(new Error('FIXTURE_TRANSFER_FAILED'), { safeCode: m[1] }));
         if (/Top-level await|Cannot use import statement|ERR_REQUIRE_ESM|ERR_IMPORT_ASSERTION|SyntaxError|Transform failed|Unknown file extension|Cannot find module|ERR_MODULE_NOT_FOUND|Failed to load tsx/i.test(errTail)) {
@@ -252,7 +240,6 @@ async function main() {
     await fs.copyFile(path.join(run, 'staged-database.sqlite'), path.join(genDir, 'database.sqlite'));
     await copyTree(targetStorage, path.join(genDir, 'documents'));
     if ((await shaFile(path.join(genDir, 'database.sqlite'))) !== (await shaFile(targetFile))) fail('STAGED_DATABASE_MISMATCH');
-    // Minimal synthetic staging pointer. Not a backup; supervisor only reads .generation.
     await writeFileStrict(run, path.join(dataRoot, 'runtime-generations', 'current.json'), JSON.stringify({ generation }));
     note('migrated-generation-staged-for-installed-supervisor');
     stage = 'INSTALLED_SMOKE';
@@ -341,10 +328,6 @@ async function writeFileStrict(run, p, data) {
   try { await handle.writeFile(data); } finally { await handle.close(); }
 }
 
-// Narrow fixture: fresh UUID PG database via tracked migrations, minimal synthetic
-// rows (client/need/property/template version/document file), actual migratePgToSqlite,
-// before/after preservation and read-only target integrity. Written to the run
-// workspace at runtime and executed with the repository's own tsx loader.
 function fixtureSource() {
   return String.raw`
 import pg from 'pg';
@@ -366,8 +349,6 @@ const targetStorage = get('TRANSFER_TARGET_STORAGE');
 const displayName = get('TRANSFER_DISPLAY_NAME');
 const found = /^postgresql:\/\/crm:crm_test_password@127\.0\.0\.1:55432\/(transfer_proof_test_[0-9a-f]{32})$/.exec(url);
 if (!found) fail('TRANSFER_URL_REJECTED');
-// Reject inherited operational config first; run-scoped FILE_STORAGE_PATH is
-// bound below, after this guard, so it is never inherited from the operator env.
 if (process.env.DATABASE_URL || process.env.TEST_DATABASE_URL || process.env.FILE_STORAGE_PATH || process.env.SQLITE_DATABASE_URL) fail('INHERITED_DATA_ENVIRONMENT');
 const dbName = found[1];
 const admin = new pg.Client({ connectionString: 'postgresql://crm:crm_test_password@127.0.0.1:55432/postgres', connectionTimeoutMillis: 5000 });

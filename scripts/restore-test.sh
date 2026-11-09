@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # T08: фактическое восстановление backup в ОТДЕЛЬНЫЙ тестовый контур (non-interactive).
-#   ./scripts/restore-test.sh [<backup_id>] [--keep]
 # Поднимает compose project "<project>-restoretest" с собственными томом БД и каталогами
 # restore-test/, восстанавливает БД и файлы, запускает приложение в роли standby и проверяет:
-#   1) readiness /api/health; 2) вход пользователя; 3) контрольные счётчики записей (manifest);
+#   1) readiness /api/health. 2) вход пользователя. 3) контрольные счётчики записей (manifest).
 #   4) контрольный файл: SHA-256 восстановленного документа совпадает с documents.checksum
 #      (и при возможности — выдача через API с проверкой прав).
 # Учётные данные для проверки входа: RESTORE_TEST_LOGIN/RESTORE_TEST_PASSWORD
@@ -24,7 +23,6 @@ MAIN_PROJECT="$(env_value COMPOSE_PROJECT_NAME)"; MAIN_PROJECT="${MAIN_PROJECT:-
 RT_PROJECT="${MAIN_PROJECT}-restoretest"
 RT_PORT="${RESTORE_TEST_PORT:-18080}"
 RT_ENV="$ROOT_DIR/restore-test/.env"
-# Never delete the directory of a potentially running previous restore-test stack.
 [ ! -e "$ROOT_DIR/restore-test" ] || fail "restore-test уже существует: остановите прежний тестовый контур и сохраните его результаты"
 mkdir -p restore-test/data/files restore-test/data/import-staging restore-test/backups
 cp -a "backups/$ID" "restore-test/backups/$ID"
@@ -90,7 +88,6 @@ if [ -n "$DOC_LINE" ]; then
 else
   check "control_file_storage" "FAIL (в копии нет контрольного документа)"
 fi
-# Verify every gallery original and thumbnail against its metadata in the restored DB.
 rt --profile ops run --rm -T backup sh -c 'psql -X -qtA -F "|" -v ON_ERROR_STOP=1 -c "SELECT storage_key, checksum FROM documents UNION ALL SELECT thumbnail_storage_key, NULL FROM documents WHERE thumbnail_storage_key IS NOT NULL"' > "$ROOT_DIR/restore-test/media-checks.txt"
 MEDIA_OK=1; MEDIA_COUNT=0
 while IFS='|' read -r key checksum; do
@@ -108,7 +105,6 @@ if TEMPLATE_RESULT="$(rt exec -T app node node_modules/tsx/dist/cli.mjs scripts/
 else
   check "template_files" "FAIL"
 fi
-# Browser profiles are created under os.tmpdir(), outside the only backed-up storage mount.
 if find restore-test/data/files -name 'crm-browser-session-*' -print -quit | grep -q .; then
   check "temporary_profiles_excluded" "FAIL"
 else

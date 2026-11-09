@@ -1,7 +1,6 @@
 [CmdletBinding()]
 param([switch]$Execute)
 
-# No content reads, Git mutations, process termination, or recursive Remove-Item.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent)).TrimEnd('\')
@@ -17,8 +16,6 @@ function Assert-PlainPath([string]$Path) {
     if (-not $full.StartsWith($root + '\', $comparison)) { throw 'OUTSIDE_WORKSPACE' }
     $cursor = $full
     while ($cursor) {
-        # Native metadata lookup avoids repeated PowerShell provider enumeration.
-        # A missing or inaccessible ancestor fails closed.
         if ([IO.File]::GetAttributes($cursor) -band [IO.FileAttributes]::ReparsePoint) { throw 'REPARSE_POINT' }
         $parent = [IO.Directory]::GetParent($cursor)
         $cursor = if ($parent) { $parent.FullName } else { $null }
@@ -47,7 +44,6 @@ function Assert-GitSafe([string]$Relative, [bool]$Directory) {
 }
 
 function Get-ProcessSnapshot {
-    # CommandLine is inspected in memory only; never output or saved.
     return @(Get-CimInstance Win32_Process -ErrorAction Stop |
         Select-Object ProcessId,Name,ExecutablePath,CommandLine)
 }
@@ -58,8 +54,6 @@ function Assert-Inactive([string]$Path, [string]$Relative, $Processes) {
         $cmd = [string]$p.CommandLine
         $exe = [string]$p.ExecutablePath
         if (-not $exe -and -not (Get-Process -Id $p.ProcessId -ErrorAction SilentlyContinue)) { continue }
-        # Coordinator/helper command text may quote this task and candidate names.
-        # Only known external agent runtimes with no build/test entrypoint qualify.
         $agentRuntime = $exe -match '(?i)[\\/](codex|opencodex)[\\/]|[\\/]codex-runtimes[\\/]|[\\/]@bitkyc08[\\/]opencodex[\\/]'
         $buildEntrypoint = $cmd -match '(?i)(?:[\\/](?:next|vitest|playwright)[\\/]|\b(?:next|vitest|playwright|cargo|rustc)\s+(?:dev|start|build|test|run)\b)'
         if ($agentRuntime -and -not $buildEntrypoint) { continue }
@@ -73,12 +67,10 @@ function Assert-Inactive([string]$Path, [string]$Relative, $Processes) {
             $cmd.IndexOf($root, $comparison) -ge 0 -or
             $cmd.IndexOf($root.Replace('\','/'), $comparison) -ge 0
         if ($repoReference) { throw 'ACTIVE_REPO_BUILD_OR_TEST_PROCESS' }
-        # An external executable alone is insufficient: require explicit helper identity too.
         $externalHelper = [IO.Path]::IsPathRooted($exe) -and
             -not $exe.StartsWith($root + '\', $comparison) -and
             ($exe -match '(?i)codex|opencode|opencodex|mcp' -or
              $cmd -match '(?i)codex|opencode|opencodex|mcp')
-        # Installed desktop runtime has its own files outside this checkout.
         $installedApp = Join-Path $env:LOCALAPPDATA 'Programs\RealEstateCRM\app'
         if ($exe.StartsWith($installedApp + '\', $comparison) -and
             $cmd.IndexOf($installedApp + '\', $comparison) -ge 0) { $externalHelper = $true }
@@ -105,7 +97,6 @@ function Get-SafeInventory([string]$Path) {
             $dirs.Add($current)
             foreach ($child in Get-ChildItem -LiteralPath $current -Force) { $pending.Push($child.FullName) }
         } else {
-            # Check open handles without reading content; deny simultaneous opens during check.
             try {
                 $handle = [IO.File]::Open($current, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::None)
                 $handle.Dispose()
@@ -230,9 +221,7 @@ $lines.Add('')
 $lines.Add('Reuse: `powershell -NoProfile -File scripts/cleanup-workspace.ps1` (dry-run); add `-Execute` to delete. Reports reflect the latest run.')
 $lines.Add('Safety: exact allowlist; canonical workspace containment; inspected ancestors/descendants checked for reparse points; tracked content refused; directories must be ignored; protected descendant subtrees and their ancestors retained without content inspection; candidate/repository process references and ambiguous runtimes refused; explicitly identified external Codex/OpenCode/MCP helpers and installed RealEstateCRM runtime ignored; exclusive file-open probe; inventory rechecked before deletion. No recursive deletion. Concurrent filesystem changes cannot be fully fenced: do not run alongside artifact writers. Partial removals are counted on failure.')
 
-# Dry-run must not replace evidence of an earlier executed cleanup.
 if (-not $Execute) { $lines | Write-Output; exit 0 }
-# Fixed workspace-only metadata report; refuse reparse points on ancestors too.
 foreach ($destination in @((Join-Path $root 'docs/operations/workspace-cleanup.md'))) {
     $cursor = $destination
     while ($cursor) {

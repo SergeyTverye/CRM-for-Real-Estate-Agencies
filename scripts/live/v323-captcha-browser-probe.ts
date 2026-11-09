@@ -1,9 +1,3 @@
-/** v3.2.3 LIVE browser probe: ordinary Playwright Chromium, headed, no stealth.
- * No fingerprint spoofing, no auto-solving, no proxy rotation. Polite: sequential, >=2s pause.
- * Opens one search URL per source (office rent Novosibirsk) + homepage, waits for JS, records
- * challenge vs listing markers, screenshots ONLY check pages (no personal data, no listing bodies).
- * Usage: npx tsx scripts/live/v323-captcha-browser-probe.ts
- */
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright-core";
 import RealEstateScraper from "real-estate-scrapper";
@@ -28,8 +22,6 @@ async function main() {
       urls[source] = `BUILD_FAILED:${String(e).slice(0, 120)}`;
     }
   }
-  // Ordinary launch: no stealth flags, no webdriver hiding, no custom UA.
-  // Task requires headed; try headed, fall back to headless only if display unavailable (recorded honestly).
   let browser;
   let headed = true;
   try {
@@ -61,7 +53,6 @@ async function main() {
         } catch (e) {
           entry.note = `goto failed: ${String(e).slice(0, 160)}`;
         }
-        // Give Servicepipe/JS-check time to execute in a real browser. No auto-solving, no form filling.
         await sleep(7000);
         let url = "", title = "", html = "";
         try { url = page.url(); } catch {}
@@ -73,10 +64,7 @@ async function main() {
         entry.listingMarker = html ? /legacy-commercial-serp-frontend|OfferCard|data-listing|search-result|offer-card/iu.test(html) : null;
         entry.htmlBytes = html.length;
         entry.titleHint = title.slice(0, 120);
-        // Auto-passed = challenge gone and listing marker present without any human input.
         entry.autoPassed = entry.challenge === false && entry.listingMarker === true;
-        // Screenshot ONLY when a check page is shown (challenge true) — no personal data there.
-        // For listing pages we store no screenshot to avoid any seller contacts.
         if (entry.challenge) {
           const path = `${OUT_DIR}/${source}-check.png`;
           try { await page.screenshot({ path, fullPage: false }); entry.screenshot = `${source}-check.png`; }

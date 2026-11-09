@@ -4,7 +4,6 @@ import { dirname, resolve } from "node:path";
 import Database from "better-sqlite3";
 import { sqliteFilePath } from "../../src/shared/db/sqlite-adapter";
 
-/** Official Prisma migration history, shared by installation, transfer and tests. */
 export function applySqliteMigrations(file: string) {
   file = sqliteFilePath("file:" + resolve(file));
   mkdirSync(dirname(file), {recursive:true});
@@ -31,7 +30,6 @@ export function applySqliteMigrations(file: string) {
   } finally { db.close(); }
 }
 
-/** Never overwrite an existing target. Removal is restricted to files created by caller. */
 export function removeNewSqlite(file: string) {
   for (const suffix of ["", "-wal", "-shm", "-journal"]) if (existsSync(file+suffix)) rmSync(file+suffix);
 }
@@ -41,7 +39,6 @@ export async function upgradeSqlite(file: string) {
   const snapshot = file + ".before-update-" + Date.now();
   const db = new Database(file);
   try { await db.backup(snapshot); } finally { db.close(); }
-  // On failure retain the protective snapshot and the migration error for recovery.
   applySqliteMigrations(file);
   return {snapshot};
 }

@@ -22,7 +22,6 @@ async function main(){
  const logs=await db.aiUsageLog.findMany();
  const month=periodKeys(new Date(),"Asia/Novosibirsk").monthKey;
  const committed=logs.reduce((sum,row)=>{const r=decodeReservation(row.result);return sum+(r?r.monthKey===month?r.chargedMicros:0n:periodKeys(row.createdAt,"Asia/Novosibirsk").monthKey===month?rubToMicros((row.actualCostRub??row.estimatedCostRub).toString()):0n);},0n);
- // CRM demo has existing spend. Keep its journal intact and cap ADDITIONAL spend at 3 RUB.
  const ceiling=((committed+3000000n)/10000n*10000n); const ceilingRub=evidence.ceilingRub??(Number(ceiling)/1e6).toFixed(2);
  evidence.ceilingRub=ceilingRub;
  await writeFile("docs/vkr/v323-ai-assistant-live.json",JSON.stringify(evidence,null,2));
@@ -82,7 +81,6 @@ async function main(){
   const own=await db.aiUsageLog.findMany({where:{createdAt:{gte:new Date(evidence.startedAt)},callType:"chat"}});
   evidence.calls=own.length;
   evidence.chargedRub=(Number(own.reduce((sum,l)=>sum+(decodeReservation(l.result)?.chargedMicros??rubToMicros((l.actualCostRub??l.estimatedCostRub).toString())),0n))/1e6).toFixed(6);
-  // Restore only our own setting version; do not overwrite a concurrent operator's change.
   await db.aiSetting.updateMany({where:{id:setting.id,updatedAt:updated.updatedAt},data:{aiEnabled:setting.aiEnabled,monthlyBudgetRub:setting.monthlyBudgetRub,perJobLimit:setting.perJobLimit,perUserDailyLimit:setting.perUserDailyLimit,dailyLimit:setting.dailyLimit,webSearchManualAllowed:setting.webSearchManualAllowed,webSearchAutoFallback:setting.webSearchAutoFallback}});
  }
 }

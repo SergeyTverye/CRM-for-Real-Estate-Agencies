@@ -1,4 +1,3 @@
-// Authorized bounded LIVE harness. No auth state, contacts or provider payloads persisted.
 const fs=require('node:fs/promises'), cp=require('node:child_process'), {randomUUID}=require('node:crypto');
 const {chromium}=require('playwright'),{Client}=require('pg');
 require('dotenv').config({quiet:true});

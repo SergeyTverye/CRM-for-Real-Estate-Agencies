@@ -1,16 +1,3 @@
-/**
- * Bounded installed-app UI acceptance helper for the synthetic Enterprise Workbook
- * import / dry-run / profile-remap / commit / receipt-tied export / roundtrip-reimport cycle.
- *
- * Security & privacy contract:
- * - Zero top-level side effects on module import.
- * - Accepts ONLY `{ page, base, directory }` in `runInstalledImportCycle`.
- * - Enforces loopback `http://127.0.0.1:<port>` base and canonical fresh directory under
- *   `<workspace>\data\qa-v32-installed-browser\run-<UUID>\import-cycle`.
- * - Never accesses original/private workbooks, `.env`, secrets, or arbitrary user file paths.
- * - Returns a closed, redacted result schema containing only booleans, finite counts,
- *   UUIDs, SHA-256 digests, byte lengths, and fixed code labels.
- */
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -211,17 +198,11 @@ function writeOwnedFile(dir, fileName, buffer) {
 }
 
 /**
- * Builds a small, deterministic, 100% synthetic multi-sheet enterprise workbook in memory.
- * - Uses only synthetic addresses, synthetic marker UUIDs, and non-PII placeholders.
  * - Includes an intentionally unmapped column (`Внутренний шифр QA`) on sheet 1 so the UI
- *   dry-run surfaces an `unresolved` entry that must be resolved via the v2 profile editor.
  * - Includes a supported numeric formula (`B2*1000`) on sheet 1 (`Цена, руб/мес`) and valid
  *   HTTPS hyperlinks on sheet 1 (`Описание`) and sheet 2 (`Ссылка на рекламу`) so receipt-tied
- *   export formula and hyperlink preservation are genuinely exercised.
  * - Includes forbidden PII columns (`Паспорт`, `Кем выдан`, `Регистрация`, `Дата рождения`)
- *   with synthetic sentinel strings to prove they are excluded from operational DB and exports.
  * - Includes a `Черновик не для CRM` sheet that is mapped to `ignore` in the v2 profile and
- *   whose cells are cleared on receipt-based export while preserving sheet geometry.
  */
 export async function buildSyntheticEnterpriseWorkbook(runMarker) {
   if (typeof runMarker !== 'string' || !UUID_RE.test(runMarker)) {
@@ -235,7 +216,6 @@ export async function buildSyntheticEnterpriseWorkbook(runMarker) {
   wb.creator = 'CRM Synthetic Acceptance Suite';
   wb.created = new Date('2026-03-01T00:00:00.000Z');
 
-  // 1. Sheet: property + historical_deal_archive (stacked sections on one sheet)
   const wsObjects = wb.addWorksheet('База объектов');
   wsObjects.addRow([
     'Адрес',
@@ -284,7 +264,6 @@ export async function buildSyntheticEnterpriseWorkbook(runMarker) {
     95000,
   ]);
 
-  // 2. Sheet: property_agreement_control
   const wsControl = wb.addWorksheet('Контроль договоров');
   wsControl.addRow([
     'Адрес',
@@ -318,7 +297,6 @@ export async function buildSyntheticEnterpriseWorkbook(runMarker) {
     `Проверить актуальность договора ${shortTag}`,
   ]);
 
-  // 3. Sheet: client_request_need
   const wsClients = wb.addWorksheet('Обращения и потребности');
   wsClients.addRow([
     '№',
@@ -343,7 +321,6 @@ export async function buildSyntheticEnterpriseWorkbook(runMarker) {
     '9999 999999',
   ]);
 
-  // 4. Sheet: ignore worksheet (unrecognized headers on initial auto-detect, then mapped to ignore)
   const wsIgnore = wb.addWorksheet('Черновик не для CRM');
   wsIgnore.addRow(['Служебное поле А', 'Служебное поле Б']);
   wsIgnore.addRow([`SKIP-${shortTag}`, 42]);
@@ -352,13 +329,6 @@ export async function buildSyntheticEnterpriseWorkbook(runMarker) {
   return Buffer.from(arrayBuffer);
 }
 
-/**
- * Transforms the dry-run profile v2 JSON (`enterpriseProfileSchema`) so that:
- * - Any sheet without a recognized target (`target === null` and no valid `blockTargets`)
- *   is mapped to `target = "ignore"`.
- * - Any unresolved block target (`blockTargets[row] === null`) is mapped to `"ignore"`.
- * - Any unresolved column (`columns[header] === null`) is explicitly mapped to `"ignore"`.
- */
 export function resolveProfileV2Draft(profileDraft) {
   if (
     !isPlainObject(profileDraft) ||
@@ -408,13 +378,9 @@ export function resolveProfileV2Draft(profileDraft) {
 }
 
 /**
- * Inspects the exported XLSX buffer with ExcelJS to verify:
  * - Expected synthetic sheets exist (`База объектов`, `Контроль договоров`, `Обращения и потребности`, `Черновик не для CRM`).
  * - The ignored sheet (`Черновик не для CRM`) has all cell values cleared on export while preserving worksheet geometry.
  * - Forbidden PII sentinel values (`0000 000000`, `9999 999999`, `ТЕСТОВЫЙ ОТДЕЛ QA`)
- *   do NOT appear anywhere in the exported workbook.
- * - Exported workbook preserves safe formula cells and CRM-backed hyperlink cells.
- * - Exported rows contain the `runMarker`.
  */
 export async function inspectExportedWorkbook(buffer, runMarker) {
   const wb = new ExcelJS.Workbook();
@@ -694,10 +660,6 @@ export function sanitizeResult(raw) {
   });
 }
 
-/**
- * Executes the bounded synthetic enterprise import/export/reimport acceptance cycle
- * against an already-authenticated Manager session on the installed loopback app.
- */
 export async function runInstalledImportCycle({ page, base, directory } = {}) {
   const state = {
     status: 'FAIL',
@@ -716,13 +678,11 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     const normalizedBase = validateBase(base);
     const canonicalDir = prepareFreshDirectory(directory);
 
-    // Verify current page origin if already navigated
     const currentUrl = typeof page.url === 'function' ? page.url() : '';
     if (currentUrl && currentUrl !== 'about:blank' && !currentUrl.startsWith(normalizedBase)) {
       failWithCode('page_origin_mismatch');
     }
 
-    // 1. Verify authenticated actor is manager
     await page.goto(`${normalizedBase}/import`, { waitUntil: 'networkidle' });
     if (!page.url().startsWith(`${normalizedBase}/import`)) {
       failWithCode('import_page_navigation_rejected');
@@ -735,7 +695,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.actorAuthorizedManager = true;
 
-    // 2. Build owned synthetic workbook inside canonical fresh directory
     const runMarker = crypto.randomUUID();
     state.artifacts.runMarker = runMarker;
 
@@ -744,7 +703,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     state.artifacts.syntheticWorkbookSha256 = sha256Buffer(syntheticBuffer);
     const syntheticFilePath = writeOwnedFile(canonicalDir, 'synthetic-enterprise-input.xlsx', syntheticBuffer);
 
-    // 3. Locate EnterpriseImportWizard section on `/import`
     const wizardSection = page
       .locator('section')
       .filter({ has: page.getByRole('heading', { name: 'Рабочая книга объектов и обращений' }) })
@@ -752,10 +710,7 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     currentStep = 'wizard_locate';
     await wizardSection.waitFor({ state: 'visible', timeout: 15000 });
 
-    // Select auto profile mode & upload synthetic workbook.
-    // NOTE: `<label>` wraps the select so its accessible name includes the
-    // selected option; getByLabel('Профиль') resolves to zero nodes.
-    // Use the single scoped combobox instead (product UI unchanged).
+    // selected option. getByLabel('Профиль') resolves to zero nodes.
     const profileSelect = wizardSection.getByRole('combobox');
     if ((await profileSelect.count()) !== 1) {
       failWithCode('profile_select_not_unique');
@@ -766,7 +721,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     const fileInput = wizardSection.getByLabel('Синтетическая или разрешённая локальная книга .xlsx');
     await fileInput.setInputFiles(syntheticFilePath);
 
-    // Run initial dry-run via UI button (`POST /api/v1/import/enterprise` followed by `GET /api/v1/import/enterprise/${id}`)
     currentStep = 'initial_dry_run';
     const dryRunPostPromise = page.waitForResponse(
       (res) =>
@@ -804,7 +758,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
       ? initialReport.unresolved.length
       : 0;
 
-    // Verify that the unmapped column / draft sheet surfaced unresolved items requiring profile remap
     if (state.counts.initialUnresolvedCount < 1) {
       failWithCode('expected_unresolved_before_remap');
     }
@@ -812,7 +765,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     await unresolvedAlert.waitFor({ state: 'visible', timeout: 10000 });
     state.checks.unresolvedDetectedBeforeRemap = true;
 
-    // 4. Open v2 profile mapping editor in UI, resolve unmapped column & draft sheet, and re-run dry-run
     currentStep = 'remap';
     const mappingSummary = wizardSection.locator('summary', {
       hasText: 'Настройка сопоставления колонок и скрытых строк',
@@ -866,7 +818,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     state.counts.dryRunValidRows =
       Number(remappedReport?.counts?.ready ?? 0) + Number(remappedReport?.counts?.warning ?? 0);
 
-    // 5. Verify validationStatus vs commitResult separation in dry-run report & UI preview table
     const previewRows = Array.isArray(remappedReport?.rows) ? remappedReport.rows : [];
     if (previewRows.length < 4) {
       failWithCode('dry_run_preview_rows_missing');
@@ -895,7 +846,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.dryRunSeparationVerified = true;
 
-    // 6. Verify ZERO operational domain writes occurred during dry-run / remap before commit
     const preCommitCounts = await fetchMarkerDomainCounts(page, runMarker);
     state.counts.preCommitOperationalRecords = preCommitCounts.totalOperational;
     if (preCommitCounts.totalOperational !== 0) {
@@ -960,7 +910,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.commitCompleted = true;
 
-    // 8. Verify created operational domain records after commit
     const postCommitCounts = await fetchMarkerDomainCounts(page, runMarker);
     state.counts.postCommitProperties = postCommitCounts.properties;
     state.counts.postCommitClients = postCommitCounts.clients;
@@ -1076,8 +1025,6 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
     }
     state.checks.policyExclusionVerified = true;
 
-    // 11. Reimport the exported workbook with the confirmed v2 profile through UI dry-run + commit
-    // Same scoped combobox: custom mode reuses the single wizard select.
     currentStep = 'roundtrip';
     const resolvedProfilePath = writeOwnedFile(
       canonicalDir,
@@ -1193,12 +1140,7 @@ export async function runInstalledImportCycle({ page, base, directory } = {}) {
   return sanitizeResult(state);
 }
 
-/**
- * Pure in-memory self-test verifying validation guards, synthetic workbook generation,
- * profile v2 remap transformation, export inspection, and closed result redaction.
- */
 export async function selfTest() {
-  // 1. Base URL validation
   const validBase = validateBase('http://127.0.0.1:3000/');
   if (validBase !== 'http://127.0.0.1:3000') {
     failWithCode('selftest_base_normalization_failed');
@@ -1218,7 +1160,6 @@ export async function selfTest() {
     if (!rejected) failWithCode('selftest_bad_base_accepted');
   }
 
-  // 2. Directory contract validation
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const sampleRunId = '11111111-2222-4333-8444-555555555555';
   const validDir = path.join(root, 'data', 'qa-v32-installed-browser', `run-${sampleRunId}`, 'import-cycle');
@@ -1241,7 +1182,6 @@ export async function selfTest() {
     if (!rejected) failWithCode('selftest_bad_directory_accepted');
   }
 
-  // 3. Synthetic workbook + PII detection + formula/hyperlink fixture check
   const marker = '22222222-3333-4444-8555-666666666666';
   const syntheticBuf = await buildSyntheticEnterpriseWorkbook(marker);
   const rawInspection = await inspectExportedWorkbook(syntheticBuf, marker);
@@ -1255,7 +1195,6 @@ export async function selfTest() {
     failWithCode('selftest_synthetic_input_fixture_invalid');
   }
 
-  // 4. Profile v2 remap transformation check
   const sampleProfileDraft = {
     version: 2,
     code: 'enterprise_workbook_v2',
@@ -1293,7 +1232,6 @@ export async function selfTest() {
     failWithCode('selftest_profile_v2_remap_failed');
   }
 
-  // 5. Closed redaction check
   const redacted = sanitizeResult({
     status: 'FAIL',
     errorCode: 'actor_not_manager',
@@ -1315,8 +1253,6 @@ export async function selfTest() {
     failWithCode('selftest_redaction_contract_broken');
   }
 
-  // 6. Closed step diagnostics: explicit codes preserved, unclassified errors
-  // map to allowlisted `<step>_timeout` / `<step>_assertion_failed` only.
   const timeoutLike = Object.assign(new Error('Timeout 15000ms exceeded'), { name: 'TimeoutError' });
   if (stepDiagnosticCode(timeoutLike, 'initial_dry_run') !== 'initial_dry_run_timeout') {
     failWithCode('selftest_step_timeout_mapping_failed');

@@ -1,10 +1,3 @@
-/** Synthetic demo ONLY. Run from repo root:
- * node --env-file=.env scripts/docs/guide-screenshots.mjs http://127.0.0.1:3373
- * Optional: --run-id UUID (must belong to manager or realtor1).
- * Never starts searches, AI, probes, backups or imports. Creates one synthetic
- * client and draft agreement with two tiny synthetic PDFs for document screens.
- * No credentials, response bodies, browser storage or HTML dumps are persisted.
- */
 import { chromium } from '@playwright/test';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
@@ -36,8 +29,6 @@ async function step(name, fn) {
   checkpoint = name;
   try { await fn(); report.steps.push({ name, role: currentRole, status: 'PASS' }); console.log(`OK ${name}`); }
   catch (error) {
-    // Locator/HTTP failures only: never serialize complete Playwright errors,
-    // response bodies or call arguments (they could contain credentials).
     const reason = error.name === 'TimeoutError' ? 'UI timeout; inspect the related screenshot/selector' : 'Step failed; check page availability and demo data';
     errors.push(name); report.steps.push({ name, role: currentRole, status: 'FAIL', checkpoint, reason }); console.log(`FAIL ${name} at ${checkpoint}: ${reason}`);
   }
@@ -53,8 +44,6 @@ async function go(page, path) {
 
 async function capture(page, name, targets = [], extra = {}) {
   await page.evaluate(() => document.fonts.ready);
-  // Defense in depth for the AI connection screen: mask all text-entry values.
-  // Labels/budget status stay visible; no secrets are read into this process.
   const secretPage = new URL(page.url()).pathname === '/settings/ai';
   const mask = secretPage ? page.locator('input:not([type=checkbox]):not([type=radio]), textarea') : page.locator('input[type=password]');
   const file = `${name}.png`;
@@ -69,8 +58,6 @@ async function capture(page, name, targets = [], extra = {}) {
     elements.push({ label, found: true, visible: Boolean(visible), cssBox: box,
       pixelBox: box ? Object.fromEntries(Object.entries(box).map(([k, v]) => [k, Math.round(v * 2)])) : null });
   }
-  // A compact inventory of visible controls gives annotators useful boxes even
-  // when UI labels changed. Values and general page text are never collected.
   const controls = await page.locator('button,summary,h1,h2,[role=tab]').evaluateAll(els => els.map(el => {
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || r.height <= 0 || r.top >= 900 || r.bottom <= 0) return null;
@@ -98,7 +85,6 @@ async function discover(page, list, kind) {
 }
 
 function pdfFile(name) {
-  // Minimal actual PDF, ASCII contents and byte-correct xref; synthetic only.
   const objects = ['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
     '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 200] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>'];
   const text = 'BT /F1 14 Tf 30 130 Td (Synthetic CRM guide example only) Tj ET';
@@ -121,7 +107,6 @@ try {
     await context.route('**/*', async route => {
       const request = route.request(); const url = new URL(request.url());
       if (url.origin !== base.origin) { countBlock('external'); return route.abort('blockedbyclient'); }
-      // Deny paid/side-effecting paths regardless of HTTP verb, including probes.
       if (/\/analysis(?:\/|$)|\/ai\/(?:generate|chat)|\/web-search|\/browser-sessions/.test(url.pathname)) {
         countBlock('AI/external-operation'); return route.abort('blockedbyclient');
       }
@@ -132,7 +117,6 @@ try {
       }
       if (documentWrites && request.method() === 'POST' && url.pathname === '/api/v1/documents') {
         uploadNumber++;
-        // Explicitly labelled simulated failure for the failed-only retry screenshot.
         if (uploadNumber === 2) {
           report.steps.push({name:'injected-document-failure',role,status:'INFO',httpStatus:503,uploadNumber,source:'Playwright route.fulfill; not CRM server'});
           console.log('INJECTED учебный HTTP 503: second document upload; not CRM server');
@@ -151,7 +135,6 @@ try {
         console.log(`HTTP POST ${path} ${response.status()}`);
       }
     });
-    // Never save trace/HAR/storageState: they can contain credentials/sessions.
     page.on('dialog', dialog => void dialog.accept());
     if (role === 'REALTOR1') await step('login', async () => {
       await go(page, '/login'); await capture(page, 'login', [['login-form', page.locator('form')]]);
@@ -189,20 +172,13 @@ try {
       await page.getByRole('heading',{name:'Мои поиски',exact:true}).scrollIntoViewIfNeeded();
       await capture(page,'saved-searches');
     });
-    // GET only: savedSearch.lastSuccessfulRunId points at an already finished run.
-    // Access is verified by the API under the same role, never copied across users.
     if (!savedResultsCaptured) await step(`saved-results-${role.toLowerCase()}`, async () => {
       const savedResponse = await context.request.get('/api/v1/property-search/saved-searches');
       if (!savedResponse.ok()) throw Error('Cannot read saved searches');
       const saved = await savedResponse.json();
-      // A later successful-but-empty fallback may replace lastSuccessfulRunId.
-      // Reuse historical DEMO IDs from the screenshot evidence registry as
-      // read-only fallbacks, verifying ownership and >=2 results via current API.
       const registry=JSON.parse(await readFile(resolve('docs/screenshots/vkr/manifest.json'),'utf8'));
       const recorded=registry.filter(s=>/DEMO|синтетич|ТЕСТОВ/i.test(`${s.mode||''} ${s.scenario||''}`))
         .map(s=>s.runId || (s.url ? new URL(s.url,base).searchParams.get('runId') : null));
-      // Current v3.2.2 evidence uses a separate registry. Read only run IDs,
-      // never re-execute harnesses or inspect .env/database/private-data.
       const moreRecorded=[];
       const collectIds=value=>{
         if(!value || typeof value!=='object') return;
@@ -237,7 +213,6 @@ try {
       await view.selectOption('cards');
       const select=page.getByRole('button',{name:'Выделить страницу',exact:true});
       await select.waitFor({state:'visible'}); await select.click({trial:true});
-      // needs_review is valid saved evidence too; never start a new search.
       if (!await page.getByRole('button',{name:'К сравнению',exact:true}).count()) {
         const review=page.getByRole('tab',{name:/^Требуют проверки/});
         if (await review.count()) await review.click();
@@ -276,8 +251,6 @@ try {
       checkpointAt('agreement-select-files');
       await page.getByLabel('Выбрать файлы договора').setInputFiles([pdfFile('Пример договор.pdf'),pdfFile('Пример приложение.pdf')]);
       checkpointAt('agreement-file-type');
-      // The wrapping label includes select option text in its accessible name.
-      // Exact getByLabel(..., exact:true) therefore times out despite visible UI.
       await page.getByRole('combobox',{name:/^Тип файла Пример приложение\.pdf/}).selectOption('agreement_attachment');
       checkpointAt('agreement-files-screenshot');
       await page.getByText('Документы договора',{exact:true}).scrollIntoViewIfNeeded();

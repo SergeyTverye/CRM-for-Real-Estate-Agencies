@@ -1,4 +1,3 @@
-// Opt-in library only: importing this module performs no I/O or installed execution.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,7 +29,6 @@ export function validateDirectory(value) {
   return normalized;
 }
 async function canonicalDirectory(directory) {
-  // Supplemental only: parent MUST perform Windows-native reparse/ACL preflight.
   let cursor = directory;
   for (let i = 0; i < 64; i++) {
     const info = await fs.lstat(cursor);
@@ -73,14 +71,6 @@ async function archiveEvidence(file, directory) {
   } finally { await handle.close(); }
 }
 
-/**
- * Parent owns lifecycle, credentials and native CUA. Required additional callback:
- * afterCommand({requestId, action, timeoutMs, signal}) -> {page, base}.
- * It waits for this owned supervisor operation/restart, proves ancestry/identity,
- * re-logins using its private closure, and returns the authenticated Playwright page.
- * No raw result files, credentials, session or configuration may be returned.
- * See data/coordination/installed-backup-cycle.md before opting in.
- */
 export async function runInstalledBackupCycle({ page, base, clientId, directory, onNativeDialog, afterCommand }) {
   let stage = 'PREFLIGHT', phrase, recovery;
   const checks = [];
@@ -93,8 +83,6 @@ export async function runInstalledBackupCycle({ page, base, clientId, directory,
     await canonicalDirectory(directory);
     need((await fs.readdir(directory)).length === 0, 'BK_FRESH_DIRECTORY_REQUIRED');
     const archiveFile = path.win32.join(directory, 'synthetic.crmbackup');
-    // Never use page.evaluate for secrets; authenticated context requests do not
-    // populate UI fields. Parent MUST disable tracing/HAR/video/debug logging.
     async function request(route, method = 'GET', options = {}, binary = false) {
       let response;
       try {
@@ -200,7 +188,6 @@ export async function runInstalledBackupCycle({ page, base, clientId, directory,
     need(recordHash(await request(`/api/v1/clients/${clientId}`)) === originalHash, 'BK_RECORD_NOT_RESTORED');
     await checkDocument(); pass('record-projection-and-document-restored');
     const protective = archives(restored).filter(a => !preRestoreIds.has(a.backupId));
-    // Public API has no protectiveBackupId; do not equate a new catalog item with proven linkage.
     stage = 'NATIVE_IMPORT_SELECTION';
     await native('import');
     const finalFile = await archiveEvidence(archiveFile, directory);
@@ -212,7 +199,6 @@ export async function runInstalledBackupCycle({ page, base, clientId, directory,
       selectedFileRestore: { status: 'BLOCKED', code: 'EXISTING_LOCAL_CATALOG_ARCHIVE_REJECTED' },
       coverage: { businessActions: 'AUTHENTICATED_API', nativeDialogs: 'CALLER_CUA_PLUS_ACTOR_BOUND_API_RESULT', backupPanelUi: 'NOT_TESTED' } };
   } catch (error) {
-    // Deliberately discard raw errors, callbacks' errors, response bodies and secrets.
     const detail = typeof error?.safeCode === 'string' && /^[A-Z][A-Z0-9_]{0,90}$/.test(error.safeCode) ? `_${error.safeCode}` : '';
     fail(`BK_FAILED_${stage}${detail}`);
   } finally { phrase = undefined; recovery = undefined; }

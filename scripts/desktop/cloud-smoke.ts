@@ -1,8 +1,3 @@
-/**
- * FUTURE, EXPLICIT REAL-CLOUD TEST ONLY. Not run by CI or desktop startup.
- * npx tsx scripts/desktop/cloud-smoke.ts --execute-real-cloud-smoke
- * Reads D:\\crm-secrets\\clouds.env without printing credentials.
- */
 import { randomBytes, randomUUID } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
@@ -20,7 +15,6 @@ import type { BackupDestination } from "../../src/modules/desktop-backup/domain/
 async function main() {
   if (!process.argv.includes("--execute-real-cloud-smoke")) throw new Error("EXPLICIT_SMOKE_FLAG_REQUIRED");
   const secrets = parse(await readFile("D:\\crm-secrets\\clouds.env"));
-  // Accept both the documented template names (D:\\crm-secrets\\clouds.env) and the module names.
   const aliases: Record<string, string[]> = {
     YANDEX_S3_BUCKET: ["YC_S3_BUCKET"], YANDEX_S3_ACCESS_KEY_ID: ["YC_S3_ACCESS_KEY_ID"], YANDEX_S3_SECRET_ACCESS_KEY: ["YC_S3_SECRET_ACCESS_KEY"],
     MAILRU_WEBDAV_EMAIL: ["MAILRU_EMAIL"], MAILRU_WEBDAV_APP_PASSWORD: ["MAILRU_APP_PASSWORD"],
@@ -64,7 +58,6 @@ async function main() {
   }
 }
 main().catch((error: unknown) => {
-  // Only stable error codes are printed; provider responses and credentials stay redacted.
   const raw = error instanceof Error ? error.message : "";
   const code = /^[A-Z][A-Z0-9_]+(:[A-Z0-9_]+)?$/.test(raw) ? raw : (error as { name?: string })?.name ?? "Error";
   console.error("CLOUD_SMOKE_FAILED " + code + " (credentials and provider responses redacted)"); process.exitCode = 1;

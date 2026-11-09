@@ -3,7 +3,6 @@ import type ExcelJS from 'exceljs';
 import { parseEnterprise, type EnterpriseProfile } from '../../src/modules/import/domain/enterprise-workbook';
 
 type Counter = { matched: number; mismatched: number };
-/** Values, sheet names, headers and format strings never leave this function. */
 export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workbook, profile: EnterpriseProfile, imported: Set<string>, onRowMismatch?: (sheet: number, row: number, field: string) => void) {
   const counters: Record<string, Counter> = {};
   const check = (type: string, a: unknown, b: unknown) => {
@@ -21,7 +20,6 @@ export function compareWorkbook(before: ExcelJS.Workbook, after: ExcelJS.Workboo
     const beforeWidths = columnWidths(sheet), afterWidths = next ? columnWidths(next) : undefined;
     check('widths', beforeWidths, afterWidths);
     if (afterWidths && !isDeepStrictEqual(beforeWidths, afterWidths)) {
-      // Preserve a numeric diagnostic for a completely blank/formatted sheet.
       counters[`widths_sheet_${i + 1}_before_count`] = { matched: beforeWidths.length, mismatched: 0 };
       counters[`widths_sheet_${i + 1}_after_count`] = { matched: afterWidths.length, mismatched: 0 };
     }

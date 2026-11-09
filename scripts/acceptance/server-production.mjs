@@ -1,4 +1,3 @@
-// Synthetic-only production acceptance. No root dotenv, installs, builds or existing CRM stacks.
 import { spawnSync } from 'node:child_process';
 import { randomBytes, randomUUID, createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync, readFileSync, realpathSync, existsSync, cpSync } from 'node:fs';
@@ -144,7 +143,6 @@ try {
   await request(c, null, `/documents/${doc.id}/download`, {}, [401]);
   evidence.control = { clientId: clients[0].id, documentId: doc.id, sha256: sha(control) };
   pass('protected document upload/download + cross-ID/anonymous denial + SHA256');
-  // Generate only a tiny synthetic workbook inside the existing image, using its installed ExcelJS.
   const generator = `const ExcelJS=require('exceljs'); (async()=>{const w=new ExcelJS.Workbook();const s=w.addWorksheet('Synthetic');s.addRow(['Жилая продажа']);s.addRow(['Адрес','Площадь','Цена','Комнаты','Этаж','Этажность']);s.addRow(['СИНТЕТИЧЕСКИЙ QA адрес ${stamp}',54,6500000,2,5,9]);await w.xlsx.writeFile('/data/import-staging/qa-fixture.xlsx')})().catch(()=>process.exit(1));`;
   c.dc('exec', '-T', 'app', 'node', '-e', generator);
   const fixture = readFileSync(path.join(c.dir, 'import-staging/qa-fixture.xlsx'));
@@ -166,7 +164,6 @@ try {
   if (sha((await request(c, cookies[1], `/documents/${doc.id}/download`)).data) !== sha(control)) throw new Error('Restart file loss');
   await login(c, credentials, 'MANAGER');
   pass('restart persistence DB + files + session + fresh login');
-  // Quiesce writers before backup so restore row-count comparison is deterministic.
   c.dc('stop', 'app', 'worker', 'search-worker');
   const backup = c.dc('--profile', 'ops', 'run', '--rm', '-T', '--no-deps', 'backup', 'bash', '/app/ops/backup/scripts/backup.sh', '--trigger', 'manual').split(/\r?\n/).at(-1);
   if (!/^\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d$/.test(backup)) throw new Error('Invalid backup id');
@@ -185,7 +182,6 @@ try {
   await request(rt, restoredCookies[2], `/documents/${doc.id}/download`, {}, [403,404]);
   pass('restored app/workers healthy + 3 logins + control rows + API SHA256 + RBAC');
   evidence.status = 'PASS (server synthetic scope only)';
-  // Preserve volumes/artifacts; stop only these explicitly owned projects.
   rt.dc('stop'); c.dc('stop');
   evidence.handles = 'Both owned projects stopped; volumes and synthetic artifacts retained. No existing CRM touched.';
 } catch (e) {

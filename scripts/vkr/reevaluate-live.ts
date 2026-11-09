@@ -1,4 +1,3 @@
-/** Offline replay of saved LIVE snapshots. No scraper, HTTP or AI dependencies. */
 import { config } from "dotenv";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { db, disconnectDb, Prisma } from "../../src/shared/db/client";
@@ -23,13 +22,10 @@ async function main() {
       const snapshot = run.snapshots.find(s => s.listingId === result.listingId);
       if (!snapshot) throw new Error(`Missing snapshot for result ${result.id}`);
       const listing = snapshot.normalized as unknown as NormalizedListing;
-      // Historical 2.1.0 snapshots predate provenance: Yandex/OnRealt use
-      // baseParser + inferPropertyType(title), not a structured purpose field.
       const replay = { ...listing, purposeSource: listing.purposeSource ?? (["yandex", "onrealt"].includes(listing.source) ? "rule" as const : "structured" as const) };
       const evaluation = evaluateListing(replay, filters);
       evaluated++;
       const purpose = evaluation.criteria.find(c => c.criterion === "purpose" && c.state === "contradicted");
-      // Scope of this repair is purpose only. Preserve historical AI and all other evidence.
       if (!purpose || result.verdict === "rejected") continue;
       const previous = result.criteria as unknown as CriterionEvaluation[];
       changes.push({ id: result.id, runId: run.id, listingId: result.listingId, before: result.verdict, after: "rejected", previousCriteria: result.criteria,

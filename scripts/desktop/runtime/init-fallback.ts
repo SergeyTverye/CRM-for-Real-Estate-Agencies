@@ -1,5 +1,3 @@
-/** Temporary executable interface; bundler prefers scripts/desktop/init-db.ts.
- * Use official Prisma migration history, never a parallel migration ledger. */
 import { applySqliteMigrations } from "../database-lifecycle";
 export async function initializeDesktopDatabase() {
   if (process.env.CRM_DEPLOYMENT_MODE !== "desktop") throw Error("DESKTOP_REQUIRED");

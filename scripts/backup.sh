@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 # Ручной/плановый backup (ТЗ 36.4, 39.10).
 #   ./scripts/backup.sh                    — локальный backup (то же, что --local)
-#   ./scripts/backup.sh --local
 #   ./scripts/backup.sh --targets all      — локальный backup + репликация во все включённые targets
 #   ./scripts/backup.sh --target <code>    — локальный backup + репликация в один target
-#   ./scripts/backup.sh --trigger scheduled|pre_update|pre_migration|shutdown
 # Для расписания используйте cron/systemd timer хоста, например:
-#   30 20 * * 1-6  cd /opt/crm && ./scripts/backup.sh --trigger scheduled --targets all >> backups/backup.log 2>&1
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
@@ -21,7 +18,7 @@ while [ $# -gt 0 ]; do
     --target) TARGETS="$2"; shift 2 ;;
     --trigger) TRIGGER="$2"; shift 2 ;;
     -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
-    *) fail "неизвестный аргумент: $1" ;;
+    *) fail "неизвестный аргумент: $1" ..
   esac
 done
 

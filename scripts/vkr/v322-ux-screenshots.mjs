@@ -4,8 +4,6 @@ import { resolve, join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 
-// Usage: node scripts/vkr/v322-ux-screenshots.mjs http://127.0.0.1:3000 data/ux-after
-// Use a synthetic demo database only. No .env loading, no saved sessions or response bodies.
 const [baseArgument, outputArgument] = process.argv.slice(2);
 if (!baseArgument || !outputArgument) throw new Error('Укажите базовый URL и папку снимков.');
 const base = new URL(baseArgument);
@@ -21,7 +19,6 @@ for (const role of roles) {
 }
 await mkdir(output, { recursive: true });
 const scriptRevision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-// The running server can be a different checkout; never label its screenshots with the script's HEAD.
 const revision = process.env.CRM_SCREENSHOT_REVISION ?? null;
 const viewports = [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }];
 const screens = [
@@ -40,7 +37,6 @@ try {
   for (const role of roles) {
     const context = await browser.newContext({ baseURL: base.origin });
     try {
-      // Guard against accidental writes, paid calls and external navigation while taking screenshots.
       await context.route('**/*', route => {
         const req = route.request();
         const url = new URL(req.url());
@@ -57,7 +53,6 @@ try {
       let pageErrors = 0;
       page.on('pageerror', () => { pageErrors++; });
       const roleScreens = role === 'MANAGER' ? [...screens, ['employee-tasks', '/tasks?view=all'], ['reports', '/reports']] : [...screens];
-      // Discover authorized records from visible links; never assume seed IDs or inspect a database.
       for (const [kind, listPath] of [['client', '/clients'], ['need', '/needs'], ['collection', '/collections'], ['offer', '/offers'], ['task', '/tasks']]) {
         await page.goto(listPath, { waitUntil: 'networkidle', timeout: 60_000 });
         const detail = await page.locator('a[href]').evaluateAll((links, prefix) => {

@@ -62,7 +62,6 @@ function column(ws, col, start, end, header, formatIds) {
   if(/^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}(?:\s|$)/.test(s)) date++;
   const fmt=c.numFmt ?? 'General';
   if(/[$€£₽]|руб|\[\$|currency/i.test(fmt)) monetary++;
-  // Format literals may contain secrets: emit IDs and a fixed semantic class only.
   formats.set(fmt,{id:formatIds.get(c.address)??0,hash:hash(fmt),class:/[$€£₽]|руб|\[\$/i.test(fmt)?'money':/[dy]/i.test(fmt.replace(/"[^"]*"/g,''))?'date':fmt==='General'?'general':'custom'});
   if(t==='formula') {const shape=formulaShape(c); shapes.set(JSON.stringify(shape),shape);}
  }
@@ -82,7 +81,6 @@ export async function profileWorkbook(input) {
  const wbXml=xml(zip['xl/workbook.xml']),rels=nodes(xml(zip['xl/_rels/workbook.xml.rels']),'Relationship');
  const styles=zip['xl/styles.xml']?nodes(xml(zip['xl/styles.xml']),'cellXfs')[0]:null;
  const styleIds=styles?nodes(styles,'xf').map(n=>num(n.getAttribute('numFmtId'))??0):[0];
- // Reject names that make ExcelJS emit a warning containing workbook text.
  if(nodes(wbXml,'sheet').some(s => s.getAttribute('name').length>31))throw new Error('invalid');
  const book=new ExcelJS.Workbook();await book.xlsx.load(bytes);
  const sheets=[];

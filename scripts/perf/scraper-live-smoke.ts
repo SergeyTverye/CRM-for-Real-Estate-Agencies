@@ -3,7 +3,6 @@ import { SOURCES, SearchFilters } from "../../src/modules/property-search/domain
 import { buildScraperQuery, classifyScraperErrors, scraperErrorReason } from "../../src/modules/property-search/infrastructure/source-filters";
 import { scraperHttpRequest } from "../../src/modules/property-search/infrastructure/scraper-http";
 
-// One search per site, one page, no retries; up to three same-site HTTPS redirects.
 const args = process.argv.slice(2);
 const excluded = (args.find(a => a.startsWith("--exclude="))?.slice(10) ?? "").split(",");
 const budget = Number(args.find(a => a.startsWith("--request-budget="))?.split("=")[1] ?? 2);

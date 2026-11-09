@@ -52,7 +52,6 @@ async function main() {
     }
     identities = await Promise.all(accounts.map(async ([name]) => ({ name, cookie: await login(`perf_${name}_${suffix}`, password) })));
   const byName = Object.fromEntries(identities.map((x) => [x.name, x.cookie]));
-  // Find one realtor1-owned client, then verify the other realtor receives the privacy-preserving 404.
   const own = await call("realtor1", byName.realtor1!, "clients.list", "/clients?limit=20");
   const payload = own.data as { items?: Array<{ id?: string }>; clients?: Array<{ id?: string }> } | null;
   const list = payload?.items ?? payload?.clients ?? [];
@@ -68,7 +67,6 @@ async function main() {
       if (name !== "manager") operations.push(["need.card", "/needs?limit=1"]);
       else operations.push(["manager.report", "/reports/manager"]);
       await Promise.all(operations.map(([op, path]) => call(name, cookie, op, path)));
-      // Request writes are measured through the API, tagged, and remain attributable to the temporary user.
       await call(name, cookie, "request.create", "/requests", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ occurredAt: nowIso(), channelCode: "phone", sourceCode: "other", summary: `[PERF] synthetic measurement ${suffix}`, client: { mode: "none" }, outcome: { resultCode: "one_off_service", nextAction: { title: `[PERF] follow-up ${suffix}`, description: "Synthetic performance check", taskType: "call_or_contact", dueAt: new Date(Date.now() + 86_400_000).toISOString(), priority: "normal" } } }) });
     }));
   }

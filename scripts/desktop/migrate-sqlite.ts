@@ -3,8 +3,6 @@ import { resolve } from "node:path";
 import Database from "better-sqlite3";
 import { sqliteFilePath } from "../../src/shared/db/sqlite-adapter";
 const file = sqliteFilePath(process.env.SQLITE_DATABASE_URL ?? "file:" + resolve("data/desktop/crm.db"));
-// Prisma 7.10 Windows schema engine cannot create the initial file reliably.
-// Native open is exclusive to the explicit desktop migration target, never PG.
 new Database(file).close();
 execFileSync(process.platform === "win32" ? "npx.cmd" : "npx",
   ["prisma","migrate","deploy","--config","prisma/sqlite.config.ts"], {

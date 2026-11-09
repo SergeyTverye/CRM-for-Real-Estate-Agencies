@@ -50,7 +50,6 @@ try {
     const resultPath = join(evidence, `${backend}.results.json`);
     const runEnv = { ...env, REGRESSION_ROOT: work, REGRESSION_RESULTS_PATH: resultPath, REGRESSION_EVIDENCE_PATH: join(evidence, `${backend}.environment.json`), SYNTHETIC_CONTROL_DATABASE_URL: `postgresql://crm:crm_test_password@127.0.0.1:55432/synthetic_final_regression_test_${randomUUID().replaceAll('-', '')}` };
     const started = Date.now();
-    // One foreground child per contour. No timeout, no detached process, no raw logs retained.
     const child = spawnSync(process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', `tests/regression-synthetic/${backend}.config.mts`, ...selectedFiles], { env: runEnv, stdio: ['ignore', 'ignore', 'ignore'], windowsHide: true });
     const safe = existsSync(resultPath) ? JSON.parse(readFileSync(resultPath, 'utf8')) : null;
     const profiles = [];

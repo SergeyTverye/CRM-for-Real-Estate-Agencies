@@ -1,4 +1,3 @@
-/** Explicit diagnostics for AT-01/16; only crm_demo, no paid AI calls. */
 import { config } from "dotenv";
 import { spawnSync } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";

@@ -1,5 +1,4 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-// Deterministic application icon: simple building glyph, no external artwork.
 const size=32, xor=size*size*4, mask=size*4, image=Buffer.alloc(40+xor+mask);
 image.writeUInt32LE(40,0); image.writeInt32LE(size,4); image.writeInt32LE(size*2,8);
 image.writeUInt16LE(1,12); image.writeUInt16LE(32,14); image.writeUInt32LE(xor,20);

@@ -15,22 +15,15 @@ function normalizedCellForms(text) {
     return forms;
   }
   const words = text.match(/[\p{L}\p{N}]+/gu) ?? [];
-  // Whole values only: never create a fingerprint of an isolated ordinary word.
   if (text.length >= 10 && (words.length >= 2 || /\d/u.test(text))) forms.add(text);
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(text)) forms.add(text);
   if (/\p{L}/u.test(text) && /(?:\b\d+[\p{L}]?(?:[/-]\d+)?\b)/u.test(text) && /(?:улица|ул\.|проспект|пр-т|переулок|пер\.|шоссе|дом|д\.)/u.test(text)) forms.add(text);
   return forms;
 }
 
-// Lines stay separate until extraction; normalizing first would erase CSV/TSV boundaries.
-// N-grams locate complete cell phrases embedded in prose, never isolated words.
 export function* textForms(text) {
   const emit = function* (candidate) { yield* cellForms(candidate); };
-  // Fast path: candidate is already a substring of a normalized line bounded by
-  // word characters, so re-running NFKC/casefold/whitespace-collapse is redundant.
-  // Branch logic stays identical inside normalizedCellForms.
   const emitNormalized = function* (candidate) {
-    // The ASCII subset is closed under normalization; Unicode keeps the full path.
     yield* /^[\x00-\x7f]*$/.test(candidate) ? normalizedCellForms(candidate) : cellForms(candidate);
   };
   for (const line of String(text).split(/[\r\n]/u)) {
