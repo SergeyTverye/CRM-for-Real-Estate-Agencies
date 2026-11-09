@@ -123,6 +123,18 @@ it("task-only local workspace conflicts on incoming receive and leaves DB/files 
   expect(await storageHash(process.env.FILE_STORAGE_PATH!)).toBe(beforeFiles);
 });
 
+it("неверный ключ восстановления отклоняется понятной 400 без утечки фразы", async () => {
+  const passphrase = "synthetic desktop only phrase";
+  for (const recoveryKey of ["CRM1-not-hex", "CRM1-" + "a".repeat(64) + "-000000000000"]) {
+    const error = await backupControlCommand(users.manager, { action: "create", passphrase, recoveryKey, recoveryKeySaved: true }).then(
+      () => { throw new Error("должен отклонить"); },
+      (e: unknown) => e as { status?: number; message?: string },
+    );
+    expect(error.status).toBe(400);
+    expect(String(error.message)).toContain("ключ восстановления");
+    expect(String(error.message)).not.toContain(passphrase);
+  }
+});
 it("document-only local workspace conflicts on incoming receive and leaves DB/files unchanged", async () => {
   const secret = { passphrase: "synthetic desktop only phrase", recoveryKey: newRecoveryKey() };
   const queued = await backupControlCommand(users.manager, { action: "create", ...secret, recoveryKeySaved: true }) as { requestId: string };
