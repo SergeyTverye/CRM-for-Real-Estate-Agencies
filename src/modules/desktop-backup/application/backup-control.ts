@@ -168,6 +168,8 @@ async function backupControlCommandInternal(actor: Actor, raw: unknown, budgetHe
      return await (budgetHeld ? publish() : withNativeArchiveBudget(archiveRoot(), publish));
    } catch (e) {
      if (e instanceof BackupError && ["IMPORT_COMMANDS_AMBIGUOUS", "IMPORT_CACHE_RETAINED_INVALID"].includes(e.code)) throw new InfrastructureError("Входная копия сохранена: обнаружены повреждённые метаданные или неоднозначная очередь (" + e.code + ").");
+     if (e instanceof BackupError && e.code === "RECOVERY_KEY_INVALID") throw new ValidationError("Неверный ключ восстановления: проверьте значение и повторите");
+     if (e instanceof BackupError && e.code === "PASSPHRASE_LENGTH") throw new ValidationError("Кодовая фраза: минимум 12 символов");
     if (e instanceof ConflictError || e instanceof ValidationError || e instanceof InfrastructureError) throw e;
     if (e instanceof BackupError && e.code === "QUEUE_REVISION_CONFLICT") throw new ConflictError("STALE_UPDATE", "Очередь изменилась. Обновите данные.");
     throw new InfrastructureError("Операция не выполнена: проверьте сеть, учётные данные, доступность носителя и свободное место");
