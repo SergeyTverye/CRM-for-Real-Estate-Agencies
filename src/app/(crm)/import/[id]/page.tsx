@@ -38,7 +38,7 @@ const VALIDATION_SET = new Set<string>(VALIDATION_STATUS_ORDER);
 const COMMIT_SET = new Set(["imported", "skipped", "error"]);
 const CANCELLABLE = ["uploaded", "dry_run_ready", "dry_run_failed"];
 const PAGE_SIZE = 25;
-/** Предупреждения, которые носят справочный характер (не требуют действий). */
+
 const INFO_CODES = new Set(["policy_fields_excluded", "phone_removed_from_description"]);
 
 const sourceSectionOf = (s: Section) => s.profileCode ?? `unrecognized:${s.sectionKey}`;
@@ -51,7 +51,7 @@ function qs(params: Record<string, string | undefined>): string {
   return s ? `?${s}` : "";
 }
 
-/** Безопасное отображение нормализованного значения preview (исключённые политикой колонки сервер не читает). */
+
 function previewValue(dicts: Dictionaries, target: string | null, key: string, v: unknown): string | null {
   if (v === null || v === undefined || v === "") return null;
   if (v instanceof Date) return fmtDateOnly(v);
@@ -271,7 +271,7 @@ export default async function ImportJobPage({ params, searchParams }: { params: 
   if (!UUID_RE.test(id)) notFound();
   const sp = searchParamsToObject(await searchParams);
 
-  // Фильтры строк нормализуются здесь, чтобы некорректный параметр не скрывал карточку задания.
+  
   const show = sp.show === "all" ? "all" : "problems";
   const filters = {
     show,

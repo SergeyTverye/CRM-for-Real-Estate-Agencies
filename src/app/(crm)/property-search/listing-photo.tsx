@@ -6,7 +6,7 @@ import { apiCall } from "@/ui/api-client";
 
 type Photo = { kind: string; archived: boolean; isCover: boolean; thumbnailUrl: string; caption: string | null; name: string };
 
-/** Only user-uploaded CRM photos are reusable. Source image URLs do not establish usage rights. */
+
 export function ListingPhoto({ propertyId, sourceUrl, compact = false }: { propertyId: string | null; sourceUrl: string; compact?: boolean }) {
   const [preview, setPreview] = useState<{ propertyId: string; photo: Photo | null } | null>(null);
   useEffect(() => {

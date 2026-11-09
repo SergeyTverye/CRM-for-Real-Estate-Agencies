@@ -148,7 +148,7 @@ export const taskFiltersSchema = zPagination.extend({
   dealId: zUuid.optional(),
   propertyId: zUuid.optional(),
   q: z.string().trim().max(200).optional(),
-  /** Drill-down из отчёта: только просроченные в выбранном представлении (в т.ч. «Все» у руководителя). */
+  
   overdueOnly: z.enum(["yes"]).optional(),
 });
 
@@ -187,7 +187,7 @@ export async function listTasks(actor: Actor, rawFilters: unknown): Promise<Page
   return { items: rows.map((r) => toTaskView(actor, r, now)), total, page: f.page, pageSize: f.pageSize };
 }
 
-/** Задачи, связанные с карточкой (клиент/потребность/сделка/объект), видимые пользователю. */
+
 export async function listTasksLinkedTo(
   actor: Actor,
   link: { clientId?: string; needId?: string; dealId?: string; propertyId?: string; showingId?: string; agreementId?: string; advertisementId?: string; offerId?: string },
@@ -202,7 +202,7 @@ export async function listTasksLinkedTo(
   if (link.agreementId) and.push({ agreementLinks: { some: { agreementId: link.agreementId } } });
   if (link.advertisementId) and.push({ advertisementLinks: { some: { advertisementId: link.advertisementId } } });
   if (link.offerId) and.push({ offerLinks: { some: { commercialOfferId: link.offerId } } });
-  // Открытые задачи всегда загружаются полностью и идут первыми. завершённые — отдельно, с лимитом.
+  
   const open = await db.task.findMany({
     where: { AND: [...and, { status: { in: [...OPEN_TASK_STATUSES] } }] },
     include: taskIncludeFor(actor),
@@ -228,7 +228,7 @@ export async function getTask(actor: Actor, taskId: string): Promise<TaskView> {
   return toTaskView(actor, row);
 }
 
-/** Повторяемая серия: экземпляры с тем же корнем. */
+
 export async function listRecurrenceSeries(actor: Actor, task: TaskView): Promise<{ id: string; dueAt: Date; status: string }[]> {
   const rootId = task.parentTaskId ?? task.id;
   return db.task.findMany({
@@ -285,11 +285,7 @@ const todayFiltersSchema = z.object({
   userId: zUuid.optional(),
 });
 
-/**
- * Экран «Сегодня» (UC-10, FR-25, ТЗ 37.4): вычисляемое представление над Task и контрольными датами
- * показов, договоров, рекламы и КП. Отдельной таблицы нет. Руководитель может переключить «Мои/Все»
- * и фильтр по сотруднику. риелтор видит только свои действия.
- */
+
 export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now = getTodayReferenceTime()): Promise<TodayView> {
   const f = parseInput(todayFiltersSchema, rawFilters);
   const cfg = getConfig();
@@ -320,7 +316,7 @@ export async function getTodayView(actor: Actor, rawFilters: unknown = {}, now =
     else if (bucket === "week") week.push(v);
   }
 
-  // Контрольные даты: независимые запросы идут одним пакетом, а не водопадом.
+  
   const bounds = dayBounds(now);
   const responsibleFilter = scope === "all" ? {} : { responsibleUserId: userId };
   const showingsPromise = db.showing.findMany({

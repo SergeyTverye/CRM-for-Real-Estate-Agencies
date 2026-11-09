@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
-// Explicit synthetic harness: never consult DATABASE_URL, TEST_DATABASE_URL or dotenv.
+
 const backend = process.env.SYNTHETIC_CONTROL_BACKEND ?? 'sqlite';
 if (!['sqlite', 'pg', 'unit'].includes(backend)) throw new Error('EXPLICIT_SYNTHETIC_BACKEND_REQUIRED');
 const dir = mkdtempSync(join(tmpdir(), 'crm-control-synthetic-'));

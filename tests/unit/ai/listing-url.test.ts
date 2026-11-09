@@ -42,8 +42,8 @@ describe("strict card allowlist", () => {
   it("covers all three live evidence sources", () => {
     for (const host of ["onrealt.ru", "realty.yandex.ru", "mirkvartir.ru"]) expect([...liveUrls].some(url => new URL(url).hostname.endsWith(host))).toBe(true);
   });
-  // Evidence also retains one historical false positive: the nedorogo catalogue.
-  // Keep it as a negative regression rather than treating it as a listing.
+  
+  
   const serviceUrls = [...liveUrls].filter(url => /(?:^|[/-])nedorogo(?:[/-]|$)/u.test(new URL(url).pathname));
   it.each(serviceUrls)("rejects a service URL retained in evidence %s", url => expect(listingUrlRejection(url)).toBe("CATALOGUE_NOT_LISTING"));
   it.each([...liveUrls].filter(url => !serviceUrls.includes(url)))("accepts the saved live listing %s", url => expect(listingUrlRejection(url)).toBeNull());

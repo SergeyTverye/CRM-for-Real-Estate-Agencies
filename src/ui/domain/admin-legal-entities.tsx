@@ -56,7 +56,7 @@ function RenameForm({ item, onDone, onCancel }: { item: LegalEntityRow; onDone: 
   );
 }
 
-/** Юридические субъекты предприятия (ИП/ООО) для сделок, договоров и КП. Удаления нет — только деактивация. */
+
 export function LegalEntitiesPanel({ items }: { items: LegalEntityRow[] }) {
   const router = useRouter();
   const [entityType, setEntityType] = useState("LLC");

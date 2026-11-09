@@ -12,11 +12,7 @@ import { writeAudit, diffFields } from "@/modules/audit/application/audit";
 import { assertDictionaryCode } from "@/modules/dictionaries/application/dictionaries-service";
 import { insertTask } from "@/modules/tasks/application/task-service";
 
-/**
- * Договоры/соглашения (FR-32, ТЗ 29.14, 37.11, 40.4).
- * Срок и наличие договора не хранятся в комментарии: status, valid_until, причина отсутствия,
- * требуемое действие. Для signed от имени предприятия обязателен LegalEntity.
- */
+
 
 const fieldsSchema = z.object({
   agreementType: zCode("agreementType"),
@@ -38,7 +34,7 @@ const fieldsSchema = z.object({
 
 type Fields = z.output<typeof fieldsSchema>;
 
-/** Правила статуса signed и дат (используются при создании и изменении). */
+
 function agreementRuleErrors(f: Partial<Fields>): Record<string, string[]> {
   const e: Record<string, string[]> = {};
   if (f.status === "signed" && !f.signedAt) e.signedAt = ["Для подписанного договора укажите дату подписания"];

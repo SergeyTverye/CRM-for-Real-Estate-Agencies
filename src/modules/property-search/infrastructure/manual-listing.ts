@@ -14,7 +14,7 @@ export function listingSourceUrl(raw: string): { source: Source; url: string } {
   if (url.protocol !== "https:" || url.port && url.port !== "443") throw new Error("UNSAFE_SCRAPER_URL");
   const source = (Object.keys(domains) as Source[]).find(s => url.hostname === domains[s] || url.hostname.endsWith(`.${domains[s]}`));
   if (!source) throw new Error("UNSUPPORTED_LISTING_HOST");
-  // Do not retain tracking/query tokens in manual fallback forms.
+  
   url.search = ""; url.hash = "";
   return { source, url: url.href };
 }
@@ -35,7 +35,7 @@ export type LinkListingResult = { status: "success"; listing: ReturnType<typeof 
   status: "manual_required"; source: Source; url: string;
   reason: "needs_user_action" | "blocked" | "rate_limited" | "parse_failed" | "timeout" | "cancelled" | "fetch_failed";
 };
-/** Inert bytes only. Redirects and DNS use the same pinned SSRF guard as search. */
+
 export async function addListingByUrl(raw: string, options: { signal?: AbortSignal; timeoutMs?: number; fetchedAt?: string } = {}): Promise<LinkListingResult> {
   const identity = listingSourceUrl(raw);
   const fallback = (reason: Extract<LinkListingResult, { status: "manual_required" }>["reason"]): LinkListingResult => ({ status: "manual_required", ...identity, reason });
@@ -52,7 +52,7 @@ export async function addListingByUrl(raw: string, options: { signal?: AbortSign
       const page = parser.parsePage(html, identity.url, {});
       const row = page.results.find(row => new URL(row.url).pathname === new URL(identity.url).pathname);
       if (row) return { status: "success", listing: { ...normalizeListing(row, fetchedAt), ...extractListingDates(identity.source, html, { id: row.id, url: identity.url }, fetchedAt) } };
-    } catch { /* Detail cards often differ from search cards; inspect JSON-LD. */ }
+    } catch {  }
     const $ = load(html);
     let result: ReturnType<typeof normalizeListing> | undefined;
     $("script[type='application/ld+json']").each((_, el) => {
@@ -67,7 +67,7 @@ export async function addListingByUrl(raw: string, options: { signal?: AbortSign
           let same = false;
           try { same = listingSourceUrl(new URL(candidate, identity.url).href).url === identity.url; } catch { return; }
           if (same) {
-            // Operation is not inferred from a price; retain unknown unless explicit.
+            
             const listing = manualListing({ url: identity.url, title: n.name, operation: /rent|lease/iu.test(String(offer.businessFunction)) ? "rent" : "sale", price: Number.isFinite(Number(offer.price)) && offer.price !== undefined ? Number(offer.price) : null, address: typeof n.address === "string" ? n.address : null, description: typeof n.description === "string" ? n.description : "" }, fetchedAt);
             result = { ...listing, operation: /rent|lease/iu.test(String(offer.businessFunction)) ? "rent" : /sell|sale/iu.test(String(offer.businessFunction)) ? "sale" : null, ...extractListingDates(identity.source, node, { url: identity.url }, fetchedAt), structuredFeatures: {} };
           }

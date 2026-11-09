@@ -6,8 +6,8 @@ import { normalizeListing } from "@/modules/property-search/infrastructure/norma
 import { evaluateListing } from "@/modules/property-search/domain/evaluation";
 import { SearchFilters } from "@/modules/property-search/domain/types";
 
-// Synthetic offers in the exact SSR envelope consumed by the real package parser.
-// No recorded pages, personal data, network, browser, or provider calls.
+
+
 const url = "https://www.cian.ru/cat.php?offer_type=flat&p=1";
 const query: RealEstateScraper.Query = { category: "residential", type: "flat", deal: "sale", page: 1 };
 const offer = (overrides: Record<string, unknown> = {}) => ({
@@ -82,7 +82,7 @@ describe("truthful residential parser attachment (synthetic real-package fixture
     const payload = ssr([offer({ category: "commercialSale", officeType: "office",
       areaParts: [{ area: 40, floorFrom: 1, floorTo: 1, price: 100 }, { area: 70, floorFrom: 2, floorTo: 3, price: 200 }] })], 5);
     expect(scraper.parsers.cian.parsePage(payload, url, commercialQuery)).toEqual(plain.parsers.cian.parsePage(payload, url, commercialQuery));
-    // Commercial listings returned by a residential query are not rewritten either.
+    
     expect(scraper.parsers.cian.parsePage(payload, url, query)).toEqual(plain.parsers.cian.parsePage(payload, url, query));
   });
 

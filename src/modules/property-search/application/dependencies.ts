@@ -9,12 +9,12 @@ import { ConflictError } from "@/shared/errors";
 import { navigationDefaults } from "../infrastructure/browser-navigation";
 
 export type SearchAiPort = Pick<SearchAi, "parseSearchQuery" | "analyzeDescriptions" | "webSearch" | "checkWebSearchAvailability"> & {
-  /** Server-composed readiness, never supplied by the search request. */
+  
   configured?: boolean;
-  /** Local readiness only: no provider request or budget reservation. */
+  
   assertConfigured?: () => Promise<void>;
 };
-// Composition seam: a persistent AiGate-backed factory can be installed by the AI module.
+
 let aiFactory: (() => Promise<SearchAiPort | null>) | undefined;
 export function configureSearchAi(factory: () => Promise<SearchAiPort | null>) { aiFactory = factory; }
 export async function getSearchAi(): Promise<SearchAiPort | null> {
@@ -27,12 +27,12 @@ export async function getSearchAi(): Promise<SearchAiPort | null> {
   }
   const { createPersistentSearchAi } = await import("@/modules/ai/application/persistent-search-ai");
   try {
-    // Resolve credentials once inside persistent composition. The readiness decision
-    // and the paid port must refer to the same credential snapshot.
+    
+    
     return await createPersistentSearchAi();
   } catch (error) {
     if (!(error instanceof ConflictError) || !["AI_CREDENTIALS_MISSING", "AI_TARIFF_UNAVAILABLE"].includes(error.code)) throw error;
-    // Explicit AI actions retain their safe, actionable pre-persistence error.
+    
     const unavailable = async (): Promise<never> => { throw error; };
     return { configured: false, assertConfigured: unavailable, parseSearchQuery: unavailable, analyzeDescriptions: unavailable, webSearch: unavailable,
       checkWebSearchAvailability: async () => ({ budgetAvailable: false, limitAvailable: false }) };

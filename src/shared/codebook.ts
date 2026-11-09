@@ -1,15 +1,4 @@
-/**
- * Системный codebook (ТЗ 19.6, 40.9).
- *
- * Стабильные коды состояний и типов, от которых зависят бизнес-инварианты,
- * права, миграция и тесты. Пользователь их не редактирует: коды зафиксированы
- * здесь и продублированы CHECK-ограничениями в SQL-миграции
- * (tests/unit/codebook-migration.test.ts проверяет их совпадение).
- *
- * Русское отображаемое название отделено от кода.
- * Изменяемые бизнес-справочники (каналы, источники, площадки, типы объектов)
- * живут в таблице dictionary_items — см. src/modules/dictionaries.
- */
+
 
 export const CODEBOOK = {
   listingDateSource: { site_published: "Публикация площадки", site_updated: "Обновление площадки", relative_label: "Относительная подпись", first_seen: "Первое обнаружение", unknown: "Неизвестно" },
@@ -257,19 +246,19 @@ export const CODEBOOK = {
 export type CodebookName = keyof typeof CODEBOOK;
 export type Code<N extends CodebookName> = keyof (typeof CODEBOOK)[N] & string;
 
-/** Список кодов справочника в порядке объявления. */
+
 export function codesOf<N extends CodebookName>(name: N): [Code<N>, ...Code<N>[]] {
   return Object.keys(CODEBOOK[name]) as [Code<N>, ...Code<N>[]];
 }
 
-/** Русское название кода. для неизвестного кода возвращает сам код. */
+
 export function labelOf<N extends CodebookName>(name: N, code: string | null | undefined): string {
   if (!code) return "—";
   const book = CODEBOOK[name] as Record<string, string>;
   return book[code] ?? code;
 }
 
-/** Пары {code, label} для select-ов UI. */
+
 export function optionsOf<N extends CodebookName>(name: N): { value: Code<N>; label: string }[] {
   return codesOf(name).map((value) => ({ value, label: labelOf(name, value) }));
 }
@@ -278,10 +267,7 @@ export function isCode<N extends CodebookName>(name: N, value: unknown): value i
   return typeof value === "string" && Object.prototype.hasOwnProperty.call(CODEBOOK[name], value);
 }
 
-/**
- * Привязка codebook к колонкам БД. Используется генератором CHECK-ограничений
- * (scripts/dev/print-check-constraints.ts) и тестом их соответствия миграции.
- */
+
 export const CODEBOOK_COLUMNS: ReadonlyArray<{ table: string; column: string; book: CodebookName; nullable?: boolean }> = [
   {"table":"external_listings","column":"date_source","book":"listingDateSource"},
   {"table":"external_listings","column":"date_precision","book":"listingDatePrecision"},

@@ -2,14 +2,11 @@ import { z } from "zod";
 import { CODEBOOK, type CodebookName, codesOf } from "./codebook";
 import { NotFoundError, ValidationError, type FieldErrors } from "./errors";
 
-/**
- * Общие схемы runtime-валидации DTO (Zod). Серверная схема — доверенная граница.
- * клиентская валидация в формах — только для удобства (ТЗ 37.17).
- */
+
 
 export const zUuid = z.string().uuid("Некорректный идентификатор");
 
-/** Строка: обрезка пробелов, пустая строка → null. */
+
 export const zText = (max = 4000) =>
   z
     .string()
@@ -25,7 +22,7 @@ export const zRequiredText = (max = 500, message = "Обязательное п�
     .transform((s) => s.trim())
     .pipe(z.string().min(1, message).max(max, `Не более ${max} символов`));
 
-/** Момент времени (ISO-8601 с часовым поясом) → Date. */
+
 export const zDateTime = z
   .string()
   .refine((s) => !Number.isNaN(Date.parse(s)) && /T/.test(s), "Некорректные дата и время")
@@ -38,7 +35,7 @@ export const zOptDateTime = z
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-/** Календарная дата без времени 'YYYY-MM-DD' → Date (UTC-полночь, как хранит PostgreSQL date). */
+
 export const zDateOnly = z
   .string()
   .regex(DATE_RE, "Дата в формате ГГГГ-ММ-ДД")
@@ -50,10 +47,7 @@ export const zOptDateOnly = z
   .optional()
   .transform((v) => (v instanceof Date ? v : null));
 
-/**
- * Денежная сумма numeric(16,2). Принимает строку/число, возвращает строку
- * без потери точности (float для денег запрещён — ТЗ 29.1).
- */
+
 export const zMoney = z
   .union([z.string(), z.number()])
   .transform((v) => String(v).replace(/\s/g, "").replace(",", "."))
@@ -64,7 +58,7 @@ export const zOptMoney = z
   .optional()
   .transform((v) => (v === "" || v === null || v === undefined ? null : v));
 
-/** Неотрицательная десятичная величина (площадь, мощность). */
+
 export const zOptDecimal = z
   .union([z.string(), z.number(), z.null()])
   .optional()
@@ -83,7 +77,7 @@ export const zOptBool = z
   .optional()
   .transform((v) => (v === true || v === "true" ? true : v === false || v === "false" ? false : null));
 
-/** Код системного codebook. */
+
 export function zCode<N extends CodebookName>(name: N, message = "Недопустимое значение") {
   const codes = codesOf(name) as [string, ...string[]];
   return z.enum(codes, { error: message }) as unknown as z.ZodType<keyof (typeof CODEBOOK)[N] & string>;
@@ -96,13 +90,13 @@ export function zOptCode<N extends CodebookName>(name: N) {
     .transform((v) => (v ? (v as keyof (typeof CODEBOOK)[N] & string) : null));
 }
 
-/** Ожидаемое значение updated_at для optimistic concurrency (ТЗ 40.10). */
+
 export const zExpectedUpdatedAt = z
   .string({ error: "Не передана версия записи (updatedAt)" })
   .refine((s) => !Number.isNaN(Date.parse(s)), "Некорректная версия записи")
   .transform((s) => new Date(s));
 
-// ───── Серверная пагинация (NFR-21) ─────
+
 
 export const DEFAULT_PAGE_SIZE = 50;
 export const MAX_PAGE_SIZE = 200;
@@ -125,7 +119,7 @@ export function skipTake(p: Pagination) {
   return { skip: (p.page - 1) * p.pageSize, take: p.pageSize };
 }
 
-// ───── Разбор входа ─────
+
 
 export function zodFieldErrors(error: z.ZodError): FieldErrors {
   const out: FieldErrors = {};
@@ -136,14 +130,14 @@ export function zodFieldErrors(error: z.ZodError): FieldErrors {
   return out;
 }
 
-/** Валидирует данные схемой. при ошибке бросает ValidationError с ошибками полей. */
+
 export function parseInput<S extends z.ZodType>(schema: S, data: unknown): z.output<S> {
   const res = schema.safeParse(data);
   if (!res.success) throw new ValidationError(undefined, zodFieldErrors(res.error));
   return res.data;
 }
 
-/** URLSearchParams → объект (для zod-схем фильтров списков). Пустые значения отбрасываются. */
+
 export function searchParamsToObject(sp: URLSearchParams | Record<string, string | string[] | undefined>): Record<string, string> {
   const out: Record<string, string> = {};
   if (sp instanceof URLSearchParams) {
@@ -161,7 +155,7 @@ export function searchParamsToObject(sp: URLSearchParams | Record<string, string
 
 const UUID_ANY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Идентификатор записи из URL: не-UUID трактуется как отсутствующая запись (404), а не ошибка сервера. */
+
 export function assertRecordId(id: string): void {
   if (!UUID_ANY_RE.test(id)) throw new NotFoundError();
 }

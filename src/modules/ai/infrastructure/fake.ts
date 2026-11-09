@@ -1,7 +1,7 @@
 import type { AiRequest, AiResponse, ResponsesProvider } from "../domain/contracts";
 import type { AiLedgerRepository, AiLedgerTransaction, AiReservation } from "../domain/gate";
 
-/** Explicit test/demo provider. Never falls back from a live provider silently. */
+
 export class FakeResponsesProvider implements ResponsesProvider {
   readonly mode = "test" as const;
   readonly requests: AiRequest[] = [];
@@ -12,7 +12,7 @@ export class FakeResponsesProvider implements ResponsesProvider {
   }
 }
 
-/** Test/demo only, process-local mutex with rollback. Production needs durable SERIALIZABLE storage. */
+
 export class InMemoryAiLedger implements AiLedgerRepository {
   private rows = new Map<string, AiReservation>();
   private queue: Promise<unknown> = Promise.resolve();

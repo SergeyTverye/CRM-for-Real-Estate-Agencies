@@ -25,7 +25,7 @@ it("reads saved raw/normalized address without inventing geography from the titl
 it("uses total sale price, keeps unitless rent under review and explains it", () => {
   const sale = normalizeListing(raw("yandex"));
   expect(sale.priceUnit).toBe("rub_total");
-  // ADR 0011: единицу цены нельзя угадывать по операции (в продаже бывает цена за м²).
+  
   expect(resultPriceUnit({ operation: "sale", priceUnit: null }, {})).toBe("период не указан");
   const rent = normalizeListing({ ...raw("yandex"), deal: "rent" });
   expect(rent.priceUnit).toBeNull();

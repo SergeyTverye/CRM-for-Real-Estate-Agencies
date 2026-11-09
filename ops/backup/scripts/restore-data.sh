@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Восстановление PostgreSQL и файлового хранилища из локального backup-набора.
-# Вызывается хостовым scripts/restore.sh (production, с подтверждением)
-# либо scripts/restore-test.sh (изолированный тестовый контур T08). Приложение должно быть остановлено.
-# Использование: restore-data.sh <backup_id> --confirm
+
+
+
+
 set -euo pipefail
 . "$(dirname "$0")/common.sh"
 
@@ -12,7 +12,7 @@ DIR="$(backup_path "$ID")"
 "$(dirname "$0")/verify.sh" "$ID" >/dev/null
 
 log "восстановление PostgreSQL из $ID"
-# Чистая схема: удаляем public и восстанавливаем объекты из dump в одной транзакции.
+
 psql_q -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;" >/dev/null
 pg_restore --no-owner --no-privileges --single-transaction --exit-on-error -d "$PGDATABASE" "$DIR/database.dump"
 
@@ -24,11 +24,11 @@ if [ -s "$DIR/files.sha256" ]; then
   (cd "$FILES_DIR" && sha256sum --quiet -c "$DIR/files.sha256") || die "контрольные суммы восстановленных файлов не совпадают"
 fi
 
-# Восстановленная копия содержит свою запись backup_runs в состоянии running — фиксируем успех.
+
 psql_q -c "UPDATE backup_runs SET local_status='success', finished_at=COALESCE(finished_at, now()) WHERE backup_id=$(sql_lit "$ID") AND local_status='running'" >/dev/null || true
 psql_q -c "UPDATE backup_runs SET local_status='failed', error_summary='прервано: состояние на момент снимка' WHERE local_status='running'" >/dev/null || true
 
-# Сверка контрольных счётчиков manifest.
+
 mismatch=0
 while IFS=$'\t' read -r table expected; do
   [ -n "$table" ] || continue

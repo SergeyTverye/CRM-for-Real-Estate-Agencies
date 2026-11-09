@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Проверка локального backup-набора (ТЗ 39.8): checksums, manifest, читаемость dump и архива.
-# Использование: verify.sh <backup_id>
+
+
 set -euo pipefail
 . "$(dirname "$0")/common.sh"
 

@@ -1,11 +1,7 @@
 import { displayLabel } from "@/shared/codebook";
 import type { PropertyPick } from "./need-pickers";
 
-/**
- * Типы значений и чистые функции форм показов, договоров, рекламы, КП и сделок.
- * Модуль без "use client": его функции вызываются и в server components (предзаполнение),
- * и в клиентских формах.
- */
+
 
 export type { PropertyPick };
 
@@ -25,7 +21,7 @@ export interface NeedLabels {
   propertyType: Record<string, string>;
 }
 
-/** Деньги для клиентских компонентов (строка numeric → «1 234 567 ₽»). */
+
 export function moneyText(v: string | null | undefined): string {
   if (v === null || v === undefined || v === "") return "—";
   const n = Number(v);
@@ -38,7 +34,7 @@ export function needTitle(n: NeedPick, labels: NeedLabels): string {
   return `${who}: ${labels.operation[n.operationType] ?? displayLabel("need_operation_type", n.operationType)} · ${labels.propertyType[n.propertyType] ?? displayLabel("property_type", n.propertyType)}`;
 }
 
-// ───── Договор ─────
+
 
 export interface AgreementFormValue {
   agreementType: string;
@@ -76,7 +72,7 @@ export const emptyAgreement = (): AgreementFormValue => ({
   notes: "",
 });
 
-// ───── Реклама ─────
+
 
 export interface AdFormValue {
   platformCode: string;
@@ -90,12 +86,12 @@ export interface AdFormValue {
 
 export const emptyAd = (): AdFormValue => ({ platformCode: "", url: "", adText: "", status: "active", publishedAt: "", expiresAt: "", comment: "" });
 
-// ───── Коммерческое предложение ─────
+
 
 export interface OfferItemDraft {
   propertyId: string;
   addressText: string;
-  /** Текущая цена объекта — подсказка. в КП сохраняется snapshot. */
+  
   currentPrice: string | null;
   price: string;
   terms: string;

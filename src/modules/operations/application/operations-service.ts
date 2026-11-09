@@ -11,12 +11,7 @@ import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { readiness } from "./health";
 
-/**
- * Раздел «Эксплуатация» (FR-33, ТЗ 37.15, 37.22): версия, идентичность узла, состояние БД и файлов,
- * локальные BackupRun и состояние BackupRemote. Ручной запуск локального backup и проверки копии
- * выполняет тот же скрипт ops/backup, что и scripts/backup.sh. Секреты в UI не отображаются.
- * Destructive restore из UI не выполняется — только скриптом с подтверждением.
- */
+
 
 function requireManager(actor: Actor) {
   if (!isManager(actor)) throw new ForbiddenError("Раздел доступен руководителю");
@@ -173,7 +168,7 @@ function scriptEnv(): NodeJS.ProcessEnv {
   };
 }
 
-/** Ручной локальный backup (асинхронно): статус виден в backup_runs, повторный запуск блокируется. */
+
 export async function startManualBackup(actor: Actor, trigger: "manual" | "scheduled" = "manual"): Promise<{ started: true }> {
   requireManager(actor);
   const running = await db.backupRun.count({ where: { localStatus: "running", startedAt: { gt: new Date(Date.now() - 30 * 60_000) } } });
@@ -192,7 +187,7 @@ export async function startManualBackup(actor: Actor, trigger: "manual" | "sched
   child.on("exit", (code) => {
     logger[code === 0 ? "info" : "error"]({ event: "backup.manual_finished", code, tail: code === 0 ? undefined : stderr.split("\n").slice(-5).join(" | ") }, "manual backup finished");
     if (code === 0) return;
-    // Скрипт не смог даже зарегистрировать запуск (нет инструментов/БД) — фиксируем неудачу, чтобы её было видно в UI.
+    
     void (async () => {
       const recorded = await db.backupRun.count({ where: { startedAt: { gte: new Date(startedAt.getTime() - 5_000) }, initiatedByUserId: actor.userId } });
       if (recorded) return;
@@ -216,7 +211,7 @@ export async function startManualBackup(actor: Actor, trigger: "manual" | "sched
   return { started: true };
 }
 
-/** Проверка локальной копии (checksums, manifest, читаемость dump/архива). */
+
 export async function verifyLocalBackup(actor: Actor, backupId: string): Promise<{ backupId: string; verified: boolean; output: string }> {
   requireManager(actor);
   if (!BACKUP_ID_RE.test(backupId)) throw new ValidationError(undefined, { backupId: ["Некорректный идентификатор копии"] });
@@ -229,7 +224,7 @@ export async function verifyLocalBackup(actor: Actor, backupId: string): Promise
     child.on("error", () => reject(new InfrastructureError("Инструменты проверки резервной копии недоступны в этом окружении")));
     child.on("exit", (code) => {
       clearTimeout(timer);
-      // Вывод содержит только служебные сообщения скрипта (без секретов).
+      
       resolve({ backupId, verified: code === 0, output: out.split("\n").filter(Boolean).slice(-10).join("\n") });
     });
   });

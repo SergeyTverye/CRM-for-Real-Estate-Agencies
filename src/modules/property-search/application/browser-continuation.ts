@@ -14,8 +14,7 @@ import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { regroupRunListings } from "./duplicate-ingestion";
 import { parseExternalUrl } from "@/shared/net/ssrf";
 import type { DepthOptions } from "../infrastructure/source-limits";
-/** Adapter owns source terms, safe start URL, positive readiness detection and parsing.
- * collect MUST use the supplied page/context, never launch another browser or solve challenges. */
+
 export interface InteractiveSearchAdapter {
   prepare(filters: SearchFilters, source: SessionSource, depth?: DepthOptions): Promise<PreparedSearch>;
   isReady(page: Page, source: SessionSource): Promise<boolean>;
@@ -29,9 +28,9 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
       if (run.cancelRequested) throw new ConflictError("SEARCH_NOT_WAITING", "Источник не ожидает проверки сотрудника");
       const params = run.depthParams as { depth?: DepthOptions; sourceDepth?: Partial<Record<SessionSource, DepthOptions>> };
       const filters = parseInput(SearchFilters, run.filters);
-      // Ручная попытка для заблокированного источника: разрешена только когда оператор
-      // включил площадку (assertAllowed внутри адаптера). Без разрешения — понятный
-      // конфликт и подсказка про ссылку/официальный импорт, без смены статуса.
+      
+      
+      
       if (row?.status === "blocked" && !row.needsUserAction) {
         let prepared: PreparedSearch;
         try { prepared = await adapter.prepare(filters, source, params.sourceDepth?.[source] ?? params.depth); }
@@ -39,8 +38,8 @@ export function attachInteractiveSearchAdapter(adapter: InteractiveSearchAdapter
           if (error instanceof ConflictError && error.code === "SOURCE_CONTINUATION_NOT_ALLOWED") await port.blocked(runId, source, "access_not_allowed");
           throw error;
         }
-        // Переоткрываем источник для ручной проверки в той же сессии/запуске:
-        // повторные поиски в течение жизни сессии используют её, без перезапуска всего поиска.
+        
+        
         await transaction(async tx => {
           await tx.$executeRaw(lockSql(Prisma.sql`SELECT id FROM search_runs WHERE id=${runId}::uuid FOR UPDATE`));
           await tx.searchRunSource.updateMany({ where: { runId, source, status: "blocked" }, data: { status: "needs_user_action", needsUserAction: true, statusReasonRu: "Открыта ручная проверка сотрудником" } });

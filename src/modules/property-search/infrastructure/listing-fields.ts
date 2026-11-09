@@ -1,4 +1,4 @@
-/** Package fields and older saved wrappers. Blank strings are missing values. */
+
 const record = (value: unknown): Record<string, unknown> => value && typeof value === "object" ? value as Record<string, unknown> : {};
 export const listingText = (...values: unknown[]): string | null => {
   for (const value of values) if (typeof value === "string" && value.trim()) return value.replace(/\s+/gu, " ").trim();

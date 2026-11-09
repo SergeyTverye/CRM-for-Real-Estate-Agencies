@@ -9,10 +9,7 @@ import { isManager, type Actor } from "@/modules/auth/domain/actor";
 import { advertisementWriteScope, canEditProperty } from "@/modules/access/domain/scopes";
 import { assertDictionaryCode } from "@/modules/dictionaries/application/dictionaries-service";
 
-/**
- * Реклама (FR-16, ТЗ 37.12, 40.5): площадка (code), URL, рабочий текст, статус, даты публикации/проверки/окончания.
- * Автопубликация и API площадок вне MVP. last_checked_at обновляется пользователем при подтверждении актуальности.
- */
+
 
 const URL_RE = /^https?:\/\/[^\s]+$/i;
 

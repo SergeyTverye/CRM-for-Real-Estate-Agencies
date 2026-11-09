@@ -19,7 +19,7 @@ export function parsePriceUnit(text: string | null | undefined, operation: "sale
   if (/(?:год|года)(?=$|[^\p{L}\p{N}_])/iu.test(text)) return perArea ? "rub_m2_year" : "rub_year";
   return null;
 }
-/** Package 2.1.0 already expands Cian grouped listings into #part-N/parentId rows. */
+
 export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new Date().toISOString()): NormalizedListing & ListingDates & { title: string | null } {
   const url = safeUrl(raw.url);
   if (!url) throw new Error("INVALID_LISTING_URL");
@@ -29,7 +29,7 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
   let floor = parseFloor(raw.floor);
   if (raw.floorType === "basement") floor = { kind: "basement", number: floor.number, raw: raw.floor === null ? "basement" : String(raw.floor) };
   if (raw.floorRange && raw.floorRange[0] !== raw.floorRange[1]) floor = { kind: "unknown", number: null, raw: raw.floorRange.join("–") };
-  // Known package/API sign defects: an explicit basement description invalidates a positive floor.
+  
   const basement = raw.description?.match(/(?:^|[.;\n])\s*(?:этаж\s*[:—-]?\s*)?(цоколь\S*|полуподвал\S*|подвал\S*)\s*(?:этаж|помещени\S*)?(?=[\s,.;]|$)/iu);
   if (basement) floor = parseFloor(basement[1]);
   floor = describedUndergroundFloor(raw.description ?? "") ?? floor;
@@ -42,7 +42,7 @@ export function normalizeListing(raw: RealEstateScraper.Listing, fetchedAt = new
     ...dates,
     source: raw.source, sourceListingId: raw.parentId ?? raw.id ?? null, sourceUnitId: part ?? (raw.parentId ? raw.id ?? null : null), url,
     purpose: purposeMap[raw.propertyType ?? ""] ?? null, operation,
-    // Package 2.1.0 generic parsers infer propertyType from title, not a source field.
+    
     purposeSource: ["yandex", "onrealt"].includes(raw.source) ? "rule" : "structured",
     price, priceUnit: operation === "sale" ? "rub_total" : quality.priceUnit ?? parsePriceUnit(raw.priceText, operation),
     rooms: quality.rooms,
@@ -62,7 +62,7 @@ const ABBR: Record<string, string> = {
   "наб": "набережная",
 };
 const STREET_TYPE = new Set(["улица", "проспект", "переулок", "бульвар", "шоссе", "площадь", "набережная", "проезд", "тупик", "аллея"]);
-/** Улица без номера дома: «улица Ленина» совпадает, «улица Ленина, 21» — нет. */
+
 function streetOnlyKey(address: string): string {
   return address
     .replace(/[,\s]+(\d[\p{L}\p{N}/\\.-]*(\s*(корп|корпус|стр|строение|литер)\.?[\s\p{L}\p{N}/\\.-]*)?)\s*$/giu, "")
@@ -89,7 +89,7 @@ export function deduplicateListings<T extends NormalizedListing>(input: T[]): T[
     if (a.source === b.source || !a.address || !b.address || !a.city || !b.city || a.area === null || a.area !== b.area) continue;
     if (keyOf(a.city, null) !== keyOf(b.city, null)) continue;
     if (keyOf(a.address, a.city) === keyOf(b.address, b.city)) { flag(a, b); continue; }
-    // Одна сторона — только улица без номера дома: тоже кандидат на проверку, не слияние.
+    
     const streetA = keyOf(streetOnlyKey(a.address), a.city);
     const streetB = keyOf(streetOnlyKey(b.address), b.city);
     if (streetA && streetA === streetB && ((streetOnlyKey(a.address) !== a.address) !== (streetOnlyKey(b.address) !== b.address))) flag(a, b);

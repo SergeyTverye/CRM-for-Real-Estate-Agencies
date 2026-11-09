@@ -68,7 +68,7 @@ export async function cancelSearch(actor: Actor, runId: string) {
   await cancelRunBrowserSessions(runId);
   return accessibleRun(actor, runId);
 }
-/** Resume only interrupted sources; completed observations are immutable and never fetched again. */
+
 export async function recoverSearchQueue(now = new Date()) {
   return transaction(async tx => {
     const threshold = new Date(+now - 60000);
@@ -82,7 +82,7 @@ export async function recoverSearchQueue(now = new Date()) {
 }
 type SourceDetails = Omit<SourceRun, "status"> & { status: string; adapterStatus?: string; failureCode?: string; pagesFetched?: number; listingsFetched?: number; incomplete?: boolean; retryAfterAt?: string; actionUrl?: string; dateDetails?: DateDetailProgress };
 type FailureStage = "SETTINGS" | "FETCH" | "NORMALIZE" | "PERSIST" | "FINALIZE";
-/** Finite public diagnostics only: never serialize an exception or its metadata. */
+
 function workerFailureCode(error: unknown) {
   if (error instanceof Prisma.PrismaClientValidationError) return "DB_INPUT_INVALID";
   const code = error && typeof error === "object" && "code" in error ? error.code : null;
@@ -110,7 +110,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
   const workerId = `${options.workerId ?? "search"}:${randomUUID()}`;
   const run = await transaction(async tx => {
     await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(310105)`));
-    // One durable slot across all processes; bounded per-source adapter concurrency stays separate.
+    
     if (await tx.searchRun.count({ where: { status: "running", lockedBy: { not: null } } })) return null;
     const candidate = await tx.searchRun.findFirst({ where: { status: "queued" }, orderBy: [{ startedAt: "asc" }, { id: "asc" }] });
     if (!candidate) return null;
@@ -141,7 +141,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
     const params = run.depthParams as { confirmedPaid?: boolean; previousRunId?: string | null; depth?: { maxPages: number; limit: number }; sourceDepth?: Partial<Record<typeof SOURCES[number], { maxPages: number; limit: number }>>; scenario?: string };
     const adapter = options.scraper ?? scraperFor(settings, params.scenario, params);
     const ai = settings.aiEnabled && params.confirmedPaid ? await getSearchAi() : null;
-    // Fast HTTP sources first. Reserve a fair slice for every remaining source.
+    
     const priority = ["mirkvartir", "onrealt", "youla", "yandex", "cian", "domclick", "avito"];
     const plannedSources = [...filters.sources].sort((a,b) => priority.indexOf(a) - priority.indexOf(b));
     for (const [sourceIndex, source] of plannedSources.entries()) {
@@ -159,7 +159,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
       const started = Date.now();
       let result: { listings: SearchResult["listings"]; sources: SourceDetails[] };
       try {
-        // Even a faulty adapter that ignores AbortSignal cannot hold the durable slot indefinitely.
+        
         let abortTimer: ReturnType<typeof setTimeout> | undefined;
         let onAbort: (() => void) | undefined;
         try {
@@ -188,7 +188,7 @@ export async function processSearchQueue(options: { scraper?: ScraperAdapter; si
               } }, controller.signal),
               new Promise<never>((_resolve, reject) => { onAbort = () => reject(new Error("SEARCH_ABORTED")); if (controller.signal.aborted) onAbort(); else controller.signal.addEventListener("abort", onAbort, { once: true }); }),
             ]);
-          } catch { /* Keep rule results on budget limit, cancellation or provider failure. */ }
+          } catch {  }
           finally { if (onAbort) controller.signal.removeEventListener("abort", onAbort); }
         }
         items.push({ listing, evaluation });

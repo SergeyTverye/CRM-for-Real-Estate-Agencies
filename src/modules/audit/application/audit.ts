@@ -2,11 +2,7 @@ import type { DbOrTx } from "@/shared/db/client";
 import { getRequestContext } from "@/shared/context";
 import { Prisma } from "@/generated/prisma/client";
 
-/**
- * AuditLog — технический журнал критичных изменений (ТЗ 19.1, 29.9).
- * До записи before/after вырезаются password_hash, токены, секреты и storage key.
- * AuditLog не подмешивается в пользовательскую историю клиента.
- */
+
 
 const SECRET_KEY_RE = /(password|token|secret|storagekey|storage_key|cookie|crypt)/i;
 
@@ -55,7 +51,7 @@ export async function writeAudit(tx: DbOrTx, entry: AuditEntry): Promise<void> {
   });
 }
 
-/** Только изменившиеся поля (для компактного before/after). */
+
 export function diffFields<T extends Record<string, unknown>>(before: T, after: Partial<T>): { before: Partial<T>; after: Partial<T> } {
   const b: Partial<T> = {};
   const a: Partial<T> = {};

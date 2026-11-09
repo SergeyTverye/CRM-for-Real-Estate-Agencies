@@ -15,7 +15,7 @@ import { createBrowserNavigation, headedBrowserAvailable, type NavigationSource 
 export interface AdapterSourceRun extends Omit<SourceRun, "status"> {
   status: SourceRun["status"] | AdapterFailure;
   incomplete: boolean; pagesFetched: number; listingsFetched: number;
-  /** Aggregate planned page allowance over all package category variants. */
+  
   maxPages: number; limit: number; estimatedRequests: number;
   actionUrl?: string;
   failureCode?: string;
@@ -41,7 +41,7 @@ export interface ScraperAdapter {
 }
 export type ScraperClient = Pick<RealEstateScraper, "searchSite" | "close">;
 export type ScraperFactory = (config: RealEstateScraper.Config & { navigationSource?: NavigationSource; browser?: true | RealEstateScraper.BrowserOptions; jobDeadlineAt?: number; dateDetailMaxCards?: number }) => Promise<ScraperClient>;
-/** A small HTTP-200 challenge is not an empty market or a selector regression. */
+
 export function isCianAccessChallenge(url: string, data: unknown): boolean {
   const host = new URL(url).hostname;
   return (host === "cian.ru" || host.endsWith(".cian.ru")) && typeof data === "string" && data.length < 20000 &&
@@ -88,10 +88,10 @@ const transport: RealEstateScraper.Transport = async request => {
   });
   const text = response.data.toString("utf8");
   let data: unknown = text;
-  if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch { /* Parser reports invalid payload. */ } }
+  if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch {  } }
   return { data, status: response.status, url: response.url, headers: Object.fromEntries(Object.entries(response.headers).filter((entry): entry is [string, string] => typeof entry[1] === "string")) };
 };
-/** Use the public browser lifecycle API to intercept ALL browser network, including subresources. */
+
 export const defaultScraperFactory: ScraperFactory = async config => {
   const { browser, navigationSource, jobDeadlineAt, dateDetailMaxCards, ...provided } = config;
   const deadline = jobDeadlineAt ?? Date.now() + (config.timeout ?? 30000);
@@ -108,8 +108,8 @@ export const defaultScraperFactory: ScraperFactory = async config => {
   }
   if (!browser) return extendSourceParsers(await RealEstateScraper.create(httpConfig), { deadline, maxCards: dateDetailMaxCards });
   const browserOptions = browser === true ? {} : browser;
-  // Ordinary Playwright launch: no fingerprint changes or anti-detection scripts.
-  // Channel is only used when explicitly configured; otherwise the bundled Chromium is used.
+  
+  
   const browserInstance = await chromium.launch({ ...(browserOptions.channel ? { channel: browserOptions.channel } : {}),
     executablePath: browserOptions.executablePath ?? process.env.SCRAPER_BROWSER_EXECUTABLE_PATH ?? process.env.SCRAPER_CHROME_PATH,
     headless: browserOptions.headless ?? true, timeout: httpConfig.timeout });
@@ -147,7 +147,7 @@ export const defaultScraperFactory: ScraperFactory = async config => {
   } catch (error) { await launched.close(); throw error; }
 };
 function positiveInt(value: unknown, fallback: number): number { const number = Number(value ?? fallback); if (!Number.isSafeInteger(number) || number < 1) throw new Error("INVALID_SCRAPER_LIMIT"); return number; }
-// Shared process-wide limiter for production adapters; tests may inject an isolated limiter.
+
 let productionLimiter: ScraperJobLimiter | undefined;
 export class RealEstateScraperAdapter implements ScraperAdapter {
   private readonly limiter: ScraperJobLimiter;
@@ -157,7 +157,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     this.limiter = options.limiter ?? (options.factory ? new ScraperJobLimiter(maximum) : productionLimiter ??= new ScraperJobLimiter(maximum));
     this.timeout = Math.min(300_000, positiveInt(options.jobTimeoutMs ?? process.env.SCRAPER_JOB_TIMEOUT_MS, 180_000));
   }
-  /** Compatibility bridge until application/model adopts v3.1 statuses. */
+  
   async search(input: unknown, context?: { signal?: AbortSignal; deadline?: number }): Promise<SearchResult> {
     const result = await this.searchDetailed(input, context);
     return { ...result, sources: result.sources.map(run => ({ ...run, adapterStatus: run.status,
@@ -190,8 +190,8 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
     if (browserEnabled && source === "cian" && !headedBrowserAvailable() && !this.options.factory)
       return empty("needs_user_action", "Автоматическая проверка Циана недоступна: нет дисплея. Пройдите проверку в браузере CRM или импортируйте выгрузку");
     return this.limiter.run(async () => {
-      // Queue time belongs to the job deadline too. Never start a new network
-      // request after an earlier source consumed the entire job's budget.
+      
+      
       const remaining = deadline - Date.now();
       if (remaining <= 0) return empty("timeout", "Превышен срок выполнения задания");
       if (signal?.aborted) return empty("cancelled", "Поиск отменён");
@@ -217,9 +217,9 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
             ...this.options.browser, sources: [source] } } : {}) });
         if (controller.signal.aborted || finished) { await created.close(); throw { code: "ABORTED" }; }
         client = created;
-        // Mixed commercial+residential selections query both categories; single-category searches keep one request.
-        // Жилая раскрыта в 6 однотипных запросов: площадки поддерживают не все типы жилья,
-        // поэтому ветви выполняются изолированно — успех одних сохраняется при отказе других.
+        
+        
+        
         const queries = plan.queries.map(query => ({ ...query, signal: controller.signal }));
         const merged = await (async (): Promise<RealEstateScraper.SearchResult> => {
           let acc: RealEstateScraper.SearchResult | undefined;
@@ -248,12 +248,12 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
                 if (!acc) acc = { query, timestamp: new Date().toISOString(), total: 0, results: [], errors: [entry], pages: [], partial: false };
                 else { acc.errors.push(entry); acc.partial = true; }
               }
-              // Publish at every branch boundary: a later hung call must not erase it.
+              
               partial = acc;
               if (Date.now() >= deadline) controller.abort();
             }
           };
-          // Flat/studio come first in the plan; two workers bound in-flight work.
+          
           await Promise.all(Array.from({ length: parallelHousing ? 2 : 1 }, () => worker()));
           if (!acc) throw { code: "ABORTED" };
           return acc;
@@ -261,12 +261,12 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         return merged;
       };
       try {
-        // Install cancellation before starting work, including a slow factory.
+        
         const stopped = new Promise<RealEstateScraper.SearchResult>((resolve, reject) => {
           const stop = () => {
             if (finished) return;
             stopCode = signal?.aborted ? "ABORTED" : "TIMEOUT";
-            // Give the page-accumulating parser a bounded chance to return its tail.
+            
             graceTimer = setTimeout(() => partial ? resolve(partial) : reject({ code: stopCode }), 20);
           };
           controller.signal.addEventListener("abort", stop, { once: true });
@@ -280,8 +280,8 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
           try { if (raw.source !== source) throw new Error("SOURCE_MISMATCH"); return [normalizeListing(raw, batch.timestamp)]; }
           catch { invalid++; return []; }
         }));
-        // Round-robin selection keeps later housing types represented even when
-        // a client over-returns or the source allowance is smaller than fanout.
+        
+        
         const interleaved: ReturnType<typeof normalizeListing>[] = [];
         for (let row = 0; row < Math.max(0, ...normalized.map(batch => batch.length)); row++) {
           for (const batch of normalized) if (batch[row]) interleaved.push(batch[row]!);
@@ -319,7 +319,7 @@ export class RealEstateScraperAdapter implements ScraperAdapter {
         signal?.removeEventListener("abort", abort);
         if (timer) clearTimeout(timer);
         controller.abort();
-        // close() is idempotent; race bounds cleanup even for faulty injected clients.
+        
         if (client) { let cleanupTimer: ReturnType<typeof setTimeout> | undefined; await Promise.race([client.close().catch(() => undefined), new Promise<void>(resolve => { cleanupTimer = setTimeout(resolve, 1000); })]); if (cleanupTimer) clearTimeout(cleanupTimer); }
       }
     }, { signal, deadline }).catch(error => {

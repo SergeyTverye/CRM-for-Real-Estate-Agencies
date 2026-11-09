@@ -68,7 +68,7 @@ export interface ListingEvaluation {
   verdict: "confirmed" | "needs_review" | "rejected";
   criteria: CriterionEvaluation[]; preferences: CriterionEvaluation[]; score: number; aiPending: string[];
 }
-/** Only public, contact-redacted description and unresolved criteria; no CRM actor/client data. */
+
 export interface DescriptionAnalyzer {
   analyze(input: { description: string; criteria: string[]; signal?: AbortSignal }): Promise<CriterionEvaluation[]>;
 }

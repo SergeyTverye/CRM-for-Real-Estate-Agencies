@@ -86,7 +86,7 @@ export async function transferToCatalog(actor: Actor, listingId: string, input: 
     if (unverifiedIdentity && !data.identityConfirmed)
       throw new ConflictError("IDENTITY_CONFIRMATION_REQUIRED", "Недостаточно ключей. Проверьте первоисточник и подтвердите идентичность вручную.");
     await guardExternalUrl(listing.url);
-    // Serialize the provenance as well as this row: separate rows may describe one object.
+    
     if (listing.sourceListingId) {
       await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify([listing.source, listing.sourceListingId, listing.sourceUnitId])}, 0))`));
       const linked = await tx.externalListing.findFirst({ where: { source: listing.source, sourceListingId: listing.sourceListingId,
@@ -100,7 +100,7 @@ export async function transferToCatalog(actor: Actor, listingId: string, input: 
     }
     const addressText = data.address ?? listing.address;
     if (!addressText) throw new ValidationError("Укажите проверенный адрес объекта");
-    // Unknown price units must not silently become comparable CRM prices.
+    
     const canCopyPrice = listing.operation === "sale" && listing.priceUnit === "total" || listing.operation === "rent" && listing.priceUnit === "per_month";
     const property = await tx.property.create({ data: { responsibleUserId: actor.userId, createdBy: actor.userId, propertyType: "commercial",
       operationType: data.operation ?? listing.operation, sourceType: "external_market", sourceUrl: listing.url,
@@ -128,7 +128,7 @@ export async function proposeListing(actor: Actor, listingId: string, input: unk
   return transaction(async tx => {
     await tx.$executeRaw(lockSql(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`search-propose:${data.needId}`}, 0))`));
     const { propertyId } = await actionContext(actor, listingId, input, tx);
-    // Matching service owns stage transitions; this boundary adds idempotence for candidates.
+    
     const existing = await tx.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } });
     const result = existing ? { created: [] as string[], skipped: [propertyId] } : await proposePropertiesInTransaction(tx, actor, data.needId, { propertyIds: [propertyId], comment: data.comment });
     const matchId = existing?.id ?? result.created[0] ?? (await tx.needPropertyMatch.findFirst({ where: { clientNeedId: data.needId, propertyId }, orderBy: { offeredAt: "desc" } }))?.id;

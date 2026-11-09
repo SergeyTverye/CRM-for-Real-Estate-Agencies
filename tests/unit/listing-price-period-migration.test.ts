@@ -16,7 +16,7 @@ it.each([true,false])("price-period rebuild preserves populated history (transac
       INSERT INTO external_listing_snapshots(id,listing_id,search_run_id,fetched_at,normalized) VALUES('snapshot','l','r',0,'{"priceUnit":null}');`);
     const schema=()=>db.prepare("SELECT type,name,sql FROM sqlite_master WHERE tbl_name='external_listings' AND type IN ('index','trigger') ORDER BY type,name").all();
     const before=schema();
-    expect(before.filter(row=>(row as {type:string}).type==="index")).toHaveLength(12); // 11 explicit + PK
+    expect(before.filter(row=>(row as {type:string}).type==="index")).toHaveLength(12); 
     expect(before.filter(row=>(row as {type:string}).type==="trigger")).toEqual([]);
     expect(db.pragma("foreign_keys",{simple:true})).toBe(1);
     const sql=readFileSync(join(root,target,"migration.sql"),"utf8");

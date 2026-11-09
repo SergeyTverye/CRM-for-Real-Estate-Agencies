@@ -9,11 +9,11 @@ import { detectAccessChallenge, resilientTransport, retryAfterMs } from "@/modul
 import { resolveSourceDepth, SOURCE_LIMITS } from "@/modules/property-search/infrastructure/source-limits";
 import { defaultScraperFactory, RealEstateScraperAdapter, ScraperJobLimiter } from "@/modules/property-search/infrastructure/scraper-adapter";
 
-// This suite isolates adapter/network contracts; domain evaluations have their own regression suite.
+
 vi.mock("@/modules/property-search/domain/evaluation", () => ({ evaluateListing: () => ({ verdict: "needs_review", criteria: [], preferences: [], score: 0, aiPending: [] }) }));
 
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllEnvs(); });
-const fetchedAt = "2026-11-05T18:30:00.000Z"; // Nov 6, 01:30 in Novosibirsk.
+const fetchedAt = "2026-11-05T18:30:00.000Z"; 
 const domains: Record<Source, string> = { cian: "www.cian.ru", avito: "www.avito.ru", domclick: "domclick.ru", yandex: "realty.yandex.ru", onrealt: "onrealt.ru", youla: "youla.ru", mirkvartir: "cre.mirkvartir.ru" };
 function fixture(source: Source): RealEstateScraper.SearchResult { return JSON.parse(readFileSync(`tests/fixtures/scraper/${source}.json`, "utf8")); }
 
@@ -65,7 +65,7 @@ describe("AT-04 REPLAY live evidence (not a fresh live test)", () => {
       expect(row).toHaveProperty("publishedAt"); expect(row).toHaveProperty("sourceUpdatedAt");
     }
     expect(JSON.stringify(replay)).not.toMatch(/(?:phone|password|cookie|authorization)"\s*:/iu);
-    // All seven legacy source listing contracts continue to normalize.
+    
     expect(normalizeListing(fixture(source).results[0]!, fetchedAt)).toMatchObject({ source, price: "15000000.00" });
   });
   it.each(SOURCES)("%s rejects CAPTCHA and unrecognized parser input offline", source => {

@@ -10,8 +10,7 @@ import { detectAccessChallenge } from "./source-response";
 import { extractListingDates } from "./listing-dates";
 import { resolveSourceDepth, type DepthOptions } from "./source-limits";
 
-/** No browser/network is created by the parser. All navigation uses the guarded HITL page.
- * Enabling a source is an operator assertion of permission, not an anti-bot bypass. */
+
 export class ProductionInteractiveSearchAdapter implements InteractiveSearchAdapter {
   constructor(private readonly allowed: () => readonly string[] = () => (process.env.BROWSER_SESSION_ALLOWED_SOURCES ?? "").split(",").map(s => s.trim())) {}
   private assertAllowed(source: SessionSource) {
@@ -21,7 +20,7 @@ export class ProductionInteractiveSearchAdapter implements InteractiveSearchAdap
     this.assertAllowed(source);
     const query = buildScraperQuery(filters, source, new AbortController().signal, undefined, depth);
     const parser = new RealEstateScraper({ maxRetries: 0 }).parsers[source];
-    // Native multi-type sources preserve OR; other parsers may support only one branch.
+    
     const startUrl = parser.buildSearchUrl(query);
     if (!allowsStart(source, startUrl)) throw new Error("INVALID_CONTINUATION_URL");
     return { startUrl, parameters: { query: { ...query, signal: undefined }, startUrl, source, depth: resolveSourceDepth(source, depth) } };
@@ -71,7 +70,7 @@ export class ProductionInteractiveSearchAdapter implements InteractiveSearchAdap
       if (index >= depth.maxPages || listings.length >= depth.limit) { incomplete = true; break; }
       const next = parsed.nextUrl && new URL(parsed.nextUrl, url).toString();
       if (!next || !allowsStart(input.source, next)) { incomplete = true; break; }
-      // Same page, cookies and network policy. No retries after a repeated challenge.
+      
       const response = await input.page.goto(next, { waitUntil: "domcontentloaded" });
       if (response && [401, 403, 429, 439].includes(response.status())) { blocked = true; break; }
     }

@@ -3,7 +3,7 @@ import pg from "pg";
 
 const E2E_DB = process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e";
 
-/** Только crm_e2e. Копируем применённую схему crm_demo, без generate/migrate. */
+
 export default async function globalSetup() {
   if (new URL(E2E_DB).pathname !== "/crm_e2e") throw new Error("E2E requires isolated crm_e2e database");
   const admin = new pg.Client({ connectionString: E2E_DB.replace(/\/crm_e2e$/, "/crm_test") });

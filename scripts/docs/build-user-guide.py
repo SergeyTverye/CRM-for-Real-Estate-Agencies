@@ -126,7 +126,7 @@ def prepare_images():
     ]
     for name,relative,crop,boxes in extra_specs:
         source=(images/relative).resolve()
-        # Historical source paths are repository-relative, not image-relative.
+        
         if relative.startswith('../../../../'):
             source=ROOT/'docs'/relative.removeprefix('../../../../')
         if not source.exists() and (images/f'{name}.png').exists():
@@ -177,8 +177,8 @@ def build():
     source=(DEST/'guide.md').read_text(encoding='utf-8-sig')
     chunks=re.split(r'^## (.+)$',source,flags=re.M)
     chapters=list(zip(chunks[1::2],chunks[2::2]))
-    # Fixed one-topic pages keep steps and their figure together. Fail if edited
-    # content exceeds the page rather than silently clipping or inserting blanks.
+    
+    
     output=DEST/f'CRM-руководство-пользователя-{VERSION}.pdf'
     c=canvas.Canvas(str(output),pagesize=(595.276,841.89),pageCompression=1)
     c.setTitle(f'CRM {VERSION} — Руководство пользователя')
@@ -194,7 +194,7 @@ def build():
     para(c,'От первого звонка до результата — с проверкой следующего действия и сохранности данных.',321,15,23,'#FFFFFF',width=430)
     para(c,'Windows / серверный режим\nРедакция 08.11.2026 · Демонстрационные и LIVE-иллюстрации'.replace('\n',' · '),122,10,16,'#B9D8F0')
     c.showPage()
-    # 28 entries on one page, with destinations and final physical page numbers.
+    
     para(c,'Оглавление',781,26,31,BLUE,bold=True)
     y=723
     for i,(title,_) in enumerate(chapters):
@@ -241,7 +241,7 @@ def build():
     if ARGS.render:
         subprocess.run(['pdftoppm','-r','110','-png',str(output),str(TMP/'page')],check=True)
         pages=sorted(TMP.glob('page-*.png'))
-        # Contact sheets are only for orientation; also inspect full-page renders.
+        
         for start in range(0,len(pages),6):
             sheet=PILImage.new('RGB',(1120,1224),'#DDE4EC')
             d=ImageDraw.Draw(sheet)

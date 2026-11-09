@@ -14,7 +14,7 @@ function localStore(config: AppConfig): CredentialStore | undefined {
   if (config.CRM_DEPLOYMENT_MODE !== "desktop" || !process.env.DESKTOP_DATA_DIR || !path.isAbsolute(process.env.DESKTOP_DATA_DIR)) return;
   return new EncryptedFileCredentialStore(path.join(process.env.DESKTOP_DATA_DIR, "ai-credentials"), new WindowsDpapiProtector());
 }
-/** No caching: server and worker see a replacement on their next composition. */
+
 export class AiCredentialsService {
   constructor(private readonly config: AppConfig, private readonly store?: CredentialStore) {}
   async resolve(): Promise<{ credentials: Credentials | null; source: "environment" | "local" | "none"; unavailable: boolean }> {
@@ -37,7 +37,7 @@ export class AiCredentialsService {
   }
   async replace(actor: Actor, input: unknown) {
     this.manager(actor);
-    // Do not propagate Zod issues/input or adapter exceptions into logs/audit.
+    
     const parsed = inputSchema.safeParse(input);
     if (!parsed.success) throw new ValidationError("Проверьте ключ API и каталог Яндекс AI");
     if (!this.store?.available) throw new InfrastructureError("Защищённое хранилище Яндекс AI недоступно");

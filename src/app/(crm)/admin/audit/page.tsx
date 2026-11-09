@@ -114,7 +114,7 @@ function entityHref(type: string, id: string): string | null {
   }
 }
 
-/** before/after: идентификаторы сотрудников заменяются именами для читаемости. */
+
 function JsonCell({ value, names }: { value: unknown; names: Map<string, string> }) {
   if (value === null || value === undefined) return <span className="text-slate-400">—</span>;
   const replacer = (_k: string, v: unknown) => (typeof v === "string" && names.has(v) ? names.get(v) : v);

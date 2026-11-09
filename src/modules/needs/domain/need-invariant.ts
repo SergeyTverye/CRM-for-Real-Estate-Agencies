@@ -2,14 +2,7 @@ import type { DbOrTx } from "@/shared/db/client";
 import { ConflictError, DomainError } from "@/shared/errors";
 import { OPEN_TASK_STATUSES } from "@/modules/tasks/domain/task-rules";
 
-/**
- * Межтабличные инварианты жизненного цикла ClientNeed (ТЗ 19.6, 40.2.1, FR-23).
- * Проверяются в конце каждой бизнес-команды внутри той же транзакции:
- *  - active  → есть незавершённая следующая Task.
- *  - paused  → есть незавершённая Task возврата (due_at обязателен для любой Task).
- *  - closed  → stop_reason_code и closed_at (дублируется CHECK-ограничением).
- *  - success → фиксирует результат, следующая Task не требуется.
- */
+
 export async function findNeedInvariantViolations(tx: DbOrTx, needIds: string[]): Promise<{ needId: string; status: string; violation: string }[]> {
   if (needIds.length === 0) return [];
   const needs = await tx.clientNeed.findMany({

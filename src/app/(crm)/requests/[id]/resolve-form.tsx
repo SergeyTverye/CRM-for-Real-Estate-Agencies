@@ -11,7 +11,7 @@ import { optionsOf } from "@/shared/codebook";
 
 const STATUSES = optionsOf("leadStatus");
 
-/** Решение руководителя по обращению: привязка к клиенту, ответственный, статус (ТЗ 37.4.1, 40.1). */
+
 export function ResolveRequestForm({ requestId, updatedAt, status, users, hasClient }: { requestId: string; updatedAt: string; status: string; users: Option[]; hasClient: boolean }) {
   const router = useRouter();
   const [client, setClient] = useState<ClientPick | null>(null);

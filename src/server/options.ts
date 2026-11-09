@@ -9,7 +9,7 @@ export interface Option {
   label: string;
 }
 
-/** Активные значения бизнес-справочника для форм. Текущее (возможно деактивированное) значение сохраняется. */
+
 export function dictOptions(dicts: Dictionaries, category: DictionaryCategory, keep?: string | null): Option[] {
   return dicts[category].filter((o) => o.isActive || o.value === keep).map(({ value, label }) => ({ value, label }));
 }

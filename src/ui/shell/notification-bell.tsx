@@ -5,7 +5,7 @@ import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NotificationBrowserDelivery } from "@/modules/notifications/presentation/browser-notifications";
 
-/** Счётчик не мешает работе оболочки при недоступном API. */
+
 export function NotificationBell() {
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {

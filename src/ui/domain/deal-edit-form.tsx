@@ -8,7 +8,7 @@ import { useApiAction, useUnsavedChangesWarning } from "../hooks";
 import { Field, FormErrorBanner, SubmitButton } from "../form";
 import { DateTimeInput, SelectInput, type Option } from "../client-kit";
 
-/** Изменение рабочей сделки (до закрытия): этап, ИП/ООО, цена, ключевые даты, ответственный. */
+
 
 export interface DealEditValue {
   status: string;

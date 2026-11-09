@@ -19,7 +19,7 @@ export async function tickBackupWorker(now = new Date(), signal?: AbortSignal) {
     let changed = false;
     for (const d of destinations) {
       if (!pending.rows.some(r => r.destinationId === d.id && r.status === "failed" && r.attempts >= 5 && r.nextAttemptAt <= now.getTime())) continue;
-      try { await d.list(); for (const row of pending.rows) if (row.destinationId === d.id && row.status === "failed" && row.attempts >= 5) { row.attempts = 0; row.nextAttemptAt = 0; row.status = "queued"; changed = true; } } catch { /* Isolated provider remains offline. */ }
+      try { await d.list(); for (const row of pending.rows) if (row.destinationId === d.id && row.status === "failed" && row.attempts >= 5) { row.attempts = 0; row.nextAttemptAt = 0; row.status = "queued"; changed = true; } } catch {  }
     }
     if (changed) await journal.save(pending.revision, pending.rows);
     const queue = new ReplicationQueue(path.join(backupRuntimeRoot(), "queue"), destinations, {}, journal);

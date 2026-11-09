@@ -24,7 +24,7 @@ impl Drop for Control { fn drop(&mut self) { unsafe { CloseHandle(self.event); C
 pub fn request_stop() -> io::Result<()> {
     unsafe {
         let event = OpenEventW(EVENT_MODIFY_STATE,0,wide(STOP).as_ptr());
-        if event.is_null() { return Ok(()); } // No instance is already stopped.
+        if event.is_null() { return Ok(()); } 
         let result = SetEvent(event); CloseHandle(event);
         if result == 0 { return Err(io::Error::last_os_error()); }
     }

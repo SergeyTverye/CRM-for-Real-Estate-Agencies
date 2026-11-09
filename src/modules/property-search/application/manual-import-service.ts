@@ -55,7 +55,7 @@ export async function importSearchFeed(actor: Actor, file: File, raw: unknown) {
     try { await guardExternalUrl(listingSourceUrl(listing.url).url); accepted.push(listing); }
     catch { result.errors.push({ row: 0, code: "INVALID_FEED_ROW" }); }
   }
-  // Preview is inert; neither pending rows without public URLs nor rejected network URLs are stored.
+  
   const preview = accepted.map(l => ({ listing: l, evaluation: evaluateListing(l, input.filters) }));
   const saved = input.commit ? await saveManualCandidates(actor, input.filters, accepted, true) : {};
   if (input.commit) await searchAudit(db, actor, "feed_imported", "SearchRun", (saved as { runId: string }).runId, { rowsRead: result.rowsRead, count: accepted.length });

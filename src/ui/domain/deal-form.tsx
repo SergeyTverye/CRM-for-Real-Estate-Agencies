@@ -10,10 +10,7 @@ import { DateTimeInput, SelectInput, type Option } from "../client-kit";
 import { ClientPicker, type ClientPick } from "./need-pickers";
 import { NeedPicker, PropertySelect, type NeedLabels, type NeedPick, type PropertyPick } from "./deal-pickers";
 
-/**
- * Открытие сделки (UC-07, ТЗ 17.5, 29.7): объект, ИП/ООО, статус, дата, цена, участники
- * (клиент CRM или внешний участник) и отдельные записи комиссий.
- */
+
 
 const ROLES = optionsOf("dealPartyRole");
 const OPEN_STATUSES = optionsOf("dealStatus").filter((o) => !["completed", "cancelled"].includes(o.value));
@@ -94,7 +91,7 @@ export function NewDealForm({
   const setCommission = (i: number, patch: Partial<CommissionDraft>) => setCommissions((s) => s.map((c, j) => (j === i ? { ...c, ...patch } : c)));
   const removeParty = (i: number) => {
     setParties((s) => s.filter((_, j) => j !== i));
-    // Плательщик комиссии указывается индексом участника — сдвигаем ссылки.
+    
     setCommissions((s) => s.map((c) => (c.payerIndex === "" ? c : Number(c.payerIndex) === i ? { ...c, payerIndex: "" } : Number(c.payerIndex) > i ? { ...c, payerIndex: String(Number(c.payerIndex) - 1) } : c)));
   };
 

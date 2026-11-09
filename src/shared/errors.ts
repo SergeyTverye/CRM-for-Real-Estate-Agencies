@@ -1,9 +1,4 @@
-/**
- * Единая модель ошибок (ТЗ 20.2, 32.1).
- * Ошибки валидации, аутентификации, авторизации, отсутствия, конфликта,
- * нарушения бизнес-инварианта и инфраструктуры различаются внутри приложения.
- * Внешний ответ не раскрывает сведений о недоступных объектах и stack trace.
- */
+
 
 export type FieldErrors = Record<string, string[]>;
 
@@ -45,7 +40,7 @@ export class AuthenticationError extends AppError {
   }
 }
 
-/** Неверный логин/пароль: одинаковое сообщение для любого логина (не раскрывает его существование). */
+
 export class InvalidCredentialsError extends AppError {
   readonly status = 401;
   readonly code = "INVALID_CREDENTIALS";
@@ -62,7 +57,7 @@ export class PasswordChangeRequiredError extends AppError {
   }
 }
 
-/** Отказ по роли/функции. Для конкретных записей используется NotFoundError, чтобы не раскрывать их существование. */
+
 export class ForbiddenError extends AppError {
   readonly status = 403;
   readonly code = "FORBIDDEN";
@@ -79,7 +74,7 @@ export class NotFoundError extends AppError {
   }
 }
 
-/** Optimistic concurrency: запись изменена другим пользователем после открытия формы. */
+
 export class StaleUpdateError extends AppError {
   readonly status = 409;
   readonly code = "STALE_UPDATE";
@@ -97,7 +92,7 @@ export class ConflictError extends AppError {
   }
 }
 
-/** Нарушение бизнес-инварианта (например, active ClientNeed без следующего действия). */
+
 export class DomainError extends AppError {
   readonly status = 422;
   readonly code: string;

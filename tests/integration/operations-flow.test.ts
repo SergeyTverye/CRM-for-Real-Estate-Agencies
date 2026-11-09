@@ -29,13 +29,13 @@ describe("T04: подбор → показ → результат → этап �
     const cand = await findCandidates(u.realtor1, needId, { strict: "no" });
     const s1 = cand.items.find((i) => i.id === p1.id)!;
     const s2 = cand.items.find((i) => i.id === p2.id)!;
-    expect(s1.score).toBeGreaterThan(s2.score); // p2 вне бюджета
+    expect(s1.score).toBeGreaterThan(s2.score); 
     expect(JSON.stringify(cand.items)).not.toMatch(/owner|contacts/i);
 
     const proposed = await proposeProperties(u.realtor1, needId, { propertyIds: [p1.id, p2.id] });
     expect(proposed.created).toHaveLength(2);
     expect((await db.clientNeed.findUniqueOrThrow({ where: { id: needId } })).stage).toBe("selection");
-    // повторное предложение активного варианта не дублируется
+    
     expect((await proposeProperties(u.realtor1, needId, { propertyIds: [p1.id] })).skipped).toEqual([p1.id]);
 
     const sh = await scheduleShowing(u.realtor1, { clientNeedId: needId, propertyId: p1.id, scheduledAt: inDays(1) });
@@ -43,17 +43,17 @@ describe("T04: подбор → показ → результат → этап �
     const match = await db.needPropertyMatch.findFirstOrThrow({ where: { clientNeedId: needId, propertyId: p1.id } });
     expect(match.status).toBe("showing_planned");
 
-    // Завершаем исходную задачу, чтобы задача показа стала единственной открытой.
+    
     const firstTask = await db.task.findFirstOrThrow({ where: { needLinks: { some: { clientNeedId: needId } }, taskType: "call_or_contact" } });
     await db.task.update({ where: { id: firstTask.id }, data: { status: "completed", completedAt: new Date() } });
 
-    // Результат без продолжения — потребность осталась бы без next action → откат всей команды.
+    
     const err = await recordShowingResult(u.realtor1, sh.id, { expectedUpdatedAt: await showingVersion(sh.id), status: "completed", resultCode: "interested" }).catch((e) => e);
     expect(err).toBeInstanceOf(DomainError);
     expect(err.code).toBe("NEXT_ACTION_REQUIRED");
     expect((await db.showing.findUniqueOrThrow({ where: { id: sh.id } })).status).toBe("planned");
 
-    // Результат + переход этапа + следующее действие одной командой.
+    
     await recordShowingResult(u.realtor1, sh.id, {
       expectedUpdatedAt: await showingVersion(sh.id),
       status: "completed",
@@ -117,7 +117,7 @@ describe("FR-25/FR-26: экран «Сегодня» и контрольные �
     expect(view.controls.advertising.some((c) => c.kind === "advertisement")).toBe(true);
     expect(view.counters.needsWithoutNextAction).toBe(0);
 
-    // Другой риелтор не видит чужие действия, руководитель видит «Все».
+    
     const other = await getTodayView(u.realtor2);
     expect(other.overdue).toHaveLength(0);
     const all = await getTodayView(u.manager, { scope: "all" });

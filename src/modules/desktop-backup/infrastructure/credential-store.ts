@@ -45,7 +45,7 @@ export class WindowsDpapiProtector implements SecretProtector {
       const chunks: Buffer[] = []; let length = 0;
       const timeout = setTimeout(() => { child.kill(); reject(new BackupError("DPAPI_FAILED")); }, 15000);
       child.stdout.on("data", (chunk: Buffer) => { length += chunk.length; if (length > 65536) child.kill(); else chunks.push(chunk); });
-      child.stderr.resume(); // Never print provider/PowerShell errors or stdin.
+      child.stderr.resume(); 
       child.stdin.on("error", () => {});
       child.on("error", () => { clearTimeout(timeout); reject(new BackupError("DPAPI_FAILED")); });
       child.on("close", code => { clearTimeout(timeout); if (code !== 0 || length === 0 || length > 65536) reject(new BackupError("DPAPI_FAILED")); else resolve(Buffer.from(Buffer.concat(chunks).toString("utf8").trim(), "base64")); });

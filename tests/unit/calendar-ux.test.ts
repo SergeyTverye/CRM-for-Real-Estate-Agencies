@@ -6,7 +6,7 @@ import { groupNotifications, notificationText } from "@/modules/notifications/do
 
 const zone = "Asia/Novosibirsk";
 const date = (s: string) => new Date(s);
-const event = { start: "2026-11-06T03:00:00Z", end: "2026-11-06T04:00:00Z" }; // Friday
+const event = { start: "2026-11-06T03:00:00Z", end: "2026-11-06T04:00:00Z" }; 
 const form: RepeatForm = { mode: "weekdays", days: [], end: "count", count: 3, until: "" };
 describe("calendar UX recurrence", () => {
   it("skips weekends and counts occurrences, including in later windows", () => {

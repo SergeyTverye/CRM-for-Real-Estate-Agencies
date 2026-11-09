@@ -37,7 +37,7 @@ export function evaluateFeature(criterion: string, listing: NormalizedListing): 
     const prefix = clause.slice(0, match.index);
     const suffix = clause.slice(match.index + match[0].length);
     const negated = /(?:^|\s)(?:нет|без|не|отсутствует|отсутствуют)(?:\s+\S+){0,2}\s+$/iu.test(prefix) || /^\s*(?:нет|отсутствует|отсутствуют)(?=$|[^\p{L}])|^\s*не\s+(?:имеется|предусмотрен|оборудован|планиру|будет|будут|возмож)/iu.test(suffix);
-    // Explicit absence wins over hypothetical/future language in the same clause.
+    
     if (!negated && /можно|возможн|планиру|проект|перспектив|будет|будут|при\s+необходимости/iu.test(clause)) continue;
     const numeric = match[1] ? Number(match[1].replace(",", ".")) : null;
     evidence.push({ criterion, source: "rule", evidence: clause.trim(), state: negated || (minimum !== null && numeric !== null && numeric < minimum) ? "contradicted" : minimum !== null && numeric === null ? "unknown" : "matched" });
@@ -53,7 +53,7 @@ function summarize(criteria: CriterionEvaluation[], preferences: CriterionEvalua
     aiPending: [...criteria, ...preferences].filter(c => c.state === "unknown" && c.source === "rule").map(c => c.criterion),
   };
 }
-/** Страница выдачи, а не карточка: нет ID площадки, цены, площади, заголовка и города. */
+
 export function isCataloguePage(listing: NormalizedListing): boolean {
   return listing.identityNeedsReview
     && listing.price === null
@@ -101,26 +101,26 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
   }
   const wantsResidential = (filters.purposes as string[]).includes("residential");
   const commercialPurposes = filters.purposes.filter(p => p !== "residential");
-  if (kinds.length && !filters.purposes.length) { /* Kind selection replaces the default commercial category. */
+  if (kinds.length && !filters.purposes.length) { 
   } else if (!wantsResidential) {
     const residentialPurpose = residentialPurposeContradiction(listing);
     if (residentialPurpose) criteria.push(residentialPurpose);
     else if (filters.purposes.length) {
     const matches = filters.purposes.some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? "")));
-    // The OnRealt fallback category PSN contains possible retail uses. Its
-    // inferred broad category is neither proof nor a contradiction of retail.
+    
+    
     const retailFallback = !matches && listing.source === "onrealt" && listing.purposeSource === "rule"
       && listing.purpose === "free_purpose" && filters.purposes.includes("retail");
     if (retailFallback) criteria.push(unknown("purpose", "Категория ПСН OnRealt; торговое назначение требует проверки"));
     else add("purpose", !!listing.purpose && !hasAmbiguousLegacyPurpose(listing), matches, listing.purpose ?? "Назначение неизвестно");
     }
   } else if (!commercialPurposes.length) {
-    // Residential-only: commercial wording contradicts, mixed/unknown stays honest.
+    
     const match = residentialPurposeMatch(listing);
     if (match) criteria.push(match);
     else criteria.push(unknown("purpose", "Назначение не подтверждено как жилое"));
   } else {
-    // Mixed ИЛИ: residential-positive или коммерческое совпадение подтверждает назначение.
+    
     const match = residentialPurposeMatch(listing);
     if (match?.state === "matched") criteria.push(match);
     else if (listing.purpose && (commercialPurposes as string[]).some(p => p === listing.purpose || (["psn_universal", "free_purpose"].includes(p) && ["psn_universal", "free_purpose"].includes(listing.purpose ?? ""))) && !hasAmbiguousLegacyPurpose(listing)) {
@@ -162,7 +162,7 @@ export function evaluateListing(listing: NormalizedListing, filters: SearchFilte
       criteria.push({ ...fact, criterion: `features.${key}`, state: fact.state === "unknown" ? "unknown" : condition ? fact.state : fact.state === "matched" ? "contradicted" : "matched" });
     } else if (condition) {
       const fact: CriterionEvaluation = typeof structured === "number" && Number.isFinite(structured) ? { criterion: label, state: "matched", source: "structured", evidence: `${key}=${structured}` } : evaluateFeature(`${label} ${condition.min ?? 0}`, listing);
-      // A numeric upper bound needs an actual measured value, never a boolean claim.
+      
       const number = typeof structured === "number" ? structured : Number(fact.evidence.match(/(\d+(?:[.,]\d+)?)\s*(?:квт|м)/iu)?.[1]?.replace(",", "."));
       criteria.push({ criterion: `features.${key}`, state: fact.state === "contradicted" ? "contradicted" : fact.state === "unknown" || !Number.isFinite(number) ? "unknown" : (condition.min === undefined || number >= condition.min) && (condition.max === undefined || number <= condition.max) ? "matched" : "contradicted", source: fact.source, evidence: fact.evidence });
     }
@@ -174,7 +174,7 @@ export function redactPublicDescription(description: string): string {
   return description.replace(/[\w.+-]+@[\w.-]+\.[a-zа-я]{2,}/giu, "[email]").replace(/(?:\+?\d[\s().-]*){10,15}/gu, "[телефон]");
 }
 export async function analyzeUnresolved(listing: NormalizedListing, evaluation: ListingEvaluation, analyzer: DescriptionAnalyzer, signal?: AbortSignal): Promise<ListingEvaluation> {
-  // Typed ranges/negated boolean conditions already carry precise rules; AI cannot invent measurements.
+  
   const permitted = new Set([...evaluation.criteria, ...evaluation.preferences].filter(c => c.source === "rule" && !c.criterion.startsWith("features.") && !["owner", "purpose", "freshness", "city", "district", "propertyKind", "rooms", "rentalPeriod"].includes(c.criterion)).map(c => c.criterion));
   evaluation = { ...evaluation, aiPending: evaluation.aiPending.filter(c => permitted.has(c)) };
   if (!evaluation.aiPending.length) return evaluation;
@@ -184,7 +184,7 @@ export async function analyzeUnresolved(listing: NormalizedListing, evaluation: 
     if (item.state !== "unknown" || !evaluation.aiPending.includes(item.criterion)) return item;
     const answer = answers.find(a => a.criterion === item.criterion && ["matched", "contradicted", "unknown"].includes(a.state) && a.evidence.trim() && description.includes(a.evidence));
     if (!answer) return item;
-    // A quoted promise is evidence of uncertainty, never existing equipment.
+    
     if (answer.state === "matched" && /можно|возможн|планиру|проект|перспектив|будет|будут|при\s+необходимости/iu.test(answer.evidence)) return item;
     return { ...answer, source: "ai" as const };
   });

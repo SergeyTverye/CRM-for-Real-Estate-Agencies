@@ -10,13 +10,7 @@ import { writeAudit } from "@/modules/audit/application/audit";
 import { loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { insertTask } from "@/modules/tasks/application/task-service";
 
-/**
- * UC-15 CreateCommercialOffer (FR-39, ТЗ 29.17, 37.20).
- * КП — самостоятельная сущность: ClientNeed → CommercialOffer → CommercialOfferItem → Property.
- * Snapshot цены/адреса/площади/условий фиксируется при добавлении объекта и не меняется вслед
- * за текущей карточкой Property. Позиции редактируются только в черновике.
- * Для prepared/sent от имени предприятия обязателен LegalEntity. Контакты собственника в КП не попадают.
- */
+
 
 const itemInputSchema = z.object({
   propertyId: zUuid,
@@ -130,7 +124,7 @@ const updateSchema = z.object({
     .optional(),
 });
 
-/** Изменение черновика: текст, юрлицо, порядок/состав позиций (новые позиции получают свежий snapshot). */
+
 export async function updateOffer(actor: Actor, id: string, input: unknown): Promise<{ id: string }> {
   const d = parseInput(updateSchema, input);
   return transaction(async (tx) => {
@@ -156,7 +150,7 @@ export async function updateOffer(actor: Actor, id: string, input: unknown): Pro
       const keep = new Map(existing.map((e) => [e.propertyId, e]));
       const wanted = new Set(d.items.map((i) => i.propertyId));
       await tx.commercialOfferItem.deleteMany({ where: { commercialOfferId: id, propertyId: { notIn: [...wanted] } } });
-      // временные позиции, чтобы не нарушить UNIQUE при перестановке
+      
       let pos = 1000;
       for (const e of existing.filter((x) => wanted.has(x.propertyId))) await tx.commercialOfferItem.update({ where: { id: e.id }, data: { position: pos++ } });
       let position = 1;
@@ -296,7 +290,7 @@ export async function getOffer(actor: Actor, id: string) {
   return {
     offer: { ...o, need: redactClientLink(actor, o.need) },
     clientVisible: canSeeClient(actor, o.need.client),
-    // Расхождение snapshot и текущей цены — для подсказки пользователю, snapshot не меняется.
+    
     priceChanged: o.items.filter((i) => i.priceSnapshot !== null && i.property.price !== null && !i.priceSnapshot.equals(i.property.price)).map((i) => i.id),
   };
 }

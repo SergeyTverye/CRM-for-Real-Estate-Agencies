@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-/**
- * Runtime-валидация переменных окружения (ТЗ 36.5).
- * Значения, влияющие на безопасность, проверяются при старте и не имеют
- * небезопасных production-defaults.
- */
+
 
 const bool = (def: boolean) =>
   z
@@ -26,7 +22,7 @@ function isValidTimeZone(tz: string): boolean {
 
 const WEAK_DB_PASSWORDS = new Set(["", "password", "postgres", "changeme", "change_me", "crm", "admin", "123456", "secret"]);
 
-/** Пустой, демонстрационный или короткий (< 12 символов) пароль PostgreSQL в production запрещён. */
+
 function isWeakDbPassword(url: string): boolean {
   try {
     const pwd = decodeURIComponent(new URL(url).password);
@@ -124,8 +120,8 @@ export type AppConfig = ReturnType<typeof buildConfig>;
 function buildConfig(raw: z.infer<typeof schema>) {
   return {
     ...raw,
-    // Рабочий часовой пояс по умолчанию — Новосибирск (ТЗ v2.4.1 §5).
-    // В production идентификаторы обязательны (см. superRefine).
+    
+    
     APP_TIMEZONE: raw.APP_TIMEZONE,
     DEPLOYMENT_ID: raw.DEPLOYMENT_ID ?? DEV_DEPLOYMENT_ID,
     INSTANCE_ID: raw.INSTANCE_ID ?? "dev-instance",
@@ -159,7 +155,7 @@ export function getConfig(): AppConfig {
   return cached;
 }
 
-/** Только для тестов: сбросить кэш после изменения process.env. */
+
 export function resetConfigCache(): void {
   cached = null;
 }

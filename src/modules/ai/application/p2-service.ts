@@ -37,7 +37,7 @@ async function noteContext(actor: Actor, context: NoteContext) {
 export async function p2Available(actor: Actor) { return (await getAiLimits(actor)).modes.ai; }
 export async function withP2Ai<T>(actor: Actor, type: "call_note" | "offer_text", work: (ai: SearchAi, context: {user:{userId:string;active:boolean};jobId:string;ownerUserId:string;requestId:string})=>Promise<T>, injected?: SearchAi) {
   if (!injected && !await p2Available(actor)) throw new DomainError("AI_DISABLED", "ИИ отключён. Данные можно заполнить вручную.");
-  // Standalone budget context: only the durable ledger/reservation is persisted.
+  
   const jobId = randomUUID();
   try {
     const ai = injected ?? await createPersistentSearchAi();
@@ -53,7 +53,7 @@ export async function previewCallNote(actor: Actor, raw: unknown, injected?: Sea
   const context = await noteContext(actor,input.context);
   const safe = sanitizeFreeNote(input.note, context.names);
   const draft = await withP2Ai(actor,"call_note",(ai,c)=>ai.parseCallNote(c,safe),injected);
-  // Original note never enters persisted run or ledger. Preview remains in the browser only.
+  
   const need = context.needId ? await loadAccessibleNeed(db,actor,context.needId) : null;
   return {...draft, expectedUpdatedAt:need?.updatedAt.toISOString() ?? null};
 }

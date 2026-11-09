@@ -2,7 +2,7 @@ const novosibirsk = "Дзержинский|Железнодорожный|За�
 const moscow = ("Академический|Алексеевский|Алтуфьевский|Арбат|Аэропорт|Бабушкинский|Басманный|Беговой|Бескудниковский|Бибирево|Бирюлёво Восточное|Бирюлёво Западное|Богородское|Братеево|Бутырский|Вешняки|Внуково|Войковский|Восточное Дегунино|Восточное Измайлово|Восточный|Выхино-Жулебино|Гагаринский|Головинский|Гольяново|Даниловский|Дмитровский|Донской|Дорогомилово|Замоскворечье|Западное Дегунино|Зюзино|Зябликово|Ивановское|Измайлово|Капотня|Коньково|Коптево|Косино-Ухтомский|Котловка|Красносельский|Крылатское|Крюково|Кузьминки|Кунцево|Куркино|Левобережный|Лефортово|Лианозово|Ломоносовский|Лосиноостровский|Люблино|Марфино|Марьина Роща|Марьино|Матушкино|Метрогородок|Мещанский|Митино|Можайский|Молжаниновский|Москворечье-Сабурово|Нагатино-Садовники|Нагатинский Затон|Нагорный|Некрасовка|Нижегородский|Ново-Переделкино|Новогиреево|Новокосино|Обручевский|Орехово-Борисово Северное|Орехово-Борисово Южное|Останкинский|Отрадное|Очаково-Матвеевское|Перово|Печатники|Покровское-Стрешнево|Преображенское|Пресненский|Проспект Вернадского|Раменки|Ростокино|Рязанский|Савёлки|Савёловский|Свиблово|Северное Бутово|Северное Измайлово|Северное Медведково|Северное Тушино|Северный|Силино|Сокол|Соколиная Гора|Сокольники|Солнцево|Старое Крюково|Строгино|Таганский|Тверской|Текстильщики|Тёплый Стан|Тимирязевский|Тропарёво-Никулино|Филёвский Парк|Фили-Давыдково|Хамовники|Ховрино|Хорошёво-Мнёвники|Хорошёвский|Царицыно|Черёмушки|Чертаново Северное|Чертаново Центральное|Чертаново Южное|Щукино|Южное Бутово|Южное Медведково|Южное Тушино|Южнопортовый|Якиманка|Ярославский|Ясенево").split("|");
 export function normalizeGeography(value: string): string { return value.toLocaleLowerCase("ru").replaceAll("ё", "е").replace(/(?:^|\s)(?:г\.|город|район|р-н)(?=\s|$)/gu, " ").replace(/\s+/g, " ").trim(); }
 export const DISTRICTS: Readonly<Record<string, readonly string[]>> = { новосибирск: novosibirsk, москва: moscow };
-/** Address must explicitly identify a district: no inference from street/metro names or description. */
+
 export function resolveDistrict(city: string | null, district: string | null, address: string | null): string | null {
   const catalog = DISTRICTS[normalizeGeography(city ?? "")];
   if (!catalog) return null;
@@ -19,7 +19,7 @@ export function resolveDistrict(city: string | null, district: string | null, ad
 }
 
 
-/** Stable location IDs, independent of marketplace namespaces. */
+
 export const SEARCH_LOCATIONS = [
   { id: "novosibirsk", label: "Новосибирск", kind: "city", city: "Новосибирск", slug: "novosibirsk" },
   { id: "suburbs", label: "Новосибирск и пригороды", kind: "group", city: "Новосибирск", slug: "novosibirsk" },
@@ -38,7 +38,7 @@ export function selectedLocations(filters: { city: string; locations?: SearchLoc
   return selected.flatMap(l => l.id === "suburbs" ? SEARCH_LOCATIONS.filter(v => ["novosibirsk", "berdsk", "ob", "koltsovo", "krasnoobsk"].includes(v.id)) : [l]).filter((l, i, all) => all.findIndex(v => v.id === l.id) === i);
 }
 const token = (text: string, name: string) => new RegExp(`(?<![\\p{L}\\p{N}])${name}(?![\\p{L}\\p{N}])`, "iu").test(text);
-/** Address evidence wins over a parser's broad city label. Streets named after a city are not a locality. */
+
 export function locationState(listing: { city: string | null; address: string | null; district: string | null }, filters: { city: string; locations?: SearchLocationId[] }): "matched" | "contradicted" | "unknown" {
   const address = normalizeGeography(listing.address ?? "").replace(/обл\.(?=\s|,|$)/gu, "область");
   const placeText = address.replace(/(?:река|реки|берег|набережная)\s+обь/gu, "").replace(/(?:улица|ул\.|проспект|пр-т|переулок|шоссе|площадь)\s+[^,;]+/gu, "");
@@ -67,7 +67,7 @@ export function locationSummary(filters: { city: string; locations?: SearchLocat
   return filters.locations?.length ? SEARCH_LOCATIONS.filter(l => filters.locations!.includes(l.id)).map(l => l.label).join(" или ") : filters.city;
 }
 
-/** Only a fresh implicit city is replaced; restored searches keep their explicit selection. */
+
 export function chooseLocations(selected: SearchLocationId[], id: SearchLocationId, implicitDefault: boolean): SearchLocationId[] {
   if (implicitDefault && selected.length === 1 && selected[0] === "novosibirsk" && id !== "novosibirsk") return [id];
   return selected.includes(id) ? selected.filter(value => value !== id) : [...selected, id];

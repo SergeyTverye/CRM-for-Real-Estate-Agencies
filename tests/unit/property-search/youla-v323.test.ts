@@ -81,7 +81,7 @@ describe("Youla v323 REPLAY / sanitized LIVE shapes", () => {
     transport.mockResolvedValueOnce({data:fixture('flat')}).mockRejectedValueOnce(new Error('unavailable'));
     expect((await parser.searchPage(q)).results.length).toBeGreaterThan(0);
     await parser.searchPage({...q,type:'room'});
-    expect(transport).toHaveBeenCalledTimes(3); // 2 feeds, only 1 detail attempt.
+    expect(transport).toHaveBeenCalledTimes(3); 
   });
   it("retains the feed when an optional detail exceeds three seconds", async () => {
     vi.useFakeTimers();
@@ -112,7 +112,7 @@ describe("Youla v323 REPLAY / sanitized LIVE shapes", () => {
     const transport=vi.fn<RealEstateScraper.Transport>(async request=>request.method==='POST'?{data:fixture('flat')}:{data:'<script>window.__YOULA_STATE__ = {"entities":{"cities":[{"id":"'+cityId+'","slug":"novosibirsk","name":"Новосибирск"}]}};</script>'});
     const adapter=new RealEstateScraperAdapter({enabled:true,browserEnabled:false,depth:{maxPages:1,limit:12},factory:async config=>extendSourceParsers(new RealEstateScraper({...config,transport,delay:0,maxRetries:0}),{maxCards:0})});
     const result=await adapter.searchDetailed({city:'Новосибирск',operation:'sale',purposes:['residential'],sources:['youla']});
-    expect(result.sources[0]).toMatchObject({status:'partial',failureCode:'UNSUPPORTED_FILTER'}); // cottage/townhouse explicitly unavailable.
+    expect(result.sources[0]).toMatchObject({status:'partial',failureCode:'UNSUPPORTED_FILTER'}); 
     expect(result.listings.length).toBeGreaterThan(0);
     expect(result.listings.every(p=>p.listing.structuredFeatures.category==='residential')).toBe(true);
   });

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Общие функции хостовых эксплуатационных скриптов. На хосте нужны только Docker Engine
-# и Docker Compose plugin (NFR-22): Node.js, npm, Prisma и PostgreSQL client не требуются.
+
+
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,7 +22,7 @@ require_env() {
   [ -f "$ENV_FILE" ] || fail "Файл $ENV_FILE не найден. Сначала выполните ./scripts/bootstrap.sh"
 }
 
-# Значение переменной из .env (без вывода секретов в лог).
+
 env_value() {
   local key="$1"
   grep -E "^${key}=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//' || true
@@ -55,15 +55,15 @@ wait_healthy() {
 }
 
 git_commit() { git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown; }
-# Версия commit попадает в образ, manifest backup и отчёты проверки.
+
 export APP_COMMIT="${APP_COMMIT:-$(git_commit)}"
 
 backup_run() {
-  # Запуск команды в одноразовом ops/backup контейнере.
+  
   dc --profile ops run --rm -T backup "$@"
 }
 
-# Установка INSTANCE_ROLE в .env (active|standby).
+
 set_env_role() {
   local role="$1" tmp
   tmp="$(mktemp)"
@@ -72,7 +72,7 @@ set_env_role() {
   chmod 600 "$ENV_FILE"
 }
 
-# Запись события экземпляра в AuditLog через ops-контейнер (параметры — переменные psql, без конкатенации SQL).
+
 record_instance_event() {
   local action="$1" dep="$2" inst="$3" who="$4"
   backup_run psql -X -q -v ON_ERROR_STOP=1 -v action="$action" -v dep="$dep" -v inst="$inst" -v who="$who" \

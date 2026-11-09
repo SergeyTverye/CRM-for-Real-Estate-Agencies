@@ -18,7 +18,7 @@ export function Field({
   required?: boolean;
   className?: string;
 }) {
-  // <label> оборачивает поле: подпись программно связана с вводом (доступность, автотесты).
+  
   return (
     <div className={className} data-invalid={error ? "true" : undefined}>
       <label className="block">
@@ -34,7 +34,7 @@ export function Field({
   );
 }
 
-/** Общая ошибка формы: валидация, отказ в доступе, конфликт версии (с кнопкой обновления), сбой сервера. */
+
 export function FormErrorBanner({ error, onRetry }: { error: ApiErrorBody | null; onRetry?: () => void }) {
   const router = useRouter();
   if (!error) return null;

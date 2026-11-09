@@ -28,7 +28,7 @@ describe("calendar / notifications database integration (existing v2.4.1 schema 
     expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task",state:"dismissed" } })).toBe(3);
     await db.$disconnect();
     await generateNotifications(new Date(+moved+1000));
-    await Promise.all([generateNotifications(new Date(+moved+2000)),generateNotifications(new Date(+moved+2000))]); // competing workers
+    await Promise.all([generateNotifications(new Date(+moved+2000)),generateNotifications(new Date(+moved+2000))]); 
     expect(await db.notification.count({ where:{ sourceId:t.id,kind:"task",state:"delivered" } })).toBe(2);
     const n = await db.notification.findFirstOrThrow({ where:{ sourceId:t.id,kind:"task",state:"delivered" } });
     await snoozeNotification(users.realtor1,n.id,{ until:new Date(Date.now()+3*86400000).toISOString() });
@@ -36,7 +36,7 @@ describe("calendar / notifications database integration (existing v2.4.1 schema 
     await generateNotifications(new Date(Date.now()+4*86400000));
     expect((await db.notification.findUniqueOrThrow({ where:{ id:n.id } })).state).toBe("delivered");
     await readNotification(users.realtor1,n.id);
-    expect((await unreadCount(users.realtor1)).count).toBe(3); // assignment and two other deadline phases remain
+    expect((await unreadCount(users.realtor1)).count).toBe(3); 
   });
   it("shows one showing, not its helper task, and never exposes foreign task text", async () => {
     const c = await makeClient(users.realtor1), need = await makeNeed(users.realtor1,c.id), p = await makeProperty(users.realtor1);

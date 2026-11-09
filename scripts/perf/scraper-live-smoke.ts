@@ -22,7 +22,7 @@ async function main() {
         onResponse: response => { httpStatuses.push(response.status); httpHops.push({ url: response.url, status: response.status, location: response.headers.location }); } });
       const text = response.data.toString("utf8");
       let data: unknown = text;
-      if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch { /* parser validates */ } }
+      if (/json/iu.test(String(response.headers["content-type"]))) { try { data = JSON.parse(text); } catch {  } }
       return { data, status: response.status, url: response.url };
     } });
     try {

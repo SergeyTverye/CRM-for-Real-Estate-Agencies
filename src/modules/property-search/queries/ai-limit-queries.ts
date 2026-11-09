@@ -5,7 +5,7 @@ import { envAiLimits } from "@/modules/ai/infrastructure/config";
 import { microsToRub, PrismaAiLedger, PrismaAiSettings } from "@/modules/ai/infrastructure/prisma-repositories";
 import { getConfig } from "@/shared/config/env";
 
-/** Read-only display of remaining budget; actual reservation remains in AiGate. */
+
 export async function getSearchAiLimits(actor: Actor) {
   const config = getConfig();
   const [limits, settings] = await Promise.all([getAiLimits(actor), new PrismaAiSettings().getLimits()]);

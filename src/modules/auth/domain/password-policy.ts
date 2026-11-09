@@ -1,4 +1,4 @@
-/** Минимальная политика паролей для локальных учётных записей. */
+
 export const PASSWORD_MIN_LENGTH = 10;
 
 export function passwordPolicyErrors(password: string, login?: string): string[] {

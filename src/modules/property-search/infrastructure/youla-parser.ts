@@ -25,7 +25,7 @@ const commercialTypes: Record<string, NonNullable<RealEstateScraper.Listing["pro
 const roomIds: Record<number, string> = { 0: "10660", 1: "10654", 2: "10655", 3: "10656", 4: "10657" };
 export const YOULA_FEED_HASH = "6e7275a709ca5eb1df17abfb9d5d68212ad910dd711d55446ed6fa59557e2602";
 
-/** Inert JSON only. No eval, script execution or recursive scanning of seller data. */
+
 export function youlaState(payload: unknown): Row {
   if (typeof payload !== "string") return {};
   const match = /window\.__YOULA_STATE__\s*=\s*(\{)/u.exec(payload);
@@ -50,7 +50,7 @@ function sourceUrl(value: unknown): string {
 const attribute = (p: Row, slug: string): Row => Array.isArray(p.attributes) ? row(p.attributes.find(a => row(a).slug === slug)) : {};
 const attrId = (p: Row, slug: string): string => String(row((attribute(p, slug).values as unknown[] | undefined)?.[0]).id ?? "");
 
-/** Whitelist output: seller IDs, names, phones and raw descriptions never enter replay/CRM DTOs. */
+
 export function parseYoulaProduct(value: unknown, cityName: string | null = null): RealEstateScraper.Listing & { residentialType: string | null; publishedAt: string | null; sourceUpdatedAt: string | null } {
   const p = row(value), location = row(p.location), price = row(p.price);
   const id = str(p.id), title = str(p.name), url = sourceUrl(p.url);
@@ -76,7 +76,7 @@ export function parseYoulaProduct(value: unknown, cityName: string | null = null
     residentialType: housing ? studio ? "studio" : housing.type : null,
     propertyType: isCommercial ? commercialTypes[attrId(p, "kommer_realty_tip_stroeniya")] ?? null : null,
     deal, price: amount === null ? null : amount / 100,
-    // Even long-term category is not evidence of a monthly price unit.
+    
     priceText: str(price.realPriceText) || str(p.priceText) || null,
     rooms: studio ? 0 : rooms !== undefined ? Number(rooms) : titleRooms ? Number(titleRooms[1]) : null,
     area: rawArea !== null ? rawArea / 100 : areaText ? num(areaText[1]) : null,
@@ -99,7 +99,7 @@ export function parseYoulaFeed(payload: unknown, url: string, cityId: string) {
   return { results, hasNext: info.hasNextPage, nextUrl: info.hasNextPage ? next.toString() : null };
 }
 
-/** Public website GraphQL contract verified against LIVE; all I/O uses guarded parser.fetch. */
+
 export function attachYoulaParser(client: RealEstateScraper, options: DateDetailOptions & { minRequestIntervalMs?: number } = {}): void {
   const parser = client.parsers.youla, originalBuild = parser.buildSearchUrl.bind(parser);
   const cities = new Map<string, { id: string; name: string | null }>();
@@ -184,14 +184,14 @@ export function attachYoulaParser(client: RealEstateScraper, options: DateDetail
         const product = row(row(row(state.entities).products)[item.id!]);
         if (product.id !== item.id) continue;
         if (product.isDeleted || product.isArchived || product.isSold || product.isBlocked) { page.results.splice(i--, 1); continue; }
-        // Preserve city and period text from feed when the detail omits them.
+        
         const detail = parseYoulaProduct(product, item.city);
         if (str(row(product.location).city) && row(product.location).city !== city.id) continue;
         page.results[i] = { ...detail, priceText: detail.priceText || item.priceText, images: detail.images.length ? detail.images : item.images };
       } catch (error) {
         const code = row(row(error).cause).code ?? row(error).code;
         if (["NEEDS_USER_ACTION", "ACCESS_BLOCKED", "RATE_LIMITED", "ABORTED"].includes(str(code))) throw Object.assign(error instanceof Error ? error : new Error(str(code)), { code });
-        detailsStopped = true; // Keep SERP facts; no invented date/floor on unavailable details.
+        detailsStopped = true; 
       }
     }
     return { ...page, source: "youla", page: q.page ?? 1, url };

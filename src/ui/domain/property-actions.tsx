@@ -11,7 +11,7 @@ import { Field, FormErrorBanner } from "../form";
 import { EntityPicker, Modal, SelectInput, type Option } from "../client-kit";
 import { DuplicateNotice, emptyClient, NewClientFields, newClientPayload, type NewClientValue } from "./client-fields";
 
-/** Запрос риелтора на доступ к контактам собственника чужого объекта (UC-12): создаёт задачу руководителю. */
+
 export function RequestAccessButton({ propertyId }: { propertyId: string }) {
   const router = useRouter();
   const { pending, error, run } = useApiAction();
@@ -44,7 +44,7 @@ export function RequestAccessButton({ propertyId }: { propertyId: string }) {
   );
 }
 
-/** Смена ответственного за объект (только руководитель). Пустое значение — объект без ответственного. */
+
 export function ReassignPropertyButton({ propertyId, users, currentUserId }: { propertyId: string; users: Option[]; currentUserId: string | null }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -99,7 +99,7 @@ interface PickedClient {
   contacts?: { rawValue: string }[];
 }
 
-/** Добавление собственника: существующий доступный клиент или новый с проверкой дублей (ТЗ 40.2). */
+
 export function AddOwnerButton({ propertyId }: { propertyId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -110,7 +110,7 @@ export function AddOwnerButton({ propertyId }: { propertyId: string }) {
   const [share, setShare] = useState("");
   const [comment, setComment] = useState("");
   const { pending, error, run, fieldError, setError } = useApiAction();
-  // Ошибки нормализации контактов приходят без префикса newClient.
+  
   const clientFieldError = (n: string) => fieldError(n) ?? fieldError(n.replace(/^newClient\./, ""));
 
   function reset() {

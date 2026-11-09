@@ -1,7 +1,7 @@
 import { safeRequest } from "@/shared/net/ssrf";
 import { listingUrlRejection } from "../domain/listing-url";
 
-/** A reachable page is still not proof of availability, price or ownership. No retries. */
+
 export async function verifyListingPage(url: string): Promise<string> {
   if (listingUrlRejection(url)) return "UNSAFE_OR_NON_CARD_URL";
   try {

@@ -8,7 +8,7 @@ export function toast(message: string, tone: ToastMessage["tone"] = "success") {
   window.dispatchEvent(new CustomEvent<ToastMessage>("crm:toast", { detail: { message, tone } }));
 }
 
-/** Один live-region на оболочку. ошибки также остаются рядом с формой. */
+
 export function ToastViewport() {
   const [messages, setMessages] = useState<(ToastMessage & { id: number })[]>([]);
   const sequence = useRef(0);

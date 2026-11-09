@@ -25,12 +25,7 @@ import { insertTask } from "@/modules/tasks/application/task-service";
 import { advanceNeedStage, loadAccessibleNeed } from "@/modules/needs/application/need-service";
 import { postdealTemplatesFor } from "../domain/postdeal-templates";
 
-/**
- * UC-07 OpenOrCloseDeal (FR-12, FR-13, ТЗ 17.5, 19.4, 29.7).
- * Обязательны Property, responsible, LegalEntity, status, opened_at и хотя бы один DealParty.
- * Комиссии — отдельные записи DealCommission (numeric, неизвестная сумма не заменяется нулём).
- * Закрытие сделки не архивирует Client и не уничтожает историю.
- */
+
 
 const partySchema = z
   .object({
@@ -164,7 +159,7 @@ const updateSchema = z.object({
   responsibleUserId: zUuid.optional(),
 });
 
-/** Изменение рабочей сделки (до закрытия). Изменения цены, юрлица, ответственного, статуса и дат — в AuditLog. */
+
 export async function updateDeal(actor: Actor, id: string, input: unknown): Promise<{ id: string }> {
   const d = parseInput(updateSchema, input);
   return transaction(async (tx) => {
@@ -292,10 +287,7 @@ async function defaultManagerId(tx: Tx): Promise<string> {
   return m.id;
 }
 
-/**
- * Закрытие сделки: статус/дата + выбранные постсделочные задачи (task_type=postdeal, task_subtype_code).
- * Ответственный по умолчанию — руководитель. руководитель может явно выбрать другого сотрудника.
- */
+
 export async function closeDeal(actor: Actor, dealId: string, input: unknown): Promise<{ id: string; taskIds: string[] }> {
   const d = parseInput(closeSchema, input);
   return transaction(async (tx) => {

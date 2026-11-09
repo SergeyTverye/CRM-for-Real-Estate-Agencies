@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 
-/** Versioned import profiles (ТЗ 38.2): JSON-файлы в import-profiles/, проверяются схемой при загрузке. */
+
 export const profileSchema = z.object({
   code: z.string().regex(/^[a-z_]+_v\d+$/),
   version: z.string(),
@@ -36,7 +36,7 @@ export function loadProfiles(dir = profilesDir()): ImportProfile[] {
   return profiles;
 }
 
-/** Версия mapping набора профилей (фиксируется в import_jobs.mapping_version). */
+
 export function mappingVersion(profiles: ImportProfile[]): string {
   return profiles.map((p) => `${p.code}@${p.version}`).join(",");
 }

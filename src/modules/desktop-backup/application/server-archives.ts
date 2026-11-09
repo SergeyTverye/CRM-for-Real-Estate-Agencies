@@ -48,7 +48,7 @@ export async function packageServerBackups() {
       await atomicJson(result.path + ".json", { archive: result.archive, serverBackupId: run.backupId, format: "postgres-ops-v1" });
       await withBackupDestinations(async destinations => { const queue = new ReplicationQueue(path.join(backupRuntimeRoot(), "queue"), destinations, {}, new DatabaseReplicationJournal()); await queue.enqueue(result.archive, result.path); });
     } finally { await rm(stage, { recursive: true, force: true }); }
-    break; // Bounded: at most one completed ops generation is packaged per worker tick.
+    break; 
   }
 }
 export async function verifyServerPortable(file: string, credential: Credential) {

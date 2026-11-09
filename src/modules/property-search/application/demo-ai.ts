@@ -3,7 +3,7 @@ import { createSearchAi } from "@/modules/ai/infrastructure/create-search-ai";
 import { FakeResponsesProvider } from "@/modules/ai/infrastructure/fake";
 import { PrismaAiLedger, PrismaAiSettings, PrismaAiTariffs } from "@/modules/ai/infrastructure/prisma-repositories";
 
-/** Explicit demo provider still passes through the durable gate/limits; no paid network calls. */
+
 export function createDemoSearchAi(config: AppConfig) {
   const provider = new FakeResponsesProvider(request => {
     if (request.tools?.length) return { text: JSON.stringify({ candidates: [{ title: "Демонстрационное объявление: требуется проверка первоисточника", url: "https://cian.ru/synthetic-101" }] }),

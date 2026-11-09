@@ -4,7 +4,7 @@ import { ValidationError } from "@/shared/errors";
 
 export const GET = api({ access: "manager" }, async ({ actor }) => ({ items: await listImportJobs(actor) }));
 
-/** Загрузка файла и dry-run: multipart/form-data с полем file (.xlsx). */
+
 export const POST = api({ access: "manager" }, async ({ req, actor }) => {
   if (!(req.headers.get("content-type") ?? "").includes("multipart/form-data")) throw new ValidationError("Ожидается multipart/form-data");
   const form = await req.formData();

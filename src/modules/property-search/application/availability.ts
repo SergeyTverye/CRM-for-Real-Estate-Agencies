@@ -9,7 +9,7 @@ type FeatureReadyReason = "disabled_by_server" | "disabled_by_settings" | "ready
 export function featureReason(ceiling: boolean, requested: boolean): FeatureReadyReason {
   return !ceiling ? "disabled_by_server" : !requested ? "disabled_by_settings" : "ready";
 }
-/** Configuration readiness only; does not probe providers or start a browser. */
+
 export async function searchAvailability() {
   const s = await searchSettings();
   const credentials = await aiCredentialsService(s.config).resolve();

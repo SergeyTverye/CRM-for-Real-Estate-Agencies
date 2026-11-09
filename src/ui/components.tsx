@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Серверно-безопасные компоненты разметки (без состояния). */
+
 
 export function PageHeader({ title, subtitle, actions, back }: { title: React.ReactNode; subtitle?: React.ReactNode; actions?: React.ReactNode; back?: { href: string; label: string } }) {
   return (
@@ -96,7 +96,7 @@ export function EmptyState({ title, hint, action }: { title: string; hint?: stri
   );
 }
 
-/** Пагинация списков с сохранением фильтров (NFR-21). */
+
 export function Pagination({ page, pageSize, total, basePath, params }: { page: number; pageSize: number; total: number; basePath: string; params: Record<string, string> }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const href = (p: number) => {
@@ -129,7 +129,7 @@ export function Pagination({ page, pageSize, total, basePath, params }: { page: 
   );
 }
 
-/** Вкладки карточки через параметр ?tab= (серверный рендер). */
+
 export function Tabs({ tabs, current, basePath }: { tabs: { key: string; label: string; count?: number }[]; current: string; basePath: string }) {
   return (
     <nav className="mb-4 flex gap-1 border-b border-slate-200" aria-label="Разделы карточки">
@@ -151,7 +151,7 @@ export function Tabs({ tabs, current, basePath }: { tabs: { key: string; label: 
   );
 }
 
-/** GET-форма фильтров списка: применяется перезагрузкой страницы с параметрами (серверная фильтрация). */
+
 export function FilterBar({ action, children, resetHref }: { action: string; children: React.ReactNode; resetHref?: string }) {
   return (
     <form method="get" action={action} className="mb-3 flex flex-wrap items-end gap-2">

@@ -23,12 +23,7 @@ import { writeAudit } from "@/modules/audit/application/audit";
 import { sanitizeFileName, validateUpload } from "../domain/file-policy";
 import { PHOTO_MIMES, preparePropertyImage } from "../domain/property-image";
 
-/**
- * UC-08 UploadOrDownloadDocument (FR-14, ТЗ 20.4, 29.8, 40.8).
- * Файл хранится через StorageAdapter, в БД — метаданные и связь через join-таблицы.
- * Выдача — только после проверки доступа к связанной сущности. storage key/путь наружу не выдаётся.
- * Для исходящих документов из Deal/Agreement/CommercialOffer legal_entity_id наследуется.
- */
+
 
 export const LINK_KINDS = ["client", "need", "property", "showing", "deal", "advertisement", "agreement", "offer"] as const;
 export type LinkKind = (typeof LINK_KINDS)[number];
@@ -40,7 +35,7 @@ export interface DocumentLink {
 
 const OUTGOING_TYPES = new Set(["agreement", "agreement_addendum", "agreement_attachment", "commercial_offer", "act", "invoice"]);
 
-/** Право загрузить документ к сущности (запись), возвращает наследуемый legal_entity_id. */
+
 async function assertCanAttach(tx: DbOrTx, actor: Actor, link: DocumentLink): Promise<{ legalEntityId: string | null }> {
   const fail = () => {
     throw new NotFoundError("Связанная запись не найдена или недоступна");
@@ -121,10 +116,7 @@ export interface StoreDocumentInput {
   legalEntityId: string | null;
 }
 
-/**
- * Сохранение бинарного файла и метаданных. При ошибке БД файл удаляется (без бесхозных файлов).
- * Права на связанную сущность проверяются вызывающей командой.
- */
+
 export async function storeDocument(actorUserId: string, input: StoreDocumentInput, auditAction = "document.uploaded"): Promise<{ id: string }> {
   const storage = getStorage();
   const image = input.documentTypeCode === "photo" || (input.link.kind === "property" && PHOTO_MIMES.has(input.mimeType))
@@ -168,7 +160,7 @@ export async function storeDocument(actorUserId: string, input: StoreDocumentInp
   }
 }
 
-/** Загрузка пользователем (multipart). */
+
 export async function uploadDocument(actor: Actor, file: File | null, rawMeta: unknown): Promise<{ id: string }> {
   const meta = parseInput(uploadMetaSchema, rawMeta);
   if (!file || typeof file === "string") throw new ValidationError("Выберите файл", { file: ["Файл не передан"] });
@@ -186,13 +178,13 @@ export async function uploadDocument(actor: Actor, file: File | null, rawMeta: u
   return storeDocument(actor.userId, { data, originalName, mimeType: check.mime, documentTypeCode: meta.documentTypeCode, link, legalEntityId });
 }
 
-/** Сгенерированный документ (КП и т.п.) — после проверки прав вызывающей командой. */
+
 export async function attachGeneratedDocument(actor: Actor, input: Omit<StoreDocumentInput, "legalEntityId"> & { legalEntityId?: string | null }): Promise<{ id: string }> {
   const inherited = await assertCanAttach(db, actor, input.link);
   return storeDocument(actor.userId, { ...input, legalEntityId: input.legalEntityId ?? inherited.legalEntityId }, "document.generated");
 }
 
-/** Выдача файла: сначала доступ к бизнес-сущности, затем поток. Знание id/storage key прав не даёт. */
+
 export async function openDocumentForDownload(actor: Actor, documentId: string): Promise<{ stream: Readable; size: number; mimeType: string; fileName: string }> {
   const doc = await db.document.findFirst({ where: { id: documentId, ...documentScope(actor) } });
   if (!doc) throw new NotFoundError();
@@ -222,7 +214,7 @@ const LINK_WHERE: Record<LinkKind, (id: string) => object> = {
   offer: (id) => ({ offerLinks: { some: { commercialOfferId: id } } }),
 };
 
-/** Документы карточки, видимые пользователю. */
+
 export async function listDocumentsFor(actor: Actor, link: DocumentLink, opts: { includeArchived?: boolean } = {}) {
   const docs = await db.document.findMany({
     where: { AND: [LINK_WHERE[link.kind](link.id), documentScope(actor), opts.includeArchived ? {} : { archivedAt: null }] },
@@ -240,6 +232,6 @@ export async function listDocumentsFor(actor: Actor, link: DocumentLink, opts: {
       legalEntity: { select: { displayName: true } },
     },
   });
-  // Сколько документов скрыто правом доступа (без раскрытия сведений), — только для объекта.
+  
   return docs.map((d) => ({ ...d, fileSize: Number(d.fileSize), canArchive: isManager(actor) || d.uploadedBy === actor.userId }));
 }

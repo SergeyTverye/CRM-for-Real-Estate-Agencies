@@ -11,10 +11,7 @@ import { DateTimeInput, SelectInput, type Option } from "../client-kit";
 import { PropertySelect, type PropertyPick } from "./deal-pickers";
 import type { AdFormValue } from "./deal-form-values";
 
-/**
- * Рекламное объявление объекта (ТЗ 37.12, 40.5): площадка (код справочника), ссылка, рабочий текст,
- * статус и контрольные даты. Автопубликации нет — объявление ведётся вручную.
- */
+
 
 export type { AdFormValue };
 

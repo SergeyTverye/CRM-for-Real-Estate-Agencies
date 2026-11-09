@@ -32,14 +32,11 @@ export interface AiLedgerTransaction {
   insert(reservation: AiReservation): Promise<void>;
   update(reservation: AiReservation): Promise<void>;
 }
-/** Serializable budget operation: shared transaction-scoped lock or SERIALIZABLE with retry.
- * find/usage/insert/update MUST share the transaction, requestId has a UNIQUE constraint.
- * No prompt/response/credentials in this ledger. Reserved calls consume quotas immediately.
- */
+
 export interface AiLedgerRepository { atomic<T>(work: (tx: AiLedgerTransaction) => Promise<T>): Promise<T> }
 export interface AiSettingsRepository { getLimits(): Promise<Partial<AiLimits>> }
 
-/** UI can tighten safety ceilings, never relax ENV or turn on an ENV-disabled feature. */
+
 export function effectiveLimits(env: AiLimits, ui: Partial<AiLimits>): AiLimits {
   const n = (key: "requestsPerUserHour" | "requestsPerUserDay" | "callsPerJob" | "webCallsPerJob" | "webJobsPerUserDay") => {
     const value = ui[key] ?? env[key];
@@ -81,7 +78,7 @@ export class AiGate {
       const existing = await tx.find(job.requestId);
       if (existing) {
         if (existing.userId !== user.userId || existing.jobId !== job.id || existing.fingerprint !== job.fingerprint || existing.callType !== callType || existing.model !== job.model) throw new AiError("AI_IDEMPOTENCY_CONFLICT");
-        // Never retry an uncertain paid request. Caller may load its saved result by requestId.
+        
         throw new AiError("AI_ALREADY_RESERVED");
       }
       const keys = periodKeys(now, this.timeZone);
@@ -101,7 +98,7 @@ export class AiGate {
   }
 
   async release(requestId: string): Promise<void> {
-    // Only callers with evidence that dispatch never happened may use this method.
+    
     await this.ledger.atomic(async (tx) => {
       const r = await tx.find(requestId);
       if (!r) throw new AiError("AI_RESERVATION_NOT_FOUND");
@@ -120,7 +117,7 @@ export class AiGate {
       const estimated = !result.usage || ((record.callType === "web_search" || record.callType === "chat_web") && result.webSearchCalls === undefined);
       const webSearchCalls = result.webSearchCalls ?? record.estimatedWebCalls;
       const knownCost = calculateCost(record.tariff, result.usage ?? record.estimatedUsage, webSearchCalls);
-      // Unknown usage or timeout retains at least the full reserve, including search context.
+      
       const chargedMicros = estimated && knownCost < record.estimatedMicros ? record.estimatedMicros : knownCost;
       const finishedAt = this.clock();
       await tx.update({ ...record, ...result, webSearchCalls, chargedMicros, estimated, actualMicros: estimated ? undefined : knownCost,

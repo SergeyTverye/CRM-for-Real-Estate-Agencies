@@ -85,7 +85,7 @@ async function main() {
   try {
     const context = await browser.newContext({ acceptDownloads: false, recordVideo: undefined });
     const page = await context.newPage();
-    page.on("console", () => {}); // Deliberately discard all console output.
+    page.on("console", () => {}); 
     page.on("pageerror", () => {});
     await page.goto(new URL("/login", baseUrl).toString());
     await page.getByLabel("Логин").fill(login);

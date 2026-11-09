@@ -110,10 +110,7 @@ export interface OwnerView {
   client: { id: string; displayName: string; visible: boolean; contacts: { contactType: string; rawValue: string }[] } | null;
 }
 
-/**
- * Карточка объекта. Контакты собственника включаются в DTO только при праве (ТЗ 17.2):
- * руководитель, ответственный риелтор или действующий grant. Иначе — маскированное состояние.
- */
+
 export async function getPropertyCard(actor: Actor, propertyId: string) {
   assertRecordId(propertyId);
   const property = await db.property.findUnique({
@@ -173,7 +170,7 @@ export async function getPropertyCard(actor: Actor, propertyId: string) {
     canSeeOwners,
     canEdit: canEditProperty(actor, property),
     hasGrant: Boolean(myGrant),
-    // Имя чужого клиента не попадает в ответ API (маскируется на сервере, а не только в UI).
+    
     matches: property.matches.map((m) => {
       const clientVisible = canSeeClient(actor, m.need.client);
       return { ...m, need: { id: clientVisible ? m.need.id : null, client: { displayName: clientVisible ? m.need.client.displayName : null } }, clientVisible };
@@ -183,7 +180,7 @@ export async function getPropertyCard(actor: Actor, propertyId: string) {
 
 export type PropertyCard = Awaited<ReturnType<typeof getPropertyCard>>;
 
-/** Объекты для выбора в формах (обращение, подбор, сделка). */
+
 export async function pickProperties(q: string | undefined, take = 20) {
   return db.property.findMany({
     where: { status: { in: ["draft", "active", "paused"] }, ...(q ? { addressText: { contains: q, mode: "insensitive" } } : {}) },

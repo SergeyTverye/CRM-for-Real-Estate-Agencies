@@ -168,7 +168,7 @@ export function SearchWorkspace({
         if (active) setSaved(items);
       })
       .catch(() => {
-        /* Full error/retry is available in Мои поиски. */
+        
       });
     if (!initialAvailability) {
       apiCall<SearchRuntimeAvailability>("GET", "/api/v1/property-search/availability")
@@ -176,7 +176,7 @@ export function SearchWorkspace({
           if (active) setAvailability(next);
         })
         .catch(() => {
-          /* Fallback props remain active if availability endpoint fails. */
+          
         });
     }
     return () => {

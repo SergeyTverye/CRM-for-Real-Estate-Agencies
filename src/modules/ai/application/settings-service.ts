@@ -55,7 +55,7 @@ export async function updateAiSettings(actor: Actor, input: unknown) {
       for (const value of [tariff.inputRubPerMillion, tariff.outputRubPerMillion, tariff.webRubPerCall])
         if (rubToMicros(value) <= 0n) throw new ValidationError("Цена тарифа должна быть больше нуля");
       const effectiveFrom = new Date(tariff.effectiveFrom);
-      // Versioned append-only rates preserve the meaning of settled usage and historical dates.
+      
       const latest = await tx.aiTariff.findFirst({ where: { model: tariff.model }, orderBy: { effectiveFrom: "desc" } });
       if (latest && latest.effectiveFrom >= effectiveFrom) throw new ValidationError("Новая версия тарифа должна иметь более позднюю дату действия");
       await tx.aiTariff.createMany({ data: [
@@ -76,7 +76,7 @@ export async function getAiUsage(actor: Actor, raw: unknown = {}) {
   const input = parseInput(z.object({ month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional(), page: z.coerce.number().int().min(1).max(100000).default(1) }).strict(), raw);
   const month = input.month ?? periodKeys(new Date(), config.APP_TIMEZONE).monthKey;
   const start = new Date(`${month}-01T00:00:00Z`), end = new Date(start); end.setUTCMonth(end.getUTCMonth() + 1);
-  // Include UTC margins, then use the exact local-month key (including DST).
+  
   const rows = await db.aiUsageLog.findMany({ where: { createdAt: { gte: new Date(+start - 86400000), lt: new Date(+end + 86400000) } },
     include: { user: { select: { displayName: true } } }, orderBy: [{ createdAt: "desc" }, { id: "desc" }] });
   let committed = 0n, actual = 0n, reserved = 0n;

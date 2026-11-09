@@ -7,10 +7,7 @@ import { apiCall } from "../api-client";
 import { useApiAction } from "../hooks";
 import { FormErrorBanner } from "../form";
 
-/**
- * Шаг 1 мастера импорта (ТЗ 37.14): выбор .xlsx и загрузка. Сервер сразу выполняет dry-run
- * (операционные таблицы не меняются) и возвращает id задания — открываем его карточку.
- */
+
 export function ImportUploadForm({ maxMb, blockedReason }: { maxMb: number; blockedReason?: string | null }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);

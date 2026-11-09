@@ -1,4 +1,4 @@
-/** Клиентский вызов /api/v1 с единым разбором ошибок (используется формами). */
+
 
 export interface ApiErrorBody {
   code: string;

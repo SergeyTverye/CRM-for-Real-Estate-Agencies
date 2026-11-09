@@ -30,7 +30,7 @@ describe("residential provider parse compatibility", () => {
     expect(PROVIDER_PURPOSE_ALLOWLIST).toContain("residential");
     for (const purpose of PURPOSES) expect(PROVIDER_PURPOSE_ALLOWLIST).toContain(purpose);
     expect(providerParseInstructions).toContain("residential");
-    // Provider dialect stays flat: no enums/refs that would leak Zod internals.
+    
     expect(JSON.stringify(providerParseSchema)).not.toMatch(/anyOf|oneOf|\$ref|format|minimum|default|enum/);
   });
 

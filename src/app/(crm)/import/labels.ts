@@ -1,14 +1,14 @@
 import type { Tone } from "@/ui/components";
 
-/** Русские подписи кодов мастера импорта (ТЗ 37.14, 38). Неизвестный код показывается как есть. */
+
 
 export const ROW_CODE_LABELS: Record<string, string> = {
-  // dry-run: политика и распознавание
+  
   policy_fields_excluded: "В строке были поля, исключённые политикой (значения не загружаются)",
   section_needs_mapping: "Секция не распознана — нужен mapping",
   comment_or_separator: "Строка-комментарий или разделитель",
   unresolved_fields_ignored: "Неоднозначные поля (ОВ/ЗУ/А) не импортируются",
-  // dry-run: проверка значений
+  
   missing_required: "Нет ни адреса/объекта, ни участника",
   missing_address: "Не указан адрес",
   missing_name: "Не указано имя клиента",
@@ -25,7 +25,7 @@ export const ROW_CODE_LABELS: Record<string, string> = {
   no_contact: "Нет контакта (поле «Координаты» пусто)",
   phone_removed_from_description: "Телефон удалён из описания",
   ambiguous_agreement_presence: "Неоднозначное значение «Наличие договора»",
-  // дубли и повторный импорт
+  
   probable_duplicate: "Вероятный дубль",
   already_imported: "Уже загружено ранее",
   unrecognized: "Не распознано",
@@ -40,7 +40,7 @@ export const ROW_CODE_LABELS: Record<string, string> = {
 
 export const rowCodeLabel = (code: string) => ROW_CODE_LABELS[code] ?? code;
 
-/** Поля профилей (import-profiles/*.json, ключ columns → поле). */
+
 export const MAPPING_FIELD_LABELS: Record<string, string> = {
   sourceRowId: "№ записи источника",
   dealDate: "Дата сделки",
@@ -93,7 +93,7 @@ export const MAPPING_FIELD_LABELS: Record<string, string> = {
   fixNote: "Что нужно исправить",
 };
 
-/** Поля безопасного preview строки (нормализованная запись без исключённых политикой колонок). */
+
 export const PREVIEW_FIELD_LABELS: Record<string, string> = {
   ...MAPPING_FIELD_LABELS,
   dealDateText: "Дата (как в файле)",
@@ -113,7 +113,7 @@ export const PREVIEW_FIELD_LABELS: Record<string, string> = {
   agreementPresent: "Договор есть",
 };
 
-/** Ключевые поля preview по типу цели — показываются в строке таблицы, остальные — по раскрытию. */
+
 export const PREVIEW_PRIMARY: Record<string, string[]> = {
   historical_deal_archive: ["dealDateText", "objectText", "participantName", "price"],
   property: ["addressText", "area", "price"],

@@ -22,7 +22,7 @@ export const needFiltersSchema = zPagination.extend({
   stale: z.enum(["yes"]).optional(),
 });
 
-/** Условие «без движения» (ТЗ 40.6): нет Communication/Match/Showing/StageHistory/завершённой Task за период. */
+
 export function staleNeedWhere(since: Date): Prisma.ClientNeedWhereInput {
   return {
     status: "active",

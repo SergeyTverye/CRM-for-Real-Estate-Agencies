@@ -8,10 +8,7 @@ import { useApiAction } from "../hooks";
 import { Field, FormErrorBanner } from "../form";
 import { DateTimeInput, Modal } from "../client-kit";
 
-/**
- * Переходы статуса КП (ТЗ 37.20): подготовлено/отправлено требуют ИП/ООО при оформлении от имени
- * агентства. при отправке можно сразу поставить задачу «узнать решение».
- */
+
 
 const TRANSITIONS: Record<string, string[]> = {
   draft: ["prepared", "sent", "archived"],

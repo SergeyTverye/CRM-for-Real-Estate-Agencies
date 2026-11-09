@@ -2,7 +2,7 @@ import type { SearchFilters } from "./types";
 
 export const ROOM_LABELS = { studio: "Студия", "1": "1", "2": "2", "3": "3", "4+": "4+" } as const;
 export type RoomChoice = keyof typeof ROOM_LABELS;
-/** Only explicit counts: floor numbers, area and euro-layouts are not room counts. */
+
 export function parseRooms(value: unknown, title = ""): number | null {
   if ((typeof value === "number" || typeof value === "string" && /^\d{1,2}$/u.test(value)) && Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 30) return Number(value);
   if (/студи[яиюи]/iu.test(title)) return 0;

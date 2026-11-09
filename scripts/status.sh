@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Состояние стека: контейнеры, health, версия приложения.
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

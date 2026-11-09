@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Проверка совместимости target: list/write/read/delete через crypt-слой (ТЗ 39.2).
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

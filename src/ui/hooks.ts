@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ApiCallError, type ApiErrorBody } from "./api-client";
 import { toast } from "./toast";
 
-/** Выполнение API-действия с состояниями pending/error и обработкой 401/смены пароля. */
+
 export function useApiAction() {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -48,7 +48,7 @@ export function useApiAction() {
   return { pending, error, setError, run, fieldError };
 }
 
-/** Предупреждение при уходе со страницы с несохранёнными изменениями (ТЗ 37.17). */
+
 export function useUnsavedChangesWarning(dirty: boolean) {
   useEffect(() => {
     if (!dirty) return;

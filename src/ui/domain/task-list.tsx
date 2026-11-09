@@ -11,7 +11,7 @@ const UNIT: Record<string, string> = { daily: "дн.", weekly: "нед.", monthl
 
 const isOpen = (status: string) => status === "planned" || status === "in_progress";
 
-/** Правило повторения словами: «Ежемесячно», «Каждые 2 нед., до 31.12.2026». */
+
 export function describeRecurrence(t: Pick<TaskView, "recurrenceKind" | "recurrenceInterval" | "recurrenceUntil" | "recurrenceRule">): string | null {
   const rule = parseRecurrence(t.recurrenceRule);
   if (rule) return `${rule.days ? "По дням недели" : rule.frequency === "YEARLY" ? "Ежегодно" : rule.frequency === "MONTHLY" ? rule.interval === 3 ? "Ежеквартально" : "Ежемесячно" : rule.frequency === "DAILY" ? "Ежедневно" : "Еженедельно"}${rule.count ? ` · осталось: ${rule.count}` : ""}${rule.until || t.recurrenceUntil ? `, до ${fmtDateOnly(rule.until ?? t.recurrenceUntil!)}` : ""}`;
@@ -20,7 +20,7 @@ export function describeRecurrence(t: Pick<TaskView, "recurrenceKind" | "recurre
   return t.recurrenceUntil ? `${base}, до ${fmtDateOnly(t.recurrenceUntil)}` : base;
 }
 
-/** Срок следующего экземпляра повторяемой открытой задачи (создаётся при её завершении). */
+
 export function nextInstanceDue(t: Pick<TaskView, "status" | "dueAt" | "recurrenceKind" | "recurrenceInterval" | "recurrenceUntil" | "recurrenceRule">): Date | null {
   if (!isOpen(t.status)) return null;
   return nextTaskDue(t, tz());
@@ -45,7 +45,7 @@ function TaskLinks({ links }: { links: TaskView["links"] }) {
   );
 }
 
-/** Строки задач без обрамления — для встраивания в группы экрана «Сегодня». */
+
 export function TaskRows({ tasks, showLinks = true, compact = false, withOpen = false }: { tasks: TaskView[]; showLinks?: boolean; compact?: boolean; withOpen?: boolean }) {
   const zone = tz();
   return (
@@ -93,7 +93,7 @@ export function TaskRows({ tasks, showLinks = true, compact = false, withOpen = 
   );
 }
 
-/** Список задач для карточек и экрана «Сегодня» (серверный компонент). */
+
 export function TaskList({
   tasks,
   emptyHint,
@@ -112,7 +112,7 @@ export function TaskList({
   title?: React.ReactNode;
   showLinks?: boolean;
   compact?: boolean;
-  /** Показывать кнопку «Открыть» в быстрых действиях. */
+  
   withOpen?: boolean;
   footer?: React.ReactNode;
 }) {
@@ -134,7 +134,7 @@ export function TaskList({
   );
 }
 
-/** Табличное представление раздела «Задачи» (ТЗ 37.9): все обязательные колонки. */
+
 export function TaskTable({ tasks }: { tasks: TaskView[] }) {
   const zone = tz();
   return (

@@ -38,7 +38,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
   const users = isManager ? await userOptions() : [];
   const filtered = Boolean(sp.q || sp.taskType || sp.responsibleUserId || (sp.status && sp.status !== "open"));
 
-  // Переключение режима сохраняет остальные фильтры, но сбрасывает страницу.
+  
   const viewHref = (key: string) => {
     const p = new URLSearchParams({ ...sp, view: key });
     p.delete("page");

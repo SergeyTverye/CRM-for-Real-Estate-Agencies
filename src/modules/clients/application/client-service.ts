@@ -7,12 +7,7 @@ import { clientScope } from "@/modules/access/domain/scopes";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { normalizeContact, type ContactType } from "../domain/contact-normalization";
 
-/**
- * UC-02 CreateOrUpdateClient (FR-01..FR-03, ТЗ 40.2, 40.2.2).
- * Дубли ищутся по нормализованному телефону/e-mail. Автоматического слияния нет.
- * Риелтору чужой Client не раскрывается: при совпадении возвращается нейтральный
- * конфликт без id, имени, ответственного и статуса. Руководитель видит кандидатов.
- */
+
 
 export const contactInputSchema = z.object({
   contactType: zCode("contactType"),
@@ -70,13 +65,13 @@ export interface DuplicateCandidate {
 }
 
 export interface DuplicateCheck {
-  /** Кандидаты, которые actor вправе видеть (свои клиенты. руководителю — все). */
+  
   visible: DuplicateCandidate[];
-  /** Есть совпадение с клиентом, недоступным actor (только признак, без сведений). */
+  
   foreignConflict: boolean;
 }
 
-/** Серверная проверка вероятных дублей по нормализованным контактам. */
+
 export async function checkDuplicates(tx: DbOrTx, actor: Actor, normalizedValues: string[], excludeClientId?: string): Promise<DuplicateCheck> {
   const values = [...new Set(normalizedValues.filter(Boolean))];
   if (!values.length) return { visible: [], foreignConflict: false };
@@ -112,7 +107,7 @@ export async function checkDuplicates(tx: DbOrTx, actor: Actor, normalizedValues
 export const NEUTRAL_DUPLICATE_MESSAGE =
   "Этот контакт уже зарегистрирован в CRM за другим сотрудником. Требуется решение руководителя: передайте обращение руководителю.";
 
-/** Бросает конфликт дубля в зависимости от роли (используется клиентами и обращениями). */
+
 export function assertNoDuplicates(check: DuplicateCheck, confirmDuplicate: boolean): void {
   if (check.foreignConflict) {
     throw new ConflictError("DUPLICATE_CONFLICT", NEUTRAL_DUPLICATE_MESSAGE);
@@ -132,10 +127,7 @@ async function resolveClientResponsible(tx: DbOrTx, actor: Actor, requested: str
   return requested;
 }
 
-/**
- * Вставка клиента с контактами внутри транзакции вызывающей команды.
- * Проверка дублей выполняется ДО вызова (assertNoDuplicates).
- */
+
 export async function insertClient(
   tx: Tx,
   createdBy: string,
@@ -199,7 +191,7 @@ export async function createClient(actor: Actor, input: unknown): Promise<{ id: 
   });
 }
 
-/** Загрузка клиента с проверкой доступа (NotFound для чужого — не раскрывает существование). */
+
 export async function loadAccessibleClient(tx: DbOrTx, actor: Actor, clientId: string) {
   assertRecordId(clientId);
   const client = await tx.client.findFirst({ where: { id: clientId, ...clientScope(actor) } });
@@ -291,10 +283,7 @@ const reassignSchema = z.object({
   comment: zOptText(1000),
 });
 
-/**
- * Передача клиента другому сотруднику (только руководитель, ТЗ 40.1). Журналируется.
- * Незавершённые задачи автоматически НЕ передаются, чтобы не скрыть существующие обязательства.
- */
+
 export async function reassignClient(actor: Actor, clientId: string, input: unknown): Promise<void> {
   if (!isManager(actor)) throw new ForbiddenError("Сменить ответственного может только руководитель");
   const data = parseInput(reassignSchema, input);
@@ -332,7 +321,7 @@ export async function reassignClient(actor: Actor, clientId: string, input: unkn
   });
 }
 
-/** Осознанное архивирование руководителем (ТЗ 40.2.2). Данные не удаляются. */
+
 export async function archiveClient(actor: Actor, clientId: string, input: unknown): Promise<void> {
   if (!isManager(actor)) throw new ForbiddenError("Архивировать клиента может только руководитель");
   const data = parseInput(z.object({ comment: zOptText(1000) }), input ?? {});
@@ -361,10 +350,7 @@ export async function restoreClient(actor: Actor, clientId: string): Promise<voi
   });
 }
 
-/**
- * Реактивация (ТЗ 40.2.2): новый LeadRequest или новая active ClientNeed переводят inactive Client в active
- * в той же бизнес-команде. Archived не восстанавливается автоматически.
- */
+
 export async function reactivateClientIfInactive(tx: Tx, clientId: string): Promise<"active" | "reactivated" | "archived"> {
   const client = await tx.client.findUniqueOrThrow({ where: { id: clientId }, select: { status: true } });
   if (client.status === "archived") return "archived";

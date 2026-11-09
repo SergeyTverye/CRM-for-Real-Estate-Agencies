@@ -18,7 +18,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 type ShowingRow = Awaited<ReturnType<typeof listShowings>>["items"][number];
 
-/** Понедельник недели, в которую попадает календарная дата 'YYYY-MM-DD'. */
+
 function weekStart(date: string): Date {
   const d = new Date(`${date}T00:00:00.000Z`);
   const dow = (d.getUTCDay() + 6) % 7;
@@ -44,7 +44,7 @@ export default async function ShowingsPage({ searchParams }: { searchParams: Pro
   const monday = weekStart(sp.date && DATE_RE.test(sp.date) ? sp.date : today);
   const days = Array.from({ length: 7 }, (_, i) => iso(addDays(monday, i)));
 
-  // Неделя: запрос с запасом в сутки по краям (границы фильтра — даты UTC), группировка по локальной дате.
+  
   const query: Record<string, string> = week
     ? { ...sp, from: iso(addDays(monday, -1)), to: iso(addDays(monday, 7)), status: sp.status ?? "planned", page: "1", pageSize: "200" }
     : sp;

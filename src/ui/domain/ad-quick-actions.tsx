@@ -7,7 +7,7 @@ import { useApiAction } from "../hooks";
 
 const STATUSES = optionsOf("advertisementStatus");
 
-/** Быстрые действия списка рекламы: «Проверено, актуально» и смена статуса (PATCH с версией записи). */
+
 export function AdQuickActions({ adId, updatedAt, status, canCheck }: { adId: string; updatedAt: string; status: string; canCheck: boolean }) {
   const router = useRouter();
   const { pending, error, run } = useApiAction();

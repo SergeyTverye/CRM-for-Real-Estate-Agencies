@@ -19,7 +19,7 @@ function residential(query: RealEstateScraper.Query = {}): boolean {
     ["apartment", "квартира", "квартиры", "комната", "дом", "коттедж", "таунхаус", "студия"].includes(text(query.type));
 }
 
-/** Read only the package's known Cian SSR envelope; never evaluate page code. */
+
 function offersFromSsr(payload: unknown): RecordValue[] | null {
   if (typeof payload !== "string") return null;
   for (const script of payload.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/giu)) {
@@ -45,7 +45,7 @@ function offersFromSsr(payload: unknown): RecordValue[] | null {
           const state = record(entries.find(entry => record(entry).key === "initialState"));
           const offers = record(record(state.value).results).offers;
           if (Array.isArray(offers)) return offers.map(record);
-        } catch { /* Original parser remains responsible for malformed/error states. */ }
+        } catch {  }
         break;
       }
     }
@@ -55,13 +55,13 @@ function offersFromSsr(payload: unknown): RecordValue[] | null {
 
 function evidence(offer: RecordValue, listingUrl: string) {
   let path = "";
-  try { const url = new URL(listingUrl); if (/(?:^|\.)cian\.ru$/u.test(url.hostname)) path = url.pathname; } catch { /* Unknown. */ }
+  try { const url = new URL(listingUrl); if (/(?:^|\.)cian\.ru$/u.test(url.hostname)) path = url.pathname; } catch {  }
   const route = path.match(/^\/(sale|rent)\/(flat|studio|room|house|cottage|townhouse|commercial|office|warehouse|building)\/\d+\/?$/u);
   const category = text(offer.category);
   const native = category.match(/^(flat|studio|room|house|cottage|townhouse)(Sale|Rent)$/u);
   const candidates = [text(offer.officeType), text(offer.propertyType), text(offer.type), category,
     ...(Array.isArray(offer.types) ? offer.types.map(text) : [])];
-  // Explicit commercial evidence wins over misleading residential URLs/queries.
+  
   const isCommercial = candidates.some(value => commercial.has(value)) || category === "commercialSale" || category === "commercialRent" || Boolean(route && commercial.has(route[2]!));
   const kind = candidates.find(value => housing.has(value)) ?? native?.[1] ?? (route && housing.has(route[2]!) ? route[2] : null);
   const deal = ["sale", "rent", "daily"].includes(text(offer.dealType)) ? text(offer.dealType) : native?.[2]?.toLowerCase() ?? route?.[1] ?? null;
@@ -71,7 +71,7 @@ function evidence(offer: RecordValue, listingUrl: string) {
 function correctCian(item: RealEstateScraper.Listing, offer: RecordValue): RealEstateScraper.Listing {
   const facts = evidence(offer, item.url);
   if (facts.isCommercial) return item;
-  // Do not relabel grouped commercial units or borrow their parent dimensions.
+  
   if (item.parentId) return item;
   if (!facts.kind) return { ...item, category: null, propertyType: null, deal: facts.deal };
   const rooms = number(offer.roomsCount);
@@ -84,14 +84,14 @@ function correctCian(item: RealEstateScraper.Listing, offer: RecordValue): RealE
   const priceText = text(offer.formattedFullPrice) || text(offer.formattedShortPrice) ||
     (price !== null ? `${price} ₽${terms.priceType === "squareMeter" ? "/м²" : ""}${period ? `/${period}` : ""}` : "");
   return { ...item, category: "residential", propertyType: null,
-    // Listing.propertyType in package 2.1.0 is commercial-only. Preserve native subtype separately.
+    
     ...{ residentialType: kind, priceUnit: terms.priceType ?? null },
     title: text(offer.title) || labels[kind], rooms: kind === "studio" ? 0 : rooms,
     area, floor, floorType: floor === null ? null : floor > 0 ? "aboveGround" : "basement",
     price, priceText: period ? `${priceText} /${period}` : priceText, deal: facts.deal };
 }
 
-/** Adapter-local attachment. No vendor mutation, requested category is never listing evidence. */
+
 export function attachResidentialParsers(client: RealEstateScraper): void {
   const mir = client.parsers.mirkvartir;
   const mirBuild = mir.buildSearchUrl.bind(mir);
@@ -124,7 +124,7 @@ export function attachResidentialParsers(client: RealEstateScraper): void {
   };
   const cian = client.parsers.cian, parse = cian.parsePage.bind(cian);
   cian.parsePage = (payload, url, query) => {
-    // Keep the original parser's validation, errors, pagination and commercial path.
+    
     const page = parse(payload, url, query);
     const offers = offersFromSsr(payload);
     if (!offers) return page;
@@ -140,8 +140,8 @@ export function attachResidentialParsers(client: RealEstateScraper): void {
       return residential(query) ? correctCian(enriched, offer) : enriched;
     }) };
   };
-  // These package specializations have no verified residential parsing contract.
-  // Guard planning AND direct page callers. Youla has its own verified adapter.
+  
+  
   for (const source of ["avito", "domclick"] as const) {
     const parser = client.parsers[source];
     const build = parser.buildSearchUrl, search = parser.searchPage;

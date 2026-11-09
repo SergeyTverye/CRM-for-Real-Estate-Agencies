@@ -3,10 +3,7 @@ import { getConfig } from "@/shared/config/env";
 import { generateSessionToken, hashSessionToken } from "../infrastructure/session-token";
 import type { Actor, Role } from "../domain/actor";
 
-/**
- * Серверные отзывные сессии (ТЗ 12, 17.4, 29.2): сырой токен — только в HttpOnly cookie,
- * в БД — SHA-256. Деактивация пользователя и смена пароля отзывают активные сессии.
- */
+
 
 const LAST_SEEN_THROTTLE_MS = 5 * 60 * 1000;
 
@@ -31,7 +28,7 @@ export async function createSession(tx: DbOrTx, userId: string, meta: SessionMet
   return { token, expiresAt };
 }
 
-/** Проверяет токен из cookie. возвращает Actor или null (истёк/отозван/пользователь деактивирован). */
+
 export async function resolveSession(token: string | null | undefined): Promise<Actor | null> {
   if (!token || token.length < 20 || token.length > 200) return null;
   const now = new Date();

@@ -17,7 +17,7 @@ const OPEN_DEFAULT = "yes";
 export default async function DealsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const actor = await requirePageActor();
   const sp = searchParamsToObject(await searchParams);
-  // По умолчанию — рабочие (незакрытые) сделки. «Все» — open=all.
+  
   const openView = sp.open ?? OPEN_DEFAULT;
   const query = { ...sp, open: openView === "all" ? undefined : openView };
   const res = await loadList(() => listDeals(actor, query), "/deals");

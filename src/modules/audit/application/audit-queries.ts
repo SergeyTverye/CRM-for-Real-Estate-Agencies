@@ -7,10 +7,7 @@ import { ForbiddenError } from "@/shared/errors";
 import { parseInput, skipTake, zPagination, zUuid, type Page } from "@/shared/validation";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 
-/**
- * Просмотр AuditLog руководителем (ТЗ 27.1, 37.16): только чтение, серверная пагинация.
- * Секреты в before/after не попадают ещё при записи (writeAudit → sanitize).
- */
+
 
 const dateParam = z
   .string()
@@ -23,7 +20,7 @@ export const auditFiltersSchema = zPagination.extend({
   action: z.string().trim().max(100).optional(),
   actorUserId: zUuid.optional(),
   entityId: zUuid.optional(),
-  /** Локальные календарные даты периода (включительно) в APP_TIMEZONE. */
+  
   from: dateParam.optional(),
   to: dateParam.optional(),
 });
@@ -42,7 +39,7 @@ export interface AuditRow {
   correlationId: string | null;
 }
 
-/** Начало локального дня 'YYYY-MM-DD' в часовом поясе экземпляра (полдень UTC гарантированно внутри этого дня). */
+
 function localDayStart(date: string, timeZone: string): Date {
   return startOfDayInTz(new Date(`${date}T12:00:00.000Z`), timeZone);
 }
@@ -53,7 +50,7 @@ export async function listAuditLog(actor: Actor, raw: unknown): Promise<Page<Aud
   const tz = getConfig().APP_TIMEZONE;
   const and: Prisma.AuditLogWhereInput[] = [];
   if (f.entityType) and.push({ entityType: f.entityType });
-  // Действие: точный код или префикс группы ("user." → все действия с пользователями).
+  
   if (f.action) and.push(f.action.endsWith(".") ? { action: { startsWith: f.action } } : { action: f.action });
   if (f.actorUserId) and.push({ actorUserId: f.actorUserId });
   if (f.entityId) and.push({ entityId: f.entityId });
@@ -87,7 +84,7 @@ export async function listAuditLog(actor: Actor, raw: unknown): Promise<Page<Aud
   };
 }
 
-/** Значения для фильтров журнала: встречающиеся типы сущностей и действия. */
+
 export async function listAuditFacets(actor: Actor): Promise<{ entityTypes: string[]; actions: string[] }> {
   if (!isManager(actor)) throw new ForbiddenError();
   const [types, actions] = await Promise.all([

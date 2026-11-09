@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Первичная подготовка узла (ТЗ 36.4): проверка Docker/Compose, каталоги данных,
-# .env из .env.example с безопасно сгенерированными секретами, проверка конфигурации.
-# Существующий .env не перезаписывается.
+
+
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
@@ -9,7 +9,7 @@ require_docker
 
 mkdir -p data/files data/import-staging backups secrets
 chmod 700 secrets
-# Контейнеры app/migrate/backup работают от владельца каталогов данных (APP_UID/APP_GID).
+
 if [ "$(id -u)" = "0" ]; then
   RUN_UID=1000; RUN_GID=1000
   chown -R "$RUN_UID:$RUN_GID" data backups

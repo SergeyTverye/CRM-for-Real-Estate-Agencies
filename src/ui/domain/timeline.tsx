@@ -28,7 +28,7 @@ const KIND_COLOR: Record<TimelineEvent["kind"], string> = {
   offer: "bg-fuchsia-500",
 };
 
-/** Единая временная лента истории клиента (ТЗ 37.5). */
+
 export function Timeline({ events }: { events: TimelineEvent[]; dicts?: Dictionaries }) {
   return (
     <Card bodyClassName="">

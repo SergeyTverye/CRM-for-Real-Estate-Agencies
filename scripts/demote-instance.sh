@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Перевод экземпляра в standby (только чтение): изменяющие API-запросы отклоняются (ТЗ 41.6).
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker

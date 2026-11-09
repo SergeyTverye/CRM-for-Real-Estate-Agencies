@@ -5,11 +5,7 @@ import { parseInput, zCode, zRequiredText } from "@/shared/validation";
 import { writeAudit } from "@/modules/audit/application/audit";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 
-/**
- * Юридические субъекты предприятия (ИП/ООО, ТЗ 19.6, 37.10–37.11, 37.16).
- * Используются в сделках, договорах и КП. Записи не удаляются — только деактивируются,
- * чтобы сохранить ссылки исторических сделок и договоров.
- */
+
 
 export interface LegalEntityDto {
   id: string;
@@ -40,7 +36,7 @@ export async function listLegalEntities(actor: Actor): Promise<LegalEntityDto[]>
   return rows.map(({ _count, ...r }) => ({ ...r, usage: { deals: _count.deals, agreements: _count.agreements, offers: _count.offers } }));
 }
 
-/** Активные субъекты для выбора в формах (сделка, договор, КП) — доступно всем ролям. */
+
 export async function listActiveLegalEntities(): Promise<LegalEntityBrief[]> {
   return db.legalEntity.findMany({
     where: { isActive: true },
@@ -78,7 +74,7 @@ const updateSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-/** Переименование и (де)активация. Форма ИП/ООО не меняется — она определяет смысл исторических документов. */
+
 export async function updateLegalEntity(actor: Actor, id: string, input: unknown): Promise<LegalEntityBrief & { isActive: boolean }> {
   requireManager(actor);
   const data = parseInput(updateSchema, input);

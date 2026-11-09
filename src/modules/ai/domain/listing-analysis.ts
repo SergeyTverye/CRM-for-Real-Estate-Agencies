@@ -13,13 +13,12 @@ export function analysisCacheKey(description: string, criteria: string[], model:
 export function forbiddenAnalysisCriterion(criterion: string) {
   return /owner|seller|availability|собствен|владел|продавец|актуальн|доступност|свободно/iu.test(criterion);
 }
-/** A refinement may change only explicitly mentioned categories; defaults returned by
- * a model must never erase unrelated constraints. Full reset is an explicit phrase. */
+
 export function preserveSearchConditions(previous: SearchFilters, proposed: SearchFilters, query: string): SearchFilters {
   if (/новый поиск|начни заново|сбрось все/iu.test(query)) return proposed;
   const next = { ...previous };
-  // Recognize money separately from area/floor ranges; bare bounds such as
-  // «до 100 м²» must never authorize erasing the existing budget.
+  
+  
   const money = /цен|бюджет|руб|стоим|₽|(?:от|до|за)\s*\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}])|(?:в|за|\/)\s*(?:месяц|мес|год))|\d[\d\s.,]*(?:тыс|млн|[кk](?![\p{L}]))|(?:от|до|за)\s*\d[\d\s.,]*(?![\d\s.,])(?=\s*(?:[,;.!]|$))/iu;
   const area = /площад|м[²2]|кв\.?\s*м|квадратн\p{L}*\s+метр|\d+\s+метр/iu;
   const floor = /этаж|подвал|цокол/iu;
@@ -43,8 +42,8 @@ export function preserveSearchConditions(previous: SearchFilters, proposed: Sear
     if (mentions[key]?.test(query)) Object.assign(next, { [key]: proposed[key] });
   }
   if (mentions.locations!.test(query)) {
-    // A location word alone must not erase districts: only an explicit district
-    // clause or an actual move to another place clears the previous selection.
+    
+    
     const locChanged = JSON.stringify(previous.locations ?? null) !== JSON.stringify(proposed.locations ?? null) || previous.city !== proposed.city;
     next.city = proposed.city;
     next.locations = proposed.locations;

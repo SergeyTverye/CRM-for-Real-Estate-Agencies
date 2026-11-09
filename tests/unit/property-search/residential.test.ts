@@ -49,8 +49,8 @@ describe("residential (Жилая) end-to-end, synthetic offline", () => {
       searches.push(...plan.searches);
       errors.push(...plan.errors);
     }
-    // youla/domclick/cian-suburban требуют native URL для части жилых типов:
-    // проваленные ветви фиксируются, успешные сохраняются, подмена unsupported_filter запрещена.
+    
+    
     for (const entry of [...searches, ...errors]) expect(JSON.stringify(entry)).not.toMatch(/types accepts commercial property types only/);
     expect(searches.length + errors.length).toBeGreaterThan(0);
     if (searches.length) expect(errors.every(e => ["UNSUPPORTED_FILTER", "NOT_APPLICABLE", "LOCATION_REQUIRED"].includes(e.code))).toBe(true);
@@ -75,7 +75,7 @@ describe("residential (Жилая) end-to-end, synthetic offline", () => {
           for (const entry of plan.errors) expect(GENUINE).toContain(entry.code);
         }
       }
-      // Mixed OR fanout: 1 commercial + all housing branches, legacy single keeps commercial.
+      
       const mixed = SearchFilters.parse({ city, operation, priceUnit: operation === "rent" ? "rub_month" : "rub_total", purposes: ["office", "residential"] });
       const fanout = buildScraperQueries(mixed, source, signal);
       expect(fanout).toHaveLength(1 + HOUSING.length);
@@ -110,7 +110,7 @@ describe("residential (Жилая) end-to-end, synthetic offline", () => {
     expect(queries[0]).toMatchObject({ category: "commercial" });
     expect(queries.slice(1).map(q => q.category)).toEqual(HOUSING.map(() => "residential"));
     expect(queries.slice(1).map(q => q.type).sort()).toEqual([...HOUSING].sort());
-    // Legacy single-query callers keep the commercial branch.
+    
     expect(buildScraperQuery(mixed, source, signal)).toMatchObject({ category: "commercial" });
     expect(buildScraperQuery(base, source, signal)).toMatchObject({ category: "residential", type: "flat" });
   });

@@ -7,11 +7,11 @@ function siteDomain(url: URL): string | undefined {
   return siteDomains.find(domain => url.hostname === domain || url.hostname.endsWith(`.${domain}`));
 }
 
-/** Canonical search routes observed in the sites' own 301 Location headers. */
+
 export function canonicalScraperUrl(raw: string): string {
   const url = new URL(raw);
   if (url.hostname === "onrealt.ru") {
-    // Public navigation form /core/send_form.php, observed 06.11.2026.
+    
     url.pathname = url.pathname.replace(/\/arenda-torgovoj-ploshchadi(?=\/|$)/u, "/arenda-torgovyh-ploshchadej");
   }
   if (url.hostname === "realty.yandex.ru" && /\/kommercheskaya-nedvizhimost\/$/u.test(url.pathname)) {
@@ -32,7 +32,7 @@ export function canonicalScraperUrl(raw: string): string {
   return url.href;
 }
 
-/** Explicit site allowlist avoids guessing registrable domains from the last two labels. */
+
 export async function scraperHttpRequest(raw: string, options: SafeRequestOptions & {
   beforeRequest?: (url: string) => void | Promise<void>;
   onResponse?: (response: Response) => void;
@@ -46,7 +46,7 @@ export async function scraperHttpRequest(raw: string, options: SafeRequestOption
     const remaining = deadline - Date.now();
     if (remaining <= 0) throw new Error("NETWORK_TIMEOUT_OR_ABORT");
     await options.beforeRequest?.(url.href);
-    // safeRequest repeats DNS/private-IP validation and pins every individual hop.
+    
     const request = domain === "mirkvartir.ru" ? compressedScraperRequest : safeRequest;
     const response = await request(url.href, { ...options, method, body, headers, timeoutMs: remaining, followRedirects: false });
     options.onResponse?.(response);

@@ -8,18 +8,14 @@ import { useApiAction } from "../hooks";
 import { Field, FormErrorBanner } from "../form";
 import { DateTimeInput, Modal, SelectInput, type Option } from "../client-kit";
 
-/**
- * Закрытие сделки (UC-07, ТЗ 6.5, 25.4, 37.10): статус и дата + постсделочные задачи по шаблонам.
- * Ответственный по умолчанию — руководитель. руководитель может выбрать другого сотрудника,
- * риелтор — себя. Закрытие не архивирует клиента.
- */
+
 
 export interface PostdealTemplateView {
   subtypeCode: string;
   title: string;
   offsetDays: number;
   recurrenceKind?: string;
-  /** Срок по умолчанию: сегодня + offsetDays (рассчитан на сервере в часовом поясе экземпляра). */
+  
   defaultDueAt: string;
 }
 
@@ -50,7 +46,7 @@ export function DealCloseButton({
   dealId: string;
   updatedAt: string;
   templates: PostdealTemplateView[];
-  /** Кого можно назначить вместо руководителя (руководителю — все сотрудники, риелтору — он сам). */
+  
   responsibleOptions: Option[];
   timeZone: string;
   defaultExtraDueAt: string;
@@ -106,7 +102,7 @@ export function DealCloseButton({
     }
   }
 
-  // Ошибки сервера по задачам приходят как postdealTasks.<индекс среди выбранных>.<поле>.
+  
   const taskError = (i: number, field: string) => {
     const pos = tasks.slice(0, i).filter((t) => t.checked).length;
     return fieldError(`tasks.${i}.${field}`) ?? fieldError(`postdealTasks.${pos}.${field}`);

@@ -38,7 +38,7 @@ async function main() {
     let ready = false;
     for (let i = 0; i < 60; i++) {
       if (server.exitCode !== null) throw new Error("SERVER_EXITED");
-      try { const r = await fetch(`${base}/api/health/ready`, { signal: AbortSignal.timeout(2000) }); if (r.ok) { ready = true; break; } } catch { /* bounded startup */ }
+      try { const r = await fetch(`${base}/api/health/ready`, { signal: AbortSignal.timeout(2000) }); if (r.ok) { ready = true; break; } } catch {  }
       await delay(1000);
     }
     if (!ready) throw new Error("SERVER_NOT_READY");

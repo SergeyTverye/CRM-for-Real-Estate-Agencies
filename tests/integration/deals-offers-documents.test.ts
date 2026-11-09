@@ -35,18 +35,18 @@ describe("T06: сделка, ИП/ООО, участники, комиссии, 
     });
     const deal = await db.deal.findUniqueOrThrow({ where: { id: dealId }, include: { commissions: true, parties: true } });
     expect(deal.legalEntityId).toBe(u.ipId);
-    expect(deal.dealPrice?.toString()).toBe("12345678901234.56"); // без потери точности
+    expect(deal.dealPrice?.toString()).toBe("12345678901234.56"); 
     expect(deal.commissions[0]!.amount.toString()).toBe("45000.5");
     expect(deal.commissions[0]!.payerPartyId).toBe(deal.parties.find((p) => p.clientId === clientId)!.id);
 
-    // Несколько комиссионных обязательств без изменения схемы
+    
     const c2 = await addCommission(u.realtor1, dealId, { amount: "10000", status: "due" });
     const c2row = await db.dealCommission.findUniqueOrThrow({ where: { id: c2.id } });
     await updateCommission(u.realtor1, dealId, c2.id, { expectedUpdatedAt: c2row.updatedAt.toISOString(), status: "received" });
     expect((await db.dealCommission.findUniqueOrThrow({ where: { id: c2.id } })).receivedAt).not.toBeNull();
 
     const fresh = await db.deal.findUniqueOrThrow({ where: { id: dealId } });
-    // Риелтор не может назначить постсделочную задачу второму риелтору
+    
     await expect(
       closeDeal(u.realtor1, dealId, {
         expectedUpdatedAt: fresh.updatedAt.toISOString(),
@@ -111,7 +111,7 @@ describe("T10: коммерческое предложение со snapshot и 
     expect(before.offer.items.map((i) => i.propertyId)).toEqual([p2.id, p1.id]);
     expect(before.offer.items[1]!.termsSnapshot).toBe("аренда, без комиссии");
 
-    // prepared требует ИП/ООО
+    
     await expect(changeOfferStatus(u.realtor1, offerId, { expectedUpdatedAt: before.offer.updatedAt.toISOString(), status: "prepared" })).rejects.toBeInstanceOf(ValidationError);
     await db.commercialOffer.update({ where: { id: offerId }, data: { legalEntityId: u.llcId } });
     const v1 = await db.commercialOffer.findUniqueOrThrow({ where: { id: offerId } });
@@ -127,7 +127,7 @@ describe("T10: коммерческое предложение со snapshot и 
     expect(doc.offerLinks[0]!.commercialOfferId).toBe(offerId);
     expect(Number(doc.fileSize)).toBeGreaterThan(1000);
 
-    // Изменение текущей цены объекта не меняет предложение
+    
     const prop = await db.property.findUniqueOrThrow({ where: { id: p1.id } });
     await updateProperty(u.realtor1, p1.id, { expectedUpdatedAt: prop.updatedAt.toISOString(), price: "150000.00" });
     const after = await getOffer(u.realtor1, offerId);
@@ -154,7 +154,7 @@ describe("T05: документы недоступной сущности не �
     expect(res1.status).toBe(200);
     expect(res1.headers.get("content-disposition")).toContain("attachment");
     expect(await res1.text()).toContain("%PDF");
-    // storage key в ответах API не раскрывается
+    
     const doc = await db.document.findUniqueOrThrow({ where: { id: docId } });
     expect(JSON.stringify(Object.fromEntries(res1.headers))).not.toContain(doc.storageKey);
   });
@@ -184,10 +184,10 @@ describe("T05: документы недоступной сущности не �
     expect((await upload("ok.pdf", Buffer.from("%PDF-1.4 ok"))).status).toBe(201);
     expect((await upload("virus.exe", Buffer.from("MZ..."))).status).toBe(400);
     expect((await upload("fake.pdf", Buffer.from("MZ\x90\x00"))).status).toBe(400);
-    const big = await upload("big.txt", Buffer.alloc(3 * 1024 * 1024, 97)); // MAX_UPLOAD_MB=2 в тестах
+    const big = await upload("big.txt", Buffer.alloc(3 * 1024 * 1024, 97)); 
     expect(big.status).toBe(400);
     expect((await readBody<{ error: { fieldErrors: Record<string, string[]> } }>(big)).error.fieldErrors.file).toBeTruthy();
-    // Чужой клиент: 404 и файл не остаётся в хранилище
+    
     const fd = new FormData();
     fd.set("file", new File([new Uint8Array(Buffer.from("%PDF x"))], "x.pdf"));
     fd.set("documentTypeCode", "other");

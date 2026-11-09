@@ -2,7 +2,7 @@ import { db } from "@/shared/db/client";
 import type { Actor } from "@/modules/auth/domain/actor";
 import { regroupForListings, getGroupsForListings, type DuplicateGroupDto } from "@/modules/listing-duplicates";
 
-/** Called after commit. Grouping failure must never discard an accepted listing. */
+
 export async function regroupRunListings(runId: string) {
   const results = await db.searchRunResult.findMany({ where: { runId }, select: { listingId: true }, orderBy: { listingId: "asc" } });
   let failed = false;

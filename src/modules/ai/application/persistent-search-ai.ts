@@ -8,11 +8,11 @@ import { aiCredentialsService } from "./credentials-service";
 import { ConflictError } from "@/shared/errors";
 import { bootstrapAiTariffs, missingTariffMessage, searchTariffsReady } from "./tariff-bootstrap";
 
-/** Server composition entrypoint; never falls back to process-local accounting. */
+
 export async function createPersistentSearchAi() {
   const config = getConfig();
-  // Also covers an initialized desktop profile composed outside the native launcher.
-  // PostgreSQL retains its explicit prisma/seed.ts lifecycle.
+  
+  
   if (config.CRM_DEPLOYMENT_MODE === "desktop" && !config.isReadOnlyInstance) await bootstrapAiTariffs();
   const row = await db.$transaction(async (tx) => { await lockAi(tx); return singleton(tx); });
   const { values } = effectiveAiSettings(row, config);

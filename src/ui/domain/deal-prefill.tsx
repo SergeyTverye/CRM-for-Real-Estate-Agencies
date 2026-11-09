@@ -9,10 +9,7 @@ import { NotFoundError } from "@/shared/errors";
 import type { ClientPick } from "./need-pickers";
 import type { NeedLabels, NeedPick, PropertyPick } from "./deal-form-values";
 
-/**
- * Предзаполнение форм из параметров URL (?needId, ?propertyId, ?clientId): запись берётся
- * только через запросы с проверкой прав — недоступный id просто не подставляется.
- */
+
 
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

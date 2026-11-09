@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-/** Ошибка сервера при загрузке страницы: без технических подробностей, с кодом для журнала. */
+
 export default function CrmError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error(error);

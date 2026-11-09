@@ -6,7 +6,7 @@ const key = "crm:browser-reminders:v31";
 function subscribe(callback: () => void) { window.addEventListener("storage", callback); window.addEventListener("reminders:preferences", callback); return () => { window.removeEventListener("storage", callback); window.removeEventListener("reminders:preferences", callback); }; }
 function snapshot() { try { return localStorage.getItem(key) ?? "off"; } catch { return "off"; } }
 function usePreference() { return useSyncExternalStore(subscribe, snapshot, () => "off"); }
-function setPreference(value: string) { try { localStorage.setItem(key,value); } catch { /* In-memory event still leaves reminders disabled when storage is blocked. */ } window.dispatchEvent(new Event("reminders:preferences")); }
+function setPreference(value: string) { try { localStorage.setItem(key,value); } catch {  } window.dispatchEvent(new Event("reminders:preferences")); }
 export function BrowserNotificationControls() {
   const preference = usePreference(), [notice, setNotice] = useState("");
   return <div className="flex flex-wrap items-center gap-2 text-sm"><label><input type="checkbox" checked={preference !== "off"} onChange={e => {
@@ -29,7 +29,7 @@ export function NotificationBrowserDelivery() {
         if (stopped) return;
         const seenKey = `${key}:seen`;
         let seen: string[] = [];
-        try { seen = JSON.parse(localStorage.getItem(seenKey) ?? "[]") as string[]; } catch { /* no stored IDs */ }
+        try { seen = JSON.parse(localStorage.getItem(seenKey) ?? "[]") as string[]; } catch {  }
         const fresh = result.items.filter(n => !n.readAt && !seen.includes(`${n.id}:${n.snoozedUntil ?? n.triggerAt}`));
         for (const n of fresh.slice(0,5)) {
           if (preference === "system" && "Notification" in window && Notification.permission === "granted") {
@@ -39,8 +39,8 @@ export function NotificationBrowserDelivery() {
         }
         if (fresh.length && audio?.state === "running") { const osc = audio.createOscillator(), gain = audio.createGain(); osc.connect(gain); gain.connect(audio.destination); gain.gain.value = 0.05; osc.frequency.value = 660; osc.start(); osc.stop(audio.currentTime+0.15); }
         seen = [...new Set([...seen, ...fresh.map(n => `${n.id}:${n.snoozedUntil ?? n.triggerAt}`)])].slice(-1000);
-        try { localStorage.setItem(seenKey,JSON.stringify(seen)); } catch { /* browser may block storage */ }
-      } catch { /* Regular CRM notifications remain available when polling fails. */ }
+        try { localStorage.setItem(seenKey,JSON.stringify(seen)); } catch {  }
+      } catch {  }
       finally { running = false; }
     }
     void tick(); const timer = setInterval(() => void tick(),30000);

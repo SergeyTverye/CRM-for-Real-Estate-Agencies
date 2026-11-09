@@ -16,7 +16,7 @@ interface SearchGroup {
   items: SearchHit[];
 }
 
-/** Глобальный поиск по мере ввода (ТЗ 37.3, FR-31). Результаты фильтруются сервером по RBAC. */
+
 export function GlobalSearch() {
   const router = useRouter();
   const [q, setQ] = useState("");
@@ -39,7 +39,7 @@ export function GlobalSearch() {
           setOpen(true);
         }
       } catch {
-        /* запрос отменён */
+        
       } finally {
         setLoading(false);
       }

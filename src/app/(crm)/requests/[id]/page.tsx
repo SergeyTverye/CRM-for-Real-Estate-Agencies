@@ -29,7 +29,7 @@ export default async function RequestCardPage({ params }: { params: Promise<{ id
   const dicts = await loadDictionaries();
   const isManager = actor.role === "manager";
   const users = isManager ? await userOptions() : [];
-  // Контакт из обращения не показывается, если он относится к чужому клиенту.
+  
   const showRawContact = !r.client || clientVisible;
   const escalated = r.statusCode === "open" && !r.clientId;
 

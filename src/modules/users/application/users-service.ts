@@ -8,11 +8,7 @@ import { LOGIN_RE, normalizeLogin, passwordPolicyErrors } from "@/modules/auth/d
 import { revokeAllUserSessions } from "@/modules/auth/application/session-service";
 import { isManager, type Actor } from "@/modules/auth/domain/actor";
 
-/**
- * UC-13 AdminUserAccount (FR-29): руководитель создаёт учётные записи, меняет роль,
- * деактивирует/восстанавливает и сбрасывает пароль через временный пароль.
- * Самостоятельной регистрации нет. Пользователь физически не удаляется.
- */
+
 
 export interface UserDto {
   id: string;
@@ -47,7 +43,7 @@ export async function listUsers(actor: Actor): Promise<UserDto[]> {
   return db.user.findMany({ select: userSelect, orderBy: [{ isActive: "desc" }, { displayName: "asc" }] });
 }
 
-/** Справочник активных сотрудников для выбора ответственного (доступен всем ролям: только id/имя/роль). */
+
 export async function listActiveUsersBrief(): Promise<{ id: string; displayName: string; roleCode: string }[]> {
   return db.user.findMany({
     where: { isActive: true },
@@ -99,7 +95,7 @@ async function activeManagersCount(): Promise<number> {
   return db.user.count({ where: { roleCode: "manager", isActive: true } });
 }
 
-/** Изменение имени/роли/активности. Деактивация отзывает активные сессии. */
+
 export async function updateUser(actor: Actor, userId: string, input: unknown): Promise<UserDto> {
   requireManager(actor);
   const data = parseInput(updateSchema, input);
@@ -132,7 +128,7 @@ export async function updateUser(actor: Actor, userId: string, input: unknown): 
   });
 }
 
-/** Сброс пароля руководителем: временный пароль + обязательная смена. все сессии отзываются. */
+
 export async function resetUserPassword(actor: Actor, userId: string): Promise<{ temporaryPassword: string }> {
   requireManager(actor);
   const user = await db.user.findUnique({ where: { id: userId } });
@@ -148,7 +144,7 @@ export async function resetUserPassword(actor: Actor, userId: string): Promise<{
   return { temporaryPassword };
 }
 
-/** Для seed/скриптов: проверка пароля по политике. */
+
 export function assertPasswordPolicy(password: string, login: string): void {
   const errors = passwordPolicyErrors(password, login);
   if (errors.length) throw new ValidationError("Пароль не соответствует требованиям", { password: errors });

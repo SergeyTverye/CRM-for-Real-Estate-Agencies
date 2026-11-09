@@ -70,11 +70,11 @@ export interface PropertyFormOptions {
   purposes: Option[];
   statuses: Option[];
   districts: string[];
-  /** Только для руководителя при создании. */
+  
   users: Option[];
 }
 
-// Тот же шаблон, что и на сервере: телефон собственника не должен попадать в общее описание (ТЗ 37.7).
+
 const PHONE_IN_TEXT_RE = /(\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/;
 const KNOWN_TYPES = ["residential", "commercial", "country", "land"];
 
@@ -109,7 +109,7 @@ export function PropertyForm({
   mode: "create" | "edit";
   id?: string;
   updatedAt?: string;
-  /** Для создания не передаётся — форма начинается с пустых значений. */
+  
   initial?: PropertyFormValue;
   options: PropertyFormOptions;
 }) {

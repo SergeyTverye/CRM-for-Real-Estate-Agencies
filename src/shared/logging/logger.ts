@@ -1,11 +1,7 @@
 import pino from "pino";
 import { getRequestContext } from "../context";
 
-/**
- * Структурированные JSON-логи (NFR-16): время, уровень, correlation id.
- * Пароли, токены, cookie, секреты и содержимое документов вырезаются redact-правилами,
- * а в логи прикладной код передаёт только идентификаторы, а не персональные данные.
- */
+
 const REDACT_PATHS = [
   "password",
   "*.password",

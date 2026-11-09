@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Общие функции ops-скриптов резервного копирования (выполняются внутри контейнера
-# backup либо app). Секреты (пароли БД, crypt/rclone) в логи и manifest не выводятся.
+
+
 set -euo pipefail
 
 BACKUP_DIR="${BACKUP_DIR:-/backups}"
@@ -16,7 +16,7 @@ die() { log "ОШИБКА: $*"; exit 1; }
 
 psql_q() { psql -X -v ON_ERROR_STOP=1 -qtA "$@"; }
 
-# Экранирование значения для SQL-литерала.
+
 sql_lit() {
   if [ -z "${1-}" ]; then printf 'NULL'; else printf "'%s'" "$(printf '%s' "$1" | sed "s/'/''/g")"; fi
 }

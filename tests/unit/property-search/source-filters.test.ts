@@ -7,8 +7,8 @@ import { evaluateListing } from "@/modules/property-search/domain/evaluation";
 
 const scraper = new RealEstateScraper({ transport: async () => { throw new Error("NETWORK_FORBIDDEN"); } });
 const signal = new AbortController().signal;
-// Commercial-only matrix: PURPOSES now includes "residential" (separate category/type contract),
-// which must not assert category:"commercial". Residential is covered in residential.test.ts.
+
+
 const COMMERCIAL_PURPOSES = PURPOSES.filter((p): p is Exclude<(typeof PURPOSES)[number], "residential"> => p !== "residential");
 for (const city of ["Новосибирск", "Москва"]) for (const source of SOURCES) for (const operation of ["sale", "rent"] as const) {
   it.each(COMMERCIAL_PURPOSES)(`${city}/${source}/${operation}/%s`, async purpose => {

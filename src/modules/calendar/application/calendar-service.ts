@@ -75,7 +75,7 @@ export async function listCalendar(actor: Actor, input: unknown, options: { recu
       ...(options.recurringOnly ? { recurrenceRule: { not: null } } : {}),
       ...(f.employee ? { ownerUserId: f.employee } : {}), OR: [{ endAt: { gt: f.from } }, { recurrenceRule: { not: null } }] }, take: 1001 });
     if (events.length > 1000) throw new ValidationError("Слишком много встреч. Уточните период или сотрудника.");
-    // Один батч вместо до 4 запросов на событие (linksAccessible в цикле — N+1).
+    
     const [access, needClient] = await Promise.all([
       batchLinksAccessible(db, actor, events),
       client ? needClientMap(db, events) : Promise.resolve(new Map<string, string | null>()),
@@ -111,10 +111,7 @@ async function linksAccessible(tx: DbOrTx, actor: Actor, data: Links): Promise<b
   return true;
 }
 
-/**
- * Тот же предикат, что linksAccessible, но для списка событий: ≤4 запроса
- * вместо до 4 на каждое событие. Семантика проверок идентична поштучной.
- */
+
 export async function batchLinksAccessible(tx: DbOrTx, actor: Actor, items: Links[]): Promise<boolean[]> {
   const pick = (key: keyof Links) => [...new Set(items.map(e => e[key]).filter((v): v is string => !!v))];
   const clientIds = pick("clientId"), needIds = pick("needId"), dealIds = pick("dealId"), propertyIds = pick("propertyId");
@@ -134,7 +131,7 @@ export async function batchLinksAccessible(tx: DbOrTx, actor: Actor, items: Link
     (!e.propertyId || okProp.has(e.propertyId)));
 }
 
-/** needId события → clientId потребности (для фильтра по клиенту без N+1). */
+
 export async function needClientMap(tx: DbOrTx, events: { id: string; needId?: string | null }[]): Promise<Map<string, string | null>> {
   const ids = [...new Set(events.map(e => e.needId).filter((v): v is string => !!v))];
   const rows = ids.length ? await tx.clientNeed.findMany({ where: { id: { in: ids } }, select: { id: true, clientId: true } }) : [];

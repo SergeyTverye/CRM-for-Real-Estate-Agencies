@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Остановка контейнеров БЕЗ удаления данных (тома и каталоги data/, backups/ сохраняются).
-# Полное удаление данных разработки — только явно: CRM_ALLOW_PURGE=yes ./scripts/down.sh --purge-dev-data
+
+
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 require_docker; require_env

@@ -7,10 +7,7 @@ import { apiCall } from "@/ui/api-client";
 import { useApiAction } from "@/ui/hooks";
 import { FormErrorBanner } from "@/ui/form";
 
-/**
- * Таблица кандидатов рабочего места подбора (ТЗ 37.19): объяснимый score, отметка
- * «уже предлагался», групповые действия. Контакты собственника сюда не передаются.
- */
+
 
 export interface CandidateRow {
   id: string;

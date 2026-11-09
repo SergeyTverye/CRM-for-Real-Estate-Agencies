@@ -6,11 +6,7 @@ import type { Actor } from "@/modules/auth/domain/actor";
 import { clientScope, dealScope, needScope, taskScope } from "@/modules/access/domain/scopes";
 import { clientSearchWhere } from "@/modules/clients/application/client-queries";
 
-/**
- * Глобальный поиск (FR-31, ТЗ 37.3) с учётом RBAC: каждая группа строится только
- * по разрешённым записям. Совпадение в чужом Client или защищённом контакте собственника
- * не раскрывается ни результатом, ни счётчиком (счётчики не возвращаются).
- */
+
 export interface SearchGroup {
   kind: "clients" | "needs" | "properties" | "deals" | "tasks";
   label: string;
@@ -48,7 +44,7 @@ export async function globalSearch(actor: Actor, rawQ: string): Promise<{ groups
       orderBy: { updatedAt: "desc" },
       take: LIMIT,
     }),
-    // Каталог объектов доступен всем. поиск идёт только по адресу/району, не по контактам собственников.
+    
     db.property.findMany({
       where: { OR: [{ addressText: { contains: q, mode: "insensitive" } }, { district: { contains: q, mode: "insensitive" } }] },
       select: { id: true, addressText: true, status: true, price: true },

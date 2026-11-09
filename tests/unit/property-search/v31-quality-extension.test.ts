@@ -12,7 +12,7 @@ describe("v3.1 independently labelled live extension",()=>{
  it.each(["V15","V20"])("keeps an unproven sale/rent operation unknown for %s instead of inventing a contradiction",id=>{
   const item=extension.listings.find(x=>x.id===id)!;
   const filters=SearchFilters.parse(queries.find(x=>x.id==="commercial-sale")!.filters);
-  // The frozen labels say rejected, but their own rationale says the operation is unproven (SR-02).
+  
   expect(item.input.operation).toBeNull();
   expect(item.input.priceUnit).toBeNull();
   expect(evaluateListing(item.input as NormalizedListing,filters)).toMatchObject({verdict:"needs_review",criteria:expect.arrayContaining([

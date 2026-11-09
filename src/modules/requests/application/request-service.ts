@@ -21,13 +21,7 @@ import {
 import { insertNeed, needParamsSchema } from "@/modules/needs/application/need-service";
 import { assertNeedInvariants } from "@/modules/needs/domain/need-invariant";
 
-/**
- * UC-01 RegisterIncomingRequest (FR-06, ТЗ 6.1, 40.1).
- * Факт обращения сохраняется всегда, даже без дальнейшей потребности.
- * Правило «чей объект, того и клиент»: для НОВОГО клиента с контекстом Property/Advertisement
- * Client, LeadRequest и новая ClientNeed получают ответственного объекта. Для СУЩЕСТВУЮЩЕГО клиента
- * ответственность не меняется автоматически. конфликт с ответственным объекта возвращается в ответе.
- */
+
 
 const clientChoiceSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("existing"), clientId: zUuid }),
@@ -57,9 +51,9 @@ export const registerRequestSchema = z.object({
   responsibleUserId: zUuid.optional(),
   client: clientChoiceSchema,
   outcome: outcomeSchema,
-  /** Риелтор подтверждает передачу руководителю при совпадении контакта с чужим клиентом. */
+  
   escalateDuplicate: z.boolean().default(false),
-  /** Руководитель восстанавливает архивного клиента в рамках обращения. */
+  
   restoreArchivedClient: z.boolean().default(false),
 });
 
@@ -71,9 +65,9 @@ export interface RegisterRequestResult {
   needId: string | null;
   taskId: string | null;
   responsibleUserId: string;
-  /** Клиент передан другому сотруднику по правилу «чей объект» — у регистрирующего риелтора может не быть доступа. */
+  
   assignedToOther: boolean;
-  /** Существующий клиент закреплён не за ответственным объекта (требует решения руководителя). */
+  
   responsibleConflict: { propertyResponsible: string; clientResponsible: string } | null;
   escalated: boolean;
   duplicateWarnings: { clientId: string; displayName: string }[];
@@ -115,7 +109,7 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
     const external = d.externalListingId ? await tx.externalListing.findUnique({ where: { id: d.externalListingId }, select: { id: true, propertyId: true } }) : null;
     if (d.externalListingId && !external) throw new NotFoundError("Внешнее объявление не найдено");
     if (d.responsibleUserId && !await tx.user.findFirst({ where: { id: d.responsibleUserId, isActive: true }, select: { id: true } })) throw new ValidationError("Ответственный недоступен");
-    // Объектный контекст: Advertisement → его Property.
+    
     let propertyId = d.propertyId ?? null;
     if (d.advertisementId) {
       const ad = await tx.advertisement.findUnique({ where: { id: d.advertisementId }, select: { propertyId: true } });
@@ -147,7 +141,7 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
       clientReactivated: false,
     };
 
-    // Ответственный по умолчанию для нового клиента/обращения без клиента.
+    
     const defaultResponsible = isManager(actor) && d.responsibleUserId ? d.responsibleUserId : (propertyResponsible ?? actor.userId);
     let clientId: string | null = null;
     let responsibleUserId = defaultResponsible;
@@ -156,7 +150,7 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
     if (d.client.mode === "existing") {
       const client = await loadAccessibleClient(tx, actor, d.client.clientId);
       clientId = client.id;
-      responsibleUserId = client.responsibleUserId; // текущий ответственный клиента сохраняется (ТЗ 40.1)
+      responsibleUserId = client.responsibleUserId; 
       if (propertyResponsible && propertyResponsible !== client.responsibleUserId) {
         result.responsibleConflict = { propertyResponsible, clientResponsible: client.responsibleUserId };
       }
@@ -185,7 +179,7 @@ export async function registerRequest(actor: Actor, input: unknown): Promise<Reg
       }
     }
 
-    // Эскалация: обращение сохраняется без клиента, руководитель получает задачу (без сведений о чужой карточке).
+    
     if (result.escalated) {
       const managerId = await firstActiveManager(tx);
       const rawContact = d.client.mode === "new" ? d.client.client.contacts.map((c) => c.value).join(", ") : d.rawContact;
@@ -292,7 +286,7 @@ const resolveSchema = z.object({
   nextAction: nextActionSchema.optional(),
 });
 
-/** Руководитель разрешает обращение: привязывает к клиенту, назначает ответственного, меняет статус. */
+
 export async function resolveRequest(actor: Actor, requestId: string, input: unknown): Promise<void> {
   const d = parseInput(resolveSchema, input);
   await transaction(async (tx) => {
@@ -324,7 +318,7 @@ export async function resolveRequest(actor: Actor, requestId: string, input: unk
       if (["active", "paused"].includes(need.status) && !await tx.taskNeed.count({ where: { clientNeedId: need.id, task: { status: { in: [...OPEN_TASK_STATUSES] }, dueAt: { gte: new Date() } } } })) throw new ConflictError("NEXT_ACTION_REQUIRED", "Для перспективного обращения назначьте следующее действие с ответственным и сроком");
       await assertNeedInvariants(tx, [need.id]);
     }
-    // Комментарий решения руководителя хранится только в AuditLog: summary видит зарегистрировавший риелтор.
+    
     await tx.leadRequest.update({ where: { id: requestId }, data });
     if (data.clientId || data.responsibleUserId || d.comment || d.statusCode) {
       await writeAudit(tx, {
@@ -339,7 +333,7 @@ export async function resolveRequest(actor: Actor, requestId: string, input: unk
   });
 }
 
-/** Предпросмотр ответственного для формы обращения (правило «чей объект, того и клиент»). */
+
 export async function previewResponsible(actor: Actor, opts: { propertyId?: string; advertisementId?: string }) {
   const d = parseInput(z.object({ propertyId: zUuid.optional(), advertisementId: zUuid.optional() }), opts);
   const propertyWhere = { AND: [propertyReadScope(actor), { archivedAt: null, status: { not: "archived" } }] };

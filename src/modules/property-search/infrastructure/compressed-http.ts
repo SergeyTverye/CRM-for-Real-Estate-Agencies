@@ -2,7 +2,7 @@ import https from "node:https";
 import { brotliDecompressSync, gunzipSync, inflateSync } from "node:zlib";
 import { guardExternalUrl, type SafeRequestOptions } from "@/shared/net/ssrf";
 
-/** Sites may ignore Accept-Encoding: identity. Both wire and decoded sizes are bounded. */
+
 export function decodeScraperBody(body: Buffer, encoding: string | undefined, maxBytes: number): Buffer {
   const decode = ({ gzip: gunzipSync, deflate: inflateSync, br: brotliDecompressSync } as const)[encoding?.toLowerCase() as "gzip" | "deflate" | "br"];
   if (encoding && encoding !== "identity" && !decode) throw new Error("UNSUPPORTED_CONTENT_ENCODING");
@@ -11,7 +11,7 @@ export function decodeScraperBody(body: Buffer, encoding: string | undefined, ma
   return result;
 }
 
-/** Same DNS validation/pinning as safeRequest; redirects stay with scraperHttpRequest. */
+
 export async function compressedScraperRequest(raw: string, options: SafeRequestOptions = {}) {
   const controller = new AbortController(), abort = () => controller.abort();
   const timer = setTimeout(abort, options.timeoutMs ?? 30000);

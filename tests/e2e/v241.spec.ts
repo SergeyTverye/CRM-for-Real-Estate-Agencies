@@ -34,7 +34,7 @@ async function searchManually(page: Page, scenario = "success") {
 test("v2.4.1: обращение → поиск → подборка → КП → показ → сделка → повторный контакт", async ({ page }) => {
   test.setTimeout(300_000);
   await login(page, "realtor1");
-  // Диалоги — настоящие подтверждения пользователя, сетевые ответы не подменяются.
+  
   page.on("dialog", d => { if (d.type() === "beforeunload") void d.accept(); else throw new Error("Unexpected native dialog"); });
   const name = `ВКР E2E ${Date.now()}`;
   await page.goto("/requests/new");
@@ -138,7 +138,7 @@ test("v2.4.1: обращение → поиск → подборка → КП �
   const repeatEvent = page.locator(".fc-event-title").filter({ hasText: repeatTitle }).first();
   if (!await repeatEvent.isVisible()) await page.locator(".fc-timegrid-more-link").first().click();
   await expect(repeatEvent).toBeVisible();
-  // Один реальный такт фонового исполнителя, без вставки искусственного Notification.
+  
   execFileSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "tests/e2e/notification-tick.ts"], {
     env: { ...process.env, DATABASE_URL: process.env.E2E_DATABASE_URL ?? "postgresql://crm:crm_test_password@127.0.0.1:55432/crm_e2e", APP_TIMEZONE: "Asia/Novosibirsk" }, stdio: "pipe",
   });

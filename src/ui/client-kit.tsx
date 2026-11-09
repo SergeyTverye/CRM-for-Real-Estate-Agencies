@@ -9,14 +9,14 @@ import { useApiAction } from "./hooks";
 import { Field, FormErrorBanner } from "./form";
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from "@/shared/time";
 
-/** Клиентские строительные блоки форм и быстрых действий. */
+
 
 export interface Option {
   value: string;
   label: string;
 }
 
-/** Кнопка изменяющего действия: вызов API → обновление страницы. */
+
 export function ActionButton({
   method = "POST",
   url,
@@ -101,7 +101,7 @@ export function defaultNextAction(title = "Связаться с клиенто�
   return { title, dueAt: d.toISOString(), taskType, priority: "normal" };
 }
 
-/** Блок «Следующее действие» — используется во всех командах, где нужен next action. */
+
 export function NextActionFields({
   value,
   onChange,
@@ -145,7 +145,7 @@ export function NextActionFields({
   );
 }
 
-/** Модальное окно на основе <dialog>. */
+
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   const pendingControlledCloses = useRef(0);
@@ -178,7 +178,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
   );
 }
 
-/** Поиск и выбор записи через API (клиенты, объекты). */
+
 export function EntityPicker<T extends { id: string }>({
   url,
   value,
@@ -251,10 +251,7 @@ export function EntityPicker<T extends { id: string }>({
   );
 }
 
-/**
- * Небольшая форма в модальном окне: поля описываются конфигурацией.
- * Подходит для быстрых действий карточек (добавить контакт, причина, комментарий).
- */
+
 export interface QuickField {
   name: string;
   label: string;

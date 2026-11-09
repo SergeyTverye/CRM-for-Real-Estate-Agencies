@@ -16,7 +16,7 @@ export interface DictionaryOption {
 
 export type Dictionaries = Record<DictionaryCategory, DictionaryOption[]>;
 
-/** Все бизнес-справочники (активные и неактивные — неактивные нужны для отображения истории). */
+
 export const loadDictionaries = cache(async (): Promise<Dictionaries> => {
   const rows = await db.dictionaryItem.findMany({ orderBy: [{ category: "asc" }, { sortOrder: "asc" }, { displayName: "asc" }] });
   const out = Object.fromEntries(Object.keys(DICTIONARY_CATEGORIES).map((k) => [k, [] as DictionaryOption[]])) as Dictionaries;
@@ -31,10 +31,7 @@ export function dictLabel(dicts: Dictionaries, category: DictionaryCategory, cod
   return dicts[category].find((o) => o.value === code)?.label ?? displayLabel(category, code);
 }
 
-/**
- * Проверка, что значение входит в активный справочник (для новых записей).
- * Для существующих записей допускается сохранение прежнего (деактивированного) кода.
- */
+
 export async function assertDictionaryCode(category: DictionaryCategory, code: string | null | undefined, field: string, previous?: string | null): Promise<void> {
   if (code === null || code === undefined) return;
   if (previous !== undefined && previous === code) return;
@@ -75,7 +72,7 @@ const updateSchema = z.object({
   sortOrder: z.coerce.number().int().min(0).max(10000).optional(),
 });
 
-/** Код не меняется и не удаляется — только название, порядок и активность. */
+
 export async function updateDictionaryItem(actor: Actor, id: string, input: unknown) {
   if (!isManager(actor)) throw new ForbiddenError();
   const data = parseInput(updateSchema, input);

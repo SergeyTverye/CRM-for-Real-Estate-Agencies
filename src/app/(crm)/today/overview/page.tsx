@@ -15,11 +15,7 @@ function hoursSince(d: Date): number {
   return (Date.now() - d.getTime()) / 3_600_000;
 }
 
-/**
- * Режим «Обзор» стартового экрана руководителя (ТЗ 37.18): KPI за период по тем же первичным данным,
- * «Требует внимания», договоры и реклама с ближайшим сроком, нагрузка по сотрудникам, последние сделки,
- * состояние backup. Каждая цифра ведёт к отфильтрованному списку. вручную редактируемых цифр нет.
- */
+
 export default async function ManagerOverviewPage() {
   const actor = await requirePageActor({ manager: true });
   const [report, today, deals, ops] = await Promise.all([

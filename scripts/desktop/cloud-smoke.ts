@@ -48,7 +48,7 @@ async function main() {
       const restored = await restoreArchive({ archivePath: downloaded, credential: { passphrase }, schemaVersion: 1, validator, store, confirmed: true, hooks: { withStoppedRuntime: work => work(), async protectCurrent() { return { path: backup.path, archive: backup.archive, credential: { passphrase } }; }, async prepareStage() {} } });
       if (await readFile(path.join(restored.activePath, "documents/synthetic.txt"), "utf8") !== "synthetic smoke document") throw new Error("RESTORE_FILE_MISMATCH");
       results.push({ destination: destination.id, status: "restored" });
-      await destination.delete(backup.archive.backupId); // Only this synthetic backup, never other objects.
+      await destination.delete(backup.archive.backupId); 
     }
     console.log(JSON.stringify({ results }));
     if (results.some(r => r.status !== "restored")) process.exitCode = 1;

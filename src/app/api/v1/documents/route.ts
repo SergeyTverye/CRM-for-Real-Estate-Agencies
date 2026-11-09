@@ -11,7 +11,7 @@ export const GET = api({}, async ({ req, actor }) => {
   return { items: await listDocumentsFor(actor, { kind, id }) };
 });
 
-/** Загрузка файла: multipart/form-data с полями file, documentTypeCode, linkKind, linkId[, legalEntityId]. */
+
 export const POST = api({}, async ({ req, actor }) => {
   const ct = req.headers.get("content-type") ?? "";
   if (!ct.includes("multipart/form-data")) throw new ValidationError("Ожидается multipart/form-data");
